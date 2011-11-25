@@ -1140,6 +1140,8 @@ static void RB_T_Shadow( const drawSurf_t *surf ) {
 		return;
 	}
 
+#if 0 // LEITH: the original patent free "preload" code
+
 	// patent-free work around
 	if ( !external ) {
 		// "preload" the stencil buffer with the number of volumes
@@ -1160,6 +1162,30 @@ static void RB_T_Shadow( const drawSurf_t *surf ) {
 	qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilDecr );
 	GL_Cull( CT_BACK_SIDED );
 	RB_DrawShadowElementsWithCounters( tri, numIndexes );
+
+#else // LEITH: the patented "Carmack's Reverse" code
+
+	// patented depth-fail stencil shadows
+	if ( !external ) {
+		qglStencilOp( GL_KEEP, tr.stencilDecr, GL_KEEP );
+		GL_Cull( CT_FRONT_SIDED );
+		RB_DrawShadowElementsWithCounters( tri, numIndexes );
+		qglStencilOp( GL_KEEP, tr.stencilIncr, GL_KEEP );
+		GL_Cull( CT_BACK_SIDED );
+		RB_DrawShadowElementsWithCounters( tri, numIndexes );
+	}
+	// traditional depth-pass stencil shadows
+	else {
+		qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilIncr );
+		GL_Cull( CT_FRONT_SIDED );
+		RB_DrawShadowElementsWithCounters( tri, numIndexes );
+
+		qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilDecr );
+		GL_Cull( CT_BACK_SIDED );
+		RB_DrawShadowElementsWithCounters( tri, numIndexes );
+	}
+
+#endif
 }
 
 /*
