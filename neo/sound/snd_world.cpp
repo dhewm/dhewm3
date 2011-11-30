@@ -1763,7 +1763,7 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 
 				// handle streaming sounds (decode on the fly) both single shot AND looping
 				if ( chan->triggered ) {
-					alSourcei( chan->openalSource, AL_BUFFER, NULL );
+					alSourcei( chan->openalSource, AL_BUFFER, 0 );
 					alDeleteBuffers( 3, &chan->lastopenalStreamingBuffer[0] );
 					chan->lastopenalStreamingBuffer[0] = chan->openalStreamingBuffer[0];
 					chan->lastopenalStreamingBuffer[1] = chan->openalStreamingBuffer[1];

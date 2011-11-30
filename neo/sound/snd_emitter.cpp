@@ -185,7 +185,7 @@ void idSoundChannel::Clear( void ) {
 	memset( &parms, 0, sizeof(parms) );
 
 	triggered = false;
-	openalSource = NULL;
+	openalSource = 0;
 	openalStreamingOffset = 0;
 	openalStreamingBuffer[0] = openalStreamingBuffer[1] = openalStreamingBuffer[2] = 0;
 	lastopenalStreamingBuffer[0] = lastopenalStreamingBuffer[1] = lastopenalStreamingBuffer[2] = 0;
