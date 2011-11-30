@@ -1056,7 +1056,7 @@ void R_SetColorMappings( void );
 void R_ScreenShot_f( const idCmdArgs &args );
 void R_StencilShot( void );
 
-bool R_CheckExtension( char *name );
+bool R_CheckExtension( const char *name );
 
 
 /*
