@@ -207,6 +207,7 @@ int roq::SizeFile( idFile *ftosize )
 	return ftosize->Length();
 }
 
+#if 0
 /* Expanded data destination object for stdio output */
 
 typedef struct {
@@ -516,6 +517,7 @@ void roq::WriteLossless( void ) {
 	/* And we're done! */
 	encoder->SetPreviousImage( "first frame", image );
 }
+#endif
 
 void roq::InitRoQFile( const char *RoQFilename )
 {

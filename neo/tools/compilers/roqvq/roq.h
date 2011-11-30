@@ -31,10 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "gdefs.h"
 #include "roqParam.h"
 #include "quaddefs.h"
-#define JPEG_INTERNALS
-extern "C" {
-#include "../../../renderer/jpeg-6/jpeglib.h"
-}
+
+//#define JPEG_INTERNALS
+#include <jpeglib.h>
+
 #pragma once
 
 class codec;
@@ -71,7 +71,7 @@ public:
 						roq();
 						~roq();
 
-	void				WriteLossless( void );
+	//void				WriteLossless( void );
 	void				LoadAndDisplayImage( const char *filename );
 	void				CloseRoQFile( bool which );
 	void				InitRoQFile( const char *roqFilename );
@@ -104,6 +104,7 @@ private:
 	void				CloseRoQFile( void );
 	void				WriteCodeBookToStream( byte *codebook, int csize, word cflags );
 	
+#if 0
 	static	void		JPEGInitDestination( j_compress_ptr cinfo );
 	static	boolean		JPEGEmptyOutputBuffer( j_compress_ptr cinfo );
 	static	void		JPEGTermDestination( j_compress_ptr cinfo );
@@ -112,6 +113,7 @@ private:
 	JDIMENSION			JPEGWriteScanlines( j_compress_ptr cinfo, JSAMPARRAY scanlines, JDIMENSION num_lines );
 	void				JPEGDest( j_compress_ptr cinfo, byte* outfile, int size );
 	void				JPEGSave( char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer );
+#endif
 
 	codec *				encoder;
 	roqParam *			paramFile;

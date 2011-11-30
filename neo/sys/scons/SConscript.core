@@ -9,54 +9,6 @@ import scons_utils
 Import( 'GLOBALS' )
 Import( GLOBALS )
 
-jpeg_string = ' \
-	jcapimin.c \
-	jccoefct.c \
-	jccolor.c \
-	jcdctmgr.c \
-	jchuff.c \
-	jcinit.c \
-	jcmainct.c \
-	jcmarker.c \
-	jcmaster.c \
-	jcomapi.c \
-	jcparam.c \
-	jcphuff.c \
-	jcprepct.c \
-	jcsample.c \
-	jdapimin.c \
-	jdapistd.c \
-	jdatadst.c \
-	jdatasrc.c \
-	jdcoefct.c \
-	jdcolor.c \
-	jddctmgr.c \
-	jdhuff.c \
-	jdinput.c \
-	jdmainct.c \
-	jdmarker.c \
-	jdmaster.c \
-	jdmerge.c \
-	jdphuff.c \
-	jdpostct.c \
-	jdsample.c \
-	jdtrans.c \
-	jerror.c \
-	jfdctflt.c \
-	jfdctfst.c \
-	jfdctint.c \
-	jidctflt.c \
-	jidctfst.c \
-	jidctint.c \
-	jidctred.c \
-	jmemmgr.c \
-	jmemnobs.c \
-	jquant1.c \
-	jquant2.c \
-	jutils.c'
-
-jpeg_list = scons_utils.BuildList( 'renderer/jpeg-6', jpeg_string )
-
 ogg_string = ' \
 	oggsrc/bitwise.c \
 	oggsrc/framing.c \
@@ -295,7 +247,7 @@ tools_string = ' \
 
 tools_list = scons_utils.BuildList( 'tools', tools_string )
 
-core_list = framework_list + jpeg_list + renderer_list + ui_list \
+core_list = framework_list + renderer_list + ui_list \
 	+ cm_list + dmap_list + renderbump_list + aas_list + roq_list \
 	+ snd_list + sys_list + tools_list + [ 'TypeInfo/TypeInfoGen.cpp' ]
 
@@ -336,7 +288,7 @@ else:
 	sound_env.Append( CPPDEFINES = 'NO_ALSA' )
 sound_lib = sound_env.StaticLibrary( 'sound', sound_list )
 
-local_env.Append( LIBS = [ 'pthread', 'dl' ] )
+local_env.Append( LIBS = [ 'pthread', 'dl', 'jpeg' ] )
 
 if ( local_curl == 1 ):
 	local_env.Append( LIBS = [ 'curl', 'z' ] )

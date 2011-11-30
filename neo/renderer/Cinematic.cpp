@@ -29,10 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#define JPEG_INTERNALS
-extern "C" {
-#include "jpeg-6/jpeglib.h"
-}
+#include <jpeglib.h>
 
 #include "tr_local.h"
 
@@ -1334,7 +1331,7 @@ struct jpeg_error_mgr jerr;
  */
 
 
-METHODDEF boolean fill_input_buffer( j_decompress_ptr cinfo )
+static boolean fill_input_buffer( j_decompress_ptr cinfo )
 {
   my_src_ptr src = (my_src_ptr) cinfo->src;
   int nbytes;
@@ -1363,7 +1360,7 @@ METHODDEF boolean fill_input_buffer( j_decompress_ptr cinfo )
  */
 
 
-METHODDEF void init_source (j_decompress_ptr cinfo)
+static void init_source (j_decompress_ptr cinfo)
 {
   my_src_ptr src = (my_src_ptr) cinfo->src;
 
@@ -1386,7 +1383,7 @@ METHODDEF void init_source (j_decompress_ptr cinfo)
  * buffer is the application writer's problem.
  */
 
-METHODDEF void
+static void
 skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
   my_src_ptr src = (my_src_ptr) cinfo->src;
@@ -1421,14 +1418,14 @@ skip_input_data (j_decompress_ptr cinfo, long num_bytes)
  * for error exit.
  */
 
-METHODDEF void
+static void
 term_source (j_decompress_ptr cinfo)
 {
 	cinfo = cinfo;
   /* no work necessary here */
 }
 
-GLOBAL void
+void
 jpeg_memory_src (j_decompress_ptr cinfo, byte *infile, int size)
 {
   my_src_ptr src;
