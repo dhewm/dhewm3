@@ -1874,7 +1874,7 @@ int	idFileSystemLocal::ListOSFiles( const char *directory, const char *extension
 
 	// push a new entry
 	dir_cache[dir_cache_index].Init( directory, extension, list );
-	dir_cache_index = (++dir_cache_index) % MAX_CACHED_DIRS;
+	dir_cache_index = (dir_cache_index + 1) % MAX_CACHED_DIRS;
 	if ( dir_cache_count < MAX_CACHED_DIRS ) {
 		dir_cache_count++;
 	}
