@@ -20,7 +20,7 @@ typedef struct {
 } glExtName_t;
 
 glExtName_t glExtNames[] = {
-	NULL
+	{ NULL }
 };
 
 static void StubFunction( void ) { }
