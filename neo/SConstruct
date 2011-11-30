@@ -359,13 +359,12 @@ game_objects = []
 local_demo = 0
 # curl usage. there is a global toggle flag
 local_curl = 0
-curl_lib = []
 # if idlib should produce PIC objects ( depending on core or game inclusion )
 local_idlibpic = 0
 # switch between base game build and d3xp game build
 local_d3xp = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic curl_lib local_curl local_d3xp OPTCPPFLAGS'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
 
 # end general configuration ----------------------
 
@@ -382,13 +381,8 @@ game_demo = None
 
 # build curl if needed
 if ( NOCURL == '0' and ( TARGET_CORE == '1' or TARGET_MONO == '1' ) ):
-	# 1: debug, 2: release
-	if ( BUILD == 'release' ):
-		local_curl = 2
-	else:
-		local_curl = 1
+	local_curl = 1
 	Export( 'GLOBALS ' + GLOBALS )
-	curl_lib = SConscript( 'sys/scons/SConscript.curl' )
 
 if ( TARGET_CORE == '1' ):
 	local_gamedll = 1
@@ -476,7 +470,6 @@ if ( TARGET_DEMO == '1' ):
 	local_idlibpic = 0
 	local_curl = 0
 	local_d3xp = 0
-	curl_lib = []
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/demo/glimp', '.', duplicate = 1 )
 	SConscript( g_build + '/demo/glimp/sys/scons/SConscript.gl' )

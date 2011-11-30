@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #if ID_ENABLE_CURL
-	#include "../curl/include/curl/curl.h"
+	#include <curl/curl.h>
 #endif
 
 /*
