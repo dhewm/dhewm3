@@ -1,1 +1,10 @@
 build
+*~
+.*.swp
+*.pyc
+neo/site.conf
+neo/scons.signatures.dblite
+neo/doom.x86
+neo/doomded.x86
+neo/game*.so
+neo/core
