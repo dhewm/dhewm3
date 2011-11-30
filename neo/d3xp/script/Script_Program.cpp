@@ -1237,7 +1237,7 @@ byte *idProgram::ReserveMem(int size) {
 	byte *res = &variables[ numVariables ];
 	numVariables += size;
 	if ( numVariables > sizeof( variables ) ) {
-		throw idCompileError( va( "Exceeded global memory size (%d bytes)", sizeof( variables ) ) );
+		throw idCompileError( va( "Exceeded global memory size (%zd bytes)", sizeof( variables ) ) );
 	}
 
 	memset( res, 0, size );
@@ -1801,13 +1801,13 @@ void idProgram::CompileStats( void ) {
 
 	gameLocal.Printf( "\nMemory usage:\n" );
 	gameLocal.Printf( "     Strings: %d, %d bytes\n", fileList.Num(), stringspace );
-	gameLocal.Printf( "  Statements: %d, %d bytes\n", statements.Num(), statements.MemoryUsed() );
+	gameLocal.Printf( "  Statements: %d, %zd bytes\n", statements.Num(), statements.MemoryUsed() );
 	gameLocal.Printf( "   Functions: %d, %d bytes\n", functions.Num(), funcMem );
 	gameLocal.Printf( "   Variables: %d bytes\n", numVariables );
 	gameLocal.Printf( "    Mem used: %d bytes\n", memused );
-	gameLocal.Printf( " Static data: %d bytes\n", sizeof( idProgram ) );
+	gameLocal.Printf( " Static data: %zd bytes\n", sizeof( idProgram ) );
 	gameLocal.Printf( "   Allocated: %d bytes\n", memallocated );
-	gameLocal.Printf( " Thread size: %d bytes\n\n", sizeof( idThread ) );
+	gameLocal.Printf( " Thread size: %zd bytes\n\n", sizeof( idThread ) );
 }
 
 /*

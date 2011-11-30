@@ -935,7 +935,7 @@ void idMultiplayerGame::PlayerStats( int clientNum, char *data, const int len ) 
 		return;
 	}
 
-	idStr::snPrintf( data, len, "team=%d score=%ld tks=%ld", team, playerState[ clientNum ].fragCount, playerState[ clientNum ].teamFragCount );
+	idStr::snPrintf( data, len, "team=%d score=%d tks=%d", team, playerState[ clientNum ].fragCount, playerState[ clientNum ].teamFragCount );
 
 	return;
 

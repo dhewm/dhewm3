@@ -715,7 +715,7 @@ void idEvent::Restore( idRestoreGame *savefile ) {
 		// read the args
 		savefile->ReadInt( argsize );
 		if ( argsize != event->eventdef->GetArgSize() ) {
-			savefile->Error( "idEvent::Restore: arg size (%d) doesn't match saved arg size(%d) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName() );
+			savefile->Error( "idEvent::Restore: arg size (%zd) doesn't match saved arg size(%d) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName() );
 		}
 		if ( argsize ) {
 			event->data = eventDataAllocator.Alloc( argsize );

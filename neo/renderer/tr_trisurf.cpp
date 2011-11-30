@@ -227,7 +227,7 @@ R_ShowTriMemory_f
 ===============
 */
 void R_ShowTriSurfMemory_f( const idCmdArgs &args ) {
-	common->Printf( "%6d kB in %d triangle surfaces\n",
+	common->Printf( "%6zd kB in %d triangle surfaces\n",
 		( srfTrianglesAllocator.GetAllocCount() * sizeof( srfTriangles_t ) ) >> 10,
 			srfTrianglesAllocator.GetAllocCount() );
 
@@ -267,7 +267,7 @@ void R_ShowTriSurfMemory_f( const idCmdArgs &args ) {
 		triDupVertAllocator.GetBaseBlockMemory() >> 10, triDupVertAllocator.GetFreeBlockMemory() >> 10,
 			triDupVertAllocator.GetNumFreeBlocks(), triDupVertAllocator.GetNumEmptyBaseBlocks() );
 
-	common->Printf( "%6d kB total triangle memory\n",
+	common->Printf( "%6zu kB total triangle memory\n",
 		( srfTrianglesAllocator.GetAllocCount() * sizeof( srfTriangles_t ) +
 			triVertexAllocator.GetBaseBlockMemory() +
 			triIndexAllocator.GetBaseBlockMemory() +
