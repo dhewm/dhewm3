@@ -89,8 +89,6 @@ private:
 #define ALSA_PCM_NEW_SW_PARAMS_API
 #include <alsa/asoundlib.h>
 
-#define id_snd_pcm_hw_params_alloca(ptr) do { assert(ptr); *ptr = (snd_pcm_hw_params_t *) alloca(id_snd_pcm_hw_params_sizeof()); memset(*ptr, 0, id_snd_pcm_hw_params_sizeof()); } while (0)
-
 typedef const char * ( *pfn_snd_asoundlib_version )( void );
 typedef snd_pcm_sframes_t ( *pfn_snd_pcm_avail_update )( snd_pcm_t *pcm );
 typedef int ( *pfn_snd_pcm_close )( snd_pcm_t *pcm );
