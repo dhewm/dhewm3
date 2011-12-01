@@ -49,7 +49,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGN16( x )					__declspec(align(16)) x
 #define PACKED
 
-#define _alloca16( x )					((void *)((((int)_alloca( (x)+15 )) + 15) & ~15))
+#define _alloca16( x )					((void *)((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15))
 
 #define PATHSEPERATOR_STR				"\\"
 #define PATHSEPERATOR_CHAR				'\\'
@@ -84,7 +84,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #define _alloca							alloca
-#define _alloca16( x )					((void *)((((int)alloca( (x)+15 )) + 15) & ~15))
+#define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
 
 #define PATHSEPERATOR_STR				"/"
 #define PATHSEPERATOR_CHAR				'/'
@@ -120,7 +120,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #define _alloca							alloca
-#define _alloca16( x )					((void *)((((int)alloca( (x)+15 )) + 15) & ~15))
+#define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
 
 #define ALIGN16( x )					x
 #define PACKED							__attribute__((packed))
