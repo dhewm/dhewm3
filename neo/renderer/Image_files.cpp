@@ -218,20 +218,20 @@ BMP LOADING
 typedef struct
 {
 	char id[2];
-	unsigned long fileSize;
-	unsigned long reserved0;
-	unsigned long bitmapDataOffset;
-	unsigned long bitmapHeaderSize;
-	unsigned long width;
-	unsigned long height;
+	unsigned int fileSize;
+	unsigned int reserved0;
+	unsigned int bitmapDataOffset;
+	unsigned int bitmapHeaderSize;
+	unsigned int width;
+	unsigned int height;
 	unsigned short planes;
 	unsigned short bitsPerPixel;
-	unsigned long compression;
-	unsigned long bitmapDataSize;
-	unsigned long hRes;
-	unsigned long vRes;
-	unsigned long colors;
-	unsigned long importantColors;
+	unsigned int compression;
+	unsigned int bitmapDataSize;
+	unsigned int hRes;
+	unsigned int vRes;
+	unsigned int colors;
+	unsigned int importantColors;
 	unsigned char palette[256][4];
 } BMPHeader_t;
 
@@ -270,33 +270,33 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height, ID_T
 
 	bmpHeader.id[0] = *buf_p++;
 	bmpHeader.id[1] = *buf_p++;
-	bmpHeader.fileSize = LittleLong( * ( long * ) buf_p );
+	bmpHeader.fileSize = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.reserved0 = LittleLong( * ( long * ) buf_p );
+	bmpHeader.reserved0 = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.bitmapDataOffset = LittleLong( * ( long * ) buf_p );
+	bmpHeader.bitmapDataOffset = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.bitmapHeaderSize = LittleLong( * ( long * ) buf_p );
+	bmpHeader.bitmapHeaderSize = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.width = LittleLong( * ( long * ) buf_p );
+	bmpHeader.width = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.height = LittleLong( * ( long * ) buf_p );
+	bmpHeader.height = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
 	bmpHeader.planes = LittleShort( * ( short * ) buf_p );
 	buf_p += 2;
 	bmpHeader.bitsPerPixel = LittleShort( * ( short * ) buf_p );
 	buf_p += 2;
-	bmpHeader.compression = LittleLong( * ( long * ) buf_p );
+	bmpHeader.compression = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.bitmapDataSize = LittleLong( * ( long * ) buf_p );
+	bmpHeader.bitmapDataSize = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.hRes = LittleLong( * ( long * ) buf_p );
+	bmpHeader.hRes = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.vRes = LittleLong( * ( long * ) buf_p );
+	bmpHeader.vRes = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.colors = LittleLong( * ( long * ) buf_p );
+	bmpHeader.colors = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.importantColors = LittleLong( * ( long * ) buf_p );
+	bmpHeader.importantColors = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
 
 	memcpy( bmpHeader.palette, buf_p, sizeof( bmpHeader.palette ) );
