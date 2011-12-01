@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#define FILESIZE_fontInfo_t (20548)
+
 #ifdef BUILD_FREETYPE
 #include "../ft2/fterrors.h"
 #include "../ft2/ftsystem.h"
@@ -344,7 +346,7 @@ bool idRenderSystemLocal::RegisterFont( const char *fontName, fontInfoEx_t &font
 		idStr::Copynz( outFont->name, name, sizeof( outFont->name ) );
 
 		len = fileSystem->ReadFile( name, NULL, &ftime );
-		if ( len != sizeof( fontInfo_t ) ) {
+		if ( len != FILESIZE_fontInfo_t ) {
 			common->Warning( "RegisterFont: couldn't find font: '%s'", name );
 			return false;
 		}
@@ -513,6 +515,7 @@ bool idRenderSystemLocal::RegisterFont( const char *fontName, fontInfoEx_t &font
 	memcpy( &registeredFont[registeredFontCount++], &font, sizeof( fontInfo_t ) );
 
 	if ( r_saveFontData->integer ) {
+		common->Warning( "FIXME: font saving doesnt respect alignment!" );
 		fileSystem->WriteFile( va( "fonts/fontImage_%i.dat", pointSize), &font, sizeof( fontInfo_t ) );
 	}
 
