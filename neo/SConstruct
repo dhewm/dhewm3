@@ -12,7 +12,7 @@ import scons_utils
 conf_filename='site.conf'
 # choose configuration variables which should be saved between runs
 # ( we handle all those as strings )
-serialized=['CC', 'CXX', 'BUILD', 'IDNET_HOST', 'GL_HARDLINK', 'DEDICATED',
+serialized=['CC', 'CXX', 'X86', 'BUILD', 'IDNET_HOST', 'GL_HARDLINK', 'DEDICATED',
 	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK', 'ALSA',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS' ]
@@ -62,6 +62,9 @@ BUILD_GAMEPAK (default 0)
 
 BASEFLAGS (default '')
 	Add compile flags
+
+X86 (default 0)
+	cross compile for x86 (only applicable on x86_64)
 
 NOCONF (default 0, not saved)
 	ignore site configuration and use defaults + command line only
@@ -136,16 +139,25 @@ EnsureSConsVersion( 0, 96 )
 # system detection -------------------------------
 
 # CPU type
-cpu = commands.getoutput('uname -m')
-exp = re.compile('.*i?86.*')
-if exp.match(cpu):
-	cpu = 'x86'
-else:
-	cpu = commands.getoutput('uname -p')
-	if ( cpu == 'powerpc' ):
-		cpu = 'ppc'
-	else:
-		cpu = 'cpu'
+g_cpu = ''
+
+uname = commands.getoutput('uname -m')
+if uname == 'x86_64':
+	g_cpu = 'x86_64'
+
+if len(g_cpu) < 1:
+	exp = re.compile('.*i?86.*')
+	if exp.match(uname):
+		g_cpu = 'x86'
+
+if len(g_cpu) < 1:
+	uname = commands.getoutput('uname -p')
+	if (uname == 'powerpc'):
+		g_cpu = 'ppc'
+
+if len(g_cpu) < 1:
+		g_cpu = 'cpu'
+
 g_os = 'Linux'
 
 # end system detection ---------------------------
@@ -155,6 +167,7 @@ g_os = 'Linux'
 CC = 'gcc'
 CXX = 'g++'
 BUILD = 'debug'
+X86 = '0'
 DEDICATED = '0'
 TARGET_CORE = '1'
 TARGET_GAME = '1'
@@ -236,21 +249,6 @@ if ( g_sdk or SDK != '0' ):
 
 # general configuration, target selection --------
 
-g_build = BUILD_ROOT + '/' + BUILD
-
-SConsignFile( 'scons.signatures' )
-
-if ( GL_HARDLINK != '0' ):
-	g_build += '-hardlink'
-
-if ( DEBUG_MEMORY != '0' ):
-	g_build += '-debugmem'
-
-if ( LIBC_MALLOC != '1' ):
-	g_build += '-nolibcmalloc'
-
-LINK = CXX
-
 # common flags
 # BASE + CORE + OPT for engine
 # BASE + GAME + OPT for game
@@ -267,6 +265,27 @@ CORELINKFLAGS = [ ]
 # for release build, further optimisations that may not work on all files
 OPTCPPFLAGS = [ ]
 
+if (g_cpu == 'x86_64' and X86 == '1'):
+	print('cross compiling for x86')
+	g_cpu = 'x86'
+	BASECPPFLAGS.append('-m32')
+	BASELINKFLAGS.append('-m32')
+
+g_build = '%s/%s-%s' % (BUILD_ROOT, g_cpu, BUILD)
+
+SConsignFile( g_build + '/scons.signatures' )
+
+if ( GL_HARDLINK != '0' ):
+	g_build += '-hardlink'
+
+if ( DEBUG_MEMORY != '0' ):
+	g_build += '-debugmem'
+
+if ( LIBC_MALLOC != '1' ):
+	g_build += '-nolibcmalloc'
+
+LINK = CXX
+
 BASECPPFLAGS.extend( BASEFLAGS.split(' ') )
 BASECPPFLAGS.append( '-pipe' )
 # warn all
@@ -278,9 +297,6 @@ CORECPPFLAGS.append( '-DXTHREADS' )
 if ( g_os == 'Linux' ):
 	# gcc 4.x option only - only export what we mean to from the game SO
 	BASECPPFLAGS.append( '-fvisibility=hidden' )
-	# get the 64 bits machine on the distcc array to produce 32 bit binaries :)
-	BASECPPFLAGS.append( '-m32' )
-	BASELINKFLAGS.append( '-m32' )
 
 if ( g_sdk or SDK != '0' ):
 	BASECPPFLAGS.append( '-D_D3SDK' )
@@ -299,7 +315,10 @@ elif ( BUILD == 'release' ):
 	# -finline-functions: implicit at -O3
 	# -fschedule-insns2: implicit at -O2
 	# no-unsafe-math-optimizations: that should be on by default really. hit some wonko bugs in physics code because of that
-	OPTCPPFLAGS = [ '-O3', '-march=pentium3', '-Winline', '-ffast-math', '-fno-unsafe-math-optimizations', '-fomit-frame-pointer' ]
+	OPTCPPFLAGS = [ '-O3', '-ffast-math', '-fno-unsafe-math-optimizations', '-fomit-frame-pointer' ]
+	if (g_cpu == 'x86'):
+		OPTCPPFLAGS.append('-march=pentium3')
+
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '2'
 else:
@@ -367,7 +386,7 @@ local_idlibpic = 0
 # switch between base game build and d3xp game build
 local_d3xp = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os g_cpu g_build ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
 
 # end general configuration ----------------------
 
@@ -395,14 +414,13 @@ if ( TARGET_CORE == '1' ):
 		local_dedicated = 0
 		Export( 'GLOBALS ' + GLOBALS )
 
-		VariantDir( g_build + '/core/glimp', '.', duplicate = 1 )
-		SConscript( g_build + '/core/glimp/sys/scons/SConscript.gl' )
-		VariantDir( g_build + '/core', '.', duplicate = 0 )
-		idlib_objects = SConscript( g_build + '/core/sys/scons/SConscript.idlib' )
+		VariantDir( g_build + '/obj-core/glimp', '.', duplicate = 1 )
+		SConscript( g_build + '/obj-core/glimp/sys/scons/SConscript.gl' )
+		VariantDir( g_build + '/obj-core', '.', duplicate = 0 )
+		idlib_objects = SConscript( g_build + '/obj-core/sys/scons/SConscript.idlib' )
 		Export( 'GLOBALS ' + GLOBALS ) # update idlib_objects
-		doom = SConscript( g_build + '/core/sys/scons/SConscript.core' )
-
-		InstallAs( '#doom.' + cpu, doom )
+		doom = SConscript( g_build + '/obj-core/sys/scons/SConscript.core' )
+		g_env.Default(doom)
 
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
@@ -414,8 +432,7 @@ if ( TARGET_CORE == '1' ):
 		idlib_objects = SConscript( g_build + '/dedicated/sys/scons/SConscript.idlib' )
 		Export( 'GLOBALS ' + GLOBALS )
 		doomded = SConscript( g_build + '/dedicated/sys/scons/SConscript.core' )
-
-		InstallAs( '#doomded.' + cpu, doomded )
+		g_env.Default(doomded)
 
 if ( TARGET_GAME == '1' or TARGET_D3XP == '1' ):
 	local_gamedll = 1
@@ -429,24 +446,24 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' ):
 		# clear the build directory to be safe
 		g_env.PreBuildSDK( [ g_build + '/game', g_build + '/d3xp' ] )
 		dupe = 1
-	VariantDir( g_build + '/game', '.', duplicate = dupe )
-	idlib_objects = SConscript( g_build + '/game/sys/scons/SConscript.idlib' )
+	VariantDir( g_build + '/obj-base', '.', duplicate = dupe )
+	idlib_objects = SConscript( g_build + '/obj-base/sys/scons/SConscript.idlib' )
 	if ( TARGET_GAME == '1' ):
 		local_d3xp = 0
 		Export( 'GLOBALS ' + GLOBALS )
-		game = SConscript( g_build + '/game/sys/scons/SConscript.game' )
-		game_base = InstallAs( '#game%s-base.so' % cpu, game )
+		game = SConscript( g_build + '/obj-base/sys/scons/SConscript.game' )
+		g_env.Default(game)
 		if ( BUILD_GAMEPAK == '1' ):
-			Command( '#game01-base.pk4', [ game_base, game ], Action( g_env.BuildGamePak ) )
+			Command( '#game01-base.pk4', [ game, game ], Action( g_env.BuildGamePak ) )
 	if ( TARGET_D3XP == '1' ):
 		# uses idlib as compiled for game/
 		local_d3xp = 1
-		VariantDir( g_build + '/d3xp', '.', duplicate = dupe )
+		VariantDir( g_build + '/obj-d3xp', '.', duplicate = dupe )
 		Export( 'GLOBALS ' + GLOBALS )
-		d3xp = SConscript( g_build + '/d3xp/sys/scons/SConscript.game' )
-		game_d3xp = InstallAs( '#game%s-d3xp.so' % cpu, d3xp )
+		d3xp = SConscript( g_build + '/obj-d3xp/sys/scons/SConscript.game' )
+		g_env.Default(d3xp)
 		if ( BUILD_GAMEPAK == '1' ):
-			Command( '#game01-d3xp.pk4', [ game_d3xp, d3xp ], Action( g_env.BuildGamePak ) )
+			Command( '#game01-d3xp.pk4', [ d3xp, d3xp ], Action( g_env.BuildGamePak ) )
 
 if ( TARGET_MONO == '1' ):
 	# NOTE: no D3XP atm. add a TARGET_MONO_D3XP
@@ -463,7 +480,7 @@ if ( TARGET_MONO == '1' ):
 	game_objects = SConscript( g_build + '/mono/sys/scons/SConscript.game' )
 	Export( 'GLOBALS ' + GLOBALS )
 	doom_mono = SConscript( g_build + '/mono/sys/scons/SConscript.core' )
-	InstallAs( '#doom-mon.' + cpu, doom_mono )
+	g_env.Default(doom_mono)
 
 if ( TARGET_DEMO == '1' ):
 	# NOTE: no D3XP atm. add a TARGET_DEMO_D3XP
@@ -480,8 +497,7 @@ if ( TARGET_DEMO == '1' ):
 	idlib_objects = SConscript( g_build + '/demo/sys/scons/SConscript.idlib' )
 	Export( 'GLOBALS ' + GLOBALS )
 	doom_demo = SConscript( g_build + '/demo/sys/scons/SConscript.core' )
-
-	InstallAs( '#doom-demo.' + cpu, doom_demo )
+	g_env.Default(doom_demo)
 
 	local_idlibpic = 1
 	Export( 'GLOBALS ' + GLOBALS )
@@ -489,8 +505,7 @@ if ( TARGET_DEMO == '1' ):
 	idlib_objects = SConscript( g_build + '/demo/game/sys/scons/SConscript.idlib' )
 	Export( 'GLOBALS ' + GLOBALS )
 	game_demo = SConscript( g_build + '/demo/game/sys/scons/SConscript.game' )
-
-	InstallAs( '#game%s-demo.so' % cpu, game_demo )
+	g_env.Default(doom_demo)
 
 if ( SETUP != '0' ):
 	brandelf = Program( 'brandelf', 'sys/linux/setup/brandelf.c' )

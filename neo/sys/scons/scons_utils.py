@@ -126,7 +126,7 @@ def checkLDD( target, source, env ):
 		sys.exit(1)
 
 def SharedLibrarySafe( env, target, source ):
-	ret = env.SharedLibrary( target, source )
+	ret = env.SharedLibrary( target, source, SHLIBPREFIX='' )
 	env.AddPostAction( ret, checkLDD )
 	return ret
 

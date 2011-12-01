@@ -84,9 +84,12 @@ if ( local_d3xp ):
 	game_string += ' \
 	Grabber.cpp \
 	physics/Force_Grab.cpp'
+	game_name = 'd3xp'
 	game_list = scons_utils.BuildList( 'd3xp', game_string )
 else:
+	game_name = 'base'
 	game_list = scons_utils.BuildList( 'game', game_string )
+
 
 for i in range( len( game_list ) ):
 	game_list[ i ] = '../../' + game_list[ i ]
@@ -100,7 +103,7 @@ if ( local_demo == 1 ):
 
 if ( local_gamedll == 1 ):
 	local_env.Append( CPPDEFINES = [ 'GAME_DLL' ] )
-	ret = local_env.SharedLibrarySafe( local_env, 'game', game_list + idlib_objects )
+	ret = local_env.SharedLibrary( '%s/game%s-%s.so' % (g_build, g_cpu, game_name), game_list + idlib_objects, SHLIBPREFIX='' )
 	Return( 'ret' )
 else:
 	ret_list = []

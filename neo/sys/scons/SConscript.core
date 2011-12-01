@@ -273,5 +273,13 @@ source_list += g_env_noopt.StaticObject( '../../tools/compilers/dmap/optimize_gc
 if ( local_gamedll == 0 ):
 	source_list += game_objects
 
-d3wm = local_env.Program( target = 'doom', source = source_list )
+basename = 'doom'
+if ( local_dedicated == 1 ):
+	basename += 'ded'
+elif ( local_gamedll == 0 ):
+	basename += '-mon'
+if ( local_demo == 1 ):
+	basename += '-demo'
+
+d3wm = local_env.Program( target = '%s/%s.%s' % (g_build, basename, g_cpu), source = source_list )
 Return( 'd3wm' )
