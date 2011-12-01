@@ -326,6 +326,11 @@ if ( ID_NOLANADDRESS != '0' ):
 if ( ID_MCHECK == '1' ):
 	BASECPPFLAGS.append( '-DID_MCHECK' )
 
+# TODO fix these warnings
+BASECPPFLAGS.append('-Wno-sign-compare')
+BASECPPFLAGS.append('-Wno-switch')
+BASECPPFLAGS.append('-Wno-format-security')
+
 # create the build environements
 g_base_env = Environment( ENV = os.environ, CC = CC, CXX = CXX, LINK = LINK, CPPFLAGS = BASECPPFLAGS, LINKFLAGS = BASELINKFLAGS, CPPPATH = CORECPPPATH, LIBPATH = CORELIBPATH )
 scons_utils.SetupUtils( g_base_env )
