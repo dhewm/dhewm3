@@ -226,9 +226,9 @@ const char *	idSysLocal::GetCallStackStr( const address_t *callStack, const int 
 const char *	idSysLocal::GetCallStackCurStr( int depth ) { return ""; }
 void			idSysLocal::ShutdownSymbols( void ) {}
 
-int				idSysLocal::DLL_Load( const char *dllName ) { return 0; }
-void *			idSysLocal::DLL_GetProcAddress( int dllHandle, const char *procName ) { return NULL; }
-void			idSysLocal::DLL_Unload( int dllHandle ) { }
+uintptr_t		idSysLocal::DLL_Load( const char *dllName ) { return 0; }
+void *			idSysLocal::DLL_GetProcAddress( uintptr_t dllHandle, const char *procName ) { return NULL; }
+void			idSysLocal::DLL_Unload( uintptr_t dllHandle ) { }
 void			idSysLocal::DLL_GetFileName( const char *baseName, char *dllName, int maxLength ) { }
 
 sysEvent_t		idSysLocal::GenerateMouseButtonEvent( int button, bool down ) { sysEvent_t ev; memset( &ev, 0, sizeof( ev ) ); return ev; }
