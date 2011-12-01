@@ -36,6 +36,9 @@ Event are used for scheduling tasks and for linking script commands.
 #define D_EVENT_MAXARGS				8			// if changed, enable the CREATE_EVENT_CODE define in Event.cpp to generate switch statement for idClass::ProcessEventArgPtr.
 												// running the game will then generate c:\doom\base\events.txt, the contents of which should be copied into the switch statement.
 
+// stack size of idVec3, aligned to native pointer size
+#define E_EVENT_SIZEOF_VEC			((sizeof(idVec3) + (sizeof(intptr_t) - 1)) & ~(sizeof(intptr_t) - 1))
+
 #define D_EVENT_VOID				( ( char )0 )
 #define D_EVENT_INTEGER				'd'
 #define D_EVENT_FLOAT				'f'
