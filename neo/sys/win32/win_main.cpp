@@ -93,11 +93,11 @@ Sys_Createthread
 void Sys_CreateThread(  xthread_t function, void *parms, xthreadPriority priority, xthreadInfo &info, const char *name, xthreadInfo *threads[MAX_THREADS], int *thread_count ) {
 	HANDLE temp = CreateThread(	NULL,	// LPSECURITY_ATTRIBUTES lpsa,
 									0,		// DWORD cbStack,
-									(LPTHREAD_START_ROUTINE)function,	// LPTHREAD_START_ROUTINE lpStartAddr,
+									function,	// LPTHREAD_START_ROUTINE lpStartAddr,
 									parms,	// LPVOID lpvThreadParm,
 									0,		//   DWORD fdwCreate,
 									&info.threadId);
-	info.threadHandle = (int) temp;
+	info.threadHandle = (intptr_t) temp;
 	if (priority == THREAD_HIGHEST) {
 		SetThreadPriority( (HANDLE)info.threadHandle, THREAD_PRIORITY_HIGHEST );		//  we better sleep enough to do this
 	} else if (priority == THREAD_ABOVE_NORMAL ) {
@@ -137,7 +137,7 @@ Sys_GetThreadName
 ==================
 */
 const char* Sys_GetThreadName(int *index) {
-	int id = GetCurrentThreadId();
+	size_t id = GetCurrentThreadId();
 	for( int i = 0; i < g_thread_count; i++ ) {
 		if ( id == g_threads[i]->threadId ) {
 			if ( index ) {
@@ -870,7 +870,7 @@ void Sys_In_Restart_f( const idCmdArgs &args ) {
 Sys_AsyncThread
 ==================
 */
-static void Sys_AsyncThread( void *parm ) {
+static THREAD_RETURN_TYPE Sys_AsyncThread( void *parm ) {
 	int		wakeNumber;
 	int		startTime;
 
@@ -900,6 +900,8 @@ static void Sys_AsyncThread( void *parm ) {
 
 		common->Async();
 	}
+
+	return (THREAD_RETURN_TYPE) 0;
 }
 
 /*
@@ -920,7 +922,7 @@ void Sys_StartAsyncThread( void ) {
 	t.HighPart = t.LowPart = 0;
 	SetWaitableTimer( hTimer, &t, USERCMD_MSEC, NULL, NULL, TRUE );
 
-	Sys_CreateThread( (xthread_t)Sys_AsyncThread, NULL, THREAD_ABOVE_NORMAL, threadInfo, "Async", g_threads,  &g_thread_count );
+	Sys_CreateThread( Sys_AsyncThread, NULL, THREAD_ABOVE_NORMAL, threadInfo, "Async", g_threads,  &g_thread_count );
 
 #ifdef SET_THREAD_AFFINITY
 	// give the async thread an affinity for the second cpu

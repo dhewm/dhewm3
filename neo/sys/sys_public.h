@@ -59,6 +59,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
 
+#define THREAD_RETURN_TYPE				dword
+
 #endif
 
 // Mac OSX
@@ -96,6 +98,8 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_STATIC_TEMPLATE
 
 #define assertmem( x, y )
+
+#define THREAD_RETURN_TYPE				void *
 
 #endif
 
@@ -135,6 +139,8 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_STATIC_TEMPLATE
 
 #define assertmem( x, y )
+
+#define THREAD_RETURN_TYPE				void *
 
 #endif
 
@@ -482,7 +488,7 @@ void			Sys_ShutdownNetworking( void );
 ==============================================================
 */
 
-typedef unsigned int (*xthread_t)( void * );
+typedef THREAD_RETURN_TYPE (*xthread_t)( void * );
 
 typedef enum {
 	THREAD_NORMAL,
@@ -492,8 +498,8 @@ typedef enum {
 
 typedef struct {
 	const char *	name;
-	int				threadHandle;
-	unsigned long	threadId;
+	intptr_t		threadHandle;
+	size_t			threadId;
 } xthreadInfo;
 
 const int MAX_THREADS				= 10;

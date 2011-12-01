@@ -983,13 +983,15 @@ static OSErr DoRegCodeDialog( char* ioRegCode1 )
 Sys_AsyncThread
 =================
 */
-void Sys_AsyncThread( void ) {
+THREAD_RETURN_TYPE Sys_AsyncThread( void * ) {
 	while ( 1 ) {
 		usleep( 16666 );
 		common->Async();
 		Sys_TriggerEvent( TRIGGER_EVENT_ONE );
 		pthread_testcancel();
 	}
+
+	return (THREAD_RETURN_TYPE) 0;
 }
 
 
