@@ -257,7 +257,7 @@ double Sys_GetClockTicks( void ) {
 						  : "=r" (lo), "=r" (hi) );
 	return (double) lo + (double) 0xFFFFFFFF * hi;
 #else
-#error unsupported CPU
+	return 0.0;
 #endif
 }
 
