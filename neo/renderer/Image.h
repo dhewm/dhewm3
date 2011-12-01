@@ -64,57 +64,57 @@ typedef enum {
 static const int	MAX_TEXTURE_LEVELS = 14;
 
 // surface description flags
-const unsigned long DDSF_CAPS           = 0x00000001l;
-const unsigned long DDSF_HEIGHT         = 0x00000002l;
-const unsigned long DDSF_WIDTH          = 0x00000004l;
-const unsigned long DDSF_PITCH          = 0x00000008l;
-const unsigned long DDSF_PIXELFORMAT    = 0x00001000l;
-const unsigned long DDSF_MIPMAPCOUNT    = 0x00020000l;
-const unsigned long DDSF_LINEARSIZE     = 0x00080000l;
-const unsigned long DDSF_DEPTH          = 0x00800000l;
+const unsigned int DDSF_CAPS           = 0x00000001l;
+const unsigned int DDSF_HEIGHT         = 0x00000002l;
+const unsigned int DDSF_WIDTH          = 0x00000004l;
+const unsigned int DDSF_PITCH          = 0x00000008l;
+const unsigned int DDSF_PIXELFORMAT    = 0x00001000l;
+const unsigned int DDSF_MIPMAPCOUNT    = 0x00020000l;
+const unsigned int DDSF_LINEARSIZE     = 0x00080000l;
+const unsigned int DDSF_DEPTH          = 0x00800000l;
 
 // pixel format flags
-const unsigned long DDSF_ALPHAPIXELS    = 0x00000001l;
-const unsigned long DDSF_FOURCC         = 0x00000004l;
-const unsigned long DDSF_RGB            = 0x00000040l;
-const unsigned long DDSF_RGBA           = 0x00000041l;
+const unsigned int DDSF_ALPHAPIXELS    = 0x00000001l;
+const unsigned int DDSF_FOURCC         = 0x00000004l;
+const unsigned int DDSF_RGB            = 0x00000040l;
+const unsigned int DDSF_RGBA           = 0x00000041l;
 
 // our extended flags
-const unsigned long DDSF_ID_INDEXCOLOR	= 0x10000000l;
-const unsigned long DDSF_ID_MONOCHROME	= 0x20000000l;
+const unsigned int DDSF_ID_INDEXCOLOR	= 0x10000000l;
+const unsigned int DDSF_ID_MONOCHROME	= 0x20000000l;
 
 // dwCaps1 flags
-const unsigned long DDSF_COMPLEX         = 0x00000008l;
-const unsigned long DDSF_TEXTURE         = 0x00001000l;
-const unsigned long DDSF_MIPMAP          = 0x00400000l;
+const unsigned int DDSF_COMPLEX         = 0x00000008l;
+const unsigned int DDSF_TEXTURE         = 0x00001000l;
+const unsigned int DDSF_MIPMAP          = 0x00400000l;
 
 #define DDS_MAKEFOURCC(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
 
 typedef struct {
-	unsigned long dwSize;
-	unsigned long dwFlags;
-	unsigned long dwFourCC;
-	unsigned long dwRGBBitCount;
-	unsigned long dwRBitMask;
-	unsigned long dwGBitMask;
-	unsigned long dwBBitMask;
-	unsigned long dwABitMask;
+	unsigned int dwSize;
+	unsigned int dwFlags;
+	unsigned int dwFourCC;
+	unsigned int dwRGBBitCount;
+	unsigned int dwRBitMask;
+	unsigned int dwGBitMask;
+	unsigned int dwBBitMask;
+	unsigned int dwABitMask;
 } ddsFilePixelFormat_t;
 
 typedef struct
 {
-	unsigned long dwSize;
-	unsigned long dwFlags;
-	unsigned long dwHeight;
-	unsigned long dwWidth;
-	unsigned long dwPitchOrLinearSize;
-	unsigned long dwDepth;
-	unsigned long dwMipMapCount;
-	unsigned long dwReserved1[11];
+	unsigned int dwSize;
+	unsigned int dwFlags;
+	unsigned int dwHeight;
+	unsigned int dwWidth;
+	unsigned int dwPitchOrLinearSize;
+	unsigned int dwDepth;
+	unsigned int dwMipMapCount;
+	unsigned int dwReserved1[11];
 	ddsFilePixelFormat_t ddspf;
-	unsigned long dwCaps1;
-	unsigned long dwCaps2;
-	unsigned long dwReserved2[3];
+	unsigned int dwCaps1;
+	unsigned int dwCaps2;
+	unsigned int dwReserved2[3];
 } ddsFileHeader_t;
 
 
