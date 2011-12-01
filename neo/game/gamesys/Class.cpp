@@ -828,7 +828,7 @@ idClass::ProcessEventArgs
 bool idClass::ProcessEventArgs( const idEventDef *ev, int numargs, ... ) {
 	idTypeInfo	*c;
 	int			num;
-	int			data[ D_EVENT_MAXARGS ];
+	intptr_t	data[ D_EVENT_MAXARGS ];
 	va_list		args;
 
 	assert( ev );
@@ -936,7 +936,7 @@ bool idClass::ProcessEvent( const idEventDef *ev, idEventArg arg1, idEventArg ar
 idClass::ProcessEventArgPtr
 ================
 */
-bool idClass::ProcessEventArgPtr( const idEventDef *ev, int *data ) {
+bool idClass::ProcessEventArgPtr( const idEventDef *ev, intptr_t *data ) {
 	idTypeInfo	*c;
 	int			num;
 	eventCallback_t	callback;
@@ -990,42 +990,42 @@ http://developer.apple.com/documentation/DeveloperTools/Conceptual/MachORuntime/
 		break;
 
 	case 1 :
-		typedef void ( idClass::*eventCallback_1_t )( const int );
+		typedef void ( idClass::*eventCallback_1_t )( const intptr_t );
 		( this->*( eventCallback_1_t )callback )( data[ 0 ] );
 		break;
 
 	case 2 :
-		typedef void ( idClass::*eventCallback_2_t )( const int, const int );
+		typedef void ( idClass::*eventCallback_2_t )( const intptr_t, const intptr_t );
 		( this->*( eventCallback_2_t )callback )( data[ 0 ], data[ 1 ] );
 		break;
 
 	case 3 :
-		typedef void ( idClass::*eventCallback_3_t )( const int, const int, const int );
+		typedef void ( idClass::*eventCallback_3_t )( const intptr_t, const intptr_t, const intptr_t );
 		( this->*( eventCallback_3_t )callback )( data[ 0 ], data[ 1 ], data[ 2 ] );
 		break;
 
 	case 4 :
-		typedef void ( idClass::*eventCallback_4_t )( const int, const int, const int, const int );
+		typedef void ( idClass::*eventCallback_4_t )( const intptr_t, const intptr_t, const intptr_t, const intptr_t );
 		( this->*( eventCallback_4_t )callback )( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] );
 		break;
 
 	case 5 :
-		typedef void ( idClass::*eventCallback_5_t )( const int, const int, const int, const int, const int );
+		typedef void ( idClass::*eventCallback_5_t )( const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t );
 		( this->*( eventCallback_5_t )callback )( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ], data[ 4 ] );
 		break;
 
 	case 6 :
-		typedef void ( idClass::*eventCallback_6_t )( const int, const int, const int, const int, const int, const int );
+		typedef void ( idClass::*eventCallback_6_t )( const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t );
 		( this->*( eventCallback_6_t )callback )( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ], data[ 4 ], data[ 5 ] );
 		break;
 
 	case 7 :
-		typedef void ( idClass::*eventCallback_7_t )( const int, const int, const int, const int, const int, const int, const int );
+		typedef void ( idClass::*eventCallback_7_t )( const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t );
 		( this->*( eventCallback_7_t )callback )( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ], data[ 4 ], data[ 5 ], data[ 6 ] );
 		break;
 
 	case 8 :
-		typedef void ( idClass::*eventCallback_8_t )( const int, const int, const int, const int, const int, const int, const int, const int );
+		typedef void ( idClass::*eventCallback_8_t )( const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t, const intptr_t );
 		( this->*( eventCallback_8_t )callback )( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ], data[ 4 ], data[ 5 ], data[ 6 ], data[ 7 ] );
 		break;
 
