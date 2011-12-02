@@ -9,34 +9,6 @@ import scons_utils
 Import( 'GLOBALS' )
 Import( GLOBALS )
 
-ogg_string = ' \
-	oggsrc/bitwise.c \
-	oggsrc/framing.c \
-	vorbissrc/analysis.c \
-	vorbissrc/bitrate.c \
-	vorbissrc/block.c \
-	vorbissrc/codebook.c \
-	vorbissrc/envelope.c \
-	vorbissrc/floor0.c \
-	vorbissrc/floor1.c \
-	vorbissrc/info.c \
-	vorbissrc/lookup.c \
-	vorbissrc/lpc.c \
-	vorbissrc/lsp.c \
-	vorbissrc/mapping0.c \
-	vorbissrc/mdct.c \
-	vorbissrc/psy.c \
-	vorbissrc/registry.c \
-	vorbissrc/res0.c \
-	vorbissrc/sharedbook.c \
-	vorbissrc/smallft.c \
-	vorbissrc/synthesis.c \
-	vorbissrc/vorbisenc.c \
-	vorbissrc/vorbisfile.c \
-	vorbissrc/windowvb.c'
-
-ogg_list = scons_utils.BuildList( 'sound/OggVorbis', ogg_string )
-
 renderer_string = ' \
 	Cinematic.cpp \
 	GuiModel.cpp \
@@ -254,9 +226,6 @@ core_list = framework_list + renderer_list + ui_list \
 for i in range( len( core_list ) ):
 	core_list[ i ] = '../../' + core_list[ i ]
 
-for i in range( len( ogg_list ) ):
-	ogg_list[ i ] = '../../' + ogg_list[ i ]
-
 local_env = g_env.Clone()
 
 if ( local_dedicated == 1 ):
@@ -273,10 +242,6 @@ if ( local_demo == 1 ):
 if ( local_curl == 0 ):
 	local_env.Append( CPPDEFINES = [ 'ID_ENABLE_CURL=0' ] )
 
-ogg_env = local_env.Clone()
-ogg_env.Append( CPPPATH = '#sound/OggVorbis/vorbissrc' )
-libogg = ogg_env.StaticLibrary( 'ogg', ogg_list )
-
 sound_env = local_env.Clone()
 sound_env.Append( CPPPATH = '/usr/local/lib/oss/include' )
 # store a local copy of the include headers as well for holy build
@@ -288,7 +253,7 @@ else:
 	sound_env.Append( CPPDEFINES = 'NO_ALSA' )
 sound_lib = sound_env.StaticLibrary( 'sound', sound_list )
 
-local_env.Append( LIBS = [ 'pthread', 'dl', 'jpeg' ] )
+local_env.Append( LIBS = [ 'pthread', 'dl', 'jpeg', 'vorbisfile' ] )
 
 if ( local_curl == 1 ):
 	local_env.Append( LIBS = [ 'curl', 'z' ] )
@@ -300,7 +265,6 @@ if ( local_dedicated == 0 ):
 source_list = core_list
 source_list += idlib_objects
 source_list += [ '../../glimp/sys/scons/libglimp.a' ]
-source_list += libogg
 source_list += sound_lib
 source_list += [ '../../openal/stubs.cpp' ]
 
