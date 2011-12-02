@@ -12,7 +12,7 @@ import scons_utils
 conf_filename='site.conf'
 # choose configuration variables which should be saved between runs
 # ( we handle all those as strings )
-serialized=['CC', 'CXX', 'JOBS', 'BUILD', 'IDNET_HOST', 'GL_HARDLINK', 'DEDICATED',
+serialized=['CC', 'CXX', 'BUILD', 'IDNET_HOST', 'GL_HARDLINK', 'DEDICATED',
 	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK', 'ALSA',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT' ]
@@ -40,9 +40,6 @@ CXX (default g++)
 	ex: CC="gcc-3.3"
 	You can use ccache and distcc, for instance:
 	CC="ccache distcc gcc" CXX="ccache distcc g++"
-
-JOBS (default 1)
-	Parallel build
 
 BUILD (default debug)
 	Use debug-all/debug/release to select build settings
@@ -160,7 +157,6 @@ g_os = 'Linux'
 
 CC = 'gcc'
 CXX = 'g++'
-JOBS = '1'
 BUILD = 'debug'
 DEDICATED = '0'
 TARGET_CORE = '1'
@@ -257,8 +253,6 @@ if ( DEBUG_MEMORY != '0' ):
 if ( LIBC_MALLOC != '1' ):
 	g_build += '-nolibcmalloc'
 
-SetOption('num_jobs', JOBS)
-
 LINK = CXX
 
 # common flags
@@ -284,8 +278,6 @@ BASECPPFLAGS.append( '-Wall' )
 BASECPPFLAGS.append( '-Wno-unknown-pragmas' )
 # this define is necessary to make sure threading support is enabled in X
 CORECPPFLAGS.append( '-DXTHREADS' )
-# don't wrap gcc messages
-BASECPPFLAGS.append( '-fmessage-length=0' )
 # gcc 4.0
 BASECPPFLAGS.append( '-fpermissive' )
 
@@ -359,14 +351,6 @@ g_game_env['CPPFLAGS'] += GAMECPPFLAGS
 g_env.Append( CPPFLAGS = '-fno-strict-aliasing' )
 g_env_noopt.Append( CPPFLAGS = '-fno-strict-aliasing' )
 g_game_env.Append( CPPFLAGS = '-fno-strict-aliasing' )
-
-if ( int(JOBS) > 1 ):
-	print 'Using buffered process output'
-	silent = False
-	if ( SILENT == '1' ):
-		silent = True
-	scons_utils.SetupBufferedOutput( g_env, silent )
-	scons_utils.SetupBufferedOutput( g_game_env, silent )
 
 # mark the globals
 
