@@ -223,6 +223,7 @@ R_AlphaRampImage
 Creates a 0-255 ramp image
 ================
 */
+#if 0
 static void R_AlphaRampImage( idImage *image ) {
 	int		x;
 	byte	data[256][4];
@@ -237,6 +238,7 @@ static void R_AlphaRampImage( idImage *image ) {
 	image->GenerateImage( (byte *)data, 256, 1,
 		TF_NEAREST, false, TR_CLAMP, TD_HIGH_QUALITY );
 }
+#endif
 
 
 
@@ -382,6 +384,7 @@ static void R_RGBA8Image( idImage *image ) {
 		TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY );
 }
 
+#if 0
 static void R_RGB8Image( idImage *image ) {
 	byte	data[DEFAULT_SIZE][DEFAULT_SIZE][4];
 
@@ -394,6 +397,7 @@ static void R_RGB8Image( idImage *image ) {
 	image->GenerateImage( (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE,
 		TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY );
 }
+#endif
 
 static void R_AlphaNotchImage( idImage *image ) {
 	byte	data[2][4];
@@ -448,6 +452,7 @@ static void R_AmbientNormalImage( idImage *image ) {
 }
 
 
+#if 0
 static void CreateSquareLight( void ) {
 	byte		*buffer;
 	int			x, y;
@@ -520,6 +525,7 @@ static void CreateFlashOff( void ) {
 
 	R_StaticFree( buffer );
 }
+#endif
 
 
 /*

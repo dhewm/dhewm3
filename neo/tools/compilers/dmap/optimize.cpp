@@ -1058,6 +1058,7 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 }
 
 // debugging tool
+#if 0
 static void ReportNearbyVertexes( const optVertex_t *v, const optIsland_t *island ) {
 	const optVertex_t	*ov;
 	float		d;
@@ -1077,6 +1078,7 @@ static void ReportNearbyVertexes( const optVertex_t *v, const optIsland_t *islan
 		}
 	}
 }
+#endif
 
 /*
 ====================
@@ -1749,6 +1751,7 @@ static void OptimizeIsland( optIsland_t *island ) {
 AddVertexToIsland_r
 ================
 */
+#if 0
 static void AddVertexToIsland_r( optVertex_t *vert, optIsland_t *island ) {
 	optEdge_t	*e;
 
@@ -1783,6 +1786,7 @@ static void AddVertexToIsland_r( optVertex_t *vert, optIsland_t *island ) {
 	}
 
 }
+#endif
 
 /*
 ====================
@@ -1798,6 +1802,7 @@ doing this, because PointInSourceTris() can give a bad answer if
 the source list has triangles not used in the optimization
 ====================
 */
+#if 0
 static void SeparateIslands( optimizeGroup_t *opt ) {
 	int		i;
 	optIsland_t	island;
@@ -1820,6 +1825,7 @@ static void SeparateIslands( optimizeGroup_t *opt ) {
 		common->Printf( "%6i islands\n", numIslands );
 	}
 }
+#endif
 
 static void DontSeparateIslands( optimizeGroup_t *opt ) {
 	int		i;
@@ -1852,6 +1858,7 @@ PointInSourceTris
 This is a sloppy bounding box check
 ====================
 */
+#if 0
 static bool PointInSourceTris( float x, float y, float z, optimizeGroup_t *opt ) {
 	mapTri_t	*tri;
 	idBounds	b;
@@ -1876,6 +1883,7 @@ static bool PointInSourceTris( float x, float y, float z, optimizeGroup_t *opt )
 	}
 	return false;
 }
+#endif
 
 /*
 ====================

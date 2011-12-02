@@ -1332,6 +1332,7 @@ HeightForTrajectory
 Returns the maximum hieght of a given trajectory
 =====================
 */
+#if 0
 static float HeightForTrajectory( const idVec3 &start, float zVel, float gravity ) {
 	float maxHeight, t;
 
@@ -1341,6 +1342,7 @@ static float HeightForTrajectory( const idVec3 &start, float zVel, float gravity
 
 	return maxHeight;
 }
+#endif
 
 /*
 =====================

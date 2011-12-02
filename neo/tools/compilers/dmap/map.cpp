@@ -201,6 +201,7 @@ static uBrush_t *FinishBrush( void ) {
 AdjustEntityForOrigin
 ================
 */
+#if 0
 static void AdjustEntityForOrigin( uEntity_t *ent ) {
 	primitive_t	*prim;
 	uBrush_t	*b;
@@ -232,6 +233,7 @@ static void AdjustEntityForOrigin( uEntity_t *ent ) {
 		CreateBrushWindings(b);
 	}
 }
+#endif
 
 /*
 =================
