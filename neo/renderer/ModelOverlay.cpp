@@ -103,7 +103,6 @@ may extend well past the 0.0 to 1.0 texture range
 */
 void idRenderModelOverlay::CreateOverlay( const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr ) {
 	int i, maxVerts, maxIndexes, surfNum;
-	idRenderModelOverlay *overlay = NULL;
 
 	// count up the maximum possible vertices and indexes per surface
 	maxVerts = 0;

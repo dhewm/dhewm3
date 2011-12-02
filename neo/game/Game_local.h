@@ -110,10 +110,11 @@ void gameError( const char *fmt, ... );
 
 //============================================================================
 
-const int MAX_GAME_MESSAGE_SIZE		= 8192;
-const int MAX_ENTITY_STATE_SIZE		= 512;
-const int ENTITY_PVS_SIZE			= ((MAX_GENTITIES+31)>>5);
-const int NUM_RENDER_PORTAL_BITS	= idMath::BitsForInteger( PS_BLOCK_ALL );
+#define MAX_GAME_MESSAGE_SIZE	8192
+#define MAX_ENTITY_STATE_SIZE	512
+#define ENTITY_PVS_SIZE			((MAX_GENTITIES+31)>>5)
+
+extern const int NUM_RENDER_PORTAL_BITS;
 
 typedef struct entityState_s {
 	int						entityNumber;
@@ -682,11 +683,10 @@ typedef enum {
 #define	MASK_SHOT_RENDERMODEL		(CONTENTS_SOLID|CONTENTS_RENDERMODEL)
 #define	MASK_SHOT_BOUNDINGBOX		(CONTENTS_SOLID|CONTENTS_BODY)
 
-const float DEFAULT_GRAVITY			= 1066.0f;
 #define DEFAULT_GRAVITY_STRING		"1066"
-const idVec3 DEFAULT_GRAVITY_VEC3( 0, 0, -DEFAULT_GRAVITY );
-
-const int	CINEMATIC_SKIP_DELAY	= SEC2MS( 2.0f );
+extern const float	DEFAULT_GRAVITY;
+extern const idVec3	DEFAULT_GRAVITY_VEC3;
+extern const int	CINEMATIC_SKIP_DELAY;
 
 //============================================================================
 

@@ -70,16 +70,6 @@ void idAASLocal::DrawReachability( const idReachability *reach ) const {
 	if ( gameLocal.GetLocalPlayer() ) {
 		gameRenderWorld->DrawText( va( "%d", reach->edgeNum ), ( reach->start + reach->end ) * 0.5f, 0.1f, colorWhite, gameLocal.GetLocalPlayer()->viewAxis );
 	}
-
-	switch( reach->travelType ) {
-		case TFL_WALK: {
-			const idReachability_Walk *walk = static_cast<const idReachability_Walk *>(reach);
-			break;
-		}
-		default: {
-			break;
-		}
-	}
 }
 
 /*

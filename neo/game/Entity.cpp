@@ -2524,7 +2524,6 @@ idEntity::RunPhysics
 bool idEntity::RunPhysics( void ) {
 	int			i, reachedTime, startTime, endTime;
 	idEntity *	part, *blockedPart, *blockingEntity;
-	trace_t		results;
 	bool		moved;
 
 	// don't run physics if not enabled

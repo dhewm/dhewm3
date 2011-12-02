@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
+const int ASYNC_PLAYER_INV_AMMO_BITS = idMath::BitsForInteger( 999 );	// 9 bits to cover the range [0, 999]
+const int ASYNC_PLAYER_INV_CLIP_BITS = -7;								// -7 bits to cover the range [-1, 60]
+
 /*
 ===============================================================================
 
@@ -6816,7 +6819,6 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
 			damage = 1;
 		}
 
-		int oldHealth = health;
 		health -= damage;
 
 		if ( health <= 0 ) {

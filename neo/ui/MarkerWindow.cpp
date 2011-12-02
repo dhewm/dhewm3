@@ -321,7 +321,6 @@ void idMarkerWindow::Activate(bool activate, idStr &act) {
 			fileSystem->FreeFileList( markers );
 			memset(imageBuff, 0, 512*64*4);
 			float step = 511.0f / (numStats - 1);
-			float startX = 0;
 			float x1, y1, x2, y2;
 			x1 = 0 - step;
 			for (i = 0; i < numStats-1; i++) {

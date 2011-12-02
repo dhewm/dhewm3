@@ -79,8 +79,6 @@ typedef struct {
 
 } atiVertexShaderInfo_t;
 
-static atiVertexShaderInfo_t	vsi;
-
 /*
 ===================
 RB_R200_ARB_DrawInteraction

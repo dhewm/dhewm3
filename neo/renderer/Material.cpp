@@ -2601,7 +2601,6 @@ maps are constant, but 2/3 of the surface references are.
 This is probably an optimization of dubious value.
 ==================
 */
-static int	c_constant, c_variable;
 void idMaterial::CheckForConstantRegisters() {
 	if ( !pd->registersAreConstant ) {
 		return;

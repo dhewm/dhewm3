@@ -31,8 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Rectangle.h"
 
-static const char *VAR_GUIPREFIX = "gui::";
-static const int VAR_GUIPREFIX_LEN = strlen(VAR_GUIPREFIX);
+extern const char *VAR_GUIPREFIX;
 
 class idWindow;
 class idWinVar {

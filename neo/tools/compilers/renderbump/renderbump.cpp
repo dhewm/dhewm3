@@ -102,7 +102,6 @@ typedef struct {
 	triHash_t	*hash;
 } renderBump_t;
 
-static float traceFraction;
 static int rayNumber;		// for avoiding retests of bins and faces
 
 static int oldWidth, oldHeight;

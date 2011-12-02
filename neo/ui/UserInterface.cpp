@@ -185,7 +185,6 @@ idUserInterface *idUserInterfaceManagerLocal::FindGui( const char *qpath, bool a
 	int c = guis.Num();
 
 	for ( int i = 0; i < c; i++ ) {
-		idUserInterfaceLocal *gui = guis[i];
 		if ( !idStr::Icmp( guis[i]->GetSourceFile(), qpath ) ) {
 			if ( !forceNOTUnique && ( needUnique || guis[i]->IsInteractive() ) ) {
 				break;

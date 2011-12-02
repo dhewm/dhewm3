@@ -7903,10 +7903,10 @@ const float	AF_VELOCITY_MAX				= 16000;
 const int	AF_VELOCITY_TOTAL_BITS		= 16;
 const int	AF_VELOCITY_EXPONENT_BITS	= idMath::BitsForInteger( idMath::BitsForFloat( AF_VELOCITY_MAX ) ) + 1;
 const int	AF_VELOCITY_MANTISSA_BITS	= AF_VELOCITY_TOTAL_BITS - 1 - AF_VELOCITY_EXPONENT_BITS;
-const float	AF_FORCE_MAX				= 1e20f;
-const int	AF_FORCE_TOTAL_BITS			= 16;
-const int	AF_FORCE_EXPONENT_BITS		= idMath::BitsForInteger( idMath::BitsForFloat( AF_FORCE_MAX ) ) + 1;
-const int	AF_FORCE_MANTISSA_BITS		= AF_FORCE_TOTAL_BITS - 1 - AF_FORCE_EXPONENT_BITS;
+//const float	AF_FORCE_MAX				= 1e20f;
+//const int	AF_FORCE_TOTAL_BITS			= 16;
+//const int	AF_FORCE_EXPONENT_BITS		= idMath::BitsForInteger( idMath::BitsForFloat( AF_FORCE_MAX ) ) + 1;
+//const int	AF_FORCE_MANTISSA_BITS		= AF_FORCE_TOTAL_BITS - 1 - AF_FORCE_EXPONENT_BITS;
 
 /*
 ================

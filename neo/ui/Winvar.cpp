@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "Winvar.h"
 #include "UserInterfaceLocal.h"
 
+const char *VAR_GUIPREFIX = "gui::";
+static const int VAR_GUIPREFIX_LEN = strlen(VAR_GUIPREFIX);
+
 idWinVar::idWinVar() {
 	guiDict = NULL;
 	name = NULL;

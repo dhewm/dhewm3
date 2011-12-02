@@ -3299,7 +3299,6 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 
 #ifdef _D3XP
 
-		int ammoAvail = owner->inventory.HasAmmo( ammoType, ammoRequired );
 		if ( ( clipSize != 0 ) && ( ammoClip <= 0 ) ) {
 			return;
 		}
@@ -3500,7 +3499,6 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 	// avoid all ammo considerations on a client
 	if ( !gameLocal.isClient ) {
 
-		int ammoAvail = owner->inventory.HasAmmo( ammoType, ammoRequired );
 		if ( ( clipSize != 0 ) && ( ammoClip <= 0 ) ) {
 			return;
 		}

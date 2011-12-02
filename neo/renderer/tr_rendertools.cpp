@@ -733,7 +733,6 @@ Debugging tool
 =====================
 */
 static void RB_ShowTris( drawSurf_t **drawSurfs, int numDrawSurfs ) {
-	modelTrace_t mt;
 	idVec3 end;
 
 	if ( !r_showTris.GetInteger() ) {
@@ -811,7 +810,6 @@ static void RB_ShowSurfaceInfo( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	qglPolygonOffset( -1, -2 );
 	qglEnable( GL_POLYGON_OFFSET_LINE );
 
-	idVec3	trans[3];
 	float	matrix[16];
 
 	// transform the object verts into global space

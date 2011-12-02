@@ -823,7 +823,6 @@ void idPhysics_Player::SpectatorMove( void ) {
 	idVec3	wishdir;
 	float	scale;
 
-	trace_t	trace;
 	idVec3	end;
 
 	// fly movement

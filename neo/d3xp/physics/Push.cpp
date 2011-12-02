@@ -800,9 +800,6 @@ int idPush::TryRotatePushEntity( trace_t &results, idEntity *check, idClipModel 
 	SaveEntityPosition( check );
 
 	newRotation.Set( rotation.GetOrigin(), rotation.GetVec(), checkAngle );
-	// NOTE:	this code prevents msvc 6.0 & 7.0 from screwing up the above code in
-	//			release builds moving less floats than it should
-	static float shit = checkAngle;
 
 	newRotation.RotatePoint( rotationPoint );
 

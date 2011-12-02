@@ -381,7 +381,6 @@ void idTextureLevel::UpdateTile( int localX, int localY, int globalX, int global
 			break;
 		}
 
-		int	byteSize = size * 4;
 		// mip-map in place
 		for ( int y = 0 ; y < size ; y++ ) {
 			byte	*in, *in2, *out;

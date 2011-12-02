@@ -401,7 +401,7 @@ bool MA_ParseFace(idParser& parser, maAttribHeader_t* header) {
 			pMesh->faces[currentFace].vertexColors[0] = pMesh->faces[currentFace].vertexColors[1] = pMesh->faces[currentFace].vertexColors[2] = -1;
 
 		} else if(!token.Icmp("mu")) {
-			int uvstIndex = parser.ParseInt();
+			/* int uvstIndex = */ parser.ParseInt();
 			int count = parser.ParseInt();
 			if(count != 3) {
 				throw idException(va("Maya Loader '%s': Invalid texture coordinates.", parser.GetFileName()));

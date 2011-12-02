@@ -1000,10 +1000,6 @@ guiPoint_t	idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 	R_GlobalPointToLocal( def->modelMatrix, start, localStart );
 	R_GlobalPointToLocal( def->modelMatrix, end, localEnd );
 
-
-	float best = 99999.0;
-	const modelSurface_t *bestSurf = NULL;
-
 	for ( j = 0 ; j < model->NumSurfaces() ; j++ ) {
 		const modelSurface_t *surf = model->Surface( j );
 

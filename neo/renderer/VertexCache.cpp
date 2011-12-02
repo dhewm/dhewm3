@@ -504,10 +504,8 @@ idVertexCache::List
 */
 void idVertexCache::List( void ) {
 	int	numActive = 0;
-	int	numDeferred = 0;
 	int frameStatic = 0;
 	int	totalStatic = 0;
-	int	deferredSpace = 0;
 
 	vertCache_t *block;
 	for ( block = staticHeaders.next ; block != &staticHeaders ; block = block->next) {
