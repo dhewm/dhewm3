@@ -272,8 +272,6 @@ bool idUserInterfaceLocal::InitFromFile( const char *qpath, bool rebuild, bool c
 		return false;
 	}
 
-	int sz = sizeof( idWindow );
-	sz = sizeof( idSimpleWindow );
 	loading = true;
 
 	if ( rebuild ) {

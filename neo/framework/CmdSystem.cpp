@@ -223,7 +223,6 @@ idCmdSystemLocal::Exec_f
 */
 void idCmdSystemLocal::Exec_f( const idCmdArgs &args ) {
 	char *	f;
-	int		len;
 	idStr	filename;
 
 	if ( args.Argc () != 2 ) {
@@ -233,7 +232,7 @@ void idCmdSystemLocal::Exec_f( const idCmdArgs &args ) {
 
 	filename = args.Argv(1);
 	filename.DefaultFileExtension( ".cfg" );
-	len = fileSystem->ReadFile( filename, reinterpret_cast<void **>(&f), NULL );
+	fileSystem->ReadFile( filename, reinterpret_cast<void **>(&f), NULL );
 	if ( !f ) {
 		common->Printf( "couldn't exec %s\n", args.Argv(1) );
 		return;

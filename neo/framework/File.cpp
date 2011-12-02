@@ -259,11 +259,10 @@ idFile::Printf
 */
 int idFile::Printf( const char *fmt, ... ) {
 	char buf[MAX_PRINT_MSG];
-	int length;
 	va_list argptr;
 
 	va_start( argptr, fmt );
-	length = idStr::vsnPrintf( buf, MAX_PRINT_MSG-1, fmt, argptr );
+	idStr::vsnPrintf( buf, MAX_PRINT_MSG-1, fmt, argptr );
 	va_end( argptr );
 
 	// so notepad formats the lines correctly

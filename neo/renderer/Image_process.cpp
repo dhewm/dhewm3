@@ -308,7 +308,6 @@ byte *R_MipMapWithAlphaSpecularity( const byte *in, int width, int height ) {
 	int		i, j, c, x, y, sx, sy;
 	const byte	*in_p;
 	byte	*out, *out_p;
-	int		row;
 	int		newWidth, newHeight;
 	float	*fbuf, *fbuf_p;
 
@@ -327,8 +326,6 @@ byte *R_MipMapWithAlphaSpecularity( const byte *in, int width, int height ) {
 		fbuf_p[2] = ( in_p[2] / 255.0 ) * 2.0 - 1.0;
 		fbuf_p[3] = ( in_p[3] / 255.0 );				// filtered divegence / specularity
 	}
-
-	row = width * 4;
 
 	newWidth = width >> 1;
 	newHeight = height >> 1;

@@ -108,7 +108,6 @@ OPTIMIZE: we could also take exact portal passing into consideration
 */
 bool R_PreciseCullSurface( const drawSurf_t *drawSurf, idBounds &ndcBounds ) {
 	const srfTriangles_t *tri;
-	int numTriangles;
 	idPlane clip, eye;
 	int i, j;
 	unsigned int pointOr;
@@ -150,8 +149,6 @@ bool R_PreciseCullSurface( const drawSurf_t *drawSurf, idBounds &ndcBounds ) {
 	}
 
 	// backface and frustum cull
-	numTriangles = tri->numIndexes / 3;
-
 	R_GlobalPointToLocal( drawSurf->space->modelMatrix, tr.viewDef->renderView.vieworg, localView );
 
 	for ( i = 0; i < tri->numIndexes; i += 3 ) {

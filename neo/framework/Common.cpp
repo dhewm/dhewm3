@@ -817,10 +817,9 @@ idCommonLocal::ParseCommandLine
 ==================
 */
 void idCommonLocal::ParseCommandLine( int argc, const char **argv ) {
-	int i, current_count;
+	int i;
 
 	com_numConsoleLines = 0;
-	current_count = 0;
 	// API says no program path
 	for ( i = 0; i < argc; i++ ) {
 		if ( argv[ i ][ 0 ] == '+' ) {

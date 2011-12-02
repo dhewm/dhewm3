@@ -137,7 +137,7 @@ idAASLocal::WalkPathValid
 ============
 */
 bool idAASLocal::WalkPathValid( int areaNum, const idVec3 &origin, int goalAreaNum, const idVec3 &goalOrigin, int travelFlags, idVec3 &endPos, int &endAreaNum ) const {
-	int curAreaNum, lastAreaNum, lastAreas[4], lastAreaIndex;
+	int curAreaNum, lastAreas[4], lastAreaIndex;
 	idPlane pathPlane, frontPlane, farPlane;
 	idReachability *reach;
 	const aasArea_t *area;
@@ -164,7 +164,6 @@ bool idAASLocal::WalkPathValid( int areaNum, const idVec3 &origin, int goalAreaN
 	farPlane.FitThroughPoint( goalOrigin );
 
 	curAreaNum = areaNum;
-	lastAreaNum = curAreaNum;
 
 	while ( 1 ) {
 

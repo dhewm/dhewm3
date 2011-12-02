@@ -608,7 +608,7 @@ static	void RemoveIfColinear( optVertex_t *ov, optIsland_t *island ) {
 	optEdge_t	*e, *e1, *e2;
 	optVertex_t *v1, *v2, *v3;
 	idVec3		dir1, dir2;
-	float		len, dist;
+	float		dist;
 	idVec3		point;
 	idVec3		offset;
 	float		off;
@@ -674,7 +674,7 @@ static	void RemoveIfColinear( optVertex_t *ov, optIsland_t *island ) {
 
 	// see if they are colinear
 	VectorSubtract( v3->v.xyz, v1->v.xyz, dir1 );
-	len = dir1.Normalize();
+	dir1.Normalize();
 	VectorSubtract( v2->v.xyz, v1->v.xyz, dir2 );
 	dist = DotProduct( dir2, dir1 );
 	VectorMA( v1->v.xyz, dist, dir1, point );

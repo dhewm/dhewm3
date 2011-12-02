@@ -3290,13 +3290,11 @@ idPlayer::UpdateConditions
 */
 void idPlayer::UpdateConditions( void ) {
 	idVec3	velocity;
-	float	fallspeed;
 	float	forwardspeed;
 	float	sidespeed;
 
 	// minus the push velocity to avoid playing the walking animation and sounds when riding a mover
 	velocity = physicsObj.GetLinearVelocity() - physicsObj.GetPushedLinearVelocity();
-	fallspeed = velocity * physicsObj.GetGravityNormal();
 
 	if ( influenceActive ) {
 		AI_FORWARD		= false;
@@ -5305,7 +5303,6 @@ void idPlayer::UpdateFocus( void ) {
 	idUserInterface *oldUI;
 	idAI		*oldChar;
 	int			oldTalkCursor;
-	idAFEntity_Vehicle *oldVehicle;
 	int			i, j;
 	idVec3		start, end;
 	bool		allowFocus;
@@ -5332,7 +5329,6 @@ void idPlayer::UpdateFocus( void ) {
 	oldUI			= focusUI;
 	oldChar			= focusCharacter;
 	oldTalkCursor	= talkCursor;
-	oldVehicle		= focusVehicle;
 
 	if ( focusTime <= gameLocal.time ) {
 		ClearFocus();
@@ -7712,11 +7708,10 @@ idPlayer::RouteGuiMouse
 */
 void idPlayer::RouteGuiMouse( idUserInterface *gui ) {
 	sysEvent_t ev;
-	const char *command;
 
 	if ( usercmd.mx != oldMouseX || usercmd.my != oldMouseY ) {
 		ev = sys->GenerateMouseMoveEvent( usercmd.mx - oldMouseX, usercmd.my - oldMouseY );
-		command = gui->HandleEvent( &ev, gameLocal.time );
+		gui->HandleEvent( &ev, gameLocal.time );
 		oldMouseX = usercmd.mx;
 		oldMouseY = usercmd.my;
 	}

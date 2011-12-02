@@ -923,9 +923,6 @@ idThread::Event_TerminateThread
 ================
 */
 void idThread::Event_TerminateThread( int num ) {
-	idThread *thread;
-
-	thread = GetThread( num );
 	KillThread( num );
 }
 

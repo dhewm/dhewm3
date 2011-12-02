@@ -532,7 +532,7 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 										const viewDef_t * viewDef ) {
 
 	idMat4 omodel = make_idMat4( entityDef->modelMatrix );
-	idMat4 lmodel = make_idMat4( lightDef->modelMatrix );
+	//idMat4 lmodel = make_idMat4( lightDef->modelMatrix );
 
 	// compute light polyhedron
 	polyhedron lvol = PolyhedronFromBounds( lightDef->frustumTris->bounds );

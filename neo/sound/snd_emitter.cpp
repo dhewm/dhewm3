@@ -1147,7 +1147,7 @@ idSlowChannel::GenerateSlowChannel
 void idSlowChannel::GenerateSlowChannel( FracTime& playPos, int sampleCount44k, float* finalBuffer ) {
 	idSoundWorldLocal *sw = static_cast<idSoundWorldLocal*>( soundSystemLocal.GetPlayingSoundWorld() );
 	float in[MIXBUFFER_SAMPLES+3], out[MIXBUFFER_SAMPLES+3], *src, *spline, slowmoSpeed;
-	int i, neededSamples, orgTime, zeroedPos, count = 0;
+	int i, neededSamples, zeroedPos, count = 0;
 
 	src = in + 2;
 	spline = out + 2;
@@ -1160,7 +1160,6 @@ void idSlowChannel::GenerateSlowChannel( FracTime& playPos, int sampleCount44k, 
 	}
 
 	neededSamples = sampleCount44k * slowmoSpeed + 4;
-	orgTime = playPos.time;
 
 	// get the channel's samples
 	chan->GatherChannelSamples( playPos.time * 2, neededSamples, src );

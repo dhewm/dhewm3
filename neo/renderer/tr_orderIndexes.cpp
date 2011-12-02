@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 R_MeshCost
 ===============
 */
+#if 0
 #define	CACHE_SIZE	24
 #define	STALL_SIZE	8
 int	R_MeshCost( int numIndexes, glIndex_t *indexes ) {
@@ -71,6 +72,7 @@ int	R_MeshCost( int numIndexes, glIndex_t *indexes ) {
 
 	return c_loads;
 }
+#endif
 
 
 typedef struct vertRef_s {
@@ -98,7 +100,7 @@ void R_OrderIndexes( int numIndexes, glIndex_t *indexes ) {
 	int			numVerts;
 	int			v1, v2;
 	int			c_starts;
-	int			c_cost;
+	//int			c_cost;
 
 	if ( !r_orderIndexes.GetBool() ) {
 		return;
@@ -192,7 +194,7 @@ void R_OrderIndexes( int numIndexes, glIndex_t *indexes ) {
 		} while ( 1 );
 	}
 
-	c_cost = R_MeshCost( numIndexes, indexes );
+	//c_cost = R_MeshCost( numIndexes, indexes );
 
 }
 

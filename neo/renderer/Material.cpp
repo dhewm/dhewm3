@@ -1782,13 +1782,10 @@ If there is any error during parsing, defaultShader will be set.
 */
 void idMaterial::ParseMaterial( idLexer &src ) {
 	idToken		token;
-	int			s;
 	char		buffer[1024];
 	const char	*str;
 	idLexer		newSrc;
 	int			i;
-
-	s = 0;
 
 	numOps = 0;
 	numRegisters = EXP_REG_NUM_PREDEFINED;	// leave space for the parms to be copied in

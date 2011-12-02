@@ -280,8 +280,6 @@ void SSDEntity::Draw(idDeviceContext *dc) {
 	persize.x = idMath::Fabs(screenBounds[1].x - screenBounds[0].x);
 	persize.y = idMath::Fabs(screenBounds[1].y - screenBounds[0].y);
 
-	idVec3 center = screenBounds.GetCenter();
-
 	x = screenBounds[0].x;
 	y = screenBounds[1].y;
 	dc->DrawMaterialRotated(x, y, persize.x, persize.y, material, matColor, 1.0f, 1.0f, DEG2RAD(rotation));

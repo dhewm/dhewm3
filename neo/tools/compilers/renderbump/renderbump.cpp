@@ -1349,13 +1349,11 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 	int		i;
 	idBounds	bounds;
 	srfTriangles_t	*mesh;
-	float	boundsScale;
 
 	// update the screen as we print
 	common->SetRefreshOnPrint( true );
 
 	width = height = 256;
-	boundsScale = 0;
 
 	// check options
 	for ( i = 1 ; i < args.Argc() - 1; i++ ) {

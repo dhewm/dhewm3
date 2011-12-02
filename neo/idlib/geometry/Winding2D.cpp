@@ -149,7 +149,6 @@ int idWinding2D::Split( const idVec3 &plane, const float epsilon, idWinding2D **
 	idVec2			mid;
 	idWinding2D *	f;
 	idWinding2D *	b;
-	int				maxpts;
 
 	counts[0] = counts[1] = counts[2] = 0;
 
@@ -180,8 +179,6 @@ int idWinding2D::Split( const idVec3 &plane, const float epsilon, idWinding2D **
 		*front = Copy();
 		return SIDE_FRONT;
 	}
-
-	maxpts = numPoints+4;	// cant use counts[0]+2 because of fp grouping errors
 
 	*front = f = new idWinding2D;
 	*back = b = new idWinding2D;

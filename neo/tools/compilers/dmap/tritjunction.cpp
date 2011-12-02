@@ -298,7 +298,7 @@ on an edge of the given mapTri, otherwise returns NULL.
 */
 static mapTri_t *FixTriangleAgainstHashVert( const mapTri_t *a, const hashVert_t *hv ) {
 	int			i;
-	const idDrawVert	*v1, *v2, *v3;
+	const idDrawVert	*v1, *v2;
 	idDrawVert	split;
 	idVec3		dir;
 	float		len;
@@ -323,7 +323,6 @@ static mapTri_t *FixTriangleAgainstHashVert( const mapTri_t *a, const hashVert_t
 	for ( i = 0 ; i < 3 ; i++ ) {
 		v1 = &a->v[i];
 		v2 = &a->v[(i+1)%3];
-		v3 = &a->v[(i+2)%3];
 		VectorSubtract( v2->xyz, v1->xyz, dir );
 		len = dir.Normalize();
 

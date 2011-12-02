@@ -2616,8 +2616,11 @@ void VPCALL idSIMD_Generic::DeriveUnsmoothedTangents( idDrawVert *verts, const d
 
 	for ( i = 0; i < numVerts; i++ ) {
 		idDrawVert *a, *b, *c;
-		float d0, d1, d2, d3, d4;
-		float d5, d6, d7, d8, d9;
+#ifndef DERIVE_UNSMOOTHED_BITANGENT
+		float d3, d8;
+#endif
+		float d0, d1, d2, d4;
+		float d5, d6, d7, d9;
 		float s0, s1, s2;
 		float n0, n1, n2;
 		float t0, t1, t2;
@@ -2632,13 +2635,17 @@ void VPCALL idSIMD_Generic::DeriveUnsmoothedTangents( idDrawVert *verts, const d
 		d0 = b->xyz[0] - a->xyz[0];
 		d1 = b->xyz[1] - a->xyz[1];
 		d2 = b->xyz[2] - a->xyz[2];
+#ifndef DERIVE_UNSMOOTHED_BITANGENT
 		d3 = b->st[0] - a->st[0];
+#endif
 		d4 = b->st[1] - a->st[1];
 
 		d5 = c->xyz[0] - a->xyz[0];
 		d6 = c->xyz[1] - a->xyz[1];
 		d7 = c->xyz[2] - a->xyz[2];
+#ifndef DERIVE_UNSMOOTHED_BITANGENT
 		d8 = c->st[0] - a->st[0];
+#endif
 		d9 = c->st[1] - a->st[1];
 
 		s0 = dt.normalizationScale[0];

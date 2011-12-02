@@ -2625,16 +2625,12 @@ idAI::DeadMove
 */
 void idAI::DeadMove( void ) {
 	idVec3				delta;
-	monsterMoveResult_t	moveResult;
-
-	idVec3 org = physicsObj.GetOrigin();
 
 	GetMoveDelta( viewAxis, viewAxis, delta );
 	physicsObj.SetDelta( delta );
 
 	RunPhysics();
 
-	moveResult = physicsObj.GetMoveResult();
 	AI_ONGROUND = physicsObj.OnGround();
 }
 
@@ -2648,7 +2644,6 @@ void idAI::AnimMove( void ) {
 	idVec3				delta;
 	idVec3				goalDelta;
 	float				goalDist;
-	monsterMoveResult_t	moveResult;
 	idVec3				newDest;
 
 	idVec3 oldorigin = physicsObj.GetOrigin();
@@ -2712,7 +2707,6 @@ void idAI::AnimMove( void ) {
 		gameRenderWorld->DebugLine( colorCyan, oldorigin, physicsObj.GetOrigin(), 5000 );
 	}
 
-	moveResult = physicsObj.GetMoveResult();
 	if ( !af_push_moveables && attack.Length() && TestMelee() ) {
 		DirectDamage( attack, enemy.GetEntity() );
 	} else {
@@ -2767,11 +2761,9 @@ void idAI::SlideMove( void ) {
 	idVec3				delta;
 	idVec3				goalDelta;
 	float				goalDist;
-	monsterMoveResult_t	moveResult;
 	idVec3				newDest;
 
 	idVec3 oldorigin = physicsObj.GetOrigin();
-	idMat3 oldaxis = viewAxis;
 
 	AI_BLOCKED = false;
 
@@ -2841,7 +2833,6 @@ void idAI::SlideMove( void ) {
 		gameRenderWorld->DebugLine( colorCyan, oldorigin, physicsObj.GetOrigin(), 5000 );
 	}
 
-	moveResult = physicsObj.GetMoveResult();
 	if ( !af_push_moveables && attack.Length() && TestMelee() ) {
 		DirectDamage( attack, enemy.GetEntity() );
 	} else {
