@@ -1197,10 +1197,10 @@ void idSoundWorldLocal::WriteToSaveGameSoundChannel( idFile *saveGame, idSoundCh
 	saveGame->WriteInt( ch->trigger44kHzTime );
 	saveGame->WriteInt( ch->triggerGame44kHzTime );
 	WriteToSaveGameSoundShaderParams( saveGame, &ch->parms );
-	saveGame->WriteInt( (int)ch->leadinSample );
+	saveGame->WriteInt( 0 /* ch->leadinSample */ );
 	saveGame->WriteInt( ch->triggerChannel );
-	saveGame->WriteInt( (int)ch->soundShader );
-	saveGame->WriteInt( (int)ch->decoder );
+	saveGame->WriteInt( 0 /* ch->soundShader */ );
+	saveGame->WriteInt( 0 /* ch->decoder */ );
 	saveGame->WriteFloat(ch->diversity );
 	saveGame->WriteFloat(ch->lastVolume );
 	for (int m = 0; m < 6; m++)
@@ -1295,7 +1295,7 @@ void idSoundWorldLocal::ReadFromSaveGame( idFile *savefile ) {
 
 			idSoundChannel *chan = &def->channels[channel];
 
-			if ( chan->decoder != NULL ) {
+			if ( !chan->decoder ) {
 				// The pointer in the save file is not valid, so we grab a new one
 				chan->decoder = idSampleDecoder::Alloc();
 			}
@@ -1362,16 +1362,20 @@ void idSoundWorldLocal::ReadFromSaveGameSoundShaderParams( idFile *saveGame, sou
 void idSoundWorldLocal::ReadFromSaveGameSoundChannel( idFile *saveGame, idSoundChannel *ch ) {
 	saveGame->ReadBool( ch->triggerState );
 	char tmp;
+	int i;
 	saveGame->ReadChar( tmp );
 	saveGame->ReadChar( tmp );
 	saveGame->ReadChar( tmp );
 	saveGame->ReadInt( ch->trigger44kHzTime );
 	saveGame->ReadInt( ch->triggerGame44kHzTime );
 	ReadFromSaveGameSoundShaderParams( saveGame, &ch->parms );
-	saveGame->ReadInt( (int&)ch->leadinSample );
+	saveGame->ReadInt( i );
+	ch->leadinSample = NULL;
 	saveGame->ReadInt( ch->triggerChannel );
-	saveGame->ReadInt( (int&)ch->soundShader );
-	saveGame->ReadInt( (int&)ch->decoder );
+	saveGame->ReadInt( i );
+	ch->soundShader = NULL;
+	saveGame->ReadInt( i );
+	ch->decoder = NULL;
 	saveGame->ReadFloat(ch->diversity );
 	saveGame->ReadFloat(ch->lastVolume );
 	for (int m = 0; m < 6; m++)
