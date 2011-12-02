@@ -329,6 +329,15 @@ bool idAASReach::Reachability_Step_Barrier_WaterJump_WalkOffLedge( int area1num,
 		}
 	}
 
+	floor_bestArea1FloorEdgeNum = 0;
+
+	floor_bestStart.Zero();
+	floor_bestEnd.Zero();
+	floor_bestNormal.Zero();
+	water_bestStart.Zero();
+	water_bestEnd.Zero();
+	water_bestNormal.Zero();
+
 	floor_foundReach = false;
 	floor_bestDist = 99999;
 	floor_bestLength = 0;

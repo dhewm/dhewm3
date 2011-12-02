@@ -2025,8 +2025,8 @@ idCollisionModelManagerLocal::R_CreateAxialBSPTree
 ================
 */
 cm_node_t *idCollisionModelManagerLocal::R_CreateAxialBSPTree( cm_model_t *model, cm_node_t *node, const idBounds &bounds ) {
-	int planeType;
-	float planeDist;
+	int planeType = 0;
+	float planeDist = 0.0f;
 	cm_polygonRef_t *pref, *nextpref, *prevpref;
 	cm_brushRef_t *bref, *nextbref, *prevbref;
 	cm_node_t *frontNode, *backNode, *n;

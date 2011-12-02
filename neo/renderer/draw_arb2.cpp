@@ -368,7 +368,7 @@ void R_LoadARBProgram( int progIndex ) {
 	fullPath += progs[progIndex].name;
 	char	*fileBuffer;
 	char	*buffer;
-	char	*start, *end;
+	char	*start = NULL, *end;
 
 	common->Printf( "%s", fullPath.c_str() );
 
@@ -405,14 +405,14 @@ void R_LoadARBProgram( int progIndex ) {
 			common->Printf( ": GL_VERTEX_PROGRAM_ARB not available\n" );
 			return;
 		}
-		start = strstr( (char *)buffer, "!!ARBvp" );
+		start = strstr( buffer, "!!ARBvp" );
 	}
 	if ( progs[progIndex].target == GL_FRAGMENT_PROGRAM_ARB ) {
 		if ( !glConfig.ARBFragmentProgramAvailable ) {
 			common->Printf( ": GL_FRAGMENT_PROGRAM_ARB not available\n" );
 			return;
 		}
-		start = strstr( (char *)buffer, "!!ARBfp" );
+		start = strstr( buffer, "!!ARBfp" );
 	}
 	if ( !start ) {
 		common->Printf( ": !!ARB not found\n" );
@@ -430,7 +430,7 @@ void R_LoadARBProgram( int progIndex ) {
 	qglGetError();
 
 	qglProgramStringARB( progs[progIndex].target, GL_PROGRAM_FORMAT_ASCII_ARB,
-		strlen( start ), (unsigned char *)start );
+		strlen( start ), start );
 
 	err = qglGetError();
 	qglGetIntegerv( GL_PROGRAM_ERROR_POSITION_ARB, (GLint *)&ofs );
@@ -439,7 +439,7 @@ void R_LoadARBProgram( int progIndex ) {
 		common->Printf( "\nGL_PROGRAM_ERROR_STRING_ARB: %s\n", str );
 		if ( ofs < 0 ) {
 			common->Printf( "GL_PROGRAM_ERROR_POSITION_ARB < 0 with error\n" );
-		} else if ( ofs >= (int)strlen( (char *)start ) ) {
+		} else if ( ofs >= (int)strlen( start ) ) {
 			common->Printf( "error at end of program\n" );
 		} else {
 			common->Printf( "error at %i:\n%s", ofs, start + ofs );

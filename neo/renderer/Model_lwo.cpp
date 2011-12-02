@@ -338,7 +338,7 @@ Read an ENVL chunk from an LWO2 file.
 lwEnvelope *lwGetEnvelope( idFile *fp, int cksize )
 {
    lwEnvelope *env;
-   lwKey *key;
+   lwKey *key = NULL;
    lwPlugin *plug;
    unsigned int id;
    unsigned short sz;
@@ -1821,8 +1821,8 @@ Read an lwSurface from an LWOB file.
 lwSurface *lwGetSurface5( idFile *fp, int cksize, lwObject *obj )
 {
    lwSurface *surf;
-   lwTexture *tex;
-   lwPlugin *shdr;
+   lwTexture *tex = NULL;
+   lwPlugin *shdr = NULL;
    char *s;
    float v[ 3 ];
    unsigned int id, flags;
@@ -1987,7 +1987,7 @@ lwSurface *lwGetSurface5( idFile *fp, int cksize, lwObject *obj )
 		 case ID_TFLG:
 			flags = getU2( fp );
 
-			if ( flags & 1 ) i = 0;
+			i = 0;
 			if ( flags & 2 ) i = 1;
 			if ( flags & 4 ) i = 2;
 			tex->axis = i;
@@ -2079,6 +2079,7 @@ lwSurface *lwGetSurface5( idFile *fp, int cksize, lwObject *obj )
 			break;
 
 		 case ID_SDAT:
+			if ( !shdr ) goto Fail;
 			shdr->data = getbytes( fp, sz );
 			break;
 

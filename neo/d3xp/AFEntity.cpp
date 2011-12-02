@@ -3215,7 +3215,7 @@ void idHarvestable::Init(idEntity* parent) {
 		parent->SetSkin(declManager->FindSkin(skin.c_str()));
 	}
 
-	idEntity* head;
+	idEntity* head = NULL;
 	if(parent->IsType(idActor::Type)) {
 		idActor* withHead = (idActor*)parent;
 		head = withHead->GetHeadEntity();
@@ -3358,7 +3358,7 @@ void idHarvestable::BeginBurn() {
 	parent->GetRenderEntity()->noShadow = true;
 	parent->SetShaderParm( SHADERPARM_TIME_OF_DEATH, gameLocal.slow.time * 0.001f );
 
-	idEntity* head;
+	idEntity* head = NULL;
 	if(parent->IsType(idActor::Type)) {
 		idActor* withHead = (idActor*)parent;
 		head = withHead->GetHeadEntity();

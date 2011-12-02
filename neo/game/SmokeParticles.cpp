@@ -237,7 +237,7 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 		}
 
 		// find an activeSmokeStage that matches this
-		activeSmokeStage_t	*active;
+		activeSmokeStage_t	*active = NULL;
 		int i;
 		for ( i = 0 ; i < activeStages.Num() ; i++ ) {
 			active = &activeStages[i];

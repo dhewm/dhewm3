@@ -532,7 +532,10 @@ static void R_FlareDeform( drawSurf_t *surf ) {
 	idDrawVert *ac = (idDrawVert *)_alloca16( newTri->numVerts * sizeof( idDrawVert ) );
 
 	// find the plane
-	plane.FromPoints( tri->verts[tri->indexes[0]].xyz, tri->verts[tri->indexes[1]].xyz, tri->verts[tri->indexes[2]].xyz );
+	if (!plane.FromPoints( tri->verts[tri->indexes[0]].xyz, tri->verts[tri->indexes[1]].xyz, tri->verts[tri->indexes[2]].xyz )) {
+		common->Warning( "R_FlareDeform: plane.FromPoints failed" );
+		return;
+	}
 
 	// if viewer is behind the plane, draw nothing
 	R_GlobalPointToLocal( surf->space->modelMatrix, tr.viewDef->renderView.vieworg, localViewer );

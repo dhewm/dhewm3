@@ -638,6 +638,9 @@ static void getCubeVector(int i, int cubesize, int x, int y, float *vector) {
 	vector[1] = -tc;
 	vector[2] = -1.0;
 	break;
+  default:
+	common->Error ("getCubeVector: invalid cube map face index");
+	return;
   }
 
   mag = idMath::InvSqrt(vector[0]*vector[0] + vector[1]*vector[1] + vector[2]*vector[2]);
@@ -652,7 +655,7 @@ static void getCubeVector(int i, int cubesize, int x, int y, float *vector) {
  * access the cube map.
  */
 static void makeNormalizeVectorCubeMap( idImage *image ) {
-	float vector[3];
+	float vector[3] = { };
 	int i, x, y;
 	byte	*pixels[6];
 	int		size;

@@ -1248,8 +1248,8 @@ void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const 
 			shaderParms = renderEntity->shaderParms;
 		}
 
-		float oldFloatTime;
-		int oldTime;
+		float oldFloatTime = 0.0f;
+		int oldTime = 0;
 
 		if ( space->entityDef && space->entityDef->parms.timeGroup ) {
 			oldFloatTime = tr.viewDef->floatTime;
@@ -1481,8 +1481,8 @@ void R_AddModelSurfaces( void ) {
 			}
 		}
 
-		float oldFloatTime;
-		int oldTime;
+		float oldFloatTime = 0.0f;
+		int oldTime = 0;
 
 		game->SelectTimeGroup( vEntity->entityDef->parms.timeGroup );
 

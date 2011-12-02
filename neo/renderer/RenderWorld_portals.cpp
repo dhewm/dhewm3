@@ -330,7 +330,7 @@ void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int
 	portal_t*		p;
 	float			d;
 	portalArea_t *	area;
-	const portalStack_t	*check, *firstPortalStack;
+	const portalStack_t	*check, *firstPortalStack = NULL;
 	portalStack_t	newStack;
 	int				i, j;
 	idVec3			v1, v2;

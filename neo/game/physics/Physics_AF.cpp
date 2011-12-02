@@ -633,6 +633,7 @@ void idAFConstraint_BallAndSocketJoint::Evaluate( float invTimeStep ) {
 		c1.SubVec3(0) = -( invTimeStep * ERROR_REDUCTION ) * ( a2 + master->GetWorldOrigin() - ( a1 + body1->GetWorldOrigin() ) );
 	}
 	else {
+		a2.Zero();
 		c1.SubVec3(0) = -( invTimeStep * ERROR_REDUCTION ) * ( anchor2 - ( a1 + body1->GetWorldOrigin() ) );
 	}
 
@@ -4480,7 +4481,7 @@ idAFTree::Factor
 void idAFTree::Factor( void ) const {
 	int i, j;
 	idAFBody *body;
-	idAFConstraint *child;
+	idAFConstraint *child = NULL;
 	idMatX childI;
 
 	childI.SetData( 6, 6, MATX_ALLOCA( 6 * 6 ) );
