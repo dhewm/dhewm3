@@ -78,7 +78,6 @@ public:
 	virtual const char*	HandleEvent(const sysEvent_t *event, bool *updateVisuals);
 	virtual void		PostParse();
 	virtual void		Draw(int time, float x, float y);
-	virtual const char*	Activate(bool activate);
 	virtual idWinVar *	GetWinVarByName	(const char *_name, bool winLookup = false, drawWin_t** owner = NULL);
 
 private:

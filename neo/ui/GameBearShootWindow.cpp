@@ -538,15 +538,6 @@ void idGameBearShootWindow::Draw(int time, float x, float y) {
 
 /*
 =============================
-idGameBearShootWindow::Activate
-=============================
-*/
-const char *idGameBearShootWindow::Activate(bool activate) {
-	return "";
-}
-
-/*
-=============================
 idGameBearShootWindow::UpdateTurret
 =============================
 */

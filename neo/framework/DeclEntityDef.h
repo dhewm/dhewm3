@@ -45,7 +45,7 @@ public:
 	virtual const char *	DefaultDefinition() const;
 	virtual bool			Parse( const char *text, const int textLength );
 	virtual void			FreeData( void );
-	virtual void			Print( void );
+	virtual void			Print( void ) const;
 };
 
 #endif /* !__DECLENTITYDEF_H__ */

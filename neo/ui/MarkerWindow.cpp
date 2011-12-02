@@ -84,10 +84,6 @@ bool idMarkerWindow::ParseInternalVar(const char *_name, idParser *src) {
 	return idWindow::ParseInternalVar(_name, src);
 }
 
-idWinVar *idMarkerWindow::GetWinVarByName(const char *_name, bool fixup) {
-	return idWindow::GetWinVarByName(_name, fixup);
-}
-
 const char *idMarkerWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals) {
 
 	if (!(event->evType == SE_KEY && event->evValue2)) {

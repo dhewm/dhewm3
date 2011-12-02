@@ -208,7 +208,7 @@ public:
 	virtual void				LoadModel() = 0;
 
 	// internal use
-	virtual bool				IsLoaded() = 0;
+	virtual bool				IsLoaded() const = 0;
 	virtual void				SetLevelLoadReferenced( bool referenced ) = 0;
 	virtual bool				IsLevelLoadReferenced() = 0;
 

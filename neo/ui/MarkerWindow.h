@@ -42,7 +42,6 @@ public:
 	idMarkerWindow(idDeviceContext *d, idUserInterfaceLocal *gui);
 	virtual ~idMarkerWindow();
 	virtual size_t Allocated(){return idWindow::Allocated();};
-	virtual idWinVar *GetWinVarByName(const char *_name, bool winLookup = false);
 
 	virtual const char *HandleEvent(const sysEvent_t *event, bool *updateVisuals);
 	virtual void PostParse();
