@@ -7088,7 +7088,7 @@ void idMatX::Eigen_SortIncreasing( idVecX &eigenValues ) {
 	int i, j, k;
 	float min;
 
-	for ( i = 0, j; i <= numRows - 2; i++ ) {
+	for ( i = 0; i <= numRows - 2; i++ ) {
 		j = i;
 		min = eigenValues[j];
 		for ( k = i + 1; k < numRows; k++ ) {
@@ -7113,7 +7113,7 @@ void idMatX::Eigen_SortDecreasing( idVecX &eigenValues ) {
 	int i, j, k;
 	float max;
 
-	for ( i = 0, j; i <= numRows - 2; i++ ) {
+	for ( i = 0; i <= numRows - 2; i++ ) {
 		j = i;
 		max = eigenValues[j];
 		for ( k = i + 1; k < numRows; k++ ) {

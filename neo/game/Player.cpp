@@ -6057,7 +6057,7 @@ void idPlayer::UpdateHud( void ) {
 				inventory.nextItemNum = 1;
 			}
 			int i;
-			for ( i = 0; i < 5, i < c; i++ ) {
+			for ( i = 0; i < 5 && i < c; i++ ) {
 				hud->SetStateString( va( "itemtext%i", inventory.nextItemNum ), inventory.pickupItemNames[0].name );
 				hud->SetStateString( va( "itemicon%i", inventory.nextItemNum ), inventory.pickupItemNames[0].icon );
 				hud->HandleNamedEvent( va( "itemPickup%i", inventory.nextItemNum++ ) );
