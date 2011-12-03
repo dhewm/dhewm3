@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "posix_public.h"
 
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
 
 const int siglist[] = {
@@ -97,7 +98,7 @@ static void sig_handler( int signum, siginfo_t *info, void *context ) {
 
 	if ( double_fault ) {
 		Sys_Printf( "double fault %s, bailing out\n", strsignal( signum ) );
-		Posix_Exit( signum );
+		_exit( signum );
 	}
 
 	double_fault = true;
