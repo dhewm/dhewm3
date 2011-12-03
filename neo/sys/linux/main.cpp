@@ -383,12 +383,13 @@ void Sys_DoStartProcess( const char *exeName, bool dofork ) {
 	if ( dofork ) {
 		switch ( fork() ) {
 		case -1:
-			// main thread
+			printf( "fork failed: %s\n", strerror( errno ) );
 			break;
 		case 0:
 			if ( use_system ) {
 				printf( "system %s\n", exeName );
-				system( exeName );
+				if (system( exeName ) == -1)
+					printf( "system failed: %s\n", strerror( errno ) );
 				_exit( 0 );
 			} else {
 				printf( "execl %s\n", exeName );
@@ -397,12 +398,16 @@ void Sys_DoStartProcess( const char *exeName, bool dofork ) {
 				_exit( -1 );
 			}
 			break;
+		default:
+			break;
 		}
 	} else {
 		if ( use_system ) {
 			printf( "system %s\n", exeName );
-			system( exeName );
-			sleep( 1 );	// on some systems I've seen that starting the new process and exiting this one should not be too close
+			if (system( exeName ) == -1)
+				printf( "system failed: %s\n", strerror( errno ) );
+			else
+				sleep( 1 );	// on some systems I've seen that starting the new process and exiting this one should not be too close
 		} else {
 			printf( "execl %s\n", exeName );
 			execl( exeName, exeName, NULL );
