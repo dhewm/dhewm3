@@ -410,7 +410,7 @@ SetupHuffman
 ================
 */
 void SetupHuffman( void ) {
-	int i, height;
+	int i, height id_attribute((unused));
 	huffmanNode_t *firstNode, *node;
 	huffmanCode_t code;
 

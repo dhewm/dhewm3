@@ -2846,7 +2846,7 @@ idGameLocal::AddAASObstacle
 aasHandle_t idGameLocal::AddAASObstacle( const idBounds &bounds ) {
 	int i;
 	aasHandle_t obstacle;
-	aasHandle_t check;
+	aasHandle_t check id_attribute((unused));
 
 	if ( !aasList.Num() ) {
 		return -1;

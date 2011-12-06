@@ -101,7 +101,7 @@ bool idMsgQueue::Get( byte *data, int &size ) {
 		size = 0;
 		return false;
 	}
-	int sequence;
+	int sequence id_attribute((unused));
 	size = ReadShort();
 	sequence = ReadLong();
 	ReadData( data, size );

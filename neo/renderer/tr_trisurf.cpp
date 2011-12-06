@@ -437,7 +437,7 @@ void R_CheckStaticTriSurfMemory( const srfTriangles_t *tri ) {
 	if ( tri->verts != NULL ) {
 		// R_CreateLightTris points tri->verts at the verts of the ambient surface
 		if ( tri->ambientSurface == NULL || tri->verts != tri->ambientSurface->verts ) {
-			const char *error = triVertexAllocator.CheckMemory( tri->verts );
+			const char *error id_attribute((unused)) = triVertexAllocator.CheckMemory( tri->verts );
 			assert( error == NULL );
 		}
 	}
@@ -446,14 +446,14 @@ void R_CheckStaticTriSurfMemory( const srfTriangles_t *tri ) {
 		if ( tri->indexes != NULL ) {
 			// if a surface is completely inside a light volume R_CreateLightTris points tri->indexes at the indexes of the ambient surface
 			if ( tri->ambientSurface == NULL || tri->indexes != tri->ambientSurface->indexes ) {
-				const char *error = triIndexAllocator.CheckMemory( tri->indexes );
+				const char *error id_attribute((unused)) = triIndexAllocator.CheckMemory( tri->indexes );
 				assert( error == NULL );
 			}
 		}
 	}
 
 	if ( tri->shadowVertexes != NULL ) {
-		const char *error = triShadowVertexAllocator.CheckMemory( tri->shadowVertexes );
+		const char *error id_attribute((unused)) = triShadowVertexAllocator.CheckMemory( tri->shadowVertexes );
 		assert( error == NULL );
 	}
 }

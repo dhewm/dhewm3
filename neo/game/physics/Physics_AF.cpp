@@ -993,7 +993,7 @@ idAFConstraint_UniversalJoint::SetShafts
 */
 void idAFConstraint_UniversalJoint::SetShafts( const idVec3 &cardanShaft1, const idVec3 &cardanShaft2 ) {
 	idVec3 cardanAxis;
-	float l;
+	float l id_attribute((unused));
 
 	shaft1 = cardanShaft1;
 	l = shaft1.Normalize();
@@ -7962,7 +7962,7 @@ idPhysics_AF::ReadFromSnapshot
 ================
 */
 void idPhysics_AF::ReadFromSnapshot( const idBitMsgDelta &msg ) {
-	int i, num;
+	int i, num id_attribute((unused));
 	idCQuat quat;
 
 	current.atRest = msg.ReadLong();

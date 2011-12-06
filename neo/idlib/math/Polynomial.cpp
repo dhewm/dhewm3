@@ -187,7 +187,7 @@ idPolynomial::Test
 */
 void idPolynomial::Test( void ) {
 	int i, num;
-	float roots[4], value;
+	float roots[4], value id_attribute((unused));
 	idComplex complexRoots[4], complexValue;
 	idPolynomial p;
 
