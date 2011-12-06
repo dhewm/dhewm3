@@ -15,7 +15,7 @@ conf_filename='site.conf'
 serialized=['CC', 'CXX', 'BUILD', 'IDNET_HOST', 'GL_HARDLINK', 'DEDICATED',
 	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK', 'ALSA',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
-	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT' ]
+	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS' ]
 
 # global build mode ------------------------------
 
@@ -65,9 +65,6 @@ BASEFLAGS (default '')
 
 NOCONF (default 0, not saved)
 	ignore site configuration and use defaults + command line only
-	
-SILENT ( default 0, saved )
-	hide the compiler output, unless error
 """
 
 if ( not g_sdk ):
@@ -178,7 +175,6 @@ NOCONF = '0'
 NOCURL = '0'
 BUILD_GAMEPAK = '0'
 BASEFLAGS = ''
-SILENT = '0'
 
 # end default settings ---------------------------
 
