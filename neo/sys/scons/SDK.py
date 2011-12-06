@@ -3,7 +3,7 @@ import os, sys
 import scons_utils
 
 class idSDK( scons_utils.idSetupBase ):
-	
+
 	def PreBuildSDK( self, build_path ):
 		self.build_path = build_path
 		print 'PreBuildSDK: ' + repr( build_path )

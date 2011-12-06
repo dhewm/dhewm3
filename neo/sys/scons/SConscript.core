@@ -145,7 +145,7 @@ aas_string = ' \
 	AASFileManager.cpp \
 	Brush.cpp \
 	BrushBSP.cpp'
-	
+
 aas_list = scons_utils.BuildList( 'tools/compilers/aas', aas_string )
 
 roq_string = ' \
@@ -258,7 +258,7 @@ local_env.Append( LIBS = [ 'pthread', 'dl', 'jpeg', 'vorbisfile' ] )
 if ( local_curl == 1 ):
 	local_env.Append( LIBS = [ 'curl', 'z' ] )
 if ( local_dedicated == 0 ):
-	local_env.Append( LIBS = [ 'X11', 'Xext', 'Xxf86vm' ] ) # 'Xxf86dga', 
+	local_env.Append( LIBS = [ 'X11', 'Xext', 'Xxf86vm' ] ) # 'Xxf86dga',
 	local_env.Append( LIBPATH = [ '/usr/X11R6/lib' ] )
 #	local_env.Append( LIBS = [ 'openal' ] )
 

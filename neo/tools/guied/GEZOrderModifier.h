@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -45,15 +45,15 @@ public:
 	};
 
 	rvGEZOrderModifier ( const char* name, idWindow* window, EZOrderChange change );
-	
+
 	virtual bool		Apply	( void );
 	virtual bool		Undo	( void );
 	virtual bool		IsValid	( void );
-			
+
 protected:
-	
+
 	idWindow*	mBefore;
 	idWindow*	mUndoBefore;
-}; 
+};
 
 #endif // GEZORDERMODIFIER_H_

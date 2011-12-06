@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 	This is a replacement for the compiler heap code (i.e. "C" malloc() and
 	free() calls). On average 2.5-3.0 times faster than MSVC malloc()/free().
 	Worst case performance is 1.65 times faster and best case > 70 times.
- 
+
 ===============================================================================
 */
 

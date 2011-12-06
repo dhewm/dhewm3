@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -83,7 +83,7 @@ void ConsoleView::AddText( const char *msg ) {
 	}
 	editConsole.SetSel( len, len );
 	editConsole.ReplaceSel( work );
-	
+
 	//Hack: scrolls down a bit
 	editConsole.LineScroll(100);
 }
@@ -114,19 +114,19 @@ void ConsoleView::ExecuteCommand ( const idStr& cmd ) {
 		editInput.GetWindowText(str);
 	}
 
-	if ( str != "" ) {			
+	if ( str != "" ) {
 		editInput.SetWindowText("");
-		common->Printf("%s\n", str.GetBuffer(0));		
+		common->Printf("%s\n", str.GetBuffer(0));
 
 		//avoid adding multiple identical commands in a row
 		int index = consoleHistory.Num ();
 
-		if ( index == 0 || str.GetBuffer(0) != consoleHistory[index-1]) {					
+		if ( index == 0 || str.GetBuffer(0) != consoleHistory[index-1]) {
 			//keep the history to 16 commands, removing the oldest command
 			if ( consoleHistory.Num () > 16 ) {
 				consoleHistory.RemoveIndex ( 0 );
 			}
-			currentHistoryPosition = consoleHistory.Append ( str.GetBuffer (0) );    
+			currentHistoryPosition = consoleHistory.Append ( str.GetBuffer (0) );
 		}
 		else {
 			currentHistoryPosition = consoleHistory.Num () - 1;
@@ -151,7 +151,7 @@ void ConsoleView::ExecuteCommand ( const idStr& cmd ) {
 }
 
 /**
-* Handles keyboard input to process the "Enter" key to execute 
+* Handles keyboard input to process the "Enter" key to execute
 * commands and command history.
 */
 BOOL ConsoleView::PreTranslateMessage(MSG* pMsg) {
@@ -163,7 +163,7 @@ BOOL ConsoleView::PreTranslateMessage(MSG* pMsg) {
 			return TRUE;
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_UP ) {     
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_UP ) {
 			//save off the current in-progress command so we can get back to it
 			if ( saveCurrentCommand == true ) {
 				CString str;
@@ -186,7 +186,7 @@ BOOL ConsoleView::PreTranslateMessage(MSG* pMsg) {
 			return TRUE;
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DOWN ) {  
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DOWN ) {
 			int selLocation = 0;
 			if ( currentHistoryPosition < consoleHistory.Num () - 1 ) {
 				++currentHistoryPosition;
@@ -204,7 +204,7 @@ BOOL ConsoleView::PreTranslateMessage(MSG* pMsg) {
 
 			return TRUE;
 		}
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB ) {  
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB ) {
 			common->Printf ( "Command History\n----------------\n" );
 			for ( int i = 0 ; i < consoleHistory.Num ();i++ )
 			{
@@ -212,20 +212,20 @@ BOOL ConsoleView::PreTranslateMessage(MSG* pMsg) {
 			}
 			common->Printf ( "----------------\n" );
 		}
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_NEXT) {  
-			editConsole.LineScroll ( 10 );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_NEXT) {
+			editConsole.LineScroll ( 10 );
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_PRIOR ) {  
-			editConsole.LineScroll ( -10 );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_PRIOR ) {
+			editConsole.LineScroll ( -10 );
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_HOME ) {  
-			editConsole.LineScroll ( -editConsole.GetLineCount() );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_HOME ) {
+			editConsole.LineScroll ( -editConsole.GetLineCount() );
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_END ) {  
-			editConsole.LineScroll ( editConsole.GetLineCount() );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_END ) {
+			editConsole.LineScroll ( editConsole.GetLineCount() );
 		}
 	}
 
@@ -246,7 +246,7 @@ void ConsoleView::DoDataExchange(CDataExchange* pDX) {
 * Transfers data to and from the controls in the console.
 */
 void ConsoleView::OnInitialUpdate() {
-	
+
 	CFormView::OnInitialUpdate();
 
 	CRect rect;

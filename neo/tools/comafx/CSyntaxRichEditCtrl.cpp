@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -514,7 +514,7 @@ CHARRANGE CSyntaxRichEditCtrl::GetVisibleRange( void ) const {
 	firstLine = GetFirstVisibleLine();
 	GetClientRect( &rectArea );
 	lastLine = firstLine + ( rectArea.bottom / ( defaultCharFormat.yHeight / 20 ) );
-	
+
 	if ( lastLine >= GetLineCount() ) {
 		lastLine = GetLineCount() - 1;
 	}
@@ -1364,14 +1364,14 @@ CSyntaxRichEditCtrl::OnToolHitTest
 int CSyntaxRichEditCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CRichEditCtrl::OnToolHitTest( point, pTI );
 
-    pTI->hwnd = GetSafeHwnd();
-    pTI->uId = (UINT_PTR)GetSafeHwnd();
+	pTI->hwnd = GetSafeHwnd();
+	pTI->uId = (UINT_PTR)GetSafeHwnd();
 	pTI->uFlags |= TTF_IDISHWND;
-    pTI->lpszText = LPSTR_TEXTCALLBACK;
-    pTI->rect = CRect( point, point );
+	pTI->lpszText = LPSTR_TEXTCALLBACK;
+	pTI->rect = CRect( point, point );
 	pTI->rect.right += 100;
 	pTI->rect.bottom += 20;
-    return pTI->uId;
+	return pTI->uId;
 }
 
 /*

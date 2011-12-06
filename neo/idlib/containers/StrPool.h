@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -138,7 +138,7 @@ ID_INLINE void idStrPool::FreeString( const idPoolStr *poolStr ) {
 	poolStr->numUsers--;
 	if ( poolStr->numUsers <= 0 ) {
 		hash = poolHash.GenerateKey( poolStr->c_str(), caseSensitive );
-		if ( caseSensitive ) { 
+		if ( caseSensitive ) {
 			for ( i = poolHash.First( hash ); i != -1; i = poolHash.Next( i ) ) {
 				if ( pool[i]->Cmp( poolStr->c_str() ) == 0 ) {
 					break;

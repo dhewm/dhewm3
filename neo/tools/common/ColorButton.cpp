@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -62,9 +62,9 @@ void ColorButton_SetColor ( HWND hWnd, const char* color )
 	{
 		return;
 	}
-	
+
 	sscanf ( color, "%f,%f,%f,%f", &red, &green, &blue, &alpha );
-	
+
 	ColorButton_SetColor ( hWnd, RGB(red*255.0f, green*255.0f, blue*255.0f) );
 }
 
@@ -79,9 +79,9 @@ void AlphaButton_SetColor ( HWND hWnd, const char* color )
 	{
 		return;
 	}
-	
+
 	sscanf ( color, "%f,%f,%f,%f", &red, &green, &blue, &alpha );
-	
+
 	ColorButton_SetColor ( hWnd, RGB(alpha*255.0f, alpha*255.0f, alpha*255.0f) );
 }
 
@@ -114,19 +114,19 @@ static void ColorButton_DrawArrow ( HDC hDC, RECT* pRect, COLORREF color )
 	ptsArrow[1].y = pRect->top;
 	ptsArrow[2].x = (pRect->left + pRect->right)/2;
 	ptsArrow[2].y = pRect->bottom;
-	
+
 	HBRUSH arrowBrush = CreateSolidBrush ( color );
 	HPEN   arrowPen   = CreatePen ( PS_SOLID, 1, color );
-	
+
 	HGDIOBJ oldBrush = SelectObject ( hDC, arrowBrush );
 	HGDIOBJ oldPen   = SelectObject ( hDC, arrowPen );
-	
+
 	SetPolyFillMode(hDC, WINDING);
 	Polygon(hDC, ptsArrow, 3);
-	
+
 	SelectObject ( hDC, oldBrush );
 	SelectObject ( hDC, oldPen );
-	
+
 	DeleteObject ( arrowBrush );
 	DeleteObject ( arrowPen );
 }
@@ -144,7 +144,7 @@ void ColorButton_DrawItem ( HWND hWnd, LPDRAWITEMSTRUCT dis )
 
 	HDC		hDC		 = dis->hDC;
 	UINT    state    = dis->itemState;
-    RECT	rDraw    = dis->rcItem;
+	RECT	rDraw    = dis->rcItem;
 	RECT	rArrow;
 
 	// Draw outter edge
@@ -159,7 +159,7 @@ void ColorButton_DrawItem ( HWND hWnd, LPDRAWITEMSTRUCT dis )
 	{
 		uFrameState |= DFCS_INACTIVE;
 	}
-	
+
 	DrawFrameControl ( hDC, &rDraw, DFC_BUTTON, uFrameState );
 
 	// Draw Focus
@@ -168,15 +168,15 @@ void ColorButton_DrawItem ( HWND hWnd, LPDRAWITEMSTRUCT dis )
 		OffsetRect(&rDraw, 1,1);
 	}
 
-	if (state & ODS_FOCUS) 
-    {
+	if (state & ODS_FOCUS)
+	{
 		RECT rFocus = {rDraw.left,
 					   rDraw.top,
 					   rDraw.right - 1,
 					   rDraw.bottom};
-  
-        DrawFocusRect ( hDC, &rFocus );
-    }
+
+		DrawFocusRect ( hDC, &rFocus );
+	}
 
 	InflateRect ( &rDraw, -GetSystemMetrics(SM_CXEDGE), -GetSystemMetrics(SM_CYEDGE) );
 
@@ -195,7 +195,7 @@ void ColorButton_DrawItem ( HWND hWnd, LPDRAWITEMSTRUCT dis )
 
 	rDraw.right -= (GetSystemMetrics(SM_CXEDGE) * 2) + 1 ;
 
-	// Draw Color				  
+	// Draw Color
 	if ((state & ODS_DISABLED) == 0)
 	{
 		HBRUSH color = CreateSolidBrush ( (COLORREF)GetWindowLong ( hWnd, GWL_USERDATA ) );

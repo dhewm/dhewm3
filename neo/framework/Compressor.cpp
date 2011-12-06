@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -813,7 +813,7 @@ typedef struct nodetype {
 	struct nodetype *next, *prev;			// doubly-linked list
 	struct nodetype **head;					// highest ranked node in block
 	int				weight;
-	int				symbol; 
+	int				symbol;
 } huffmanNode_t;
 
 class idCompressor_Huffman : public idCompressor_None {
@@ -904,7 +904,7 @@ void idCompressor_Huffman::Init( idFile *f, bool compress, int wordLength ) {
 		tree->parent = tree->left = tree->right = NULL;
 		loc[NYT] = tree;
 	} else {
-		// Initialize the tree & list with the NYT node 
+		// Initialize the tree & list with the NYT node
 		tree = lhead = ltail = loc[NYT] = &nodeList[blocNode++];
 		tree->symbol = NYT;
 		tree->weight = 0;
@@ -1011,7 +1011,7 @@ idCompressor_Huffman::Swap
   Swap the location of the given two nodes in the tree.
 ================
 */
-void idCompressor_Huffman::Swap( huffmanNode_t *node1, huffmanNode_t *node2 ) { 
+void idCompressor_Huffman::Swap( huffmanNode_t *node1, huffmanNode_t *node2 ) {
 	huffmanNode_t *par1, *par2;
 
 	par1 = node1->parent;
@@ -1021,7 +1021,7 @@ void idCompressor_Huffman::Swap( huffmanNode_t *node1, huffmanNode_t *node2 ) {
 		if ( par1->left == node1 ) {
 			par1->left = node2;
 		} else {
-	      par1->right = node2;
+		  par1->right = node2;
 		}
 	} else {
 		tree = node2;
@@ -1036,7 +1036,7 @@ void idCompressor_Huffman::Swap( huffmanNode_t *node1, huffmanNode_t *node2 ) {
 	} else {
 		tree = node1;
 	}
-  
+
 	node1->parent = par2;
 	node2->parent = par1;
 }
@@ -1092,7 +1092,7 @@ void idCompressor_Huffman::Increment( huffmanNode_t *node ) {
 	}
 
 	if ( node->next != NULL && node->next->weight == node->weight ) {
-	    lnode = *node->head;
+		lnode = *node->head;
 		if ( lnode != node->parent ) {
 			Swap( lnode, node );
 		}
@@ -1101,13 +1101,13 @@ void idCompressor_Huffman::Increment( huffmanNode_t *node ) {
 	if ( node->prev && node->prev->weight == node->weight ) {
 		*node->head = node->prev;
 	} else {
-	    *node->head = NULL;
+		*node->head = NULL;
 		Free_ppnode( node->head );
 	}
 	node->weight++;
 	if ( node->next && node->next->weight == node->weight ) {
 		node->head = node->next->head;
-	} else { 
+	} else {
 		node->head = Get_ppnode();
 		*node->head = node;
 	}
@@ -1150,7 +1150,7 @@ void idCompressor_Huffman::AddRef( byte ch ) {
 		}
 		lhead->next = tnode2;
 		tnode2->prev = lhead;
- 
+
 		tnode->symbol = ch;
 		tnode->weight = 1;
 		tnode->next = lhead->next;
@@ -1162,7 +1162,7 @@ void idCompressor_Huffman::AddRef( byte ch ) {
 				/* this should never happen */
 				tnode->head = Get_ppnode();
 				*tnode->head = tnode2;
-		    }
+			}
 		} else {
 			/* this should never happen */
 			tnode->head = Get_ppnode();
@@ -1171,7 +1171,7 @@ void idCompressor_Huffman::AddRef( byte ch ) {
 		lhead->next = tnode;
 		tnode->prev = lhead;
 		tnode->left = tnode->right = NULL;
- 
+
 		if ( lhead->parent ) {
 			if ( lhead->parent->left == lhead ) { /* lhead is guaranteed to by the NYT */
 				lhead->parent->left = tnode2;
@@ -1179,17 +1179,17 @@ void idCompressor_Huffman::AddRef( byte ch ) {
 				lhead->parent->right = tnode2;
 			}
 		} else {
-			tree = tnode2; 
+			tree = tnode2;
 		}
- 
+
 		tnode2->right = tnode;
 		tnode2->left = lhead;
- 
+
 		tnode2->parent = lhead->parent;
 		lhead->parent = tnode->parent = tnode2;
-     
+
 		loc[ch] = tnode;
- 
+
 		Increment( tnode2->parent );
 	} else {
 		Increment( loc[ch] );
@@ -1246,7 +1246,7 @@ idCompressor_Huffman::Transmit
 */
 void idCompressor_Huffman::Transmit( int ch, byte *fout ) {
 	int i;
-	if ( loc[ch] == NULL ) { 
+	if ( loc[ch] == NULL ) {
 		/* huffmanNode_t hasn't been transmitted, send a NYT, then the symbol */
 		Transmit( NYT, fout );
 		for ( i = 7; i >= 0; i-- ) {
@@ -1296,7 +1296,7 @@ void idCompressor_Huffman::FinishCompress( void ) {
 	if ( compress == false ) {
 		return;
 	}
-	
+
 	bloc += 7;
 	int str = (bloc>>3);
 	if ( str ) {
@@ -1335,7 +1335,7 @@ int idCompressor_Huffman::Read( void *outData, int outLength ) {
 				ch = ( ch << 1 ) + Get_bit();
 			}
 		}
-    
+
 		((byte *)outData)[i] = ch;			/* Write symbol */
 		AddRef( (byte) ch );				/* Increment node */
 	}
@@ -1384,13 +1384,13 @@ public:
 
 	int				Write( const void *inData, int inLength );
 	int				Read( void *outData, int outLength );
-	
+
 private:
 					typedef struct acProbs_s {
 						unsigned int	low;
 						unsigned int	high;
 					} acProbs_t;
-				
+
 					typedef struct acSymbol_s {
 						unsigned int	low;
 						unsigned int	high;
@@ -1466,7 +1466,7 @@ void idCompressor_Arithmetic::UpdateProbabilities( acSymbol_t* symbol ) {
 	int i, x;
 
 	x = symbol->position;
-	
+
 	probabilities[ x ].high++;
 
 	for( i = x + 1; i < (1<<AC_WORD_LENGTH); i++ ) {
@@ -1483,7 +1483,7 @@ idCompressor_Arithmetic::GetCurrentCount
 ================
 */
 int idCompressor_Arithmetic::GetCurrentCount( void ) {
-    return (unsigned int) ( ( ( ( (long) code - low ) + 1 ) * scale - 1 ) / ( ( (long) high - low ) + 1 ) );
+	return (unsigned int) ( ( ( ( (long) code - low ) + 1 ) * scale - 1 ) / ( ( (long) high - low ) + 1 ) );
 }
 
 /*
@@ -1521,10 +1521,10 @@ int idCompressor_Arithmetic::ProbabilityForCount( unsigned int count ) {
 	int j;
 
 	for( j = 0; j < (1<<AC_WORD_LENGTH); j++ ) {
-        if ( count >= probabilities[ j ].low && count < probabilities[ j ].high ) {
+		if ( count >= probabilities[ j ].low && count < probabilities[ j ].high ) {
 			return j;
-        }
-    }
+		}
+	}
 
 	assert( false );
 
@@ -1540,10 +1540,10 @@ idCompressor_Arithmetic::SymbolFromCount
 */
 int idCompressor_Arithmetic::SymbolFromCount( unsigned int count, acSymbol_t* symbol ) {
 	int p = ProbabilityForCount( count );
-    symbol->low = probabilities[ p ].low;
-    symbol->high = probabilities[ p ].high;
+	symbol->low = probabilities[ p ].low;
+	symbol->high = probabilities[ p ].high;
 	symbol->position = p;
-    return p;
+	return p;
 }
 
 /*
@@ -1552,31 +1552,31 @@ idCompressor_Arithmetic::RemoveSymbolFromStream
 ================
 */
 void idCompressor_Arithmetic::RemoveSymbolFromStream( acSymbol_t* symbol ) {
-    long range;
+	long range;
 
 	range	= ( long )( high - low ) + 1;
 	high	= low + ( unsigned short )( ( range * symbol->high ) / scale - 1 );
 	low		= low + ( unsigned short )( ( range * symbol->low ) / scale );
 
-    while( true ) {
+	while( true ) {
 
-        if ( ( high & AC_MSB_MASK ) == ( low & AC_MSB_MASK ) ) {
+		if ( ( high & AC_MSB_MASK ) == ( low & AC_MSB_MASK ) ) {
 
 		} else if( ( low & AC_MSB2_MASK ) == AC_MSB2_MASK && ( high & AC_MSB2_MASK ) == 0 ) {
-            code	^= AC_MSB2_MASK;
-            low		&= AC_MSB2_MASK - 1;
-            high	|= AC_MSB2_MASK;
+			code	^= AC_MSB2_MASK;
+			low		&= AC_MSB2_MASK - 1;
+			high	|= AC_MSB2_MASK;
 		} else {
 			UpdateProbabilities( symbol );
-            return;
+			return;
 		}
 
-        low <<= 1;
-        high <<= 1;
-        high |= 1;
-        code <<= 1;
-        code |= ReadBits( 1 );
-    }
+		low <<= 1;
+		high <<= 1;
+		high |= 1;
+		code <<= 1;
+		code |= ReadBits( 1 );
+	}
 }
 
 /*
@@ -1608,7 +1608,7 @@ idCompressor_Arithmetic::EncodeSymbol
 */
 void idCompressor_Arithmetic::EncodeSymbol( acSymbol_t* symbol ) {
 	unsigned int range;
-	
+
 	// rescale high and low for the new symbol.
 	range	= ( high - low ) + 1;
 	high	= low + ( unsigned short )(( range * symbol->high ) / scale - 1 );
@@ -1619,26 +1619,26 @@ void idCompressor_Arithmetic::EncodeSymbol( acSymbol_t* symbol ) {
 			// the high digits of low and high have converged, and can be written to the stream
 			WriteBits( high >> AC_MSB_SHIFT, 1 );
 
-            while( underflowBits > 0 ) {
+			while( underflowBits > 0 ) {
 
 				WriteBits( ~high >> AC_MSB_SHIFT, 1 );
 
 				underflowBits--;
-            }
-        } else if ( ( low & AC_MSB2_MASK ) && !( high & AC_MSB2_MASK ) ) {
+			}
+		} else if ( ( low & AC_MSB2_MASK ) && !( high & AC_MSB2_MASK ) ) {
 			// underflow is in danger of happening, 2nd digits are converging but 1st digits don't match
 			underflowBits	+= 1;
 			low				&= AC_MSB2_MASK - 1;
 			high			|= AC_MSB2_MASK;
 		} else {
 			UpdateProbabilities( symbol );
-            return;
+			return;
 		}
 
-        low <<= 1;
-        high <<= 1;
-        high |=	1;
-    }
+		low <<= 1;
+		high <<= 1;
+		high |=	1;
+	}
 }
 
 /*
@@ -2339,7 +2339,7 @@ int idCompressor_LZW::Lookup( int w, int k ) {
 		return k;
 	} else {
 		for ( j = index.First( w ^ k ); j >= 0 ; j = index.Next( j ) ) {
-			if ( dictionary[ j ].k == k && dictionary[ j ].w == w ) { 
+			if ( dictionary[ j ].k == k && dictionary[ j ].w == w ) {
 				return j;
 			}
 		}

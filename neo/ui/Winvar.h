@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -41,21 +41,21 @@ public:
 	virtual ~idWinVar();
 
 	void SetGuiInfo(idDict *gd, const char *_name);
-	const char *GetName() const { 
+	const char *GetName() const {
 		if (name) {
 			if (guiDict && *name == '*') {
 				return guiDict->GetString(&name[1]);
 			}
 			return name;
 		}
-		return ""; 
+		return "";
 	}
-	void SetName(const char *_name) { 
-		delete []name; 
+	void SetName(const char *_name) {
+		delete []name;
 		name = NULL;
 		if (_name) {
-			name = new char[strlen(_name)+1]; 
-			strcpy(name, _name); 
+			name = new char[strlen(_name)+1];
+			strcpy(name, _name);
 		}
 	}
 
@@ -85,7 +85,7 @@ public:
 	bool GetEval() {
 		return eval;
 	}
-	
+
 protected:
 	idDict *guiDict;
 	char *name;
@@ -117,14 +117,14 @@ public:
 
 	operator bool() const { return data; }
 
-	virtual void Set(const char *val) { 
+	virtual void Set(const char *val) {
 		data = ( atoi( val ) != 0 );
 		if (guiDict) {
 			guiDict->SetBool(GetName(), data);
 		}
 	}
 
-	virtual void Update() {	
+	virtual void Update() {
 		const char *s = GetName();
 		if ( guiDict && s[0] != '\0' ) {
 			data = guiDict->GetBool( s );
@@ -157,7 +157,7 @@ public:
 		idWinVar::Init(_name, win);
 		if (guiDict) {
 			data = guiDict->GetString(GetName());
-		} 
+		}
 	}
 	int	operator==(	const idStr &other ) const {
 		return (other == data);
@@ -260,7 +260,7 @@ public:
 		idWinVar::Init(_name,  win);
 		if (guiDict) {
 			data = guiDict->GetInt(GetName());
-		} 
+		}
 	}
 	int &operator=(	const int &other ) {
 		data = other;
@@ -319,7 +319,7 @@ public:
 		idWinVar::Init(_name, win);
 		if (guiDict) {
 			data = guiDict->GetFloat(GetName());
-		} 
+		}
 	}
 	idWinFloat &operator=( const idWinFloat &other ) {
 		idWinVar::operator=(other);
@@ -378,9 +378,9 @@ public:
 			data.y = v.y;
 			data.w = v.z;
 			data.h = v.w;
-		} 
+		}
 	}
-	
+
 	int	operator==(	const idRectangle &other ) const {
 		return (other == data);
 	}
@@ -406,7 +406,7 @@ public:
 		}
 		return data;
 	}
-	
+
 	operator const idRectangle&() const {
 		return data;
 	}
@@ -481,7 +481,7 @@ public:
 		idWinVar::Init(_name, win);
 		if (guiDict) {
 			data = guiDict->GetVec2(GetName());
-		} 
+		}
 	}
 	int	operator==(	const idVec2 &other ) const {
 		return (other == data);
@@ -491,7 +491,7 @@ public:
 		data = other.data;
 		return *this;
 	}
-	
+
 	idVec2 &operator=(	const idVec2 &other ) {
 		data = other;
 		if (guiDict) {
@@ -552,7 +552,7 @@ public:
 		idWinVar::Init(_name, win);
 		if (guiDict) {
 			data = guiDict->GetVec4(GetName());
-		} 
+		}
 	}
 	int	operator==(	const idVec4 &other ) const {
 		return (other == data);
@@ -640,7 +640,7 @@ public:
 		idWinVar::Init(_name, win);
 		if (guiDict) {
 			data = guiDict->GetVector(GetName());
-		} 
+		}
 	}
 	int	operator==(	const idVec3 &other ) const {
 		return (other == data);
@@ -719,7 +719,7 @@ public:
 		idWinStr::Init(_name, win);
 		if (guiDict) {
 			data = guiDict->GetString(GetName());
-		} 
+		}
 	}
 	int	operator==(	const idStr &other ) const {
 		return (other == data);
@@ -853,4 +853,3 @@ public:
 };
 
 #endif /* !__WINVAR_H__ */
-

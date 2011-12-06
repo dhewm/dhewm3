@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -54,7 +54,7 @@ bool rvDebuggerQuickWatchDlg::DoModal ( rvDebuggerWindow* window, int callstackD
 	mCallstackDepth = callstackDepth;
 	mDebuggerWindow = window;
 	mVariable       = variable?variable:"";
-	
+
 	DialogBoxParam ( window->GetInstance(), MAKEINTRESOURCE(IDD_DBG_QUICKWATCH), window->GetWindow(), DlgProc, (LONG)this );
 
 	return true;
@@ -70,7 +70,7 @@ Dialog Procedure for the quick watch dialog
 INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
 	rvDebuggerQuickWatchDlg* dlg = (rvDebuggerQuickWatchDlg*) GetWindowLong ( wnd, GWL_USERDATA );
-	
+
 	switch ( msg )
 	{
 		case WM_GETMINMAXINFO:
@@ -80,18 +80,18 @@ INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM w
 			mmi->ptMinTrackSize.y = 200;
 			break;
 		}
-		
+
 		case WM_CLOSE:
 			gDebuggerApp.GetOptions().SetWindowPlacement ( "wp_quickwatch", wnd );
 			gDebuggerApp.GetOptions().SetColumnWidths ( "cw_quickwatch", GetDlgItem ( wnd, IDC_DBG_CURVALUE ) );
 			EndDialog ( wnd, 0 );
 			break;
-	
+
 		case WM_SIZE:
 		{
 			RECT client;
 			RECT button;
-			
+
 			GetClientRect ( wnd, &client );
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_RECALC ), &button );
 			ScreenToClient ( wnd, (POINT*)&button );
@@ -101,28 +101,28 @@ INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM w
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_CLOSE ), &button );
 			ScreenToClient ( wnd, (POINT*)&button );
 			ScreenToClient ( wnd, (POINT*)&button.right );
-			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_CLOSE ), client.right - dlg->mButtonFromRight, button.top, button.right-button.left,button.bottom-button.top, TRUE );			
+			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_CLOSE ), client.right - dlg->mButtonFromRight, button.top, button.right-button.left,button.bottom-button.top, TRUE );
 
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_ADDWATCH ), &button );
 			ScreenToClient ( wnd, (POINT*)&button );
 			ScreenToClient ( wnd, (POINT*)&button.right );
-			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_ADDWATCH ), client.right - dlg->mButtonFromRight, button.top, button.right-button.left,button.bottom-button.top, TRUE );			
+			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_ADDWATCH ), client.right - dlg->mButtonFromRight, button.top, button.right-button.left,button.bottom-button.top, TRUE );
 
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), &button );
 			ScreenToClient ( wnd, (POINT*)&button );
 			ScreenToClient ( wnd, (POINT*)&button.right );
-			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), button.left, button.top, client.right-button.left-dlg->mEditFromRight, button.bottom-button.top, TRUE );			
+			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), button.left, button.top, client.right-button.left-dlg->mEditFromRight, button.bottom-button.top, TRUE );
 
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_CURVALUE ), &button );
 			ScreenToClient ( wnd, (POINT*)&button );
 			ScreenToClient ( wnd, (POINT*)&button.right );
-			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_CURVALUE ), button.left, button.top, client.right-button.left-dlg->mEditFromRight, client.bottom-button.top - dlg->mEditFromBottom, TRUE );			
-			
+			MoveWindow ( GetDlgItem ( wnd, IDC_DBG_CURVALUE ), button.left, button.top, client.right-button.left-dlg->mEditFromRight, client.bottom-button.top - dlg->mEditFromBottom, TRUE );
+
 			break;
 		}
-	
-		case WM_INITDIALOG:			
-		{		
+
+		case WM_INITDIALOG:
+		{
 			RECT  client;
 			RECT  button;
 
@@ -130,18 +130,18 @@ INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM w
 			dlg = (rvDebuggerQuickWatchDlg*) lparam;
 			SetWindowLong ( wnd, GWL_USERDATA, lparam );
 			dlg->mWnd = wnd;
-			
+
 			GetClientRect ( wnd, &client );
 
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_RECALC ), &button );
-			ScreenToClient ( wnd, (POINT*)&button );	
+			ScreenToClient ( wnd, (POINT*)&button );
 			dlg->mButtonFromRight = client.right - button.left;
 
 			GetWindowRect ( GetDlgItem ( wnd, IDC_DBG_CURVALUE ), &button );
 			ScreenToClient ( wnd, (POINT*)&button.right );
 			dlg->mEditFromRight = client.right - button.right;
 			dlg->mEditFromBottom = client.bottom - button.bottom;
-								
+
 			// Disable the value controls until a variable is entered
 			EnableWindow ( GetDlgItem ( wnd, IDC_DBG_ADDWATCH ), false );
 			EnableWindow ( GetDlgItem ( wnd, IDC_DBG_RECALC ), false );
@@ -157,7 +157,7 @@ INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM w
 			col.cx = 150;
 			col.pszText = "Value";
 			ListView_InsertColumn ( GetDlgItem ( wnd, IDC_DBG_CURVALUE ), 1, &col );
-		
+
 			// Set the initial variable if one was given
 			if ( dlg->mVariable.Length() )
 			{
@@ -167,19 +167,19 @@ INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM w
 
 			gDebuggerApp.GetOptions().GetWindowPlacement ( "wp_quickwatch", wnd );
 			gDebuggerApp.GetOptions().GetColumnWidths ( "cw_quickwatch", GetDlgItem ( wnd, IDC_DBG_CURVALUE ) );
-		
+
 			return TRUE;
 		}
-			
+
 		case WM_COMMAND:
 			switch ( LOWORD(wparam) )
 			{
 				case IDC_DBG_CLOSE:
 					SendMessage ( wnd, WM_CLOSE, 0, 0 );
 					break;
-					
+
 				case IDC_DBG_VARIABLE:
-					// When the variable text changes to something other than empty 
+					// When the variable text changes to something other than empty
 					// we can enable the addwatch and recalc buttons
 					if ( HIWORD(wparam) == EN_CHANGE )
 					{
@@ -192,22 +192,22 @@ INT_PTR CALLBACK rvDebuggerQuickWatchDlg::DlgProc ( HWND wnd, UINT msg, WPARAM w
 				case IDC_DBG_ADDWATCH:
 				{
 					char varname[1024];
-					GetWindowText ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), varname, 1023 ); 
+					GetWindowText ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), varname, 1023 );
 					dlg->mDebuggerWindow->AddWatch ( varname );
 					break;
 				}
-					
+
 				case IDC_DBG_RECALC:
 				{
 					char varname[1024];
-					GetWindowText ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), varname, 1023 ); 
+					GetWindowText ( GetDlgItem ( wnd, IDC_DBG_VARIABLE ), varname, 1023 );
 					dlg->SetVariable ( varname );
 					break;
 				}
 			}
 			break;
 	}
-	
+
 	return FALSE;
 }
 
@@ -226,7 +226,7 @@ void rvDebuggerQuickWatchDlg::SetVariable ( const char* varname, bool force )
 		return;
 	}
 
-	// Throw up a wait cursor	
+	// Throw up a wait cursor
 	SetCursor ( LoadCursor ( NULL, IDC_WAIT ) );
 
 	// Clear the current value list control
@@ -235,12 +235,12 @@ void rvDebuggerQuickWatchDlg::SetVariable ( const char* varname, bool force )
 	// Get the value of the new variable
 	gDebuggerApp.GetClient().InspectVariable ( varname, mCallstackDepth );
 
-	// Wait for the variable value to be sent over from the debugger server		
+	// Wait for the variable value to be sent over from the debugger server
 	if ( !gDebuggerApp.GetClient().WaitFor ( DBMSG_INSPECTVARIABLE, 2500 ) )
 	{
 		return;
 	}
-	
+
 	// Make sure we got the value of the variable
 	if ( !gDebuggerApp.GetClient().GetVariableValue(varname, mCallstackDepth)[0] )
 	{
@@ -251,14 +251,14 @@ void rvDebuggerQuickWatchDlg::SetVariable ( const char* varname, bool force )
 	mVariable = varname;
 	EnableWindow ( GetDlgItem ( mWnd, IDC_DBG_CURVALUE ), true );
 	EnableWindow ( GetDlgItem ( mWnd, IDC_DBG_CURVALUE_STATIC ), true );
-			
-	// Add the variablae value to the list control			
+
+	// Add the variablae value to the list control
 	LVITEM item;
 	item.mask = LVIF_TEXT;
 	item.pszText = (LPSTR)varname;
 	item.iItem = 0;
 	item.iSubItem = 0;
-	ListView_InsertItem ( GetDlgItem ( mWnd, IDC_DBG_CURVALUE ), &item );				
+	ListView_InsertItem ( GetDlgItem ( mWnd, IDC_DBG_CURVALUE ), &item );
 	ListView_SetItemText ( GetDlgItem ( mWnd, IDC_DBG_CURVALUE ), 0, 1, (LPSTR)gDebuggerApp.GetClient().GetVariableValue(varname,mCallstackDepth) );
 
 	// Give focus back to the variable edit control and set the cursor back to an arrow

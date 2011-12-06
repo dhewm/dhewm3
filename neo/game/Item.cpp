@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -165,7 +165,7 @@ bool idItem::UpdateRenderEntity( renderEntity_s *renderEntity, const renderView_
 		}
 	}
 
-	// fade down after the last pulse finishes 
+	// fade down after the last pulse finishes
 	if ( !inView && cycle > lastCycle ) {
 		renderEntity->shaderParms[4] = 0.0f;
 	} else {
@@ -224,7 +224,7 @@ void idItem::Think( void ) {
 			SetAngles( ang );
 
 			float scale = 0.005f + entityNumber * 0.00001f;
-			
+
 			org = orgOrigin;
 			org.z += 4.0f + cos( ( gameLocal.time + 2000 ) * scale ) * 4.0f;
 			SetOrigin( org );
@@ -344,8 +344,8 @@ bool idItem::GiveToPlayer( idPlayer *player ) {
 
 	if ( spawnArgs.GetBool( "inv_carry" ) ) {
 		return player->GiveInventoryItem( &spawnArgs );
-	} 
-	
+	}
+
 	return player->GiveItem( this );
 }
 
@@ -355,7 +355,7 @@ idItem::Pickup
 ================
 */
 bool idItem::Pickup( idPlayer *player ) {
-	
+
 	if ( !GiveToPlayer( player ) ) {
 		return false;
 	}
@@ -394,7 +394,7 @@ bool idItem::Pickup( idPlayer *player ) {
 		const char *sfx = spawnArgs.GetString( "fxRespawn" );
 		if ( sfx && *sfx ) {
 			PostEventSec( &EV_RespawnFx, respawn - 0.5f );
-		} 
+		}
 		PostEventSec( &EV_RespawnItem, respawn );
 	} else if ( !spawnArgs.GetBool( "inv_objective" ) && !no_respawn ) {
 		// give some time for the pickup sound to play
@@ -729,7 +729,7 @@ void idObjective::Event_Trigger( idEntity *activator ) {
 		//Pickup( player );
 
 		if ( spawnArgs.GetString( "inv_objective", NULL ) ) {
-	 		if ( player && player->hud ) {
+			if ( player && player->hud ) {
 				idStr shotName = gameLocal.GetMapName();
 				shotName.StripFileExtension();
 				shotName += "/";
@@ -848,7 +848,7 @@ bool idPDAItem::GiveToPlayer(idPlayer *player) {
 ===============================================================================
 
   idMoveableItem
-	
+
 ===============================================================================
 */
 
@@ -885,7 +885,7 @@ idMoveableItem::Save
 ================
 */
 void idMoveableItem::Save( idSaveGame *savefile ) const {
-   	savefile->WriteStaticObject( physicsObj );
+	savefile->WriteStaticObject( physicsObj );
 
 	savefile->WriteClipModel( trigger );
 
@@ -985,7 +985,7 @@ void idMoveableItem::Think( void ) {
 		// update trigger position
 		trigger->Link( gameLocal.clip, this, 0, GetPhysics()->GetOrigin(), mat3_identity );
 	}
-	
+
 	if ( thinkFlags & TH_UPDATEPARTICLES ) {
 		if ( !gameLocal.smokeParticles->EmitSmoke( smoke, smokeTime, gameLocal.random.CRandomFloat(), GetPhysics()->GetOrigin(), GetPhysics()->GetAxis() ) ) {
 			smokeTime = 0;
@@ -1005,7 +1005,7 @@ bool idMoveableItem::Pickup( idPlayer *player ) {
 	bool ret = idItem::Pickup( player );
 	if ( ret ) {
 		trigger->SetContents( 0 );
-	} 
+	}
 	return ret;
 }
 
@@ -1229,7 +1229,7 @@ idItemRemover::RemoveItem
 */
 void idItemRemover::RemoveItem( idPlayer *player ) {
 	const char *remove;
-	
+
 	remove = spawnArgs.GetString( "remove" );
 	player->RemoveInventoryItem( remove );
 }
@@ -1310,7 +1310,7 @@ void idObjectiveComplete::Event_Trigger( idEntity *activator ) {
 		RemoveItem( player );
 
 		if ( spawnArgs.GetString( "inv_objective", NULL ) ) {
-	 		if ( player->hud ) {
+			if ( player->hud ) {
 				player->hud->SetStateString( "objective", "2" );
 				player->hud->SetStateString( "objectivetext", spawnArgs.GetString( "objectivetext" ) );
 				player->hud->SetStateString( "objectivetitle", spawnArgs.GetString( "objectivetitle" ) );

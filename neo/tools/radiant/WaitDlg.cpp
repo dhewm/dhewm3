@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -74,21 +74,21 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CWaitDlg message handlers
 
-BOOL CWaitDlg::OnInitDialog() 
+BOOL CWaitDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	//GetDlgItem(IDC_WAITSTR)->SetWindowText(waitStr);
 	GetDlgItem(IDC_WAITSTR)->SetFocus();
 	UpdateData(FALSE);
 	ShowWindow(SW_SHOW);
-	
+
 	// cancel disabled by default
 	AllowCancel( false );
 
 	// TODO: Add extra initialization here
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CWaitDlg::SetText(const char *msg, bool append) {

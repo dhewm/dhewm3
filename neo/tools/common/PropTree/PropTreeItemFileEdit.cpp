@@ -31,7 +31,7 @@ BEGIN_MESSAGE_MAP(CPropTreeItemFileEdit, CPropTreeItemEdit)
 	//}}AFX_MSG_MAP
 	ON_WM_CONTEXTMENU()
 	ON_WM_CREATE()
-	
+
 	ON_COMMAND(ID_EDITMENU_INSERTFILE, OnInsertFile)
 	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
@@ -82,26 +82,26 @@ int CPropTreeItemFileEdit::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CPropTreeItemFileEdit::OnInsertFile() {
 	CFileDialog dlg(TRUE);
 	dlg.m_ofn.Flags |= OFN_FILEMUSTEXIST;
-	
+
 	int startSel, endSel;
 	GetSel(startSel, endSel);
 
 	if( dlg.DoModal()== IDOK) {
-		
+
 		idStr currentText = (char*)GetItemValue();
 		idStr newText = currentText.Left(startSel) + currentText.Right(currentText.Length() - endSel);
-		
+
 		idStr filename = fileSystem->OSPathToRelativePath(dlg.m_ofn.lpstrFile);
 		filename.BackSlashesToSlashes();
 
-		
+
 		newText.Insert(filename, startSel);
 
 		SetItemValue((LPARAM)newText.c_str());
 		m_pProp->RefreshItems(this);
 
 		m_pProp->SendNotify(PTN_ITEMCHANGED, this);
-		
+
 	}
 }
 

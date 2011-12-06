@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -36,17 +36,17 @@ class rvGENavigator
 public:
 
 	rvGENavigator ( );
-	
+
 	bool	Create				( HWND parent, bool visible );
 	void	Show				( bool visibile );
 
 	void	Refresh				( void );
 
 	void	SetWorkspace		( rvGEWorkspace* workspace );
-	
-	void	Update				( void );	
+
+	void	Update				( void );
 	void	UpdateSelections	( void );
-	
+
 	HWND	GetWindow			( void );
 
 protected:

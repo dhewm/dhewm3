@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -173,7 +173,7 @@ static void Drag_Setup( int x, int y, int buttons,
 	}
 
 	if (g_qeglobals.d_select_mode == sel_vertex) {
-		
+
 		if ( radiant_entityMode.GetBool() ) {
 			return;
 		}
@@ -188,7 +188,7 @@ static void Drag_Setup( int x, int y, int buttons,
 	}
 
 	if (g_qeglobals.d_select_mode == sel_edge) {
-		
+
 		if ( radiant_entityMode.GetBool() ) {
 			return;
 		}
@@ -517,7 +517,7 @@ static void MoveSelection( const idVec3 &orgMove ) {
 	if (g_pParentWnd->ActiveXY()->RotateMode() || g_bPatchBendMode) {
 		float	fDeg = -move[2];
 		float	fAdj = move[2];
-	   	int axis = 0;
+		int axis = 0;
 		if (g_pParentWnd->ActiveXY()->GetViewType() == XY) {
 			fDeg = -move[1];
 			fAdj = move[1];
@@ -757,7 +757,7 @@ void Drag_MouseUp(int nButtons) {
 		Sys_UpdateWindows(W_CAMERA);
 	}
 */
-	
+
 	Undo_EndBrushList(&selected_brushes);
 	Undo_End();
 }

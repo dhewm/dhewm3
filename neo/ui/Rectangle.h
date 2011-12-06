@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -41,7 +41,7 @@ public:
 	idRectangle(float ix, float iy, float iw, float ih) { x = ix; y = iy; w = iw; h = ih; }
 	float Bottom() const { return y + h; }
 	float Right() const { return x + w; }
-	void Offset (float x, float y) { 
+	void Offset (float x, float y) {
 		this->x += x;
 		this->y += y;
 	}

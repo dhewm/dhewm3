@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -72,10 +72,10 @@ idSimpleWindow::idSimpleWindow(idWindow *win) {
 	}
 	backGroundName.SetMaterialPtr(&background);
 
-// 
+//
 //  added parent
 	mParent = win->GetParent();
-// 
+//
 
 	hideCursor = win->hideCursor;
 
@@ -122,7 +122,7 @@ idSimpleWindow::~idSimpleWindow() {
 }
 
 void idSimpleWindow::StateChanged( bool redraw ) {
-	if ( redraw && background && background->CinematicLength() ) { 
+	if ( redraw && background && background->CinematicLength() ) {
 		background->UpdateCinematic( gui->GetTime() );
 	}
 }
@@ -189,7 +189,7 @@ void idSimpleWindow::CalcClientRect(float xofs, float yofs) {
 		drawRect.x = rect.x() - rect.w();
 		drawRect.y = rect.y() - rect.h();
 	}
-	
+
 	drawRect.x += xofs;
 	drawRect.y += yofs;
 
@@ -205,7 +205,7 @@ void idSimpleWindow::CalcClientRect(float xofs, float yofs) {
 
 		textRect = clientRect;
 		textRect.x += 2.0;
-	 	textRect.w -= 2.0;
+		textRect.w -= 2.0;
 		textRect.y += 2.0;
 		textRect.h -= 2.0;
 		textRect.x += textAlignx;
@@ -218,7 +218,7 @@ void idSimpleWindow::CalcClientRect(float xofs, float yofs) {
 
 
 void idSimpleWindow::Redraw(float x, float y) {
-	
+
 	if (!visible) {
 		return;
 	}

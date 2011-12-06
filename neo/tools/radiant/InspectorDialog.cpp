@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -88,8 +88,8 @@ BOOL CInspectorDialog::OnInitDialog()
 	AddDockedWindow ( &texWnd	  , W_TEXTURE , 2 , "Textures"   , (dockedTabs & W_TEXTURE ) != 0 , InspectorsDockingCallback );
 	AddDockedWindow ( &mediaDlg	  , W_MEDIA	  , 3 , "Media"	     , (dockedTabs & W_MEDIA   ) != 0 , InspectorsDockingCallback );
 	AddDockedWindow ( &entityDlg  , W_ENTITY  , 4 , "Entity"	 , (dockedTabs & W_ENTITY  ) != 0 , InspectorsDockingCallback );
-	
-	SetMode(W_CONSOLE);	
+
+	SetMode(W_CONSOLE);
 	initialized = true;
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -163,7 +163,7 @@ void CInspectorDialog::OnSize(UINT nType, int cx, int cy)
 
 void CInspectorDialog::OnDestroy()
 {
-	::SaveWindowPlacement(GetSafeHwnd() , "radiant_InspectorsWindow" );	
+	::SaveWindowPlacement(GetSafeHwnd() , "radiant_InspectorsWindow" );
 	SetCvarInt("radiant_InspectorDockedDialogs" , dockedTabs );
 
 	CTabsDlg::OnDestroy();

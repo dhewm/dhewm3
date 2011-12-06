@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
 
-#include "GEApp.h"	
+#include "GEApp.h"
 #include "GEModifierStack.h"
 
 rvGEModifierStack::rvGEModifierStack ( )
@@ -45,12 +45,12 @@ rvGEModifierStack::~rvGEModifierStack ( )
 void rvGEModifierStack::Reset ( void )
 {
 	int i;
-	
+
 	for ( i = 0; i < mModifiers.Num ( ); i ++ )
 	{
 		delete mModifiers[i];
 	}
-	
+
 	mModifiers.Clear ( );
 }
 
@@ -68,11 +68,11 @@ bool rvGEModifierStack::Append ( rvGEModifier* modifier )
 		delete mModifiers[mModifiers.Num()-1];
 		mModifiers.RemoveIndex ( mModifiers.Num()-1 );
 	}
-	
+
 	if ( !mMergeBlock && mModifiers.Num ( ) )
 	{
 		rvGEModifier* top = mModifiers[mModifiers.Num()-1];
-		
+
 		// See if the two modifiers can merge
 		if ( top->GetWindow() == modifier->GetWindow() &&
 			 !idStr::Icmp ( top->GetName ( ), modifier->GetName ( ) ) &&
@@ -82,21 +82,21 @@ bool rvGEModifierStack::Append ( rvGEModifier* modifier )
 			if ( top->Merge ( modifier ) )
 			{
 				top->Apply ( );
-				
+
 				gApp.GetProperties().Update ( );
 				gApp.GetTransformer().Update ( );
-			
+
 				delete modifier;
 				return true;
-			}		
+			}
 		}
 	}
-	
+
 	mModifiers.Append ( modifier );
 	mCurrentModifier = mModifiers.Num ( ) - 1;
-	
+
 	modifier->Apply ( );
-	
+
 	mMergeBlock = false;
 
 	gApp.GetProperties().Update ( );
@@ -111,7 +111,7 @@ bool rvGEModifierStack::Undo ( void )
 	{
 		return false;
 	}
-	
+
 	mModifiers[mCurrentModifier]->Undo ( );
 	mCurrentModifier--;
 
@@ -134,4 +134,3 @@ bool rvGEModifierStack::Redo ( void )
 
 	return true;
 }
-

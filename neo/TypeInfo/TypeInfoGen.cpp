@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -630,7 +630,7 @@ void idTypeInfoGen::ParseScope( const char *scope, bool isTemplate, idParser &sr
 			isStatic = true;
 
 		} else if ( token.type == TT_NAME ) {
-	
+
 			assert( indent == 1 );
 
 			// if this is a class operator
@@ -720,7 +720,7 @@ void idTypeInfoGen::ParseScope( const char *scope, bool isTemplate, idParser &sr
 						var.bits = 0;
 						typeInfo->variables.Append( var );
 						if ( !src.CheckTokenString( "," ) ) {
-                            varType = "";
+							varType = "";
 							isConst = false;
 							isStatic = false;
 							break;

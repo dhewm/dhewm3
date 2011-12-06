@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -91,7 +91,7 @@ void RB_DrawElementsWithCounters( const srfTriangles_t *tri ) {
 	}
 
 	if ( tri->indexCache && r_useIndexBuffers.GetBool() ) {
-		qglDrawElements( GL_TRIANGLES, 
+		qglDrawElements( GL_TRIANGLES,
 						r_singleTriangle.GetBool() ? 3 : tri->numIndexes,
 						GL_INDEX_TYPE,
 						(int *)vertexCache.Position( tri->indexCache ) );
@@ -100,7 +100,7 @@ void RB_DrawElementsWithCounters( const srfTriangles_t *tri ) {
 		if ( r_useIndexBuffers.GetBool() ) {
 			vertexCache.UnbindIndex();
 		}
-		qglDrawElements( GL_TRIANGLES, 
+		qglDrawElements( GL_TRIANGLES,
 						r_singleTriangle.GetBool() ? 3 : tri->numIndexes,
 						GL_INDEX_TYPE,
 						tri->indexes );
@@ -120,7 +120,7 @@ void RB_DrawShadowElementsWithCounters( const srfTriangles_t *tri, int numIndexe
 	backEnd.pc.c_shadowVertexes += tri->numVerts;
 
 	if ( tri->indexCache && r_useIndexBuffers.GetBool() ) {
-		qglDrawElements( GL_TRIANGLES, 
+		qglDrawElements( GL_TRIANGLES,
 						r_singleTriangle.GetBool() ? 3 : numIndexes,
 						GL_INDEX_TYPE,
 						(int *)vertexCache.Position( tri->indexCache ) );
@@ -129,7 +129,7 @@ void RB_DrawShadowElementsWithCounters( const srfTriangles_t *tri, int numIndexe
 		if ( r_useIndexBuffers.GetBool() ) {
 			vertexCache.UnbindIndex();
 		}
-		qglDrawElements( GL_TRIANGLES, 
+		qglDrawElements( GL_TRIANGLES,
 						r_singleTriangle.GetBool() ? 3 : numIndexes,
 						GL_INDEX_TYPE,
 						tri->indexes );
@@ -229,7 +229,7 @@ matrix will already have been loaded, and backEnd.currentSpace will
 be updated after the triangle function completes.
 ====================
 */
-void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs, 
+void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs,
 											  void (*triFunc_)( const drawSurf_t *) ) {
 	int				i;
 	const drawSurf_t		*drawSurf;
@@ -255,7 +255,7 @@ void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs
 		// change the scissor if needed
 		if ( r_useScissor.GetBool() && !backEnd.currentScissor.Equals( drawSurf->scissorRect ) ) {
 			backEnd.currentScissor = drawSurf->scissorRect;
-			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1, 
+			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 				backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 				backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 				backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
@@ -277,7 +277,7 @@ void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs
 RB_RenderDrawSurfChainWithFunction
 ======================
 */
-void RB_RenderDrawSurfChainWithFunction( const drawSurf_t *drawSurfs, 
+void RB_RenderDrawSurfChainWithFunction( const drawSurf_t *drawSurfs,
 										void (*triFunc_)( const drawSurf_t *) ) {
 	const drawSurf_t		*drawSurf;
 
@@ -300,7 +300,7 @@ void RB_RenderDrawSurfChainWithFunction( const drawSurf_t *drawSurfs,
 		// change the scissor if needed
 		if ( r_useScissor.GetBool() && !backEnd.currentScissor.Equals( drawSurf->scissorRect ) ) {
 			backEnd.currentScissor = drawSurf->scissorRect;
-			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1, 
+			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 				backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 				backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 				backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
@@ -449,9 +449,9 @@ RB_FinishStageTexture
 ======================
 */
 void RB_FinishStageTexture( const textureStage_t *texture, const drawSurf_t *surf ) {
-	if ( texture->texgen == TG_DIFFUSE_CUBE || texture->texgen == TG_SKYBOX_CUBE 
+	if ( texture->texgen == TG_DIFFUSE_CUBE || texture->texgen == TG_SKYBOX_CUBE
 		|| texture->texgen == TG_WOBBLESKY_CUBE ) {
-		qglTexCoordPointer( 2, GL_FLOAT, sizeof( idDrawVert ), 
+		qglTexCoordPointer( 2, GL_FLOAT, sizeof( idDrawVert ),
 			(void *)&(((idDrawVert *)vertexCache.Position( surf->geo->ambientCache ))->st) );
 	}
 
@@ -559,14 +559,14 @@ void RB_BeginDrawingView (void) {
 	qglMatrixMode(GL_MODELVIEW);
 
 	// set the window clipping
-	qglViewport( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1, 
-		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1, 
+	qglViewport( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
+		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
 		backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1,
 		backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1 );
 
 	// the scissor may be smaller than the viewport for subviews
-	qglScissor( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1, 
-		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1, 
+	qglScissor( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
+		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
 		backEnd.viewDef->scissor.x2 + 1 - backEnd.viewDef->scissor.x1,
 		backEnd.viewDef->scissor.y2 + 1 - backEnd.viewDef->scissor.y1 );
 	backEnd.currentScissor = backEnd.viewDef->scissor;
@@ -667,12 +667,12 @@ static void RB_SubmittInteraction( drawInteraction_t *din, void (*DrawInteractio
 	}
 
 	// if we wouldn't draw anything, don't call the Draw function
-	if ( 
-		( ( din->diffuseColor[0] > 0 || 
-		din->diffuseColor[1] > 0 || 
+	if (
+		( ( din->diffuseColor[0] > 0 ||
+		din->diffuseColor[1] > 0 ||
 		din->diffuseColor[2] > 0 ) && din->diffuseImage != globalImages->blackImage )
-		|| ( ( din->specularColor[0] > 0 || 
-		din->specularColor[1] > 0 || 
+		|| ( ( din->specularColor[0] > 0 ||
+		din->specularColor[1] > 0 ||
 		din->specularColor[2] > 0 ) && din->specularImage != globalImages->blackImage ) ) {
 		DrawInteraction( din );
 	}
@@ -711,7 +711,7 @@ void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void (*DrawInterac
 	// change the scissor if needed
 	if ( r_useScissor.GetBool() && !backEnd.currentScissor.Equals( surf->scissorRect ) ) {
 		backEnd.currentScissor = surf->scissorRect;
-		qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1, 
+		qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 			backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 			backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 			backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
@@ -852,7 +852,7 @@ void RB_DrawView( const void *data ) {
 	cmd = (const drawSurfsCommand_t *)data;
 
 	backEnd.viewDef = cmd->viewDef;
-	
+
 	// we will need to do a new copyTexSubImage of the screen
 	// when a SS_POST_PROCESS material is used
 	backEnd.currentRenderCopied = false;

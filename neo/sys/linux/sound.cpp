@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -76,12 +76,12 @@ idAudioHardware::~idAudioHardware
 ===============
 */
 idAudioHardware::~idAudioHardware() { }
-	
+
 /*
 =================
 idAudioHardwareOSS::~idAudioHardwareOSS
-=================	
-*/	
+=================
+*/
 idAudioHardwareOSS::~idAudioHardwareOSS() {
 	Release();
 }
@@ -89,8 +89,8 @@ idAudioHardwareOSS::~idAudioHardwareOSS() {
 /*
 =================
 idAudioHardwareOSS::Release
-=================	
-*/	
+=================
+*/
 void idAudioHardwareOSS::Release( bool bSilent ) {
 	if (m_audio_fd) {
 		if (!bSilent) {
@@ -101,7 +101,7 @@ void idAudioHardwareOSS::Release( bool bSilent ) {
 			m_buffer = NULL;
 			m_buffer_size = 0;
 		}
-		common->Printf("close sound device\n");	
+		common->Printf("close sound device\n");
 		if (close(m_audio_fd) == -1) {
 			common->Warning( "failed to close sound device: %s", strerror(errno) );
 		}
@@ -110,13 +110,13 @@ void idAudioHardwareOSS::Release( bool bSilent ) {
 			common->Printf("--------------------------------\n");
 		}
 	}
-}	
+}
 
 /*
 =================
 idAudioHardwareOSS::InitFailed
-=================	
-*/	
+=================
+*/
 void idAudioHardwareOSS::InitFailed() {
 	Release( true );
 	cvarSystem->SetCVarBool( "s_noSound", true );
@@ -127,8 +127,8 @@ void idAudioHardwareOSS::InitFailed() {
 /*
 =================
 idAudioHardwareOSS::ExtractOSSVersion
-=================	
-*/	
+=================
+*/
 void idAudioHardwareOSS::ExtractOSSVersion( int version, idStr &str ) const {
 	sprintf( str, "%d.%d.%d", ( version & 0xFF0000 ) >> 16, ( version & 0xFF00 ) >> 8, version & 0xFF );
 }
@@ -142,7 +142,7 @@ though OSS API docs (1.1) advertise AFMT_S32_LE, AFMT_S16_LE is the only output 
 
 BSD NOTE: With the GNU library, you can use free to free the blocks that memalign, posix_memalign, and valloc return.
 That does not work in BSD, however--BSD does not provide any way to free such blocks.
-=================	
+=================
 */
 idCVar s_device( "s_dsp", "/dev/dsp", CVAR_SYSTEM | CVAR_ARCHIVE, "" );
 
@@ -154,11 +154,11 @@ bool idAudioHardwareOSS::Initialize( ) {
 	struct audio_buf_info info;
 
 	memset( &info, 0, sizeof( info ) );
-	
+
 	if (m_audio_fd) {
 		Release();
 	}
-	
+
 	// open device ------------------------------------------------
 	if ((m_audio_fd = open( s_device.GetString(), O_WRONLY | O_NONBLOCK, 0)) == -1) {
 		m_audio_fd = 0;
@@ -179,9 +179,9 @@ bool idAudioHardwareOSS::Initialize( ) {
 		InitFailed();
 		return false;
 	}
-	
+
 	common->Printf("opened sound device '%s'\n", s_device.GetString());
-	
+
 	// verify capabilities -----------------------------------------
 
 	// may only be available starting with OSS API v4.0
@@ -218,7 +218,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 		InitFailed();
 		return false;
 	}
-	
+
 	// sample format -----------------------------------------------
 	requested_sample_format = AFMT_S16_LE;
 	m_sample_format = requested_sample_format;
@@ -232,7 +232,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 		InitFailed();
 		return false;
 	}
-	
+
 	// channels ----------------------------------------------------
 
 	// sanity over number of speakers
@@ -269,7 +269,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 		}
 	}
 	assert( (int)m_channels == idSoundSystemLocal::s_numberOfSpeakers.GetInteger() );
-	
+
 	// sampling rate ------------------------------------------------
 	m_speed = PRIMARYFREQ;
 	if ( ioctl( m_audio_fd, SNDCTL_DSP_SPEED, &m_speed ) == -1 ) {
@@ -285,7 +285,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 		return false;
 	}
 	common->Printf("%s - bit rate: %d, channels: %d, frequency: %d\n", s_device.GetString(), m_sample_format, m_channels, m_speed);
-	
+
 	// output buffer ------------------------------------------------
 	// allocate a final buffer target, the sound engine locks, writes, and we write back to the device
 	// we want m_buffer_size ( will have to rename those )
@@ -298,7 +298,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 	common->Printf( "allocated a mix buffer of %d bytes\n", m_buffer_size );
 
 	// toggle sound -------------------------------------------------
-	
+
 	// toggle off before toggling on. that's what OSS source code samples recommends
 	int flag = 0;
 	if (ioctl(m_audio_fd, SNDCTL_DSP_SETTRIGGER, &flag) == -1) {
@@ -337,7 +337,7 @@ bool idAudioHardwareOSS::Flush( void ) {
 =================
 idAudioHardwareOSS::GetMixBufferSize
 =================
-*/	
+*/
 int idAudioHardwareOSS::GetMixBufferSize() {
 	//	return MIXBUFFER_SAMPLES * 2 * m_channels;
 	return m_buffer_size;
@@ -347,7 +347,7 @@ int idAudioHardwareOSS::GetMixBufferSize() {
 =================
 idAudioHardwareOSS::GetMixBuffer
 =================
-*/	
+*/
 short* idAudioHardwareOSS::GetMixBuffer() {
 	return (short *)m_buffer;
 }
@@ -396,4 +396,3 @@ void idAudioHardwareOSS::Write( bool flushing ) {
 bool Sys_LoadOpenAL( void ) {
 	return false;
 }
-

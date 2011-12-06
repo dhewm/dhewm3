@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,10 +37,10 @@ class rvGEStateModifier : public rvGEModifier
 public:
 
 	rvGEStateModifier ( const char* name, idWindow* window, idDict& dict );
-	
+
 	virtual bool		Apply	( void );
 	virtual bool		Undo	( void );
-			
+
 protected:
 
 	bool	SetState	( idDict& dict );
@@ -49,6 +49,6 @@ protected:
 	rvGEWindowWrapper::EWindowType	mUndoWindowType;
 	idDict							mDict;
 	idDict							mUndoDict;
-}; 
+};
 
 #endif // GESTATEMODIFIER_H_

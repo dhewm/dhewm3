@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -46,7 +46,7 @@ idRenderWindow::idRenderWindow(idUserInterfaceLocal *g) : idWindow(g) {
 }
 
 idRenderWindow::~idRenderWindow() {
-	renderSystem->FreeRenderWorld( world ); 
+	renderSystem->FreeRenderWorld( world );
 }
 
 void idRenderWindow::CommonInit() {
@@ -65,7 +65,7 @@ void idRenderWindow::CommonInit() {
 
 
 void idRenderWindow::BuildAnimation(int time) {
-	
+
 	if (!updateAnimation) {
 		return;
 	}
@@ -168,10 +168,10 @@ void idRenderWindow::PostParse() {
 	idWindow::PostParse();
 }
 
-// 
-//  
+//
+//
 idWinVar *idRenderWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t** owner ) {
-// 
+//
 	if (idStr::Icmp(_name, "model") == 0) {
 		return &modelName;
 	}
@@ -197,10 +197,10 @@ idWinVar *idRenderWindow::GetWinVarByName(const char *_name, bool fixup, drawWin
 		return &needsRender;
 	}
 
-// 
-//  
+//
+//
 	return idWindow::GetWinVarByName(_name, fixup, owner);
-// 
+//
 }
 
 bool idRenderWindow::ParseInternalVar(const char *_name, idParser *src) {

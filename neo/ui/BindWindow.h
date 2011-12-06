@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -39,12 +39,12 @@ public:
 	virtual void PostParse();
 	virtual void Draw(int time, float x, float y);
 	virtual size_t Allocated(){return idWindow::Allocated();};
-// 
-//  
+//
+//
 	virtual idWinVar *GetWinVarByName(const char *_name, bool winLookup = false, drawWin_t** owner = NULL );
-// 
+//
 	virtual void Activate( bool activate, idStr &act );
-	
+
 private:
 	void CommonInit();
 	idWinStr bindName;

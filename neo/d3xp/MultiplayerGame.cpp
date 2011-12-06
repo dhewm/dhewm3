@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -122,10 +122,10 @@ idMultiplayerGame::idMultiplayerGame() {
 
 	flagMsgOn = true;
 
-    player_blue_flag = -1;
-    player_red_flag = -1;
+	player_blue_flag = -1;
+	player_red_flag = -1;
 #endif
-    
+
 	Clear();
 }
 
@@ -181,13 +181,13 @@ void idMultiplayerGame::Reset() {
 	assert( !scoreBoard && !spectateGui && !guiChat && !mainGui && !mapList );
 
 #ifdef CTF
-    // CTF uses its own scoreboard
-    if ( IsGametypeFlagBased() )
-        scoreBoard = uiManager->FindGui( "guis/ctfscoreboard.gui", true, false, true );
-    else
+	// CTF uses its own scoreboard
+	if ( IsGametypeFlagBased() )
+		scoreBoard = uiManager->FindGui( "guis/ctfscoreboard.gui", true, false, true );
+	else
 #endif
 	scoreBoard = uiManager->FindGui( "guis/scoreboard.gui", true, false, true );
-    
+
 	spectateGui = uiManager->FindGui( "guis/spectate.gui", true, false, true );
 	guiChat = uiManager->FindGui( "guis/chat.gui", true, false, true );
 	mainGui = uiManager->FindGui( "guis/mpmain.gui", true, false, true );
@@ -228,7 +228,7 @@ void idMultiplayerGame::SpawnPlayer( int clientNum ) {
 		idPlayer *p = static_cast< idPlayer * >( gameLocal.entities[ clientNum ] );
 		p->spawnedTime = gameLocal.time;
 
-		if ( IsGametypeTeamBased() ) {  /* CTF */ 
+		if ( IsGametypeTeamBased() ) {  /* CTF */
 			SwitchToTeam( clientNum, -1, p->team );
 		}
 		p->tourneyRank = 0;
@@ -292,7 +292,7 @@ idMultiplayerGame::ClearGuis
 */
 void idMultiplayerGame::ClearGuis() {
 	int i;
-	
+
 	for ( i = 0; i < MAX_CLIENTS; i++ ) {
 		scoreBoard->SetStateString( va( "player%i",i+1 ), "" );
 		scoreBoard->SetStateString( va( "player%i_score", i+1 ), "" );
@@ -313,11 +313,11 @@ void idMultiplayerGame::ClearGuis() {
 		scoreBoard->SetStateInt( va( "rank%i", i+1 ), 0 );
 		player->hud->SetStateInt( "rank_self", 0 );
 
-	}	
-    
+	}
+
 #ifdef CTF
-    ClearHUDStatus();
-#endif	
+	ClearHUDStatus();
+#endif
 }
 
 #ifdef CTF
@@ -327,23 +327,23 @@ idMultiplayerGame::ClearHUDStatus
 ================
 */
 void idMultiplayerGame::ClearHUDStatus( void ) {
-    int i;
+	int i;
 
-    for ( i = 0; i < MAX_CLIENTS; i++ ) {
-        
+	for ( i = 0; i < MAX_CLIENTS; i++ ) {
+
 		idPlayer *player = static_cast<idPlayer *>( gameLocal.entities[ i ] );
 		if ( !player || !player->hud ) {
 			continue;
 		}
-        
-        player->hud->SetStateInt( "red_flagstatus", 0 );
-        player->hud->SetStateInt( "blue_flagstatus", 0 );
-        if ( IsGametypeFlagBased())
-            player->hud->SetStateInt( "self_team", player->team );
-        else
-            player->hud->SetStateInt( "self_team", -1 ); // Invisible.
-    }
-    
+
+		player->hud->SetStateInt( "red_flagstatus", 0 );
+		player->hud->SetStateInt( "blue_flagstatus", 0 );
+		if ( IsGametypeFlagBased())
+			player->hud->SetStateInt( "self_team", player->team );
+		else
+			player->hud->SetStateInt( "self_team", -1 ); // Invisible.
+	}
+
 }
 
 /*
@@ -358,9 +358,9 @@ Gets number of captures in CTF game.
 */
 int idMultiplayerGame::GetFlagPoints( int team )
 {
-    assert( team <= 1 );
-    
-    return teamPoints[ team ];
+	assert( team <= 1 );
+
+	return teamPoints[ team ];
 }
 #endif
 
@@ -523,7 +523,7 @@ void idMultiplayerGame::UpdateScoreboard( idUserInterface *scoreBoard, idPlayer 
 					continue;
 				}
 			}
-	
+
 			iline++;
 			if ( !playerState[ i ].ingame ) {
 				scoreBoard->SetStateString( va( "player%i", iline ), common->GetLanguageDict()->GetString( "#str_04244" ) );
@@ -595,9 +595,9 @@ void idMultiplayerGame::UpdateScoreboard( idUserInterface *scoreBoard, idPlayer 
 	} else if ( gameLocal.gameType != GAME_CTF ) {
 #else
 	} else {
-#endif 
+#endif
 		livesinfo = va( "%s: %i", common->GetLanguageDict()->GetString( "#str_01982" ), gameLocal.serverInfo.GetInt( "si_fragLimit" ) );
-	} 
+	}
 	if ( gameLocal.serverInfo.GetInt( "si_timeLimit" ) > 0 ) {
 		timeinfo = va( "%s: %i", common->GetLanguageDict()->GetString( "#str_01983" ), gameLocal.serverInfo.GetInt( "si_timeLimit" ) );
 	} else {
@@ -610,7 +610,7 @@ void idMultiplayerGame::UpdateScoreboard( idUserInterface *scoreBoard, idPlayer 
 	scoreBoard->Redraw( gameLocal.time );
 }
 
-#ifdef CTF 
+#ifdef CTF
 /*
 ================
 idMultiplayerGame::UpdateCTFScoreboard
@@ -622,197 +622,197 @@ void idMultiplayerGame::UpdateCTFScoreboard( idUserInterface *scoreBoard, idPlay
 	idEntity *ent;
 	int value;
 
-    // The display lines
-    int ilines[2] = {0,0};
+	// The display lines
+	int ilines[2] = {0,0};
 
-    // The team strings
-    char redTeam[] = "red";
-    char blueTeam[] = "blue";
-    char *curTeam = NULL;
+	// The team strings
+	char redTeam[] = "red";
+	char blueTeam[] = "blue";
+	char *curTeam = NULL;
 
 	/* Word "frags" */
 	scoreBoard->SetStateString( "scoretext", gameLocal.gameType == GAME_LASTMAN ? common->GetLanguageDict()->GetString( "#str_04242" ) : common->GetLanguageDict()->GetString( "#str_04243" ) );
 
-    // Blank the flag carrier on the scoreboard.  We update these in the loop below if necessary.
-    if ( this->player_blue_flag == -1 )
+	// Blank the flag carrier on the scoreboard.  We update these in the loop below if necessary.
+	if ( this->player_blue_flag == -1 )
 		scoreBoard->SetStateInt( "player_blue_flag", 0 );
 
-    if ( this->player_red_flag == -1 )
-        scoreBoard->SetStateInt( "player_red_flag", 0 );
-    
+	if ( this->player_red_flag == -1 )
+		scoreBoard->SetStateInt( "player_red_flag", 0 );
+
 	if ( gameState != WARMUP ) {
 		for ( i = 0; i < numRankedPlayers; i++ ) {
 
-            idPlayer *player = rankedPlayers[ i ];
-            assert( player );
+			idPlayer *player = rankedPlayers[ i ];
+			assert( player );
 
-            if ( player->team == 0 )
-                curTeam = redTeam;
-            else
-                curTeam = blueTeam;
-            
-            // Increase the appropriate iline
-            assert( player->team <= 1 );
-            ilines[ player->team ]++;
+			if ( player->team == 0 )
+				curTeam = redTeam;
+			else
+				curTeam = blueTeam;
+
+			// Increase the appropriate iline
+			assert( player->team <= 1 );
+			ilines[ player->team ]++;
 
 
 			// Update the flag status
 			if ( this->player_blue_flag == player->entityNumber )
 				scoreBoard->SetStateInt( "player_blue_flag", ilines[ player->team ] );
-       
-			if ( player->team == 1 && this->player_red_flag == player->entityNumber )       
+
+			if ( player->team == 1 && this->player_red_flag == player->entityNumber )
 				scoreBoard->SetStateInt( "player_red_flag", ilines[ player->team ] );
-            
 
 
-            /* Player Name */
-            scoreBoard->SetStateString( va( "player%i_%s", ilines[ player->team ], curTeam ), player->GetUserInfo()->GetString( "ui_name" ) );
-            
-			if ( IsGametypeTeamBased() ) { 
-                
+
+			/* Player Name */
+			scoreBoard->SetStateString( va( "player%i_%s", ilines[ player->team ], curTeam ), player->GetUserInfo()->GetString( "ui_name" ) );
+
+			if ( IsGametypeTeamBased() ) {
+
 				value = idMath::ClampInt( MP_PLAYER_MINFRAGS, MP_PLAYER_MAXFRAGS, playerState[ rankedPlayers[ i ]->entityNumber ].fragCount );
 				scoreBoard->SetStateInt( va( "player%i_%s_score", ilines[ player->team ], curTeam ), value );
 
-                /* Team score and score, blanked */
-                scoreBoard->SetStateString( va( "player%i_%s_tscore", ilines[ player->team ], curTeam ), "" );
-                //scoreBoard->SetStateString( va( "player%i_%s_score",  ilines[ player->team ], curTeam ), "" );
-			} 
+				/* Team score and score, blanked */
+				scoreBoard->SetStateString( va( "player%i_%s_tscore", ilines[ player->team ], curTeam ), "" );
+				//scoreBoard->SetStateString( va( "player%i_%s_score",  ilines[ player->team ], curTeam ), "" );
+			}
 
-            /* Wins */
+			/* Wins */
 			value = idMath::ClampInt( 0, MP_PLAYER_MAXWINS, playerState[ rankedPlayers[ i ]->entityNumber ].wins );
-            scoreBoard->SetStateInt( va( "player%i_%s_wins", ilines[ player->team ], curTeam ), value );
+			scoreBoard->SetStateInt( va( "player%i_%s_wins", ilines[ player->team ], curTeam ), value );
 
-            /* Ping */
-            scoreBoard->SetStateInt( va( "player%i_%s_ping", ilines[ player->team ], curTeam ), playerState[ rankedPlayers[ i ]->entityNumber ].ping );
+			/* Ping */
+			scoreBoard->SetStateInt( va( "player%i_%s_ping", ilines[ player->team ], curTeam ), playerState[ rankedPlayers[ i ]->entityNumber ].ping );
 		}
 	}
-    
-    for ( i = 0; i < MAX_CLIENTS; i++ ) {
-            
-        ent = gameLocal.entities[ i ];
-        if ( !ent || !ent->IsType( idPlayer::Type ) ) {
-            continue;
-        }
-            
-        if ( gameState != WARMUP ) {	
-            // check he's not covered by ranks already
-            for ( j = 0; j < numRankedPlayers; j++ ) {
-                if ( ent == rankedPlayers[ j ] ) {
-                    break;
-                }
-            }
-			
-            if ( j != numRankedPlayers ) {
-                continue;
-            }
-			
-        }
-        player = static_cast< idPlayer * >( ent );
-        
-        if ( player->spectating )
-            continue;
 
-        if ( player->team == 0 )
-            curTeam = redTeam;
-        else
-            curTeam = blueTeam;
-	
-        ilines[ player->team ]++;
+	for ( i = 0; i < MAX_CLIENTS; i++ ) {
 
+		ent = gameLocal.entities[ i ];
+		if ( !ent || !ent->IsType( idPlayer::Type ) ) {
+			continue;
+		}
 
-        
-   
+		if ( gameState != WARMUP ) {
+			// check he's not covered by ranks already
+			for ( j = 0; j < numRankedPlayers; j++ ) {
+				if ( ent == rankedPlayers[ j ] ) {
+					break;
+				}
+			}
 
-        if ( !playerState[ i ].ingame ) {
+			if ( j != numRankedPlayers ) {
+				continue;
+			}
 
-            /* "New Player" on player's name location */
-            scoreBoard->SetStateString( va( "player%i_%s", ilines[ player->team ], curTeam ), common->GetLanguageDict()->GetString( "#str_04244" ) );
+		}
+		player = static_cast< idPlayer * >( ent );
 
-            /* "Connecting" on player's score location */
-            scoreBoard->SetStateString( va( "player%i_%s_score", ilines[ player->team ], curTeam ), common->GetLanguageDict()->GetString( "#str_04245" ) );
+		if ( player->spectating )
+			continue;
 
-                
-        } else {
+		if ( player->team == 0 )
+			curTeam = redTeam;
+		else
+			curTeam = blueTeam;
 
-            /* Player's name in player's name location */
-            if ( !player->spectating )
-                scoreBoard->SetStateString( va( "player%i_%s", ilines[ player->team ], curTeam ), gameLocal.userInfo[ i ].GetString( "ui_name" ) );
-                
-            if ( gameState == WARMUP ) {
-
-                if ( player->spectating ) {
-
-                    /* "Spectating" on player's score location */
-                    scoreBoard->SetStateString( va( "player%i_%s_score", ilines[ player->team ], curTeam ), common->GetLanguageDict()->GetString( "#str_04246" ) );
-
-                } else {
-
-                    /* Display "ready" in player's score location if they're ready.  Display nothing if not.  No room for 'not ready'.  */
-                    scoreBoard->SetStateString( va( "player%i_%s_score", ilines[ player->team ], curTeam ), player->IsReady() ? common->GetLanguageDict()->GetString( "#str_04247" ) : "" );
-
-                }
-            } 
-        }
-
-    }
-
-    // Clear remaining slots
-    for ( i = 0; i < 2; i++ )
-    {
-        if ( i )
-            curTeam = blueTeam;
-        else
-            curTeam = redTeam;
-        
-        for ( j = ilines[ i ]+1; j <= 8; j++ )
-        {
-            scoreBoard->SetStateString( va( "player%i_%s", j, curTeam ), "" );
-            scoreBoard->SetStateString( va( "player%i_%s_score", j, curTeam ), "" );
-            scoreBoard->SetStateString( va( "player%i_%s_wins", j, curTeam ), "" );
-            scoreBoard->SetStateString( va( "player%i_%s_ping", j, curTeam ), "" );
-            scoreBoard->SetStateInt( "rank_self", 0 );            
-        }
-    }
+		ilines[ player->team ]++;
 
 
-    // Don't display "CTF" -- if this scoreboard comes up, it should be apparent.
-    
+
+
+
+		if ( !playerState[ i ].ingame ) {
+
+			/* "New Player" on player's name location */
+			scoreBoard->SetStateString( va( "player%i_%s", ilines[ player->team ], curTeam ), common->GetLanguageDict()->GetString( "#str_04244" ) );
+
+			/* "Connecting" on player's score location */
+			scoreBoard->SetStateString( va( "player%i_%s_score", ilines[ player->team ], curTeam ), common->GetLanguageDict()->GetString( "#str_04245" ) );
+
+
+		} else {
+
+			/* Player's name in player's name location */
+			if ( !player->spectating )
+				scoreBoard->SetStateString( va( "player%i_%s", ilines[ player->team ], curTeam ), gameLocal.userInfo[ i ].GetString( "ui_name" ) );
+
+			if ( gameState == WARMUP ) {
+
+				if ( player->spectating ) {
+
+					/* "Spectating" on player's score location */
+					scoreBoard->SetStateString( va( "player%i_%s_score", ilines[ player->team ], curTeam ), common->GetLanguageDict()->GetString( "#str_04246" ) );
+
+				} else {
+
+					/* Display "ready" in player's score location if they're ready.  Display nothing if not.  No room for 'not ready'.  */
+					scoreBoard->SetStateString( va( "player%i_%s_score", ilines[ player->team ], curTeam ), player->IsReady() ? common->GetLanguageDict()->GetString( "#str_04247" ) : "" );
+
+				}
+			}
+		}
+
+	}
+
+	// Clear remaining slots
+	for ( i = 0; i < 2; i++ )
+	{
+		if ( i )
+			curTeam = blueTeam;
+		else
+			curTeam = redTeam;
+
+		for ( j = ilines[ i ]+1; j <= 8; j++ )
+		{
+			scoreBoard->SetStateString( va( "player%i_%s", j, curTeam ), "" );
+			scoreBoard->SetStateString( va( "player%i_%s_score", j, curTeam ), "" );
+			scoreBoard->SetStateString( va( "player%i_%s_wins", j, curTeam ), "" );
+			scoreBoard->SetStateString( va( "player%i_%s_ping", j, curTeam ), "" );
+			scoreBoard->SetStateInt( "rank_self", 0 );
+		}
+	}
+
+
+	// Don't display "CTF" -- if this scoreboard comes up, it should be apparent.
+
 	if ( gameLocal.gameType == GAME_CTF ) {
 
-        int captureLimit = gameLocal.serverInfo.GetInt( "si_fragLimit" );
-		
+		int captureLimit = gameLocal.serverInfo.GetInt( "si_fragLimit" );
+
 		if ( captureLimit > MP_CTF_MAXPOINTS  )
 			captureLimit = MP_CTF_MAXPOINTS;
 
-        int timeLimit    = gameLocal.serverInfo.GetInt( "si_timeLimit" );
+		int timeLimit    = gameLocal.serverInfo.GetInt( "si_timeLimit" );
 
-        /* Prints "Capture Limit: %i" at the bottom of the scoreboard, left */
-        if ( captureLimit )
-            scoreBoard->SetStateString( "gameinfo_red", va( common->GetLanguageDict()->GetString( "#str_11108" ), captureLimit) );
-        else
-            scoreBoard->SetStateString( "gameinfo_red", "" );
+		/* Prints "Capture Limit: %i" at the bottom of the scoreboard, left */
+		if ( captureLimit )
+			scoreBoard->SetStateString( "gameinfo_red", va( common->GetLanguageDict()->GetString( "#str_11108" ), captureLimit) );
+		else
+			scoreBoard->SetStateString( "gameinfo_red", "" );
 
-        /* Prints "Time Limit: %i" at the bottom of the scoreboard, right */
-        if ( timeLimit )
-            scoreBoard->SetStateString( "gameinfo_blue", va( common->GetLanguageDict()->GetString( "#str_11109" ), timeLimit) );
-        else
-            scoreBoard->SetStateString( "gameinfo_blue", "" );            
+		/* Prints "Time Limit: %i" at the bottom of the scoreboard, right */
+		if ( timeLimit )
+			scoreBoard->SetStateString( "gameinfo_blue", va( common->GetLanguageDict()->GetString( "#str_11109" ), timeLimit) );
+		else
+			scoreBoard->SetStateString( "gameinfo_blue", "" );
 	}
-    
 
 
-    // Set team scores
-    scoreBoard->SetStateInt( "red_team_score", GetFlagPoints( 0 ) );
-    scoreBoard->SetStateInt( "blue_team_score", GetFlagPoints( 1 ) );
+
+	// Set team scores
+	scoreBoard->SetStateInt( "red_team_score", GetFlagPoints( 0 ) );
+	scoreBoard->SetStateInt( "blue_team_score", GetFlagPoints( 1 ) );
 
 	// Handle flag status changed event
 	scoreBoard->HandleNamedEvent( "BlueFlagStatusChange" );
-    scoreBoard->HandleNamedEvent( "RedFlagStatusChange" );
-	
+	scoreBoard->HandleNamedEvent( "RedFlagStatusChange" );
+
 	scoreBoard->Redraw( gameLocal.time );
 
-	
-	
+
+
 
 }
 #endif
@@ -844,7 +844,7 @@ const char *idMultiplayerGame::GameTime() {
 		if ( ms < 0 ) {
 			ms = 0;
 		}
-	
+
 		s = ms / 1000;
 		m = s / 60;
 		s -= m * 60;
@@ -1006,7 +1006,7 @@ idPlayer *idMultiplayerGame::FragLimitHit() {
 idMultiplayerGame::TimeLimitHit
 ================
 */
-bool idMultiplayerGame::TimeLimitHit() {	
+bool idMultiplayerGame::TimeLimitHit() {
 	int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
 	if ( timeLimit ) {
 		if ( gameLocal.time >= matchStartedTime + timeLimit * 60000 ) {
@@ -1174,7 +1174,7 @@ void idMultiplayerGame::UpdateWinsLosses( idPlayer *winner ) {
 					PlayGlobalSound( player->entityNumber, SND_YOULOSE );
 				}
 			} else if ( gameLocal.gameType == GAME_TOURNEY ) {
-				if ( player == winner ) { 
+				if ( player == winner ) {
 					playerState[ i ].wins++;
 					PlayGlobalSound( player->entityNumber, SND_YOUWIN );
 				} else if ( i == currentTourneyPlayer[ 0 ] || i == currentTourneyPlayer[ 1 ] ) {
@@ -1210,7 +1210,7 @@ void idMultiplayerGame::UpdateWinsLosses( idPlayer *winner ) {
 		}
 	}
 #endif
-    
+
 	if ( winner ) {
 		lastWinner = winner->entityNumber;
 	} else {
@@ -1310,7 +1310,7 @@ void idMultiplayerGame::PlayerDeath( idPlayer *dead, idPlayer *killer, bool tele
 	if ( killer ) {
 		if ( gameLocal.gameType == GAME_LASTMAN ) {
 			playerState[ dead->entityNumber ].fragCount--;
-            
+
 		} else if ( IsGametypeTeamBased() ) { /* CTF */
 			if ( killer == dead || killer->team == dead->team ) {
 				// suicide or teamkill
@@ -1357,7 +1357,7 @@ void idMultiplayerGame::PlayerStats( int clientNum, char *data, const int len ) 
 	}
 
 	// find which team this player is on
-	ent = gameLocal.entities[ clientNum ]; 
+	ent = gameLocal.entities[ clientNum ];
 	if ( ent && ent->IsType( idPlayer::Type ) ) {
 		team = static_cast< idPlayer * >(ent)->team;
 	} else {
@@ -1418,7 +1418,7 @@ void idMultiplayerGame::NewState( gameState_t news, idPlayer *player ) {
 			teamPoints[0] = 0;
 			teamPoints[1] = 0;
 
-            ClearHUDStatus();
+			ClearHUDStatus();
 #endif
 
 			PlayGlobalSound( -1, SND_FIGHT );
@@ -1628,7 +1628,7 @@ void idMultiplayerGame::CycleTourneyPlayers( ) {
 	if ( lastWinner != -1 ) {
 		idEntity *ent = gameLocal.entities[ lastWinner ];
 		if ( ent && ent->IsType( idPlayer::Type ) ) {
-			currentTourneyPlayer[ 0 ] = lastWinner;		
+			currentTourneyPlayer[ 0 ] = lastWinner;
 		}
 	}
 	FillTourneySlots( );
@@ -1669,7 +1669,7 @@ void idMultiplayerGame::ExecuteVote( void ) {
 			if ( needRestart ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "nextMap" );
 			}
-#endif			
+#endif
 			break;
 		case VOTE_FRAGLIMIT:
 			si_fragLimit.SetInteger( atoi( voteValue ) );
@@ -1900,7 +1900,7 @@ void idMultiplayerGame::Run() {
 				break;
 			}
 #endif
-            
+
 			player = FragLimitHit();
 			if ( player ) {
 				// delay between detecting frag limit and ending game. let the death anims play
@@ -1944,7 +1944,7 @@ void idMultiplayerGame::Run() {
 				break;
 			}
 #endif
-            
+
 			player = FragLeader();
 			if ( player ) {
 				if ( !fragLimitTimeout ) {
@@ -2557,10 +2557,10 @@ void idMultiplayerGame::UpdateHud( idPlayer *player, idUserInterface *hud ) {
 	}
 
 #ifdef CTF
-    if ( IsGametypeFlagBased() )
-        hud->SetStateInt( "self_team", player->team );
-    else
-        hud->SetStateInt( "self_team", -1 ); /* Disable */
+	if ( IsGametypeFlagBased() )
+		hud->SetStateInt( "self_team", player->team );
+	else
+		hud->SetStateInt( "self_team", -1 ); /* Disable */
 #endif
 
 }
@@ -2576,14 +2576,14 @@ void idMultiplayerGame::DrawScoreBoard( idPlayer *player ) {
 			scoreBoard->Activate( true, gameLocal.time );
 			playerState[ player->entityNumber ].scoreBoardUp = true;
 		}
-        
+
 #ifdef CTF
-        if ( IsGametypeFlagBased() )
-            UpdateCTFScoreboard( scoreBoard, player );
-        else
+		if ( IsGametypeFlagBased() )
+			UpdateCTFScoreboard( scoreBoard, player );
+		else
 #endif
 		UpdateScoreboard( scoreBoard, player );
-        
+
 	} else {
 		if ( playerState[ player->entityNumber ].scoreBoardUp ) {
 			scoreBoard->Activate( false, gameLocal.time );
@@ -2611,11 +2611,11 @@ idMultiplayerGame::AddChatLine
 void idMultiplayerGame::AddChatLine( const char *fmt, ... ) {
 	idStr temp;
 	va_list argptr;
-	
+
 	va_start( argptr, fmt );
 	vsprintf( temp, fmt, argptr );
 	va_end( argptr );
-	
+
 	gameLocal.Printf( "%s\n", temp.c_str() );
 
 	chatHistory[ chatHistoryIndex % NUM_CHAT_NOTIFY ].line = temp;
@@ -2704,10 +2704,10 @@ void idMultiplayerGame::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	}
 
 #ifdef CTF
-    msg.WriteShort( teamPoints[0] );
-    msg.WriteShort( teamPoints[1] );
-    msg.WriteShort( player_red_flag );
-    msg.WriteShort( player_blue_flag );
+	msg.WriteShort( teamPoints[0] );
+	msg.WriteShort( teamPoints[1] );
+	msg.WriteShort( player_red_flag );
+	msg.WriteShort( player_blue_flag );
 #endif
 }
 
@@ -2742,14 +2742,14 @@ void idMultiplayerGame::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 		playerState[i].ingame = msg.ReadBits( 1 ) != 0;
 	}
 
-#ifdef CTF    
-    teamPoints[0] = msg.ReadShort();
-    teamPoints[1] = msg.ReadShort();
+#ifdef CTF
+	teamPoints[0] = msg.ReadShort();
+	teamPoints[1] = msg.ReadShort();
 
-    player_red_flag = msg.ReadShort();
-    player_blue_flag = msg.ReadShort();
+	player_red_flag = msg.ReadShort();
+	player_blue_flag = msg.ReadShort();
 
-#endif    
+#endif
 
 }
 
@@ -2880,8 +2880,8 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 			break;
 
 		case MSG_FLAGTAKEN :
-            if ( gameLocal.GetLocalPlayer() == NULL )
-                break;
+			if ( gameLocal.GetLocalPlayer() == NULL )
+				break;
 
 			if ( parm2 < 0 || parm2 >= MAX_CLIENTS )
 				break;
@@ -2894,8 +2894,8 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 			break;
 
 		case MSG_FLAGDROP :
-            if ( gameLocal.GetLocalPlayer() == NULL )
-                break;
+			if ( gameLocal.GetLocalPlayer() == NULL )
+				break;
 
 			if ( gameLocal.GetLocalPlayer()->team != parm1 ) {
 				AddChatLine( common->GetLanguageDict()->GetString( "#str_11103" ) );	// your team
@@ -2905,8 +2905,8 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 			break;
 
 		case MSG_FLAGRETURN :
-            if ( gameLocal.GetLocalPlayer() == NULL )
-                break;
+			if ( gameLocal.GetLocalPlayer() == NULL )
+				break;
 
 			if ( parm2 >= 0 && parm2 < MAX_CLIENTS ) {
 				if ( gameLocal.GetLocalPlayer()->team != parm1 ) {
@@ -2915,13 +2915,13 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 					AddChatLine( common->GetLanguageDict()->GetString( "#str_11121" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// enemy
 				}
 			} else {
-				AddChatLine( common->GetLanguageDict()->GetString( "#str_11105" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );                       
+				AddChatLine( common->GetLanguageDict()->GetString( "#str_11105" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );
 			}
 			break;
 
 		case MSG_FLAGCAPTURE :
-            if ( gameLocal.GetLocalPlayer() == NULL )
-                break;
+			if ( gameLocal.GetLocalPlayer() == NULL )
+				break;
 
 			if ( parm2 < 0 || parm2 >= MAX_CLIENTS )
 				break;
@@ -2930,8 +2930,8 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 				AddChatLine( common->GetLanguageDict()->GetString( "#str_11122" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// your team
 			} else {
 				AddChatLine( common->GetLanguageDict()->GetString( "#str_11123" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// enemy
-			}	
-			
+			}
+
 //			AddChatLine( common->GetLanguageDict()->GetString( "#str_11106" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );
 			break;
 
@@ -3017,11 +3017,11 @@ void idMultiplayerGame::CheckRespawns( idPlayer *spectator ) {
 				}
 			} else {
 				if ( gameLocal.gameType == GAME_DM ||		// CTF : 3wave sboily, was DM really included before?
-                     IsGametypeTeamBased() )
-                {
+					 IsGametypeTeamBased() )
+				{
 					if ( gameState == WARMUP || gameState == COUNTDOWN || gameState == GAMEON ) {
 						p->ServerSpectate( false );
-					}				
+					}
 				} else if ( gameLocal.gameType == GAME_TOURNEY ) {
 					if ( i == currentTourneyPlayer[ 0 ] || i == currentTourneyPlayer[ 1 ] ) {
 						if ( gameState == WARMUP || gameState == COUNTDOWN || gameState == GAMEON ) {
@@ -3336,7 +3336,7 @@ void idMultiplayerGame::ClientCallVote( vote_flags_t voteIndex, const char *vote
 	idBitMsg	outMsg;
 	byte		msgBuf[ MAX_GAME_MESSAGE_SIZE ];
 
-	// send 
+	// send
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_CALLVOTE );
 	outMsg.WriteByte( voteIndex );
@@ -3424,7 +3424,7 @@ void idMultiplayerGame::ServerCallVote( int clientNum, const idBitMsg &msg ) {
 			if ( vote_timeLimit == gameLocal.serverInfo.GetInt( "si_timeLimit" ) ) {
 				gameLocal.ServerSendChatMessage( clientNum, "server", common->GetLanguageDict()->GetString( "#str_04270" ) );
 				common->DPrintf( "client %d: already at the voted Time Limit\n", clientNum );
-				return;					
+				return;
 			}
 			if ( vote_timeLimit < si_timeLimit.GetMinValue() || vote_timeLimit > si_timeLimit.GetMaxValue() ) {
 				gameLocal.ServerSendChatMessage( clientNum, "server", common->GetLanguageDict()->GetString( "#str_04269" ) );
@@ -3439,7 +3439,7 @@ void idMultiplayerGame::ServerCallVote( int clientNum, const idBitMsg &msg ) {
 			if ( vote_fragLimit == gameLocal.serverInfo.GetInt( "si_fragLimit" ) ) {
 				gameLocal.ServerSendChatMessage( clientNum, "server", common->GetLanguageDict()->GetString( "#str_04267" ) );
 				common->DPrintf( "client %d: already at the voted Frag Limit\n", clientNum );
-				return;					
+				return;
 			}
 			if ( vote_fragLimit < si_fragLimit.GetMinValue() || vote_fragLimit > si_fragLimit.GetMaxValue() ) {
 				gameLocal.ServerSendChatMessage( clientNum, "server", common->GetLanguageDict()->GetString( "#str_04266" ) );
@@ -3619,7 +3619,7 @@ void idMultiplayerGame::MapRestart( void ) {
 	teamPoints[0] = 0;
 	teamPoints[1] = 0;
 
-    ClearHUDStatus();    
+	ClearHUDStatus();
 #endif
 
 #ifdef CTF
@@ -3627,7 +3627,7 @@ void idMultiplayerGame::MapRestart( void ) {
 	if ( g_balanceTDM.GetBool() && lastGameType != GAME_TDM && lastGameType != GAME_CTF && gameLocal.mpGame.IsGametypeTeamBased() ) {
 #else
 	if ( g_balanceTDM.GetBool() && lastGameType != GAME_TDM && gameLocal.gameType == GAME_TDM ) {
-#endif	
+#endif
 		for ( clientNum = 0; clientNum < gameLocal.numClients; clientNum++ ) {
 			if ( gameLocal.entities[ clientNum ] && gameLocal.entities[ clientNum ]->IsType( idPlayer::Type ) ) {
 				if ( static_cast< idPlayer* >( gameLocal.entities[ clientNum ] )->BalanceTDM() ) {
@@ -3650,7 +3650,7 @@ void idMultiplayerGame::SwitchToTeam( int clientNum, int oldteam, int newteam ) 
 	idEntity *ent;
 	int i;
 
- 	assert( IsGametypeTeamBased() ); /* CTF */
+	assert( IsGametypeTeamBased() ); /* CTF */
 	assert( oldteam != newteam );
 	assert( !gameLocal.isClient );
 
@@ -3662,16 +3662,16 @@ void idMultiplayerGame::SwitchToTeam( int clientNum, int oldteam, int newteam ) 
 		if ( i == clientNum ) {
 			continue;
 		}
-		ent = gameLocal.entities[ i ]; 
+		ent = gameLocal.entities[ i ];
 		if ( ent && ent->IsType( idPlayer::Type ) && static_cast< idPlayer * >(ent)->team == newteam ) {
 			playerState[ clientNum ].teamFragCount = playerState[ i ].teamFragCount;
 			break;
-		}	
+		}
 	}
 	if ( i == gameLocal.numClients ) {
 		// alone on this team
 		playerState[ clientNum ].teamFragCount = 0;
-        
+
 	}
 #ifdef CTF
 	if ( ( gameState == GAMEON || ( IsGametypeFlagBased() && gameState == SUDDENDEATH ) ) && oldteam != -1 ) {
@@ -3686,9 +3686,9 @@ void idMultiplayerGame::SwitchToTeam( int clientNum, int oldteam, int newteam ) 
 		}
 		p->Kill( true, true );
 #ifdef CTF
-        if ( IsGametypeFlagBased() )
-            p->DropFlag();
-#endif        
+		if ( IsGametypeFlagBased() )
+			p->DropFlag();
+#endif
 		CheckAbortGame();
 	}
 #ifdef CTF
@@ -3710,7 +3710,7 @@ void idMultiplayerGame::ProcessChatMessage( int clientNum, bool team, const char
 	const char *prefix = NULL;
 	int			send_to; // 0 - all, 1 - specs, 2 - team
 	int			i;
-	idEntity 	*ent;
+	idEntity	*ent;
 	idPlayer	*p;
 	idStr		prefixed_name;
 
@@ -3761,7 +3761,7 @@ void idMultiplayerGame::ProcessChatMessage( int clientNum, bool team, const char
 		}
 	} else {
 		for ( i = 0; i < gameLocal.numClients; i++ ) {
-			ent = gameLocal.entities[ i ]; 
+			ent = gameLocal.entities[ i ];
 			if ( !ent || !ent->IsType( idPlayer::Type ) ) {
 				continue;
 			}
@@ -3801,7 +3801,7 @@ void idMultiplayerGame::Precache( void ) {
 		return;
 	}
 	gameLocal.FindEntityDefDict( "player_doommarine", false );;
-	
+
 	// skins
 	idStr str = cvarSystem->GetCVarString( "mod_validSkins" );
 	idStr skin;
@@ -3881,7 +3881,7 @@ idMultiplayerGame::ToggleTeam
 void idMultiplayerGame::ToggleTeam( void ) {
 	bool team;
 	assert( gameLocal.isClient || gameLocal.localClientNum == 0 );
-	
+
 	team = ( idStr::Icmp( cvarSystem->GetCVarString( "ui_team" ), "Red" ) == 0 );
 	if ( team ) {
 		cvarSystem->SetCVarString( "ui_team", "Blue" );
@@ -4082,7 +4082,7 @@ void idMultiplayerGame::ServerWriteInitialReliableMessages( int clientNum ) {
 	outMsg.WriteShort( startFragLimit );
 	// send the powerup states and the spectate states
 	for( i = 0; i < gameLocal.numClients; i++ ) {
-		ent = gameLocal.entities[ i ]; 
+		ent = gameLocal.entities[ i ];
 		if ( i != clientNum && ent && ent->IsType( idPlayer::Type ) ) {
 			outMsg.WriteShort( i );
 			outMsg.WriteShort( static_cast< idPlayer * >( ent )->inventory.powerups );
@@ -4144,7 +4144,7 @@ void idMultiplayerGame::ClientReadWarmupTime( const idBitMsg &msg ) {
 /*
 #ifdef CTF
 
-    Threewave note:
+	Threewave note:
 	The below IsGametype...() functions were implemented for CTF,
 	but we did not #ifdef CTF them, because doing so would clutter
 	the codebase substantially.  Please consider them part of the merged
@@ -4158,52 +4158,52 @@ idMultiplayerGame::IsGametypeTeamBased
 */
 bool idMultiplayerGame::IsGametypeTeamBased( void ) /* CTF */
 {
-    switch ( gameLocal.gameType )
-    {
-    case GAME_SP:
-    case GAME_DM:
-    case GAME_TOURNEY:
-    case GAME_LASTMAN:
-        return false;
+	switch ( gameLocal.gameType )
+	{
+	case GAME_SP:
+	case GAME_DM:
+	case GAME_TOURNEY:
+	case GAME_LASTMAN:
+		return false;
 #ifdef CTF
-    case GAME_CTF:
+	case GAME_CTF:
 #endif
-    case GAME_TDM:
-        return true;
+	case GAME_TDM:
+		return true;
 
-    default:
-        assert( !"Add support for your new gametype here." );
-    }
+	default:
+		assert( !"Add support for your new gametype here." );
+	}
 
-    return false;
+	return false;
 }
 
 /*
 ================
-idMultiplayerGame::IsGametypeFlagBased 
+idMultiplayerGame::IsGametypeFlagBased
 ================
 */
 bool idMultiplayerGame::IsGametypeFlagBased( void )  {
-    switch ( gameLocal.gameType )
-    {
-    case GAME_SP:
-    case GAME_DM:
-    case GAME_TOURNEY:
-    case GAME_LASTMAN:
-    case GAME_TDM:        
-        return false;
+	switch ( gameLocal.gameType )
+	{
+	case GAME_SP:
+	case GAME_DM:
+	case GAME_TOURNEY:
+	case GAME_LASTMAN:
+	case GAME_TDM:
+		return false;
 
 #ifdef CTF
-    case GAME_CTF:
-        return true;
+	case GAME_CTF:
+		return true;
 #endif
 
-    default:
-        assert( !"Add support for your new gametype here." );
-    }
+	default:
+		assert( !"Add support for your new gametype here." );
+	}
 
-    return false;
-    
+	return false;
+
 }
 #ifdef CTF
 
@@ -4213,8 +4213,8 @@ idMultiplayerGame::GetTeamFlag
 ================
 */
 idItemTeam * idMultiplayerGame::GetTeamFlag( int team ) {
-    assert( team == 0 || team == 1 );
-    
+	assert( team == 0 || team == 1 );
+
 	if ( !IsGametypeFlagBased() || ( team != 0 && team != 1 ) ) /* CTF */
 		return NULL;
 
@@ -4263,24 +4263,24 @@ idMultiplayerGame::GetFlagStatus
 ================
 */
 flagStatus_t idMultiplayerGame::GetFlagStatus( int team ) {
-    //assert( IsGametypeFlagBased() );
+	//assert( IsGametypeFlagBased() );
 
-    idItemTeam *teamFlag = GetTeamFlag( team );
-    //assert( teamFlag != NULL );
+	idItemTeam *teamFlag = GetTeamFlag( team );
+	//assert( teamFlag != NULL );
 
 	if ( teamFlag != NULL ) {
 		if ( teamFlag->carried == false && teamFlag->dropped == false )
-	        return FLAGSTATUS_INBASE;
+			return FLAGSTATUS_INBASE;
 
-	    if ( teamFlag->carried == true )
+		if ( teamFlag->carried == true )
 			return FLAGSTATUS_TAKEN;
 
 		if ( teamFlag->carried == false && teamFlag->dropped == true )
-	        return FLAGSTATUS_STRAY;
+			return FLAGSTATUS_STRAY;
 	}
 
-    //assert( !"Invalid flag state." );
-    return FLAGSTATUS_NONE;
+	//assert( !"Invalid flag state." );
+	return FLAGSTATUS_NONE;
 }
 
 /*
@@ -4355,7 +4355,7 @@ void idMultiplayerGame::ReloadScoreboard() {
 
 #ifdef _D3XP
 idStr idMultiplayerGame::GetBestGametype( const char* map, const char* gametype ) {
-	
+
 	int num = declManager->GetNumDecls( DECL_MAPDEF );
 	int i, j;
 

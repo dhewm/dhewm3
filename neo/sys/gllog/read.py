@@ -22,5 +22,5 @@ def read_gl(f_in):
 			else:
 				sys.stderr.write('ERROR: unknown type %s\n' % tokens[1])
 				raise "abort"
-	
+
 	return (gl, wgl, glX)

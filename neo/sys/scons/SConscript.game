@@ -107,5 +107,3 @@ else:
 	for i in game_list:
 		ret_list += local_env.StaticObject( source = i )
 	Return( 'ret_list' )
-
-

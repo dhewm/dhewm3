@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -623,22 +623,22 @@ static void Cmd_Say( bool team, const idCmdArgs &args ) {
 		}
 
 #ifdef CTF
-        // Append the player's location to team chat messages in CTF
-        if ( gameLocal.mpGame.IsGametypeFlagBased() && team && player ) {
-            idLocationEntity *locationEntity = gameLocal.LocationForPoint( player->GetEyePosition() );
-            
-            if ( locationEntity ) {
-                idStr temp = "[";
-                temp += locationEntity->GetLocation();
-                temp += "] ";
-                temp += text;
-                text = temp;
-            }
-            
-        }
+		// Append the player's location to team chat messages in CTF
+		if ( gameLocal.mpGame.IsGametypeFlagBased() && team && player ) {
+			idLocationEntity *locationEntity = gameLocal.LocationForPoint( player->GetEyePosition() );
+
+			if ( locationEntity ) {
+				idStr temp = "[";
+				temp += locationEntity->GetLocation();
+				temp += "] ";
+				temp += text;
+				text = temp;
+			}
+
+		}
 #endif
 
-        
+
 	} else {
 		name = "server";
 	}
@@ -2119,7 +2119,7 @@ static void Cmd_CloseViewNotes_f( const idCmdArgs &args ) {
 	if ( !player ) {
 		return;
 	}
-	
+
 	player->hud->SetStateString( "viewcomments", "" );
 	player->hud->HandleNamedEvent( "hideViewComments" );
 }
@@ -2159,7 +2159,7 @@ static void Cmd_ShowViewNotes_f( const idCmdArgs &args ) {
 		}
 	}
 
-	if ( parser.ExpectTokenString( "view" ) && parser.Parse1DMatrix( 3, origin.ToFloatPtr() ) && 
+	if ( parser.ExpectTokenString( "view" ) && parser.Parse1DMatrix( 3, origin.ToFloatPtr() ) &&
 		parser.Parse1DMatrix( 9, axis.ToFloatPtr() ) && parser.ExpectTokenString( "comments" ) && parser.ReadToken( &token ) ) {
 		player->hud->SetStateString( "viewcomments", token );
 		player->hud->HandleNamedEvent( "showViewComments" );
@@ -2274,7 +2274,7 @@ void Cmd_NextGUI_f( const idCmdArgs &args ) {
 			if ( ent->spawnArgs.GetString( "gui", NULL ) != NULL ) {
 				break;
 			}
-			
+
 			if ( ent->spawnArgs.GetString( "gui2", NULL ) != NULL ) {
 				break;
 			}
@@ -2282,7 +2282,7 @@ void Cmd_NextGUI_f( const idCmdArgs &args ) {
 			if ( ent->spawnArgs.GetString( "gui3", NULL ) != NULL ) {
 				break;
 			}
-			
+
 			// try the next entity
 			gameLocal.lastGUIEnt = ent;
 		}
@@ -2317,7 +2317,7 @@ void Cmd_NextGUI_f( const idCmdArgs &args ) {
 
 	assert( geom->facePlanes != NULL );
 
-	modelMatrix = idMat4( renderEnt->axis, renderEnt->origin );	
+	modelMatrix = idMat4( renderEnt->axis, renderEnt->origin );
 	normal = geom->facePlanes[ 0 ].Normal() * renderEnt->axis;
 	center = geom->bounds.GetCenter() * modelMatrix;
 
@@ -2346,7 +2346,7 @@ void Cmd_SetActorState_f( const idCmdArgs &args ) {
 		return;
 	}
 
-	
+
 	if(!ent->IsType(idActor::Type)) {
 		gameLocal.Printf( "entity not an actor\n" );
 		return;
@@ -2381,7 +2381,7 @@ void Cmd_TestId_f( const idCmdArgs &args ) {
 	if ( idStr::Cmpn( id, STRTABLE_ID, STRTABLE_ID_LENGTH ) != 0 ) {
 		id = STRTABLE_ID + id;
 	}
-	gameLocal.mpGame.AddChatLine( common->GetLanguageDict()->GetString( id ), "<nothing>", "<nothing>", "<nothing>" );	
+	gameLocal.mpGame.AddChatLine( common->GetLanguageDict()->GetString( id ), "<nothing>", "<nothing>", "<nothing>" );
 }
 
 /*

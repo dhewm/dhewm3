@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -94,7 +94,7 @@ public:
 
 	bool				inUse;
 
-	
+
 public:
 						SSDEntity();
 	virtual				~SSDEntity();
@@ -113,7 +113,7 @@ public:
 
 	void				Update();
 	bool				HitTest(const idVec2& pt);
-	
+
 
 	virtual void		EntityUpdate() {};
 	virtual void		Draw(idDeviceContext *dc);
@@ -131,7 +131,7 @@ public:
 
 /*
 *****************************************************************************
-* SSDMover	
+* SSDMover
 ****************************************************************************
 */
 
@@ -157,7 +157,7 @@ public:
 
 /*
 *****************************************************************************
-* SSDAsteroid	
+* SSDAsteroid
 ****************************************************************************
 */
 
@@ -185,15 +185,15 @@ public:
 	static void			ReadAsteroids(idFile* savefile, idGameSSDWindow* _game);
 
 
-	
+
 protected:
 	static SSDAsteroid	asteroidPool[MAX_ASTEROIDS];
-	
+
 };
 
 /*
 *****************************************************************************
-* SSDAstronaut	
+* SSDAstronaut
 ****************************************************************************
 */
 #define MAX_ASTRONAUT 8
@@ -207,7 +207,7 @@ public:
 public:
 							SSDAstronaut();
 							~SSDAstronaut();
-	
+
 	virtual void	WriteToSaveGame( idFile *savefile );
 	virtual void	ReadFromSaveGame( idFile *savefile,  idGameSSDWindow* _game  );
 
@@ -225,7 +225,7 @@ protected:
 
 /*
 *****************************************************************************
-* SSDExplosion	
+* SSDExplosion
 ****************************************************************************
 */
 #define MAX_EXPLOSIONS 64
@@ -283,7 +283,7 @@ class SSDPoints : public SSDEntity {
 	idVec4	beginColor;
 	idVec4	endColor;
 
-	
+
 public:
 	SSDPoints();
 	~SSDPoints();
@@ -336,7 +336,7 @@ protected:
 
 #define MAX_POWERUPS 64
 
-/** 
+/**
 * Powerups work in two phases:
 *	1.) Closed container hurls at you
 *		If you shoot the container it open
@@ -385,7 +385,7 @@ public:
 	void	OnOpenPowerup();
 	void	OnActivatePowerup();
 
-	
+
 
 	void	Init(idGameSSDWindow* _game, float _speed, float _rotation);
 
@@ -436,7 +436,7 @@ typedef struct {
 	int		size;
 } SSDWeaponData_t;
 
-/** 
+/**
 * SSDLevelStats_t
 *	Data that is used for each level. This data is reset
 *	each new level.
@@ -459,7 +459,7 @@ typedef struct {
 	SSDEntity*			targetEnt;
 } SSDLevelStats_t;
 
-/** 
+/**
 * SSDGameStats_t
 *	Data that is used for the game that is currently running. Memset this
 *	to completely reset the game
@@ -491,8 +491,8 @@ public:
 
 	virtual const char*	HandleEvent(const sysEvent_t *event, bool *updateVisuals);
 	virtual idWinVar*	GetWinVarByName	(const char *_name, bool winLookup = false, drawWin_t** owner = NULL);
-	
-	
+
+
 	virtual void		Draw(int time, float x, float y);
 
 	void				AddHealth(int health);
@@ -510,11 +510,11 @@ public:
 
 
 
-	static idRandom		random;	
+	static idRandom		random;
 	int					ssdTime;
-	
+
 private:
-	
+
 	//Initialization
 	virtual bool		ParseInternalVar(const char *name, idParser *src);
 	void				ParseLevelData(int level, const idStr& levelDataString);
@@ -541,7 +541,7 @@ private:
 	void				LevelComplete();
 	void				GameComplete();
 
-	
+
 
 	void				UpdateGame();
 	void				CheckForHits();
@@ -555,10 +555,10 @@ private:
 	void				HitAsteroid(SSDAsteroid* asteroid, int key);
 	void				AsteroidStruckPlayer(SSDAsteroid* asteroid);
 
-	
-	
 
-	
+
+
+
 	void				RefreshGuiData();
 
 	idVec2				GetCursorWorld();
@@ -577,7 +577,7 @@ private:
 
 	//void				FreeSoundEmitter( bool immediate );
 
-	
+
 
 
 public:
@@ -598,7 +598,7 @@ public:
 	idList<SSDAstronautData_t>	astronautData;
 	idList<SSDPowerupData_t>	powerupData;
 
-	
+
 	//Weapon Data
 	int							weaponCount;
 	idList<SSDWeaponData_t>		weaponData;
@@ -610,7 +610,7 @@ public:
 	idList<SSDEntity*>			entities;
 
 	int							currentSound;
-	
+
 };
 
 #endif //__GAME_SSD_WINDOW_H__

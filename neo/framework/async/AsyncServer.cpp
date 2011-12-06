@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -1131,7 +1131,7 @@ void idAsyncServer::SendGameInitToClient( int clientNum ) {
 	// clear the unsent fragments. might flood winsock but that's ok
 	while( client.channel.UnsentFragmentsLeft() ) {
 		client.channel.SendNextFragment( serverPort, serverTime );
-	}			
+	}
 
 	msg.Init( msgBuf, sizeof( msgBuf ) );
 	msg.WriteLong( gameInitId );
@@ -1236,7 +1236,7 @@ void idAsyncServer::ProcessUnreliableClientMessage( int clientNum, const idBitMs
 
 	// while loading a map the client may send empty messages to keep the connection alive
 	if ( clientGameInitId == GAME_INIT_ID_MAP_LOAD ) {
-		if ( idAsyncNetwork::verbose.GetInteger() ) {			
+		if ( idAsyncNetwork::verbose.GetInteger() ) {
 			common->Printf( "ignore unreliable msg from client %d, gameInitId == ID_MAP_LOAD\n", clientNum );
 		}
 		return;
@@ -1402,7 +1402,7 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 	authReply_t		reply;
 	authReplyMsg_t	replyMsg = AUTH_REPLY_WAITING;
 	idStr			replyPrintMsg;
-	
+
 	reply = (authReply_t)msg.ReadByte();
 	if ( reply <= 0 || reply >= AUTH_MAXSTATES ) {
 		common->DPrintf( "auth: invalid reply %d\n", reply );
@@ -1411,7 +1411,7 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 	clientId = msg.ReadShort( );
 	msg.ReadNetadr( &client_from );
 	msg.ReadString( client_guid, sizeof( client_guid ) );
-	if ( reply != AUTH_OK ) {		
+	if ( reply != AUTH_OK ) {
 		replyMsg = (authReplyMsg_t)msg.ReadByte();
 		if ( replyMsg <= 0 || replyMsg >= AUTH_REPLY_MAXSTATES ) {
 			common->DPrintf( "auth: invalid reply msg %d\n", replyMsg );
@@ -1426,7 +1426,7 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 	lastAuthTime = serverTime;
 
 	// no message parsing below
-	
+
 	for ( i = 0; i < MAX_CHALLENGES; i++ ) {
 		if ( !challenges[i].connected && challenges[ i ].clientId == clientId ) {
 			// return if something is wrong
@@ -1455,7 +1455,7 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 		common->DWarning( "auth: challenge 0x%x %s authState %d != CDK_WAIT", challenges[ i ].challenge, Sys_NetAdrToString( challenges[ i ].address ), challenges[ i ].authState );
 		return;
 	}
-	
+
 	idStr::snPrintf( challenges[ i ].guid, 12, client_guid );
 	if ( reply == AUTH_OK ) {
 		challenges[ i ].authState = CDK_OK;
@@ -1726,7 +1726,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 				msg = challenges[ ichallenge ].authReplyPrint.c_str();
 			}
 			l_msg = common->GetLanguageDict()->GetString( msg );
-			
+
 			common->DPrintf( "%s: %s\n", Sys_NetAdrToString( from ), l_msg );
 
 			if ( challenges[ ichallenge ].authReplyMsg == AUTH_REPLY_UNKNOWN || challenges[ ichallenge ].authReplyMsg == AUTH_REPLY_WAITING ) {
@@ -1739,9 +1739,9 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 				outMsg.WriteString( "authrequired" );
 				serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 			}
-		
+
 			PrintOOB( from, SERVER_PRINT_MISC, msg );
-		
+
 			// update the guid in the challenges
 			idStr::snPrintf( challenges[ ichallenge ].guid, sizeof( challenges[ ichallenge ].guid ), guid );
 
@@ -1754,7 +1754,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 				outMsg.WriteLong( ASYNC_PROTOCOL_VERSION );
 				outMsg.WriteNetadr( from );
 				outMsg.WriteLong( clientId );
-				outMsg.WriteString( guid );	
+				outMsg.WriteString( guid );
 				// protocol 1.37 addition
 				outMsg.WriteByte( fileSystem->RunningD3XP() );
 				serverPort.SendPacket( idAsyncNetwork::GetMasterAddress(), outMsg.GetData(), outMsg.GetSize() );
@@ -1867,7 +1867,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	outMsg.WriteDeltaDict( sessLocal.mapSpawnData.serverInfo, NULL );
 
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
-	
+
 	InitClient( clientNum, clientId, clientRate );
 
 	clients[clientNum].gameInitSequence = 1;
@@ -1970,7 +1970,7 @@ void idAsyncServer::ProcessReliablePure( int clientNum, const idBitMsg &msg ) {
 	idBitMsg	outMsg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 	int			clientGameInitId;
-	
+
 	clientGameInitId = msg.ReadLong();
 	if ( clientGameInitId != gameInitId ) {
 		common->DPrintf( "client %d: ignoring reliable pure from an old gameInit (%d)\n", clientNum, clientGameInitId );
@@ -2106,7 +2106,7 @@ see (client) "getInfo" -> (server) "infoResponse" -> (client)ProcessGetInfoMessa
 void idAsyncServer::PrintLocalServerInfo( void ) {
 	int i;
 
-	common->Printf( "server '%s' IP = %s\nprotocol %d.%d OS mask 0x%x\n", 
+	common->Printf( "server '%s' IP = %s\nprotocol %d.%d OS mask 0x%x\n",
 					sessLocal.mapSpawnData.serverInfo.GetString( "si_name" ),
 					Sys_NetAdrToString( serverPort.GetAdr() ),
 					ASYNC_PROTOCOL_MAJOR,
@@ -2170,10 +2170,10 @@ bool idAsyncServer::ConnectionlessMessage( const netadr_t from, const idBitMsg &
 	}
 
 	// download request
-	if ( idStr::Icmp( string, "downloadRequest" ) == 0 ) {		
+	if ( idStr::Icmp( string, "downloadRequest" ) == 0 ) {
 		ProcessDownloadRequestMessage( from, msg );
 	}
-	
+
 	// auth server
 	if ( idStr::Icmp( string, "auth" ) == 0 ) {
 		if ( !Sys_CompareNetAdrBase( from, idAsyncNetwork::GetMasterAddress() ) ) {
@@ -2244,7 +2244,7 @@ bool idAsyncServer::ProcessMessage( const netadr_t from, idBitMsg &msg ) {
 
 		return false;
 	}
-	
+
 	// if we received a sequenced packet from an address we don't recognize,
 	// send an out of band disconnect packet to it
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
@@ -2308,7 +2308,7 @@ void idAsyncServer::SendReliableGameMessageExcluding( int clientNum, const idBit
 			continue;
 		}
 		SendReliableMessage( i, outMsg );
-	}	
+	}
 }
 
 /*
@@ -2389,7 +2389,7 @@ void idAsyncServer::RunFrame( void ) {
 		ProcessConnectionLessMessages();
 		return;
 	}
-	
+
 	gameTimeResidual += msec;
 
 	// spin in place processing incoming packets until enough time lapsed to run a new game frame
@@ -2515,7 +2515,7 @@ void idAsyncServer::RunFrame( void ) {
 
 		// dedicated will verbose to console
 		if ( idAsyncNetwork::serverDedicated.GetBool() && serverTime >= nextAsyncStatsTime ) {
-			common->Printf( "delay = %d msec, total outgoing rate = %d KB/s, total incoming rate = %d KB/s\n", GetDelay(), 
+			common->Printf( "delay = %d msec, total outgoing rate = %d KB/s, total incoming rate = %d KB/s\n", GetDelay(),
 							GetOutgoingRate() >> 10, GetIncomingRate() >> 10 );
 
 			for ( i = 0; i < MAX_ASYNC_CLIENTS; i++ ) {
@@ -2698,7 +2698,7 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 		common->DPrintf( "client %s: got download request message, not in CDK_PUREWAIT\n", Sys_NetAdrToString( from ) );
 		return;
 	}
-	
+
 	// the first token of the pak names list passed to the game will be empty if no game pak is requested
 	dlGamePak = msg.ReadLong();
 	if ( dlGamePak ) {
@@ -2758,7 +2758,7 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 		if ( next ) {
 			*next = '\0';
 		}
-		
+
 		if ( type == 0 ) {
 			type = atoi( token );
 		} else if ( type == SERVER_DL_REDIRECT ) {
@@ -2773,7 +2773,7 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 			common->DPrintf( "wrong op type %d\n", type );
 			next = token = NULL;
 		}
-		
+
 		if ( next ) {
 			token = next + 1;
 			next = strchr( token, ';' );
@@ -2785,10 +2785,10 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 	if ( type == SERVER_DL_LIST ) {
 		int totalDlSize = 0;
 		int numActualPaks = 0;
-		
+
 		// put the answer packet together
-		outMsg.WriteByte( SERVER_DL_LIST );			
-		
+		outMsg.WriteByte( SERVER_DL_LIST );
+
 		tmpMsg.Init( tmpBuf, MAX_MESSAGE_SIZE );
 
 		for ( i = 0; i < pakURLs.Num(); i++ ) {
@@ -2805,7 +2805,7 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 				tmpMsg.WriteString( pakURLs[ i ] );
 				tmpMsg.WriteLong( dlSize[ i ] );
 			}
-			
+
 			// keep last 5 bytes for an 'end of message' - SERVER_PAK_END and the totalDlSize long
 			if ( outMsg.GetRemainingSpace() - tmpMsg.GetSize() > 5 ) {
 				outMsg.WriteData( tmpMsg.GetData(), tmpMsg.GetSize() );

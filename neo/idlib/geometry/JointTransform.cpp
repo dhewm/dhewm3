@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -40,11 +40,11 @@ idJointQuat idJointMat::ToJointQuat( void ) const {
 	float		trace;
 	float		s;
 	float		t;
-	int     	i;
+	int	i;
 	int			j;
 	int			k;
 
-	static int 	next[3] = { 1, 2, 0 };
+	static int	next[3] = { 1, 2, 0 };
 
 	trace = mat[0 * 4 + 0] + mat[1 * 4 + 1] + mat[2 * 4 + 2];
 

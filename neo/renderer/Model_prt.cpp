@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -167,7 +167,7 @@ idRenderModel *idRenderModelPrt::InstantiateDynamicModel( const struct renderEnt
 			steppingRandom.RandomInt();
 			steppingRandom2.RandomInt();
 
-			// calculate local age for this index 
+			// calculate local age for this index
 			int	bunchOffset = stage->particleLife * 1000 * stage->spawnBunching * index / stage->totalParticles;
 
 			int particleAge = stageAge - bunchOffset;
@@ -189,7 +189,7 @@ idRenderModel *idRenderModelPrt::InstantiateDynamicModel( const struct renderEnt
 
 			int	inCycleTime = particleAge - particleCycle * stage->cycleMsec;
 
-			if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] && 
+			if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] &&
 				g.renderView->time - inCycleTime >= renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME]*1000 ) {
 				// don't fire any more particles
 				continue;

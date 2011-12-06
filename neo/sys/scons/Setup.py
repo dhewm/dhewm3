@@ -66,7 +66,7 @@ class idSetup( scons_utils.idSetupBase ):
 		if ( demo_build ):
 			self.SimpleCommand( 'cp -R -f sys/linux/setup/image-demo/* ' + base_dirname )
 		else:
-			self.SimpleCommand( 'cp -R -f sys/linux/setup/image/* ' + base_dirname )			
+			self.SimpleCommand( 'cp -R -f sys/linux/setup/image/* ' + base_dirname )
 		# process M4 stuff
 		if ( demo_build ):
 			m4_dict = { 'M4_PRODUCT' : 'doom3-demo', 'M4_DESC' : 'DOOM III demo', 'M4_VERSION' : '%s.%s' % ( main_version, version ) }
@@ -90,7 +90,7 @@ class idSetup( scons_utils.idSetupBase ):
 #			game_zip.write( game_path, 'gamex86.so' )
 #			game_zip.write( 'sys/linux/setup/binary.conf', 'binary.conf' )
 #			game_zip.printdir()
-#			game_zip.close()			
+#			game_zip.close()
 #			print 'zipping together d3xp game01.pk4'
 #			game_zip = zipfile.ZipFile( 'sys/linux/setup/media/d3xp/game01.pk4', 'w', zipfile.ZIP_DEFLATED )
 #			game_zip.write( d3xp_path, 'gamex86.so' )
@@ -157,4 +157,3 @@ class idSetup( scons_utils.idSetupBase ):
 		self.SimpleCommand( 'rm -rf %s' % temp_dir )
 		# success
 		return None
-

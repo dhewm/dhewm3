@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -210,7 +210,7 @@ void idRenderModelOverlay::CreateOverlay( const idRenderModel *model, const idPl
 			}
 		}
 		if ( i < materials.Num() ) {
-            materials[i]->surfaces.Append( s );
+			materials[i]->surfaces.Append( s );
 		} else {
 			overlayMaterial_t *mat = new overlayMaterial_t;
 			mat->material = mtr;

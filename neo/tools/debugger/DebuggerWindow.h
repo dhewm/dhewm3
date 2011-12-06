@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -48,25 +48,25 @@ class rvDebuggerClient;
 class rvDebuggerWindow
 {
 public:
-	
+
 	rvDebuggerWindow ( );
 	~rvDebuggerWindow ( );
 
-	bool			Create				( HINSTANCE hInstance );	
-		
+	bool			Create				( HINSTANCE hInstance );
+
 	static bool		Activate			( void );
 
 	void			ProcessNetMessage	( msg_t* msg );
 
 	void			Printf				( const char* format, ... );
-	
+
 	HWND			GetWindow			( void );
 
 	void			AddWatch			( const char* name, bool update = true );
-	
+
 	HINSTANCE		GetInstance			( void );
-		
-protected:		
+
+protected:
 
 	bool					FindPrev			( const char* text = NULL );
 	bool					FindNext			( const char* text = NULL );
@@ -84,7 +84,7 @@ protected:
 	int						GetSelectedText		( idStr& text );
 
 	void					ToggleBreakpoint	( void );
-	
+
 	HWND							mWnd;
 	HWND							mWndScript;
 	HWND							mWndOutput;
@@ -97,18 +97,18 @@ protected:
 	HWND							mWndThreads;
 	HWND							mWndToolTips;
 	HWND							mWndToolbar;
-	
+
 	HMENU							mRecentFileMenu;
 	int								mRecentFileInsertPos;
-		
+
 	WNDPROC							mOldWatchProc;
 	WNDPROC							mOldScriptProc;
 	idStr							mTooltipVar;
 	idStr							mTooltipValue;
-	
+
 	HINSTANCE						mInstance;
 	HIMAGELIST						mImageList;
-	
+
 	RECT							mSplitterRect;
 	bool							mSplitterDrag;
 
@@ -116,23 +116,23 @@ protected:
 	int								mActiveScript;
 	int								mLastActiveScript;
 	int								mCurrentStackDepth;
-	
+
 	HMENU							mWindowMenu;
 	int								mWindowMenuPos;
-		
+
 	int								mZoomScaleNum;
 	int								mZoomScaleDem;
 	int								mMarginSize;
-	
+
 	idStr							mFind;
-	
+
 	rvDebuggerClient*				mClient;
 
 	rvDebuggerWatchList				mWatches;
-	
+
 private:
 
-	bool		RegisterClass				( void );	
+	bool		RegisterClass				( void );
 	void		CreateToolbar				( void );
 	bool		InitRecentFiles				( void );
 
@@ -141,7 +141,7 @@ private:
 	int			HandleCreate				( WPARAM wparam, LPARAM lparam );
 	int			HandleActivate				( WPARAM wparam, LPARAM lparam );
 	int			HandleDrawItem				( WPARAM wparam, LPARAM lparam );
-	void		HandleTooltipGetDispInfo	( WPARAM wparam, LPARAM lparam );	
+	void		HandleTooltipGetDispInfo	( WPARAM wparam, LPARAM lparam );
 
 	static LRESULT CALLBACK WndProc				( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
 	static LRESULT CALLBACK MarginWndProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
@@ -181,4 +181,3 @@ ID_INLINE HINSTANCE rvDebuggerWindow::GetInstance ( void )
 }
 
 #endif // DEBUGGERWINDOW_H_
-

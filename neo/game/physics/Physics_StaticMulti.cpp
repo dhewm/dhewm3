@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -762,7 +762,7 @@ void idPhysics_StaticMulti::DisableClip( void ) {
 	int i;
 
 	for ( i = 0; i < clipModels.Num(); i++ ) {
-        if ( clipModels[i] ) {
+		if ( clipModels[i] ) {
 			clipModels[i]->Disable();
 		}
 	}
@@ -792,7 +792,7 @@ void idPhysics_StaticMulti::UnlinkClip( void ) {
 	int i;
 
 	for ( i = 0; i < clipModels.Num(); i++ ) {
-        if ( clipModels[i] ) {
+		if ( clipModels[i] ) {
 			clipModels[i]->Unlink();
 		}
 	}
@@ -934,7 +934,7 @@ void idPhysics_StaticMulti::SetMaster( idEntity *master, const bool orientated )
 			// transform from world space to master space
 			self->GetMasterPosition( masterOrigin, masterAxis );
 			for ( i = 0; i < clipModels.Num(); i++ ) {
-                current[i].localOrigin = ( current[i].origin - masterOrigin ) * masterAxis.Transpose();
+				current[i].localOrigin = ( current[i].origin - masterOrigin ) * masterAxis.Transpose();
 				if ( orientated ) {
 					current[i].localAxis = current[i].axis * masterAxis.Transpose();
 				} else {

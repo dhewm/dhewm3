@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 /**
 * View in the Material Editor that functions as a Doom III
-* console. It allows users to view console output as well as issue 
+* console. It allows users to view console output as well as issue
 * console commands to the engine.
 */
 class ConsoleView : public CFormView
@@ -42,7 +42,7 @@ public:
 
 	CEdit			editConsole;
 	CEdit			editInput;
-	
+
 	idStr			consoleStr;
 	idStrList		consoleHistory;
 	idStr			currentCommand;
@@ -56,8 +56,8 @@ public:
 	void			AddText(const char *msg);
 	void			SetConsoleText ( const idStr& text );
 	void			ExecuteCommand ( const idStr& cmd = "" );
-		
-	
+
+
 protected:
 	ConsoleView();
 	DECLARE_DYNCREATE(ConsoleView)
@@ -69,7 +69,7 @@ protected:
 
 	//Message Handlers
 	afx_msg void	OnSize(UINT nType, int cx, int cy);
-	DECLARE_MESSAGE_MAP()	
+	DECLARE_MESSAGE_MAP()
 
 	//Protected Operations
 	const char*		TranslateString(const char *buf);

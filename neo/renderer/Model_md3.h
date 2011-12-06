@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -84,7 +84,7 @@ typedef struct md3Tag_s {
 */
 
 typedef struct md3Surface_s {
-	int			ident;				// 
+	int			ident;				//
 
 	char		name[MAX_MD3PATH];	// polyset name
 
@@ -131,7 +131,7 @@ typedef struct md3Header_s {
 	int			flags;
 
 	int			numFrames;
-	int			numTags;			
+	int			numTags;
 	int			numSurfaces;
 
 	int			numSkins;

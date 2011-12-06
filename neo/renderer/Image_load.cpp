@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -36,7 +36,7 @@ PROBLEM: compressed textures may break the zero clamp rule!
 */
 
 static bool FormatIsDXT( int internalFormat ) {
-	if ( internalFormat < GL_COMPRESSED_RGB_S3TC_DXT1_EXT 
+	if ( internalFormat < GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	|| internalFormat > GL_COMPRESSED_RGBA_S3TC_DXT5_EXT ) {
 		return false;
 	}
@@ -233,7 +233,7 @@ GLenum idImage::SelectInternalFormat( const byte **dataPtrs, int numDataPtrs, in
 
 			cor = scan[0] | scan[1] | scan[2];
 			cand = scan[0] & scan[1] & scan[2];
-			
+
 			// if rgb are all the same, the or and and will match
 			rgbDiffer |= ( cor ^ cand );
 
@@ -278,7 +278,7 @@ GLenum idImage::SelectInternalFormat( const byte **dataPtrs, int numDataPtrs, in
 			return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		} else {
 			// we always need the alpha channel for bump maps for swizzling
-			return GL_RGBA8; 
+			return GL_RGBA8;
 		}
 	}
 
@@ -506,8 +506,8 @@ There is no way to specify explicit mip map levels
 
 ================
 */
-void idImage::GenerateImage( const byte *pic, int width, int height, 
-					   textureFilter_t filterParm, bool allowDownSizeParm, 
+void idImage::GenerateImage( const byte *pic, int width, int height,
+					   textureFilter_t filterParm, bool allowDownSizeParm,
 					   textureRepeat_t repeatParm, textureDepth_t depthParm ) {
 	bool	preserveBorder;
 	byte		*scaledBuffer;
@@ -706,7 +706,7 @@ void idImage::GenerateImage( const byte *pic, int width, int height,
 		if ( internalFormat == GL_COLOR_INDEX8_EXT ) {
 			UploadCompressedNormalMap( scaled_width, scaled_height, scaledBuffer, miplevel );
 		} else {
-			qglTexImage2D( GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 
+			qglTexImage2D( GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height,
 				0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer );
 		}
 	}
@@ -728,7 +728,7 @@ Generate3DImage
 ==================
 */
 void idImage::Generate3DImage( const byte *pic, int width, int height, int picDepth,
-					   textureFilter_t filterParm, bool allowDownSizeParm, 
+					   textureFilter_t filterParm, bool allowDownSizeParm,
 					   textureRepeat_t repeatParm, textureDepth_t minDepthParm ) {
 	int			scaled_width, scaled_height, scaled_depth;
 
@@ -863,8 +863,8 @@ GenerateCubeImage
 Non-square cube sides are not allowed
 ====================
 */
-void idImage::GenerateCubeImage( const byte *pic[6], int size, 
-					   textureFilter_t filterParm, bool allowDownSizeParm, 
+void idImage::GenerateCubeImage( const byte *pic[6], int size,
+					   textureFilter_t filterParm, bool allowDownSizeParm,
 					   textureDepth_t depthParm ) {
 	int			scaled_width, scaled_height;
 	int			width, height;
@@ -932,7 +932,7 @@ void idImage::GenerateCubeImage( const byte *pic[6], int size,
 	// upload the base level
 	// FIXME: support GL_COLOR_INDEX8_EXT?
 	for ( i = 0 ; i < 6 ; i++ ) {
-		qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, 0, internalFormat, scaled_width, scaled_height, 0, 
+		qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, 0, internalFormat, scaled_width, scaled_height, 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, pic[i] );
 	}
 
@@ -950,8 +950,8 @@ void idImage::GenerateCubeImage( const byte *pic[6], int size,
 		for ( i = 0 ; i < 6 ; i++ ) {
 			byte	*shrunken;
 
-			qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, miplevel, internalFormat, 
-				scaled_width / 2, scaled_height / 2, 0, 
+			qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, miplevel, internalFormat,
+				scaled_width / 2, scaled_height / 2, 0,
 				GL_RGBA, GL_UNSIGNED_BYTE, shrunk[i] );
 
 			if ( scaled_width > 2 ) {
@@ -1070,7 +1070,7 @@ void idImage::WritePrecompressedImage() {
 		case GL_COLOR_INDEX8_EXT:
 		case GL_COLOR_INDEX:
 			// this will not work with dds viewers but we need it in this format to save disk
-			// load speed ( i.e. size ) 
+			// load speed ( i.e. size )
 			altInternalFormat = GL_COLOR_INDEX;
 			bitSize = 24;
 		break;
@@ -1465,36 +1465,36 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 
 	uploadWidth = header->dwWidth;
 	uploadHeight = header->dwHeight;
-    if ( header->ddspf.dwFlags & DDSF_FOURCC ) {
-        switch ( header->ddspf.dwFourCC ) {
-        case DDS_MAKEFOURCC( 'D', 'X', 'T', '1' ):
+	if ( header->ddspf.dwFlags & DDSF_FOURCC ) {
+		switch ( header->ddspf.dwFourCC ) {
+		case DDS_MAKEFOURCC( 'D', 'X', 'T', '1' ):
 			if ( header->ddspf.dwFlags & DDSF_ALPHAPIXELS ) {
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			} else {
 				internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 			}
-            break;
-        case DDS_MAKEFOURCC( 'D', 'X', 'T', '3' ):
-            internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-            break;
-        case DDS_MAKEFOURCC( 'D', 'X', 'T', '5' ):
-            internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-            break;
+			break;
+		case DDS_MAKEFOURCC( 'D', 'X', 'T', '3' ):
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			break;
+		case DDS_MAKEFOURCC( 'D', 'X', 'T', '5' ):
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			break;
 		case DDS_MAKEFOURCC( 'R', 'X', 'G', 'B' ):
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 			break;
-        default:
-            common->Warning( "Invalid compressed internal format\n" );
-            return;
-        }
-    } else if ( ( header->ddspf.dwFlags & DDSF_RGBA ) && header->ddspf.dwRGBBitCount == 32 ) {
+		default:
+			common->Warning( "Invalid compressed internal format\n" );
+			return;
+		}
+	} else if ( ( header->ddspf.dwFlags & DDSF_RGBA ) && header->ddspf.dwRGBBitCount == 32 ) {
 		externalFormat = GL_BGRA_EXT;
 		internalFormat = GL_RGBA8;
-    } else if ( ( header->ddspf.dwFlags & DDSF_RGB ) && header->ddspf.dwRGBBitCount == 32 ) {
-        externalFormat = GL_BGRA_EXT;
+	} else if ( ( header->ddspf.dwFlags & DDSF_RGB ) && header->ddspf.dwRGBBitCount == 32 ) {
+		externalFormat = GL_BGRA_EXT;
 		internalFormat = GL_RGBA8;
-    } else if ( ( header->ddspf.dwFlags & DDSF_RGB ) && header->ddspf.dwRGBBitCount == 24 ) {
-		if ( header->ddspf.dwFlags & DDSF_ID_INDEXCOLOR ) { 
+	} else if ( ( header->ddspf.dwFlags & DDSF_RGB ) && header->ddspf.dwRGBBitCount == 24 ) {
+		if ( header->ddspf.dwFlags & DDSF_ID_INDEXCOLOR ) {
 			externalFormat = GL_COLOR_INDEX;
 			internalFormat = GL_COLOR_INDEX8_EXT;
 		} else {
@@ -1984,14 +1984,14 @@ void idImage::UploadScratch( const byte *data, int cols, int rows ) {
 
 			// upload the base level
 			for ( i = 0 ; i < 6 ; i++ ) {
-				qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, 0, GL_RGB8, cols, rows, 0, 
+				qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, 0, GL_RGB8, cols, rows, 0,
 					GL_RGBA, GL_UNSIGNED_BYTE, data + cols*rows*4*i );
 			}
 		} else {
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
 			// it and don't try and do a texture compression
 			for ( i = 0 ; i < 6 ; i++ ) {
-				qglTexSubImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, 0, 0, 0, cols, rows, 
+				qglTexSubImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT+i, 0, 0, 0, cols, rows,
 					GL_RGBA, GL_UNSIGNED_BYTE, data + cols*rows*4*i );
 			}
 		}
@@ -2026,10 +2026,10 @@ void idImage::UploadScratch( const byte *data, int cols, int rows ) {
 		// a smear across the entire polygon
 #if 1
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );	
+		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 #else
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );	
+		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 #endif
 	}
 }
@@ -2205,7 +2205,7 @@ void idImage::Print() const {
 		common->Printf( "<BAD REPEAT:%i>", repeat );
 		break;
 	}
-	
+
 	common->Printf( "%4ik ", StorageSize() / 1024 );
 
 	common->Printf( " %s\n", imgName.c_str() );

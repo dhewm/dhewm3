@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -134,49 +134,49 @@ void WIN_Sizing(WORD side, RECT *rect)
 // Keep this in sync with the one in win_input.cpp
 // This one is used in the menu, the other one is used in game
 
-static byte s_scantokey[128] = 
-{ 
+static byte s_scantokey[128] =
+{
 //  0            1       2          3          4       5            6         7
 //  8            9       A          B          C       D            E         F
-	0,          27,    '1',       '2',        '3',    '4',         '5',      '6', 
+	0,          27,    '1',       '2',        '3',    '4',         '5',      '6',
 	'7',        '8',    '9',       '0',        '-',    '=',          K_BACKSPACE, 9, // 0
-	'q',        'w',    'e',       'r',        't',    'y',         'u',      'i', 
+	'q',        'w',    'e',       'r',        't',    'y',         'u',      'i',
 	'o',        'p',    '[',       ']',        K_ENTER,K_CTRL,      'a',      's',   // 1
-	'd',        'f',    'g',       'h',        'j',    'k',         'l',      ';', 
+	'd',        'f',    'g',       'h',        'j',    'k',         'l',      ';',
 	'\'',       '`',    K_SHIFT,   '\\',       'z',    'x',         'c',      'v',   // 2
-	'b',        'n',    'm',       ',',        '.',    '/',         K_SHIFT,  K_KP_STAR, 
+	'b',        'n',    'm',       ',',        '.',    '/',         K_SHIFT,  K_KP_STAR,
 	K_ALT,      ' ',    K_CAPSLOCK,K_F1,       K_F2,   K_F3,        K_F4,     K_F5,  // 3
-	K_F6,       K_F7,   K_F8,      K_F9,       K_F10,  K_PAUSE,     K_SCROLL, K_HOME, 
+	K_F6,       K_F7,   K_F8,      K_F9,       K_F10,  K_PAUSE,     K_SCROLL, K_HOME,
 	K_UPARROW,  K_PGUP, K_KP_MINUS,K_LEFTARROW,K_KP_5, K_RIGHTARROW,K_KP_PLUS,K_END, // 4
-	K_DOWNARROW,K_PGDN, K_INS,     K_DEL,      0,      0,           0,        K_F11, 
+	K_DOWNARROW,K_PGDN, K_INS,     K_DEL,      0,      0,           0,        K_F11,
 	K_F12,      0,      0,         K_LWIN,     K_RWIN, K_MENU,      0,        0,     // 5
-	0,          0,      0,         0,          0,      0,           0,        0, 
+	0,          0,      0,         0,          0,      0,           0,        0,
 	0,          0,      0,         0,          0,      0,           0,        0,     // 6
-	0,          0,      0,         0,          0,      0,           0,        0, 
+	0,          0,      0,         0,          0,      0,           0,        0,
 	0,          0,      0,         0,          0,      0,           0,        0      // 7
-}; 
+};
 
-static byte s_scantoshift[128] = 
-{ 
+static byte s_scantoshift[128] =
+{
 //  0            1       2          3          4       5            6         7
 //  8            9       A          B          C       D            E         F
-	0,           27,    '!',       '@',        '#',    '$',         '%',      '^', 
-	'&',        '*',    '(',       ')',        '_',    '+',         K_BACKSPACE, 9,  // 0 
-	'Q',        'W',    'E',       'R',        'T',    'Y',         'U',      'I', 
-	'O',        'P',    '{',       '}',        K_ENTER,K_CTRL,      'A',      'S',   // 1 
-	'D',        'F',    'G',       'H',        'J',    'K',         'L',      ':', 
-	'|' ,       '~',    K_SHIFT,   '\\',       'Z',    'X',         'C',      'V',   // 2 
-	'B',        'N',    'M',       '<',        '>',    '?',         K_SHIFT,  K_KP_STAR, 
+	0,           27,    '!',       '@',        '#',    '$',         '%',      '^',
+	'&',        '*',    '(',       ')',        '_',    '+',         K_BACKSPACE, 9,  // 0
+	'Q',        'W',    'E',       'R',        'T',    'Y',         'U',      'I',
+	'O',        'P',    '{',       '}',        K_ENTER,K_CTRL,      'A',      'S',   // 1
+	'D',        'F',    'G',       'H',        'J',    'K',         'L',      ':',
+	'|' ,       '~',    K_SHIFT,   '\\',       'Z',    'X',         'C',      'V',   // 2
+	'B',        'N',    'M',       '<',        '>',    '?',         K_SHIFT,  K_KP_STAR,
 	K_ALT,      ' ',    K_CAPSLOCK,K_F1,       K_F2,   K_F3,        K_F4,     K_F5,  // 3
-	K_F6,       K_F7,   K_F8,      K_F9,       K_F10,  K_PAUSE,     K_SCROLL, K_HOME, 
+	K_F6,       K_F7,   K_F8,      K_F9,       K_F10,  K_PAUSE,     K_SCROLL, K_HOME,
 	K_UPARROW,  K_PGUP, K_KP_MINUS,K_LEFTARROW,K_KP_5, K_RIGHTARROW,K_KP_PLUS,K_END, // 4
-	K_DOWNARROW,K_PGDN, K_INS,     K_DEL,      0,      0,           0,        K_F11, 
+	K_DOWNARROW,K_PGDN, K_INS,     K_DEL,      0,      0,           0,        K_F11,
 	K_F12,      0,      0,         K_LWIN,     K_RWIN, K_MENU,      0,        0,     // 5
-	0,          0,      0,         0,          0,      0,           0,        0, 
+	0,          0,      0,         0,          0,      0,           0,        0,
 	0,          0,      0,         0,          0,      0,           0,        0,     // 6
-	0,          0,      0,         0,          0,      0,           0,        0, 
+	0,          0,      0,         0,          0,      0,           0,        0,
 	0,          0,      0,         0,          0,      0,           0,        0      // 7
-}; 
+};
 
 
 /*
@@ -351,8 +351,8 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 
 			if (!win32.cdsFullscreen )
 			{
-				xPos = (short) LOWORD(lParam);    // horizontal position 
-				yPos = (short) HIWORD(lParam);    // vertical position 
+				xPos = (short) LOWORD(lParam);    // horizontal position
+				yPos = (short) HIWORD(lParam);    // vertical position
 
 				r.left   = 0;
 				r.top    = 0;
@@ -452,5 +452,5 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 		}
 	}
 
-    return DefWindowProc( hWnd, uMsg, wParam, lParam );
+	return DefWindowProc( hWnd, uMsg, wParam, lParam );
 }

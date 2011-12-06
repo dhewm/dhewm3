@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -47,14 +47,14 @@ AllocPortal
 uPortal_t	*AllocPortal (void)
 {
 	uPortal_t	*p;
-	
+
 	c_active_portals++;
 	if (c_active_portals > c_peak_portals)
 		c_peak_portals = c_active_portals;
-	
+
 	p = (uPortal_t *)Mem_Alloc (sizeof(uPortal_t ));
 	memset (p, 0, sizeof(uPortal_t ));
-	
+
 	return p;
 }
 
@@ -111,7 +111,7 @@ void AddPortalToNodes (uPortal_t  *p, node_t *front, node_t *back) {
 	p->nodes[0] = front;
 	p->next[0] = front->portals;
 	front->portals = p;
-	
+
 	p->nodes[1] = back;
 	p->next[1] = back->portals;
 	back->portals = p;
@@ -126,14 +126,14 @@ RemovePortalFromNode
 void RemovePortalFromNode (uPortal_t  *portal, node_t *l)
 {
 	uPortal_t	**pp, *t;
-	
+
 // remove reference to the current portal
 	pp = &l->portals;
 	while (1)
 	{
 		t = *pp;
 		if (!t)
-			common->Error( "RemovePortalFromNode: portal not in leaf");	
+			common->Error( "RemovePortalFromNode: portal not in leaf");
 
 		if ( t == portal )
 			break;
@@ -145,15 +145,15 @@ void RemovePortalFromNode (uPortal_t  *portal, node_t *l)
 		else
 			common->Error( "RemovePortalFromNode: portal not bounding leaf");
 	}
-	
+
 	if ( portal->nodes[0] == l ) {
 		*pp = portal->next[0];
 		portal->nodes[0] = NULL;
 	} else if ( portal->nodes[1] == l ) {
-		*pp = portal->next[1];	
+		*pp = portal->next[1];
 		portal->nodes[1] = NULL;
 	} else {
-		common->Error( "RemovePortalFromNode: mislinked" ); 
+		common->Error( "RemovePortalFromNode: mislinked" );
 	}
 }
 
@@ -163,7 +163,7 @@ void PrintPortal (uPortal_t *p)
 {
 	int			i;
 	idWinding	*w;
-	
+
 	w = p->winding;
 	for ( i = 0; i < w->GetNumPoints(); i++ )
 		common->Printf("(%5.0f,%5.0f,%5.0f)\n",(*w)[i][0], (*w)[i][1], (*w)[i][2]);
@@ -204,14 +204,14 @@ static void MakeHeadnodePortals( tree_t *tree ) {
 			common->Error( "Backwards tree volume" );
 		}
 	}
-	
+
 	for (i=0 ; i<3 ; i++) {
 		for (j=0 ; j<2 ; j++) {
 			n = j*3 + i;
 
 			p = AllocPortal ();
 			portals[n] = p;
-			
+
 			pl = &bplanes[n];
 			memset (pl, 0, sizeof(*pl));
 			if (j) {
@@ -293,7 +293,7 @@ static void MakeNodePortal( node_t *node ) {
 	w = BaseWindingForNode (node);
 
 	// clip the portal by all the other portals in the node
-	for (p = node->portals ; p && w; p = p->next[side])	
+	for (p = node->portals ; p && w; p = p->next[side])
 	{
 		idPlane	plane;
 
@@ -331,7 +331,7 @@ static void MakeNodePortal( node_t *node ) {
 	new_portal = AllocPortal ();
 	new_portal->plane = dmapGlobals.mapPlanes[node->planenum];
 	new_portal->onnode = node;
-	new_portal->winding = w;	
+	new_portal->winding = w;
 	AddPortalToNodes (new_portal, node->children[0], node->children[1]);
 }
 
@@ -412,7 +412,7 @@ static void SplitNodePortals( node_t *node ) {
 				AddPortalToNodes (p, other_node, f);
 			continue;
 		}
-		
+
 	// the winding is split
 		new_portal = AllocPortal ();
 		*new_portal = *p;

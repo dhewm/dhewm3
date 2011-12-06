@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -52,7 +52,7 @@ public:
 	//Material Selection
 	void			SetSelectedMaterial(idMaterial* material);
 	MaterialDoc*	GetCurrentMaterialDoc() { return currentMaterial; };
-	
+
 	//State Checking Methods
 	bool			DoesFileNeedApply(const char* filename);
 	bool			DoesAnyNeedApply();
@@ -79,9 +79,9 @@ public:
 
 
 	//Used to get and/or create a MaterialDoc object for editing
-	MaterialDoc* 	CreateMaterialDoc(const char* materialName);
-	MaterialDoc* 	CreateMaterialDoc(idMaterial* material);
-	MaterialDoc* 	GetInProgressDoc(idMaterial* material);
+	MaterialDoc*	CreateMaterialDoc(const char* materialName);
+	MaterialDoc*	CreateMaterialDoc(idMaterial* material);
+	MaterialDoc*	GetInProgressDoc(idMaterial* material);
 
 	//Copy Paste
 	void			CopyMaterial(MaterialDoc* materialDoc = NULL, bool cut = false);
@@ -111,9 +111,9 @@ public:
 
 	//Misc
 	idStr			GetUniqueMaterialName(idStr name);
-	
+
 protected:
-	
+
 	/**
 	* View notification types
 	*/

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -51,12 +51,12 @@ MaterialModifier::MaterialModifier(MaterialDocManager* manager, const char* mate
 /**
 * Constructor for AttributeMaterialModifier
 */
-AttributeMaterialModifier::AttributeMaterialModifier(MaterialDocManager* manager, const char* materialName, int stage, const char* key) 
+AttributeMaterialModifier::AttributeMaterialModifier(MaterialDocManager* manager, const char* materialName, int stage, const char* key)
 : MaterialModifier(manager, materialName) {
-	
+
 	this->stage = stage;
 	this->key = key;
-	
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ AttributeMaterialModifier::AttributeMaterialModifier(MaterialDocManager* manager
 /**
 * Constructor for AttributeMaterialModifierString
 */
-AttributeMaterialModifierString::AttributeMaterialModifierString(MaterialDocManager* manager, const char* materialName, int stage, const char* key, const char* value, const char* oldValue) 
+AttributeMaterialModifierString::AttributeMaterialModifierString(MaterialDocManager* manager, const char* materialName, int stage, const char* key, const char* value, const char* oldValue)
 : AttributeMaterialModifier(manager, materialName, stage, key) {
 
 	this->value = value;
@@ -96,7 +96,7 @@ void AttributeMaterialModifierString::Redo() {
 /**
 * Constructor for AttributeMaterialModifierBool
 */
-AttributeMaterialModifierBool::AttributeMaterialModifierBool(MaterialDocManager* manager, const char* materialName, int stage, const char* key, bool value, bool oldValue) 
+AttributeMaterialModifierBool::AttributeMaterialModifierBool(MaterialDocManager* manager, const char* materialName, int stage, const char* key, bool value, bool oldValue)
 : AttributeMaterialModifier(manager, materialName, stage, key) {
 
 	this->value = value;
@@ -155,7 +155,7 @@ void StageMoveModifier::Redo() {
 /**
 * Constructor for StageDeleteModifier
 */
-StageDeleteModifier::StageDeleteModifier(MaterialDocManager* manager, const char* materialName, int stageNum, idDict stageData) 
+StageDeleteModifier::StageDeleteModifier(MaterialDocManager* manager, const char* materialName, int stageNum, idDict stageData)
 : MaterialModifier(manager, materialName) {
 	this->stageNum = stageNum;
 	this->stageData = stageData;
@@ -253,15 +253,15 @@ DeleteMaterialModifier::DeleteMaterialModifier(MaterialDocManager* manager, cons
 * Performs an undo operation of a deleted material.
 */
 void DeleteMaterialModifier::Undo() {
-	
-	manager->RedoAddMaterial(materialName, false);	
+
+	manager->RedoAddMaterial(materialName, false);
 }
 
 /**
 * Performs a redo operation of a deleted material.
 */
 void DeleteMaterialModifier::Redo() {
-	
+
 	MaterialDoc* material = manager->CreateMaterialDoc(materialName);
 	manager->DeleteMaterial(material, false);
 }
@@ -284,7 +284,7 @@ MoveMaterialModifier::MoveMaterialModifier(MaterialDocManager* manager, const ch
 * Performs an undo operation of a moved material
 */
 void MoveMaterialModifier::Undo() {
-	
+
 	//Delete New Material
 	MaterialDoc* material = manager->CreateMaterialDoc(materialName);
 	manager->DeleteMaterial(material, false);
@@ -329,7 +329,7 @@ void RenameMaterialModifier::Undo() {
 * Performs a redo operation of a renamed material.
 */
 void RenameMaterialModifier::Redo() {
-	
+
 	MaterialDoc* material = manager->CreateMaterialDoc(oldName);
 	material->SetMaterialName(materialName, false);
 }
@@ -408,7 +408,7 @@ DeleteMaterialFolderModifier::DeleteMaterialFolderModifier(MaterialDocManager* m
 * Performs an undo operation of a deleted material folder.
 */
 void DeleteMaterialFolderModifier::Undo() {
-	
+
 	//Add the folder back and save the folder position for the redo
 	item = view->AddFolder(materialName, parent);
 
@@ -425,4 +425,3 @@ void DeleteMaterialFolderModifier::Redo() {
 
 	view->DeleteFolder(item, false);
 }
-

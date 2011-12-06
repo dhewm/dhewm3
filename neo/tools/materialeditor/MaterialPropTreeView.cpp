@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -98,7 +98,7 @@ void MaterialPropTreeView::SetPropertyListType(int listType, int stageNum) {
 				break;
 			case MaterialDef::MATERIAL_DEF_TYPE_STRING:
 				{
-					//pCurrentNode = m_Tree.InsertItem(new CPropTreeItemEdit(), pCurrentGroup);	
+					//pCurrentNode = m_Tree.InsertItem(new CPropTreeItemEdit(), pCurrentGroup);
 					pCurrentNode = m_Tree.InsertItem(new CPropTreeItemFileEdit(), pCurrentGroup);
 
 				}
@@ -134,7 +134,7 @@ void MaterialPropTreeView::SaveSettings() {
 * @param pMaterial The selected material.
 */
 void MaterialPropTreeView::MV_OnMaterialChange(MaterialDoc* pMaterial) {
-	
+
 	if(materialDocManager->GetCurrentMaterialDoc()) {
 		idStr currentName = materialDocManager->GetCurrentMaterialDoc()->name;
 		if(!internalChange && !pMaterial->name.Icmp(currentName)) {
@@ -166,7 +166,7 @@ void MaterialPropTreeView::OnPropertyChangeNotification( NMHDR *nmhdr, LRESULT *
 				break;
 			case MaterialDef::MATERIAL_DEF_TYPE_STRING:
 				{
-					idStr val = (LPCTSTR)item->GetItemValue();								
+					idStr val = (LPCTSTR)item->GetItemValue();
 					materialDoc->SetAttribute(currentStage, propItem->dictName, val);
 				}
 				break;
@@ -212,13 +212,13 @@ MaterialDef* MaterialPropTreeView::FindDefForTreeID(UINT treeID) {
 * Initializes the property tree with the data from the currently selected material.
 */
 void MaterialPropTreeView::RefreshProperties() {
-	
+
 	MaterialDefList* propList = MaterialDefManager::GetMaterialDefs(currentListType);
 
 	if(!propList)
 		return;
 
- 	MaterialDoc* materialDoc = materialDocManager->GetCurrentMaterialDoc();
+	MaterialDoc* materialDoc = materialDocManager->GetCurrentMaterialDoc();
 
 	for(int i = 0; i < propList->Num(); i++) {
 		switch((*propList)[i]->type) {
@@ -241,8 +241,3 @@ void MaterialPropTreeView::RefreshProperties() {
 
 	Invalidate();
 }
-
-
-
-
-

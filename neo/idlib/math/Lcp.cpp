@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -578,7 +578,7 @@ bool idLCP_Square::Solve( const idMatX &o_m, idVecX &o_x, const idVecX &o_b, con
 		}
 	}
 
-	// sub matrix for factorization 
+	// sub matrix for factorization
 	clamped.SetData( m.GetNumRows(), m.GetNumColumns(), MATX_ALLOCA( m.GetNumRows() * m.GetNumColumns() ) );
 	diagonal.SetData( m.GetNumRows(), VECX_ALLOCA( m.GetNumRows() ) );
 
@@ -1368,7 +1368,7 @@ bool idLCP_Symmetric::Solve( const idMatX &o_m, idVecX &o_x, const idVecX &o_b, 
 		}
 	}
 
-	// sub matrix for factorization 
+	// sub matrix for factorization
 	clamped.SetData( m.GetNumRows(), m.GetNumColumns(), MATX_ALLOCA( m.GetNumRows() * m.GetNumColumns() ) );
 	diagonal.SetData( m.GetNumRows(), VECX_ALLOCA( m.GetNumRows() ) );
 	solveCache1.SetData( m.GetNumRows(), VECX_ALLOCA( m.GetNumRows() ) );

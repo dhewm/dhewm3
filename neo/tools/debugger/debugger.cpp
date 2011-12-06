@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -54,7 +54,7 @@ Main entry point for the debugger application
 ================
 */
 void DebuggerClientInit( const char *cmdline )
-{	
+{
 	// See if the debugger is already running
 	if ( rvDebuggerWindow::Activate ( ) )
 	{
@@ -99,9 +99,9 @@ void DebuggerClientLaunch ( void )
 
 	STARTUPINFO			startup;
 	PROCESS_INFORMATION	process;
-	
+
 	ZeroMemory ( &startup, sizeof(startup) );
-	startup.cb = sizeof(startup);	
+	startup.cb = sizeof(startup);
 
 	GetCurrentDirectory ( MAX_PATH, curDir );
 
@@ -124,7 +124,7 @@ Thread proc for the debugger server
 DWORD CALLBACK DebuggerServerThread ( LPVOID param )
 {
 	assert ( gDebuggerServer );
-	
+
 	while ( !gDebuggerServerQuit )
 	{
 		gDebuggerServer->ProcessMessages ( );
@@ -155,7 +155,7 @@ bool DebuggerServerInit ( void )
 	{
 		return false;
 	}
-	
+
 	// Initialize the debugger server
 	if ( !gDebuggerServer->Initialize ( ) )
 	{
@@ -163,10 +163,10 @@ bool DebuggerServerInit ( void )
 		gDebuggerServer = NULL;
 		return false;
 	}
-	
+
 	// Start the debugger server thread
 	gDebuggerServerThread = CreateThread ( NULL, 0, DebuggerServerThread, 0, 0, &gDebuggerServerThreadID );
-	
+
 	return true;
 }
 
@@ -183,16 +183,16 @@ void DebuggerServerShutdown ( void )
 	{
 		// Signal the debugger server to quit
 		gDebuggerServerQuit = true;
-		
+
 		// Wait for the thread to finish
 		WaitForSingleObject ( gDebuggerServerThread, INFINITE );
-		
+
 		// Shutdown the server now
 		gDebuggerServer->Shutdown();
 
 		delete gDebuggerServer;
 		gDebuggerServer = NULL;
-		
+
 		// Cleanup the thread handle
 		CloseHandle ( gDebuggerServerThread );
 		gDebuggerServerThread = NULL;
@@ -212,7 +212,7 @@ void DebuggerServerCheckBreakpoint ( idInterpreter* interpreter, idProgram* prog
 	{
 		return;
 	}
-	
+
 	gDebuggerServer->CheckBreakpoints ( interpreter, program, instructionPointer );
 }
 
@@ -229,7 +229,6 @@ void DebuggerServerPrint ( const char* text )
 	{
 		return;
 	}
-	
+
 	gDebuggerServer->Print ( text );
 }
-

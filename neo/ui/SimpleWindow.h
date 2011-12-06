@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -58,25 +58,25 @@ public:
 	virtual void	ReadFromSaveGame( idFile *savefile );
 
 protected:
-	void 			CalcClientRect(float xofs, float yofs);
-	void 			SetupTransforms(float x, float y);
-	void 			DrawBackground(const idRectangle &drawRect);
-	void 			DrawBorderAndCaption(const idRectangle &drawRect);
+	void			CalcClientRect(float xofs, float yofs);
+	void			SetupTransforms(float x, float y);
+	void			DrawBackground(const idRectangle &drawRect);
+	void			DrawBorderAndCaption(const idRectangle &drawRect);
 
 	idUserInterfaceLocal *gui;
 	idDeviceContext *dc;
-	int 			flags;
-	idRectangle 	drawRect;			// overall rect
-	idRectangle 	clientRect;			// client area
-	idRectangle 	textRect;
+	int				flags;
+	idRectangle		drawRect;			// overall rect
+	idRectangle		clientRect;			// client area
+	idRectangle		textRect;
 	idVec2			origin;
-	int 			fontNum;
-	float 			matScalex;
-	float 			matScaley;
-	float 			borderSize;
-	int 			textAlign;
-	float 			textAlignx;
-	float 			textAligny;
+	int				fontNum;
+	float			matScalex;
+	float			matScaley;
+	float			borderSize;
+	int				textAlign;
+	float			textAlignx;
+	float			textAligny;
 	int				textShadow;
 
 	idWinStr		text;
@@ -92,7 +92,7 @@ protected:
 	idWinBackground	backGroundName;
 
 	const idMaterial* background;
-	
+
 	idWindow *		mParent;
 
 	idWinBool	hideCursor;

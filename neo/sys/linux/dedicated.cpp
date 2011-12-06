@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -76,8 +76,8 @@ void GLimp_EnableLogging( bool enable ) { }
 
 bool GLimp_Init( glimpParms_t a ) { return true; }
 
-void GLimp_SetGamma( unsigned short red[256], 
-				    unsigned short green[256],
+void GLimp_SetGamma( unsigned short red[256],
+					unsigned short green[256],
 					unsigned short blue[256] ) { }
 
 void GLimp_Shutdown( void ) { }
@@ -89,4 +89,3 @@ void GLimp_DeactivateContext( void ) { }
 void GLimp_ActivateContext( void ) { }
 
 bool GLimp_SetScreenParms( glimpParms_t parms ) { return true; }
-

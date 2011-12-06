@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -39,10 +39,10 @@ If you have questions concerning this license or the applicable additional terms
 
 
 int		LoadFile( const char *filename, void **bufferptr );
-void 	DefaultExtension( char *path, char *extension );
-void 	DefaultPath( char *path, char *basepath );
-void 	StripFilename( char *path );
-void 	StripExtension( char *path );
+void	DefaultExtension( char *path, char *extension );
+void	DefaultPath( char *path, char *basepath );
+void	StripFilename( char *path );
+void	StripExtension( char *path );
 
 // error and printf functions
 typedef void (PFN_ERR)( const char *pFormat, ... );

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -181,7 +181,7 @@ public:
 
 	bool				insideExecuteMapChange;	// draw loading screen and update
 												// screen on prints
-	int					bytesNeededForMapLoad;	// 
+	int					bytesNeededForMapLoad;	//
 
 	// we don't want to redraw the loading screen for every single
 	// console print that happens
@@ -217,7 +217,7 @@ public:
 
 
 	bool				aviCaptureMode;		// if true, screenshots will be taken and sound captured
-	idStr				aviDemoShortName;	// 
+	idStr				aviDemoShortName;	//
 	float				aviDemoFrameCount;
 	int					aviTicStart;
 
@@ -226,7 +226,7 @@ public:
 	int					numDemoFrames;		// for timeDemo and demoShot
 	int					demoTimeOffset;
 	renderView_t		currentDemoRenderView;
-	// the next one will be read when 
+	// the next one will be read when
 	// com_frameTime + demoTimeOffset > currentDemoRenderView.
 
 	// TODO: make this private (after sync networking removal and idnet tweaks)
@@ -242,14 +242,14 @@ public:
 	idUserInterface *	guiGameOver;
 	idUserInterface *	guiTest;
 	idUserInterface *	guiTakeNotes;
-	
+
 	idUserInterface *	guiMsg;
 	idUserInterface *	guiMsgRestore;				// store the calling GUI for restore
 	idStr				msgFireBack[ 2 ];
 	bool				msgRunning;
 	int					msgRetIndex;
 	bool				msgIgnoreButtons;
-	
+
 	bool				waitingOnBind;
 
 	const idMaterial *	whiteMaterial;
@@ -288,7 +288,7 @@ public:
 
 	void				AdvanceRenderDemo( bool singleFrameOnly );
 	void				RunGameTic();
-	
+
 	void				FinishCmdLoad();
 	void				LoadLoadingGui(const char *mapName);
 
@@ -332,11 +332,11 @@ public:
 	void				SetModsMenuGuiVars( void );
 	void				SetMainMenuSkin( void );
 	void				SetPbMenuGuiVars( void );
-	
+
 private:
 	bool				BoxDialogSanityCheck( void );
 	void				EmitGameAuth( void );
-	
+
 	typedef enum {
 		CDKEY_UNKNOWN,	// need to perform checks on the key
 		CDKEY_INVALID,	// that key is wrong

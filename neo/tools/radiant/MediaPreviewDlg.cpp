@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -101,7 +101,7 @@ BOOL CMediaPreviewDlg::OnInitDialog()
 	GetClientRect(rct);
 	int h = (mode == GUIS) ? (rct.Width() - 8) / 1.333333f : rct.Height() - 8;
 	wndPreview.SetWindowPos(NULL, 4, 4, rct.Width() - 8, h, SWP_SHOWWINDOW);
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }

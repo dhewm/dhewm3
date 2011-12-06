@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 LRESULT CALLBACK GEScriptEdit_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
 	WNDPROC wndproc = (WNDPROC) GetWindowLong ( hwnd, GWL_USERDATA );
-	
+
 	switch ( msg )
 	{
 		case WM_CHAR:
@@ -46,35 +46,35 @@ LRESULT CALLBACK GEScriptEdit_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, LPAR
 				SendMessage ( GetParent ( hwnd ), WM_CLOSE, 0, 0 );
 			}
 			break;
-			
+
 		case WM_GETDLGCODE:
 			return DLGC_WANTALLKEYS;
 	}
-	
+
 	return CallWindowProc ( wndproc, hwnd, msg, wParam, lParam );
-}	
+}
 
 bool GEItescriptsDlg_Init ( HWND hwnd )
 {
 	idWindow*			window;
 	rvGEWindowWrapper*	wrapper;
 	HWND				script;
-	
+
 	// Extract the window pointer from the win32 windows user data long
 	window = (idWindow*)GetWindowLong ( hwnd, GWL_USERDATA );
 	assert ( window );
-	
+
 	// Get the window wrapper of the script window
 	wrapper = rvGEWindowWrapper::GetWrapper ( window );
 	assert ( wrapper );
-	
+
 	// Get the edit box used to edit the script
 	script = GetDlgItem ( hwnd, IDC_GUIED_SCRIPT );
 
 	UINT tabsize = 16;
 	SendMessage ( script, EM_SETTABSTOPS, 1, (LPARAM)&tabsize );
 	SetWindowLong ( script, GWL_USERDATA, GetWindowLong ( script, GWL_WNDPROC ) );
-	SetWindowLong ( script, GWL_WNDPROC, (LONG) GEScriptEdit_WndProc );					
+	SetWindowLong ( script, GWL_WNDPROC, (LONG) GEScriptEdit_WndProc );
 
 	TEXTMETRIC tm;
 	HDC dc;
@@ -85,8 +85,8 @@ bool GEItescriptsDlg_Init ( HWND hwnd )
 	LOGFONT lf;
 	ZeroMemory ( &lf, sizeof(lf) );
 	lf.lfHeight = tm.tmHeight;
-	strcpy ( lf.lfFaceName, "Courier New" );	
-	
+	strcpy ( lf.lfFaceName, "Courier New" );
+
 	SendMessage ( script, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
 
 	SendMessage ( script, EM_SETMARGINS, EC_LEFTMARGIN|EC_RIGHTMARGIN, MAKELONG(10,10) );
@@ -96,39 +96,39 @@ bool GEItescriptsDlg_Init ( HWND hwnd )
 	for ( i = 0; i < wrapper->GetVariableDict().GetNumKeyVals ( ); i ++ )
 	{
 		const idKeyValue* key = wrapper->GetVariableDict().GetKeyVal ( i );
-		
+
 		SendMessage ( script, EM_SETSEL, -1, -1 );
-		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)key->GetKey().c_str() );		
+		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)key->GetKey().c_str() );
 		SendMessage ( script, EM_SETSEL, -1, -1 );
-		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\t" );		
+		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\t" );
 		SendMessage ( script, EM_SETSEL, -1, -1 );
-		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)key->GetValue().c_str() );		
+		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)key->GetValue().c_str() );
 		SendMessage ( script, EM_SETSEL, -1, -1 );
-		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\r\n" );	
+		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\r\n" );
 	}
-	
+
 	if ( i )
 	{
 		SendMessage ( script, EM_SETSEL, -1, -1 );
-		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\r\n" );	
+		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\r\n" );
 	}
-	
+
 	for ( i = 0; i < wrapper->GetScriptDict().GetNumKeyVals ( ); i ++ )
 	{
 		const idKeyValue* key = wrapper->GetScriptDict().GetKeyVal ( i );
-		
+
 		SendMessage ( script, EM_SETSEL, -1, -1 );
 		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)va("%s\r\n", key->GetKey().c_str() ) );
 		SendMessage ( script, EM_SETSEL, -1, -1 );
 		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)key->GetValue().c_str() );
 		SendMessage ( script, EM_SETSEL, -1, -1 );
-		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\r\n\r\n" );	
+		SendMessage ( script, EM_REPLACESEL, FALSE, (LPARAM)"\r\n\r\n" );
 	}
 
 	SendMessage ( script, EM_SETSEL, 0, 0 );
 	SendMessage ( script, EM_SCROLLCARET, 0, 0 );
-	
-	return true;	
+
+	return true;
 }
 
 bool GEItescriptsDlg_Apply ( HWND hwnd )
@@ -136,15 +136,15 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 	idWindow*			window;
 	rvGEWindowWrapper*	wrapper;
 	HWND				script;
-	
+
 	// Extract the window pointer from the win32 windows user data long
 	window = (idWindow*)GetWindowLong ( hwnd, GWL_USERDATA );
 	assert ( window );
-	
+
 	// Get the window wrapper of the script window
 	wrapper = rvGEWindowWrapper::GetWrapper ( window );
 	assert ( wrapper );
-	
+
 	// Get the edit box used to edit the script
 	script = GetDlgItem ( hwnd, IDC_GUIED_SCRIPT );
 
@@ -153,9 +153,9 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 	textLen.flags = GTL_DEFAULT|GTL_USECRLF;
 	textLen.codepage = CP_ACP;
 	chars = SendMessage ( script, EM_GETTEXTLENGTHEX, (WPARAM)&textLen, 0 );
-	
+
 	char* text = new char[chars+1];
-	
+
 	GETTEXTEX getText;
 	getText.cb = chars+1;
 	getText.codepage = CP_ACP;
@@ -163,11 +163,11 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 	getText.lpDefaultChar = NULL;
 	getText.lpUsedDefChar = NULL;
 	SendMessage ( script, EM_GETTEXTEX, (WPARAM)&getText, (LPARAM)text );
-	
+
 	idStr parse = text;
 	delete[] text;
-	
-	try 
+
+	try
 	{
 		idParser src ( parse, parse.Length(), "", LEXFL_ALLOWMULTICHARLITERALS | LEXFL_NOSTRINGCONCAT | LEXFL_ALLOWBACKSLASHSTRINGCONCAT );
 		idToken token;
@@ -176,7 +176,7 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 		wrapper->GetScriptDict().Clear ( );
 
 		while ( src.ReadToken ( &token ) )
-		{		
+		{
 			idStr scriptName;
 			idStr out;
 
@@ -196,7 +196,7 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 				idWindow				tempwin ( &ui );
 				idStr					out;
 				int						i;
-				
+
 				src.SetMarker ( );
 				for ( i = 0; i < 3; i ++ )
 				{
@@ -204,9 +204,9 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 					src.ExpectTokenString(",");
 				}
 
-				tempwin.ParseExpression ( &src, &var );								
+				tempwin.ParseExpression ( &src, &var );
 				src.GetStringFromMarker ( out, true );
-				
+
 				wrapper->GetVariableDict().Set ( token + "\t\"" + token2 + "\"", out );
 
 				continue;
@@ -221,7 +221,7 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 					src.Error ( "expected define name" );
 					return false;
 				}
-				
+
 				idWinFloat				var;
 				idUserInterfaceLocal	ui;
 				idWindow				tempwin ( &ui );
@@ -232,10 +232,10 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 				src.GetStringFromMarker ( out, true );
 
 				wrapper->GetVariableDict().Set ( token + "\t\"" + token2 + "\"", out );
-				
+
 				continue;
-			}		
-			// If the token is a scriptdef then just parse out the 
+			}
+			// If the token is a scriptdef then just parse out the
 			// braced section and add it to the list.  Right now only
 			// one scriptdef per window is supported
 			else if ( !token.Icmp ( "scriptdef" ) )
@@ -249,7 +249,7 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 					src.Error ( "expected time" );
 					return false;
 				}
-				
+
 				scriptName = "onTime ";
 				scriptName.Append ( token );
 			}
@@ -260,14 +260,14 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 					src.Error ( "expected time" );
 					return false;
 				}
-				
+
 				scriptName = "onEvent ";
 				scriptName.Append ( token );
 			}
 			else
 			{
 				int i;
-				
+
 				for( i = 0; i < idWindow::SCRIPT_COUNT; i ++ )
 				{
 					if ( idStr::Icmp ( idWindow::ScriptNames[i], token ) == 0 )
@@ -275,29 +275,29 @@ bool GEItescriptsDlg_Apply ( HWND hwnd )
 						scriptName = idWindow::ScriptNames[i];
 						break;
 					}
-				}								
+				}
 
 				if ( i >= idWindow::SCRIPT_COUNT )
 				{
 					src.Error ( "expected script name" );
 					return false;
 				}
-			}			
-			
+			}
+
 			if ( !src.ParseBracedSectionExact ( out, 1) )
 			{
 				return false;
 			}
-			
+
 			wrapper->GetScriptDict().Set ( scriptName, out );
 		}
 	}
 	catch ( idException &e )
-	{		
+	{
 		MessageBox ( hwnd, e.error, "Script Error", MB_OK|MB_ICONERROR);
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -317,10 +317,10 @@ INT_PTR CALLBACK GEItescriptsDlg_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, L
 		{
 			RECT rClient;
 			GetClientRect ( hwnd, &rClient );
-			MoveWindow ( GetDlgItem ( hwnd, IDC_GUIED_SCRIPT ), 
-						 rClient.left, rClient.top, 
+			MoveWindow ( GetDlgItem ( hwnd, IDC_GUIED_SCRIPT ),
+						 rClient.left, rClient.top,
 						 rClient.right - rClient.left,
-						 rClient.bottom - rClient.top, 
+						 rClient.bottom - rClient.top,
 						 FALSE );
 			break;
 		}
@@ -328,7 +328,7 @@ INT_PTR CALLBACK GEItescriptsDlg_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, L
 		case WM_ERASEBKGND:
 			return TRUE;
 
-			
+
 		case WM_CLOSE:
 			if ( !GEItescriptsDlg_Apply ( hwnd ) )
 			{
@@ -338,7 +338,7 @@ INT_PTR CALLBACK GEItescriptsDlg_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, L
 			EndDialog ( hwnd, 1 );
 			break;
 	}
-	
+
 	return FALSE;
 }
 
@@ -357,7 +357,6 @@ bool GEItemScriptsDlg_DoModal ( HWND parent, idWindow* window )
 	{
 		return true;
 	}
-	
+
 	return false;
 }
-	

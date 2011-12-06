@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -239,7 +239,7 @@ public:
 
 	// Animation system calls for non-game based skeletal rendering.
 	virtual idRenderModel *		ANIM_GetModelFromEntityDef( const char *classname );
-	virtual const idVec3 		&ANIM_GetModelOffsetFromEntityDef( const char *classname );
+	virtual const idVec3		&ANIM_GetModelOffsetFromEntityDef( const char *classname );
 	virtual idRenderModel *		ANIM_GetModelFromEntityDef( const idDict *args );
 	virtual idRenderModel *		ANIM_GetModelFromName( const char *modelName );
 	virtual const idMD5Anim *	ANIM_GetAnimFromEntityDef( const char *classname, const char *animname );

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -41,9 +41,9 @@ class idSIMD_SSE : public idSIMD_MMX {
 public:
 #if defined(MACOS_X) && defined(__i386__)
 	virtual const char * VPCALL GetName( void ) const;
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idDrawVert *src,	const int count );	
-	virtual	void VPCALL MinMax( idVec3 &min,		idVec3 &max,			const idDrawVert *src,	const int *indexes,		const int count );	
-	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idPlane *src,		const int count );	
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idDrawVert *src,	const int count );
+	virtual	void VPCALL MinMax( idVec3 &min,		idVec3 &max,			const idDrawVert *src,	const int *indexes,		const int count );
+	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idPlane *src,		const int count );
 
 #elif defined(_WIN32)
 	virtual const char * VPCALL GetName( void ) const;

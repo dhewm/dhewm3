@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -58,7 +58,7 @@ public:
 					idAngles( float pitch, float yaw, float roll );
 					explicit idAngles( const idVec3 &v );
 
-	void 			Set( float pitch, float yaw, float roll );
+	void			Set( float pitch, float yaw, float roll );
 	idAngles &		Zero( void );
 
 	float			operator[]( int index ) const;
@@ -209,7 +209,7 @@ ID_INLINE bool idAngles::Compare( const idAngles &a, const float epsilon ) const
 	if ( idMath::Fabs( pitch - a.pitch ) > epsilon ) {
 		return false;
 	}
-			
+
 	if ( idMath::Fabs( yaw - a.yaw ) > epsilon ) {
 		return false;
 	}

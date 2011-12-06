@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -727,7 +727,7 @@ idWinding *Brush_MakeFaceWinding(brush_t *b, face_t *face, bool keepOnPlaneWindi
 
 	if (!w) {
 		Sys_Status("Unable to create face winding on brush\n");
-	} 
+	}
 	return w;
 }
 
@@ -1436,7 +1436,7 @@ brush_t *Brush_Parse(idVec3 origin) {
 			if (newFormat) {
 				//Brush_BuildWindings(b, true, true, false, false);
 			}
-			
+
 			if (b == NULL) {
 				Warning("parsing brush primitive");
 				return NULL;
@@ -2475,7 +2475,7 @@ extern bool RayIntersectsTri
 				const idVec3	&vert0,
 				const idVec3	&vert1,
 				const idVec3	&vert2,
-                float           &scale
+				float           &scale
 			);
 
 
@@ -2505,11 +2505,11 @@ Brush_ModelIntersect
 bool Brush_ModelIntersect(brush_t *b, idVec3 origin, idVec3 dir,float &scale) {
 	idRenderModel *model = b->modelHandle;
 	idRenderModel *md5;
-   
-    if ( !model )
-        model = b->owner->eclass->entityModel;
 
-    scale = 0;
+	if ( !model )
+		model = b->owner->eclass->entityModel;
+
+	scale = 0;
 	if (model) {
 		if ( model->IsDynamicModel() != DM_STATIC ) {
 			if ( dynamic_cast<idRenderModelMD5 *>( model ) ) {
@@ -2591,7 +2591,7 @@ face_t *Brush_Ray(idVec3 origin, idVec3 dir, brush_t *b, float *dist, bool testP
 	idVec3	p1, p2;
 	float	frac, d1, d2;
 	int		i;
-    float scale = HUGE_DISTANCE * 2;
+	float scale = HUGE_DISTANCE * 2;
 	VectorCopy(origin, p1);
 	for (i = 0; i < 3; i++) {
 		p2[i] = p1[i] + dir[i] * HUGE_DISTANCE * 2;
@@ -3700,11 +3700,11 @@ void DrawProjectedLight(brush_t *b, bool bSelected, bool texture) {
 GLCircle
 ================
 */
-void GLCircle(float x, float y, float z, float r) 
-{ 
-	float ix = 0; 
-	float iy = r; 
-	float ig = 3 - 2 * r; 
+void GLCircle(float x, float y, float z, float r)
+{
+	float ix = 0;
+	float iy = r;
+	float ig = 3 - 2 * r;
 	float idgr = -6;
 	float idgd = 4 * r - 10;
 	qglPointSize(0.5f);
@@ -3730,7 +3730,7 @@ void GLCircle(float x, float y, float z, float r)
 		qglVertex3f(x - iy, y - ix, z);
 	}
 	qglEnd();
-} 
+}
 
 /*
 ================
@@ -3742,9 +3742,9 @@ void DrawSpeaker(brush_t *b, bool bSelected, bool twoD) {
 	if (!(g_qeglobals.d_savedinfo.showSoundAlways || (g_qeglobals.d_savedinfo.showSoundWhenSelected && bSelected))) {
 		return;
 	}
-	
+
 	// convert to units ( inches )
-	float min = FloatForKey(b->owner, "s_mindistance"); 
+	float min = FloatForKey(b->owner, "s_mindistance");
 	float max = FloatForKey(b->owner, "s_maxdistance");
 
 	const char *s = b->owner->epairs.GetString("s_shader");
@@ -3758,12 +3758,12 @@ void DrawSpeaker(brush_t *b, bool bSelected, bool twoD) {
 				max = shader->GetMaxDistance();
 			}
 		}
-	} 
+	}
 
 	if (min == 0 && max == 0) {
 		return;
 	}
-	
+
 
 	// convert from meters to doom units
 	min *= METERS_TO_DOOM;
@@ -3812,7 +3812,7 @@ void DrawSpeaker(brush_t *b, bool bSelected, bool twoD) {
 		qglPopMatrix();
 	}
 
-		
+
 }
 
 /*
@@ -3959,7 +3959,7 @@ void Brush_DrawModel( brush_t *b, bool camera, bool bSelected ) {
 		model = b->owner->eclass->entityModel;
 	}
 	if ( model ) {
-		idRenderModel *model2; 
+		idRenderModel *model2;
 
 		model2 = NULL;
 		bool fixedBounds = false;
@@ -4023,30 +4023,30 @@ void Brush_DrawModel( brush_t *b, bool camera, bool bSelected ) {
 
 		qglColor4fv( colorSave.ToFloatPtr() );
 
-        if ( bSelected && camera )
-        {
-            //draw selection tints
+		if ( bSelected && camera )
+		{
+			//draw selection tints
 			/*
-            if ( camera && g_PrefsDlg.m_nEntityShowState != ENTITY_WIREFRAME ) {
-                qglPolygonMode ( GL_FRONT_AND_BACK , GL_FILL );
-                qglColor3fv ( g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr () );
-                qglEnable ( GL_BLEND );
-                qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );                
-                DrawRenderModel( model, b->owner->origin, axis, camera );
-            }
+			if ( camera && g_PrefsDlg.m_nEntityShowState != ENTITY_WIREFRAME ) {
+				qglPolygonMode ( GL_FRONT_AND_BACK , GL_FILL );
+				qglColor3fv ( g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr () );
+				qglEnable ( GL_BLEND );
+				qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+				DrawRenderModel( model, b->owner->origin, axis, camera );
+			}
 			*/
 
-            //draw white triangle outlines
+			//draw white triangle outlines
 			globalImages->BindNull();
 
-            qglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            qglDisable( GL_BLEND );
+			qglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			qglDisable( GL_BLEND );
 			qglDisable( GL_DEPTH_TEST );
-            qglColor3f( 1.0f, 1.0f, 1.0f );
-            qglPolygonOffset( 1.0f, 3.0f );
-            DrawRenderModel( model, b->owner->origin, axis, false );
+			qglColor3f( 1.0f, 1.0f, 1.0f );
+			qglPolygonOffset( 1.0f, 3.0f );
+			DrawRenderModel( model, b->owner->origin, axis, false );
 			qglEnable( GL_DEPTH_TEST );
-        }
+		}
 
 		if ( model2 ) {
 			delete model2;
@@ -4193,7 +4193,7 @@ void Brush_DrawAxis(brush_t *b) {
 			wr = yr;
 			type = 1;
 		}
-		
+
 		if (g_qeglobals.flatRotation) {
 			if (yr > wr) {
 				wr = yr;
@@ -4254,7 +4254,7 @@ void Brush_DrawEmitter(brush_t *b, bool bSelected, bool cam) {
 	if ( !( b->owner->eclass->nShowFlags & ECLASS_PARTICLE ) ) {
 		return;
 	}
-		
+
 	if (bSelected) {
 		qglColor4f(g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].x, g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].y, g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].z, .5);
 	} else {
@@ -4336,8 +4336,8 @@ void Brush_DrawCombatNode( brush_t *b, bool cameraView, bool bSelected ) {
 		color = colorRed;
 	} else  {
 		color = colorBlue;
-	} 
-		
+	}
+
 	idVec3 leftDir( -cone_left.y, cone_left.x, 0.0f );
 	idVec3 rightDir( cone_right.y, -cone_right.x, 0.0f );
 	leftDir.NormalizeFast();
@@ -4423,7 +4423,7 @@ void Brush_Draw(brush_t *b, bool bSelected) {
 		DrawSpeaker( b, bSelected, false );
 
 		if ( g_PrefsDlg.m_bNewLightDraw && (b->owner->eclass->nShowFlags & ECLASS_LIGHT) && !(b->modelHandle || b->entityModel) ) {
- 			DrawLight( b, bSelected );
+			DrawLight( b, bSelected );
 			return;
 		}
 
@@ -4577,7 +4577,7 @@ idSurface_SweptSpline *SplineToSweptSpline( idCurve<idVec3> *curve ) {
 Brush_DrawCurve
 ================
 */
-void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) { 
+void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 	if ( b == NULL || b->owner->curve == NULL ) {
 		return;
 	}
@@ -4587,7 +4587,7 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 	qglColor3f( 0.0f, 0.0f, 1.0f );
 	for ( i = 0; i < maxage; i++) {
 
-		if ( bSelected && g_qeglobals.d_select_mode == sel_editpoint ) { 
+		if ( bSelected && g_qeglobals.d_select_mode == sel_editpoint ) {
 			idVec3 v = b->owner->curve->GetValue( i );
 			if ( cam ) {
 				glBox( colorBlue, v, 6.0f );
@@ -4605,7 +4605,7 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 				}
 			}
 		}
-/*		
+/*
 		if ( cam ) {
 			idSurface_SweptSpline *ss = SplineToSweptSpline( b->owner->curve );
 			if ( ss ) {
@@ -4638,10 +4638,10 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 				for ( int j = 0; j < POINTS_PER_KNOT; j++ ) {
 					idVec3 v = b->owner->curve->GetCurrentValue( start );
 					qglVertex3f( v.x, v.y, v.z );
-					start += inc;								
+					start += inc;
 				}
 			}*/
-                // DHM - _D3XP : Makes it easier to see curve
+				// DHM - _D3XP : Makes it easier to see curve
 		qglBegin( GL_LINE_STRIP );
 		if ( i + 1  < maxage ) {
 			int start = b->owner->curve->GetTime( i );
@@ -4650,7 +4650,7 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 			for ( int j = 0; j <= POINTS_PER_KNOT; j++ ) {
 				idVec3 v = b->owner->curve->GetCurrentValue( start );
 				qglVertex3f( v.x, v.y, v.z );
-				start += inc;								
+				start += inc;
 			}
 			}
 			qglEnd();
@@ -4702,7 +4702,7 @@ void Brush_DrawXY(brush_t *b, int nViewType, bool bSelected, bool ignoreViewType
 
 	if (b->owner->eclass->fixedsize) {
 
- 		DrawSpeaker(b, bSelected, true);
+		DrawSpeaker(b, bSelected, true);
 		if (g_PrefsDlg.m_bNewLightDraw && (b->owner->eclass->nShowFlags & ECLASS_LIGHT) && !(b->modelHandle || b->entityModel)) {
 			idVec3	vCorners[4];
 			float	fMid = b->mins[2] + (b->maxs[2] - b->mins[2]) / 2;
@@ -4764,7 +4764,7 @@ void Brush_DrawXY(brush_t *b, int nViewType, bool bSelected, bool ignoreViewType
 			Brush_DrawModel( b, false, bSelected );
 			DrawBrushEntityName(b);
 			qglColor4fv(colorSave.ToFloatPtr());
-            return;
+			return;
 		}
 
 	}
@@ -4886,7 +4886,7 @@ void Brush_Move(brush_t *b, const idVec3 move, bool bSnap, bool updateOrigin) {
 				if (QE_SingleBrush(true, true)) {
 					adjustOrigin = false;
 				}
-			} 
+			}
 
 			if (adjustOrigin && updateOrigin) {
 				b->owner->origin += move;
@@ -5215,6 +5215,6 @@ void Brush_GetBounds( brush_t *b, idBounds &bo ) {
 		for ( int i = 0; i < c; i++ ) {
 			bo.AddPoint ( b->owner->curve->GetValue( i ) );
 		}
-	} 
+	}
 
 }

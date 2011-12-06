@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -177,7 +177,7 @@ ID_INLINE idPolynomial idPolynomial::operator-() const {
 	return n;
 }
 
-ID_INLINE idPolynomial &idPolynomial::operator=( const idPolynomial &p ) { 
+ID_INLINE idPolynomial &idPolynomial::operator=( const idPolynomial &p ) {
 	Resize( p.degree, false );
 	for ( int i = 0; i <= degree; i++ ) {
 		coefficient[i] = p.coefficient[i];

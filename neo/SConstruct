@@ -87,14 +87,14 @@ TARGET_DEMO (default 0)
 
 IDNET_HOST (default to source hardcoded)
 	Override builtin IDNET_HOST with your own settings
-	
+
 GL_HARDLINK (default 0)
 	Instead of dynamically loading the OpenGL libraries, use implicit dependencies
 	NOTE: no GL logging capability and no r_glDriver with GL_HARDLINK 1
 
 DEBUG_MEMORY (default 0)
 	Enables memory logging to file
-	
+
 LIBC_MALLOC (default 1)
 	Toggle idHeap memory / libc malloc usage
 	When libc malloc is on, memory size statistics are wrong ( no _msize )
@@ -102,7 +102,7 @@ LIBC_MALLOC (default 1)
 ID_NOLANADDRESS (default 0)
 	Don't recognize any IP as LAN address. This is useful when debugging network
 	code where LAN / not LAN influences application behaviour
-	
+
 ID_MCHECK (default 2)
 	Perform heap consistency checking
 	0: on in Debug / off in Release
@@ -112,9 +112,9 @@ ID_MCHECK (default 2)
 
 ALSA (default 1)
 	enable ALSA sound backend support
-	
+
 SETUP (default 0, not saved)
-    build a setup. implies release build
+	build a setup. implies release build
 
 SDK (default 0, not saved)
 	build an SDK release
@@ -245,7 +245,7 @@ if ( GL_HARDLINK != '0' ):
 
 if ( DEBUG_MEMORY != '0' ):
 	g_build += '-debugmem'
-	
+
 if ( LIBC_MALLOC != '1' ):
 	g_build += '-nolibcmalloc'
 
@@ -313,7 +313,7 @@ if ( GL_HARDLINK != '0' ):
 
 if ( DEBUG_MEMORY != '0' ):
 	BASECPPFLAGS += [ '-DID_DEBUG_MEMORY', '-DID_REDIRECT_NEWDELETE' ]
-	
+
 if ( LIBC_MALLOC != '1' ):
 	BASECPPFLAGS.append( '-DUSE_LIBC_MALLOC=0' )
 
@@ -322,10 +322,10 @@ if ( len( IDNET_HOST ) ):
 
 if ( ID_NOLANADDRESS != '0' ):
 	CORECPPFLAGS.append( '-DID_NOLANADDRESS' )
-	
+
 if ( ID_MCHECK == '1' ):
 	BASECPPFLAGS.append( '-DID_MCHECK' )
-	
+
 # create the build environements
 g_base_env = Environment( ENV = os.environ, CC = CC, CXX = CXX, LINK = LINK, CPPFLAGS = BASECPPFLAGS, LINKFLAGS = BASELINKFLAGS, CPPPATH = CORECPPPATH, LIBPATH = CORELIBPATH )
 scons_utils.SetupUtils( g_base_env )
@@ -391,7 +391,7 @@ if ( TARGET_CORE == '1' ):
 	if ( DEDICATED == '0' or DEDICATED == '2' ):
 		local_dedicated = 0
 		Export( 'GLOBALS ' + GLOBALS )
-		
+
 		VariantDir( g_build + '/core/glimp', '.', duplicate = 1 )
 		SConscript( g_build + '/core/glimp/sys/scons/SConscript.gl' )
 		VariantDir( g_build + '/core', '.', duplicate = 0 )
@@ -400,11 +400,11 @@ if ( TARGET_CORE == '1' ):
 		doom = SConscript( g_build + '/core/sys/scons/SConscript.core' )
 
 		InstallAs( '#doom.' + cpu, doom )
-		
+
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
 		Export( 'GLOBALS ' + GLOBALS )
-		
+
 		VariantDir( g_build + '/dedicated/glimp', '.', duplicate = 1 )
 		SConscript( g_build + '/dedicated/glimp/sys/scons/SConscript.gl' )
 		VariantDir( g_build + '/dedicated', '.', duplicate = 0 )
@@ -444,7 +444,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' ):
 		game_d3xp = InstallAs( '#game%s-d3xp.so' % cpu, d3xp )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-d3xp.pk4', [ game_d3xp, d3xp ], Action( g_env.BuildGamePak ) )
-	
+
 if ( TARGET_MONO == '1' ):
 	# NOTE: no D3XP atm. add a TARGET_MONO_D3XP
 	local_gamedll = 0
@@ -479,7 +479,7 @@ if ( TARGET_DEMO == '1' ):
 	doom_demo = SConscript( g_build + '/demo/sys/scons/SConscript.core' )
 
 	InstallAs( '#doom-demo.' + cpu, doom_demo )
-	
+
 	local_idlibpic = 1
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/demo/game', '.', duplicate = 0 )

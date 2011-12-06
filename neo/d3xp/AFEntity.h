@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -526,7 +526,7 @@ private:
 
 #ifdef _D3XP
 
-/** 
+/**
 * idHarvestable contains all of the code required to turn an entity into a harvestable
 * entity. The entity must create an instance of this class and call the appropriate
 * interface methods at the correct time.

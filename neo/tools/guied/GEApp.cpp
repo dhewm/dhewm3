@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -47,9 +47,9 @@ static INT_PTR CALLBACK AboutDlg_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, L
 	{
 		case WM_COMMAND:
 			EndDialog ( hwnd, 1 );
-			break;			
+			break;
 	}
-	
+
 	return FALSE;
 }
 
@@ -83,39 +83,39 @@ bool rvGEApp::Initialize ( void )
 	com_editors = EDITOR_GUI;
 
 	Sys_GrabMouseCursor( false );
-	
+
 	// Load the options
-	mOptions.Load ( );	
+	mOptions.Load ( );
 
 	mInstance = win32.hInstance;
 
 	// Create the accelerators
 	mAccelerators = LoadAccelerators ( mInstance, MAKEINTRESOURCE(IDR_GUIED_ACCELERATORS) );
 
-	// Register the window classes for the main frame and the mdi child window	
+	// Register the window classes for the main frame and the mdi child window
 	WNDCLASSEX wndClass;
 	memset ( &wndClass, 0, sizeof(wndClass) );
 	wndClass.cbSize = sizeof(WNDCLASSEX);
-	wndClass.lpszClassName	= "QUAKE4_GUIEDITOR_CLASS";		
+	wndClass.lpszClassName	= "QUAKE4_GUIEDITOR_CLASS";
 	wndClass.lpfnWndProc	= FrameWndProc;
-	wndClass.hbrBackground	= (HBRUSH) (COLOR_APPWORKSPACE + 1); 
-	wndClass.hCursor		= LoadCursor((HINSTANCE) NULL, IDC_ARROW); 
+	wndClass.hbrBackground	= (HBRUSH) (COLOR_APPWORKSPACE + 1);
+	wndClass.hCursor		= LoadCursor((HINSTANCE) NULL, IDC_ARROW);
 	wndClass.lpszMenuName	= MAKEINTRESOURCE(IDR_GUIED_MAIN);
-	wndClass.hInstance		= mInstance; 
+	wndClass.hInstance		= mInstance;
 	RegisterClassEx ( &wndClass );
 
 	wndClass.lpszMenuName	= NULL;
 	wndClass.lpfnWndProc	= MDIChildProc;
 	wndClass.lpszClassName	= "QUAKE4_GUIEDITOR_CHILD_CLASS";
 	wndClass.style			= CS_OWNDC|CS_DBLCLKS|CS_BYTEALIGNWINDOW|CS_VREDRAW|CS_HREDRAW;
-	wndClass.hbrBackground	= (HBRUSH)GetStockObject( LTGRAY_BRUSH );  
+	wndClass.hbrBackground	= (HBRUSH)GetStockObject( LTGRAY_BRUSH );
 	RegisterClassEx ( &wndClass );
-	
+
 	// Create the main window
-	mMDIFrame = CreateWindow ( "QUAKE4_GUIEDITOR_CLASS", 
-							  "Quake IV GUI Editor", 
-							  WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS, 
-							  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
+	mMDIFrame = CreateWindow ( "QUAKE4_GUIEDITOR_CLASS",
+							  "Quake IV GUI Editor",
+							  WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,
+							  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 							  NULL, NULL, mInstance, (LPVOID)this );
 
 	if ( !mMDIFrame )
@@ -124,15 +124,15 @@ bool rvGEApp::Initialize ( void )
 	}
 
 	SetClassLong( mMDIFrame, GCL_HICON, ( LONG )LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_GUIED ) ) );
-	
+
 	// Create the MDI window
 	CLIENTCREATESTRUCT ccs;
 	ccs.hWindowMenu = GetSubMenu ( GetMenu ( mMDIFrame ), 5 );
 	ccs.idFirstChild = IDM_WINDOWCHILD;
-	mMDIClient = CreateWindow ( "MDICLIENT", NULL, 
-								WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 
-								0, 0, 1000, 1000, 
-								mMDIFrame, NULL, 
+	mMDIClient = CreateWindow ( "MDICLIENT", NULL,
+								WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+								0, 0, 1000, 1000,
+								mMDIFrame, NULL,
 								mInstance, &ccs );
 
 	if ( !mMDIClient )
@@ -143,15 +143,15 @@ bool rvGEApp::Initialize ( void )
 
 	// hide the doom window by default
 	::ShowWindow ( win32.hWnd, SW_HIDE );
-	
+
 	// Show both windows
 	mOptions.GetWindowPlacement ( "mdiframe", mMDIFrame );
-	ShowWindow ( mMDIFrame, SW_SHOW ); 
+	ShowWindow ( mMDIFrame, SW_SHOW );
 	UpdateWindow ( mMDIFrame );
 
 	ShowWindow ( mMDIClient, SW_SHOW );
 	UpdateWindow ( mMDIClient );
-	
+
 	return true;
 }
 
@@ -166,9 +166,9 @@ workspace then it will return NULL
 */
 rvGEWorkspace* rvGEApp::GetActiveWorkspace ( HWND* ret )
 {
-    rvGEWorkspace*	workspace;
-    HWND			active;
-	
+	rvGEWorkspace*	workspace;
+	HWND			active;
+
 	workspace = NULL;
 	active    = (HWND)SendMessage ( mMDIClient, WM_MDIGETACTIVE, 0, NULL );
 
@@ -182,7 +182,7 @@ rvGEWorkspace* rvGEApp::GetActiveWorkspace ( HWND* ret )
 	{
 		return NULL;
 	}
-	
+
 	return rvGEWorkspace::GetWorkspace ( active );
 }
 
@@ -199,8 +199,8 @@ bool rvGEApp::TranslateAccelerator ( LPMSG msg )
 
 	if ( msg->message == WM_SYSCHAR )
 	{
-		SetFocus ( GetMDIClient ( ) );	
-		msg->hwnd = GetMDIClient ( );	
+		SetFocus ( GetMDIClient ( ) );
+		msg->hwnd = GetMDIClient ( );
 	}
 
 	if ( mViewer )
@@ -219,12 +219,12 @@ bool rvGEApp::TranslateAccelerator ( LPMSG msg )
 			return true;
 		}
 	}
-	
+
 	if ( TranslateMDISysAccel ( mMDIClient, msg ) )
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -241,12 +241,12 @@ void rvGEApp::RunFrame ( void )
 	rvGEWorkspace*	workspace = GetActiveWorkspace ( &wnd );
 
 	if ( workspace )
-	{		
+	{
 		// Render the workspace using a temp DC
-		HDC hDC = GetDC ( wnd );		
-		workspace->Render ( hDC );		
-		ReleaseDC ( wnd, hDC );				
-		
+		HDC hDC = GetDC ( wnd );
+		workspace->Render ( hDC );
+		ReleaseDC ( wnd, hDC );
+
 		if ( mViewer )
 		{
 			mViewer->RunFrame ( );
@@ -266,15 +266,15 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 	rvGEApp* app = (rvGEApp*) GetWindowLong ( hWnd, GWL_USERDATA );
 
 	switch ( uMsg )
-	{		
+	{
 		case WM_SIZE:
 		{
 			RECT rStatus;
 			RECT rClient;
 
-			// Tell the status bar to resize 			
+			// Tell the status bar to resize
 			app->mStatusBar.Resize ( LOWORD(lParam), HIWORD(lParam) );
-				
+
 			// Calculate the new client window rectangle (minus the status bar)
 			GetWindowRect ( app->mStatusBar.GetWindow ( ), &rStatus );
 			GetClientRect ( hWnd, &rClient );
@@ -284,24 +284,24 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 				rClient.bottom -= (rStatus.bottom-rStatus.top);
 			}
 			MoveWindow ( app->mMDIClient, 0, 0, rClient.right-rClient.left, rClient.bottom-rClient.top, FALSE );
-			
+
 			return 0;
 		}
-		
+
 		case WM_ENABLE:
-		{	
+		{
 			int i;
 
-		    // Synchronise all toolwindows to the same state.
+			// Synchronise all toolwindows to the same state.
 			for(i = 0; i < app->mToolWindows.Num(); i++)
 			{
-		        if(app->mToolWindows[i] != hWnd)
+				if(app->mToolWindows[i] != hWnd)
 				{
 					EnableWindow(app->mToolWindows[i], wParam);
 				}
-		    }
-		    break;
-		}		
+			}
+			break;
+		}
 
 		case WM_NCACTIVATE:
 			return app->ToolWindowActivate ( hWnd, uMsg, wParam, lParam );
@@ -314,7 +314,7 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 			app->HandleInitMenu ( wParam, lParam  );
 			break;
 
-		case WM_CLOSE:			
+		case WM_CLOSE:
 			while ( app->mWorkspaces.Num ( ) )
 			{
 				SendMessage ( app->mWorkspaces[0]->GetWindow ( ), WM_CLOSE, 0, 0 );
@@ -323,9 +323,9 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 
 		case WM_DESTROY:
 			app->mOptions.SetWindowPlacement ( "mdiframe", hWnd );
-			app->mOptions.Save ( );			
+			app->mOptions.Save ( );
 			ExitProcess(0);
-			break;			
+			break;
 
 		case WM_COMMAND:
 		{
@@ -335,26 +335,26 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 			if ( -1 != result )
 			{
 				return result;
-			}			
+			}
 			break;
 		}
 
 		case WM_CREATE:
-		{	
+		{
 			LPCREATESTRUCT		cs;
-										
+
 			cs = (LPCREATESTRUCT) lParam;
 			app = (rvGEApp*)cs->lpCreateParams;
 
 			assert ( app );
-			
+
 			SetWindowLong ( hWnd, GWL_USERDATA, (LONG)app );
 
 			app->mMDIFrame = hWnd;
-			
+
 			app->InitRecentFiles ( );
 			app->UpdateRecentFiles ( );
-			app->mNavigator.Create ( hWnd, gApp.mOptions.GetNavigatorVisible ( ) );		
+			app->mNavigator.Create ( hWnd, gApp.mOptions.GetNavigatorVisible ( ) );
 			app->mTransformer.Create ( hWnd, gApp.mOptions.GetTransformerVisible ( )  );
 			app->mStatusBar.Create ( hWnd, 9999, gApp.mOptions.GetStatusBarVisible ( )  );
 			app->mProperties.Create ( hWnd, gApp.mOptions.GetPropertiesVisible ( ) );
@@ -364,10 +364,10 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 			app->mToolWindows.Append ( app->mNavigator.GetWindow ( ) );
 			app->mToolWindows.Append ( app->mProperties.GetWindow ( ) );
 			app->mToolWindows.Append ( app->mTransformer.GetWindow ( ) );
-			
+
 			SendMessage ( app->mNavigator.GetWindow ( ), WM_NCACTIVATE, true, (LONG)-1 );
 			SendMessage ( app->mProperties.GetWindow ( ), WM_NCACTIVATE, true, (LONG)-1 );
-			SendMessage ( app->mTransformer.GetWindow ( ), WM_NCACTIVATE, true, (LONG)-1 );			
+			SendMessage ( app->mTransformer.GetWindow ( ), WM_NCACTIVATE, true, (LONG)-1 );
 
 			break;
 		}
@@ -385,7 +385,7 @@ MDI Child window procedure
 */
 LRESULT CALLBACK rvGEApp::MDIChildProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
-	rvGEWorkspace* workspace = (rvGEWorkspace*)GetWindowLong ( hWnd, GWL_USERDATA );	
+	rvGEWorkspace* workspace = (rvGEWorkspace*)GetWindowLong ( hWnd, GWL_USERDATA );
 
 	// Give the active workspace a chance to play with it
 	if ( workspace )
@@ -400,28 +400,28 @@ LRESULT CALLBACK rvGEApp::MDIChildProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 			break;
 
 		case WM_CREATE:
-		{	
+		{
 			LPMDICREATESTRUCT	mdics;
 			LPCREATESTRUCT		cs;
-					
+
 			// MDI windows have their creation params buried two levels deep, extract
 			// that param since it is the workspace pointer
 			cs = (LPCREATESTRUCT) lParam;
 			mdics = (LPMDICREATESTRUCT) cs->lpCreateParams;
-			
+
 			// Attach the workspace to the window
 			workspace = (rvGEWorkspace*) mdics->lParam;
-			workspace->Attach ( hWnd );			
+			workspace->Attach ( hWnd );
 
-			workspace->GetApplication ( )->mWorkspaces.Append ( workspace );				
-				
+			workspace->GetApplication ( )->mWorkspaces.Append ( workspace );
+
 			break;
 		}
 
 		case WM_MDIACTIVATE:
 			assert ( workspace );
 			if ( (HWND)lParam == hWnd )
-			{				
+			{
 				workspace->GetApplication ( )->GetNavigator().SetWorkspace(workspace);
 				workspace->GetApplication ( )->GetTransformer().SetWorkspace(workspace);
 				workspace->GetApplication ( )->GetProperties().SetWorkspace(workspace);
@@ -431,7 +431,7 @@ LRESULT CALLBACK rvGEApp::MDIChildProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 			{
 				gApp.GetStatusBar ( ).SetSimple ( true );
 			}
-			break;		
+			break;
 
 		case WM_DESTROY:
 			assert ( workspace );
@@ -449,20 +449,20 @@ LRESULT CALLBACK rvGEApp::MDIChildProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 		{
 			HDC			dc;
 			PAINTSTRUCT	ps;
-			
-			dc = BeginPaint(hWnd, &ps); 
-			
+
+			dc = BeginPaint(hWnd, &ps);
+
 			if ( workspace )
 			{
 				workspace->Render ( dc );
 			}
-			
-            EndPaint(hWnd, &ps); 
-           
+
+			EndPaint(hWnd, &ps);
+
 			break;
 		}
 	}
-	
+
 	return DefMDIChildProc ( hWnd, uMsg, wParam, lParam );
 }
 
@@ -476,7 +476,7 @@ Handles the ID_GUIED_FILE_SAVE and ID_GUIED_FILE_SAVEAS commands
 void rvGEApp::HandleCommandSave ( rvGEWorkspace* workspace, const char* filename )
 {
 	idStr realFilename;
-	
+
 	// See if we need to browse for a filename
 	if ( workspace->IsNew ( ) || filename == NULL )
 	{
@@ -495,8 +495,8 @@ void rvGEApp::HandleCommandSave ( rvGEWorkspace* workspace, const char* filename
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST;
 
-		// Display the save dialog box. 
-		if ( !GetSaveFileName(&ofn) ) 
+		// Display the save dialog box.
+		if ( !GetSaveFileName(&ofn) )
 		{
 			return;
 		}
@@ -517,7 +517,7 @@ void rvGEApp::HandleCommandSave ( rvGEWorkspace* workspace, const char* filename
 	else
 	{
 		realFilename = filename;
-	}	
+	}
 
 	// Now performe the file save
 	if ( workspace->SaveFile ( realFilename ) )
@@ -549,15 +549,15 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 		OpenFile ( mOptions.GetRecentFile ( mOptions.GetRecentFileCount() - (LOWORD(wParam)-ID_GUIED_FILE_MRU1) - 1 ) );
 		return 0;
 	}
-					
+
 	switch ( LOWORD ( wParam ) )
-	{		
+	{
 		case ID_GUIED_SOURCECONTROL_CHECKIN:
 			assert ( workspace );
 			HandleCommandSave ( workspace, workspace->GetFilename ( ) );
 			workspace->CheckIn ( );
 			break;
-			
+
 		case ID_GUIED_SOURCECONTROL_CHECKOUT:
 			assert ( workspace );
 			workspace->CheckOut ( );
@@ -570,14 +570,14 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 				workspace->UndoCheckout ( );
 			}
 			break;
-			
+
 		case ID_GUIED_TOOLS_RELOADMATERIALS:
 			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_WAIT) ) );
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "reloadImages\n" );
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "reloadMaterials\n" );
 			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW) ) );
 			break;
-			
+
 		case ID_GUIED_EDIT_COPY:
 			assert ( workspace );
 			workspace->Copy  ( );
@@ -587,37 +587,37 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			assert ( workspace );
 			workspace->Paste  ( );
 			break;
-	
+
 		case ID_GUIED_HELP_ABOUT:
 			DialogBox ( GetInstance(), MAKEINTRESOURCE(IDD_GUIED_ABOUT), mMDIFrame, AboutDlg_WndProc );
 			break;
-	
+
 		case ID_GUIED_TOOLS_VIEWER:
 		{
 			if ( mViewer )
 			{
 				break;
 			}
-			
+
 			mViewer = new rvGEViewer;
 			if ( !mViewer->Create ( mMDIFrame ) )
 			{
 				delete mViewer;
 				mViewer = NULL;
 			}
-						
+
 			if ( workspace )
-			{				
+			{
 				if ( !workspace->IsModified () || HandleCommand ( MAKELONG(ID_GUIED_FILE_SAVE,0), 0 ) )
 				{
 					mViewer->OpenFile ( workspace->GetFilename ( ) );
 				}
 			}
-			
+
 			SetActiveWindow ( mViewer->GetWindow ( ) );
 			break;
 		}
-		
+
 		case ID_GUIED_ITEM_MAKESAMESIZEWIDTH:
 			assert ( workspace );
 			workspace->MakeSelectedSameSize ( true, false );
@@ -632,7 +632,7 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			assert ( workspace );
 			workspace->MakeSelectedSameSize ( false, true );
 			break;
-	
+
 		case ID_GUIED_ITEM_ALIGNLEFTS:
 			assert ( workspace );
 			workspace->AlignSelected ( rvGEWorkspace::ALIGN_LEFTS );
@@ -662,32 +662,32 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			assert ( workspace );
 			workspace->AlignSelected ( rvGEWorkspace::ALIGN_BOTTOMS );
 			break;
-			
+
 		case ID_GUIED_ITEM_ARRANGESENDBACKWARD:
 			assert ( workspace );
 			workspace->SendSelectedBackward ( );
-			break;			
+			break;
 
 		case ID_GUIED_ITEM_ARRANGESENDTOBACK:
 			assert ( workspace );
 			workspace->SendSelectedToBack( );
-			break;			
+			break;
 
 		case ID_GUIED_ITEM_ARRANGEBRINGFORWARD:
 			assert ( workspace );
 			workspace->BringSelectedForward ( );
-			break;			
+			break;
 
 		case ID_GUIED_ITEM_ARRANGEBRINGTOFRONT:
 			assert ( workspace );
 			workspace->BringSelectedToFront ( );
-			break;			
-			
+			break;
+
 		case ID_GUIED_ITEM_ARRANGEMAKECHILD:
 			assert ( workspace );
 			workspace->MakeSelectedAChild ( );
 			break;
-	
+
 		case ID_GUIED_ITEM_PROPERTIES:
 			assert ( workspace );
 			workspace->EditSelectedProperties ( );
@@ -697,7 +697,7 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			assert ( workspace );
 			workspace->EditSelectedScripts ( );
 			break;
-			
+
 		case ID_GUIED_ITEM_NEWWINDOWDEF:
 			assert ( workspace );
 			workspace->AddWindow ( rvGEWindowWrapper::WT_NORMAL );
@@ -737,38 +737,38 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			assert ( workspace );
 			workspace->AddWindow ( rvGEWindowWrapper::WT_RENDER );
 			break;
-	
+
 		case ID_GUIED_WINDOW_TILE:
 			SendMessage ( mMDIClient, WM_MDITILE, 0, 0 );
-			break;	
+			break;
 
 		case ID_GUIED_WINDOW_CASCADE:
 			SendMessage ( mMDIClient, WM_MDICASCADE, 0, 0 );
-			break;	
+			break;
 
 		case ID_GUIED_VIEW_STATUSBAR:
 		{
 			RECT rWindow;
-			
+
 			mStatusBar.Show ( mOptions.GetStatusBarVisible()?false:true );
-			
+
 			GetWindowRect ( mMDIFrame, &rWindow );
-			SendMessage ( mMDIFrame, WM_SIZE, 0, MAKELONG ( rWindow.right-rWindow.left, rWindow.bottom-rWindow.top ) );			
+			SendMessage ( mMDIFrame, WM_SIZE, 0, MAKELONG ( rWindow.right-rWindow.left, rWindow.bottom-rWindow.top ) );
 			break;
 		}
 
 		case ID_GUIED_WINDOW_SHOWNAVIGATOR:
 			mNavigator.Show ( mOptions.GetNavigatorVisible()?false:true );
-			break;					
-			
+			break;
+
 		case ID_GUIED_WINDOW_SHOWPROPERTIES:
 			mProperties.Show ( mOptions.GetPropertiesVisible()?false:true );
 			break;
-			
+
 		case ID_GUIED_WINDOW_SHOWTRANSFORMER:
 			mTransformer.Show ( mOptions.GetTransformerVisible()?false:true  );
-			break;					
-			
+			break;
+
 		case ID_GUIED_EDIT_DELETE:
 			assert ( workspace );
 			workspace->DeleteSelected ( );
@@ -783,12 +783,12 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			assert ( workspace );
 			workspace->UnhideSelected ( );
 			break;
-		
+
 		case ID_GUIED_VIEW_SHOWHIDDEN:
 			assert ( workspace );
 			workspace->ShowHidden ( );
 			break;
-			
+
 		case ID_GUIED_EDIT_UNDO:
 			assert ( workspace );
 			workspace->GetModifierStack().Undo ( );
@@ -802,29 +802,29 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			mNavigator.Update ( );
 			mTransformer.Update ( );
 			break;
-	
+
 		case ID_GUIED_VIEW_OPTIONS:
 			GEOptionsDlg_DoModal ( mMDIFrame );
 			break;
-	
+
 		case ID_GUIED_VIEW_SHOWGRID:
-			mOptions.SetGridVisible ( mOptions.GetGridVisible()?false:true );				
+			mOptions.SetGridVisible ( mOptions.GetGridVisible()?false:true );
 			break;
 
 		case ID_GUIED_VIEW_SNAPTOGRID:
-			mOptions.SetGridSnap ( mOptions.GetGridSnap ()?false:true );				
+			mOptions.SetGridSnap ( mOptions.GetGridSnap ()?false:true );
 			break;
-	
+
 		case ID_GUIED_VIEW_ZOOMIN:
 			assert ( workspace );
 			workspace->ZoomIn ( );
 			break;
-			
+
 		case ID_GUIED_VIEW_ZOOMOUT:
 			assert ( workspace );
 			workspace->ZoomOut ( );
 			break;
-	
+
 		case ID_GUIED_FILE_EXIT:
 			DestroyWindow ( mMDIFrame );
 			break;
@@ -836,7 +836,7 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 				SendMessage ( active, WM_CLOSE, 0, 0 );
 			}
 			break;
-			
+
 		case ID_GUIED_FILE_NEW:
 			NewFile ( );
 			break;
@@ -849,8 +849,8 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 		case ID_GUIED_FILE_SAVEAS:
 			assert ( workspace );
 			HandleCommandSave ( workspace, NULL );
-			break;			
-			
+			break;
+
 		case ID_GUIED_FILE_OPEN:
 		{
 			OPENFILENAME ofn;
@@ -869,15 +869,15 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			ofn.lpstrInitialDir = NULL;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE) 
-			{			
+			// Display the Open dialog box.
+			if (GetOpenFileName(&ofn)==TRUE)
+			{
 				OpenFile ( ofn.lpstrFile );
 			}
 			break;
-		}			
+		}
 	}
-	
+
 	return -1;
 }
 
@@ -888,25 +888,25 @@ rvGEApp::HandleInitMenu
 Handles the initialization of the main menu
 ================
 */
-int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam ) 
-{ 
-    int				cMenuItems = GetMenuItemCount((HMENU)wParam); 
-    int				nPos; 
-    int				id; 
-    UINT			flags; 
-    rvGEWorkspace*	workspace;
-    HMENU			hmenu;
- 
+int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
+{
+	int				cMenuItems = GetMenuItemCount((HMENU)wParam);
+	int				nPos;
+	int				id;
+	UINT			flags;
+	rvGEWorkspace*	workspace;
+	HMENU			hmenu;
+
 	hmenu     = (HMENU) wParam;
 	workspace = GetActiveWorkspace ( );
 
 	// Run through all the menu items in the menu and see if any of them need
 	// modification in any way
-    for (nPos = 0; nPos < cMenuItems; nPos++) 
-    { 
-        id    = GetMenuItemID(hmenu, nPos); 
-        flags = 0;
- 
+	for (nPos = 0; nPos < cMenuItems; nPos++)
+	{
+		id    = GetMenuItemID(hmenu, nPos);
+		flags = 0;
+
 		// Handle popup menus too
 		if ( id < 0 )
 		{
@@ -917,31 +917,31 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 				continue;
 			}
 		}
-	
+
 		// Menu items that are completely unrelated to the workspace
 		switch ( id )
 		{
 			case ID_GUIED_VIEW_STATUSBAR:
 				flags = MF_BYCOMMAND | (mOptions.GetStatusBarVisible()?MF_CHECKED:MF_UNCHECKED);
 				CheckMenuItem ( hmenu, id, flags );
-				break;				
+				break;
 
 			case ID_GUIED_WINDOW_SHOWNAVIGATOR:
 				flags = MF_BYCOMMAND | (mOptions.GetNavigatorVisible()?MF_CHECKED:MF_UNCHECKED);
 				CheckMenuItem ( hmenu, id, flags );
-				break;				
-			
+				break;
+
 			case ID_GUIED_WINDOW_SHOWPROPERTIES:
 				flags = MF_BYCOMMAND | (mOptions.GetPropertiesVisible()?MF_CHECKED:MF_UNCHECKED);
 				CheckMenuItem ( hmenu, id, flags );
-				break;				
+				break;
 
 			case ID_GUIED_WINDOW_SHOWTRANSFORMER:
 				flags = MF_BYCOMMAND | (mOptions.GetTransformerVisible()?MF_CHECKED:MF_UNCHECKED);
 				CheckMenuItem ( hmenu, id, flags );
-				break;				
+				break;
 		}
- 
+
 		// Handle the basic case where an item is disabled because
 		// there is no workspace available
 		if ( !workspace )
@@ -980,7 +980,7 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 				case ID_GUIED_FILE_SAVE:
 				case ID_GUIED_FILE_SAVEAS:
 				case ID_GUIED_EDIT_COPY:
-				case ID_GUIED_EDIT_PASTE:		
+				case ID_GUIED_EDIT_PASTE:
 				case ID_GUIED_ITEM_ARRANGEMAKECHILD:
 				case ID_GUIED_SOURCECONTROL_GETLATESTVERSION:
 				case ID_GUIED_SOURCECONTROL_CHECKIN:
@@ -994,8 +994,8 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 			continue;
 		}
 
-        switch (id) 
-        { 
+		switch (id)
+		{
 			// Undo is greyed out when there is noting to undo and the text is
 			// modified to include the name of the modifier that will be undone
 			case ID_GUIED_EDIT_UNDO:
@@ -1006,9 +1006,9 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 				info.cbSize = sizeof(info);
 				info.fMask = MIIM_STATE|MIIM_TYPE;
 				info.fType = MFT_STRING;
-				
+
 				if ( !workspace->GetModifierStack().CanUndo ( ) )
-				{				
+				{
 					undo = "Undo\tCtrl+Z";
 					info.fState = MFS_GRAYED;
 				}
@@ -1022,7 +1022,7 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 
 				info.dwTypeData = (LPSTR)undo.c_str();
 				info.cch = undo.Length ( );
-									
+
 				SetMenuItemInfo ( hmenu, id, FALSE, &info );
 
 				break;
@@ -1036,9 +1036,9 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 				info.cbSize = sizeof(info);
 				info.fMask = MIIM_STATE|MIIM_TYPE;
 				info.fType = MFT_STRING;
-				
+
 				if ( !workspace || !workspace->GetModifierStack().CanRedo ( ) )
-				{				
+				{
 					undo = "Redo\tCtrl+Y";
 					info.fState = MFS_GRAYED;
 				}
@@ -1052,22 +1052,22 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 
 				info.dwTypeData = (LPSTR)undo.c_str();
 				info.cch = undo.Length ( );
-									
+
 				SetMenuItemInfo ( hmenu, id, FALSE, &info );
 
 				break;
 			}
-				
+
 			case ID_GUIED_VIEW_SHOWGRID:
 				flags = MF_BYCOMMAND | (mOptions.GetGridVisible()?MF_CHECKED:MF_UNCHECKED);
 				CheckMenuItem ( hmenu, id, flags );
-				break;				
+				break;
 
 			case ID_GUIED_VIEW_SNAPTOGRID:
 				flags = MF_BYCOMMAND | (mOptions.GetGridSnap()?MF_CHECKED:MF_UNCHECKED);
 				CheckMenuItem ( hmenu, id, flags );
-				break;				
-			
+				break;
+
 			// All menu items that are greyed out when there is no workspace
 			case ID_GUIED_WINDOW_TILE:
 			case ID_GUIED_WINDOW_CASCADE:
@@ -1091,10 +1091,10 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 				break;
 
 			// Enable paste if the clipboard has something in it
-			case ID_GUIED_EDIT_PASTE:		
+			case ID_GUIED_EDIT_PASTE:
 				EnableMenuItem ( hmenu, nPos, MF_BYPOSITION|(workspace->GetClipboard().Num()>0?MF_ENABLED:MF_GRAYED) );
 				break;
-			
+
 			// All menu items that are greyed out unless a single item is selected
 			case ID_GUIED_ITEM_ARRANGEBRINGTOFRONT:
 			case ID_GUIED_ITEM_ARRANGEBRINGFORWARD:
@@ -1127,14 +1127,14 @@ int rvGEApp::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 			case ID_GUIED_SOURCECONTROL_CHECKOUT:
 				EnableMenuItem ( hmenu, nPos, MF_BYPOSITION|((workspace->GetSourceControlState()==rvGEWorkspace::SCS_CHECKEDIN)?MF_ENABLED:MF_GRAYED) );
 				break;
-			
+
 			default:
 				continue;
-		}				
+		}
 	}
-	
+
 	return 0;
-} 
+}
 
 /*
 ================
@@ -1149,7 +1149,7 @@ bool rvGEApp::NewFile ( void )
 	if ( workspace->NewFile ( ) )
 	{
 		HWND child;
-		
+
 		child = CreateMDIWindow("QUAKE4_GUIEDITOR_CHILD_CLASS",
 								"Untitled.gui",
 								WS_CHILD|WS_VISIBLE|WS_CLIPCHILDREN|WS_HSCROLL|WS_VSCROLL|WS_MAXIMIZE,
@@ -1160,7 +1160,7 @@ bool rvGEApp::NewFile ( void )
 								mMDIClient,
 								mInstance,
 								(LONG)workspace );
-														
+
 		ShowWindow ( child, SW_SHOW );
 	}
 
@@ -1200,7 +1200,7 @@ bool rvGEApp::OpenFile ( const char* filename )
 	if ( workspace->LoadFile ( filename, &error ) )
 	{
 		HWND child;
-			
+
 		child = CreateMDIWindow("QUAKE4_GUIEDITOR_CHILD_CLASS",
 								"Unamed.gui",
 								WS_CHILD|WS_VISIBLE|WS_CLIPCHILDREN|WS_HSCROLL|WS_VSCROLL|WS_MAXIMIZE,
@@ -1211,10 +1211,10 @@ bool rvGEApp::OpenFile ( const char* filename )
 								mMDIClient,
 								mInstance,
 								(LONG)workspace );
-														
+
 		ShowWindow ( child, SW_SHOW );
-		
-		mOptions.AddRecentFile ( filename ); 
+
+		mOptions.AddRecentFile ( filename );
 		UpdateRecentFiles ( );
 
 		result = true;
@@ -1225,7 +1225,7 @@ bool rvGEApp::OpenFile ( const char* filename )
 	}
 
 	SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW ) ) );
-	
+
 	return result;;
 }
 
@@ -1244,7 +1244,7 @@ bool rvGEApp::InitRecentFiles ( void )
 
 	mRecentFileMenu = GetSubMenu ( GetMenu(mMDIFrame), 0 );
 	count			= GetMenuItemCount ( mRecentFileMenu );
-	
+
 	for ( i = 0; i < count; i ++ )
 	{
 		if ( GetMenuItemID ( mRecentFileMenu, i ) == ID_GUIED_FILE_MRU )
@@ -1254,7 +1254,7 @@ bool rvGEApp::InitRecentFiles ( void )
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -1271,8 +1271,8 @@ void rvGEApp::UpdateRecentFiles ( void )
 	int j;
 
 	// Make sure everything is initialized
-	if ( !mRecentFileMenu )	
-	{	
+	if ( !mRecentFileMenu )
+	{
 		InitRecentFiles ( );
 	}
 
@@ -1280,7 +1280,7 @@ void rvGEApp::UpdateRecentFiles ( void )
 	for ( i = 0; i < rvGEOptions::MAX_MRU_SIZE; i ++ )
 	{
 		DeleteMenu ( mRecentFileMenu, ID_GUIED_FILE_MRU1 + i, MF_BYCOMMAND );
-	}	
+	}
 
 	// Make sure there is a separator after the recent files
 	if ( mOptions.GetRecentFileCount() )
@@ -1303,7 +1303,7 @@ void rvGEApp::UpdateRecentFiles ( void )
 		idStr str = va("&%d ", j+1);
 		str.Append ( mOptions.GetRecentFile ( i ) );
 		InsertMenu ( mRecentFileMenu, mRecentFileInsertPos+j+1, MF_BYPOSITION|MF_STRING|MF_ENABLED, id, str );
-	}		
+	}
 }
 
 /*
@@ -1319,7 +1319,7 @@ void rvGEApp::CloseViewer ( void )
 	{
 		return;
 	}
-	
+
 	mViewer->Destroy ( );
 	delete mViewer;
 	mViewer = NULL;
@@ -1337,20 +1337,20 @@ int	rvGEApp::ToolWindowActivate ( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 	bool	keepActive;
 	bool	syncOthers;
 	int		i;
-	
+
 	keepActive = ( wParam != 0 );
 	syncOthers = true;
-	
+
 	for ( i = 0; i < mToolWindows.Num (); i ++ )
 	{
-		if ( (HWND)lParam == mToolWindows[i] ) 
+		if ( (HWND)lParam == mToolWindows[i] )
 		{
 			keepActive = true;
 			syncOthers = false;
 			break;
 		}
 	}
-	
+
 	if ( lParam == -1 )
 	{
 		return DefWindowProc ( hwnd, WM_NCACTIVATE, keepActive, 0 );
@@ -1366,7 +1366,7 @@ int	rvGEApp::ToolWindowActivate ( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 			}
 		}
 	}
-	
+
 	return DefWindowProc ( hwnd, WM_NCACTIVATE, keepActive, lParam );
 }
 
@@ -1374,11 +1374,10 @@ int	rvGEApp::ToolWindowActivate ( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 ================
 rvGEApp::MessageBox
 
-Displays a modal message box 
+Displays a modal message box
 ================
 */
 int rvGEApp::MessageBox ( const char* text, int flags )
 {
 	return ::MessageBox ( mMDIFrame, text, "Quake 4 GUI Editor", flags );
 }
-

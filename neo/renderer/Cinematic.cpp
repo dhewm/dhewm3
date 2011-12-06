@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -158,7 +158,7 @@ void idCinematic::InitCinematic( void ) {
 	t_vg = (0.71414f/2.0f) * (float)(1<<6) + 0.5f;
 	for( i = 0; i < 256; i++ ) {
 		float x = (float)(2 * i - 255);
-	
+
 		ROQ_UB_tab[i] = (long)( ( t_ub * x) + (1<<5));
 		ROQ_VR_tab[i] = (long)( ( t_vr * x) + (1<<5));
 		ROQ_UG_tab[i] = (long)( (-t_ug * x)		 );
@@ -358,8 +358,8 @@ void idCinematicLocal::Close() {
 idCinematicLocal::AnimationLength
 ==============
 */
-int idCinematicLocal::AnimationLength() { 
-	return animationLength; 
+int idCinematicLocal::AnimationLength() {
+	return animationLength;
 }
 
 /*
@@ -820,9 +820,9 @@ void idCinematicLocal::blitVQQuad32fs( byte **status, unsigned char *data ) {
 	newd	= 0;
 	celdata = 0;
 	index	= 0;
-	
+
 	do {
-		if (!newd) { 
+		if (!newd) {
 			newd = 7;
 			celdata = data[0] + data[1]*256;
 			data += 2;
@@ -830,9 +830,9 @@ void idCinematicLocal::blitVQQuad32fs( byte **status, unsigned char *data ) {
 			newd--;
 		}
 
-		code = (unsigned short)(celdata&0xc000); 
+		code = (unsigned short)(celdata&0xc000);
 		celdata <<= 2;
-		
+
 		switch (code) {
 			case	0x8000:													// vq code
 				blit8_32( (byte *)&vq8[(*data)*128], status[index], samplesPerLine );
@@ -842,15 +842,15 @@ void idCinematicLocal::blitVQQuad32fs( byte **status, unsigned char *data ) {
 			case	0xc000:													// drop
 				index++;													// skip 8x8
 				for(i=0;i<4;i++) {
-					if (!newd) { 
+					if (!newd) {
 						newd = 7;
 						celdata = data[0] + data[1]*256;
 						data += 2;
 					} else {
 						newd--;
 					}
-						
-					code = (unsigned short)(celdata&0xc000); celdata <<= 2; 
+
+					code = (unsigned short)(celdata&0xc000); celdata <<= 2;
 
 					switch (code) {											// code in top two bits of code
 						case	0x8000:										// 4x4 vq code
@@ -888,7 +888,7 @@ void idCinematicLocal::blitVQQuad32fs( byte **status, unsigned char *data ) {
 }
 
 #define VQ2TO4(a,b,c,d) { \
-    	*c++ = a[0];	\
+		*c++ = a[0];	\
 	*d++ = a[0];	\
 	*d++ = a[0];	\
 	*c++ = a[1];	\
@@ -909,7 +909,7 @@ void idCinematicLocal::blitVQQuad32fs( byte **status, unsigned char *data ) {
 	*d++ = b[1];	\
 	*d++ = b[1];	\
 	a += 2; b += 2; }
- 
+
 #define VQ2TO2(a,b,c,d) { \
 	*c++ = *a;	\
 	*d++ = *a;	\
@@ -928,13 +928,13 @@ void idCinematicLocal::blitVQQuad32fs( byte **status, unsigned char *data ) {
 idCinematicLocal::yuv_to_rgb
 ==============
 */
-unsigned short idCinematicLocal::yuv_to_rgb( long y, long u, long v ) { 
+unsigned short idCinematicLocal::yuv_to_rgb( long y, long u, long v ) {
 	long r,g,b,YY = (long)(ROQ_YY_tab[(y)]);
 
 	r = (YY + ROQ_VR_tab[v]) >> 9;
 	g = (YY + ROQ_UG_tab[u] + ROQ_VG_tab[v]) >> 8;
 	b = (YY + ROQ_UB_tab[u]) >> 9;
-	
+
 	if (r<0) r = 0; if (g<0) g = 0; if (b<0) b = 0;
 	if (r > 31) r = 31; if (g > 63) g = 63; if (b > 31) b = 31;
 
@@ -946,16 +946,16 @@ unsigned short idCinematicLocal::yuv_to_rgb( long y, long u, long v ) {
 idCinematicLocal::yuv_to_rgb24
 ==============
 */
-unsigned int idCinematicLocal::yuv_to_rgb24( long y, long u, long v ) { 
+unsigned int idCinematicLocal::yuv_to_rgb24( long y, long u, long v ) {
 	long r,g,b,YY = (long)(ROQ_YY_tab[(y)]);
 
 	r = (YY + ROQ_VR_tab[v]) >> 6;
 	g = (YY + ROQ_UG_tab[u] + ROQ_VG_tab[v]) >> 6;
 	b = (YY + ROQ_UB_tab[u]) >> 6;
-	
+
 	if (r<0) r = 0; if (g<0) g = 0; if (b<0) b = 0;
 	if (r > 255) r = 255; if (g > 255) g = 255; if (b > 255) b = 255;
-	
+
 	return LittleLong((r)+(g<<8)+(b<<16));
 }
 
@@ -1003,7 +1003,7 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 
 				cptr = (unsigned short *)vq4;
 				dptr = (unsigned short *)vq8;
-		
+
 				for(i=0;i<four;i++) {
 					aptr = (unsigned short *)vq2 + (*input++)*4;
 					bptr = (unsigned short *)vq2 + (*input++)*4;
@@ -1027,11 +1027,11 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 
 				icptr = (unsigned int *)vq4;
 				idptr = (unsigned int *)vq8;
-	
+
 				for(i=0;i<four;i++) {
 					iaptr = (unsigned int *)vq2 + (*input++)*4;
 					ibptr = (unsigned int *)vq2 + (*input++)*4;
-					for(j=0;j<2;j++) 
+					for(j=0;j<2;j++)
 						VQ2TO4(iaptr, ibptr, icptr, idptr);
 				}
 			}
@@ -1059,7 +1059,7 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 
 				cptr = (unsigned short *)vq4;
 				dptr = (unsigned short *)vq8;
-		
+
 				for(i=0;i<four;i++) {
 					aptr = (unsigned short *)vq2 + (*input++)*8;
 					bptr = (unsigned short *)vq2 + (*input++)*8;
@@ -1089,7 +1089,7 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 
 				icptr = (unsigned int *)vq4;
 				idptr = (unsigned int *)vq8;
-	
+
 				for(i=0;i<four;i++) {
 					iaptr = (unsigned int *)vq2 + (*input++)*8;
 					ibptr = (unsigned int *)vq2 + (*input++)*8;
@@ -1098,7 +1098,7 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 						VQ2TO4(iaptr, ibptr, icptr, idptr);
 					}
 				}
-			}			
+			}
 		}
 	} else {
 //
@@ -1116,11 +1116,11 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 
 			cptr = (unsigned short *)vq4;
 			dptr = (unsigned short *)vq8;
-	
+
 			for(i=0;i<four;i++) {
 				aptr = (unsigned short *)vq2 + (*input++)*2;
 				bptr = (unsigned short *)vq2 + (*input++)*2;
-				for(j=0;j<2;j++) { 
+				for(j=0;j<2;j++) {
 					VQ2TO2(aptr,bptr,cptr,dptr);
 				}
 			}
@@ -1137,11 +1137,11 @@ void idCinematicLocal::decodeCodeBook( byte *input, unsigned short roq_flags ) {
 
 			icptr = (unsigned int *)vq4;
 			idptr = (unsigned int *)vq8;
-	
+
 			for(i=0;i<four;i++) {
 				iaptr = (unsigned int *)vq2 + (*input++)*2;
 				ibptr = (unsigned int *)vq2 + (*input++)*2;
-				for(j=0;j<2;j++) { 
+				for(j=0;j<2;j++) {
 					VQ2TO2(iaptr,ibptr,icptr,idptr);
 				}
 			}
@@ -1160,7 +1160,7 @@ void idCinematicLocal::recurseQuad( long startX, long startY, long quadSize, lon
 	long offset;
 
 	offset = screenDelta;
-	
+
 	lowx = lowy = 0;
 	bigx = xsize;
 	bigy = ysize;
@@ -1204,8 +1204,8 @@ void idCinematicLocal::setupQuad( long xOff, long yOff ) {
 
 	onQuad = 0;
 
-	for(y=0;y<(long)ysize;y+=16) 
-		for(x=0;x<(long)xsize;x+=16) 
+	for(y=0;y<(long)ysize;y+=16)
+		for(x=0;x<(long)xsize;x+=16)
 			recurseQuad( x, y, 16, xOff, yOff );
 
 	temp = NULL;
@@ -1226,7 +1226,7 @@ void idCinematicLocal::readQuadInfo( byte *qData ) {
 	ysize    = qData[2]+qData[3]*256;
 	maxsize  = qData[4]+qData[5]*256;
 	minsize  = qData[6]+qData[7]*256;
-	
+
 	CIN_HEIGHT = ysize;
 	CIN_WIDTH  = xsize;
 
@@ -1239,7 +1239,7 @@ void idCinematicLocal::readQuadInfo( byte *qData ) {
 
 	half = false;
 	smootheddouble = false;
-	
+
 	t[0] = (0 - (unsigned int)image)+(unsigned int)image+screenDelta;
 	t[1] = (0 - ((unsigned int)image + screenDelta))+(unsigned int)image;
 
@@ -1257,7 +1257,7 @@ void idCinematicLocal::RoQPrepMcomp( long xoff, long yoff ) {
 
 	i=samplesPerLine; j=samplesPerPixel;
 	if ( xsize == (ysize*4) && !half ) { j = j+j; i = i+i; }
-	
+
 	for(y=0;y<16;y++) {
 		temp2 = (y+yoff-8)*i;
 		for(x=0;x<16;x++) {
@@ -1273,7 +1273,7 @@ idCinematicLocal::RoQReset
 ==============
 */
 void idCinematicLocal::RoQReset() {
-	
+
 	iFile->Seek( 0, FS_SEEK_SET );
 	iFile->Read( file, 16 );
 	RoQ_init();
@@ -1339,14 +1339,14 @@ static boolean fill_input_buffer( j_decompress_ptr cinfo )
   nbytes = INPUT_BUF_SIZE;
   if (nbytes > src->memsize) nbytes = src->memsize;
   if (nbytes == 0) {
-    /* Insert a fake EOI marker */
-    src->buffer[0] = (JOCTET) 0xFF;
-    src->buffer[1] = (JOCTET) JPEG_EOI;
-    nbytes = 2;
+	/* Insert a fake EOI marker */
+	src->buffer[0] = (JOCTET) 0xFF;
+	src->buffer[1] = (JOCTET) JPEG_EOI;
+	nbytes = 2;
   } else {
 	  memcpy( src->buffer, src->infile, INPUT_BUF_SIZE );
 	  src->infile = src->infile + nbytes;
- 	  src->memsize = src->memsize - INPUT_BUF_SIZE;
+	  src->memsize = src->memsize - INPUT_BUF_SIZE;
   }
   src->pub.next_input_byte = src->buffer;
   src->pub.bytes_in_buffer = nbytes;
@@ -1394,8 +1394,8 @@ skip_input_data (j_decompress_ptr cinfo, long num_bytes)
    */
   if (num_bytes > 0) {
 	src->infile = src->infile + num_bytes;
-    src->pub.next_input_byte += (size_t) num_bytes;
-    src->pub.bytes_in_buffer -= (size_t) num_bytes;
+	src->pub.next_input_byte += (size_t) num_bytes;
+	src->pub.bytes_in_buffer -= (size_t) num_bytes;
   }
 }
 
@@ -1438,12 +1438,12 @@ jpeg_memory_src (j_decompress_ptr cinfo, byte *infile, int size)
    * manager serially with the same JPEG object.  Caveat programmer.
    */
   if (cinfo->src == NULL) {	/* first time for this JPEG object? */
-    cinfo->src = (struct jpeg_source_mgr *)
-      (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
+	cinfo->src = (struct jpeg_source_mgr *)
+	  (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
 				  sizeof(my_source_mgr));
-    src = (my_src_ptr) cinfo->src;
-    src->buffer = (JOCTET *)
-      (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
+	src = (my_src_ptr) cinfo->src;
+	src->buffer = (JOCTET *)
+	  (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
 				  INPUT_BUF_SIZE * sizeof(JOCTET));
   }
 
@@ -1503,11 +1503,11 @@ int JPEGBlit( byte *wStatus, byte *data, int datasize )
   /* Step 5: Start decompressor */
 
 	cinfo.dct_method = JDCT_IFAST;
-    cinfo.dct_method = JDCT_FASTEST;
+	cinfo.dct_method = JDCT_FASTEST;
 	cinfo.dither_mode = JDITHER_NONE;
-    cinfo.do_fancy_upsampling = FALSE;
+	cinfo.do_fancy_upsampling = FALSE;
 //	cinfo.out_color_space = JCS_GRAYSCALE;
-	
+
   (void) jpeg_start_decompress(&cinfo);
   /* We can ignore the return value since suspension is not possible
    * with the stdio data source.
@@ -1518,7 +1518,7 @@ int JPEGBlit( byte *wStatus, byte *data, int datasize )
    * output image dimensions available, as well as the output colormap
    * if we asked for color quantization.
    * In this example, we need to make an output work buffer of the right size.
-   */ 
+   */
   /* JSAMPLEs per row in output buffer */
   row_stride = cinfo.output_width * cinfo.output_components;
 
@@ -1532,16 +1532,16 @@ int JPEGBlit( byte *wStatus, byte *data, int datasize )
   /* Here we use the library's state variable cinfo.output_scanline as the
    * loop counter, so that we don't have to keep track ourselves.
    */
-   
+
   wStatus += (cinfo.output_height-1)*row_stride;
   while (cinfo.output_scanline < cinfo.output_height) {
-    /* jpeg_read_scanlines expects an array of pointers to scanlines.
-     * Here the array is only one element long, but you could ask for
-     * more than one scanline at a time if that's more convenient.
-     */
-    (void) jpeg_read_scanlines(&cinfo, &buffer[0], 1);
+	/* jpeg_read_scanlines expects an array of pointers to scanlines.
+	 * Here the array is only one element long, but you could ask for
+	 * more than one scanline at a time if that's more convenient.
+	 */
+	(void) jpeg_read_scanlines(&cinfo, &buffer[0], 1);
 
-    /* Assume put_scanline_someplace wants a pointer and sample count. */
+	/* Assume put_scanline_someplace wants a pointer and sample count. */
 	memcpy( wStatus, &buffer[0][0], row_stride );
 	/*
 	int x;
@@ -1588,13 +1588,13 @@ void idCinematicLocal::RoQInterrupt(void) {
 	byte				*framedata;
 
 	iFile->Read( file, RoQFrameSize+8 );
-	if ( RoQPlayed >= ROQSize ) { 
+	if ( RoQPlayed >= ROQSize ) {
 		if (looping) {
 			RoQReset();
 		} else {
 			status = FMV_EOF;
 		}
-		return; 
+		return;
 	}
 
 	framedata = file;
@@ -1602,19 +1602,19 @@ void idCinematicLocal::RoQInterrupt(void) {
 // new frame is ready
 //
 redump:
-	switch(roq_id) 
+	switch(roq_id)
 	{
 		case	ROQ_QUAD_VQ:
 			if ((numQuads&1)) {
 				normalBuffer0 = t[1];
 				RoQPrepMcomp( roqF0, roqF1 );
 				blitVQQuad32fs( qStatus[1], framedata);
-				buf = 	image + screenDelta;
+				buf =	image + screenDelta;
 			} else {
 				normalBuffer0 = t[0];
 				RoQPrepMcomp( roqF0, roqF1 );
 				blitVQQuad32fs( qStatus[0], framedata );
-				buf = 	image;
+				buf =	image;
 			}
 			if (numQuads == 0) {		// first frame
 				memcpy(image+screenDelta, image, samplesPerLine*ysize);
@@ -1644,7 +1644,7 @@ redump:
 			RoQFrameSize = 0;
 			break;
 		case	ROQ_QUAD_JPEG:
-			if (!numQuads) { 
+			if (!numQuads) {
 				normalBuffer0 = t[0];
 				JPEGBlit( image, framedata, RoQFrameSize );
 				memcpy(image+screenDelta, image, samplesPerLine*ysize);
@@ -1654,19 +1654,19 @@ redump:
 		default:
 			status = FMV_EOF;
 			break;
-	}	
+	}
 //
 // read in next frame data
 //
-	if ( RoQPlayed >= ROQSize ) { 
+	if ( RoQPlayed >= ROQSize ) {
 		if (looping) {
 			RoQReset();
 		} else {
 			status = FMV_EOF;
 		}
-		return; 
+		return;
 	}
-	
+
 	framedata		 += RoQFrameSize;
 	roq_id		 = framedata[0] + framedata[1]*256;
 	RoQFrameSize = framedata[2] + framedata[3]*256 + framedata[4]*65536;
@@ -1682,8 +1682,8 @@ redump:
 		}
 		return;
 	}
-	if (inMemory && (status != FMV_EOF)) { 
-		inMemory = false; framedata += 8; goto redump; 
+	if (inMemory && (status != FMV_EOF)) {
+		inMemory = false; framedata += 8; goto redump;
 	}
 //
 // one more frame hits the dust
@@ -1704,7 +1704,7 @@ void idCinematicLocal::RoQ_init( void ) {
 
 	/*	get frame rate */
 	roqFPS	 = file[ 6] + file[ 7]*256;
-	
+
 	if (!roqFPS) roqFPS = 30;
 
 	numQuads = -1;

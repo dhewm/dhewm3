@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -149,7 +149,7 @@ bool idRenderWorldLocal::PortalIsFoggedOut( const portal_t *p ) {
 FloodViewThroughArea_r
 ===================
 */
-void idRenderWorldLocal::FloodViewThroughArea_r( const idVec3 origin, int areaNum, 
+void idRenderWorldLocal::FloodViewThroughArea_r( const idVec3 origin, int areaNum,
 								 const struct portalStack_s *ps ) {
 	portal_t*		p;
 	float			d;
@@ -231,7 +231,7 @@ void idRenderWorldLocal::FloodViewThroughArea_r( const idVec3 origin, int areaNu
 		// find the screen pixel bounding box of the remaining portal
 		// so we can scissor things outside it
 		newStack.rect = ScreenRectFromWinding( &w, &tr.identitySpace );
-		
+
 		// slop might have spread it a pixel outside, so trim it back
 		newStack.rect.Intersect( ps->rect );
 
@@ -325,7 +325,7 @@ void idRenderWorldLocal::FlowViewThroughPortals( const idVec3 origin, int numPla
 FloodLightThroughArea_r
 ===================
 */
-void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int areaNum, 
+void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int areaNum,
 								 const struct portalStack_s *ps ) {
 	portal_t*		p;
 	float			d;
@@ -340,7 +340,7 @@ void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int
 	area = &portalAreas[ areaNum ];
 
 	// add an areaRef
-	AddLightRefToArea( light, area );	
+	AddLightRefToArea( light, area );
 
 	// go through all the portals
 	for ( p = area->portals; p; p = p->next ) {
@@ -585,7 +585,7 @@ bool idRenderWorldLocal::CullEntityByPortals( const idRenderEntityLocal *entity,
 AddAreaEntityRefs
 
 Any models that are visible through the current portalStack will
-have their scissor 
+have their scissor
 ===================
 */
 void idRenderWorldLocal::AddAreaEntityRefs( int areaNum, const portalStack_t *ps ) {
@@ -614,7 +614,7 @@ void idRenderWorldLocal::AddAreaEntityRefs( int areaNum, const portalStack_t *ps
 					&& entity->parms.suppressSurfaceInViewID == tr.viewDef->renderView.viewID ) {
 				continue;
 			}
-			if ( entity->parms.allowSurfaceInViewID 
+			if ( entity->parms.allowSurfaceInViewID
 					&& entity->parms.allowSurfaceInViewID != tr.viewDef->renderView.viewID ) {
 				continue;
 			}

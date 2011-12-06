@@ -24,4 +24,3 @@ cat $TMPDIR/sorted-unique.log | zip -b $TMPDIR $3 -@ 1>/dev/null
 
 md5sum $3
 echo "done."
-

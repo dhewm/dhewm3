@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -566,7 +566,7 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 	} else {
 		spectated = player;
 	}
-	
+
 	// free too old snapshots
 	FreeSnapshotsOlderThanSequence( clientNum, sequence - 64 );
 
@@ -735,7 +735,7 @@ void idGameLocal::ServerProcessEntityNetworkEventQueue( void ) {
 		}
 
 		idEntityPtr< idEntity > entPtr;
-			
+
 		if( !entPtr.SetSpawnId( event->spawnId ) ) {
 			NetworkEventWarning( event, "Entity does not exist any longer, or has not been spawned yet." );
 		} else {
@@ -1262,7 +1262,7 @@ void idGameLocal::ClientProcessEntityNetworkEventQueue( void ) {
 		}
 
 		idEntityPtr< idEntity > entPtr;
-			
+
 		if( !entPtr.SetSpawnId( event->spawnId ) ) {
 			if( !gameLocal.entities[ event->spawnId & ( ( 1 << GENTITYNUM_BITS ) - 1 ) ] ) {
 				// if new entity exists in this position, silently ignore
@@ -1528,7 +1528,7 @@ idGameLocal::Tokenize
 void idGameLocal::Tokenize( idStrList &out, const char *in ) {
 	char buf[ MAX_STRING_CHARS ];
 	char *token, *next;
-	
+
 	idStr::Copynz( buf, in, MAX_STRING_CHARS );
 	token = buf;
 	next = strchr( token, ';' );
@@ -1543,7 +1543,7 @@ void idGameLocal::Tokenize( idStrList &out, const char *in ) {
 			next = strchr( token, ';' );
 		} else {
 			token = NULL;
-		}		
+		}
 	}
 }
 
@@ -1580,7 +1580,7 @@ bool idGameLocal::DownloadRequest( const char *IP, const char *guid, const char 
 				reply += ";";
 			}
 			if ( pakList[ i ][ 0 ] == '\0' ) {
- 				if ( i == 0 ) {
+				if ( i == 0 ) {
 					// pak 0 will always miss when client doesn't ask for game bin
 					common->DPrintf( "no game pak request\n" );
 				} else {
@@ -1602,7 +1602,7 @@ bool idGameLocal::DownloadRequest( const char *IP, const char *guid, const char 
 				common->DPrintf( "download for %s: %s\n", IP, url.c_str() );
 			}
 		}
-		
+
 		idStr::Copynz( urls, reply, MAX_STRING_CHARS );
 		return true;
 	}
@@ -1693,7 +1693,7 @@ entityNetEvent_t* idEventQueue::RemoveLast( void ) {
 	if ( !end ) {
 		start = NULL;
 	} else {
-		end->next = NULL;		
+		end->next = NULL;
 	}
 
 	event->next = NULL;
@@ -1737,7 +1737,7 @@ void idEventQueue::Enqueue( entityNetEvent_t *event, outOfOrderBehaviour_t behav
 			cur->next = event;
 		}
 		return;
-	} 
+	}
 
 	// add the new event
 	event->next = NULL;

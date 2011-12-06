@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -67,26 +67,26 @@ Unload the script from memory
 void rvDebuggerScript::Unload ( void )
 {
 	delete[] mContents;
-	
+
 	if ( mInterface )
 	{
 		delete mInterface;
 	}
 	else
-	{	
+	{
 		delete mProgram;
 	}
-	
+
 	mContents  = NULL;
 	mProgram   = NULL;
 	mInterface = NULL;
-}	
+}
 
 /*
 ================
 rvDebuggerScript::Load
 
-Loads the debugger script and attempts to compile it using the method 
+Loads the debugger script and attempts to compile it using the method
 appropriate for the file being loaded.  If the script cant be compiled
 the loading of the script fails
 ================
@@ -101,23 +101,23 @@ bool rvDebuggerScript::Load ( const char* filename )
 
 	// Cache the filename used to load the script
 	mFilename = filename;
-		
+
 	// Read in the file
-	size = fileSystem->ReadFile ( filename, &buffer, &mModifiedTime );	
+	size = fileSystem->ReadFile ( filename, &buffer, &mModifiedTime );
 	if ( buffer == NULL )
 	{
 		return false;
 	}
-	
+
 	// Copy the buffer over
 	mContents = new char [ size + 1 ];
 	memcpy ( mContents, buffer, size );
-	mContents[size] = 0;	
-	
+	mContents[size] = 0;
+
 	// Cleanup
 	fileSystem->FreeFile ( buffer );
 
-	// Now compile the script so we can tell what a valid line is, etc..  If its 
+	// Now compile the script so we can tell what a valid line is, etc..  If its
 	// a gui file then we need to parse it using the userinterface system rather
 	// than the normal script compiler.
 	try
@@ -126,7 +126,7 @@ bool rvDebuggerScript::Load ( const char* filename )
 		mProgram = new idProgram;
 		mProgram->BeginCompilation ( );
 		mProgram->CompileFile ( SCRIPT_DEFAULT );
-		
+
 		//BSM Nerve: Loads a game specific main script file
 		idStr gamedir = cvarSystem->GetCVarString( "fs_game" );
 		if(gamedir.Length() > 0) {
@@ -137,7 +137,7 @@ bool rvDebuggerScript::Load ( const char* filename )
 			}
 
 		}
-		
+
 		// Make sure the file isnt already compiled before trying to compile it again
 		for ( int f = mProgram->NumFilenames() - 1; f >= 0; f -- )
 		{
@@ -149,12 +149,12 @@ bool rvDebuggerScript::Load ( const char* filename )
 				break;
 			}
 		}
-		
+
 		if ( f < 0 )
 		{
 			mProgram->CompileText ( filename, mContents, false );
 		}
-		
+
 		mProgram->FinishCompilation ( );
 	}
 	catch ( idException& )
@@ -164,9 +164,9 @@ bool rvDebuggerScript::Load ( const char* filename )
 		mProgram = NULL;
 		delete[] mContents;
 		mContents = NULL;
-		
+
 		// TODO: Should cache the error for the dialog box
-		
+
 		return false;
 	}
 
@@ -181,7 +181,7 @@ Reload the contents of the script
 ================
 */
 bool rvDebuggerScript::Reload ( void )
-{	
+{
 	return Load ( mFilename );
 }
 
@@ -195,7 +195,7 @@ Determines whether or not the given line number within the script is a valid lin
 bool rvDebuggerScript::IsLineCode ( int linenumber )
 {
 	int i;
-	
+
 	assert ( mProgram );
 
 	// Run through all the statements in the program and see if any match the
@@ -207,7 +207,7 @@ bool rvDebuggerScript::IsLineCode ( int linenumber )
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -222,11 +222,11 @@ it was loaded.
 bool rvDebuggerScript::IsFileModified ( bool updateTime )
 {
 	ID_TIME_T	t;
-	bool	result = false;		
+	bool	result = false;
 
 	// Grab the filetime and shut the file down
 	fileSystem->ReadFile ( mFilename, NULL, &t );
-	
+
 	// Has the file been modified?
 	if ( t > mModifiedTime )
 	{
@@ -239,6 +239,6 @@ bool rvDebuggerScript::IsFileModified ( bool updateTime )
 	{
 		mModifiedTime = t;
 	}
-	
-	return result;	
+
+	return result;
 }

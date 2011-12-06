@@ -6,13 +6,13 @@
 //
 //  This material is provided "as is", with absolutely no warranty expressed
 //  or implied. Any use is at your own risk.
-// 
-//  Permission to use or copy this software for any purpose is hereby granted 
+//
+//  Permission to use or copy this software for any purpose is hereby granted
 //  without fee, provided the above notices are retained on all copies.
 //  Permission to modify the code and to distribute modified code is granted,
 //  provided the above notices are retained, and a notice that the code was
 //  modified is included with the above copyright notice.
-// 
+//
 //	If you use this code, drop me an email.  I'd like to know if you find the code
 //	useful.
 
@@ -495,13 +495,13 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 		{
 			HGDIOBJ oPen = pDC->SelectObject(GetStockObject(NULL_PEN));
 			HGDIOBJ oBrush = pDC->SelectObject(GetSysColorBrush(COLOR_HIGHLIGHT));
-			
+
 			CRect dr;
 			dr = drc;
 			dr.left = PROPTREEITEM_EXPANDCOLUMN;
-			
+
 			pDC->Rectangle(&dr);
-			
+
 			pDC->SelectObject(oPen);
 			pDC->SelectObject(oBrush);
 
@@ -558,7 +558,7 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 		// create clip region
 		hRgn = CreateRectRgn(m_rc.left, m_rc.top, m_rc.right, m_rc.bottom);
 		SelectClipRgn(pDC->m_hDC, hRgn);
-		
+
 		DrawAttribute(pDC, m_rc);
 
 		SelectClipRgn(pDC->m_hDC, NULL);

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -75,7 +75,7 @@ void idDeviceContext::SetupFonts() {
 	fonts.SetGranularity( 1 );
 
 	fontLang = cvarSystem->GetCVarString( "sys_lang" );
-	
+
 	// western european languages can use the english font
 	if ( fontLang == "french" || fontLang == "german" || fontLang == "spanish" || fontLang == "italian" ) {
 		fontLang = "english";
@@ -160,14 +160,14 @@ void idDeviceContext::SetTransformInfo(const idVec3 &org, const idMat3 &m) {
 	mat = m;
 }
 
-// 
+//
 //  added method
 void idDeviceContext::GetTransformInfo(idVec3& org, idMat3& m )
 {
 	m = mat;
 	org = origin;
 }
-// 
+//
 
 void idDeviceContext::PopClipRect() {
 	if (clipRects.Num()) {
@@ -192,7 +192,7 @@ bool idDeviceContext::ClippedCoords(float *x, float *y, float *w, float *h, floa
 	int c = clipRects.Num();
 	while( --c > 0 ) {
 		idRectangle *clipRect = &clipRects[c];
- 
+
 		float ox = *x;
 		float oy = *y;
 		float ow = *w;
@@ -335,7 +335,7 @@ void idDeviceContext::DrawStretchPic(float x, float y, float w, float h, float s
 	verts[3].tangents[1][0] = 0;
 	verts[3].tangents[1][1] = 1;
 	verts[3].tangents[1][2] = 0;
-	
+
 	bool ident = !mat.IsIdentity();
 	if ( ident ) {
 		verts[0].xyz -= origin;
@@ -353,7 +353,7 @@ void idDeviceContext::DrawStretchPic(float x, float y, float w, float h, float s
 	}
 
 	renderSystem->DrawStretchPic( &verts[0], &indexes[0], 4, 6, shader, ident );
-	
+
 }
 
 
@@ -362,8 +362,8 @@ void idDeviceContext::DrawMaterial(float x, float y, float w, float h, const idM
 	renderSystem->SetColor(color);
 
 	float	s0, s1, t0, t1;
-// 
-//  handle negative scales as well	
+//
+//  handle negative scales as well
 	if ( scalex < 0 )
 	{
 		w *= -1;
@@ -374,7 +374,7 @@ void idDeviceContext::DrawMaterial(float x, float y, float w, float h, const idM
 		h *= -1;
 		scaley *= -1;
 	}
-// 
+//
 	if( w < 0 ) {	// flip about vertical
 		w  = -w;
 		s0 = 1 * scalex;
@@ -405,12 +405,12 @@ void idDeviceContext::DrawMaterial(float x, float y, float w, float h, const idM
 }
 
 void idDeviceContext::DrawMaterialRotated(float x, float y, float w, float h, const idMaterial *mat, const idVec4 &color, float scalex, float scaley, float angle) {
-	
+
 	renderSystem->SetColor(color);
 
 	float	s0, s1, t0, t1;
-	// 
-	//  handle negative scales as well	
+	//
+	//  handle negative scales as well
 	if ( scalex < 0 )
 	{
 		w *= -1;
@@ -421,7 +421,7 @@ void idDeviceContext::DrawMaterialRotated(float x, float y, float w, float h, co
 		h *= -1;
 		scaley *= -1;
 	}
-	// 
+	//
 	if( w < 0 ) {	// flip about vertical
 		w  = -w;
 		s0 = 1 * scalex;
@@ -452,7 +452,7 @@ void idDeviceContext::DrawMaterialRotated(float x, float y, float w, float h, co
 }
 
 void idDeviceContext::DrawStretchPicRotated(float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *shader, float angle) {
-	
+
 	idDrawVert verts[4];
 	glIndex_t indexes[6];
 	indexes[0] = 3;
@@ -572,7 +572,7 @@ void idDeviceContext::DrawFilledRect( float x, float y, float w, float h, const 
 	}
 
 	renderSystem->SetColor(color);
-	
+
 	if (ClippedCoords(&x, &y, &w, &h, NULL, NULL, NULL, NULL)) {
 		return;
 	}
@@ -589,7 +589,7 @@ void idDeviceContext::DrawRect( float x, float y, float w, float h, float size, 
 	}
 
 	renderSystem->SetColor(color);
-	
+
 	if (ClippedCoords(&x, &y, &w, &h, NULL, NULL, NULL, NULL)) {
 		return;
 	}
@@ -877,7 +877,7 @@ idRegion *idDeviceContext::GetTextRegion(const char *text, float textScale, idRe
 		return;
 	}
 
-	y = lineSkip + rectDraw.y + yStart; 
+	y = lineSkip + rectDraw.y + yStart;
 	len = 0;
 	buff[0] = '\0';
 	newLine = 0;
@@ -896,7 +896,7 @@ idRegion *idDeviceContext::GetTextRegion(const char *text, float textScale, idRe
 			if (len) {
 
 				float x = rectDraw.x ;
-				
+
 				buff[newLine] = '\0';
 				DrawText(x, y, textScale, color, buff, 0, 0, 0);
 				if (!wrap) {
@@ -931,7 +931,7 @@ void idDeviceContext::DrawEditCursor( float x, float y, float scale ) {
 	float useScale = scale * useFont->glyphScale;
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
 	float	yadj = useScale * glyph2->top;
- 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
+	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
 }
 
 int idDeviceContext::DrawText( const char *text, float textScale, int textAlign, idVec4 color, idRectangle rectDraw, bool wrap, int cursor, bool calcOnly, idList<int> *breaks, int limit ) {
@@ -963,7 +963,7 @@ int idDeviceContext::DrawText( const char *text, float textScale, int textAlign,
 
 	textPtr = text;
 
-	y = lineSkip + rectDraw.y; 
+	y = lineSkip + rectDraw.y;
 	len = 0;
 	buff[0] = '\0';
 	newLine = 0;

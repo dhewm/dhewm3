@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -95,8 +95,8 @@ skipspace:
 	if (*script_p == '"')
 	{
 		script_p++;
-    //if (*script_p == '"')   // handle double quotes i suspect they are put in by other editors cccasionally
-    //  script_p++;
+	//if (*script_p == '"')   // handle double quotes i suspect they are put in by other editors cccasionally
+	//  script_p++;
 		while ( *script_p != '"' )
 		{
 			if (!*script_p)
@@ -106,8 +106,8 @@ skipspace:
 				Error ("Token too large on line %i",scriptline);
 		}
 		script_p++;
-    //if (*script_p == '"')   // handle double quotes i suspect they are put in by other editors cccasionally
-    //  script_p++;
+	//if (*script_p == '"')   // handle double quotes i suspect they are put in by other editors cccasionally
+	//  script_p++;
 	}
 	else while ( *script_p > 32 )
 	{
@@ -117,7 +117,7 @@ skipspace:
 	}
 
 	*token_p = 0;
-	
+
 	return true;
 }
 
@@ -154,4 +154,3 @@ bool TokenAvailable (void)
 
 	return true;
 }
-

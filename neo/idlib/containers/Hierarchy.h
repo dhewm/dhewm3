@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -43,7 +43,7 @@ public:
 
 						idHierarchy();
 						~idHierarchy();
-	
+
 	void				SetOwner( type *object );
 	type *				Owner( void ) const;
 	void				ParentTo( idHierarchy &node );
@@ -76,7 +76,7 @@ idHierarchy<type>::idHierarchy
 template< class type >
 idHierarchy<type>::idHierarchy() {
 	owner	= NULL;
-	parent	= NULL;	
+	parent	= NULL;
 	sibling	= NULL;
 	child	= NULL;
 }

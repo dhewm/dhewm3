@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -74,7 +74,7 @@ int	vkeyToDoom3Key[256] = {
 	/*0x58*/	K_KP_RIGHTARROW, K_KP_HOME, '?', K_KP_UPARROW, K_KP_PGUP, '?', '?', '?',
 	/*0x60*/	K_F5, K_F6, K_F7, K_F3, K_F8, K_F9, '?', K_F11,
 	/*0x68*/	'?', K_PRINT_SCR, '?', K_F14, '?', K_F10, '?', K_F12,
-	/*0x70*/	'?', K_F15, K_INS, K_HOME, K_PGUP, K_DEL, K_F4, K_END,	
+	/*0x70*/	'?', K_F15, K_INS, K_HOME, K_PGUP, K_DEL, K_F4, K_END,
 	/*0x78*/	K_F2, K_PGDN, K_F1, K_LEFTARROW, K_RIGHTARROW, K_DOWNARROW, K_UPARROW, K_POWER
 };
 
@@ -93,7 +93,7 @@ int	vkeyToDoom3Key_French[256] = {
 	/*0x58*/	K_KP_RIGHTARROW, K_KP_HOME, '?', K_KP_UPARROW, K_KP_PGUP, '?', '?', '?',
 	/*0x60*/	K_F5, K_F6, K_F7, K_F3, K_F8, K_F9, '?', K_F11,
 	/*0x68*/	'?', K_PRINT_SCR, '?', K_F14, '?', K_F10, '?', K_F12,
-	/*0x70*/	'?', K_F15, K_INS, K_HOME, K_PGUP, K_DEL, K_F4, K_END,	
+	/*0x70*/	'?', K_F15, K_INS, K_HOME, K_PGUP, K_DEL, K_F4, K_END,
 	/*0x78*/	K_F2, K_PGDN, K_F1, K_LEFTARROW, K_RIGHTARROW, K_DOWNARROW, K_UPARROW, K_POWER
 };
 
@@ -112,11 +112,11 @@ int	vkeyToDoom3Key_German[256] = {
 	/*0x58*/	K_KP_RIGHTARROW, K_KP_HOME, '?', K_KP_UPARROW, K_KP_PGUP, '?', '?', '?',
 	/*0x60*/	K_F5, K_F6, K_F7, K_F3, K_F8, K_F9, '?', K_F11,
 	/*0x68*/	'?', K_PRINT_SCR, '?', K_F14, '?', K_F10, '?', K_F12,
-	/*0x70*/	'?', K_F15, K_INS, K_HOME, K_PGUP, K_DEL, K_F4, K_END,	
+	/*0x70*/	'?', K_F15, K_INS, K_HOME, K_PGUP, K_DEL, K_F4, K_END,
 	/*0x78*/	K_F2, K_PGDN, K_F1, K_LEFTARROW, K_RIGHTARROW, K_DOWNARROW, K_UPARROW, K_POWER
 };
 
-static const int *vkeyTable = vkeyToDoom3Key;	
+static const int *vkeyTable = vkeyToDoom3Key;
 
 /*
  ===========
@@ -125,7 +125,7 @@ static const int *vkeyTable = vkeyToDoom3Key;
  */
 void Sys_InitScanTable( void ) {
 	KeyboardLayoutRef kbLayout;
-	
+
 	idStr lang = cvarSystem->GetCVarString( "sys_lang" );
 	if ( lang.Length() == 0 ) {
 		lang = "english";
@@ -156,12 +156,12 @@ void Sys_InitScanTable( void ) {
 
 void Sys_InitInput( void ) {
 	common->Printf( "------- Input Initialization -------\n" );
-	
+
 	if ( !distantPast ) {
 		distantPast = [ [ NSDate distantPast ] retain ];
 	}
 
-    IN_ActivateMouse();
+	IN_ActivateMouse();
 
 	inputActive = true;
 }
@@ -169,79 +169,79 @@ void Sys_InitInput( void ) {
 void Sys_ShutdownInput( void ) {
 	common->Printf( "------- Input Shutdown -------\n" );
 
-    if ( !inputActive ) {
-        return;
-    }
-    inputActive = false;
-    if ( mouseActive ) {
+	if ( !inputActive ) {
+		return;
+	}
+	inputActive = false;
+	if ( mouseActive ) {
 		IN_DeactivateMouse();
-    }
-	
-    common->Printf( "------------------------------\n" );
+	}
+
+	common->Printf( "------------------------------\n" );
 }
 
 void processMouseMovedEvent( NSEvent *mouseMovedEvent ) {
-    CGMouseDelta dx, dy;
-    
-    if ( !mouseActive ) {
-        return;
+	CGMouseDelta dx, dy;
+
+	if ( !mouseActive ) {
+		return;
 	}
 
 #if 0
 
 #define ACT_LIKE_WINDOWS
 #ifdef ACT_LIKE_WINDOWS
-    cvar_t *in_mouseLowEndSlope = Cvar_Get("in_mouseLowEndSlope", "3.5", CVAR_ARCHIVE);
-    if (in_mouseLowEndSlope->value < 1) {
-        Cvar_Set("in_mouseLowEndSlope", "1");
-    }
+	cvar_t *in_mouseLowEndSlope = Cvar_Get("in_mouseLowEndSlope", "3.5", CVAR_ARCHIVE);
+	if (in_mouseLowEndSlope->value < 1) {
+		Cvar_Set("in_mouseLowEndSlope", "1");
+	}
 #else
-    cvar_t *in_mouseLowEndSlope = Cvar_Get("in_mouseLowEndSlope", "1", CVAR_ARCHIVE);
-    if (in_mouseLowEndSlope->value < 1) {
-        Cvar_Set("in_mouseLowEndSlope", "1");
-    }
+	cvar_t *in_mouseLowEndSlope = Cvar_Get("in_mouseLowEndSlope", "1", CVAR_ARCHIVE);
+	if (in_mouseLowEndSlope->value < 1) {
+		Cvar_Set("in_mouseLowEndSlope", "1");
+	}
 #endif
 
-    cvar_t *in_mouseHighEndCutoff = Cvar_Get("in_mouseHighEndCutoff", "20", CVAR_ARCHIVE);
-    if (in_mouseLowEndSlope->value < 1) {
-        Cvar_Set("in_mouseHighEndCutoff", "1");
-    }
+	cvar_t *in_mouseHighEndCutoff = Cvar_Get("in_mouseHighEndCutoff", "20", CVAR_ARCHIVE);
+	if (in_mouseLowEndSlope->value < 1) {
+		Cvar_Set("in_mouseHighEndCutoff", "1");
+	}
 
 #endif
 
-    CGGetLastMouseDelta(&dx, &dy);
-    
-    if ( dx || dy ) {
-  #if 0 // this is be handled by the mouse driver clean me out later       
-      CGMouseDelta distSqr;
-        float m0, N;
-        
-        distSqr = dx * dx + dy * dy;
-        //Com_Printf("distSqr = %d\n", distSqr);
+	CGGetLastMouseDelta(&dx, &dy);
 
-        /* This code is here to help people that like the feel of the Logitech USB Gaming Mouse with the Win98 drivers.  By empirical testing, the Windows drivers seem to be more heavily accelerated at the low end of the curve. */
-        //N = in_mouseHighEndCutoff->value;
+	if ( dx || dy ) {
+  #if 0 // this is be handled by the mouse driver clean me out later
+	  CGMouseDelta distSqr;
+		float m0, N;
+
+		distSqr = dx * dx + dy * dy;
+		//Com_Printf("distSqr = %d\n", distSqr);
+
+		/* This code is here to help people that like the feel of the Logitech USB Gaming Mouse with the Win98 drivers.  By empirical testing, the Windows drivers seem to be more heavily accelerated at the low end of the curve. */
+		//N = in_mouseHighEndCutoff->value;
 		N = 1;
 
-        if (distSqr < N*N) {
-            float dist, accel, scale;
-            
-            //m0 = in_mouseLowEndSlope->value;
-			m0 = 1;
-            dist = sqrt(distSqr);
-            accel = (((m0 - 1.0)/(N*N) * dist + (2.0 - 2.0*m0)/N) * dist + m0) * dist;
-            
-            scale = accel / dist;
-            //Com_Printf("dx = %d, dy = %d, dist = %f, accel = %f, scale = %f\n", dx, dy, dist, accel, scale);
+		if (distSqr < N*N) {
+			float dist, accel, scale;
 
-            dx *= scale;
-            dy *= scale;
-        }
+			//m0 = in_mouseLowEndSlope->value;
+			m0 = 1;
+			dist = sqrt(distSqr);
+			accel = (((m0 - 1.0)/(N*N) * dist + (2.0 - 2.0*m0)/N) * dist + m0) * dist;
+
+			scale = accel / dist;
+			//Com_Printf("dx = %d, dy = %d, dist = %f, accel = %f, scale = %f\n", dx, dy, dist, accel, scale);
+
+			dx *= scale;
+			dy *= scale;
+		}
 #endif
-        Posix_QueEvent( SE_MOUSE, dx, dy, 0, NULL );
+		Posix_QueEvent( SE_MOUSE, dx, dy, 0, NULL );
 		Posix_AddMousePollEvent( M_DELTAX, dx );
 		Posix_AddMousePollEvent( M_DELTAY, dy );
-    }
+	}
 }
 
 inline bool OSX_LookupCharacter(unsigned short vkey, unsigned int modifiers, bool keyDownFlag, unsigned char *outChar)
@@ -251,7 +251,7 @@ inline bool OSX_LookupCharacter(unsigned short vkey, unsigned int modifiers, boo
 	UniChar unicodeString[16];
 	UniCharCount actualStringLength = 0;
 	static UInt32 keyTranslateState = 0;
-	
+
 	// Only want character if Translate() returns a single character
 	if ( sKLuchrData ) {
 		UCKeyTranslate( (UCKeyboardLayout*)sKLuchrData, vkey, keyDownFlag ? kUCKeyActionDown : kUCKeyActionUp, modifiers,
@@ -288,92 +288,92 @@ void OSX_ProcessKeyEvent( NSEvent *keyEvent, bool keyDownFlag ) {
 	if ( [ keyEvent modifierFlags ] & NSCommandKeyMask )
 		modifiers |= cmdKey;
 	modifiers >>= 8;
-				
+
 	int doomKey = (unsigned char)vkeyTable[vkey];
 	Posix_QueEvent( SE_KEY, doomKey, keyDownFlag, 0, NULL );
 	if ( keyDownFlag ) {
-		if ( OSX_LookupCharacter(vkey, modifiers, keyDownFlag, &character ) && 
+		if ( OSX_LookupCharacter(vkey, modifiers, keyDownFlag, &character ) &&
 			 character != Sys_GetConsoleKey( false ) && character != Sys_GetConsoleKey( true ) ) {
 			Posix_QueEvent( SE_CHAR, character, 0, 0, NULL);
 		}
 	}
 	Posix_AddKeyboardPollEvent( doomKey, keyDownFlag );
-	
+
 	return;
 }
 
 void sendEventForMaskChangeInFlags( int quakeKey, unsigned int modifierMask, unsigned int oldModifierFlags, unsigned int newModifierFlags ) {
-    bool oldHadModifier, newHasModifier;
+	bool oldHadModifier, newHasModifier;
 
-    oldHadModifier = (oldModifierFlags & modifierMask) != 0;
-    newHasModifier = (newModifierFlags & modifierMask) != 0;
-    if (oldHadModifier != newHasModifier) {
-        //NSLog(@"Key %d posted for modifier mask modifierMask", quakeKey);
-        Posix_QueEvent( SE_KEY, quakeKey, newHasModifier, 0, NULL);
+	oldHadModifier = (oldModifierFlags & modifierMask) != 0;
+	newHasModifier = (newModifierFlags & modifierMask) != 0;
+	if (oldHadModifier != newHasModifier) {
+		//NSLog(@"Key %d posted for modifier mask modifierMask", quakeKey);
+		Posix_QueEvent( SE_KEY, quakeKey, newHasModifier, 0, NULL);
 		Posix_AddKeyboardPollEvent( quakeKey, newHasModifier );
-    }
+	}
 }
 
 void processFlagsChangedEvent( NSEvent *flagsChangedEvent ) {
-    static int	oldModifierFlags;
-    int			newModifierFlags;
+	static int	oldModifierFlags;
+	int			newModifierFlags;
 
-    newModifierFlags = [flagsChangedEvent modifierFlags];
-    sendEventForMaskChangeInFlags( K_ALT, NSAlternateKeyMask, oldModifierFlags, newModifierFlags );
-    sendEventForMaskChangeInFlags( K_CTRL, NSControlKeyMask, oldModifierFlags, newModifierFlags );
-    sendEventForMaskChangeInFlags( K_SHIFT, NSShiftKeyMask, oldModifierFlags, newModifierFlags );
-    oldModifierFlags = newModifierFlags;
+	newModifierFlags = [flagsChangedEvent modifierFlags];
+	sendEventForMaskChangeInFlags( K_ALT, NSAlternateKeyMask, oldModifierFlags, newModifierFlags );
+	sendEventForMaskChangeInFlags( K_CTRL, NSControlKeyMask, oldModifierFlags, newModifierFlags );
+	sendEventForMaskChangeInFlags( K_SHIFT, NSShiftKeyMask, oldModifierFlags, newModifierFlags );
+	oldModifierFlags = newModifierFlags;
 }
 
 void processSystemDefinedEvent( NSEvent *systemDefinedEvent ) {
-    static int oldButtons = 0;
-    int buttonsDelta;
-    int buttons;
-    int isDown;
-    
-    if ( [systemDefinedEvent subtype] == 7 ) {
+	static int oldButtons = 0;
+	int buttonsDelta;
+	int buttons;
+	int isDown;
 
-        if ( !mouseActive ) {
-            return;
-		}        
-    
+	if ( [systemDefinedEvent subtype] == 7 ) {
+
+		if ( !mouseActive ) {
+			return;
+		}
+
 		buttons = [systemDefinedEvent data2];
-        buttonsDelta = oldButtons ^ buttons;
-        
-        //common->Printf( "uberbuttons: %08lx %08lx\n", buttonsDelta, buttons );
+		buttonsDelta = oldButtons ^ buttons;
+
+		//common->Printf( "uberbuttons: %08lx %08lx\n", buttonsDelta, buttons );
 
 		if (buttonsDelta & 1) {
-            isDown = buttons & 1;
-            Posix_QueEvent( SE_KEY, K_MOUSE1, isDown, 0, NULL);
+			isDown = buttons & 1;
+			Posix_QueEvent( SE_KEY, K_MOUSE1, isDown, 0, NULL);
 			Posix_AddMousePollEvent( M_ACTION1, isDown );
 		}
 
 		if (buttonsDelta & 2) {
-            isDown = buttons & 2;
-            Posix_QueEvent( SE_KEY, K_MOUSE2, isDown, 0, NULL);
+			isDown = buttons & 2;
+			Posix_QueEvent( SE_KEY, K_MOUSE2, isDown, 0, NULL);
 			Posix_AddMousePollEvent( M_ACTION2, isDown );
 		}
 
 		if (buttonsDelta & 4) {
-            isDown = buttons & 4;
-            Posix_QueEvent( SE_KEY, K_MOUSE3, isDown, 0, NULL);
+			isDown = buttons & 4;
+			Posix_QueEvent( SE_KEY, K_MOUSE3, isDown, 0, NULL);
 			Posix_AddMousePollEvent( M_ACTION3, isDown );
 		}
 
 		if (buttonsDelta & 8) {
-            isDown = buttons & 8;
-            Posix_QueEvent( SE_KEY, K_MOUSE4, isDown, 0, NULL);
+			isDown = buttons & 8;
+			Posix_QueEvent( SE_KEY, K_MOUSE4, isDown, 0, NULL);
 			Posix_AddMousePollEvent( M_ACTION4, isDown );
-        }
-        
+		}
+
 		if (buttonsDelta & 16) {
-            isDown = buttons & 16;
-            Posix_QueEvent( SE_KEY, K_MOUSE5, isDown, 0, NULL);
+			isDown = buttons & 16;
+			Posix_QueEvent( SE_KEY, K_MOUSE5, isDown, 0, NULL);
 			Posix_AddMousePollEvent( M_ACTION5, isDown );
 		}
-        
-        oldButtons = buttons;
-    }
+
+		oldButtons = buttons;
+	}
 }
 
 void processEvent( NSEvent *event ) {
@@ -392,7 +392,7 @@ void processEvent( NSEvent *event ) {
 	case NSRightMouseDown:
 	case NSRightMouseUp:
 		//NSLog( @"ignore simple mouse event %@", event );
-		return;		
+		return;
 	case NSMouseMoved:
 	case NSLeftMouseDragged:
 	case NSRightMouseDragged:
@@ -428,16 +428,16 @@ void processEvent( NSEvent *event ) {
 		//NSLog( @"handle event %@", event );
 		break;
 	}
-    [NSApp sendEvent:event];
+	[NSApp sendEvent:event];
 }
 
 void Posix_PollInput( void ) {
-    NSEvent *event;
-    unsigned int eventMask;
-    
-    eventMask = NSAnyEventMask;
-     
-    while ( ( event = [ NSApp nextEventMatchingMask: eventMask
+	NSEvent *event;
+	unsigned int eventMask;
+
+	eventMask = NSAnyEventMask;
+
+	while ( ( event = [ NSApp nextEventMatchingMask: eventMask
 							  untilDate: distantPast
 							  inMode: NSDefaultRunLoopMode
 							  dequeue:YES ] ) ) {
@@ -446,74 +446,74 @@ void Posix_PollInput( void ) {
 }
 
 void Sys_PreventMouseMovement( CGPoint point ) {
-    CGEventErr err;
+	CGEventErr err;
 
-    //common->Printf( "**** Calling CGAssociateMouseAndMouseCursorPosition(false)\n" );
-    err = CGAssociateMouseAndMouseCursorPosition( false );
-    if ( err != CGEventNoErr ) {
-        common->Error( "Could not disable mouse movement, CGAssociateMouseAndMouseCursorPosition returned %d\n", err );
-    }
+	//common->Printf( "**** Calling CGAssociateMouseAndMouseCursorPosition(false)\n" );
+	err = CGAssociateMouseAndMouseCursorPosition( false );
+	if ( err != CGEventNoErr ) {
+		common->Error( "Could not disable mouse movement, CGAssociateMouseAndMouseCursorPosition returned %d\n", err );
+	}
 
-    // Put the mouse in the position we want to leave it at
-    err = CGWarpMouseCursorPosition( point );
-    if ( err != CGEventNoErr ) {
-        common->Error( "Could not disable mouse movement, CGWarpMouseCursorPosition returned %d\n", err );
-    }
+	// Put the mouse in the position we want to leave it at
+	err = CGWarpMouseCursorPosition( point );
+	if ( err != CGEventNoErr ) {
+		common->Error( "Could not disable mouse movement, CGWarpMouseCursorPosition returned %d\n", err );
+	}
 }
 
 void Sys_ReenableMouseMovement() {
-    CGEventErr err;
+	CGEventErr err;
 
-    //common->Printf( "**** Calling CGAssociateMouseAndMouseCursorPosition(true)\n" );
-    err = CGAssociateMouseAndMouseCursorPosition( true );
-    if ( err != CGEventNoErr ) {
-        common->Error( "Could not reenable mouse movement, CGAssociateMouseAndMouseCursorPosition returned %d\n", err );
-    }
+	//common->Printf( "**** Calling CGAssociateMouseAndMouseCursorPosition(true)\n" );
+	err = CGAssociateMouseAndMouseCursorPosition( true );
+	if ( err != CGEventNoErr ) {
+		common->Error( "Could not reenable mouse movement, CGAssociateMouseAndMouseCursorPosition returned %d\n", err );
+	}
 
-    // Leave the mouse where it was -- don't warp here.
+	// Leave the mouse where it was -- don't warp here.
 }
 
 void Sys_LockMouseInInputRect(CGRect rect) {
-    CGPoint center;
+	CGPoint center;
 
-    center.x = rect.origin.x + rect.size.width / 2.0;
-    center.y = rect.origin.y + rect.size.height / 2.0;
+	center.x = rect.origin.x + rect.size.width / 2.0;
+	center.y = rect.origin.y + rect.size.height / 2.0;
 
-    // Now, put the mouse in the middle of the input rect (anywhere over it would do)
-    // and don't allow it to move.  This means that the user won't be able to accidentally
-    // select another application.
-    Sys_PreventMouseMovement(center);
+	// Now, put the mouse in the middle of the input rect (anywhere over it would do)
+	// and don't allow it to move.  This means that the user won't be able to accidentally
+	// select another application.
+	Sys_PreventMouseMovement(center);
 }
 
 void Sys_SetMouseInputRect(CGRect newRect) {
-    inputRectValid = YES;
-    inputRect = newRect;
+	inputRectValid = YES;
+	inputRect = newRect;
 
-    if ( mouseActive ) {
-        Sys_LockMouseInInputRect( inputRect );
+	if ( mouseActive ) {
+		Sys_LockMouseInInputRect( inputRect );
 	}
 }
 
 void IN_ActivateMouse( void ) {
-    if ( mouseActive ) {
-        return;
-    }
-    if ( inputRectValid ) {
-        // Make sure that if window moved we don't hose the user...
-        Sys_UpdateWindowMouseInputRect();
-    }
-    Sys_LockMouseInInputRect( inputRect );
-    CGDisplayHideCursor( Sys_DisplayToUse() );
-    mouseActive = true;
+	if ( mouseActive ) {
+		return;
+	}
+	if ( inputRectValid ) {
+		// Make sure that if window moved we don't hose the user...
+		Sys_UpdateWindowMouseInputRect();
+	}
+	Sys_LockMouseInInputRect( inputRect );
+	CGDisplayHideCursor( Sys_DisplayToUse() );
+	mouseActive = true;
 }
 
 void IN_DeactivateMouse( void ) {
-    if ( !mouseActive ) {
-        return;
-    }
-    Sys_ReenableMouseMovement();
-    CGDisplayShowCursor( Sys_DisplayToUse() );
-    mouseActive = false;
+	if ( !mouseActive ) {
+		return;
+	}
+	Sys_ReenableMouseMovement();
+	CGDisplayShowCursor( Sys_DisplayToUse() );
+	mouseActive = false;
 }
 
 /*

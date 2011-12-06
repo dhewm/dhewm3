@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -54,7 +54,7 @@ void rvRegistryOptions::Init( const char *key ) {
 ================
 rvRegistryOptions::Save
 
-Write the options to the registry 
+Write the options to the registry
 ================
 */
 bool rvRegistryOptions::Save ( void )
@@ -72,14 +72,14 @@ bool rvRegistryOptions::Save ( void )
 	for ( i = 0; i < mValues.GetNumKeyVals(); i ++ )
 	{
 		const idKeyValue* key = mValues.GetKeyVal ( i );
-		assert ( key );	
+		assert ( key );
 		RegSetValueEx ( hKey, key->GetKey().c_str(), 0, REG_SZ, (BYTE*)key->GetValue().c_str(), key->GetValue().Length() );
 	}
 
 	// Write Recent Files
-	for ( i = 0; i < mRecentFiles.Num(); i ++ )	
+	for ( i = 0; i < mRecentFiles.Num(); i ++ )
 	{
-		RegSetValueEx ( hKey, va("mru%d",i), 0, REG_SZ, (BYTE*)mRecentFiles[i].c_str(), mRecentFiles[i].Length() );	
+		RegSetValueEx ( hKey, va("mru%d",i), 0, REG_SZ, (BYTE*)mRecentFiles[i].c_str(), mRecentFiles[i].Length() );
 	}
 
 	return true;
@@ -114,9 +114,9 @@ bool rvRegistryOptions::Load ( void )
 	dwSize = MAX_PATH;
 	for ( i = 0; RegEnumValue ( hKey, i, keyname, &dwSize, NULL, NULL, NULL, NULL ) == ERROR_SUCCESS; i ++ )
 	{
-		temp[0] = '\0';	
+		temp[0] = '\0';
 		dwSize = MAX_PATH;
-		
+
 		if ( ERROR_SUCCESS != RegQueryValueEx ( hKey, keyname, NULL, &dwType, (LPBYTE)temp, &dwSize ) )
 		{
 			continue;
@@ -129,19 +129,19 @@ bool rvRegistryOptions::Load ( void )
 		{
 			continue;
 		}
-		
+
 		mValues.Set ( keyname, temp );
-	}			
+	}
 
 	// Read Recent Files
 	for ( i = 0; i < MAX_MRU_SIZE; i ++ )
 	{
 		dwSize = MAX_PATH;
 		if ( ERROR_SUCCESS != RegQueryValueEx ( hKey, va("mru%d", i ), NULL, &dwType, (LPBYTE)temp, &dwSize ) )
-		{	
+		{
 			continue;
 		}
-		
+
 		AddRecentFile ( temp );
 	}
 
@@ -158,12 +158,12 @@ Set a window placement in the options
 void rvRegistryOptions::SetWindowPlacement ( const char* name, HWND hwnd )
 {
 	WINDOWPLACEMENT wp;
-	
+
 	wp.length = sizeof(wp);
 	::GetWindowPlacement ( hwnd, &wp );
-	
+
 	idStr out;
-	
+
 	out = va("%d %d %d %d %d %d %d %d %d %d",
 			 wp.flags,
 			 wp.ptMaxPosition.x,
@@ -175,8 +175,8 @@ void rvRegistryOptions::SetWindowPlacement ( const char* name, HWND hwnd )
 			 wp.rcNormalPosition.right,
 			 wp.rcNormalPosition.bottom,
 			 wp.showCmd );
-			 
-	mValues.Set ( name, out );	 
+
+	mValues.Set ( name, out );
 }
 
 /*
@@ -208,9 +208,9 @@ bool rvRegistryOptions::GetWindowPlacement ( const char* name, HWND hwnd )
 			 &wp.rcNormalPosition.right,
 			 &wp.rcNormalPosition.bottom,
 			 &wp.showCmd );
-			 
+
 	::SetWindowPlacement ( hwnd, &wp );
-	
+
 	return true;
 }
 
@@ -224,7 +224,7 @@ Adds the given filename to the MRU list
 void rvRegistryOptions::AddRecentFile ( const char* filename )
 {
 	int i;
-	
+
 	idStr path = filename;
 
 	// Remove duplicates first
@@ -236,14 +236,14 @@ void rvRegistryOptions::AddRecentFile ( const char* filename )
 			break;
 		}
 	}
-	
+
 	// Alwasy trip to the max MRU size
 	while ( mRecentFiles.Num ( ) >= MAX_MRU_SIZE )
 	{
 		mRecentFiles.RemoveIndex ( 0 );
 	}
-		
-	mRecentFiles.Append ( path );	
+
+	mRecentFiles.Append ( path );
 }
 
 /*
@@ -258,14 +258,14 @@ void rvRegistryOptions::SetColumnWidths ( const char* name, HWND list )
 	LVCOLUMN col;
 	int		 index;
 	idStr	 widths;
-	
-	col.mask = LVCF_WIDTH;	
-	
+
+	col.mask = LVCF_WIDTH;
+
 	for ( index = 0; ListView_GetColumn ( list, index, &col ); index ++ )
 	{
 		widths += va("%d ", col.cx );
 	}
-	
+
 	mValues.Set ( name, widths );
 }
 
@@ -282,18 +282,18 @@ void rvRegistryOptions::GetColumnWidths ( const char* name, HWND list )
 	const char* parse;
 	const char* next;
 	int			index;
-	
+
 	widths = mValues.GetString ( name );
 	parse = widths;
 	index = 0;
-	
+
 	while ( NULL != (next = strchr ( parse, ' ' ) ) )
 	{
 		int width;
-		
+
 		sscanf ( parse, "%d", &width );
 		parse = next + 1;
-		
+
 		ListView_SetColumnWidth ( list, index++, width );
 	}
 }
@@ -312,7 +312,7 @@ void rvRegistryOptions::SetBinary ( const char* name, const unsigned char* data,
 	{
 		binary += va("%02x", *data );
 	}
-	
+
 	mValues.Set ( name, binary );
 }
 
@@ -332,5 +332,5 @@ void rvRegistryOptions::GetBinary ( const char* name, unsigned char* data, int s
 		int value;
 		sscanf ( parse, "%02x", &value );
 		*data = (unsigned char)value;
-	}	
+	}
 }

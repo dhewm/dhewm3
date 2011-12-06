@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ======================================================================
 */
-	
+
 
 #define VERBOSE( x ) { if ( ase.verbose ) { common->Printf x ; } }
 
@@ -89,7 +89,7 @@ static int ASE_GetToken( bool restOfLine )
 
 	// skip over crap
 	while ( ( ( ase.curpos - ase.buffer ) < ase.len ) &&
-		    ( *ase.curpos <= 32 ) )
+			( *ase.curpos <= 32 ) )
 	{
 		ase.curpos++;
 	}
@@ -326,7 +326,7 @@ static void ASE_KeyMESH_FACE_LIST( const char *token )
 		ASE_GetToken( false );	// skip label
 		ASE_GetToken( false );	// first vertex
 		pMesh->faces[ase.currentFace].vertexNum[0] = atoi( ase.token );
-                
+
 		ASE_GetToken( false );	// skip label
 		ASE_GetToken( false );	// second vertex
 		pMesh->faces[ase.currentFace].vertexNum[2] = atoi( ase.token );
@@ -720,7 +720,7 @@ static void ASE_KeyGEOMOBJECT( const char *token )
 	}
 	// ignore unused data blocks
 	else if ( !strcmp( token, "*NODE_TM" ) ||
-		      !strcmp( token, "*TM_ANIMATION" ) )
+			  !strcmp( token, "*TM_ANIMATION" ) )
 	{
 		ASE_ParseBracedBlock( ASE_KeyNODE_TM );
 	}
@@ -748,7 +748,7 @@ static void ASE_KeyGEOMOBJECT( const char *token )
 	}
 	// skip unused info
 	else if ( !strcmp( token, "*PROP_MOTIONBLUR" ) ||
-		      !strcmp( token, "*PROP_CASTSHADOW" ) ||
+			  !strcmp( token, "*PROP_CASTSHADOW" ) ||
 			  !strcmp( token, "*PROP_RECVSHADOW" ) )
 	{
 		ASE_SkipRestOfLine();

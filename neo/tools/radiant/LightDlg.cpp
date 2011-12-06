@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -157,27 +157,27 @@ void CLightInfo::FromDict( const idDict *e ) {
 }
 
 void CLightInfo::ToDictFromDifferences ( idDict *e, const idDict *differences ) {
-    for ( int i = 0 ; i < differences->GetNumKeyVals () ; i ++ ) {
-        const idKeyValue *kv = differences->GetKeyVal( i );
-        
-        if ( kv->GetValue().Length() > 0 ) {
-            e->Set ( kv->GetKey() ,kv->GetValue() );
+	for ( int i = 0 ; i < differences->GetNumKeyVals () ; i ++ ) {
+		const idKeyValue *kv = differences->GetKeyVal( i );
+
+		if ( kv->GetValue().Length() > 0 ) {
+			e->Set ( kv->GetKey() ,kv->GetValue() );
 		} else {
-	        e->Delete ( kv->GetKey() );
+			e->Delete ( kv->GetKey() );
 		}
 
-        common->Printf( "Applied difference: %s %s\n" , kv->GetKey().c_str() , kv->GetValue().c_str() );
-    }
+		common->Printf( "Applied difference: %s %s\n" , kv->GetKey().c_str() , kv->GetValue().c_str() );
+	}
 }
 
 //write all info to a dict, regardless of light type
 void CLightInfo::ToDictWriteAllInfo( idDict *e ) {
-    e->Set("noshadows", (!castShadows) ? "1" : "0");
+	e->Set("noshadows", (!castShadows) ? "1" : "0");
 	e->Set("nospecular", (!castSpecular) ? "1" : "0");
 	e->Set("nodiffuse", (!castDiffuse) ? "1" : "0");
 
 	e->SetFloat("falloff",fallOff);
-	
+
 	if (strTexture.GetLength() > 0 ) {
 		e->Set("texture", strTexture);
 	}
@@ -193,12 +193,12 @@ void CLightInfo::ToDictWriteAllInfo( idDict *e ) {
 	}
 
 	e->Set("light_center", va("%g %g %g", lightCenter[0], lightCenter[1], lightCenter[2]));
-    e->Set("parallel", isParallel?"1":"0");
+	e->Set("parallel", isParallel?"1":"0");
 
-    e->Set("light_target", va("%g %g %g", lightTarget[0], lightTarget[1], lightTarget[2]));
+	e->Set("light_target", va("%g %g %g", lightTarget[0], lightTarget[1], lightTarget[2]));
 	e->Set("light_up", va("%g %g %g", lightUp[0], lightUp[1], lightUp[2]));
 	e->Set("light_right", va("%g %g %g", lightRight[0], lightRight[1], lightRight[2]));
-    e->Set("light_start", va("%g %g %g", lightStart[0], lightStart[1], lightStart[2]));
+	e->Set("light_start", va("%g %g %g", lightStart[0], lightStart[1], lightStart[2]));
 	e->Set("light_end", va("%g %g %g", lightEnd[0], lightEnd[1], lightEnd[2]));
 }
 
@@ -226,7 +226,7 @@ void CLightInfo::ToDict( idDict *e ) {
 	e->Set("nodiffuse", (!castDiffuse) ? "1" : "0");
 
 	e->SetFloat("falloff",fallOff);
-	
+
 	if (strTexture.GetLength() > 0) {
 		e->Set("texture", strTexture);
 	}
@@ -313,7 +313,7 @@ CLightDlg::CLightDlg(CWnd* pParent /*=NULL*/)
 	m_centerX = 0.0f;
 	m_centerY = 0.0f;
 	m_centerZ = 0.0f;
-    m_bIsParallel = FALSE;
+	m_bIsParallel = FALSE;
 	//}}AFX_DATA_INIT
 	m_drawMaterial = new idGLDrawableMaterial();
 }
@@ -338,7 +338,7 @@ void CLightDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_SHADOWS, m_bShadows);
 	DDX_Check(pDX, IDC_CHECK_SPECULAR, m_bSpecular);
 	DDX_Check(pDX, IDC_CHECK_DIFFUSE, m_bDiffuse);
-    DDX_Check(pDX , IDC_CHECK_PARALLEL , m_bIsParallel );
+	DDX_Check(pDX , IDC_CHECK_PARALLEL , m_bIsParallel );
 	DDX_Text(pDX, IDC_EDIT_ENDX, m_fEndX);
 	DDX_Text(pDX, IDC_EDIT_ENDY, m_fEndY);
 	DDX_Text(pDX, IDC_EDIT_ENDZ, m_fEndZ);
@@ -374,7 +374,7 @@ BEGIN_MESSAGE_MAP(CLightDlg, CDialog)
 	ON_BN_CLICKED(IDC_CHECK_PROJECTED, OnCheckProjected)
 	ON_BN_CLICKED(IDC_RADIO_FALLOFF, OnRadioFalloff)
 	ON_BN_CLICKED(IDC_APPLY, OnApply)
-    ON_BN_CLICKED(IDC_APPLY_DIFFERENT, OnApplyDifferences)
+	ON_BN_CLICKED(IDC_APPLY_DIFFERENT, OnApplyDifferences)
 	ON_BN_CLICKED(IDC_BTN_COLOR, OnBtnColor)
 	ON_WM_CTLCOLOR()
 	ON_CBN_SELCHANGE(IDC_COMBO_TEXTURE, OnSelchangeComboTexture)
@@ -495,19 +495,19 @@ void CLightDlg::UpdateDialogFromLightInfo( void ) {
 	m_centerY = lightInfo.lightCenter[1];
 	m_centerZ = lightInfo.lightCenter[2];
 
-    //jhefty - added parallel light updating
-    m_bIsParallel = lightInfo.isParallel;
+	//jhefty - added parallel light updating
+	m_bIsParallel = lightInfo.isParallel;
 
 	UpdateData(FALSE);
 }
 
 void CLightDlg::UpdateLightInfoFromDialog( void ) {
 	UpdateData( TRUE );
-	
+
 	lightInfo.pointLight = ( m_bPointLight != FALSE );
 	lightInfo.equalRadius = ( m_bEqualRadius != FALSE );
 	lightInfo.explicitStartEnd = ( m_bExplicitFalloff != FALSE );
-	
+
 	if (lightInfo.pointLight) {
 		if (m_nFalloff == 0) {
 			m_fFallloff = 0.0;
@@ -526,13 +526,13 @@ void CLightDlg::UpdateLightInfoFromDialog( void ) {
 	lightInfo.castSpecular = ( m_bSpecular != FALSE );
 
 	VectorCopy(color, lightInfo.color);
-    lightInfo.isParallel = (m_bIsParallel == TRUE);
+	lightInfo.isParallel = (m_bIsParallel == TRUE);
 
 	//lightInfo.fogDensity[3] = m_fFogAlpha;
 
 	//lightInfo.strobe = m_bStrobe;
 	//lightInfo.strobeSpeed = m_fStrobe;
-	//lightInfo.rotate = m_bRotate; 
+	//lightInfo.rotate = m_bRotate;
 	//lightInfo.rotateSpeed = m_fRotate;
 
 	int sel = m_wndLights.GetCurSel();
@@ -547,8 +547,8 @@ void CLightDlg::UpdateLightInfoFromDialog( void ) {
 	lightInfo.lightEnd[1] = m_fEndY;
 	lightInfo.lightEnd[2] = m_fEndZ;
 	lightInfo.lightRadius[0] = m_fRadiusX;
-	lightInfo.lightRadius[1] = m_fRadiusY; 
-	lightInfo.lightRadius[2] = m_fRadiusZ; 
+	lightInfo.lightRadius[1] = m_fRadiusY;
+	lightInfo.lightRadius[2] = m_fRadiusZ;
 	lightInfo.lightRight[0] = m_fRightX;
 	lightInfo.lightRight[1] = m_fRightY;
 	lightInfo.lightRight[2] = m_fRightZ;
@@ -556,10 +556,10 @@ void CLightDlg::UpdateLightInfoFromDialog( void ) {
 	lightInfo.lightStart[1] = m_fStartY;
 	lightInfo.lightStart[2] = m_fStartZ;
 	lightInfo.lightTarget[0] = m_fTargetX;
-	lightInfo.lightTarget[1] = m_fTargetY; 
+	lightInfo.lightTarget[1] = m_fTargetY;
 	lightInfo.lightTarget[2] = m_fTargetZ;
 	lightInfo.lightUp[0] = m_fUpX;
-	lightInfo.lightUp[1] = m_fUpY; 
+	lightInfo.lightUp[1] = m_fUpY;
 	lightInfo.lightUp[2] = m_fUpZ;
 
 	lightInfo.hasCenter = ( m_hasCenter != FALSE );
@@ -605,14 +605,14 @@ void CLightDlg::SaveLightInfo( const idDict *differences ) {
 			}
 			gameEdit->EntityUpdateVisuals( list[i] );
 		}
-    }
+	}
 }
 
 void CLightDlg::ColorButtons() {
 	CRect r;
 
 	CClientDC dc(this);
-	
+
 	CButton *pBtn = (CButton *)GetDlgItem(IDC_BTN_COLOR);
 	pBtn->GetClientRect(&r);
 	colorBitmap.DeleteObject();
@@ -621,11 +621,11 @@ void CLightDlg::ColorButtons() {
 	MemDC.CreateCompatibleDC(&dc);
 	CBitmap *pOldBmp = MemDC.SelectObject(&colorBitmap);
 	{
-		CBrush br(RGB(color[0], color[1], color[2])); 
+		CBrush br(RGB(color[0], color[1], color[2]));
 		MemDC.FillRect(r,&br);
 	}
 	dc.SelectObject(pOldBmp);
-	pBtn->SetBitmap(HBITMAP(colorBitmap)); 
+	pBtn->SetBitmap(HBITMAP(colorBitmap));
 }
 
 
@@ -643,7 +643,7 @@ void CLightDlg::LoadLightTextures() {
 	}
 }
 
-BOOL CLightDlg::OnInitDialog() 
+BOOL CLightDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
@@ -658,7 +658,7 @@ BOOL CLightDlg::OnInitDialog()
 	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CLightDlg::OnDestroy() {
@@ -668,39 +668,39 @@ void CLightDlg::OnDestroy() {
 	return CDialog::OnDestroy();
 }
 
-void CLightDlg::OnBtnTexture() 
+void CLightDlg::OnBtnTexture()
 {
 	// TODO: Add your control notification handler code here
-	
+
 }
 
-void CLightDlg::OnCheckEqualradius() 
+void CLightDlg::OnCheckEqualradius()
 {
 	lightInfo.equalRadius = ( reinterpret_cast<CButton*>(GetDlgItem(IDC_CHECK_EQUALRADIUS))->GetCheck() != 0 );
 	SetSpecifics();
 }
 
-void CLightDlg::OnCheckExplicitfalloff() 
+void CLightDlg::OnCheckExplicitfalloff()
 {
 	lightInfo.explicitStartEnd = ( reinterpret_cast<CButton*>(GetDlgItem(IDC_CHECK_EXPLICITFALLOFF))->GetCheck() != 0 );
 	SetSpecifics();
 }
 
-void CLightDlg::OnCheckPoint() 
+void CLightDlg::OnCheckPoint()
 {
 	lightInfo.DefaultPoint();
 	UpdateDialogFromLightInfo();
 	EnableControls();
 }
 
-void CLightDlg::OnCheckProjected() 
+void CLightDlg::OnCheckProjected()
 {
 	lightInfo.DefaultProjected();
 	UpdateDialogFromLightInfo();
 	EnableControls();
 }
 
-void CLightDlg::OnRadioFalloff() 
+void CLightDlg::OnRadioFalloff()
 {
 }
 
@@ -722,7 +722,7 @@ entity_t *SingleLightSelected() {
 }
 
 void CLightDlg::UpdateDialog( bool updateChecks )
-{	
+{
 	CString title;
 
 	lightInfo.Defaults();
@@ -735,7 +735,7 @@ void CLightDlg::UpdateDialog( bool updateChecks )
 			lightInfo.FromDict(&e->epairs);
 			lightInfoOriginal.FromDict(&e->epairs); //our original copy of the values that we compare against for apply differences
 			title = "Light Editor";
-		} else {   
+		} else {
 			//find the last brush belonging to the last entity selected and use that as the source
 			e = NULL;
 			for ( brush_t *b = selected_brushes.next ; b != &selected_brushes ; b = b->next ) {
@@ -875,14 +875,14 @@ void CLightDlg::OnCancel() {
 	CDialog::OnCancel();
 }
 
-HBRUSH CLightDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+HBRUSH CLightDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	return hbr;
 }
 
-BOOL CLightDlg::DestroyWindow() 
+BOOL CLightDlg::DestroyWindow()
 {
 	if (GetSafeHwnd())
 	{
@@ -893,7 +893,7 @@ BOOL CLightDlg::DestroyWindow()
 	return CDialog::DestroyWindow();
 }
 
-void CLightDlg::OnSelchangeComboTexture() 
+void CLightDlg::OnSelchangeComboTexture()
 {
 	UpdateData(TRUE);
 	int sel = m_wndLights.GetCurSel();
@@ -908,7 +908,7 @@ void CLightDlg::OnSelchangeComboTexture()
 	Sys_UpdateWindows(W_ALL);
 }
 
-void CLightDlg::OnCheckCenter() 
+void CLightDlg::OnCheckCenter()
 {
 	if (reinterpret_cast<CButton*>(GetDlgItem(IDC_CHECK_CENTER))->GetCheck()) {
 		lightInfo.hasCenter = true;

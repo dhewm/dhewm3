@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -202,7 +202,7 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 		}
 
 		// see how many particles we should emit this tic
-		// FIXME: 			smoke.privateStartTime += stage->timeOffset;
+		// FIXME:			smoke.privateStartTime += stage->timeOffset;
 		int		finalParticleTime = stage->cycleMsec * stage->spawnBunching;
 		int		deltaMsec = gameLocal.time - systemStartTime;
 

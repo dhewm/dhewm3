@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -1360,7 +1360,7 @@ cm_polygon_t *idCollisionModelManagerLocal::TryMergePolygons( cm_model_t *model,
 	// check if the new polygon would still be convex
 	edgeNum = p1->edges[p1BeforeShare];
 	edge = model->edges + abs(edgeNum);
-	delta = model->vertices[edge->vertexNum[INTSIGNBITNOTSET(edgeNum)]].p - 
+	delta = model->vertices[edge->vertexNum[INTSIGNBITNOTSET(edgeNum)]].p -
 					model->vertices[edge->vertexNum[INTSIGNBITSET(edgeNum)]].p;
 	normal = p1->plane.Normal().Cross( delta );
 	normal.Normalize();
@@ -2276,7 +2276,7 @@ idCollisionModelManagerLocal::GetVertex
 int idCollisionModelManagerLocal::GetVertex( cm_model_t *model, const idVec3 &v, int *vertexNum ) {
 	int i, hashKey, vn;
 	idVec3 vert, *p;
-	
+
 	for (i = 0; i < 3; i++) {
 		if ( idMath::Fabs(v[i] - idMath::Rint(v[i])) < INTEGRAL_EPSILON )
 			vert[i] = idMath::Rint(v[i]);

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,7 +37,7 @@ z_t z;
 
 /*
  =======================================================================================================================
-    Z_Init
+	Z_Init
  =======================================================================================================================
  */
 void Z_Init(void) {
@@ -53,7 +53,7 @@ static int	cursorx, cursory;
 
 /*
  =======================================================================================================================
-    Z_MouseDown
+	Z_MouseDown
  =======================================================================================================================
  */
 void Z_MouseDown(int x, int y, int buttons) {
@@ -103,40 +103,40 @@ void Z_MouseDown(int x, int y, int buttons) {
 			bReset  = (GetKeyState(VK_F4) & 0x8000) != 0;
 		}
 		else
-		{	
+		{
 			// 3 button mice...
 			//
 			bToggle = (buttons == (MK_RBUTTON|MK_SHIFT|MK_CONTROL));
 			bSetTop = (buttons == (MK_RBUTTON|MK_SHIFT));
 			bSetBot = (buttons == (MK_RBUTTON|MK_CONTROL));
 			bReset  = (GetKeyState(VK_F4) & 0x8000) != 0;
-		}				
-		
+		}
+
 		if (bToggle)
 		{
 			g_pParentWnd->GetZWnd()->m_pZClip->Enable(!(g_pParentWnd->GetZWnd()->m_pZClip->IsEnabled()));
-		    Sys_UpdateWindows (W_ALL);
+			Sys_UpdateWindows (W_ALL);
 			return;
 		}
 
 		if (bSetTop)
 		{
 			g_pParentWnd->GetZWnd()->m_pZClip->SetTop(org[2]);
-		    Sys_UpdateWindows (W_ALL);
+			Sys_UpdateWindows (W_ALL);
 			return;
 		}
-		
+
 		if (bSetBot)
 		{
 			g_pParentWnd->GetZWnd()->m_pZClip->SetBottom(org[2]);
-		    Sys_UpdateWindows (W_ALL);
+			Sys_UpdateWindows (W_ALL);
 			return;
 		}
 
 		if (bReset)
 		{
 			g_pParentWnd->GetZWnd()->m_pZClip->Reset();
-		    Sys_UpdateWindows (W_ALL);
+			Sys_UpdateWindows (W_ALL);
 			return;
 		}
 	}
@@ -175,7 +175,7 @@ void Z_MouseDown(int x, int y, int buttons) {
 
 /*
  =======================================================================================================================
-    Z_MouseUp
+	Z_MouseUp
  =======================================================================================================================
  */
 void Z_MouseUp(int x, int y, int buttons) {
@@ -184,7 +184,7 @@ void Z_MouseUp(int x, int y, int buttons) {
 
 /*
  =======================================================================================================================
-    Z_MouseMoved
+	Z_MouseMoved
  =======================================================================================================================
  */
 void Z_MouseMoved(int x, int y, int buttons) {
@@ -212,7 +212,7 @@ void Z_MouseMoved(int x, int y, int buttons) {
 
 	// control mbutton = move camera
 	int nMouseButton = g_PrefsDlg.m_nMouseButtons == 2 ? MK_RBUTTON : MK_MBUTTON;
-	if ((buttons == (MK_CONTROL | nMouseButton)) || (buttons == (MK_CONTROL | MK_LBUTTON))) {	
+	if ((buttons == (MK_CONTROL | nMouseButton)) || (buttons == (MK_CONTROL | MK_LBUTTON))) {
 		g_pParentWnd->GetCamera()->Camera().origin[2] = z.origin[2] + (y - (z.height / 2)) / z.scale;
 		Sys_UpdateWindows(W_CAMERA | W_XY_OVERLAY | W_Z);
 	}
@@ -220,8 +220,8 @@ void Z_MouseMoved(int x, int y, int buttons) {
 
 /*
  =======================================================================================================================
-    DRAWING £
-    Z_DrawGrid
+	DRAWING £
+	Z_DrawGrid
  =======================================================================================================================
  */
 void Z_DrawGrid(void) {
@@ -322,7 +322,7 @@ void ZDrawCameraIcon(void) {
 void ZDrawZClip()
 {
 	float x,y;
-	
+
 	x = 0;
 	y = g_pParentWnd->GetCamera()->Camera().origin[2];
 
@@ -335,7 +335,7 @@ GLbitfield	glbitClear = GL_COLOR_BUFFER_BIT;	// HACK
 
 /*
  =======================================================================================================================
-    Z_Draw
+	Z_Draw
  =======================================================================================================================
  */
 void Z_Draw(void) {

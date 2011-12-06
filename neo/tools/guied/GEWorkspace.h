@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -72,7 +72,7 @@ public:
 		ZOOM_300,
 		ZOOM_MAX
 	};
-	
+
 	enum EItemAlign
 	{
 		ALIGN_LEFTS,
@@ -85,24 +85,24 @@ public:
 
 	rvGEWorkspace ( rvGEApp* app );
 	~rvGEWorkspace ( );
-	
+
 	// Attach the workspace to a win32 window
 	bool					Attach					( HWND wnd );
-	
+
 	// Detach the workspace from the current win32 window
 	void					Detach					( void );
-		
-	bool					NewFile					( void );		
+
+	bool					NewFile					( void );
 	bool					LoadFile				( const char* filename, idStr* error = NULL );
 	bool					SaveFile				( const char* filename );
 	const char*				GetFilename				( void );
-	
+
 	// Source control methods
 	bool					CheckOut				( void );
-	bool					CheckIn					( void );	
+	bool					CheckIn					( void );
 	bool					UndoCheckout			( void );
-	ESourceControlState		GetSourceControlState	( void );	
-	
+	ESourceControlState		GetSourceControlState	( void );
+
 	void					Render					( HDC hDC );
 
 	rvGEApp*				GetApplication			( void );
@@ -125,12 +125,12 @@ public:
 	void					HideWindow				( idWindow* window );
 	void					UnhideWindow			( idWindow* window );
 
-	EZoomLevel				ZoomIn					( void );	
-	EZoomLevel				ZoomOut					( void );	
+	EZoomLevel				ZoomIn					( void );
+	EZoomLevel				ZoomOut					( void );
 	EZoomLevel				GetZoom					( void );
 	float					GetZoomScale			( void );
-	
-	static rvGEWorkspace*		GetWorkspace			( HWND wnd );	
+
+	static rvGEWorkspace*		GetWorkspace			( HWND wnd );
 	rvGEModifierStack&			GetModifierStack		( void );
 	idUserInterfaceLocal*		GetInterface			( void );
 	rvGESelectionMgr&			GetSelectionMgr			( void );
@@ -138,17 +138,17 @@ public:
 	HWND						GetWindow				( void );
 
 	void					HandleMessage			( UINT msg, WPARAM wParam, LPARAM lParam );
-	
+
 	idVec2&					WindowToWorkspace		( idVec2& point );
 	idVec2&					WorkspaceToWindow		( idVec2& point );
 	idRectangle&			WindowToWorkspace		( idRectangle& rect );
 	idRectangle&			WorkspaceToWindow		( idRectangle& rect );
-	
+
 	bool					IsModified				( void );
 	bool					IsNew					( void );
 
 	idWindow*				AddWindow				( rvGEWindowWrapper::EWindowType type );
-	
+
 //	void					Cut						( void );
 	void					Copy					( void );
 	void					Paste					( void );
@@ -209,37 +209,37 @@ protected:
 	void					AddModifierMoveNudge( float x, float y, bool snap );
 	void					AddModifierSizeNudge( float w, float h, bool snap );
 	void					AddModifierShowAll	( void );
-	
+
 	void					AddModifiers		( EModifierType type, ... );
 	void					AddModifiers		( idWindow* window, EModifierType type, ... );
 	rvGEModifier*			CreateModifier		( EModifierType type, idWindow* window, va_list args );
 
 	idUserInterfaceLocal*		mInterface;
-	HWND						mWnd;	
-	
+	HWND						mWnd;
+
 	int							mZoom;
 	idRectangle					mRect;
-	
+
 	bool						mScrollHorz;
 	bool						mScrollVert;
-	
+
 	int							mWindowWidth;
 	int							mWindowHeight;
-	
+
 	idStr						mFilename;
-		
+
 	rvGEModifierStack			mModifiers;
 	rvGESelectionMgr			mSelections;
-	
+
 	rvGESelectionMgr::EHitTest	mDragType;
 	idVec2						mDragPoint;
 	int							mDragTime;
 	bool						mDragX;
 	bool						mDragY;
 	bool						mDragScroll;
-	
+
 	rvGEApp*					mApplication;
-	
+
 	static idList<rvGEClipboardItem*>	mClipboard;
 	idList<idWindow*>					mSelectMenu;
 	idVec2								mSelectMenuPos;
@@ -255,7 +255,7 @@ private:
 	bool					mNew;
 	bool					mDontAdd;
 	ESourceControlState		mSourceControlState;
-	
+
 	// Resources
 	HCURSOR					mHandCursor;
 };

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -111,7 +111,7 @@ extern	void ( APIENTRY *qglCombinerParameterfNV )( GLenum pname, const GLfloat p
 extern	void ( APIENTRY *qglCombinerParameteriNV )( GLenum pname, const GLint param );
 extern	void ( APIENTRY *qglCombinerInputNV )( GLenum stage, GLenum portion, GLenum variable, GLenum input,
 											  GLenum mapping, GLenum componentUsage );
-extern	void ( APIENTRY *qglCombinerOutputNV )( GLenum stage, GLenum portion, GLenum abOutput, GLenum cdOutput, 
+extern	void ( APIENTRY *qglCombinerOutputNV )( GLenum stage, GLenum portion, GLenum abOutput, GLenum cdOutput,
 											   GLenum sumOutput, GLenum scale, GLenum bias, GLboolean abDotProduct,
 											   GLboolean cdDotProduct, GLboolean muxSum );
 extern	void ( APIENTRY *qglFinalCombinerInputNV )( GLenum variable, GLenum input, GLenum mapping, GLenum componentUsage );
@@ -531,14 +531,14 @@ extern BOOL  ( WINAPI * qwglShareLists)(HGLRC, HGLRC);
 extern BOOL  ( WINAPI * qwglUseFontBitmaps)(HDC, DWORD, DWORD, DWORD);
 
 extern BOOL  ( WINAPI * qwglUseFontOutlines)(HDC, DWORD, DWORD, DWORD, FLOAT,
-                                           FLOAT, int, LPGLYPHMETRICSFLOAT);
+										   FLOAT, int, LPGLYPHMETRICSFLOAT);
 
 extern BOOL ( WINAPI * qwglDescribeLayerPlane)(HDC, int, int, UINT,
-                                            LPLAYERPLANEDESCRIPTOR);
+											LPLAYERPLANEDESCRIPTOR);
 extern int  ( WINAPI * qwglSetLayerPaletteEntries)(HDC, int, int, int,
-                                                CONST COLORREF *);
+												CONST COLORREF *);
 extern int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
-                                                COLORREF *);
+												COLORREF *);
 extern BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 

@@ -25,42 +25,42 @@ bool Sys_Hide();
 bool Sys_Unhide();
 
 typedef struct {
-    CGDirectDisplayID     display;
-    CGTableCount          tableSize;
-    CGGammaValue	 *red;
-    CGGammaValue	 *blue;
-    CGGammaValue	 *green;
+	CGDirectDisplayID     display;
+	CGTableCount          tableSize;
+	CGGammaValue	 *red;
+	CGGammaValue	 *blue;
+	CGGammaValue	 *green;
 } glwgamma_t;
 
 typedef struct
 {
-    CGDirectDisplayID	display;
-    NSDictionary		*desktopMode;
-    NSDictionary		*gameMode;
+	CGDirectDisplayID	display;
+	NSDictionary		*desktopMode;
+	NSDictionary		*gameMode;
 
-    CGDisplayCount		displayCount;
-    glwgamma_t			*originalDisplayGammaTables;
-    glwgamma_t			inGameTable;
-    glwgamma_t			tempTable;
-    
-    NSOpenGLContext		*_ctx;
-    CGLContextObj		_cgl_ctx;
-    bool				_ctx_is_current;
-    NSWindow			*window;
-    
-    FILE				*log_fp;
-    
-    unsigned int		bufferSwapCount;
-    unsigned int		glPauseCount;
+	CGDisplayCount		displayCount;
+	glwgamma_t			*originalDisplayGammaTables;
+	glwgamma_t			inGameTable;
+	glwgamma_t			tempTable;
+
+	NSOpenGLContext		*_ctx;
+	CGLContextObj		_cgl_ctx;
+	bool				_ctx_is_current;
+	NSWindow			*window;
+
+	FILE				*log_fp;
+
+	unsigned int		bufferSwapCount;
+	unsigned int		glPauseCount;
 } glwstate_t;
 
 extern glwstate_t glw_state;
 
 #define OSX_SetGLContext(context) \
 do { \
-    NSOpenGLContext *_context = (context); \
-    glw_state._ctx = _context; \
-    glw_state._cgl_ctx = [_context cglContext]; \
+	NSOpenGLContext *_context = (context); \
+	glw_state._ctx = _context; \
+	glw_state._cgl_ctx = [_context cglContext]; \
 } while (0)
 
 #define OSX_GetNSGLContext() glw_state._ctx

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -182,23 +182,23 @@ double ticksPerNanosecond;
 #ifdef __MWERKS__ //time_in_millisec is missing
 /*
 
-    .text
+	.text
 	.align 2
 	.globl _GetTB
 _GetTB:
 
 loop:
-	        mftbu   r4	;  load from TBU
-	        mftb    r5	;  load from TBL
-	        mftbu   r6	;  load from TBU
-	        cmpw    r6, r4	;  see if old == new
-	        bne     loop	;  if not, carry occured, therefore loop
+			mftbu   r4	;  load from TBU
+			mftb    r5	;  load from TBL
+			mftbu   r6	;  load from TBU
+			cmpw    r6, r4	;  see if old == new
+			bne     loop	;  if not, carry occured, therefore loop
 
-	        stw     r4, 0(r3)
-	        stw     r5, 4(r3)
+			stw     r4, 0(r3)
+			stw     r5, 4(r3)
 
 done:
-	        blr		;  return
+			blr		;  return
 
 */
 typedef struct {
@@ -211,17 +211,17 @@ asm void GetTB(U64 *in)
 {
 	nofralloc			// suppress prolog
 	machine 603			// allows the use of mftb & mftbu functions
-	
-loop:	
+
+loop:
 	mftbu	r5			// grab the upper time base register (TBU)
 	mftb	r4			// grab the lower time base register (TBL)
-	mftbu	r6			// grab the upper time base register (TBU) again 
-	
+	mftbu	r6			// grab the upper time base register (TBU) again
+
 	cmpw	r6,r5		// see if old TBU == new TBU
 	bne-	loop		// loop if carry occurred (predict branch not taken)
-	
-	stw  	r4,4(r3)	// store TBL in the low 32 bits of the return value
-	stw  	r5,0(r3)	// store TBU in the high 32 bits of the return value
+
+	stw	r4,4(r3)	// store TBL in the low 32 bits of the return value
+	stw	r5,0(r3)	// store TBU in the high 32 bits of the return value
 
 	blr
 }
@@ -251,7 +251,7 @@ double TBToDoubleNano( U64 startTime, U64 stopTime, double ticksPerNanosecond ) 
 	nanoTime = (double)(diffTime.hi)*((double)K_2POWER32) + (double)(diffTime.lo);
 	nanoTime = nanoTime/ticksPerNanosecond;
 	return (nanoTime);
-}       
+}
 
 TIME_TYPE time_in_millisec( void ) {
 	#define K_2POWER32 4294967296.0
@@ -276,7 +276,7 @@ TIME_TYPE time_in_millisec( void ) {
 }
 
 #define StartRecordTime( start )			\
-	start = time_in_millisec(); 
+	start = time_in_millisec();
 
 #define StopRecordTime( end )				\
 	end = time_in_millisec();
@@ -284,7 +284,7 @@ TIME_TYPE time_in_millisec( void ) {
 
 #else
 #define StartRecordTime( start )			\
-	start = mach_absolute_time(); 
+	start = mach_absolute_time();
 
 #define StopRecordTime( end )				\
 	end = mach_absolute_time();
@@ -3104,8 +3104,8 @@ void TestNormalizeTangents( void ) {
 		if ( !drawVerts1[i].tangents[1].Compare( drawVerts2[i].tangents[1], 1e-2f ) ) {
 			break;
 		}
-		
-		// since we're doing a lot of unaligned work, added this check to 
+
+		// since we're doing a lot of unaligned work, added this check to
 		// make sure xyz wasn't getting overwritten
 		if ( !drawVerts1[i].xyz.Compare( drawVerts2[i].xyz, 1e-2f ) ) {
 			break;
@@ -4049,7 +4049,7 @@ void TestNegate( void ) {
 	ALIGN16( float fsrc0[COUNT] );
 	ALIGN16( float fsrc1[COUNT] );
 	ALIGN16( float fsrc2[COUNT] );
-	
+
 	const char *result;
 
 	idRandom srnd( RANDOM_SEED );
@@ -4063,9 +4063,9 @@ void TestNegate( void ) {
 
 	bestClocksGeneric = 0;
 	for ( i = 0; i < NUMTESTS; i++ ) {
-	
+
 		memcpy( &fsrc1[0], &fsrc0[0], COUNT * sizeof(float) );
-	
+
 		StartRecordTime( start );
 		p_generic->Negate16( fsrc1, COUNT );
 		StopRecordTime( end );
@@ -4075,9 +4075,9 @@ void TestNegate( void ) {
 
 	bestClocksSIMD = 0;
 	for ( i = 0; i < NUMTESTS; i++ ) {
-	
+
 		memcpy( &fsrc2[0], &fsrc0[0], COUNT * sizeof(float) );
-	
+
 		StartRecordTime( start );
 		p_simd->Negate16( fsrc2, COUNT );
 		StopRecordTime( end );

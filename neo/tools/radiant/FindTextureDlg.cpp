@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -50,14 +50,14 @@ void CFindTextureDlg::updateTextures(const char *p)
 {
   if (isOpen())
   {
-    if (g_bFindActive)
-    {
-      setFindStr(p);
-    }
-    else
-    {
-      setReplaceStr(p);
-    }
+	if (g_bFindActive)
+	{
+	  setFindStr(p);
+	}
+	else
+	{
+	  setReplaceStr(p);
+	}
   }
 }
 
@@ -95,7 +95,7 @@ BEGIN_MESSAGE_MAP(CFindTextureDlg, CDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void CFindTextureDlg::OnBtnApply() 
+void CFindTextureDlg::OnBtnApply()
 {
 	UpdateData(TRUE);
 	CRect rct;
@@ -104,7 +104,7 @@ void CFindTextureDlg::OnBtnApply()
 	FindReplaceTextures( m_strFind, m_strReplace, ( m_bSelectedOnly != FALSE ), ( m_bForce != FALSE ) );
 }
 
-void CFindTextureDlg::OnOK() 
+void CFindTextureDlg::OnOK()
 {
 	UpdateData(TRUE);
 	CRect rct;
@@ -118,18 +118,18 @@ void CFindTextureDlg::show()
 {
   if (g_dlgFind.GetSafeHwnd() == NULL || IsWindow(g_dlgFind.GetSafeHwnd()) == FALSE)
   {
-    g_dlgFind.Create(IDD_DIALOG_FINDREPLACE);
-    g_dlgFind.ShowWindow(SW_SHOW);
+	g_dlgFind.Create(IDD_DIALOG_FINDREPLACE);
+	g_dlgFind.ShowWindow(SW_SHOW);
   }
   else
   {
-    g_dlgFind.ShowWindow(SW_SHOW);
+	g_dlgFind.ShowWindow(SW_SHOW);
   }
   CRect rct;
   LONG lSize = sizeof(rct);
   if (LoadRegistryInfo("Radiant::TextureFindWindow", &rct, &lSize))
-    g_dlgFind.SetWindowPos(NULL, rct.left, rct.top, 0,0, SWP_NOSIZE | SWP_SHOWWINDOW);
-}		
+	g_dlgFind.SetWindowPos(NULL, rct.left, rct.top, 0,0, SWP_NOSIZE | SWP_SHOWWINDOW);
+}
 
 
 bool CFindTextureDlg::isOpen()
@@ -142,8 +142,8 @@ void CFindTextureDlg::setFindStr(const char * p)
   g_dlgFind.UpdateData(TRUE);
   if (g_dlgFind.m_bLive)
   {
-    g_dlgFind.m_strFind = p;
-    g_dlgFind.UpdateData(FALSE);
+	g_dlgFind.m_strFind = p;
+	g_dlgFind.UpdateData(FALSE);
   }
 }
 
@@ -152,13 +152,13 @@ void CFindTextureDlg::setReplaceStr(const char * p)
   g_dlgFind.UpdateData(TRUE);
   if (g_dlgFind.m_bLive)
   {
-    g_dlgFind.m_strReplace = p;
-    g_dlgFind.UpdateData(FALSE);
+	g_dlgFind.m_strReplace = p;
+	g_dlgFind.UpdateData(FALSE);
   }
 }
 
 
-void CFindTextureDlg::OnCancel() 
+void CFindTextureDlg::OnCancel()
 {
   CRect rct;
   GetWindowRect(rct);
@@ -166,17 +166,17 @@ void CFindTextureDlg::OnCancel()
 	CDialog::OnCancel();
 }
 
-BOOL CFindTextureDlg::DestroyWindow() 
+BOOL CFindTextureDlg::DestroyWindow()
 {
 	return CDialog::DestroyWindow();
 }
 
-void CFindTextureDlg::OnSetfocusEditFind() 
+void CFindTextureDlg::OnSetfocusEditFind()
 {
   g_bFindActive = true;
 }
 
-void CFindTextureDlg::OnSetfocusEditReplace() 
+void CFindTextureDlg::OnSetfocusEditReplace()
 {
   g_bFindActive = false;
 }

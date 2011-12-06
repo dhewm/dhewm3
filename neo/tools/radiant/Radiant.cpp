@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -245,7 +245,7 @@ BOOL CRadiantApp::InitInstance()
 			{
 				// this key doesn't exist, so it's the one we'll use
 				strcpy( g_qeglobals.use_ini_registry, key.GetBuffer(0) );
-				RegCreateKeyEx( HKEY_CURRENT_USER, key, 0, NULL, 
+				RegCreateKeyEx( HKEY_CURRENT_USER, key, 0, NULL,
 					REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisp );
 				RegSetValueEx( hkResult, "RadiantName", 0, REG_SZ, reinterpret_cast<CONST BYTE *>(RadiantPath), strlen( RadiantPath )+1 );
 				RegCloseKey( hkResult );
@@ -310,7 +310,7 @@ BOOL CRadiantApp::InitInstance()
 	if (pMainFrame->m_hAccelTable) {
 		::DestroyAcceleratorTable(pMainFrame->m_hAccelTable);
 	}
-  
+
 	pMainFrame->LoadAccelTable(MAKEINTRESOURCE(IDR_MINIACCEL));
 
 	m_pMainWnd = pMainFrame;
@@ -325,7 +325,7 @@ BOOL CRadiantApp::InitInstance()
 /////////////////////////////////////////////////////////////////////////////
 // CRadiantApp commands
 
-int CRadiantApp::ExitInstance() 
+int CRadiantApp::ExitInstance()
 {
 	common->Shutdown();
 	g_pParentWnd = NULL;
@@ -348,7 +348,7 @@ void CRadiantApp::OnHelp()
 	ShellExecute(m_pMainWnd->GetSafeHwnd(), "open", "http://www.idDevNet.com", NULL, NULL, SW_SHOW);
 }
 
-int CRadiantApp::Run( void ) 
+int CRadiantApp::Run( void )
 {
 	BOOL bIdle = TRUE;
 	LONG lIdleCount = 0;
@@ -412,9 +412,9 @@ bool SaveWindowState(HWND hWnd, const char *pszName)
 	RECT rc;
 	GetWindowRect(hWnd, &rc);
 	if (hWnd != g_pParentWnd->GetSafeHwnd()) {
-	    if (::GetParent(hWnd) != g_pParentWnd->GetSafeHwnd()) {
-	      ::SetParent(hWnd, g_pParentWnd->GetSafeHwnd());
-	    }
+		if (::GetParent(hWnd) != g_pParentWnd->GetSafeHwnd()) {
+		  ::SetParent(hWnd, g_pParentWnd->GetSafeHwnd());
+		}
 		MapWindowPoints(NULL, g_pParentWnd->GetSafeHwnd(), (POINT *)&rc, 2);
 	}
 	return SaveRegistryInfo(pszName, &rc, sizeof(rc));

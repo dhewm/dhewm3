@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -38,17 +38,17 @@ class idAudioHardwareOSS : public idAudioHardware {
 	unsigned int	m_speed;
 	void			*m_buffer;
 	int				m_buffer_size;
-	
+
 					// counting the loops through the dma buffer
 	int				m_loops;
-	
+
 					// how many chunks we have left to write in cases where we need to split
 	int				m_writeChunks;
 					// how many chunks we can write to the audio device without blocking
 	int				m_freeWriteChunks;
-	
+
 public:
-	idAudioHardwareOSS() { 
+	idAudioHardwareOSS() {
 		m_audio_fd = 0;
 		m_sample_format = 0;
 		m_channels = 0;
@@ -67,14 +67,14 @@ public:
 	bool		Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize ) { return false; }
 	bool		Unlock( void *pDSLockedBuffer, dword dwDSLockedBufferSize ) { return false; }
 	bool		GetCurrentPosition( ulong *pdwCurrentWriteCursor ) { return false; }
-	
+
 	bool		Flush();
 	void		Write( bool flushing );
 
 	int			GetNumberOfSpeakers() { return m_channels; }
 	int			GetMixBufferSize();
 	short*		GetMixBuffer();
-		
+
 private:
 	void		Release( bool bSilent = false );
 	void		InitFailed();
@@ -125,7 +125,7 @@ private:
 	int					m_remainingFrames;
 
 	void				*m_handle;
-	
+
 public:
 						idAudioHardwareALSA() {
 							m_pcm_handle		= NULL;
@@ -140,14 +140,14 @@ public:
 						// dlopen the lib ( check minimum version )
 	bool				DLOpen();
 
-    bool				Initialize( void );
+	bool				Initialize( void );
 
 
 	// Linux driver doesn't support memory map API
 	bool				Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize ) { return false; }
 	bool				Unlock( void *pDSLockedBuffer, dword dwDSLockedBufferSize ) { return false; }
 	bool				GetCurrentPosition( ulong *pdwCurrentWriteCursor ) { return false; }
-	
+
 	bool				Flush();
 	void				Write( bool flushing );
 

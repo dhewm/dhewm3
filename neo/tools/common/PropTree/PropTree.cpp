@@ -6,13 +6,13 @@
 //
 //  This material is provided "as is", with absolutely no warranty expressed
 //  or implied. Any use is at your own risk.
-// 
-//  Permission to use or copy this software for any purpose is hereby granted 
+//
+//  Permission to use or copy this software for any purpose is hereby granted
 //  without fee, provided the above notices are retained on all copies.
 //  Permission to modify the code and to distribute modified code is granted,
 //  provided the above notices are retained, and a notice that the code was
 //  modified is included with the above copyright notice.
-// 
+//
 //	If you use this code, drop me an email.  I'd like to know if you find the code
 //	useful.
 
@@ -42,7 +42,7 @@ HINSTANCE ghInst;
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
 		TRACE0("PROPTREE.DLL Initializing!\n");
-		
+
 		if (!AfxInitExtensionModule(PropTreeDLL, hInstance))
 			return 0;
 
@@ -137,7 +137,7 @@ BOOL CPropTree::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT n
 }
 
 
-int CPropTree::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+int CPropTree::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -183,7 +183,7 @@ CWnd* CPropTree::GetCtrlParent()
 }
 
 
-void CPropTree::OnSize(UINT nType, int cx, int cy) 
+void CPropTree::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 	ResizeChildWindows(cx, cy);
@@ -360,7 +360,7 @@ void CPropTree::SetOriginOffset(LONG nOffset)
 	m_Origin.y = nOffset;
 }
 
-	
+
 void CPropTree::UpdatedItems()
 {
 	if (!IsWindow(m_hWnd))
@@ -399,7 +399,7 @@ void CPropTree::SetColumn(LONG nColumn)
 	CRect rc;
 
 	GetClientRect(rc);
-	
+
 	if (rc.IsRectEmpty())
 		nColumn = __max(PROPTREEITEM_EXPANDCOLUMN, nColumn);
 	else
@@ -762,7 +762,7 @@ CPropTreeItem* CPropTree::FocusPrev()
 
 	if (pNext)
 		SetFocusedItem(pNext);
-	
+
 	if (m_pFocus)
 	{
 		SelectItems(NULL, FALSE);
@@ -893,7 +893,7 @@ LRESULT CPropTree::SendNotify(UINT nNotifyCode, CPropTreeItem* pItem)
 		lpnm->code = nNotifyCode;
 		lpnm->hwndFrom = m_hWnd;
 		lpnm->idFrom = id;
-	
+
 		return GetParent()->SendMessage(WM_NOTIFY, (WPARAM)id, (LPARAM)lpnm);
 	}
 
@@ -901,18 +901,18 @@ LRESULT CPropTree::SendNotify(UINT nNotifyCode, CPropTreeItem* pItem)
 }
 
 
-void CPropTree::OnEnable(BOOL bEnable) 
+void CPropTree::OnEnable(BOOL bEnable)
 {
 	CWnd::OnEnable(bEnable);
 	Invalidate();
 }
 
 
-void CPropTree::OnSysColorChange() 
+void CPropTree::OnSysColorChange()
 {
 	CWnd::OnSysColorChange();
-	
-	Invalidate();	
+
+	Invalidate();
 }
 
 

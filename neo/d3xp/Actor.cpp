@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -230,7 +230,7 @@ idAnimState::AnimDone
 */
 bool idAnimState::AnimDone( int blendFrames ) const {
 	int animDoneTime;
-	
+
 	animDoneTime = animator->CurrentAnim( channel )->GetEndTime();
 	if ( animDoneTime < 0 ) {
 		// playing a cycle
@@ -457,7 +457,7 @@ idActor::idActor( void ) {
 	allowEyeFocus		= false;
 
 	waitState			= "";
-	
+
 	blink_anim			= NULL;
 	blink_time			= 0;
 	blink_min			= 0;
@@ -527,7 +527,7 @@ void idActor::Spawn( void ) {
 	spawnArgs.GetInt( "team", "0", team );
 	spawnArgs.GetVector( "offsetModel", "0 0 0", modelOffset );
 
-	spawnArgs.GetBool( "use_combat_bbox", "0", use_combat_bbox );	
+	spawnArgs.GetBool( "use_combat_bbox", "0", use_combat_bbox );
 
 	viewAxis = GetPhysics()->GetAxis();
 
@@ -560,7 +560,7 @@ void idActor::Spawn( void ) {
 
 		// don't let them drop to the floor
 		args.Set( "dropToFloor", "0" );
-		
+
 		gameLocal.SpawnEntityDef( args, &ent );
 		if ( !ent ) {
 			gameLocal.Error( "Couldn't spawn '%s' to attach to entity '%s'", kv->GetValue().c_str(), name.c_str() );
@@ -627,7 +627,7 @@ void idActor::Spawn( void ) {
 	int headAnim = headAnimator->GetAnim( "def_head" );
 	if ( headAnim ) {
 		if ( headEnt ) {
-            headAnimator->CycleAnim( ANIMCHANNEL_ALL, headAnim, gameLocal.time, 0 );
+			headAnimator->CycleAnim( ANIMCHANNEL_ALL, headAnim, gameLocal.time, 0 );
 		} else {
 			headAnimator->CycleAnim( ANIMCHANNEL_HEAD, headAnim, gameLocal.time, 0 );
 		}
@@ -1065,7 +1065,7 @@ void idActor::Show( void ) {
 					static_cast<idLight *>( ent )->On();
 				}
 #endif
-				
+
 
 			}
 		}
@@ -1304,7 +1304,7 @@ idThread *idActor::ConstructScriptObject( void ) {
 	} else {
 		scriptThread->EndThread();
 	}
-	
+
 	// call script object's constructor
 	constructor = scriptObject.GetConstructor();
 	if ( !constructor ) {
@@ -1392,7 +1392,7 @@ void idActor::UpdateScript( void ) {
 		if ( scriptThread->IsWaiting() ) {
 			break;
 		}
-        
+
 		scriptThread->Execute();
 		if ( idealState == state ) {
 			break;
@@ -1477,7 +1477,7 @@ bool idActor::CheckFOV( const idVec3 &pos ) const {
 
 	float	dot;
 	idVec3	delta;
-	
+
 	delta = pos - GetEyePosition();
 
 	// get our gravity normal
@@ -1911,7 +1911,7 @@ void idActor::GetAASLocation( idAAS *aas, idVec3 &pos, int &areaNum ) const {
 		areaNum = 0;
 		return;
 	}
-	
+
 	size = aas->GetSettings()->boundingBoxes[0][1];
 	bounds[0] = -size;
 	size.z = 32.0f;
@@ -1948,7 +1948,7 @@ void idActor::SetAnimState( int channel, const char *statename, int blendFrames 
 		headAnim.SetState( statename, blendFrames );
 		allowEyeFocus = true;
 		break;
-		
+
 	case ANIMCHANNEL_TORSO :
 		torsoAnim.SetState( statename, blendFrames );
 		legsAnim.Enable( blendFrames );
@@ -2200,7 +2200,7 @@ Bleeding wounds and surface overlays are applied in the collision code that
 calls Damage()
 ============
 */
-void idActor::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir, 
+void idActor::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir,
 					  const char *damageDefName, const float damageScale, const int location ) {
 	if ( !fl.takedamage ) {
 		return;
@@ -2222,7 +2222,7 @@ void idActor::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir
 	}
 
 	// Maledict is immume to the falling asteroids
-	if ( !idStr::Icmp( GetEntityDefName(), "monster_boss_d3xp_maledict" ) && 
+	if ( !idStr::Icmp( GetEntityDefName(), "monster_boss_d3xp_maledict" ) &&
 		(!idStr::Icmp( damageDefName, "damage_maledict_asteroid" ) || !idStr::Icmp( damageDefName, "damage_maledict_asteroid_splash" ) ) ) {
 		return;
 	}
@@ -2360,7 +2360,7 @@ bool idActor::Pain( idEntity *inflictor, idEntity *attacker, int damage, const i
 	}
 
 	if ( g_debugDamage.GetBool() ) {
-		gameLocal.Printf( "Damage: joint: '%s', zone '%s', anim '%s'\n", animator.GetJointName( ( jointHandle_t )location ), 
+		gameLocal.Printf( "Damage: joint: '%s', zone '%s', anim '%s'\n", animator.GetJointName( ( jointHandle_t )location ),
 			damageGroup.c_str(), painAnim.c_str() );
 	}
 
@@ -2504,7 +2504,7 @@ idActor::Event_DisableEyeFocus
 */
 void idActor::Event_DisableEyeFocus( void ) {
 	allowEyeFocus = false;
-	
+
 	idEntity *headEnt = head.GetEntity();
 	if ( headEnt ) {
 		headEnt->GetAnimator()->Clear( ANIMCHANNEL_EYELIDS, gameLocal.time, FRAME2MS( 2 ) );
@@ -2641,7 +2641,7 @@ void idActor::Event_PlayAnim( int channel, const char *animname ) {
 	animFlags_t	flags;
 	idEntity *headEnt;
 	int	anim;
-	
+
 	anim = GetAnim( channel, animname );
 	if ( !anim ) {
 		if ( ( channel == ANIMCHANNEL_HEAD ) && head.GetEntity() ) {
@@ -2720,7 +2720,7 @@ idActor::Event_PlayCycle
 void idActor::Event_PlayCycle( int channel, const char *animname ) {
 	animFlags_t	flags;
 	int			anim;
-	
+
 	anim = GetAnim( channel, animname );
 	if ( !anim ) {
 		if ( ( channel == ANIMCHANNEL_HEAD ) && head.GetEntity() ) {
@@ -2793,8 +2793,8 @@ idActor::Event_IdleAnim
 */
 void idActor::Event_IdleAnim( int channel, const char *animname ) {
 	int anim;
-	
-	anim = GetAnim( channel, animname );	
+
+	anim = GetAnim( channel, animname );
 	if ( !anim ) {
 		if ( ( channel == ANIMCHANNEL_HEAD ) && head.GetEntity() ) {
 			gameLocal.DPrintf( "missing '%s' animation on '%s' (%s)\n", animname, name.c_str(), spawnArgs.GetString( "def_head", "" ) );
@@ -3198,9 +3198,9 @@ void idActor::Event_AnimLength( int channel, const char *animname ) {
 		} else {
 			idThread::ReturnFloat( MS2SEC( animator.AnimLength( anim ) ) );
 			return;
-		}		
+		}
 	}
-	
+
 	idThread::ReturnFloat( 0.0f );
 }
 
@@ -3224,7 +3224,7 @@ void idActor::Event_AnimDistance( int channel, const char *animname ) {
 			return;
 		}
 	}
-	
+
 	idThread::ReturnFloat( 0.0f );
 }
 
@@ -3268,7 +3268,7 @@ void idActor::Event_NextEnemy( idEntity *ent ) {
 		}
 	}
 
-    idThread::ReturnEntity( NULL );
+	idThread::ReturnEntity( NULL );
 }
 
 /*

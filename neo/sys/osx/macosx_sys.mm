@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -59,13 +59,13 @@ void	Sys_Print( const char *msg );
 //===========================================================================
 
 int main(int argc, const char *argv[]) {
-    return NSApplicationMain(argc, argv);
+	return NSApplicationMain(argc, argv);
 }
 
 //===========================================================================
 
 void Sys_Sleep( const int time ) {
-    sleep( time );
+	sleep( time );
 }
 
 void EditorPrintConsole( const char *test ) {
@@ -90,29 +90,29 @@ Used to load a development dll instead of a virtual machine
 extern char		*FS_BuildOSPath( const char *base, const char *game, const char *qpath );
 
 void *Sys_LoadDll( const char *name, int (**entryPoint)(int, ...),
-                   int (*systemcalls)(int, ...) )
+				   int (*systemcalls)(int, ...) )
 {
-    return NULL;
+	return NULL;
 }
 
 //===========================================================================
 
 char *Sys_GetClipboardData(void) // FIXME
 {
-    NSPasteboard *pasteboard;
-    NSArray *pasteboardTypes;
+	NSPasteboard *pasteboard;
+	NSArray *pasteboardTypes;
 
-    pasteboard = [NSPasteboard generalPasteboard];
-    pasteboardTypes = [pasteboard types];
-    if ([pasteboardTypes containsObject:NSStringPboardType]) {
-        NSString *clipboardString;
+	pasteboard = [NSPasteboard generalPasteboard];
+	pasteboardTypes = [pasteboard types];
+	if ([pasteboardTypes containsObject:NSStringPboardType]) {
+		NSString *clipboardString;
 
-        clipboardString = [pasteboard stringForType:NSStringPboardType];
-        if (clipboardString && [clipboardString length] > 0) {
-            return strdup([clipboardString cString]);
-        }
-    }
-    return NULL;
+		clipboardString = [pasteboard stringForType:NSStringPboardType];
+		if (clipboardString && [clipboardString length] > 0) {
+			return strdup([clipboardString cString]);
+		}
+	}
+	return NULL;
 }
 
 //===========================================================================
@@ -137,7 +137,7 @@ The cvar and file system has been setup, so configurations are loaded
 void Sys_Init(void)
 {
 //    Sys_InitNetwork();
-    Sys_InitInput();	
+	Sys_InitInput();
 }
 
 /*
@@ -147,33 +147,33 @@ Sys_Shutdown
 */
 void Sys_Shutdown(void)
 {
-    common->Printf( "----- Sys_Shutdown -----\n" );
-    Sys_EndProfiling();
-    Sys_ShutdownInput();	
-    common->Printf( "------------------------\n" );
+	common->Printf( "----- Sys_Shutdown -----\n" );
+	Sys_EndProfiling();
+	Sys_ShutdownInput();
+	common->Printf( "------------------------\n" );
 }
 
 void Sys_Error(const char *error, ...)
 {
-    va_list argptr;
-    NSString *formattedString;
+	va_list argptr;
+	NSString *formattedString;
 
-    Sys_Shutdown();
+	Sys_Shutdown();
 
-    va_start(argptr,error);
-    formattedString = [[NSString alloc] initWithFormat:[NSString stringWithCString:error] arguments:argptr];
-    va_end(argptr);
+	va_start(argptr,error);
+	formattedString = [[NSString alloc] initWithFormat:[NSString stringWithCString:error] arguments:argptr];
+	va_end(argptr);
 
-    NSLog(@"Sys_Error: %@", formattedString);
-    NSRunAlertPanel(@"DOOM Error", formattedString, nil, nil, nil);
+	NSLog(@"Sys_Error: %@", formattedString);
+	NSRunAlertPanel(@"DOOM Error", formattedString, nil, nil, nil);
 
-    Sys_Quit();
+	Sys_Quit();
 }
 
 void Sys_Quit(void)
 {
-    Sys_Shutdown();
-    [NSApp terminate:nil];
+	Sys_Shutdown();
+	[NSApp terminate:nil];
 }
 
 /*
@@ -194,7 +194,7 @@ char *ansiColors[8] =
 	  "\033[36m" ,  /* ANSI Cyan */
 	  "\033[35m" ,	/* ANSI Magenta */
 	  "\033[37m" }; /* ANSI White */
-	  
+
 void Sys_Print(const char *text)
 {
 #if 0
@@ -202,29 +202,29 @@ void Sys_Print(const char *text)
 	char *scan = text;
 	char code;
 	int index;
-	
+
 	/* Make sure terminal mode is reset at the start of the line... */
 	fputs("\033[0m", stdout);
-	
+
 	while(*scan) {
-		/* See if we have a color control code.  If so, snarf the character, 
+		/* See if we have a color control code.  If so, snarf the character,
 		print what we have so far, print the ANSI Terminal color code,
 		skip over the color control code and continue */
 		if(Q_IsColorString(scan)) {
 			index = ColorIndex(scan[1]);
-			
+
 			/* Flush current message */
 			if(scan != text) {
 				fwrite(text, scan - text, 1, stdout);
 			}
-			
+
 			/* Write ANSI color code */
 			fputs(ansiColors[index], stdout);
-			
+
 			/* Reset search */
 			text = scan+2;
 			scan = text;
-			continue;			
+			continue;
 		}
 		scan++;
 	}
@@ -236,16 +236,16 @@ void Sys_Print(const char *text)
 	fputs("\033[0m", stdout);
 
 #else
-    fputs(text, stdout);
-#endif	
+	fputs(text, stdout);
+#endif
 }
 
 void OutputDebugString( const char *text ) {
-    Sys_Print( text );
+	Sys_Print( text );
 }
 
 void Sys_OutputDebugString( const char *text ) {
-    OutputDebugString( text );
+	OutputDebugString( text );
 }
 
 /*
@@ -256,5 +256,5 @@ Return true if the proper CD is in the drive
 ================
 */
 bool        Sys_CheckCD( void ) {
-    return macosx_scanForLibraryDirectory() != NULL;
+	return macosx_scanForLibraryDirectory() != NULL;
 }

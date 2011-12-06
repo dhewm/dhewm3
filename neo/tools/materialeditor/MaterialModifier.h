@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -58,8 +58,8 @@ public:
 	AttributeMaterialModifier(MaterialDocManager* manager, const char* materialName, int stage, const char* key);
 	virtual ~AttributeMaterialModifier() {};
 
-	virtual void 			Undo() = 0;
-	virtual void 			Redo() = 0;
+	virtual void			Undo() = 0;
+	virtual void			Redo() = 0;
 
 protected:
 	int						stage;
@@ -75,8 +75,8 @@ public:
 	AttributeMaterialModifierString(MaterialDocManager* manager, const char* materialName, int stage, const char* key, const char* value, const char* oldValue);
 	virtual ~AttributeMaterialModifierString() {};
 
-	virtual void 			Undo();
-	virtual void 			Redo();
+	virtual void			Undo();
+	virtual void			Redo();
 
 protected:
 	idStr					value;
@@ -93,8 +93,8 @@ public:
 	AttributeMaterialModifierBool(MaterialDocManager* manager, const char* materialName, int stage, const char* key, bool value, bool oldValue);
 	virtual ~AttributeMaterialModifierBool() {};
 
-	virtual void 			Undo();
-	virtual void 			Redo();
+	virtual void			Undo();
+	virtual void			Redo();
 
 protected:
 	bool					value;
@@ -111,8 +111,8 @@ public:
 	StageMoveModifier(MaterialDocManager* manager, const char* materialName, int from, int to);
 	virtual ~StageMoveModifier() {};
 
-	virtual void 			Undo();
-	virtual void 			Redo();
+	virtual void			Undo();
+	virtual void			Redo();
 
 protected:
 	int						from;
@@ -127,8 +127,8 @@ public:
 	StageDeleteModifier(MaterialDocManager* manager, const char* materialName, int stageNum, idDict stageData);
 	virtual ~StageDeleteModifier() {};
 
-	virtual void 			Undo();
-	virtual void 			Redo();
+	virtual void			Undo();
+	virtual void			Redo();
 
 protected:
 	int						stageNum;
@@ -149,7 +149,7 @@ public:
 protected:
 	int						stageNum;
 	int						stageType;
-	idStr					stageName;	
+	idStr					stageName;
 };
 
 /**
@@ -179,7 +179,7 @@ public:
 	virtual void			Redo();
 
 protected:
-	
+
 };
 
 /**
@@ -265,4 +265,3 @@ protected:
 	HTREEITEM				item;
 	HTREEITEM				parent;
 };
-

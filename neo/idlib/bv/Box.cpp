@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -32,19 +32,19 @@ If you have questions concerning this license or the applicable additional terms
 idBox box_zero( vec3_zero, vec3_zero, mat3_identity );
 
 /*
-            4---{4}---5
+			4---{4}---5
  +         /|        /|
  Z      {7} {8}   {5} |
  -     /    |    /    {9}
-      7--{6}----6     |
-      |     |   |     |
-    {11}    0---|-{0}-1
-      |    /    |    /       -
-      | {3}  {10} {1}       Y
-      |/        |/         +
-      3---{2}---2
+	  7--{6}----6     |
+	  |     |   |     |
+	{11}    0---|-{0}-1
+	  |    /    |    /       -
+	  | {3}  {10} {1}       Y
+	  |/        |/         +
+	  3---{2}---2
 
-	    - X +
+		- X +
 
   plane bits:
   0 = min x
@@ -374,158 +374,158 @@ idBox::IntersectsBox
 ============
 */
 bool idBox::IntersectsBox( const idBox &a ) const {
-    idVec3 dir;			// vector between centers
-    float c[3][3];		// matrix c = axis.Transpose() * a.axis
-    float ac[3][3];		// absolute values of c
-    float axisdir[3];	// axis[i] * dir
-    float d, e0, e1;	// distance between centers and projected extents
+	idVec3 dir;			// vector between centers
+	float c[3][3];		// matrix c = axis.Transpose() * a.axis
+	float ac[3][3];		// absolute values of c
+	float axisdir[3];	// axis[i] * dir
+	float d, e0, e1;	// distance between centers and projected extents
 
 	dir = a.center - center;
-    
-    // axis C0 + t * A0
-    c[0][0] = axis[0] * a.axis[0];
-    c[0][1] = axis[0] * a.axis[1];
-    c[0][2] = axis[0] * a.axis[2];
-    axisdir[0] = axis[0] * dir;
-    ac[0][0] = idMath::Fabs( c[0][0] );
-    ac[0][1] = idMath::Fabs( c[0][1] );
-    ac[0][2] = idMath::Fabs( c[0][2] );
 
-    d = idMath::Fabs( axisdir[0] );
+	// axis C0 + t * A0
+	c[0][0] = axis[0] * a.axis[0];
+	c[0][1] = axis[0] * a.axis[1];
+	c[0][2] = axis[0] * a.axis[2];
+	axisdir[0] = axis[0] * dir;
+	ac[0][0] = idMath::Fabs( c[0][0] );
+	ac[0][1] = idMath::Fabs( c[0][1] );
+	ac[0][2] = idMath::Fabs( c[0][2] );
+
+	d = idMath::Fabs( axisdir[0] );
 	e0 = extents[0];
-    e1 = a.extents[0] * ac[0][0] + a.extents[1] * ac[0][1] + a.extents[2] * ac[0][2];
+	e1 = a.extents[0] * ac[0][0] + a.extents[1] * ac[0][1] + a.extents[2] * ac[0][2];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A1
-    c[1][0] = axis[1] * a.axis[0];
-    c[1][1] = axis[1] * a.axis[1];
-    c[1][2] = axis[1] * a.axis[2];
-    axisdir[1] = axis[1] * dir;
-    ac[1][0] = idMath::Fabs( c[1][0] );
-    ac[1][1] = idMath::Fabs( c[1][1] );
-    ac[1][2] = idMath::Fabs( c[1][2] );
+	// axis C0 + t * A1
+	c[1][0] = axis[1] * a.axis[0];
+	c[1][1] = axis[1] * a.axis[1];
+	c[1][2] = axis[1] * a.axis[2];
+	axisdir[1] = axis[1] * dir;
+	ac[1][0] = idMath::Fabs( c[1][0] );
+	ac[1][1] = idMath::Fabs( c[1][1] );
+	ac[1][2] = idMath::Fabs( c[1][2] );
 
-    d = idMath::Fabs( axisdir[1] );
+	d = idMath::Fabs( axisdir[1] );
 	e0 = extents[1];
-    e1 = a.extents[0] * ac[1][0] + a.extents[1] * ac[1][1] + a.extents[2] * ac[1][2];
+	e1 = a.extents[0] * ac[1][0] + a.extents[1] * ac[1][1] + a.extents[2] * ac[1][2];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A2
-    c[2][0] = axis[2] * a.axis[0];
-    c[2][1] = axis[2] * a.axis[1];
-    c[2][2] = axis[2] * a.axis[2];
-    axisdir[2] = axis[2] * dir;
-    ac[2][0] = idMath::Fabs( c[2][0] );
-    ac[2][1] = idMath::Fabs( c[2][1] );
-    ac[2][2] = idMath::Fabs( c[2][2] );
+	// axis C0 + t * A2
+	c[2][0] = axis[2] * a.axis[0];
+	c[2][1] = axis[2] * a.axis[1];
+	c[2][2] = axis[2] * a.axis[2];
+	axisdir[2] = axis[2] * dir;
+	ac[2][0] = idMath::Fabs( c[2][0] );
+	ac[2][1] = idMath::Fabs( c[2][1] );
+	ac[2][2] = idMath::Fabs( c[2][2] );
 
-    d = idMath::Fabs( axisdir[2] );
+	d = idMath::Fabs( axisdir[2] );
 	e0 = extents[2];
-    e1 = a.extents[0] * ac[2][0] + a.extents[1] * ac[2][1] + a.extents[2] * ac[2][2];
+	e1 = a.extents[0] * ac[2][0] + a.extents[1] * ac[2][1] + a.extents[2] * ac[2][2];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * B0
-    d = idMath::Fabs( a.axis[0] * dir );
-    e0 = extents[0] * ac[0][0] + extents[1] * ac[1][0] + extents[2] * ac[2][0];
+	// axis C0 + t * B0
+	d = idMath::Fabs( a.axis[0] * dir );
+	e0 = extents[0] * ac[0][0] + extents[1] * ac[1][0] + extents[2] * ac[2][0];
 	e1 = a.extents[0];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * B1
-    d = idMath::Fabs( a.axis[1] * dir );
-    e0 = extents[0] * ac[0][1] + extents[1] * ac[1][1] + extents[2] * ac[2][1];
+	// axis C0 + t * B1
+	d = idMath::Fabs( a.axis[1] * dir );
+	e0 = extents[0] * ac[0][1] + extents[1] * ac[1][1] + extents[2] * ac[2][1];
 	e1 = a.extents[1];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * B2
-    d = idMath::Fabs( a.axis[2] * dir );
-    e0 = extents[0] * ac[0][2] + extents[1] * ac[1][2] + extents[2] * ac[2][2];
+	// axis C0 + t * B2
+	d = idMath::Fabs( a.axis[2] * dir );
+	e0 = extents[0] * ac[0][2] + extents[1] * ac[1][2] + extents[2] * ac[2][2];
 	e1 = a.extents[2];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A0xB0
-    d = idMath::Fabs( axisdir[2] * c[1][0] - axisdir[1] * c[2][0] );
-    e0 = extents[1] * ac[2][0] + extents[2] * ac[1][0];
-    e1 = a.extents[1] * ac[0][2] + a.extents[2] * ac[0][1];
+	// axis C0 + t * A0xB0
+	d = idMath::Fabs( axisdir[2] * c[1][0] - axisdir[1] * c[2][0] );
+	e0 = extents[1] * ac[2][0] + extents[2] * ac[1][0];
+	e1 = a.extents[1] * ac[0][2] + a.extents[2] * ac[0][1];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A0xB1
-    d = idMath::Fabs( axisdir[2] * c[1][1] - axisdir[1] * c[2][1] );
-    e0 = extents[1] * ac[2][1] + extents[2] * ac[1][1];
-    e1 = a.extents[0] * ac[0][2] + a.extents[2] * ac[0][0];
+	// axis C0 + t * A0xB1
+	d = idMath::Fabs( axisdir[2] * c[1][1] - axisdir[1] * c[2][1] );
+	e0 = extents[1] * ac[2][1] + extents[2] * ac[1][1];
+	e1 = a.extents[0] * ac[0][2] + a.extents[2] * ac[0][0];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A0xB2
-    d = idMath::Fabs( axisdir[2] * c[1][2] - axisdir[1] * c[2][2] );
-    e0 = extents[1] * ac[2][2] + extents[2] * ac[1][2];
-    e1 = a.extents[0] * ac[0][1] + a.extents[1] * ac[0][0];
-    if ( d > e0 + e1 ) {
-        return false;
-	}
-
-    // axis C0 + t * A1xB0
-    d = idMath::Fabs( axisdir[0] * c[2][0] - axisdir[2] * c[0][0] );
-    e0 = extents[0] * ac[2][0] + extents[2] * ac[0][0];
-    e1 = a.extents[1] * ac[1][2] + a.extents[2] * ac[1][1];
+	// axis C0 + t * A0xB2
+	d = idMath::Fabs( axisdir[2] * c[1][2] - axisdir[1] * c[2][2] );
+	e0 = extents[1] * ac[2][2] + extents[2] * ac[1][2];
+	e1 = a.extents[0] * ac[0][1] + a.extents[1] * ac[0][0];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A1xB1
-    d = idMath::Fabs( axisdir[0] * c[2][1] - axisdir[2] * c[0][1] );
-    e0 = extents[0] * ac[2][1] + extents[2] * ac[0][1];
-    e1 = a.extents[0] * ac[1][2] + a.extents[2] * ac[1][0];
+	// axis C0 + t * A1xB0
+	d = idMath::Fabs( axisdir[0] * c[2][0] - axisdir[2] * c[0][0] );
+	e0 = extents[0] * ac[2][0] + extents[2] * ac[0][0];
+	e1 = a.extents[1] * ac[1][2] + a.extents[2] * ac[1][1];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A1xB2
-    d = idMath::Fabs( axisdir[0] * c[2][2] - axisdir[2] * c[0][2] );
-    e0 = extents[0] * ac[2][2] + extents[2] * ac[0][2];
-    e1 = a.extents[0] * ac[1][1] + a.extents[1] * ac[1][0];
+	// axis C0 + t * A1xB1
+	d = idMath::Fabs( axisdir[0] * c[2][1] - axisdir[2] * c[0][1] );
+	e0 = extents[0] * ac[2][1] + extents[2] * ac[0][1];
+	e1 = a.extents[0] * ac[1][2] + a.extents[2] * ac[1][0];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A2xB0
-    d = idMath::Fabs( axisdir[1] * c[0][0] - axisdir[0] * c[1][0] );
-    e0 = extents[0] * ac[1][0] + extents[1] * ac[0][0];
-    e1 = a.extents[1] * ac[2][2] + a.extents[2] * ac[2][1];
+	// axis C0 + t * A1xB2
+	d = idMath::Fabs( axisdir[0] * c[2][2] - axisdir[2] * c[0][2] );
+	e0 = extents[0] * ac[2][2] + extents[2] * ac[0][2];
+	e1 = a.extents[0] * ac[1][1] + a.extents[1] * ac[1][0];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A2xB1
-    d = idMath::Fabs( axisdir[1] * c[0][1] - axisdir[0] * c[1][1] );
-    e0 = extents[0] * ac[1][1] + extents[1] * ac[0][1];
-    e1 = a.extents[0] * ac[2][2] + a.extents[2] * ac[2][0];
+	// axis C0 + t * A2xB0
+	d = idMath::Fabs( axisdir[1] * c[0][0] - axisdir[0] * c[1][0] );
+	e0 = extents[0] * ac[1][0] + extents[1] * ac[0][0];
+	e1 = a.extents[1] * ac[2][2] + a.extents[2] * ac[2][1];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
 
-    // axis C0 + t * A2xB2
-    d = idMath::Fabs( axisdir[1] * c[0][2] - axisdir[0] * c[1][2] );
-    e0 = extents[0] * ac[1][2] + extents[1] * ac[0][2];
-    e1 = a.extents[0] * ac[2][1] + a.extents[1] * ac[2][0];
+	// axis C0 + t * A2xB1
+	d = idMath::Fabs( axisdir[1] * c[0][1] - axisdir[0] * c[1][1] );
+	e0 = extents[0] * ac[1][1] + extents[1] * ac[0][1];
+	e1 = a.extents[0] * ac[2][2] + a.extents[2] * ac[2][0];
 	if ( d > e0 + e1 ) {
-        return false;
+		return false;
 	}
-    return true;
+
+	// axis C0 + t * A2xB2
+	d = idMath::Fabs( axisdir[1] * c[0][2] - axisdir[0] * c[1][2] );
+	e0 = extents[0] * ac[1][2] + extents[1] * ac[0][2];
+	e1 = a.extents[0] * ac[2][1] + a.extents[1] * ac[2][0];
+	if ( d > e0 + e1 ) {
+		return false;
+	}
+	return true;
 }
 
 /*
@@ -536,41 +536,41 @@ idBox::LineIntersection
 ============
 */
 bool idBox::LineIntersection( const idVec3 &start, const idVec3 &end ) const {
-    float ld[3];
-    idVec3 lineDir = 0.5f * ( end - start );
-    idVec3 lineCenter = start + lineDir;
-    idVec3 dir = lineCenter - center;
+	float ld[3];
+	idVec3 lineDir = 0.5f * ( end - start );
+	idVec3 lineCenter = start + lineDir;
+	idVec3 dir = lineCenter - center;
 
-    ld[0] = idMath::Fabs( lineDir * axis[0] );
+	ld[0] = idMath::Fabs( lineDir * axis[0] );
 	if ( idMath::Fabs( dir * axis[0] ) > extents[0] + ld[0] ) {
-        return false;
+		return false;
 	}
 
-    ld[1] = idMath::Fabs( lineDir * axis[1] );
+	ld[1] = idMath::Fabs( lineDir * axis[1] );
 	if ( idMath::Fabs( dir * axis[1] ) > extents[1] + ld[1] ) {
-        return false;
+		return false;
 	}
 
-    ld[2] = idMath::Fabs( lineDir * axis[2] );
+	ld[2] = idMath::Fabs( lineDir * axis[2] );
 	if ( idMath::Fabs( dir * axis[2] ) > extents[2] + ld[2] ) {
-        return false;
+		return false;
 	}
 
-    idVec3 cross = lineDir.Cross( dir );
+	idVec3 cross = lineDir.Cross( dir );
 
 	if ( idMath::Fabs( cross * axis[0] ) > extents[1] * ld[2] + extents[2] * ld[1] ) {
-        return false;
+		return false;
 	}
 
 	if ( idMath::Fabs( cross * axis[1] ) > extents[0] * ld[2] + extents[2] * ld[0] ) {
-        return false;
+		return false;
 	}
 
 	if ( idMath::Fabs( cross * axis[2] ) > extents[0] * ld[1] + extents[1] * ld[0] ) {
-        return false;
+		return false;
 	}
 
-    return true;
+	return true;
 }
 
 /*
@@ -619,7 +619,7 @@ bool idBox::RayIntersection( const idVec3 &start, const idVec3 &dir, float &scal
 
 	scale1 = -idMath::INFINITY;
 	scale2 = idMath::INFINITY;
-    return	BoxPlaneClip(  localDir.x, -localStart.x - extents[0], scale1, scale2 ) &&
+	return	BoxPlaneClip(  localDir.x, -localStart.x - extents[0], scale1, scale2 ) &&
 			BoxPlaneClip( -localDir.x,  localStart.x - extents[0], scale1, scale2 ) &&
 			BoxPlaneClip(  localDir.y, -localStart.y - extents[1], scale1, scale2 ) &&
 			BoxPlaneClip( -localDir.y,  localStart.y - extents[1], scale1, scale2 ) &&
@@ -701,9 +701,9 @@ void idBox::FromPoints( const idVec3 *points, const int numPoints ) {
 
 	// refine by calculating the bounds of the points projected onto the axis and adjusting the center and extents
 	bounds.Clear();
-    for ( i = 0; i < numPoints; i++ ) {
+	for ( i = 0; i < numPoints; i++ ) {
 		bounds.AddPoint( idVec3( points[i] * axis[0], points[i] * axis[1], points[i] * axis[2] ) );
-    }
+	}
 	center = ( bounds[0] + bounds[1] ) * 0.5f;
 	extents = bounds[1] - center;
 	center *= axis;

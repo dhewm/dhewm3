@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -2206,8 +2206,8 @@ bool VPCALL idSIMD_Generic::MatX_LDLTFactor( idMatX &mat, idVecX &invDiag, const
 		sum = ptr[i];
 		for ( j = 0; j < i; j++ ) {
 			d = ptr[j];
-		    v[j] = diagPtr[0] * d;
-		    sum -= v[j] * d;
+			v[j] = diagPtr[0] * d;
+			sum -= v[j] * d;
 			diagPtr += nc + 1;
 		}
 

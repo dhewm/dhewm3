@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -67,7 +67,7 @@ private:
 
 public:
 								idEventDef( const char *command, const char *formatspec = NULL, char returnType = 0 );
-								
+
 	const char					*GetName( void ) const;
 	const char					*GetArgFormat( void ) const;
 	unsigned int				GetFormatspecIndex( void ) const;
@@ -105,7 +105,7 @@ public:
 
 	static idEvent				*Alloc( const idEventDef *evdef, int numargs, va_list args );
 	static void					CopyArgs( const idEventDef *evdef, int numargs, va_list args, int data[ D_EVENT_MAXARGS ]  );
-	
+
 	void						Free( void );
 	void						Schedule( idClass *object, const idTypeInfo *cls, int time );
 	byte						*GetData( void );
@@ -121,7 +121,7 @@ public:
 	static void					Restore( idRestoreGame *savefile );				// unarchives object from save game file
 	static void					SaveTrace( idSaveGame *savefile, const trace_t &trace );
 	static void					RestoreTrace( idRestoreGame *savefile, trace_t &trace );
-	
+
 };
 
 /*

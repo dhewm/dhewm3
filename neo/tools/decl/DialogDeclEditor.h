@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -64,7 +64,7 @@ protected:
 	afx_msg void		OnEditFind();
 	afx_msg void		OnEditFindNext();
 	afx_msg void		OnEditReplace();
-    afx_msg LRESULT		OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
+	afx_msg LRESULT		OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
 	afx_msg void		OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	afx_msg void		OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	afx_msg void		OnBnClickedTest();

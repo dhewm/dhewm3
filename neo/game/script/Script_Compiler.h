@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -68,7 +68,7 @@ enum {
 	OP_ADD_SV,
 	OP_SUB_F,
 	OP_SUB_V,
-	
+
 	OP_EQ_F,
 	OP_EQ_V,
 	OP_EQ_S,
@@ -76,7 +76,7 @@ enum {
 	OP_EQ_EO,
 	OP_EQ_OE,
 	OP_EQ_OO,
-	
+
 	OP_NE_F,
 	OP_NE_V,
 	OP_NE_S,
@@ -84,7 +84,7 @@ enum {
 	OP_NE_EO,
 	OP_NE_OE,
 	OP_NE_OO,
-	
+
 	OP_LE,
 	OP_GE,
 	OP_LT,
@@ -96,7 +96,7 @@ enum {
 	OP_INDIRECT_ENT,
 	OP_INDIRECT_BOOL,
 	OP_INDIRECT_OBJ,
-	
+
 	OP_ADDRESS,
 
 	OP_EVENTCALL,
@@ -184,7 +184,7 @@ enum {
 	OP_OR_BOOLF,
 	OP_OR_FBOOL,
 	OP_OR_BOOLBOOL,
-	
+
 	OP_BITAND,
 	OP_BITOR,
 
@@ -202,10 +202,10 @@ private:
 	idParser		parser;
 	idParser		*parserPtr;
 	idToken			token;
-					
+
 	idTypeDef		*immediateType;
 	eval_t			immediate;
-					
+
 	bool			eof;
 	bool			console;
 	bool			callthread;
@@ -214,7 +214,7 @@ private:
 	int				currentLineNumber;
 	int				currentFileNumber;
 	int				errorCount;
-					
+
 	idVarDef		*scope;				// the function being parsed, or NULL
 	const idVarDef	*basetype;			// for accessing fields
 

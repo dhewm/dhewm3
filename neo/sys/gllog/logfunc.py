@@ -26,7 +26,7 @@ def do_logfunc(f_in, f_out):
 			for i in base_params:
 				regex = re.compile('([a-zA-Z0-9]*)$')
 				name = regex.search(i).group(1)
-				type = string.strip(i[0:len(i)-len(name)])				
+				type = string.strip(i[0:len(i)-len(name)])
 				# catch type with no name
 				if (len(type) == 0):
 					type = name
@@ -70,6 +70,6 @@ def do_logfunc(f_in, f_out):
 				f_out.write(i)
 			f_out.write(');\n')
 			f_out.write('}\n\n')
-			
+
 if __name__ == '__main__':
 	do_logfunc(sys.stdin, sys.stdout)

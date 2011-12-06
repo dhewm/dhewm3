@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -53,20 +53,20 @@ static bool CheckPow2(int Num)
 
 extern void Com_WriteConfigToFile( const char *filename );
 
-static BOOL CALLBACK RBFProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) 
-{  
-    switch (message) 
-    { 
-        case WM_INITDIALOG: 
+static BOOL CALLBACK RBFProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
 			SetDlgItemInt(hwndDlg, IDC_RBF_WIDTH, rbfg_DefaultWidth.GetInteger(), FALSE);
 			SetDlgItemInt(hwndDlg, IDC_RBF_HEIGHT, rbfg_DefaultHeight.GetInteger(), FALSE);
 			SetDlgItemText(hwndDlg, IDC_RBF_FILENAME, RBFName);
-            return TRUE; 
- 
-        case WM_COMMAND: 
-            switch (LOWORD(wParam)) 
-            { 
-                case IDOK: 
+			return TRUE;
+
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case IDOK:
 					{
 						int		width, height;
 
@@ -83,20 +83,20 @@ static BOOL CALLBACK RBFProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 							return TRUE;
 						}
 
-						DestroyWindow(hwndDlg); 
+						DestroyWindow(hwndDlg);
 
 						cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("renderbumpflat -size %d %d %s\n", width, height, RBFName.c_str() ) );
-	                    return TRUE; 
+						return TRUE;
 					}
- 
-                case IDCANCEL: 
-                    DestroyWindow(hwndDlg); 
-                    return TRUE; 
-            } 
-    }
 
-    return FALSE; 
-} 
+				case IDCANCEL:
+					DestroyWindow(hwndDlg);
+					return TRUE;
+			}
+	}
+
+	return FALSE;
+}
 
 void DoRBFDialog(const char *FileName)
 {
@@ -104,7 +104,7 @@ void DoRBFDialog(const char *FileName)
 
 	Sys_GrabMouseCursor( false );
 
-	DialogBox(0, MAKEINTRESOURCE(IDD_RENDERBUMPFLAT), 0, (DLGPROC)RBFProc); 
+	DialogBox(0, MAKEINTRESOURCE(IDD_RENDERBUMPFLAT), 0, (DLGPROC)RBFProc);
 
 	Sys_GrabMouseCursor( true );
 }

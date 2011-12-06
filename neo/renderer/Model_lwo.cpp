@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -49,33 +49,33 @@ Free memory used by an lwClip.
 void lwFreeClip( lwClip *clip )
 {
    if ( clip ) {
-      lwListFree( clip->ifilter, (void (__cdecl *)(void *))lwFreePlugin );
-      lwListFree( clip->pfilter, (void (__cdecl *)(void *))lwFreePlugin );
+	  lwListFree( clip->ifilter, (void (__cdecl *)(void *))lwFreePlugin );
+	  lwListFree( clip->pfilter, (void (__cdecl *)(void *))lwFreePlugin );
 	  switch( clip->type ) {
 		case ID_STIL: {
-	      if ( clip->source.still.name ) Mem_Free( clip->source.still.name );
+		  if ( clip->source.still.name ) Mem_Free( clip->source.still.name );
 		  break;
 		}
 		case ID_ISEQ: {
-          if ( clip->source.seq.suffix ) Mem_Free( clip->source.seq.suffix );
-          if ( clip->source.seq.prefix ) Mem_Free( clip->source.seq.prefix );
+		  if ( clip->source.seq.suffix ) Mem_Free( clip->source.seq.suffix );
+		  if ( clip->source.seq.prefix ) Mem_Free( clip->source.seq.prefix );
 		  break;
 		}
 		case ID_ANIM: {
 		  if ( clip->source.anim.server ) Mem_Free( clip->source.anim.server );
-          if ( clip->source.anim.name ) Mem_Free( clip->source.anim.name );
+		  if ( clip->source.anim.name ) Mem_Free( clip->source.anim.name );
 		  break;
-	    }
+		}
 		case ID_XREF: {
 		  if ( clip->source.xref.string ) Mem_Free( clip->source.xref.string );
 		  break;
 		}
 		case ID_STCC: {
-          if ( clip->source.cycle.name ) Mem_Free( clip->source.cycle.name );
+		  if ( clip->source.cycle.name ) Mem_Free( clip->source.cycle.name );
 		  break;
-	    }
+		}
 	  }
-      Mem_Free( clip );
+	  Mem_Free( clip );
    }
 }
 
@@ -125,40 +125,40 @@ lwClip *lwGetClip( idFile *fp, int cksize )
    set_flen( 0 );
 
    switch ( clip->type ) {
-      case ID_STIL:
-         clip->source.still.name = getS0( fp );
-         break;
+	  case ID_STIL:
+		 clip->source.still.name = getS0( fp );
+		 break;
 
-      case ID_ISEQ:
-         clip->source.seq.digits  = getU1( fp );
-         clip->source.seq.flags   = getU1( fp );
-         clip->source.seq.offset  = getI2( fp );
-         clip->source.seq.start   = getI2( fp );
-         clip->source.seq.end     = getI2( fp );
-         clip->source.seq.prefix  = getS0( fp );
-         clip->source.seq.suffix  = getS0( fp );
-         break;
+	  case ID_ISEQ:
+		 clip->source.seq.digits  = getU1( fp );
+		 clip->source.seq.flags   = getU1( fp );
+		 clip->source.seq.offset  = getI2( fp );
+		 clip->source.seq.start   = getI2( fp );
+		 clip->source.seq.end     = getI2( fp );
+		 clip->source.seq.prefix  = getS0( fp );
+		 clip->source.seq.suffix  = getS0( fp );
+		 break;
 
-      case ID_ANIM:
-         clip->source.anim.name   = getS0( fp );
-         clip->source.anim.server = getS0( fp );
-         rlen = get_flen();
-         clip->source.anim.data   = getbytes( fp, sz - rlen );
-         break;
+	  case ID_ANIM:
+		 clip->source.anim.name   = getS0( fp );
+		 clip->source.anim.server = getS0( fp );
+		 rlen = get_flen();
+		 clip->source.anim.data   = getbytes( fp, sz - rlen );
+		 break;
 
-      case ID_XREF:
-         clip->source.xref.index  = getI4( fp );
-         clip->source.xref.string = getS0( fp );
-         break;
+	  case ID_XREF:
+		 clip->source.xref.index  = getI4( fp );
+		 clip->source.xref.string = getS0( fp );
+		 break;
 
-      case ID_STCC:
-         clip->source.cycle.lo   = getI2( fp );
-         clip->source.cycle.hi   = getI2( fp );
-         clip->source.cycle.name = getS0( fp );
-         break;
+	  case ID_STCC:
+		 clip->source.cycle.lo   = getI2( fp );
+		 clip->source.cycle.hi   = getI2( fp );
+		 clip->source.cycle.name = getS0( fp );
+		 break;
 
-      default:
-         break;
+	  default:
+		 break;
    }
 
    /* error while reading current subchunk? */
@@ -169,14 +169,14 @@ lwClip *lwGetClip( idFile *fp, int cksize )
    /* skip unread parts of the current subchunk */
 
    if ( rlen < sz )
-      fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  fp->Seek( sz - rlen, FS_SEEK_CUR );
 
    /* end of the CLIP chunk? */
 
    rlen = fp->Tell() - pos;
    if ( cksize < rlen ) goto Fail;
    if ( cksize == rlen )
-      return clip;
+	  return clip;
 
    /* process subchunks as they're encountered */
 
@@ -185,91 +185,91 @@ lwClip *lwGetClip( idFile *fp, int cksize )
    if ( 0 > get_flen() ) goto Fail;
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_TIME:
-            clip->start_time = getF4( fp );
-            clip->duration = getF4( fp );
-            clip->frame_rate = getF4( fp );
-            break;
+	  switch ( id ) {
+		 case ID_TIME:
+			clip->start_time = getF4( fp );
+			clip->duration = getF4( fp );
+			clip->frame_rate = getF4( fp );
+			break;
 
-         case ID_CONT:
-            clip->contrast.val = getF4( fp );
-            clip->contrast.eindex = getVX( fp );
-            break;
+		 case ID_CONT:
+			clip->contrast.val = getF4( fp );
+			clip->contrast.eindex = getVX( fp );
+			break;
 
-         case ID_BRIT:
-            clip->brightness.val = getF4( fp );
-            clip->brightness.eindex = getVX( fp );
-            break;
+		 case ID_BRIT:
+			clip->brightness.val = getF4( fp );
+			clip->brightness.eindex = getVX( fp );
+			break;
 
-         case ID_SATR:
-            clip->saturation.val = getF4( fp );
-            clip->saturation.eindex = getVX( fp );
-            break;
+		 case ID_SATR:
+			clip->saturation.val = getF4( fp );
+			clip->saturation.eindex = getVX( fp );
+			break;
 
-         case ID_HUE:
-            clip->hue.val = getF4( fp );
-            clip->hue.eindex = getVX( fp );
-            break;
+		 case ID_HUE:
+			clip->hue.val = getF4( fp );
+			clip->hue.eindex = getVX( fp );
+			break;
 
-         case ID_GAMM:
-            clip->gamma.val = getF4( fp );
-            clip->gamma.eindex = getVX( fp );
-            break;
+		 case ID_GAMM:
+			clip->gamma.val = getF4( fp );
+			clip->gamma.eindex = getVX( fp );
+			break;
 
-         case ID_NEGA:
-            clip->negative = getU2( fp );
-            break;
+		 case ID_NEGA:
+			clip->negative = getU2( fp );
+			break;
 
-         case ID_IFLT:
-         case ID_PFLT:
-            filt = (lwPlugin*)Mem_ClearedAlloc( sizeof( lwPlugin ) );
-            if ( !filt ) goto Fail;
+		 case ID_IFLT:
+		 case ID_PFLT:
+			filt = (lwPlugin*)Mem_ClearedAlloc( sizeof( lwPlugin ) );
+			if ( !filt ) goto Fail;
 
-            filt->name = getS0( fp );
-            filt->flags = getU2( fp );
-            rlen = get_flen();
-            filt->data = getbytes( fp, sz - rlen );
+			filt->name = getS0( fp );
+			filt->flags = getU2( fp );
+			rlen = get_flen();
+			filt->data = getbytes( fp, sz - rlen );
 
-            if ( id == ID_IFLT ) {
-               lwListAdd( (void**)&clip->ifilter, filt );
-               clip->nifilters++;
-            }
-            else {
-               lwListAdd( (void**)&clip->pfilter, filt );
-               clip->npfilters++;
-            }
-            break;
+			if ( id == ID_IFLT ) {
+			   lwListAdd( (void**)&clip->ifilter, filt );
+			   clip->nifilters++;
+			}
+			else {
+			   lwListAdd( (void**)&clip->pfilter, filt );
+			   clip->npfilters++;
+			}
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading current subchunk? */
+	  /* error while reading current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) goto Fail;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) goto Fail;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the CLIP chunk? */
+	  /* end of the CLIP chunk? */
 
-      rlen = fp->Tell() - pos;
-      if ( cksize < rlen ) goto Fail;
-      if ( cksize == rlen ) break;
+	  rlen = fp->Tell() - pos;
+	  if ( cksize < rlen ) goto Fail;
+	  if ( cksize == rlen ) break;
 
-      /* get the next chunk header */
+	  /* get the next chunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) goto Fail;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) goto Fail;
    }
 
    return clip;
@@ -293,8 +293,8 @@ lwClip *lwFindClip( lwClip *list, int index )
 
    clip = list;
    while ( clip ) {
-      if ( clip->index == index ) break;
-      clip = clip->next;
+	  if ( clip->index == index ) break;
+	  clip = clip->next;
    }
    return clip;
 }
@@ -314,10 +314,10 @@ void lwFree( void *ptr ) {
 void lwFreeEnvelope( lwEnvelope *env )
 {
    if ( env ) {
-      if ( env->name ) Mem_Free( env->name );
-      lwListFree( env->key, lwFree );
-      lwListFree( env->cfilter, (void (__cdecl *)(void *))lwFreePlugin );
-      Mem_Free( env );
+	  if ( env->name ) Mem_Free( env->name );
+	  lwListFree( env->key, lwFree );
+	  lwListFree( env->cfilter, (void (__cdecl *)(void *))lwFreePlugin );
+	  Mem_Free( env );
    }
 }
 
@@ -369,98 +369,98 @@ lwEnvelope *lwGetEnvelope( idFile *fp, int cksize )
    /* process subchunks as they're encountered */
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_TYPE:
-            env->type = getU2( fp );
-            break;
+	  switch ( id ) {
+		 case ID_TYPE:
+			env->type = getU2( fp );
+			break;
 
-         case ID_NAME:
-            env->name = getS0( fp );
-            break;
+		 case ID_NAME:
+			env->name = getS0( fp );
+			break;
 
-         case ID_PRE:
-            env->behavior[ 0 ] = getU2( fp );
-            break;
+		 case ID_PRE:
+			env->behavior[ 0 ] = getU2( fp );
+			break;
 
-         case ID_POST:
-            env->behavior[ 1 ] = getU2( fp );
-            break;
+		 case ID_POST:
+			env->behavior[ 1 ] = getU2( fp );
+			break;
 
-         case ID_KEY:
-            key = (lwKey*)Mem_ClearedAlloc( sizeof( lwKey ) );
-            if ( !key ) goto Fail;
-            key->time = getF4( fp );
-            key->value = getF4( fp );
-            lwListInsert( (void**)&env->key, key, (int (__cdecl *)(void *,void *))compare_keys );
-            env->nkeys++;
-            break;
+		 case ID_KEY:
+			key = (lwKey*)Mem_ClearedAlloc( sizeof( lwKey ) );
+			if ( !key ) goto Fail;
+			key->time = getF4( fp );
+			key->value = getF4( fp );
+			lwListInsert( (void**)&env->key, key, (int (__cdecl *)(void *,void *))compare_keys );
+			env->nkeys++;
+			break;
 
-         case ID_SPAN:
-            if ( !key ) goto Fail;
-            key->shape = getU4( fp );
+		 case ID_SPAN:
+			if ( !key ) goto Fail;
+			key->shape = getU4( fp );
 
-            nparams = ( sz - 4 ) / 4;
-            if ( nparams > 4 ) nparams = 4;
-            for ( i = 0; i < nparams; i++ )
-               f[ i ] = getF4( fp );
+			nparams = ( sz - 4 ) / 4;
+			if ( nparams > 4 ) nparams = 4;
+			for ( i = 0; i < nparams; i++ )
+			   f[ i ] = getF4( fp );
 
-            switch ( key->shape ) {
-               case ID_TCB:
-                  key->tension = f[ 0 ];
-                  key->continuity = f[ 1 ];
-                  key->bias = f[ 2 ];
-                  break;
+			switch ( key->shape ) {
+			   case ID_TCB:
+				  key->tension = f[ 0 ];
+				  key->continuity = f[ 1 ];
+				  key->bias = f[ 2 ];
+				  break;
 
-               case ID_BEZI:
-               case ID_HERM:
-               case ID_BEZ2:
-                  for ( i = 0; i < nparams; i++ )
-                     key->param[ i ] = f[ i ];
-                  break;
-            }
-            break;
+			   case ID_BEZI:
+			   case ID_HERM:
+			   case ID_BEZ2:
+				  for ( i = 0; i < nparams; i++ )
+					 key->param[ i ] = f[ i ];
+				  break;
+			}
+			break;
 
-         case ID_CHAN:
-            plug = (lwPlugin*)Mem_ClearedAlloc( sizeof( lwPlugin ) );
-            if ( !plug ) goto Fail;
+		 case ID_CHAN:
+			plug = (lwPlugin*)Mem_ClearedAlloc( sizeof( lwPlugin ) );
+			if ( !plug ) goto Fail;
 
-            plug->name = getS0( fp );
-            plug->flags = getU2( fp );
-            plug->data = getbytes( fp, sz - get_flen() );
+			plug->name = getS0( fp );
+			plug->flags = getU2( fp );
+			plug->data = getbytes( fp, sz - get_flen() );
 
-            lwListAdd( (void**)&env->cfilter, plug );
-            env->ncfilters++;
-            break;
+			lwListAdd( (void**)&env->cfilter, plug );
+			env->ncfilters++;
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading current subchunk? */
+	  /* error while reading current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) goto Fail;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) goto Fail;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the ENVL chunk? */
+	  /* end of the ENVL chunk? */
 
-      rlen = fp->Tell() - pos;
-      if ( cksize < rlen ) goto Fail;
-      if ( cksize == rlen ) break;
+	  rlen = fp->Tell() - pos;
+	  if ( cksize < rlen ) goto Fail;
+	  if ( cksize == rlen ) break;
 
-      /* get the next subchunk header */
+	  /* get the next subchunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) goto Fail;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) goto Fail;
    }
 
    return env;
@@ -484,8 +484,8 @@ lwEnvelope *lwFindEnvelope( lwEnvelope *list, int index )
 
    env = list;
    while ( env ) {
-      if ( env->index == index ) break;
-      env = env->next;
+	  if ( env->index == index ) break;
+	  env = env->next;
    }
    return env;
 }
@@ -509,8 +509,8 @@ static float range( float v, float lo, float hi, int *i )
    float v2, r = hi - lo;
 
    if ( r == 0.0 ) {
-      if ( i ) *i = 0;
-      return lo;
+	  if ( i ) *i = 0;
+	  return lo;
    }
 
    v2 = lo + v - r * ( float ) floor(( double ) v / r );
@@ -581,14 +581,14 @@ static float bez2_time( float x0, float x1, float x2, float x3, float time,
    t = *t0 + ( *t1 - *t0 ) * 0.5f;
    v = bezier( x0, x1, x2, x3, t );
    if ( idMath::Fabs( time - v ) > .0001f ) {
-      if ( v > time )
-         *t1 = t;
-      else
-         *t0 = t;
-      return bez2_time( x0, x1, x2, x3, time, t0, t1 );
+	  if ( v > time )
+		 *t1 = t;
+	  else
+		 *t0 = t;
+	  return bez2_time( x0, x1, x2, x3, time, t0, t1 );
    }
    else
-      return t;
+	  return t;
 }
 
 
@@ -604,17 +604,17 @@ static float bez2( lwKey *key0, lwKey *key1, float time )
    float x, y, t, t0 = 0.0f, t1 = 1.0f;
 
    if ( key0->shape == ID_BEZ2 )
-      x = key0->time + key0->param[ 2 ];
+	  x = key0->time + key0->param[ 2 ];
    else
-      x = key0->time + ( key1->time - key0->time ) / 3.0f;
+	  x = key0->time + ( key1->time - key0->time ) / 3.0f;
 
    t = bez2_time( key0->time, x, key1->time + key1->param[ 0 ], key1->time,
-      time, &t0, &t1 );
+	  time, &t0, &t1 );
 
    if ( key0->shape == ID_BEZ2 )
-      y = key0->value + key0->param[ 3 ];
+	  y = key0->value + key0->param[ 3 ];
    else
-      y = key0->value + key0->param[ 1 ] / 3.0f;
+	  y = key0->value + key0->param[ 1 ] / 3.0f;
 
    return bezier( key0->value, y, key1->param[ 1 ] + key1->value, key1->value, t );
 }
@@ -635,52 +635,52 @@ static float outgoing( lwKey *key0, lwKey *key1 )
 
    switch ( key0->shape )
    {
-      case ID_TCB:
-         a = ( 1.0f - key0->tension )
-           * ( 1.0f + key0->continuity )
-           * ( 1.0f + key0->bias );
-         b = ( 1.0f - key0->tension )
-           * ( 1.0f - key0->continuity )
-           * ( 1.0f - key0->bias );
-         d = key1->value - key0->value;
+	  case ID_TCB:
+		 a = ( 1.0f - key0->tension )
+		   * ( 1.0f + key0->continuity )
+		   * ( 1.0f + key0->bias );
+		 b = ( 1.0f - key0->tension )
+		   * ( 1.0f - key0->continuity )
+		   * ( 1.0f - key0->bias );
+		 d = key1->value - key0->value;
 
-         if ( key0->prev ) {
-            t = ( key1->time - key0->time ) / ( key1->time - key0->prev->time );
-            out = t * ( a * ( key0->value - key0->prev->value ) + b * d );
-         }
-         else
-            out = b * d;
-         break;
+		 if ( key0->prev ) {
+			t = ( key1->time - key0->time ) / ( key1->time - key0->prev->time );
+			out = t * ( a * ( key0->value - key0->prev->value ) + b * d );
+		 }
+		 else
+			out = b * d;
+		 break;
 
-      case ID_LINE:
-         d = key1->value - key0->value;
-         if ( key0->prev ) {
-            t = ( key1->time - key0->time ) / ( key1->time - key0->prev->time );
-            out = t * ( key0->value - key0->prev->value + d );
-         }
-         else
-            out = d;
-         break;
+	  case ID_LINE:
+		 d = key1->value - key0->value;
+		 if ( key0->prev ) {
+			t = ( key1->time - key0->time ) / ( key1->time - key0->prev->time );
+			out = t * ( key0->value - key0->prev->value + d );
+		 }
+		 else
+			out = d;
+		 break;
 
-      case ID_BEZI:
-      case ID_HERM:
-         out = key0->param[ 1 ];
-         if ( key0->prev )
-            out *= ( key1->time - key0->time ) / ( key1->time - key0->prev->time );
-         break;
+	  case ID_BEZI:
+	  case ID_HERM:
+		 out = key0->param[ 1 ];
+		 if ( key0->prev )
+			out *= ( key1->time - key0->time ) / ( key1->time - key0->prev->time );
+		 break;
 
-      case ID_BEZ2:
-         out = key0->param[ 3 ] * ( key1->time - key0->time );
-         if ( idMath::Fabs( key0->param[ 2 ] ) > 1e-5f )
-            out /= key0->param[ 2 ];
-         else
-            out *= 1e5f;
-         break;
+	  case ID_BEZ2:
+		 out = key0->param[ 3 ] * ( key1->time - key0->time );
+		 if ( idMath::Fabs( key0->param[ 2 ] ) > 1e-5f )
+			out /= key0->param[ 2 ];
+		 else
+			out *= 1e5f;
+		 break;
 
-      case ID_STEP:
-      default:
-         out = 0.0f;
-         break;
+	  case ID_STEP:
+	  default:
+		 out = 0.0f;
+		 break;
    }
 
    return out;
@@ -701,53 +701,53 @@ static float incoming( lwKey *key0, lwKey *key1 )
 
    switch ( key1->shape )
    {
-      case ID_LINE:
-         d = key1->value - key0->value;
-         if ( key1->next ) {
-            t = ( key1->time - key0->time ) / ( key1->next->time - key0->time );
-            in = t * ( key1->next->value - key1->value + d );
-         }
-         else
-            in = d;
-         break;
+	  case ID_LINE:
+		 d = key1->value - key0->value;
+		 if ( key1->next ) {
+			t = ( key1->time - key0->time ) / ( key1->next->time - key0->time );
+			in = t * ( key1->next->value - key1->value + d );
+		 }
+		 else
+			in = d;
+		 break;
 
-      case ID_TCB:
-         a = ( 1.0f - key1->tension )
-           * ( 1.0f - key1->continuity )
-           * ( 1.0f + key1->bias );
-         b = ( 1.0f - key1->tension )
-           * ( 1.0f + key1->continuity )
-           * ( 1.0f - key1->bias );
-         d = key1->value - key0->value;
+	  case ID_TCB:
+		 a = ( 1.0f - key1->tension )
+		   * ( 1.0f - key1->continuity )
+		   * ( 1.0f + key1->bias );
+		 b = ( 1.0f - key1->tension )
+		   * ( 1.0f + key1->continuity )
+		   * ( 1.0f - key1->bias );
+		 d = key1->value - key0->value;
 
-         if ( key1->next ) {
-            t = ( key1->time - key0->time ) / ( key1->next->time - key0->time );
-            in = t * ( b * ( key1->next->value - key1->value ) + a * d );
-         }
-         else
-            in = a * d;
-         break;
+		 if ( key1->next ) {
+			t = ( key1->time - key0->time ) / ( key1->next->time - key0->time );
+			in = t * ( b * ( key1->next->value - key1->value ) + a * d );
+		 }
+		 else
+			in = a * d;
+		 break;
 
-      case ID_BEZI:
-      case ID_HERM:
-         in = key1->param[ 0 ];
-         if ( key1->next )
-            in *= ( key1->time - key0->time ) / ( key1->next->time - key0->time );
-         break;
-         return in;
+	  case ID_BEZI:
+	  case ID_HERM:
+		 in = key1->param[ 0 ];
+		 if ( key1->next )
+			in *= ( key1->time - key0->time ) / ( key1->next->time - key0->time );
+		 break;
+		 return in;
 
-      case ID_BEZ2:
-         in = key1->param[ 1 ] * ( key1->time - key0->time );
-         if ( idMath::Fabs( key1->param[ 0 ] ) > 1e-5f )
-            in /= key1->param[ 0 ];
-         else
-            in *= 1e5f;
-         break;
+	  case ID_BEZ2:
+		 in = key1->param[ 1 ] * ( key1->time - key0->time );
+		 if ( idMath::Fabs( key1->param[ 0 ] ) > 1e-5f )
+			in /= key1->param[ 0 ];
+		 else
+			in *= 1e5f;
+		 break;
 
-      case ID_STEP:
-      default:
-         in = 0.0f;
-         break;
+	  case ID_STEP:
+	  default:
+		 in = 0.0f;
+		 break;
    }
 
    return in;
@@ -776,7 +776,7 @@ float evalEnvelope( lwEnvelope *env, float time )
    /* if there's only one key, the value is constant */
 
    if ( env->nkeys == 1 )
-      return env->key->value;
+	  return env->key->value;
 
    /* find the first and last keys */
 
@@ -786,82 +786,82 @@ float evalEnvelope( lwEnvelope *env, float time )
    /* use pre-behavior if time is before first key time */
 
    if ( time < skey->time ) {
-      switch ( env->behavior[ 0 ] )
-      {
-         case BEH_RESET:
-            return 0.0f;
+	  switch ( env->behavior[ 0 ] )
+	  {
+		 case BEH_RESET:
+			return 0.0f;
 
-         case BEH_CONSTANT:
-            return skey->value;
+		 case BEH_CONSTANT:
+			return skey->value;
 
-         case BEH_REPEAT:
-            time = range( time, skey->time, ekey->time, NULL );
-            break;
+		 case BEH_REPEAT:
+			time = range( time, skey->time, ekey->time, NULL );
+			break;
 
-         case BEH_OSCILLATE:
-            time = range( time, skey->time, ekey->time, &noff );
-            if ( noff % 2 )
-               time = ekey->time - skey->time - time;
-            break;
+		 case BEH_OSCILLATE:
+			time = range( time, skey->time, ekey->time, &noff );
+			if ( noff % 2 )
+			   time = ekey->time - skey->time - time;
+			break;
 
-         case BEH_OFFSET:
-            time = range( time, skey->time, ekey->time, &noff );
-            offset = noff * ( ekey->value - skey->value );
-            break;
+		 case BEH_OFFSET:
+			time = range( time, skey->time, ekey->time, &noff );
+			offset = noff * ( ekey->value - skey->value );
+			break;
 
-         case BEH_LINEAR:
-            out = outgoing( skey, skey->next )
-                / ( skey->next->time - skey->time );
-            return out * ( time - skey->time ) + skey->value;
-      }
+		 case BEH_LINEAR:
+			out = outgoing( skey, skey->next )
+				/ ( skey->next->time - skey->time );
+			return out * ( time - skey->time ) + skey->value;
+	  }
    }
 
    /* use post-behavior if time is after last key time */
 
    else if ( time > ekey->time ) {
-      switch ( env->behavior[ 1 ] )
-      {
-         case BEH_RESET:
-            return 0.0f;
+	  switch ( env->behavior[ 1 ] )
+	  {
+		 case BEH_RESET:
+			return 0.0f;
 
-         case BEH_CONSTANT:
-            return ekey->value;
+		 case BEH_CONSTANT:
+			return ekey->value;
 
-         case BEH_REPEAT:
-            time = range( time, skey->time, ekey->time, NULL );
-            break;
+		 case BEH_REPEAT:
+			time = range( time, skey->time, ekey->time, NULL );
+			break;
 
-         case BEH_OSCILLATE:
-            time = range( time, skey->time, ekey->time, &noff );
-            if ( noff % 2 )
-               time = ekey->time - skey->time - time;
-            break;
+		 case BEH_OSCILLATE:
+			time = range( time, skey->time, ekey->time, &noff );
+			if ( noff % 2 )
+			   time = ekey->time - skey->time - time;
+			break;
 
-         case BEH_OFFSET:
-            time = range( time, skey->time, ekey->time, &noff );
-            offset = noff * ( ekey->value - skey->value );
-            break;
+		 case BEH_OFFSET:
+			time = range( time, skey->time, ekey->time, &noff );
+			offset = noff * ( ekey->value - skey->value );
+			break;
 
-         case BEH_LINEAR:
-            in = incoming( ekey->prev, ekey )
-               / ( ekey->time - ekey->prev->time );
-            return in * ( time - ekey->time ) + ekey->value;
-      }
+		 case BEH_LINEAR:
+			in = incoming( ekey->prev, ekey )
+			   / ( ekey->time - ekey->prev->time );
+			return in * ( time - ekey->time ) + ekey->value;
+	  }
    }
 
    /* get the endpoints of the interval being evaluated */
 
    key0 = env->key;
    while ( time > key0->next->time )
-      key0 = key0->next;
+	  key0 = key0->next;
    key1 = key0->next;
 
    /* check for singularities first */
 
    if ( time == key0->time )
-      return key0->value + offset;
+	  return key0->value + offset;
    else if ( time == key1->time )
-      return key1->value + offset;
+	  return key1->value + offset;
 
    /* get interval length, time in [0, 1] */
 
@@ -871,25 +871,25 @@ float evalEnvelope( lwEnvelope *env, float time )
 
    switch ( key1->shape )
    {
-      case ID_TCB:
-      case ID_BEZI:
-      case ID_HERM:
-         out = outgoing( key0, key1 );
-         in = incoming( key0, key1 );
-         hermite( t, &h1, &h2, &h3, &h4 );
-         return h1 * key0->value + h2 * key1->value + h3 * out + h4 * in + offset;
+	  case ID_TCB:
+	  case ID_BEZI:
+	  case ID_HERM:
+		 out = outgoing( key0, key1 );
+		 in = incoming( key0, key1 );
+		 hermite( t, &h1, &h2, &h3, &h4 );
+		 return h1 * key0->value + h2 * key1->value + h3 * out + h4 * in + offset;
 
-      case ID_BEZ2:
-         return bez2( key0, key1, time ) + offset;
+	  case ID_BEZ2:
+		 return bez2( key0, key1, time ) + offset;
 
-      case ID_LINE:
-         return key0->value + t * ( key1->value - key0->value ) + offset;
+	  case ID_LINE:
+		 return key0->value + t * ( key1->value - key0->value ) + offset;
 
-      case ID_STEP:
-         return key0->value + offset;
+	  case ID_STEP:
+		 return key0->value + offset;
 
-      default:
-         return offset;
+	  default:
+		 return offset;
    }
 }
 
@@ -908,9 +908,9 @@ void lwListFree( void *list, void ( *freeNode )( void * ))
 
    node = ( lwNode * ) list;
    while ( node ) {
-      next = node->next;
-      freeNode( node );
-      node = next;
+	  next = node->next;
+	  freeNode( node );
+	  node = next;
    }
 }
 
@@ -928,12 +928,12 @@ void lwListAdd( void **list, void *node )
 
    head = *(( lwNode ** ) list );
    if ( !head ) {
-      *list = node;
-      return;
+	  *list = node;
+	  return;
    }
    while ( head ) {
-      tail = head;
-      head = head->next;
+	  tail = head;
+	  head = head->next;
    }
    tail->next = ( lwNode * ) node;
    (( lwNode * ) node )->prev = tail;
@@ -952,8 +952,8 @@ void lwListInsert( void **vlist, void *vitem, int ( *compare )( void *, void * )
    lwNode **list, *item, *node, *prev;
 
    if ( !*vlist ) {
-      *vlist = vitem;
-      return;
+	  *vlist = vitem;
+	  return;
    }
 
    list = ( lwNode ** ) vlist;
@@ -962,25 +962,25 @@ void lwListInsert( void **vlist, void *vitem, int ( *compare )( void *, void * )
    prev = NULL;
 
    while ( node ) {
-      if ( 0 < compare( node, item )) break;
-      prev = node;
-      node = node->next;
+	  if ( 0 < compare( node, item )) break;
+	  prev = node;
+	  node = node->next;
    }
 
    if ( !prev ) {
-      *list = item;
-      node->prev = item;
-      item->next = node;
+	  *list = item;
+	  node->prev = item;
+	  item->next = node;
    }
    else if ( !node ) {
-      prev->next = item;
-      item->prev = prev;
+	  prev->next = item;
+	  item->prev = prev;
    }
    else {
-      item->next = node;
-      item->prev = prev;
-      prev->next = item;
-      node->prev = item;
+	  item->next = node;
+	  item->prev = prev;
+	  prev->next = item;
+	  node->prev = item;
    }
 }
 
@@ -1009,18 +1009,18 @@ void *getbytes( idFile *fp, int size )
 
    if ( flen == FLEN_ERROR ) return NULL;
    if ( size < 0 ) {
-      flen = FLEN_ERROR;
-      return NULL;
+	  flen = FLEN_ERROR;
+	  return NULL;
    }
    data = Mem_ClearedAlloc( size );
    if ( !data ) {
-      flen = FLEN_ERROR;
-      return NULL;
+	  flen = FLEN_ERROR;
+	  return NULL;
    }
    if ( size != fp->Read( data, size ) ) {
-      flen = FLEN_ERROR;
-      Mem_Free( data );
-      return NULL;
+	  flen = FLEN_ERROR;
+	  Mem_Free( data );
+	  return NULL;
    }
 
    flen += size;
@@ -1032,9 +1032,9 @@ void skipbytes( idFile *fp, int n )
 {
    if ( flen == FLEN_ERROR ) return;
    if ( fp->Seek( n, FS_SEEK_CUR ))
-      flen = FLEN_ERROR;
+	  flen = FLEN_ERROR;
    else
-      flen += n;
+	  flen += n;
 }
 
 
@@ -1046,8 +1046,8 @@ int getI1( idFile *fp )
 	c = 0;
    i = fp->Read(&c, 1);
    if ( i < 0 ) {
-      flen = FLEN_ERROR;
-      return 0;
+	  flen = FLEN_ERROR;
+	  return 0;
    }
    if ( c > 127 ) c -= 256;
    flen += 1;
@@ -1061,8 +1061,8 @@ short getI2( idFile *fp )
 
    if ( flen == FLEN_ERROR ) return 0;
    if ( 2 != fp->Read( &i, 2 )) {
-      flen = FLEN_ERROR;
-      return 0;
+	  flen = FLEN_ERROR;
+	  return 0;
    }
    BigRevBytes( &i, 2, 1 );
    flen += 2;
@@ -1076,8 +1076,8 @@ int getI4( idFile *fp )
 
    if ( flen == FLEN_ERROR ) return 0;
    if ( 4 != fp->Read( &i, 4 )) {
-      flen = FLEN_ERROR;
-      return 0;
+	  flen = FLEN_ERROR;
+	  return 0;
    }
    BigRevBytes( &i, 4, 1 );
    flen += 4;
@@ -1093,8 +1093,8 @@ unsigned char getU1( idFile *fp )
 	  c = 0;
    i = fp->Read(&c, 1);
    if ( i < 0 ) {
-      flen = FLEN_ERROR;
-      return 0;
+	  flen = FLEN_ERROR;
+	  return 0;
    }
    flen += 1;
    return c;
@@ -1107,8 +1107,8 @@ unsigned short getU2( idFile *fp )
 
    if ( flen == FLEN_ERROR ) return 0;
    if ( 2 != fp->Read( &i, 2 )) {
-      flen = FLEN_ERROR;
-      return 0;
+	  flen = FLEN_ERROR;
+	  return 0;
    }
    BigRevBytes( &i, 2, 1 );
    flen += 2;
@@ -1122,8 +1122,8 @@ unsigned int getU4( idFile *fp )
 
    if ( flen == FLEN_ERROR ) return 0;
    if ( 4 != fp->Read( &i, 4 )) {
-      flen = FLEN_ERROR;
-      return 0;
+	  flen = FLEN_ERROR;
+	  return 0;
    }
    BigRevBytes( &i, 4, 1 );
    flen += 4;
@@ -1133,7 +1133,7 @@ unsigned int getU4( idFile *fp )
 
 int getVX( idFile *fp )
 {
-    byte c;
+	byte c;
    int i;
 
    if ( flen == FLEN_ERROR ) return 0;
@@ -1144,31 +1144,31 @@ int getVX( idFile *fp )
    }
 
    if ( c != 0xFF ) {
-      i = c << 8;
+	  i = c << 8;
 	  c = 0;
 	  if (fp->Read(&c, 1) == -1) {
 		  return 0;
 	  }
-      i |= c;
-      flen += 2;
+	  i |= c;
+	  flen += 2;
    }
    else {
 	  c = 0;
 	  if (fp->Read(&c, 1) == -1) {
 		  return 0;
 	  }
-      i = c << 16;
+	  i = c << 16;
 	  c = 0;
 	  if (fp->Read(&c, 1) == -1) {
 		  return 0;
 	  }
-      i |= c << 8;
+	  i |= c << 8;
 	  c = 0;
 	  if (fp->Read(&c, 1) == -1) {
 		  return 0;
 	  }
-      i |= c;
-      flen += 4;
+	  i |= c;
+	  flen += 4;
    }
 
    return i;
@@ -1181,8 +1181,8 @@ float getF4( idFile *fp )
 
    if ( flen == FLEN_ERROR ) return 0.0f;
    if ( 4 != fp->Read( &f, 4 ) ) {
-      flen = FLEN_ERROR;
-      return 0.0f;
+	  flen = FLEN_ERROR;
+	  return 0.0f;
    }
    BigRevBytes( &f, 4, 1 );
    flen += 4;
@@ -1212,27 +1212,27 @@ char *getS0( idFile *fp )
    }
 
    if ( i == 1 ) {
-      if ( fp->Seek( pos + 2, FS_SEEK_SET ))
-         flen = FLEN_ERROR;
-      else
-         flen += 2;
-      return NULL;
+	  if ( fp->Seek( pos + 2, FS_SEEK_SET ))
+		 flen = FLEN_ERROR;
+	  else
+		 flen += 2;
+	  return NULL;
    }
 
    len = i + ( i & 1 );
    s = (char*)Mem_ClearedAlloc( len );
    if ( !s ) {
-      flen = FLEN_ERROR;
-      return NULL;
+	  flen = FLEN_ERROR;
+	  return NULL;
    }
 
    if ( fp->Seek( pos, FS_SEEK_SET )) {
-      flen = FLEN_ERROR;
-      return NULL;
+	  flen = FLEN_ERROR;
+	  return NULL;
    }
    if ( len != fp->Read( s, len )) {
-      flen = FLEN_ERROR;
-      return NULL;
+	  flen = FLEN_ERROR;
+	  return NULL;
    }
 
    flen += len;
@@ -1325,14 +1325,14 @@ int sgetVX( unsigned char **bp )
    if ( flen == FLEN_ERROR ) return 0;
 
    if ( buf[ 0 ] != 0xFF ) {
-      i = buf[ 0 ] << 8 | buf[ 1 ];
-      flen += 2;
-      *bp += 2;
+	  i = buf[ 0 ] << 8 | buf[ 1 ];
+	  flen += 2;
+	  *bp += 2;
    }
    else {
-      i = ( buf[ 1 ] << 16 ) | ( buf[ 2 ] << 8 ) | buf[ 3 ];
-      flen += 4;
-      *bp += 4;
+	  i = ( buf[ 1 ] << 16 ) | ( buf[ 2 ] << 8 ) | buf[ 3 ];
+	  flen += 4;
+	  *bp += 4;
    }
    return i;
 }
@@ -1365,15 +1365,15 @@ char *sgetS0( unsigned char **bp )
 
    len = strlen( (const char*)buf ) + 1;
    if ( len == 1 ) {
-      flen += 2;
-      *bp += 2;
-      return NULL;
+	  flen += 2;
+	  *bp += 2;
+	  return NULL;
    }
    len += len & 1;
    s = (char*)Mem_ClearedAlloc( len );
    if ( !s ) {
-      flen = FLEN_ERROR;
-      return NULL;
+	  flen = FLEN_ERROR;
+	  return NULL;
    }
 
    memcpy( s, buf, len );
@@ -1392,11 +1392,11 @@ Free memory used by an lwLayer.
 void lwFreeLayer( lwLayer *layer )
 {
    if ( layer ) {
-      if ( layer->name ) Mem_Free( layer->name );
-      lwFreePoints( &layer->point );
-      lwFreePolygons( &layer->polygon );
-      lwListFree( layer->vmap, (void (__cdecl *)(void *))lwFreeVMap );
-      Mem_Free( layer );
+	  if ( layer->name ) Mem_Free( layer->name );
+	  lwFreePoints( &layer->point );
+	  lwFreePolygons( &layer->polygon );
+	  lwListFree( layer->vmap, (void (__cdecl *)(void *))lwFreeVMap );
+	  Mem_Free( layer );
    }
 }
 
@@ -1411,12 +1411,12 @@ Free memory used by an lwObject.
 void lwFreeObject( lwObject *object )
 {
    if ( object ) {
-      lwListFree( object->layer, (void (__cdecl *)(void *))lwFreeLayer );
-      lwListFree( object->env, (void (__cdecl *)(void *))lwFreeEnvelope );
-      lwListFree( object->clip, (void (__cdecl *)(void *))lwFreeClip );
-      lwListFree( object->surf, (void (__cdecl *)(void *))lwFreeSurface );
-      lwFreeTags( &object->taglist );
-      Mem_Free( object );
+	  lwListFree( object->layer, (void (__cdecl *)(void *))lwFreeLayer );
+	  lwListFree( object->env, (void (__cdecl *)(void *))lwFreeEnvelope );
+	  lwListFree( object->clip, (void (__cdecl *)(void *))lwFreeClip );
+	  lwListFree( object->surf, (void (__cdecl *)(void *))lwFreeSurface );
+	  lwFreeTags( &object->taglist );
+	  Mem_Free( object );
    }
 }
 
@@ -1430,14 +1430,14 @@ NULL if the file couldn't be loaded.  On failure, failID and failpos
 can be used to diagnose the cause.
 
 1.  If the file isn't an LWO2 or an LWOB, failpos will contain 12 and
-    failID will be unchanged.
+	failID will be unchanged.
 
 2.  If an error occurs while reading, failID will contain the most
-    recently read IFF chunk ID, and failpos will contain the value
-    returned by fp->Tell() at the time of the failure.
+	recently read IFF chunk ID, and failpos will contain the value
+	returned by fp->Tell() at the time of the failure.
 
 3.  If the file couldn't be opened, or an error occurs while reading
-    the first 12 bytes, both failID and failpos will be unchanged.
+	the first 12 bytes, both failID and failpos will be unchanged.
 
 If you don't need this information, failID and failpos can be NULL.
 ====================================================================== */
@@ -1463,26 +1463,26 @@ lwObject *lwGetObject( const char *filename, unsigned int *failID, int *failpos 
    formsize = getU4( fp );
    type     = getU4( fp );
    if ( 12 != get_flen() ) {
-      fileSystem->CloseFile( fp );
-      return NULL;
+	  fileSystem->CloseFile( fp );
+	  return NULL;
    }
 
    /* is this a LW object? */
 
    if ( id != ID_FORM ) {
-      fileSystem->CloseFile( fp );
-      if ( failpos ) *failpos = 12;
-      return NULL;
+	  fileSystem->CloseFile( fp );
+	  if ( failpos ) *failpos = 12;
+	  return NULL;
    }
 
    if ( type != ID_LWO2 ) {
 	  fileSystem->CloseFile( fp );
-      if ( type == ID_LWOB )
-         return lwGetObject5( filename, failID, failpos );
-      else {
-         if ( failpos ) *failpos = 12;
-         return NULL;
-      }
+	  if ( type == ID_LWOB )
+		 return lwGetObject5( filename, failID, failpos );
+	  else {
+		 if ( failpos ) *failpos = 12;
+		 return NULL;
+	  }
    }
 
    /* allocate an object and a default layer */
@@ -1505,134 +1505,134 @@ lwObject *lwGetObject( const char *filename, unsigned int *failID, int *failpos 
    /* process chunks as they're encountered */
 
    while ( 1 ) {
-      cksize += cksize & 1;
+	  cksize += cksize & 1;
 
-      switch ( id )
-      {
-         case ID_LAYR:
-            if ( object->nlayers > 0 ) {
-               layer = (lwLayer*)Mem_ClearedAlloc( sizeof( lwLayer ) );
-               if ( !layer ) goto Fail;
-               lwListAdd( (void**)&object->layer, layer );
-            }
-            object->nlayers++;
+	  switch ( id )
+	  {
+		 case ID_LAYR:
+			if ( object->nlayers > 0 ) {
+			   layer = (lwLayer*)Mem_ClearedAlloc( sizeof( lwLayer ) );
+			   if ( !layer ) goto Fail;
+			   lwListAdd( (void**)&object->layer, layer );
+			}
+			object->nlayers++;
 
-            set_flen( 0 );
-            layer->index = getU2( fp );
-            layer->flags = getU2( fp );
-            layer->pivot[ 0 ] = getF4( fp );
-            layer->pivot[ 1 ] = getF4( fp );
-            layer->pivot[ 2 ] = getF4( fp );
-            layer->name = getS0( fp );
+			set_flen( 0 );
+			layer->index = getU2( fp );
+			layer->flags = getU2( fp );
+			layer->pivot[ 0 ] = getF4( fp );
+			layer->pivot[ 1 ] = getF4( fp );
+			layer->pivot[ 2 ] = getF4( fp );
+			layer->name = getS0( fp );
 
-            rlen = get_flen();
-            if ( rlen < 0 || rlen > cksize ) goto Fail;
-            if ( rlen <= cksize - 2 )
-               layer->parent = getU2( fp );
-            rlen = get_flen();
-            if ( rlen < cksize )
-               fp->Seek( cksize - rlen, FS_SEEK_CUR );
-            break;
+			rlen = get_flen();
+			if ( rlen < 0 || rlen > cksize ) goto Fail;
+			if ( rlen <= cksize - 2 )
+			   layer->parent = getU2( fp );
+			rlen = get_flen();
+			if ( rlen < cksize )
+			   fp->Seek( cksize - rlen, FS_SEEK_CUR );
+			break;
 
-         case ID_PNTS:
-            if ( !lwGetPoints( fp, cksize, &layer->point ))
-               goto Fail;
-            break;
+		 case ID_PNTS:
+			if ( !lwGetPoints( fp, cksize, &layer->point ))
+			   goto Fail;
+			break;
 
-         case ID_POLS:
-            if ( !lwGetPolygons( fp, cksize, &layer->polygon,
-               layer->point.offset ))
-               goto Fail;
-            break;
+		 case ID_POLS:
+			if ( !lwGetPolygons( fp, cksize, &layer->polygon,
+			   layer->point.offset ))
+			   goto Fail;
+			break;
 
-         case ID_VMAP:
-         case ID_VMAD:
-            node = ( lwNode * ) lwGetVMap( fp, cksize, layer->point.offset,
-               layer->polygon.offset, id == ID_VMAD );
-            if ( !node ) goto Fail;
-            lwListAdd( (void**)&layer->vmap, node );
-            layer->nvmaps++;
-            break;
+		 case ID_VMAP:
+		 case ID_VMAD:
+			node = ( lwNode * ) lwGetVMap( fp, cksize, layer->point.offset,
+			   layer->polygon.offset, id == ID_VMAD );
+			if ( !node ) goto Fail;
+			lwListAdd( (void**)&layer->vmap, node );
+			layer->nvmaps++;
+			break;
 
-         case ID_PTAG:
-            if ( !lwGetPolygonTags( fp, cksize, &object->taglist,
-               &layer->polygon ))
-               goto Fail;
-            break;
+		 case ID_PTAG:
+			if ( !lwGetPolygonTags( fp, cksize, &object->taglist,
+			   &layer->polygon ))
+			   goto Fail;
+			break;
 
-         case ID_BBOX:
-            set_flen( 0 );
-            for ( i = 0; i < 6; i++ )
-               layer->bbox[ i ] = getF4( fp );
-            rlen = get_flen();
-            if ( rlen < 0 || rlen > cksize ) goto Fail;
-            if ( rlen < cksize )
-               fp->Seek( cksize - rlen, FS_SEEK_CUR );
-            break;
+		 case ID_BBOX:
+			set_flen( 0 );
+			for ( i = 0; i < 6; i++ )
+			   layer->bbox[ i ] = getF4( fp );
+			rlen = get_flen();
+			if ( rlen < 0 || rlen > cksize ) goto Fail;
+			if ( rlen < cksize )
+			   fp->Seek( cksize - rlen, FS_SEEK_CUR );
+			break;
 
-         case ID_TAGS:
-            if ( !lwGetTags( fp, cksize, &object->taglist ))
-               goto Fail;
-            break;
+		 case ID_TAGS:
+			if ( !lwGetTags( fp, cksize, &object->taglist ))
+			   goto Fail;
+			break;
 
-         case ID_ENVL:
-            node = ( lwNode * ) lwGetEnvelope( fp, cksize );
-            if ( !node ) goto Fail;
-            lwListAdd( (void**)&object->env, node );
-            object->nenvs++;
-            break;
+		 case ID_ENVL:
+			node = ( lwNode * ) lwGetEnvelope( fp, cksize );
+			if ( !node ) goto Fail;
+			lwListAdd( (void**)&object->env, node );
+			object->nenvs++;
+			break;
 
-         case ID_CLIP:
-            node = ( lwNode * ) lwGetClip( fp, cksize );
-            if ( !node ) goto Fail;
-            lwListAdd( (void**)&object->clip, node );
-            object->nclips++;
-            break;
+		 case ID_CLIP:
+			node = ( lwNode * ) lwGetClip( fp, cksize );
+			if ( !node ) goto Fail;
+			lwListAdd( (void**)&object->clip, node );
+			object->nclips++;
+			break;
 
-         case ID_SURF:
-            node = ( lwNode * ) lwGetSurface( fp, cksize );
-            if ( !node ) goto Fail;
-            lwListAdd( (void**)&object->surf, node );
-            object->nsurfs++;
-            break;
+		 case ID_SURF:
+			node = ( lwNode * ) lwGetSurface( fp, cksize );
+			if ( !node ) goto Fail;
+			lwListAdd( (void**)&object->surf, node );
+			object->nsurfs++;
+			break;
 
-         case ID_DESC:
-         case ID_TEXT:
-         case ID_ICON:
-         default:
-            fp->Seek( cksize, FS_SEEK_CUR );
-            break;
-      }
+		 case ID_DESC:
+		 case ID_TEXT:
+		 case ID_ICON:
+		 default:
+			fp->Seek( cksize, FS_SEEK_CUR );
+			break;
+	  }
 
-      /* end of the file? */
+	  /* end of the file? */
 
-      if ( formsize <= fp->Tell() - 8 ) break;
+	  if ( formsize <= fp->Tell() - 8 ) break;
 
-      /* get the next chunk header */
+	  /* get the next chunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      cksize = getU4( fp );
-      if ( 8 != get_flen() ) goto Fail;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  cksize = getU4( fp );
+	  if ( 8 != get_flen() ) goto Fail;
    }
 
    fileSystem->CloseFile( fp );
    fp = NULL;
 
    if ( object->nlayers == 0 )
-      object->nlayers = 1;
+	  object->nlayers = 1;
 
    layer = object->layer;
    while ( layer ) {
-      lwGetBoundingBox( &layer->point, layer->bbox );
-      lwGetPolyNormals( &layer->point, &layer->polygon );
-      if ( !lwGetPointPolygons( &layer->point, &layer->polygon )) goto Fail;
-      if ( !lwResolvePolySurfaces( &layer->polygon, &object->taglist,
-         &object->surf, &object->nsurfs )) goto Fail;
-      lwGetVertNormals( &layer->point, &layer->polygon );
-      if ( !lwGetPointVMaps( &layer->point, layer->vmap )) goto Fail;
-      if ( !lwGetPolyVMaps( &layer->polygon, layer->vmap )) goto Fail;
-      layer = layer->next;
+	  lwGetBoundingBox( &layer->point, layer->bbox );
+	  lwGetPolyNormals( &layer->point, &layer->polygon );
+	  if ( !lwGetPointPolygons( &layer->point, &layer->polygon )) goto Fail;
+	  if ( !lwResolvePolySurfaces( &layer->polygon, &object->taglist,
+		 &object->surf, &object->nsurfs )) goto Fail;
+	  lwGetVertNormals( &layer->point, &layer->polygon );
+	  if ( !lwGetPointVMaps( &layer->point, layer->vmap )) goto Fail;
+	  if ( !lwGetPolyVMaps( &layer->polygon, layer->vmap )) goto Fail;
+	  layer = layer->next;
    }
 
    return object;
@@ -1640,8 +1640,8 @@ lwObject *lwGetObject( const char *filename, unsigned int *failID, int *failpos 
 Fail:
    if ( failID ) *failID = id;
    if ( fp ) {
-      if ( failpos ) *failpos = fp->Tell();
-      fileSystem->CloseFile( fp );
+	  if ( failpos ) *failpos = fp->Tell();
+	  fileSystem->CloseFile( fp );
    }
    lwFreeObject( object );
    return NULL;
@@ -1704,14 +1704,14 @@ static int add_clip( char *s, lwClip **clist, int *nclips )
    clip->gamma.val = 1.0f;
 
    if ( p = strstr( s, "(sequence)" )) {
-      p[ -1 ] = 0;
-      clip->type = ID_ISEQ;
-      clip->source.seq.prefix = s;
-      clip->source.seq.digits = 3;
+	  p[ -1 ] = 0;
+	  clip->type = ID_ISEQ;
+	  clip->source.seq.prefix = s;
+	  clip->source.seq.digits = 3;
    }
    else {
-      clip->type = ID_STIL;
-      clip->source.still.name = s;
+	  clip->type = ID_STIL;
+	  clip->source.still.name = s;
    }
 
    *nclips++;
@@ -1738,32 +1738,32 @@ static int add_tvel( float pos[], float vel[], lwEnvelope **elist, int *nenvs )
    int i;
 
    for ( i = 0; i < 3; i++ ) {
-      env = (lwEnvelope*)Mem_ClearedAlloc( sizeof( lwEnvelope ) );
-      key0 = (lwKey*)Mem_ClearedAlloc( sizeof( lwKey ) );
-      key1 = (lwKey*)Mem_ClearedAlloc( sizeof( lwKey ) );
-      if ( !env || !key0 || !key1 ) return 0;
+	  env = (lwEnvelope*)Mem_ClearedAlloc( sizeof( lwEnvelope ) );
+	  key0 = (lwKey*)Mem_ClearedAlloc( sizeof( lwKey ) );
+	  key1 = (lwKey*)Mem_ClearedAlloc( sizeof( lwKey ) );
+	  if ( !env || !key0 || !key1 ) return 0;
 
-      key0->next = key1;
-      key0->value = pos[ i ];
-      key0->time = 0.0f;
-      key1->prev = key0;
-      key1->value = pos[ i ] + vel[ i ] * 30.0f;
-      key1->time = 1.0f;
-      key0->shape = key1->shape = ID_LINE;
+	  key0->next = key1;
+	  key0->value = pos[ i ];
+	  key0->time = 0.0f;
+	  key1->prev = key0;
+	  key1->value = pos[ i ] + vel[ i ] * 30.0f;
+	  key1->time = 1.0f;
+	  key0->shape = key1->shape = ID_LINE;
 
-      env->index = *nenvs + i + 1;
-      env->type = 0x0301 + i;
-      env->name = (char*)Mem_ClearedAlloc( 11 );
-      if ( env->name ) {
-         strcpy( env->name, "Position.X" );
-         env->name[ 9 ] += i;
-      }
-      env->key = key0;
-      env->nkeys = 2;
-      env->behavior[ 0 ] = BEH_LINEAR;
-      env->behavior[ 1 ] = BEH_LINEAR;
+	  env->index = *nenvs + i + 1;
+	  env->type = 0x0301 + i;
+	  env->name = (char*)Mem_ClearedAlloc( 11 );
+	  if ( env->name ) {
+		 strcpy( env->name, "Position.X" );
+		 env->name[ 9 ] += i;
+	  }
+	  env->key = key0;
+	  env->nkeys = 2;
+	  env->behavior[ 0 ] = BEH_LINEAR;
+	  env->behavior[ 1 ] = BEH_LINEAR;
 
-      lwListAdd( (void**)elist, env );
+	  lwListAdd( (void**)elist, env );
    }
 
    *nenvs += 3;
@@ -1792,19 +1792,19 @@ static lwTexture *get_texture( char *s )
    tex->enabled = 1;
 
    if ( strstr( s, "Image Map" )) {
-      tex->type = ID_IMAP;
-      if ( strstr( s, "Planar" ))           tex->param.imap.projection = 0;
-      else if ( strstr( s, "Cylindrical" )) tex->param.imap.projection = 1;
-      else if ( strstr( s, "Spherical" ))   tex->param.imap.projection = 2;
-      else if ( strstr( s, "Cubic" ))       tex->param.imap.projection = 3;
-      else if ( strstr( s, "Front" ))       tex->param.imap.projection = 4;
-      tex->param.imap.aa_strength = 1.0f;
-      tex->param.imap.amplitude.val = 1.0f;
-      Mem_Free( s );
+	  tex->type = ID_IMAP;
+	  if ( strstr( s, "Planar" ))           tex->param.imap.projection = 0;
+	  else if ( strstr( s, "Cylindrical" )) tex->param.imap.projection = 1;
+	  else if ( strstr( s, "Spherical" ))   tex->param.imap.projection = 2;
+	  else if ( strstr( s, "Cubic" ))       tex->param.imap.projection = 3;
+	  else if ( strstr( s, "Front" ))       tex->param.imap.projection = 4;
+	  tex->param.imap.aa_strength = 1.0f;
+	  tex->param.imap.amplitude.val = 1.0f;
+	  Mem_Free( s );
    }
    else {
-      tex->type = ID_PROC;
-      tex->param.proc.name = s;
+	  tex->type = ID_PROC;
+	  tex->param.proc.name = s;
    }
 
    return tex;
@@ -1864,249 +1864,249 @@ lwSurface *lwGetSurface5( idFile *fp, int cksize, lwObject *obj )
    /* process subchunks as they're encountered */
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_COLR:
-            surf->color.rgb[ 0 ] = getU1( fp ) / 255.0f;
-            surf->color.rgb[ 1 ] = getU1( fp ) / 255.0f;
-            surf->color.rgb[ 2 ] = getU1( fp ) / 255.0f;
-            break;
+	  switch ( id ) {
+		 case ID_COLR:
+			surf->color.rgb[ 0 ] = getU1( fp ) / 255.0f;
+			surf->color.rgb[ 1 ] = getU1( fp ) / 255.0f;
+			surf->color.rgb[ 2 ] = getU1( fp ) / 255.0f;
+			break;
 
-         case ID_FLAG:
-            flags = getU2( fp );
-            if ( flags &   4 ) surf->smooth = 1.56207f;
-            if ( flags &   8 ) surf->color_hilite.val = 1.0f;
-            if ( flags &  16 ) surf->color_filter.val = 1.0f;
-            if ( flags & 128 ) surf->dif_sharp.val = 0.5f;
-            if ( flags & 256 ) surf->sideflags = 3;
-            if ( flags & 512 ) surf->add_trans.val = 1.0f;
-            break;
+		 case ID_FLAG:
+			flags = getU2( fp );
+			if ( flags &   4 ) surf->smooth = 1.56207f;
+			if ( flags &   8 ) surf->color_hilite.val = 1.0f;
+			if ( flags &  16 ) surf->color_filter.val = 1.0f;
+			if ( flags & 128 ) surf->dif_sharp.val = 0.5f;
+			if ( flags & 256 ) surf->sideflags = 3;
+			if ( flags & 512 ) surf->add_trans.val = 1.0f;
+			break;
 
-         case ID_LUMI:
-            surf->luminosity.val = getI2( fp ) / 256.0f;
-            break;
+		 case ID_LUMI:
+			surf->luminosity.val = getI2( fp ) / 256.0f;
+			break;
 
-         case ID_VLUM:
-            surf->luminosity.val = getF4( fp );
-            break;
+		 case ID_VLUM:
+			surf->luminosity.val = getF4( fp );
+			break;
 
-         case ID_DIFF:
-            surf->diffuse.val = getI2( fp ) / 256.0f;
-            break;
+		 case ID_DIFF:
+			surf->diffuse.val = getI2( fp ) / 256.0f;
+			break;
 
-         case ID_VDIF:
-            surf->diffuse.val = getF4( fp );
-            break;
+		 case ID_VDIF:
+			surf->diffuse.val = getF4( fp );
+			break;
 
-         case ID_SPEC:
-            surf->specularity.val = getI2( fp ) / 256.0f;
-            break;
+		 case ID_SPEC:
+			surf->specularity.val = getI2( fp ) / 256.0f;
+			break;
 
-         case ID_VSPC:
-            surf->specularity.val = getF4( fp );
-            break;
+		 case ID_VSPC:
+			surf->specularity.val = getF4( fp );
+			break;
 
-         case ID_GLOS:
-            surf->glossiness.val = ( float ) logf( ( float) getU2( fp )) / 20.7944f;
-            break;
+		 case ID_GLOS:
+			surf->glossiness.val = ( float ) logf( ( float) getU2( fp )) / 20.7944f;
+			break;
 
-         case ID_SMAN:
-            surf->smooth = getF4( fp );
-            break;
+		 case ID_SMAN:
+			surf->smooth = getF4( fp );
+			break;
 
-         case ID_REFL:
-            surf->reflection.val.val = getI2( fp ) / 256.0f;
-            break;
+		 case ID_REFL:
+			surf->reflection.val.val = getI2( fp ) / 256.0f;
+			break;
 
-         case ID_RFLT:
-            surf->reflection.options = getU2( fp );
-            break;
+		 case ID_RFLT:
+			surf->reflection.options = getU2( fp );
+			break;
 
-         case ID_RIMG:
-            s = getS0( fp );
-            surf->reflection.cindex = add_clip( s, &obj->clip, &obj->nclips );
-            surf->reflection.options = 3;
-            break;
+		 case ID_RIMG:
+			s = getS0( fp );
+			surf->reflection.cindex = add_clip( s, &obj->clip, &obj->nclips );
+			surf->reflection.options = 3;
+			break;
 
-         case ID_RSAN:
-            surf->reflection.seam_angle = getF4( fp );
-            break;
+		 case ID_RSAN:
+			surf->reflection.seam_angle = getF4( fp );
+			break;
 
-         case ID_TRAN:
-            surf->transparency.val.val = getI2( fp ) / 256.0f;
-            break;
+		 case ID_TRAN:
+			surf->transparency.val.val = getI2( fp ) / 256.0f;
+			break;
 
-         case ID_RIND:
-            surf->eta.val = getF4( fp );
-            break;
+		 case ID_RIND:
+			surf->eta.val = getF4( fp );
+			break;
 
-         case ID_BTEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->bump.tex, tex );
-            break;
+		 case ID_BTEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->bump.tex, tex );
+			break;
 
-         case ID_CTEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->color.tex, tex );
-            break;
+		 case ID_CTEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->color.tex, tex );
+			break;
 
-         case ID_DTEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->diffuse.tex, tex );
-            break;
+		 case ID_DTEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->diffuse.tex, tex );
+			break;
 
-         case ID_LTEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->luminosity.tex, tex );
-            break;
+		 case ID_LTEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->luminosity.tex, tex );
+			break;
 
-         case ID_RTEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->reflection.val.tex, tex );
-            break;
+		 case ID_RTEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->reflection.val.tex, tex );
+			break;
 
-         case ID_STEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->specularity.tex, tex );
-            break;
+		 case ID_STEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->specularity.tex, tex );
+			break;
 
-         case ID_TTEX:
-            s = (char*)getbytes( fp, sz );
-            tex = get_texture( s );
-            lwListAdd( (void**)&surf->transparency.val.tex, tex );
-            break;
+		 case ID_TTEX:
+			s = (char*)getbytes( fp, sz );
+			tex = get_texture( s );
+			lwListAdd( (void**)&surf->transparency.val.tex, tex );
+			break;
 
-         case ID_TFLG:
-            flags = getU2( fp );
+		 case ID_TFLG:
+			flags = getU2( fp );
 
-            if ( flags & 1 ) i = 0;
-            if ( flags & 2 ) i = 1;
-            if ( flags & 4 ) i = 2;
-            tex->axis = i;
-            if ( tex->type == ID_IMAP )
-               tex->param.imap.axis = i;
-            else
-               tex->param.proc.axis = i;
+			if ( flags & 1 ) i = 0;
+			if ( flags & 2 ) i = 1;
+			if ( flags & 4 ) i = 2;
+			tex->axis = i;
+			if ( tex->type == ID_IMAP )
+			   tex->param.imap.axis = i;
+			else
+			   tex->param.proc.axis = i;
 
-            if ( flags &  8 ) tex->tmap.coord_sys = 1;
-            if ( flags & 16 ) tex->negative = 1;
-            if ( flags & 32 ) tex->param.imap.pblend = 1;
-            if ( flags & 64 ) {
-               tex->param.imap.aa_strength = 1.0f;
-               tex->param.imap.aas_flags = 1;
-            }
-            break;
+			if ( flags &  8 ) tex->tmap.coord_sys = 1;
+			if ( flags & 16 ) tex->negative = 1;
+			if ( flags & 32 ) tex->param.imap.pblend = 1;
+			if ( flags & 64 ) {
+			   tex->param.imap.aa_strength = 1.0f;
+			   tex->param.imap.aas_flags = 1;
+			}
+			break;
 
-         case ID_TSIZ:
-            for ( i = 0; i < 3; i++ )
-               tex->tmap.size.val[ i ] = getF4( fp );
-            break;
+		 case ID_TSIZ:
+			for ( i = 0; i < 3; i++ )
+			   tex->tmap.size.val[ i ] = getF4( fp );
+			break;
 
-         case ID_TCTR:
-            for ( i = 0; i < 3; i++ )
-               tex->tmap.center.val[ i ] = getF4( fp );
-            break;
+		 case ID_TCTR:
+			for ( i = 0; i < 3; i++ )
+			   tex->tmap.center.val[ i ] = getF4( fp );
+			break;
 
-         case ID_TFAL:
-            for ( i = 0; i < 3; i++ )
-               tex->tmap.falloff.val[ i ] = getF4( fp );
-            break;
+		 case ID_TFAL:
+			for ( i = 0; i < 3; i++ )
+			   tex->tmap.falloff.val[ i ] = getF4( fp );
+			break;
 
-         case ID_TVEL:
-            for ( i = 0; i < 3; i++ )
-               v[ i ] = getF4( fp );
-            tex->tmap.center.eindex = add_tvel( tex->tmap.center.val, v,
-               &obj->env, &obj->nenvs );
-            break;
+		 case ID_TVEL:
+			for ( i = 0; i < 3; i++ )
+			   v[ i ] = getF4( fp );
+			tex->tmap.center.eindex = add_tvel( tex->tmap.center.val, v,
+			   &obj->env, &obj->nenvs );
+			break;
 
-         case ID_TCLR:
-            if ( tex->type == ID_PROC )
-               for ( i = 0; i < 3; i++ )
-                  tex->param.proc.value[ i ] = getU1( fp ) / 255.0f;
-            break;
+		 case ID_TCLR:
+			if ( tex->type == ID_PROC )
+			   for ( i = 0; i < 3; i++ )
+				  tex->param.proc.value[ i ] = getU1( fp ) / 255.0f;
+			break;
 
-         case ID_TVAL:
-            tex->param.proc.value[ 0 ] = getI2( fp ) / 256.0f;
-            break;
+		 case ID_TVAL:
+			tex->param.proc.value[ 0 ] = getI2( fp ) / 256.0f;
+			break;
 
-         case ID_TAMP:
-            if ( tex->type == ID_IMAP )
-               tex->param.imap.amplitude.val = getF4( fp );
-            break;
+		 case ID_TAMP:
+			if ( tex->type == ID_IMAP )
+			   tex->param.imap.amplitude.val = getF4( fp );
+			break;
 
-         case ID_TIMG:
-            s = getS0( fp );
-            tex->param.imap.cindex = add_clip( s, &obj->clip, &obj->nclips );
-            break;
+		 case ID_TIMG:
+			s = getS0( fp );
+			tex->param.imap.cindex = add_clip( s, &obj->clip, &obj->nclips );
+			break;
 
-         case ID_TAAS:
-            tex->param.imap.aa_strength = getF4( fp );
-            tex->param.imap.aas_flags = 1;
-            break;
+		 case ID_TAAS:
+			tex->param.imap.aa_strength = getF4( fp );
+			tex->param.imap.aas_flags = 1;
+			break;
 
-         case ID_TREF:
-            tex->tmap.ref_object = (char*)getbytes( fp, sz );
-            break;
+		 case ID_TREF:
+			tex->tmap.ref_object = (char*)getbytes( fp, sz );
+			break;
 
-         case ID_TOPC:
-            tex->opacity.val = getF4( fp );
-            break;
+		 case ID_TOPC:
+			tex->opacity.val = getF4( fp );
+			break;
 
-         case ID_TFP0:
-            if ( tex->type == ID_IMAP )
-               tex->param.imap.wrapw.val = getF4( fp );
-            break;
+		 case ID_TFP0:
+			if ( tex->type == ID_IMAP )
+			   tex->param.imap.wrapw.val = getF4( fp );
+			break;
 
-         case ID_TFP1:
-            if ( tex->type == ID_IMAP )
-               tex->param.imap.wraph.val = getF4( fp );
-            break;
+		 case ID_TFP1:
+			if ( tex->type == ID_IMAP )
+			   tex->param.imap.wraph.val = getF4( fp );
+			break;
 
-         case ID_SHDR:
-            shdr = (lwPlugin*)Mem_ClearedAlloc( sizeof( lwPlugin ) );
-            if ( !shdr ) goto Fail;
-            shdr->name = (char*)getbytes( fp, sz );
-            lwListAdd( (void**)&surf->shader, shdr );
-            surf->nshaders++;
-            break;
+		 case ID_SHDR:
+			shdr = (lwPlugin*)Mem_ClearedAlloc( sizeof( lwPlugin ) );
+			if ( !shdr ) goto Fail;
+			shdr->name = (char*)getbytes( fp, sz );
+			lwListAdd( (void**)&surf->shader, shdr );
+			surf->nshaders++;
+			break;
 
-         case ID_SDAT:
-            shdr->data = getbytes( fp, sz );
-            break;
+		 case ID_SDAT:
+			shdr->data = getbytes( fp, sz );
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading current subchunk? */
+	  /* error while reading current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) goto Fail;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) goto Fail;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the SURF chunk? */
+	  /* end of the SURF chunk? */
 
-      if ( cksize <= fp->Tell() - pos )
-         break;
+	  if ( cksize <= fp->Tell() - pos )
+		 break;
 
-      /* get the next subchunk header */
+	  /* get the next subchunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) goto Fail;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) goto Fail;
    }
 
    return surf;
@@ -2148,16 +2148,16 @@ int lwGetPolygons5( idFile *fp, int cksize, lwPolygonList *plist, int ptoffset )
    bp = buf;
 
    while ( bp < buf + cksize ) {
-      nv = sgetU2( &bp );
-      nverts += nv;
-      npols++;
-      bp += 2 * nv;
-      i = sgetI2( &bp );
-      if ( i < 0 ) bp += 2;      /* detail polygons */
+	  nv = sgetU2( &bp );
+	  nverts += nv;
+	  npols++;
+	  bp += 2 * nv;
+	  i = sgetI2( &bp );
+	  if ( i < 0 ) bp += 2;      /* detail polygons */
    }
 
    if ( !lwAllocPolygons( plist, npols, nverts ))
-      goto Fail;
+	  goto Fail;
 
    /* fill in the new polygons */
 
@@ -2166,23 +2166,23 @@ int lwGetPolygons5( idFile *fp, int cksize, lwPolygonList *plist, int ptoffset )
    pv = plist->pol[ 0 ].v + plist->voffset;
 
    for ( i = 0; i < npols; i++ ) {
-      nv = sgetU2( &bp );
+	  nv = sgetU2( &bp );
 
-      pp->nverts = nv;
-      pp->type = ID_FACE;
-      if ( !pp->v ) pp->v = pv;
-      for ( j = 0; j < nv; j++ )
-         pv[ j ].index = sgetU2( &bp ) + ptoffset;
-      j = sgetI2( &bp );
-      if ( j < 0 ) {
-         j = -j;
-         bp += 2;
-      }
-      j -= 1;
-      pp->surf = ( lwSurface * ) j;
+	  pp->nverts = nv;
+	  pp->type = ID_FACE;
+	  if ( !pp->v ) pp->v = pv;
+	  for ( j = 0; j < nv; j++ )
+		 pv[ j ].index = sgetU2( &bp ) + ptoffset;
+	  j = sgetI2( &bp );
+	  if ( j < 0 ) {
+		 j = -j;
+		 bp += 2;
+	  }
+	  j -= 1;
+	  pp->surf = ( lwSurface * ) j;
 
-      pp++;
-      pv += nv;
+	  pp++;
+	  pv += nv;
    }
 
    Mem_Free( buf );
@@ -2204,14 +2204,14 @@ file couldn't be loaded.  On failure, failID and failpos can be used
 to diagnose the cause.
 
 1.  If the file isn't an LWOB, failpos will contain 12 and failID will
-    be unchanged.
+	be unchanged.
 
 2.  If an error occurs while reading an LWOB, failID will contain the
-    most recently read IFF chunk ID, and failpos will contain the
-    value returned by fp->Tell() at the time of the failure.
+	most recently read IFF chunk ID, and failpos will contain the
+	value returned by fp->Tell() at the time of the failure.
 
 3.  If the file couldn't be opened, or an error occurs while reading
-    the first 12 bytes, both failID and failpos will be unchanged.
+	the first 12 bytes, both failID and failpos will be unchanged.
 
 If you don't need this information, failID and failpos can be NULL.
 ====================================================================== */
@@ -2241,16 +2241,16 @@ lwObject *lwGetObject5( const char *filename, unsigned int *failID, int *failpos
    formsize = getU4( fp );
    type     = getU4( fp );
    if ( 12 != get_flen() ) {
-      fileSystem->CloseFile( fp );
-      return NULL;
+	  fileSystem->CloseFile( fp );
+	  return NULL;
    }
 
    /* LWOB? */
 
    if ( id != ID_FORM || type != ID_LWOB ) {
-      fileSystem->CloseFile( fp );
-      if ( failpos ) *failpos = 12;
-      return NULL;
+	  fileSystem->CloseFile( fp );
+	  if ( failpos ) *failpos = 12;
+	  return NULL;
    }
 
    /* allocate an object and a default layer */
@@ -2272,48 +2272,48 @@ lwObject *lwGetObject5( const char *filename, unsigned int *failID, int *failpos
    /* process chunks as they're encountered */
 
    while ( 1 ) {
-      cksize += cksize & 1;
+	  cksize += cksize & 1;
 
-      switch ( id )
-      {
-         case ID_PNTS:
-            if ( !lwGetPoints( fp, cksize, &layer->point ))
-               goto Fail2;
-            break;
+	  switch ( id )
+	  {
+		 case ID_PNTS:
+			if ( !lwGetPoints( fp, cksize, &layer->point ))
+			   goto Fail2;
+			break;
 
-         case ID_POLS:
-            if ( !lwGetPolygons5( fp, cksize, &layer->polygon,
-               layer->point.offset ))
-               goto Fail2;
-            break;
+		 case ID_POLS:
+			if ( !lwGetPolygons5( fp, cksize, &layer->polygon,
+			   layer->point.offset ))
+			   goto Fail2;
+			break;
 
-         case ID_SRFS:
-            if ( !lwGetTags( fp, cksize, &object->taglist ))
-               goto Fail2;
-            break;
+		 case ID_SRFS:
+			if ( !lwGetTags( fp, cksize, &object->taglist ))
+			   goto Fail2;
+			break;
 
-         case ID_SURF:
-            node = ( lwNode * ) lwGetSurface5( fp, cksize, object );
-            if ( !node ) goto Fail2;
-            lwListAdd( (void**)&object->surf, node );
-            object->nsurfs++;
-            break;
+		 case ID_SURF:
+			node = ( lwNode * ) lwGetSurface5( fp, cksize, object );
+			if ( !node ) goto Fail2;
+			lwListAdd( (void**)&object->surf, node );
+			object->nsurfs++;
+			break;
 
-         default:
-            fp->Seek( cksize, FS_SEEK_CUR );
-            break;
-      }
+		 default:
+			fp->Seek( cksize, FS_SEEK_CUR );
+			break;
+	  }
 
-      /* end of the file? */
+	  /* end of the file? */
 
-      if ( formsize <= fp->Tell() - 8 ) break;
+	  if ( formsize <= fp->Tell() - 8 ) break;
 
-      /* get the next chunk header */
+	  /* get the next chunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      cksize = getU4( fp );
-      if ( 8 != get_flen() ) goto Fail2;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  cksize = getU4( fp );
+	  if ( 8 != get_flen() ) goto Fail2;
    }
 
    fileSystem->CloseFile( fp );
@@ -2323,7 +2323,7 @@ lwObject *lwGetObject5( const char *filename, unsigned int *failID, int *failpos
    lwGetPolyNormals( &layer->point, &layer->polygon );
    if ( !lwGetPointPolygons( &layer->point, &layer->polygon )) goto Fail2;
    if ( !lwResolvePolySurfaces( &layer->polygon, &object->taglist,
-      &object->surf, &object->nsurfs )) goto Fail2;
+	  &object->surf, &object->nsurfs )) goto Fail2;
    lwGetVertNormals( &layer->point, &layer->polygon );
 
    return object;
@@ -2331,8 +2331,8 @@ lwObject *lwGetObject5( const char *filename, unsigned int *failID, int *failpos
 Fail2:
    if ( failID ) *failID = id;
    if ( fp ) {
-      if ( failpos ) *failpos = fp->Tell();
-      fileSystem->CloseFile( fp );
+	  if ( failpos ) *failpos = fp->Tell();
+	  fileSystem->CloseFile( fp );
    }
    lwFreeObject( object );
    return NULL;
@@ -2350,14 +2350,14 @@ void lwFreePoints( lwPointList *point )
    int i;
 
    if ( point ) {
-      if ( point->pt ) {
-         for ( i = 0; i < point->count; i++ ) {
-            if ( point->pt[ i ].pol ) Mem_Free( point->pt[ i ].pol );
-            if ( point->pt[ i ].vm ) Mem_Free( point->pt[ i ].vm );
-         }
-         Mem_Free( point->pt );
-      }
-      memset( point, 0, sizeof( lwPointList ));
+	  if ( point->pt ) {
+		 for ( i = 0; i < point->count; i++ ) {
+			if ( point->pt[ i ].pol ) Mem_Free( point->pt[ i ].pol );
+			if ( point->pt[ i ].vm ) Mem_Free( point->pt[ i ].vm );
+		 }
+		 Mem_Free( point->pt );
+	  }
+	  memset( point, 0, sizeof( lwPointList ));
    }
 }
 
@@ -2374,19 +2374,19 @@ void lwFreePolygons( lwPolygonList *plist )
    int i, j;
 
    if ( plist ) {
-      if ( plist->pol ) {
-         for ( i = 0; i < plist->count; i++ ) {
-            if ( plist->pol[ i ].v ) {
-               for ( j = 0; j < plist->pol[ i ].nverts; j++ )
-                  if ( plist->pol[ i ].v[ j ].vm )
-                     Mem_Free( plist->pol[ i ].v[ j ].vm );
-            }
-         }
-         if ( plist->pol[ 0 ].v )
-            Mem_Free( plist->pol[ 0 ].v );
-         Mem_Free( plist->pol );
-      }
-      memset( plist, 0, sizeof( lwPolygonList ));
+	  if ( plist->pol ) {
+		 for ( i = 0; i < plist->count; i++ ) {
+			if ( plist->pol[ i ].v ) {
+			   for ( j = 0; j < plist->pol[ i ].nverts; j++ )
+				  if ( plist->pol[ i ].v[ j ].vm )
+					 Mem_Free( plist->pol[ i ].v[ j ].vm );
+			}
+		 }
+		 if ( plist->pol[ 0 ].v )
+			Mem_Free( plist->pol[ 0 ].v );
+		 Mem_Free( plist->pol );
+	  }
+	  memset( plist, 0, sizeof( lwPolygonList ));
    }
 }
 
@@ -2544,16 +2544,16 @@ int lwGetPolygons( idFile *fp, int cksize, lwPolygonList *plist, int ptoffset )
    bp = buf;
 
    while ( bp < buf + cksize - 4 ) {
-      nv = sgetU2( &bp );
-      nv &= 0x03FF;
-      nverts += nv;
-      npols++;
-      for ( i = 0; i < nv; i++ )
-         j = sgetVX( &bp );
+	  nv = sgetU2( &bp );
+	  nv &= 0x03FF;
+	  nverts += nv;
+	  npols++;
+	  for ( i = 0; i < nv; i++ )
+		 j = sgetVX( &bp );
    }
 
    if ( !lwAllocPolygons( plist, npols, nverts ))
-      goto Fail;
+	  goto Fail;
 
    /* fill in the new polygons */
 
@@ -2562,19 +2562,19 @@ int lwGetPolygons( idFile *fp, int cksize, lwPolygonList *plist, int ptoffset )
    pv = plist->pol[ 0 ].v + plist->voffset;
 
    for ( i = 0; i < npols; i++ ) {
-      nv = sgetU2( &bp );
-      flags = nv & 0xFC00;
-      nv &= 0x03FF;
+	  nv = sgetU2( &bp );
+	  flags = nv & 0xFC00;
+	  nv &= 0x03FF;
 
-      pp->nverts = nv;
-      pp->flags = flags;
-      pp->type = type;
-      if ( !pp->v ) pp->v = pv;
-      for ( j = 0; j < nv; j++ )
-         pp->v[ j ].index = sgetVX( &bp ) + ptoffset;
+	  pp->nverts = nv;
+	  pp->flags = flags;
+	  pp->type = type;
+	  if ( !pp->v ) pp->v = pv;
+	  for ( j = 0; j < nv; j++ )
+		 pp->v[ j ].index = sgetVX( &bp ) + ptoffset;
 
-      pp++;
-      pv += nv;
+	  pp++;
+	  pv += nv;
    }
 
    Mem_Free( buf );
@@ -2602,22 +2602,22 @@ void lwGetPolyNormals( lwPointList *point, lwPolygonList *polygon )
    float p1[ 3 ], p2[ 3 ], pn[ 3 ], v1[ 3 ], v2[ 3 ];
 
    for ( i = 0; i < polygon->count; i++ ) {
-      if ( polygon->pol[ i ].nverts < 3 ) continue;
-      for ( j = 0; j < 3; j++ ) {
+	  if ( polygon->pol[ i ].nverts < 3 ) continue;
+	  for ( j = 0; j < 3; j++ ) {
 
 		  // FIXME: track down why indexes are way out of range
-         p1[ j ] = point->pt[ polygon->pol[ i ].v[ 0 ].index ].pos[ j ];
-         p2[ j ] = point->pt[ polygon->pol[ i ].v[ 1 ].index ].pos[ j ];
-         pn[ j ] = point->pt[ polygon->pol[ i ].v[ polygon->pol[ i ].nverts - 1 ].index ].pos[ j ];
-      }
+		 p1[ j ] = point->pt[ polygon->pol[ i ].v[ 0 ].index ].pos[ j ];
+		 p2[ j ] = point->pt[ polygon->pol[ i ].v[ 1 ].index ].pos[ j ];
+		 pn[ j ] = point->pt[ polygon->pol[ i ].v[ polygon->pol[ i ].nverts - 1 ].index ].pos[ j ];
+	  }
 
-      for ( j = 0; j < 3; j++ ) {
-         v1[ j ] = p2[ j ] - p1[ j ];
-         v2[ j ] = pn[ j ] - p1[ j ];
-      }
+	  for ( j = 0; j < 3; j++ ) {
+		 v1[ j ] = p2[ j ] - p1[ j ];
+		 v2[ j ] = pn[ j ] - p1[ j ];
+	  }
 
-      cross( v1, v2, polygon->pol[ i ].norm );
-      normalize( polygon->pol[ i ].norm );
+	  cross( v1, v2, polygon->pol[ i ].norm );
+	  normalize( polygon->pol[ i ].norm );
    }
 }
 
@@ -2638,26 +2638,26 @@ int lwGetPointPolygons( lwPointList *point, lwPolygonList *polygon )
    /* count the number of polygons per point */
 
    for ( i = 0; i < polygon->count; i++ )
-      for ( j = 0; j < polygon->pol[ i ].nverts; j++ )
-         ++point->pt[ polygon->pol[ i ].v[ j ].index ].npols;
+	  for ( j = 0; j < polygon->pol[ i ].nverts; j++ )
+		 ++point->pt[ polygon->pol[ i ].v[ j ].index ].npols;
 
    /* alloc per-point polygon arrays */
 
    for ( i = 0; i < point->count; i++ ) {
-      if ( point->pt[ i ].npols == 0 ) continue;
-      point->pt[ i ].pol = (int*)Mem_ClearedAlloc( point->pt[ i ].npols * sizeof( int ) );
-      if ( !point->pt[ i ].pol ) return 0;
-      point->pt[ i ].npols = 0;
+	  if ( point->pt[ i ].npols == 0 ) continue;
+	  point->pt[ i ].pol = (int*)Mem_ClearedAlloc( point->pt[ i ].npols * sizeof( int ) );
+	  if ( !point->pt[ i ].pol ) return 0;
+	  point->pt[ i ].npols = 0;
    }
 
    /* fill in polygon array for each point */
 
    for ( i = 0; i < polygon->count; i++ ) {
-      for ( j = 0; j < polygon->pol[ i ].nverts; j++ ) {
-         k = polygon->pol[ i ].v[ j ].index;
-         point->pt[ k ].pol[ point->pt[ k ].npols ] = i;
-         ++point->pt[ k ].npols;
-      }
+	  for ( j = 0; j < polygon->pol[ i ].nverts; j++ ) {
+		 k = polygon->pol[ i ].v[ j ].index;
+		 point->pt[ k ].pol[ point->pt[ k ].npols ] = i;
+		 ++point->pt[ k ].npols;
+	  }
    }
 
    return 1;
@@ -2685,29 +2685,29 @@ int lwResolvePolySurfaces( lwPolygonList *polygon, lwTagList *tlist,
    if ( !s ) return 0;
 
    for ( i = 0; i < tlist->count; i++ ) {
-      st = *surf;
-      while ( st ) {
-         if ( !strcmp( st->name, tlist->tag[ i ] )) {
-            s[ i ] = st;
-            break;
-         }
-         st = st->next;
-      }
+	  st = *surf;
+	  while ( st ) {
+		 if ( !strcmp( st->name, tlist->tag[ i ] )) {
+			s[ i ] = st;
+			break;
+		 }
+		 st = st->next;
+	  }
    }
 
    for ( i = 0; i < polygon->count; i++ ) {
-      index = ( int ) polygon->pol[ i ].surf;
-      if ( index < 0 || index > tlist->count ) return 0;
-      if ( !s[ index ] ) {
-         s[ index ] = lwDefaultSurface();
-         if ( !s[ index ] ) return 0;
-         s[ index ]->name = (char*)Mem_ClearedAlloc( strlen( tlist->tag[ index ] ) + 1 );
-         if ( !s[ index ]->name ) return 0;
-         strcpy( s[ index ]->name, tlist->tag[ index ] );
-         lwListAdd( (void**)surf, s[ index ] );
-         *nsurfs = *nsurfs + 1;
-      }
-      polygon->pol[ i ].surf = s[ index ];
+	  index = ( int ) polygon->pol[ i ].surf;
+	  if ( index < 0 || index > tlist->count ) return 0;
+	  if ( !s[ index ] ) {
+		 s[ index ] = lwDefaultSurface();
+		 if ( !s[ index ] ) return 0;
+		 s[ index ]->name = (char*)Mem_ClearedAlloc( strlen( tlist->tag[ index ] ) + 1 );
+		 if ( !s[ index ]->name ) return 0;
+		 strcpy( s[ index ]->name, tlist->tag[ index ] );
+		 lwListAdd( (void**)surf, s[ index ] );
+		 *nsurfs = *nsurfs + 1;
+	  }
+	  polygon->pol[ i ].surf = s[ index ];
    }
 
    Mem_Free( s );
@@ -2736,29 +2736,29 @@ void lwGetVertNormals( lwPointList *point, lwPolygonList *polygon )
    float a;
 
    for ( j = 0; j < polygon->count; j++ ) {
-      for ( n = 0; n < polygon->pol[ j ].nverts; n++ ) {
-         for ( k = 0; k < 3; k++ )
-            polygon->pol[ j ].v[ n ].norm[ k ] = polygon->pol[ j ].norm[ k ];
+	  for ( n = 0; n < polygon->pol[ j ].nverts; n++ ) {
+		 for ( k = 0; k < 3; k++ )
+			polygon->pol[ j ].v[ n ].norm[ k ] = polygon->pol[ j ].norm[ k ];
 
-         if ( polygon->pol[ j ].surf->smooth <= 0 ) continue;
+		 if ( polygon->pol[ j ].surf->smooth <= 0 ) continue;
 
-         p = polygon->pol[ j ].v[ n ].index;
+		 p = polygon->pol[ j ].v[ n ].index;
 
-         for ( g = 0; g < point->pt[ p ].npols; g++ ) {
-            h = point->pt[ p ].pol[ g ];
-            if ( h == j ) continue;
+		 for ( g = 0; g < point->pt[ p ].npols; g++ ) {
+			h = point->pt[ p ].pol[ g ];
+			if ( h == j ) continue;
 
-            if ( polygon->pol[ j ].smoothgrp != polygon->pol[ h ].smoothgrp )
-               continue;
-            a = vecangle( polygon->pol[ j ].norm, polygon->pol[ h ].norm );
-            if ( a > polygon->pol[ j ].surf->smooth ) continue;
+			if ( polygon->pol[ j ].smoothgrp != polygon->pol[ h ].smoothgrp )
+			   continue;
+			a = vecangle( polygon->pol[ j ].norm, polygon->pol[ h ].norm );
+			if ( a > polygon->pol[ j ].surf->smooth ) continue;
 
-            for ( k = 0; k < 3; k++ )
-               polygon->pol[ j ].v[ n ].norm[ k ] += polygon->pol[ h ].norm[ k ];
-         }
+			for ( k = 0; k < 3; k++ )
+			   polygon->pol[ j ].v[ n ].norm[ k ] += polygon->pol[ h ].norm[ k ];
+		 }
 
-         normalize( polygon->pol[ j ].v[ n ].norm );
-      }
+		 normalize( polygon->pol[ j ].v[ n ].norm );
+	  }
    }
 }
 
@@ -3274,55 +3274,55 @@ int lwGetProcedural( idFile *fp, int rsz, lwTexture *tex )
    if ( 0 > get_flen() ) return 0;
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_TMAP:
-            if ( !lwGetTMap( fp, sz, &tex->tmap )) return 0;
-            break;
+	  switch ( id ) {
+		 case ID_TMAP:
+			if ( !lwGetTMap( fp, sz, &tex->tmap )) return 0;
+			break;
 
-         case ID_AXIS:
-            tex->param.proc.axis = getU2( fp );
-            break;
+		 case ID_AXIS:
+			tex->param.proc.axis = getU2( fp );
+			break;
 
-         case ID_VALU:
-            tex->param.proc.value[ 0 ] = getF4( fp );
-            if ( sz >= 8 ) tex->param.proc.value[ 1 ] = getF4( fp );
-            if ( sz >= 12 ) tex->param.proc.value[ 2 ] = getF4( fp );
-            break;
+		 case ID_VALU:
+			tex->param.proc.value[ 0 ] = getF4( fp );
+			if ( sz >= 8 ) tex->param.proc.value[ 1 ] = getF4( fp );
+			if ( sz >= 12 ) tex->param.proc.value[ 2 ] = getF4( fp );
+			break;
 
-         case ID_FUNC:
-            tex->param.proc.name = getS0( fp );
-            rlen = get_flen();
-            tex->param.proc.data = getbytes( fp, sz - rlen );
-            break;
+		 case ID_FUNC:
+			tex->param.proc.name = getS0( fp );
+			rlen = get_flen();
+			tex->param.proc.data = getbytes( fp, sz - rlen );
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading the current subchunk? */
+	  /* error while reading the current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) return 0;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) return 0;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the procedural block? */
+	  /* end of the procedural block? */
 
-      if ( rsz <= fp->Tell() - pos )
-         break;
+	  if ( rsz <= fp->Tell() - pos )
+		 break;
 
-      /* get the next subchunk header */
+	  /* get the next subchunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) return 0;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) return 0;
    }
 
    set_flen( fp->Tell() - pos );
@@ -3349,78 +3349,78 @@ int lwGetGradient( idFile *fp, int rsz, lwTexture *tex )
    if ( 0 > get_flen() ) return 0;
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_TMAP:
-            if ( !lwGetTMap( fp, sz, &tex->tmap )) return 0;
-            break;
+	  switch ( id ) {
+		 case ID_TMAP:
+			if ( !lwGetTMap( fp, sz, &tex->tmap )) return 0;
+			break;
 
-         case ID_PNAM:
-            tex->param.grad.paramname = getS0( fp );
-            break;
+		 case ID_PNAM:
+			tex->param.grad.paramname = getS0( fp );
+			break;
 
-         case ID_INAM:
-            tex->param.grad.itemname = getS0( fp );
-            break;
+		 case ID_INAM:
+			tex->param.grad.itemname = getS0( fp );
+			break;
 
-         case ID_GRST:
-            tex->param.grad.start = getF4( fp );
-            break;
+		 case ID_GRST:
+			tex->param.grad.start = getF4( fp );
+			break;
 
-         case ID_GREN:
-            tex->param.grad.end = getF4( fp );
-            break;
+		 case ID_GREN:
+			tex->param.grad.end = getF4( fp );
+			break;
 
-         case ID_GRPT:
-            tex->param.grad.repeat = getU2( fp );
-            break;
+		 case ID_GRPT:
+			tex->param.grad.repeat = getU2( fp );
+			break;
 
-         case ID_FKEY:
-            nkeys = sz / sizeof( lwGradKey );
-            tex->param.grad.key = (lwGradKey*)Mem_ClearedAlloc( nkeys * sizeof( lwGradKey ) );
-            if ( !tex->param.grad.key ) return 0;
-            for ( i = 0; i < nkeys; i++ ) {
-               tex->param.grad.key[ i ].value = getF4( fp );
-               for ( j = 0; j < 4; j++ )
-                  tex->param.grad.key[ i ].rgba[ j ] = getF4( fp );
-            }
-            break;
+		 case ID_FKEY:
+			nkeys = sz / sizeof( lwGradKey );
+			tex->param.grad.key = (lwGradKey*)Mem_ClearedAlloc( nkeys * sizeof( lwGradKey ) );
+			if ( !tex->param.grad.key ) return 0;
+			for ( i = 0; i < nkeys; i++ ) {
+			   tex->param.grad.key[ i ].value = getF4( fp );
+			   for ( j = 0; j < 4; j++ )
+				  tex->param.grad.key[ i ].rgba[ j ] = getF4( fp );
+			}
+			break;
 
-         case ID_IKEY:
-            nkeys = sz / 2;
-            tex->param.grad.ikey = (short*)Mem_ClearedAlloc( nkeys * sizeof( short ) );
-            if ( !tex->param.grad.ikey ) return 0;
-            for ( i = 0; i < nkeys; i++ )
-               tex->param.grad.ikey[ i ] = getU2( fp );
-            break;
+		 case ID_IKEY:
+			nkeys = sz / 2;
+			tex->param.grad.ikey = (short*)Mem_ClearedAlloc( nkeys * sizeof( short ) );
+			if ( !tex->param.grad.ikey ) return 0;
+			for ( i = 0; i < nkeys; i++ )
+			   tex->param.grad.ikey[ i ] = getU2( fp );
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading the current subchunk? */
+	  /* error while reading the current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) return 0;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) return 0;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the gradient? */
+	  /* end of the gradient? */
 
-      if ( rsz <= fp->Tell() - pos )
-         break;
+	  if ( rsz <= fp->Tell() - pos )
+		 break;
 
-      /* get the next subchunk header */
+	  /* get the next subchunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) return 0;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) return 0;
    }
 
    set_flen( fp->Tell() - pos );
@@ -3453,22 +3453,22 @@ lwTexture *lwGetTexture( idFile *fp, int bloksz, unsigned int type )
 
    sz = getU2( fp );
    if ( !lwGetTHeader( fp, sz, tex )) {
-      Mem_Free( tex );
-      return NULL;
+	  Mem_Free( tex );
+	  return NULL;
    }
 
    sz = bloksz - sz - 6;
    switch ( type ) {
-      case ID_IMAP:  ok = lwGetImageMap( fp, sz, tex );  break;
-      case ID_PROC:  ok = lwGetProcedural( fp, sz, tex );  break;
-      case ID_GRAD:  ok = lwGetGradient( fp, sz, tex );  break;
-      default:
-         ok = !fp->Seek( sz, FS_SEEK_CUR );
+	  case ID_IMAP:  ok = lwGetImageMap( fp, sz, tex );  break;
+	  case ID_PROC:  ok = lwGetProcedural( fp, sz, tex );  break;
+	  case ID_GRAD:  ok = lwGetGradient( fp, sz, tex );  break;
+	  default:
+		 ok = !fp->Seek( sz, FS_SEEK_CUR );
    }
 
    if ( !ok ) {
-      lwFreeTexture( tex );
-      return NULL;
+	  lwFreeTexture( tex );
+	  return NULL;
    }
 
    set_flen( bloksz );
@@ -3502,17 +3502,17 @@ lwPlugin *lwGetShader( idFile *fp, int bloksz )
    if ( 0 > get_flen() ) goto Fail;
 
    while ( hsz > 0 ) {
-      sz += sz & 1;
-      hsz -= sz;
-      if ( id == ID_ENAB ) {
-         shdr->flags = getU2( fp );
-         break;
-      }
-      else {
-         fp->Seek( sz, FS_SEEK_CUR );
-         id = getU4( fp );
-         sz = getU2( fp );
-      }
+	  sz += sz & 1;
+	  hsz -= sz;
+	  if ( id == ID_ENAB ) {
+		 shdr->flags = getU2( fp );
+		 break;
+	  }
+	  else {
+		 fp->Seek( sz, FS_SEEK_CUR );
+		 id = getU4( fp );
+		 sz = getU2( fp );
+	  }
    }
 
    id = getU4( fp );
@@ -3520,41 +3520,41 @@ lwPlugin *lwGetShader( idFile *fp, int bloksz )
    if ( 0 > get_flen() ) goto Fail;
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_FUNC:
-            shdr->name = getS0( fp );
-            rlen = get_flen();
-            shdr->data = getbytes( fp, sz - rlen );
-            break;
+	  switch ( id ) {
+		 case ID_FUNC:
+			shdr->name = getS0( fp );
+			rlen = get_flen();
+			shdr->data = getbytes( fp, sz - rlen );
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading the current subchunk? */
+	  /* error while reading the current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) goto Fail;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) goto Fail;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the shader block? */
+	  /* end of the shader block? */
 
-      if ( bloksz <= fp->Tell() - pos )
-         break;
+	  if ( bloksz <= fp->Tell() - pos )
+		 break;
 
-      /* get the next subchunk header */
+	  /* get the next subchunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) goto Fail;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) goto Fail;
    }
 
    set_flen( fp->Tell() - pos );
@@ -3600,17 +3600,17 @@ static int add_texture( lwSurface *surf, lwTexture *tex )
    lwTexture **list;
 
    switch ( tex->chan ) {
-      case ID_COLR:  list = &surf->color.tex;             break;
-      case ID_LUMI:  list = &surf->luminosity.tex;        break;
-      case ID_DIFF:  list = &surf->diffuse.tex;           break;
-      case ID_SPEC:  list = &surf->specularity.tex;       break;
-      case ID_GLOS:  list = &surf->glossiness.tex;        break;
-      case ID_REFL:  list = &surf->reflection.val.tex;    break;
-      case ID_TRAN:  list = &surf->transparency.val.tex;  break;
-      case ID_RIND:  list = &surf->eta.tex;               break;
-      case ID_TRNL:  list = &surf->translucency.tex;      break;
-      case ID_BUMP:  list = &surf->bump.tex;              break;
-      default:  return 0;
+	  case ID_COLR:  list = &surf->color.tex;             break;
+	  case ID_LUMI:  list = &surf->luminosity.tex;        break;
+	  case ID_DIFF:  list = &surf->diffuse.tex;           break;
+	  case ID_SPEC:  list = &surf->specularity.tex;       break;
+	  case ID_GLOS:  list = &surf->glossiness.tex;        break;
+	  case ID_REFL:  list = &surf->reflection.val.tex;    break;
+	  case ID_TRAN:  list = &surf->transparency.val.tex;  break;
+	  case ID_RIND:  list = &surf->eta.tex;               break;
+	  case ID_TRNL:  list = &surf->translucency.tex;      break;
+	  case ID_BUMP:  list = &surf->bump.tex;              break;
+	  default:  return 0;
    }
 
    lwListInsert( (void**)list, tex, (int (__cdecl *)(void *,void *))compare_textures );
@@ -3697,179 +3697,179 @@ lwSurface *lwGetSurface( idFile *fp, int cksize )
    /* process subchunks as they're encountered */
 
    while ( 1 ) {
-      sz += sz & 1;
-      set_flen( 0 );
+	  sz += sz & 1;
+	  set_flen( 0 );
 
-      switch ( id ) {
-         case ID_COLR:
-            surf->color.rgb[ 0 ] = getF4( fp );
-            surf->color.rgb[ 1 ] = getF4( fp );
-            surf->color.rgb[ 2 ] = getF4( fp );
-            surf->color.eindex = getVX( fp );
-            break;
+	  switch ( id ) {
+		 case ID_COLR:
+			surf->color.rgb[ 0 ] = getF4( fp );
+			surf->color.rgb[ 1 ] = getF4( fp );
+			surf->color.rgb[ 2 ] = getF4( fp );
+			surf->color.eindex = getVX( fp );
+			break;
 
-         case ID_LUMI:
-            surf->luminosity.val = getF4( fp );
-            surf->luminosity.eindex = getVX( fp );
-            break;
+		 case ID_LUMI:
+			surf->luminosity.val = getF4( fp );
+			surf->luminosity.eindex = getVX( fp );
+			break;
 
-         case ID_DIFF:
-            surf->diffuse.val = getF4( fp );
-            surf->diffuse.eindex = getVX( fp );
-            break;
+		 case ID_DIFF:
+			surf->diffuse.val = getF4( fp );
+			surf->diffuse.eindex = getVX( fp );
+			break;
 
-         case ID_SPEC:
-            surf->specularity.val = getF4( fp );
-            surf->specularity.eindex = getVX( fp );
-            break;
+		 case ID_SPEC:
+			surf->specularity.val = getF4( fp );
+			surf->specularity.eindex = getVX( fp );
+			break;
 
-         case ID_GLOS:
-            surf->glossiness.val = getF4( fp );
-            surf->glossiness.eindex = getVX( fp );
-            break;
+		 case ID_GLOS:
+			surf->glossiness.val = getF4( fp );
+			surf->glossiness.eindex = getVX( fp );
+			break;
 
-         case ID_REFL:
-            surf->reflection.val.val = getF4( fp );
-            surf->reflection.val.eindex = getVX( fp );
-            break;
+		 case ID_REFL:
+			surf->reflection.val.val = getF4( fp );
+			surf->reflection.val.eindex = getVX( fp );
+			break;
 
-         case ID_RFOP:
-            surf->reflection.options = getU2( fp );
-            break;
+		 case ID_RFOP:
+			surf->reflection.options = getU2( fp );
+			break;
 
-         case ID_RIMG:
-            surf->reflection.cindex = getVX( fp );
-            break;
+		 case ID_RIMG:
+			surf->reflection.cindex = getVX( fp );
+			break;
 
-         case ID_RSAN:
-            surf->reflection.seam_angle = getF4( fp );
-            break;
+		 case ID_RSAN:
+			surf->reflection.seam_angle = getF4( fp );
+			break;
 
-         case ID_TRAN:
-            surf->transparency.val.val = getF4( fp );
-            surf->transparency.val.eindex = getVX( fp );
-            break;
+		 case ID_TRAN:
+			surf->transparency.val.val = getF4( fp );
+			surf->transparency.val.eindex = getVX( fp );
+			break;
 
-         case ID_TROP:
-            surf->transparency.options = getU2( fp );
-            break;
+		 case ID_TROP:
+			surf->transparency.options = getU2( fp );
+			break;
 
-         case ID_TIMG:
-            surf->transparency.cindex = getVX( fp );
-            break;
+		 case ID_TIMG:
+			surf->transparency.cindex = getVX( fp );
+			break;
 
-         case ID_RIND:
-            surf->eta.val = getF4( fp );
-            surf->eta.eindex = getVX( fp );
-            break;
+		 case ID_RIND:
+			surf->eta.val = getF4( fp );
+			surf->eta.eindex = getVX( fp );
+			break;
 
-         case ID_TRNL:
-            surf->translucency.val = getF4( fp );
-            surf->translucency.eindex = getVX( fp );
-            break;
+		 case ID_TRNL:
+			surf->translucency.val = getF4( fp );
+			surf->translucency.eindex = getVX( fp );
+			break;
 
-         case ID_BUMP:
-            surf->bump.val = getF4( fp );
-            surf->bump.eindex = getVX( fp );
-            break;
+		 case ID_BUMP:
+			surf->bump.val = getF4( fp );
+			surf->bump.eindex = getVX( fp );
+			break;
 
-         case ID_SMAN:
-            surf->smooth = getF4( fp );
-            break;
+		 case ID_SMAN:
+			surf->smooth = getF4( fp );
+			break;
 
-         case ID_SIDE:
-            surf->sideflags = getU2( fp );
-            break;
+		 case ID_SIDE:
+			surf->sideflags = getU2( fp );
+			break;
 
-         case ID_CLRH:
-            surf->color_hilite.val = getF4( fp );
-            surf->color_hilite.eindex = getVX( fp );
-            break;
+		 case ID_CLRH:
+			surf->color_hilite.val = getF4( fp );
+			surf->color_hilite.eindex = getVX( fp );
+			break;
 
-         case ID_CLRF:
-            surf->color_filter.val = getF4( fp );
-            surf->color_filter.eindex = getVX( fp );
-            break;
+		 case ID_CLRF:
+			surf->color_filter.val = getF4( fp );
+			surf->color_filter.eindex = getVX( fp );
+			break;
 
-         case ID_ADTR:
-            surf->add_trans.val = getF4( fp );
-            surf->add_trans.eindex = getVX( fp );
-            break;
+		 case ID_ADTR:
+			surf->add_trans.val = getF4( fp );
+			surf->add_trans.eindex = getVX( fp );
+			break;
 
-         case ID_SHRP:
-            surf->dif_sharp.val = getF4( fp );
-            surf->dif_sharp.eindex = getVX( fp );
-            break;
+		 case ID_SHRP:
+			surf->dif_sharp.val = getF4( fp );
+			surf->dif_sharp.eindex = getVX( fp );
+			break;
 
-         case ID_GVAL:
-            surf->glow.val = getF4( fp );
-            surf->glow.eindex = getVX( fp );
-            break;
+		 case ID_GVAL:
+			surf->glow.val = getF4( fp );
+			surf->glow.eindex = getVX( fp );
+			break;
 
-         case ID_LINE:
-            surf->line.enabled = 1;
-            if ( sz >= 2 ) surf->line.flags = getU2( fp );
-            if ( sz >= 6 ) surf->line.size.val = getF4( fp );
-            if ( sz >= 8 ) surf->line.size.eindex = getVX( fp );
-            break;
+		 case ID_LINE:
+			surf->line.enabled = 1;
+			if ( sz >= 2 ) surf->line.flags = getU2( fp );
+			if ( sz >= 6 ) surf->line.size.val = getF4( fp );
+			if ( sz >= 8 ) surf->line.size.eindex = getVX( fp );
+			break;
 
-         case ID_ALPH:
-            surf->alpha_mode = getU2( fp );
-            surf->alpha = getF4( fp );
-            break;
+		 case ID_ALPH:
+			surf->alpha_mode = getU2( fp );
+			surf->alpha = getF4( fp );
+			break;
 
-         case ID_AVAL:
-            surf->alpha = getF4( fp );
-            break;
+		 case ID_AVAL:
+			surf->alpha = getF4( fp );
+			break;
 
-         case ID_BLOK:
-            type = getU4( fp );
+		 case ID_BLOK:
+			type = getU4( fp );
 
-            switch ( type ) {
-               case ID_IMAP:
-               case ID_PROC:
-               case ID_GRAD:
-                  tex = lwGetTexture( fp, sz - 4, type );
-                  if ( !tex ) goto Fail;
-                  if ( !add_texture( surf, tex ))
-                     lwFreeTexture( tex );
-                  set_flen( 4 + get_flen() );
-                  break;
-               case ID_SHDR:
-                  shdr = lwGetShader( fp, sz - 4 );
-                  if ( !shdr ) goto Fail;
-                  lwListInsert( (void**)&surf->shader, shdr, (int (__cdecl *)(void *,void *))compare_shaders );
-                  ++surf->nshaders;
-                  set_flen( 4 + get_flen() );
-                  break;
-            }
-            break;
+			switch ( type ) {
+			   case ID_IMAP:
+			   case ID_PROC:
+			   case ID_GRAD:
+				  tex = lwGetTexture( fp, sz - 4, type );
+				  if ( !tex ) goto Fail;
+				  if ( !add_texture( surf, tex ))
+					 lwFreeTexture( tex );
+				  set_flen( 4 + get_flen() );
+				  break;
+			   case ID_SHDR:
+				  shdr = lwGetShader( fp, sz - 4 );
+				  if ( !shdr ) goto Fail;
+				  lwListInsert( (void**)&surf->shader, shdr, (int (__cdecl *)(void *,void *))compare_shaders );
+				  ++surf->nshaders;
+				  set_flen( 4 + get_flen() );
+				  break;
+			}
+			break;
 
-         default:
-            break;
-      }
+		 default:
+			break;
+	  }
 
-      /* error while reading current subchunk? */
+	  /* error while reading current subchunk? */
 
-      rlen = get_flen();
-      if ( rlen < 0 || rlen > sz ) goto Fail;
+	  rlen = get_flen();
+	  if ( rlen < 0 || rlen > sz ) goto Fail;
 
-      /* skip unread parts of the current subchunk */
+	  /* skip unread parts of the current subchunk */
 
-      if ( rlen < sz )
-         fp->Seek( sz - rlen, FS_SEEK_CUR );
+	  if ( rlen < sz )
+		 fp->Seek( sz - rlen, FS_SEEK_CUR );
 
-      /* end of the SURF chunk? */
+	  /* end of the SURF chunk? */
 
-      if ( cksize <= fp->Tell() - pos )
-         break;
+	  if ( cksize <= fp->Tell() - pos )
+		 break;
 
-      /* get the next subchunk header */
+	  /* get the next subchunk header */
 
-      set_flen( 0 );
-      id = getU4( fp );
-      sz = getU2( fp );
-      if ( 6 != get_flen() ) goto Fail;
+	  set_flen( 0 );
+	  id = getU4( fp );
+	  sz = getU2( fp );
+	  if ( 6 != get_flen() ) goto Fail;
    }
 
    return surf;
@@ -3900,9 +3900,9 @@ void normalize( float v[] )
 
    r = ( float ) idMath::Sqrt( dot( v, v ));
    if ( r > 0 ) {
-      v[ 0 ] /= r;
-      v[ 1 ] /= r;
-      v[ 2 ] /= r;
+	  v[ 0 ] /= r;
+	  v[ 1 ] /= r;
+	  v[ 2 ] /= r;
    }
 }
 
@@ -3916,14 +3916,14 @@ Free memory used by an lwVMap.
 void lwFreeVMap( lwVMap *vmap )
 {
    if ( vmap ) {
-      if ( vmap->name ) Mem_Free( vmap->name );
-      if ( vmap->vindex ) Mem_Free( vmap->vindex );
-      if ( vmap->pindex ) Mem_Free( vmap->pindex );
-      if ( vmap->val ) {
-         if ( vmap->val[ 0 ] ) Mem_Free( vmap->val[ 0 ] );
-         Mem_Free( vmap->val );
-      }
-      Mem_Free( vmap );
+	  if ( vmap->name ) Mem_Free( vmap->name );
+	  if ( vmap->vindex ) Mem_Free( vmap->vindex );
+	  if ( vmap->pindex ) Mem_Free( vmap->pindex );
+	  if ( vmap->val ) {
+		 if ( vmap->val[ 0 ] ) Mem_Free( vmap->val[ 0 ] );
+		 Mem_Free( vmap->val );
+	  }
+	  Mem_Free( vmap );
    }
 }
 
@@ -3952,8 +3952,8 @@ lwVMap *lwGetVMap( idFile *fp, int cksize, int ptoffset, int poloffset,
 
    vmap = (lwVMap*)Mem_ClearedAlloc( sizeof( lwVMap ) );
    if ( !vmap ) {
-      Mem_Free( buf );
-      return NULL;
+	  Mem_Free( buf );
+	  return NULL;
    }
 
    /* initialize the vmap */
@@ -3971,11 +3971,11 @@ lwVMap *lwGetVMap( idFile *fp, int cksize, int ptoffset, int poloffset,
 
    npts = 0;
    while ( bp < buf + cksize ) {
-      i = sgetVX( &bp );
-      if ( perpoly )
-         i = sgetVX( &bp );
-      bp += vmap->dim * sizeof( float );
-      ++npts;
+	  i = sgetVX( &bp );
+	  if ( perpoly )
+		 i = sgetVX( &bp );
+	  bp += vmap->dim * sizeof( float );
+	  ++npts;
    }
 
    /* allocate the vmap */
@@ -3984,28 +3984,28 @@ lwVMap *lwGetVMap( idFile *fp, int cksize, int ptoffset, int poloffset,
    vmap->vindex = (int*)Mem_ClearedAlloc( npts * sizeof( int ) );
    if ( !vmap->vindex ) goto Fail;
    if ( perpoly ) {
-      vmap->pindex = (int*)Mem_ClearedAlloc( npts * sizeof( int ) );
-      if ( !vmap->pindex ) goto Fail;
+	  vmap->pindex = (int*)Mem_ClearedAlloc( npts * sizeof( int ) );
+	  if ( !vmap->pindex ) goto Fail;
    }
 
    if ( vmap->dim > 0 ) {
-      vmap->val = (float**)Mem_ClearedAlloc( npts * sizeof( float * ) );
-      if ( !vmap->val ) goto Fail;
-      f = (float*)Mem_ClearedAlloc( npts * vmap->dim * sizeof( float ) );
-      if ( !f ) goto Fail;
-      for ( i = 0; i < npts; i++ )
-         vmap->val[ i ] = f + i * vmap->dim;
+	  vmap->val = (float**)Mem_ClearedAlloc( npts * sizeof( float * ) );
+	  if ( !vmap->val ) goto Fail;
+	  f = (float*)Mem_ClearedAlloc( npts * vmap->dim * sizeof( float ) );
+	  if ( !f ) goto Fail;
+	  for ( i = 0; i < npts; i++ )
+		 vmap->val[ i ] = f + i * vmap->dim;
    }
 
    /* fill in the vmap values */
 
    bp = buf + rlen;
    for ( i = 0; i < npts; i++ ) {
-      vmap->vindex[ i ] = sgetVX( &bp );
-      if ( perpoly )
-         vmap->pindex[ i ] = sgetVX( &bp );
-      for ( j = 0; j < vmap->dim; j++ )
-         vmap->val[ i ][ j ] = sgetF4( &bp );
+	  vmap->vindex[ i ] = sgetVX( &bp );
+	  if ( perpoly )
+		 vmap->pindex[ i ] = sgetVX( &bp );
+	  for ( j = 0; j < vmap->dim; j++ )
+		 vmap->val[ i ][ j ] = sgetF4( &bp );
    }
 
    Mem_Free( buf );
@@ -4034,36 +4034,36 @@ int lwGetPointVMaps( lwPointList *point, lwVMap *vmap )
 
    vm = vmap;
    while ( vm ) {
-      if ( !vm->perpoly )
-         for ( i = 0; i < vm->nverts; i++ )
-            ++point->pt[ vm->vindex[ i ]].nvmaps;
-      vm = vm->next;
+	  if ( !vm->perpoly )
+		 for ( i = 0; i < vm->nverts; i++ )
+			++point->pt[ vm->vindex[ i ]].nvmaps;
+	  vm = vm->next;
    }
 
    /* allocate vmap references for each mapped point */
 
    for ( i = 0; i < point->count; i++ ) {
-      if ( point->pt[ i ].nvmaps ) {
-         point->pt[ i ].vm = (lwVMapPt*)Mem_ClearedAlloc( point->pt[ i ].nvmaps * sizeof( lwVMapPt ) );
-         if ( !point->pt[ i ].vm ) return 0;
-         point->pt[ i ].nvmaps = 0;
-      }
+	  if ( point->pt[ i ].nvmaps ) {
+		 point->pt[ i ].vm = (lwVMapPt*)Mem_ClearedAlloc( point->pt[ i ].nvmaps * sizeof( lwVMapPt ) );
+		 if ( !point->pt[ i ].vm ) return 0;
+		 point->pt[ i ].nvmaps = 0;
+	  }
    }
 
    /* fill in vmap references for each mapped point */
 
    vm = vmap;
    while ( vm ) {
-      if ( !vm->perpoly ) {
-         for ( i = 0; i < vm->nverts; i++ ) {
-            j = vm->vindex[ i ];
-            n = point->pt[ j ].nvmaps;
-            point->pt[ j ].vm[ n ].vmap = vm;
-            point->pt[ j ].vm[ n ].index = i;
-            ++point->pt[ j ].nvmaps;
-         }
-      }
-      vm = vm->next;
+	  if ( !vm->perpoly ) {
+		 for ( i = 0; i < vm->nverts; i++ ) {
+			j = vm->vindex[ i ];
+			n = point->pt[ j ].nvmaps;
+			point->pt[ j ].vm[ n ].vmap = vm;
+			point->pt[ j ].vm[ n ].index = i;
+			++point->pt[ j ].nvmaps;
+		 }
+	  }
+	  vm = vm->next;
    }
 
    return 1;
@@ -4087,51 +4087,51 @@ int lwGetPolyVMaps( lwPolygonList *polygon, lwVMap *vmap )
 
    vm = vmap;
    while ( vm ) {
-      if ( vm->perpoly ) {
-         for ( i = 0; i < vm->nverts; i++ ) {
-            for ( j = 0; j < polygon->pol[ vm->pindex[ i ]].nverts; j++ ) {
-               pv = &polygon->pol[ vm->pindex[ i ]].v[ j ];
-               if ( vm->vindex[ i ] == pv->index ) {
-                  ++pv->nvmaps;
-                  break;
-               }
-            }
-         }
-      }
-      vm = vm->next;
+	  if ( vm->perpoly ) {
+		 for ( i = 0; i < vm->nverts; i++ ) {
+			for ( j = 0; j < polygon->pol[ vm->pindex[ i ]].nverts; j++ ) {
+			   pv = &polygon->pol[ vm->pindex[ i ]].v[ j ];
+			   if ( vm->vindex[ i ] == pv->index ) {
+				  ++pv->nvmaps;
+				  break;
+			   }
+			}
+		 }
+	  }
+	  vm = vm->next;
    }
 
    /* allocate vmap references for each mapped vertex */
 
    for ( i = 0; i < polygon->count; i++ ) {
-      for ( j = 0; j < polygon->pol[ i ].nverts; j++ ) {
-         pv = &polygon->pol[ i ].v[ j ];
-         if ( pv->nvmaps ) {
-            pv->vm = (lwVMapPt*)Mem_ClearedAlloc( pv->nvmaps * sizeof( lwVMapPt ) );
-            if ( !pv->vm ) return 0;
-            pv->nvmaps = 0;
-         }
-      }
+	  for ( j = 0; j < polygon->pol[ i ].nverts; j++ ) {
+		 pv = &polygon->pol[ i ].v[ j ];
+		 if ( pv->nvmaps ) {
+			pv->vm = (lwVMapPt*)Mem_ClearedAlloc( pv->nvmaps * sizeof( lwVMapPt ) );
+			if ( !pv->vm ) return 0;
+			pv->nvmaps = 0;
+		 }
+	  }
    }
 
    /* fill in vmap references for each mapped point */
 
    vm = vmap;
    while ( vm ) {
-      if ( vm->perpoly ) {
-         for ( i = 0; i < vm->nverts; i++ ) {
-            for ( j = 0; j < polygon->pol[ vm->pindex[ i ]].nverts; j++ ) {
-               pv = &polygon->pol[ vm->pindex[ i ]].v[ j ];
-               if ( vm->vindex[ i ] == pv->index ) {
-                  pv->vm[ pv->nvmaps ].vmap = vm;
-                  pv->vm[ pv->nvmaps ].index = i;
-                  ++pv->nvmaps;
-                  break;
-               }
-            }
-         }
-      }
-      vm = vm->next;
+	  if ( vm->perpoly ) {
+		 for ( i = 0; i < vm->nverts; i++ ) {
+			for ( j = 0; j < polygon->pol[ vm->pindex[ i ]].nverts; j++ ) {
+			   pv = &polygon->pol[ vm->pindex[ i ]].v[ j ];
+			   if ( vm->vindex[ i ] == pv->index ) {
+				  pv->vm[ pv->nvmaps ].vmap = vm;
+				  pv->vm[ pv->nvmaps ].index = i;
+				  ++pv->nvmaps;
+				  break;
+			   }
+			}
+		 }
+	  }
+	  vm = vm->next;
    }
 
    return 1;

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -48,8 +48,8 @@ MaterialDoc::~MaterialDoc(void) {
 }
 
 /**
-* Initializes the MaterialDoc instance with a specific idMaterial. This method will 
-* parse the material into the internal dictionary representation and optionally 
+* Initializes the MaterialDoc instance with a specific idMaterial. This method will
+* parse the material into the internal dictionary representation and optionally
 * allow the idMaterial object to reparse the source.
 * @param material The idMaterial instance to use.
 * @param parseMaterial Flag to determine if the material should be parsed into the editor representation.
@@ -60,7 +60,7 @@ void MaterialDoc::SetRenderMaterial(idMaterial* material, bool parseMaterial, bo
 	renderMaterial = material;
 
 
-	if(!parseMaterial ||  !renderMaterial)	
+	if(!parseMaterial ||  !renderMaterial)
 		return;
 
 	if(parseRenderMatierial) {
@@ -101,7 +101,7 @@ int	MaterialDoc::GetStageCount() {
 * @param name The name of the stage to find.
 */
 int	MaterialDoc::FindStage(int stageType, const char* name) {
-	
+
 	for(int i = 0; i < editMaterial.stages.Num(); i++) {
 		int type = GetAttributeInt(i, "stagetype");
 		idStr localname = GetAttribute(i, "name");
@@ -226,11 +226,11 @@ bool MaterialDoc::GetAttributeBool(int stage, const char* attribName, const char
 * @param addUndo Flag that specifies if the system should add an undo operation.
 */
 void MaterialDoc::SetAttribute(int stage, const char* attribName, const char* value, bool addUndo) {
-	
+
 	//Make sure we need to set the attribute
 	idStr orig  = GetAttribute(stage, attribName);
 	if(orig.Icmp(value)) {
-		
+
 		idDict* dict;
 		if(stage == -1) {
 			dict = &editMaterial.materialData;
@@ -246,7 +246,7 @@ void MaterialDoc::SetAttribute(int stage, const char* attribName, const char* va
 		}
 
 		dict->Set(attribName, value);
-		
+
 		manager->AttributeChanged(this, stage, attribName);
 		OnMaterialChanged();
 	}
@@ -347,9 +347,9 @@ void MaterialDoc::SetAttributeBool(int stage, const char* attribName, bool value
 void MaterialDoc::SetMaterialName(const char* materialName, bool addUndo) {
 	idStr oldName = name;
 
-	declManager->RenameDecl(DECL_MATERIAL, oldName, materialName); 
+	declManager->RenameDecl(DECL_MATERIAL, oldName, materialName);
 	name = renderMaterial->GetName();
-	
+
 	if(addUndo) {
 		RenameMaterialModifier* mod = new RenameMaterialModifier(manager, name, oldName);
 		manager->AddMaterialUndoModifier(mod);
@@ -385,7 +385,7 @@ void MaterialDoc::SetData(int stage, idDict* data) {
 * @param text The new source text.
 */
 void MaterialDoc::SourceModify(SourceModifyOwner* owner) {
-	
+
 	sourceModifyOwner = owner;
 	sourceModify = true;
 	OnMaterialChanged();
@@ -402,9 +402,9 @@ bool MaterialDoc::IsSourceModified() {
 * Applies any source changes to the edit representation of the material.
 */
 void MaterialDoc::ApplySourceModify(idStr& text) {
-	
+
 	if(sourceModify) {
-		
+
 		//Changes in the source need to clear any undo redo buffer because we have no idea what has changed
 		manager->ClearUndo();
 		manager->ClearRedo();
@@ -414,7 +414,7 @@ void MaterialDoc::ApplySourceModify(idStr& text) {
 		idLexer		src;
 		src.LoadMemory(text, text.Length(), "Material");
 
-		src.SetFlags( 
+		src.SetFlags(
 			LEXFL_NOSTRINGCONCAT |			// multiple strings seperated by whitespaces are not concatenated
 			LEXFL_NOSTRINGESCAPECHARS |		// no escape characters inside strings
 			LEXFL_ALLOWPATHNAMES |			// allow path seperators in names
@@ -428,7 +428,7 @@ void MaterialDoc::ApplySourceModify(idStr& text) {
 			src.Warning( "Missing decl name" );
 			return;
 		}
-		
+
 		ParseMaterial(&src);
 		sourceModify = false;
 
@@ -583,7 +583,7 @@ void MaterialDoc::ApplyMaterialChanges(bool force) {
 		renderMaterial->GetText( declText );
 
 		renderMaterial->GetText(declText);
-		
+
 		ParseMaterialText(declText);
 
 		applyWaiting = false;
@@ -649,7 +649,7 @@ void MaterialDoc::ParseMaterialText(const char* source) {
 
 	/*idLexer src;
 	src.LoadMemory(source, strlen(source), "material");
-	src.SetFlags( 
+	src.SetFlags(
 		LEXFL_NOSTRINGCONCAT |			// multiple strings seperated by whitespaces are not concatenated
 		LEXFL_NOSTRINGESCAPECHARS |		// no escape characters inside strings
 		LEXFL_ALLOWPATHNAMES |			// allow path seperators in names
@@ -676,7 +676,7 @@ void MaterialDoc::ParseMaterial(idLexer* src) {
 
 	//Parse past the name
 	src->SkipUntilString("{");
-	
+
 	while ( 1 ) {
 		if ( !src->ExpectAnyToken( &token ) ) {
 			//Todo: Add some error checking here
@@ -690,7 +690,7 @@ void MaterialDoc::ParseMaterial(idLexer* src) {
 		if(ParseMaterialDef(&token, src, MaterialDefManager::MATERIAL_DEF_MATERIAL, &editMaterial.materialData)) {
 			continue;
 		}
-		
+
 		if ( !token.Icmp( "diffusemap" ) ) {
 			//Added as a special stage
 			idStr str;
@@ -714,22 +714,22 @@ void MaterialDoc::ParseMaterial(idLexer* src) {
 }
 
 /**
-* Parses a single stage from the source text from an idMaterial and initializes the editor dictionary 
+* Parses a single stage from the source text from an idMaterial and initializes the editor dictionary
 * representation of the material.
 * @param src The idLexer object that contains the material text.
 */
 void MaterialDoc::ParseStage(idLexer* src) {
-	
+
 	MEStage_t* newStage = new MEStage_t();
 	int index = editMaterial.stages.Append(newStage);
-	
+
 	newStage->stageData.SetInt("stagetype", STAGE_TYPE_NORMAL);
 	newStage->enabled = true;
 
 	idToken		token;
 
 	while ( 1 ) {
-		
+
 		if ( !src->ExpectAnyToken( &token ) ) {
 			//Todo: Add some error checking here
 			return;
@@ -784,7 +784,7 @@ void MaterialDoc::AddSpecialMapStage(const char* stageName, const char* map) {
 * @param dict The dictionary to initialize.
 */
 bool MaterialDoc::ParseMaterialDef(idToken* token, idLexer* src, int type, idDict* dict) {
-	
+
 	MaterialDefList* defs = MaterialDefManager::GetMaterialDefs(type);
 
 	for(int i = 0; i < defs->Num(); i++) {
@@ -870,7 +870,7 @@ const char*	MaterialDoc::GenerateSourceText() {
 }
 
 /**
-* Writes the internal dictionary data to the standard format and replaces the 
+* Writes the internal dictionary data to the standard format and replaces the
 * idMaterial source text with the newly generated text.
 */
 void MaterialDoc::ReplaceSourceText() {
@@ -899,7 +899,7 @@ void MaterialDoc::WriteStage(int stage, idFile_Memory* file) {
 	}
 	WriteMaterialDef(stage, file, MaterialDefManager::MATERIAL_DEF_STAGE, 2);
 	file->WriteFloatString( "\t}\n" );
-	
+
 }
 
 /**
@@ -963,4 +963,3 @@ void MaterialDoc::WriteMaterialDef(int stage, idFile_Memory* file, int type, int
 		}
 	}
 }
-

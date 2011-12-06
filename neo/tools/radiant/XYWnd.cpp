@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -283,9 +283,9 @@ void VectorToAngles(idVec3 vec, idVec3 angles) {
 
 /*
  =======================================================================================================================
-    RotateLight target is relative to the light origin up and right are relative to the target up and right are
-    perpendicular and are on a plane through the target with the target vector as normal delta is the movement of the
-    target relative to the light
+	RotateLight target is relative to the light origin up and right are relative to the target up and right are
+	perpendicular and are on a plane through the target with the target vector as normal delta is the movement of the
+	target relative to the light
  =======================================================================================================================
 */
 void VectorSnapGrid(idVec3 &v) {
@@ -638,7 +638,7 @@ static unsigned s_stipple[32] = {
 
 /*
  =======================================================================================================================
-    WXY_WndProc
+	WXY_WndProc
  =======================================================================================================================
  */
 LONG WINAPI XYWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -1368,7 +1368,7 @@ void CXYWnd::OnMouseMove(UINT nFlags, CPoint point) {
 		SetCursor(::LoadCursor(NULL, IDC_ARROW));
 	}
 
-	/// If precision crosshair is active, force redraw of the 2d view on mouse move 
+	/// If precision crosshair is active, force redraw of the 2d view on mouse move
 	if( m_precisionCrosshairMode != PRECISION_CROSSHAIR_NONE )
 	{
 		/// Force 2d view redraw (so that the precision cursor moves with the mouse)
@@ -2097,7 +2097,7 @@ bool MergeMenu(CMenu * pMenuDestination, const CMenu * pMenuAdd, bool bTopLevel 
 			// insert the new popup menu into the destination menu
 			HMENU hNewMenu = NewPopupMenu.GetSafeHmenu();
 			if (pMenuDestination->InsertMenu(iInsertPosDefault,
-				MF_BYPOSITION | MF_POPUP | MF_ENABLED, 
+				MF_BYPOSITION | MF_POPUP | MF_ENABLED,
 				(UINT)hNewMenu, sMenuAddString ))
 			{
 				// don't forget to correct the item count
@@ -2109,7 +2109,7 @@ bool MergeMenu(CMenu * pMenuDestination, const CMenu * pMenuAdd, bool bTopLevel 
 				return false;
 			}
 
-			// don't destroy the new menu		
+			// don't destroy the new menu
 			NewPopupMenu.Detach();
 		} // if (pSubMenu)
 	} // for (iLoop)
@@ -2130,7 +2130,7 @@ void CXYWnd::HandleDrop() {
 
 	if (!m_mnuDrop.GetSafeHmenu()) {		// first time, load it up
 		m_mnuDrop.CreatePopupMenu();
-		
+
 		CMenu *drop = new CMenu;
 		drop->LoadMenu( IDR_MENU_DROP );
 
@@ -2517,7 +2517,7 @@ bool CXYWnd::DragDelta(int x, int y, idVec3 &move) {
 
 /*
  =======================================================================================================================
-    NewBrushDrag
+	NewBrushDrag
  =======================================================================================================================
  */
 void CXYWnd::NewBrushDrag(int x, int y) {
@@ -2584,7 +2584,7 @@ void CXYWnd::NewBrushDrag(int x, int y) {
 
 /*
  =======================================================================================================================
-    XY_MouseMoved
+	XY_MouseMoved
  =======================================================================================================================
  */
 bool CXYWnd::XY_MouseMoved(int x, int y, int buttons) {
@@ -2734,8 +2734,8 @@ bool CXYWnd::XY_MouseMoved(int x, int y, int buttons) {
 
 /*
  =======================================================================================================================
-    DRAWING £
-    XY_DrawGrid
+	DRAWING £
+	XY_DrawGrid
  =======================================================================================================================
  */
 void CXYWnd::XY_DrawGrid() {
@@ -2785,7 +2785,7 @@ void CXYWnd::XY_DrawGrid() {
 
 	int stepSize = 64 * 0.1 / m_fScale;
 	if (stepSize < 64) {
-		stepSize = max ( 64 , g_qeglobals.d_gridsize ); 
+		stepSize = max ( 64 , g_qeglobals.d_gridsize );
 	}
 	else {
 		int i;
@@ -2863,10 +2863,10 @@ void CXYWnd::XY_DrawGrid() {
 				qglEnd ();
 				qglLineWidth(1);
 			}
-		}		
+		}
 	}
 
-	
+
 
 
 	// draw coordinate text if needed
@@ -2916,7 +2916,7 @@ void CXYWnd::XY_DrawGrid() {
 
 /*
  =======================================================================================================================
-    XY_DrawBlockGrid
+	XY_DrawBlockGrid
  =======================================================================================================================
  */
 void CXYWnd::XY_DrawBlockGrid() {
@@ -2990,7 +2990,7 @@ void CXYWnd::XY_DrawBlockGrid() {
 }
 
 void GLColoredBoxWithLabel(float x, float y, float size, idVec4 color, const char *text, idVec4 textColor, float xofs, float yofs, float lineSize) {
-	globalImages->BindNull();	
+	globalImages->BindNull();
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	qglDisable(GL_CULL_FACE);
 	qglDisable(GL_BLEND);
@@ -3092,7 +3092,7 @@ void CXYWnd::DrawCameraIcon() {
 		a = g_pParentWnd->GetCamera()->Camera().angles[PITCH] * idMath::M_DEG2RAD;
 	}
 
-	float scale = 1.0/m_fScale;	//jhefty - keep the camera icon proportionally the same size 
+	float scale = 1.0/m_fScale;	//jhefty - keep the camera icon proportionally the same size
 
 	qglColor3f(0.0, 0.0, 1.0);
 	qglBegin(GL_LINE_STRIP);
@@ -3161,11 +3161,11 @@ void CXYWnd::DrawZIcon(void) {
 
 /*
  =======================================================================================================================
-    FilterBrush
+	FilterBrush
  =======================================================================================================================
  */
 bool FilterBrush(brush_t *pb) {
-	
+
 	if (!pb->owner) {
 		return false;	// during construction
 	}
@@ -3186,7 +3186,7 @@ bool FilterBrush(brush_t *pb) {
 			//
 			if (pb->mins[2] > g_pParentWnd->GetZWnd()->m_pZClip->GetTop()	// brush bottom edge is above clip top
 				||
-				pb->maxs[2] < g_pParentWnd->GetZWnd()->m_pZClip->GetBottom()// brush top edge is below clip bottom 
+				pb->maxs[2] < g_pParentWnd->GetZWnd()->m_pZClip->GetBottom()// brush top edge is below clip bottom
 				)
 			{
 				return TRUE;
@@ -3261,7 +3261,7 @@ bool FilterBrush(brush_t *pb) {
 		if (pb->modelHandle > 0) {
 			idRenderModel *model = pb->modelHandle;
 			if ( dynamic_cast<idRenderModelLiquid*>(model) ) {
-				return true;			
+				return true;
 			}
 		}
 	}
@@ -3306,9 +3306,9 @@ bool FilterBrush(brush_t *pb) {
 
 /*
  =======================================================================================================================
-    PATH LINES £
-    DrawPathLines Draws connections between entities. Needs to consider all entities, not just ones on screen, because
-    the lines can be visible when neither end is. Called for both camera view and xy view.
+	PATH LINES £
+	DrawPathLines Draws connections between entities. Needs to consider all entities, not just ones on screen, because
+	the lines can be visible when neither end is. Called for both camera view and xy view.
  =======================================================================================================================
  */
 void DrawPathLines(void) {
@@ -3792,7 +3792,7 @@ void CXYWnd::XY_Draw() {
 	// area selection hack
 	if (g_qeglobals.d_select_mode == sel_area) {
 		qglEnable(GL_BLEND);
-        qglPolygonMode ( GL_FRONT_AND_BACK , GL_FILL );
+		qglPolygonMode ( GL_FRONT_AND_BACK , GL_FILL );
 		qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		qglColor4f(0.0, 0.0, 1.0, 0.25);
 		qglRectf
@@ -3803,7 +3803,7 @@ void CXYWnd::XY_Draw() {
 			g_qeglobals.d_vAreaBR[nDim2]
 		);
 		qglDisable(GL_BLEND);
-        qglPolygonMode ( GL_FRONT_AND_BACK , GL_LINE );
+		qglPolygonMode ( GL_FRONT_AND_BACK , GL_LINE );
 		qglColor3f(1.0f, 1.0f, 1.0f);
 		qglRectf
 		(
@@ -3823,7 +3823,7 @@ void CXYWnd::XY_Draw() {
 		DrawRotateIcon();
 	}
 
-	/// Draw a "precision crosshair" if enabled 
+	/// Draw a "precision crosshair" if enabled
 	if( m_precisionCrosshairMode != PRECISION_CROSSHAIR_NONE )
 		DrawPrecisionCrosshair();
 
@@ -4383,7 +4383,7 @@ void CXYWnd::OnTimer(UINT nIDEvent) {
 		// m_vOrigin[nDim1] -= m_ptDrag.x / m_fScale; m_vOrigin[nDim1] -= m_ptDrag.x /
 		// m_fScale;
 		//
-	} 
+	}
 }
 
 /*
@@ -4450,7 +4450,7 @@ BOOL CXYWnd::OnEraseBkgnd(CDC *pDC) {
 }
 
 extern void AssignModel();
-void CXYWnd::OnDropNewmodel() 
+void CXYWnd::OnDropNewmodel()
 {
 	CPoint point;
 	GetCursorPos(&point);
@@ -4459,7 +4459,7 @@ void CXYWnd::OnDropNewmodel()
 	g_Inspectors->AssignModel();
 }
 
-BOOL CXYWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
+BOOL CXYWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	if (zDelta > 0) {
 		g_pParentWnd->OnViewZoomin();
@@ -4474,7 +4474,7 @@ BOOL CXYWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
  //---------------------------------------------------------------------------
  // CyclePrecisionCrosshairMode
- // 
+ //
  // Called when the user presses the "cycle precision cursor mode" key.
  // Cycles the precision cursor among the following three modes:
  //		PRECISION_CURSOR_NONE
@@ -4493,11 +4493,11 @@ BOOL CXYWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
  }
 
  //---------------------------------------------------------------------------
-// DrawPrecisionCrosshair 
-// 
+// DrawPrecisionCrosshair
+//
 // Draws a precision crosshair beneath the cursor in the 2d (XY) view,
 //  depending on one of the following values for m_precisionCrosshairMode:
-// 
+//
 // PRECISION_CROSSHAIR_NONE		No crosshair is drawn.  Do not force refresh of XY view.
 // PRECISION_CROSSHAIR_SNAP		Crosshair snaps to grid size.  Force refresh of XY view.
 // PRECISION_CROSSHAIR_FREE		Crosshair does not snap to grid.  Force refresh of XY view.
@@ -4511,7 +4511,7 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 	float x, y;
 	idVec4 crossEndColor (1.0f, 0.0f, 1.0f, 1.0f); // the RGBA color of the precision crosshair at its ends
 	idVec4 crossMidColor; // the RGBA color of the precision crosshair at the crossing point
-	
+
 	/// Transform the mouse coordinates into axis-correct map-coordinates
 	if( m_precisionCrosshairMode == PRECISION_CROSSHAIR_SNAP )
 		SnapToPoint( m_mouseX, m_mouseY, mouse3dPos );
@@ -4519,7 +4519,7 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 		XY_ToPoint( m_mouseX, m_mouseY, mouse3dPos );
 	x = mouse3dPos[ m_axisHoriz ];
 	y = mouse3dPos[ m_axisVert ];
-	
+
 	/// Use the color specified by the user
 
 	crossEndColor[0] = g_qeglobals.d_savedinfo.colors[ COLOR_PRECISION_CROSSHAIR ][0];
@@ -4531,13 +4531,13 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 
 	if( m_precisionCrosshairMode == PRECISION_CROSSHAIR_FREE )
 		crossMidColor[ 3 ] = 0.0f; // intersection-color is 100% transparent (alpha = 0.0f)
-	
+
 	/// Set up OpenGL states (for drawing smooth-shaded plain-colored lines)
 	qglEnable( GL_BLEND );
 	qglDisable( GL_TEXTURE_2D );
 	qglShadeModel( GL_SMOOTH );
 	qglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	
+
 	/// Draw a fullscreen-sized crosshair over the cursor
 	qglBegin( GL_LINES );
 	{
@@ -4550,7 +4550,7 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 		qglVertex2f( x, y );
 		qglColor4fv( crossEndColor.ToFloatPtr() );
 		qglVertex2f( m_mcRight, y );
-		
+
 		/// Draw the vertical precision line (in two pieces)
 		qglColor4fv( crossEndColor.ToFloatPtr() );
 		qglVertex2f( x, m_mcTop );
@@ -4562,7 +4562,7 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 		qglVertex2f( x, m_mcBottom );
 	}
 	qglEnd(); // GL_LINES
-	
+
 	// Radiant was in opaque, flat-shaded mode by default; restore this to prevent possible slowdown
 	qglShadeModel( GL_FLAT );
 	qglDisable( GL_BLEND );

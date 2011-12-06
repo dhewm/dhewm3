@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -130,14 +130,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // idGLWidget message handlers
 
-BOOL idGLWidget::PreCreateWindow(CREATESTRUCT& cs) 
+BOOL idGLWidget::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: Add your specialized code here and/or call the base class
-	
+
 	return CWnd::PreCreateWindow(cs);
 }
 
-BOOL idGLWidget::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext) 
+BOOL idGLWidget::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 	if (CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext) == -1) {
 		return FALSE;
@@ -151,7 +151,7 @@ BOOL idGLWidget::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwS
 
 }
 
-void idGLWidget::OnPaint() 
+void idGLWidget::OnPaint()
 {
 
 	if (!initialized) {
@@ -161,7 +161,7 @@ void idGLWidget::OnPaint()
 		initialized = true;
 	}
 	CPaintDC dc(this); // device context for painting
-	
+
 	CRect rect;
 	GetClientRect(rect);
 
@@ -402,7 +402,7 @@ void idGLDrawableMaterial::draw(int x, int y, int w, int h) {
 			tris->verts[0].xyz.z = yOffset + 0 - height / 2;
 			tris->verts[0].st.x = 1;
 			tris->verts[0].st.y = 1;
-			
+
 			tris->verts[1].xyz.x = 64;
 			tris->verts[1].xyz.y = -xOffset + width / 2;
 			tris->verts[1].xyz.z = yOffset + height / 2;
@@ -426,7 +426,7 @@ void idGLDrawableMaterial::draw(int x, int y, int w, int h) {
 			AddTris(tris, mat);
 
 			worldModel->FinishSurfaces();
-			
+
 			renderEntity_t worldEntity;
 
 			memset( &worldEntity, 0, sizeof( worldEntity ) );
@@ -443,7 +443,7 @@ void idGLDrawableMaterial::draw(int x, int y, int w, int h) {
 
 			worldDirty = false;
 		}
-		
+
 		renderView_t	refdef;
 		// render it
 		renderSystem->BeginFrame(w, h);
@@ -671,7 +671,7 @@ void idGLDrawableModel::draw(int x, int y, int w, int h) {
 
 		worldDirty = false;
 	}
-		
+
 	renderView_t	refdef;
 	// render it
 	renderSystem->BeginFrame(w, h);
@@ -701,7 +701,7 @@ void idGLDrawableModel::draw(int x, int y, int w, int h) {
 
 
 
-void idGLWidget::OnLButtonDown(UINT nFlags, CPoint point) 
+void idGLWidget::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetCapture();
 	if (drawable) {
@@ -712,7 +712,7 @@ void idGLWidget::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 }
 
-void idGLWidget::OnLButtonUp(UINT nFlags, CPoint point) 
+void idGLWidget::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if (drawable) {
 		if ( drawable->ScreenCoords() ) {
@@ -723,7 +723,7 @@ void idGLWidget::OnLButtonUp(UINT nFlags, CPoint point)
 	ReleaseCapture();
 }
 
-void idGLWidget::OnMButtonDown(UINT nFlags, CPoint point) 
+void idGLWidget::OnMButtonDown(UINT nFlags, CPoint point)
 {
 	SetCapture();
 	if (drawable) {
@@ -734,7 +734,7 @@ void idGLWidget::OnMButtonDown(UINT nFlags, CPoint point)
 	}
 }
 
-void idGLWidget::OnMButtonUp(UINT nFlags, CPoint point) 
+void idGLWidget::OnMButtonUp(UINT nFlags, CPoint point)
 {
 	if (drawable) {
 		if ( drawable->ScreenCoords() ) {
@@ -745,7 +745,7 @@ void idGLWidget::OnMButtonUp(UINT nFlags, CPoint point)
 	ReleaseCapture();
 }
 
-void idGLWidget::OnMouseMove(UINT nFlags, CPoint point) 
+void idGLWidget::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (drawable) {
 		if ( drawable->ScreenCoords() ) {
@@ -756,7 +756,7 @@ void idGLWidget::OnMouseMove(UINT nFlags, CPoint point)
 	}
 }
 
-BOOL idGLWidget::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
+BOOL idGLWidget::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	if (drawable) {
 		float f = drawable->getScale();
@@ -776,7 +776,7 @@ BOOL idGLWidget::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return TRUE;
 }
 
-void idGLWidget::OnRButtonDown(UINT nFlags, CPoint point) 
+void idGLWidget::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	SetCapture();
 	if (drawable) {
@@ -787,7 +787,7 @@ void idGLWidget::OnRButtonDown(UINT nFlags, CPoint point)
 	}
 }
 
-void idGLWidget::OnRButtonUp(UINT nFlags, CPoint point) 
+void idGLWidget::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	if (drawable) {
 		if ( drawable->ScreenCoords() ) {
@@ -816,7 +816,7 @@ void idGLWidget::OnTimer(UINT nIDEvent) {
 
 
 idGLDrawable::idGLDrawable() {
-	scale = 1.0;   
+	scale = 1.0;
 	xOffset = 0.0;
 	yOffset = 0.0;
 	handleMove = false;
@@ -841,7 +841,7 @@ void idGLConsoleWidget::init() {
 	setDrawable(&console);
 }
 
-void idGLConsoleWidget::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void idGLConsoleWidget::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	sysEvent_t	ev;
 
@@ -865,7 +865,7 @@ END_MESSAGE_MAP()
 
 
 
-void idGLConsoleWidget::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void idGLConsoleWidget::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	sysEvent_t	ev;
 
@@ -881,7 +881,7 @@ void idGLConsoleWidget::OnPaint() {
 	idGLWidget::OnPaint();
 }
 
-void idGLConsoleWidget::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void idGLConsoleWidget::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	sysEvent_t	ev;
 
@@ -896,10 +896,10 @@ void idGLConsoleWidget::OnLButtonDown(UINT nFlags, CPoint point) {
 	SetFocus();
 }
 
-BOOL idGLWidget::OnEraseBkgnd(CDC* pDC) 
+BOOL idGLWidget::OnEraseBkgnd(CDC* pDC)
 {
 	return FALSE;
-	
+
 	//return CWnd::OnEraseBkgnd(pDC);
 }
 
@@ -922,7 +922,7 @@ void idGLDrawableWorld::AddTris(srfTriangles_t *tris, const idMaterial *mat) {
 }
 
 void idGLDrawableWorld::draw(int x, int y, int w, int h) {
-	
+
 }
 
 void idGLDrawableWorld::InitWorld() {

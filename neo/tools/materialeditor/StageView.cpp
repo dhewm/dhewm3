@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -80,11 +80,11 @@ void StageView::MV_OnMaterialSelectionChange(MaterialDoc* pMaterial) {
 
 	currentMaterial = pMaterial;
 
-	RefreshStageList();	
+	RefreshStageList();
 }
 
 /**
-* Called when the material changes have been saved. 
+* Called when the material changes have been saved.
 * @param pMaterial The saved material.
 */
 void StageView::MV_OnMaterialSaved(MaterialDoc* pMaterial) {
@@ -265,7 +265,7 @@ bool StageView::CanRename() {
 * Rebuilds the list of stages based on the currently selected material
 */
 void StageView::RefreshStageList() {
-	
+
 	CListCtrl& list = GetListCtrl();
 
 	POSITION pos = list.GetFirstSelectedItemPosition();
@@ -304,7 +304,7 @@ void StageView::RefreshStageList() {
 	}
 }
 
-/** 
+/**
 * Called by the MFC framework when the view is being created.
 */
 int StageView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
@@ -316,8 +316,8 @@ int StageView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	return 0;
 }
 
-/** 
-* Called when the user changes the selection in the list box. This method will notify the 
+/**
+* Called when the user changes the selection in the list box. This method will notify the
 * property view of the change so that it can display the appropriate properties.
 */
 void StageView::OnLvnItemchanged(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -361,7 +361,7 @@ void StageView::OnLvnItemchanged(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 }
 
-/** 
+/**
 * Notifies the property view that all stages have been removed.
 */
 void StageView::OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -373,7 +373,7 @@ void StageView::OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 }
 
-/** 
+/**
 * Starts the stage drag operation.
 */
 void StageView::OnLvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -413,7 +413,7 @@ void StageView::OnLvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 }
 
-/** 
+/**
 * Finishes a stage drag operation of the user was dragging a stage.
 */
 void StageView::OnLButtonUp(UINT nFlags, CPoint point) {
@@ -439,7 +439,7 @@ void StageView::OnLButtonUp(UINT nFlags, CPoint point) {
 	ToggleListView::OnLButtonUp(nFlags, point);
 }
 
-/** 
+/**
 * Handles drawing the drag image when a user is draging a stage.
 */
 void StageView::OnMouseMove(UINT nFlags, CPoint point) {
@@ -459,7 +459,7 @@ void StageView::OnMouseMove(UINT nFlags, CPoint point) {
 	ToggleListView::OnMouseMove(nFlags, point);
 }
 
-/** 
+/**
 * Displays the popup menu when the user performs a right mouse click.
 */
 void StageView::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -478,7 +478,7 @@ void StageView::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 }
 
-/** 
+/**
 * Begins a label edit when the user selects the rename menu option.
 */
 void StageView::OnRenameStage() {
@@ -492,7 +492,7 @@ void StageView::OnRenameStage() {
 	}
 }
 
-/** 
+/**
 * Deletes the selected stage when the user selects the delete menu option.
 */
 void StageView::OnDeleteStage() {
@@ -513,7 +513,7 @@ void StageView::OnDeleteStage() {
 	}
 }
 
-/** 
+/**
 * Conforms the user wants to delete all stages and then performs the operation.
 */
 void StageView::OnDeleteAllStages() {
@@ -524,7 +524,7 @@ void StageView::OnDeleteAllStages() {
 	}
 }
 
-/** 
+/**
 * Adds a new stage when the user selects the menu option.
 */
 void StageView::OnAddStage() {
@@ -534,7 +534,7 @@ void StageView::OnAddStage() {
 	material->AddStage(MaterialDoc::STAGE_TYPE_NORMAL, name.c_str());
 }
 
-/** 
+/**
 * Adds a new bumpmap stage when the user selects the menu option.
 */
 void StageView::OnAddBumpmapStage() {
@@ -542,7 +542,7 @@ void StageView::OnAddBumpmapStage() {
 	material->AddStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "bumpmap");
 }
 
-/** 
+/**
 * Adds a new diffusemap stage when the user selects the menu option.
 */
 void StageView::OnAddDiffuseStage() {
@@ -550,7 +550,7 @@ void StageView::OnAddDiffuseStage() {
 	material->AddStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "diffusemap");
 }
 
-/** 
+/**
 * Adds a new specularmap stage when the user selects the menu option.
 */
 void StageView::OnAddSpecualarStage() {
@@ -558,7 +558,7 @@ void StageView::OnAddSpecualarStage() {
 	material->AddStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "specularmap");
 }
 
-/** 
+/**
 * Performs a copy operation when the user selects the menu option.
 */
 void StageView::OnCopy() {
@@ -577,7 +577,7 @@ void StageView::OnCopy() {
 	}
 }
 
-/** 
+/**
 * Performs a paste operation when the user selects the menu option.
 */
 void StageView::OnPaste() {
@@ -603,7 +603,7 @@ void StageView::OnPaste() {
 	}
 }
 
-/** 
+/**
 * Determines is a label edit can be performed on the selected stage.
 */
 void StageView::OnLvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -632,7 +632,7 @@ void StageView::OnLvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 }
 
-/** 
+/**
 * Performs the stage name change after the label edit is done.
 */
 void StageView::OnLvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -649,7 +649,7 @@ void StageView::OnLvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
 	}
 }
 
-/** 
+/**
 * Handles keyboard shortcuts for copy and paste operations.
 */
 void StageView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) {
@@ -665,7 +665,7 @@ void StageView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) {
 	ToggleListView::OnChar(nChar, nRepCnt, nFlags);
 }
 
-/** 
+/**
 * Handles keyboard shortcut for the delete operations.
 */
 BOOL StageView::PreTranslateMessage(MSG* pMsg) {
@@ -681,7 +681,7 @@ BOOL StageView::PreTranslateMessage(MSG* pMsg) {
 	return FALSE;
 }
 
-/** 
+/**
 * Sets window styles before the window is created.
 */
 BOOL StageView::PreCreateWindow(CREATESTRUCT& cs) {
@@ -691,7 +691,7 @@ BOOL StageView::PreCreateWindow(CREATESTRUCT& cs) {
 	return ToggleListView::PreCreateWindow(cs);
 }
 
-/** 
+/**
 * Called by the ToggleListView when the toggle state has changed.
 */
 void StageView::OnStateChanged(int index, int toggleState) {
@@ -705,7 +705,7 @@ void StageView::OnStateChanged(int index, int toggleState) {
 	}
 }
 
-/** 
+/**
 * Dispalys the popup menu with the appropriate menu items enabled.
 */
 void StageView::PopupMenu(CPoint* pt) {
@@ -759,7 +759,7 @@ void StageView::PopupMenu(CPoint* pt) {
 	pPopupMenu->TrackPopupMenu (TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt->x, pt->y, &list);
 }
 
-/** 
+/**
 * Performs the stage move when the user has dragged and dropped a stage.
 */
 void StageView::DropItemOnList() {
@@ -777,12 +777,12 @@ void StageView::DropItemOnList() {
 
 	//Move the stage data
 	MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
-	
+
 	internalChange = true;
 	toStage = dropIndex-1;
 	material->MoveStage(dragIndex-1, dropIndex-1);
 	internalChange = false;
-		
+
 	if(dragIndex < dropIndex) {
 		dropIndex++;
 	}
@@ -822,7 +822,3 @@ void StageView::DropItemOnList() {
 	}
 	m_propView->SetPropertyListType(type, toStage);
 }
-
-
-
-

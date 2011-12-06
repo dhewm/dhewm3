@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -40,21 +40,21 @@ class idEditWindow : public idWindow {
 public:
 						idEditWindow(idUserInterfaceLocal *gui);
 						idEditWindow(idDeviceContext *d, idUserInterfaceLocal *gui);
-	virtual 			~idEditWindow();
+	virtual				~idEditWindow();
 
 	virtual void		Draw( int time, float x, float y );
 	virtual const char *HandleEvent( const sysEvent_t *event, bool *updateVisuals );
 	virtual void		PostParse();
 	virtual void		GainFocus();
 	virtual size_t		Allocated(){return idWindow::Allocated();};
-	
+
 	virtual idWinVar *	GetWinVarByName(const char *_name, bool winLookup = false, drawWin_t** owner = NULL );
-	
-	virtual void 		HandleBuddyUpdate(idWindow *buddy);
+
+	virtual void		HandleBuddyUpdate(idWindow *buddy);
 	virtual void		Activate(bool activate, idStr &act);
-	
+
 	void				RunNamedEvent( const char* eventName );
-	
+
 private:
 
 	virtual bool		ParseInternalVar(const char *name, idParser *src);
@@ -64,11 +64,11 @@ private:
 						// false: write to the cvar system
 						// force == true overrides liveUpdate 0
 	void				UpdateCvar( bool read, bool force = false );
-	
+
 	void				CommonInit();
 	void				EnsureCursorVisible();
 	void				InitScroller( bool horizontal );
-	
+
 	int					maxChars;
 	int					paintOffset;
 	int					cursorPos;
@@ -83,7 +83,7 @@ private:
 	float				sizeBias;
 	int					textIndex;
 	int					lastTextLength;
-	bool				forceScroll;	
+	bool				forceScroll;
 	idWinBool			password;
 
 	idWinStr			cvarStr;

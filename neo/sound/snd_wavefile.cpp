@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -33,9 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 
 //-----------------------------------------------------------------------------
 // Name: idWaveFile::idWaveFile()
-// Desc: Constructs the class.  Call Open() to open a wave file for reading.  
-//       Then call Read() as needed.  Calling the destructor or Close() 
-//       will close the file.  
+// Desc: Constructs the class.  Call Open() to open a wave file for reading.
+//       Then call Read() as needed.  Calling the destructor or Close()
+//       will close the file.
 //-----------------------------------------------------------------------------
 idWaveFile::idWaveFile( void ) {
 	memset( &mpwfx, 0, sizeof( waveformatextensible_t ) );
@@ -142,11 +142,11 @@ int idWaveFile::OpenFromMemory( short* pbData, int ulDataSize, waveformatextensi
 // Name: idWaveFile::ReadMMIO()
 // Desc: Support function for reading from a multimedia I/O stream.
 //       mhmmio must be valid before calling.  This function uses it to
-//       update mckRiff, and mpwfx. 
+//       update mckRiff, and mpwfx.
 //-----------------------------------------------------------------------------
 int idWaveFile::ReadMMIO( void ) {
 	mminfo_t		ckIn;           // chunk info. for general use.
-	pcmwaveformat_t pcmWaveFormat;  // Temp PCM structure to load in.       
+	pcmwaveformat_t pcmWaveFormat;  // Temp PCM structure to load in.
 
 	memset( &mpwfx, 0, sizeof( waveformatextensible_t ) );
 
@@ -222,8 +222,8 @@ int idWaveFile::ReadMMIO( void ) {
 
 //-----------------------------------------------------------------------------
 // Name: idWaveFile::ResetFile()
-// Desc: Resets the internal mck pointer so reading starts from the 
-//       beginning of the file again 
+// Desc: Resets the internal mck pointer so reading starts from the
+//       beginning of the file again
 //-----------------------------------------------------------------------------
 int idWaveFile::ResetFile( void ) {
 	if( mbIsReadingFromMemory ) {
@@ -247,22 +247,22 @@ int idWaveFile::ResetFile( void ) {
 			}
 			mck.ckid = (mck.ckid>>8) | (ioin<<24);
 		} while (mck.ckid != mmioFOURCC('d', 'a', 't', 'a'));
-		
+
 		mhmmio->Read( &mck.cksize, 4 );
 		assert( !isOgg );
 		mck.cksize = LittleLong( mck.cksize );
 		mseekBase = mhmmio->Tell();
 	}
-	
+
 	return 0;
 }
 
 //-----------------------------------------------------------------------------
 // Name: idWaveFile::Read()
-// Desc: Reads section of data from a wave file into pBuffer and returns 
+// Desc: Reads section of data from a wave file into pBuffer and returns
 //       how much read in pdwSizeRead, reading not more than dwSizeToRead.
-//       This uses mck to determine where to start reading from.  So 
-//       subsequent calls will be continue where the last left off unless 
+//       This uses mck to determine where to start reading from.  So
+//       subsequent calls will be continue where the last left off unless
 //       Reset() is called.
 //-----------------------------------------------------------------------------
 int idWaveFile::Read( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead ) {
@@ -279,7 +279,7 @@ int idWaveFile::Read( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead ) {
 		if( (byte*)(mpbDataCur + dwSizeToRead) > (byte*)(mpbData + mulDataSize) ) {
 			dwSizeToRead = mulDataSize - (int)(mpbDataCur - mpbData);
 		}
- 		SIMDProcessor->Memcpy( pBuffer, mpbDataCur, dwSizeToRead );
+		SIMDProcessor->Memcpy( pBuffer, mpbDataCur, dwSizeToRead );
 		mpbDataCur += dwSizeToRead;
 
 		if ( pdwSizeRead != NULL ) {
@@ -296,7 +296,7 @@ int idWaveFile::Read( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead ) {
 		if( pBuffer == NULL ) {
 			return -1;
 		}
-		
+
 		dwSizeToRead = mhmmio->Read( pBuffer, dwSizeToRead );
 		// this is hit by ogg code, which does it's own byte swapping internally
 		if ( !isOgg ) {
@@ -313,7 +313,7 @@ int idWaveFile::Read( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead ) {
 
 //-----------------------------------------------------------------------------
 // Name: idWaveFile::Close()
-// Desc: Closes the wave file 
+// Desc: Closes the wave file
 //-----------------------------------------------------------------------------
 int idWaveFile::Close( void ) {
 	if ( ogg != NULL ) {

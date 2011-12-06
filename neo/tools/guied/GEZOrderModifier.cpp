@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -39,16 +39,16 @@ rvGEZOrderModifier::rvGEZOrderModifier ( const char* name, idWindow* window, EZO
 	int			count;
 	int			index;
 	idWindow*	parent;
-	
+
 	parent = window->GetParent ( );
-	if ( !parent ) 
+	if ( !parent )
 	{
 		return;
 	}
-	
+
 	count = parent->GetChildCount ( );
 	index = parent->GetChildIndex ( mWindow );
-				
+
 	if ( index + 1 >= count )
 	{
 		mUndoBefore = NULL;
@@ -57,13 +57,13 @@ rvGEZOrderModifier::rvGEZOrderModifier ( const char* name, idWindow* window, EZO
 	{
 		mUndoBefore = parent->GetChild ( index + 1 );
 	}
-	
+
 	switch ( change )
 	{
 		case ZO_FORWARD:
-			index+=2;			
+			index+=2;
 			break;
-		
+
 		case ZO_BACKWARD:
 			if ( index == 0 )
 			{
@@ -74,11 +74,11 @@ rvGEZOrderModifier::rvGEZOrderModifier ( const char* name, idWindow* window, EZO
 				index-=1;
 			}
 			break;
-			
+
 		case ZO_BACK:
 			index = 0;
 			break;
-			
+
 		case ZO_FRONT:
 			index = count;
 			break;
@@ -97,11 +97,11 @@ rvGEZOrderModifier::rvGEZOrderModifier ( const char* name, idWindow* window, EZO
 bool rvGEZOrderModifier::Apply ( void )
 {
 	idWindow* parent;
-	
+
 	parent = mWindow->GetParent ( );
-	
+
 	parent->RemoveChild ( mWindow );
-	parent->InsertChild ( mWindow, mBefore );	
+	parent->InsertChild ( mWindow, mBefore );
 
 	return true;
 }
@@ -109,12 +109,12 @@ bool rvGEZOrderModifier::Apply ( void )
 bool rvGEZOrderModifier::Undo ( void )
 {
 	idWindow* parent;
-	
+
 	parent = mWindow->GetParent ( );
-	
+
 	parent->RemoveChild ( mWindow );
-	parent->InsertChild ( mWindow, mUndoBefore );	
-	
+	parent->InsertChild ( mWindow, mUndoBefore );
+
 	return true;
 }
 
@@ -124,6 +124,6 @@ bool rvGEZOrderModifier::IsValid ( void )
 	{
 		return false;
 	}
-	
+
 	return true;
 }

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -147,7 +147,7 @@ protected:
 	CEdit m_editBox;
 	CButton m_btnCtrl;
 	CFont m_SSerif8Font;
-	
+
 	int m_curSel,m_prevSel;
 	int m_nDivider;
 	int m_nDivTop;

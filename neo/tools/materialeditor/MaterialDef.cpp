@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -71,7 +71,7 @@ MaterialDefList MaterialDefManager::materialDefs[MaterialDefManager::MATERIAL_DE
 * and groups the definitions.
 */
 void MaterialDefManager::InitializeMaterialDefLists() {
-	
+
 	char	*buffer;
 	int length = fileSystem->ReadFile( MATERIAL_DEF_FILE, (void **)&buffer);
 
@@ -178,7 +178,7 @@ void MaterialDefManager::InitializeMaterialDefList(idLexer* src, const char* typ
 * Destroys all MaterialDef instances and clears the material attribute grouping lists.
 */
 void MaterialDefManager::DestroyMaterialDefLists() {
-	
+
 	for(int i = 0; i < MATERIAL_DEF_NUM; i++) {
 		for(int j = 0; j < materialDefs[i].Num(); j++) {
 			delete materialDefs[i][j];

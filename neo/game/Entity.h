@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -513,12 +513,12 @@ protected:
 
 private:
 	void					Event_GetJointHandle( const char *jointname );
-	void 					Event_ClearAllJoints( void );
-	void 					Event_ClearJoint( jointHandle_t jointnum );
-	void 					Event_SetJointPos( jointHandle_t jointnum, jointModTransform_t transform_type, const idVec3 &pos );
-	void 					Event_SetJointAngle( jointHandle_t jointnum, jointModTransform_t transform_type, const idAngles &angles );
-	void 					Event_GetJointPos( jointHandle_t jointnum );
-	void 					Event_GetJointAngle( jointHandle_t jointnum );
+	void					Event_ClearAllJoints( void );
+	void					Event_ClearJoint( jointHandle_t jointnum );
+	void					Event_SetJointPos( jointHandle_t jointnum, jointModTransform_t transform_type, const idVec3 &pos );
+	void					Event_SetJointAngle( jointHandle_t jointnum, jointModTransform_t transform_type, const idAngles &angles );
+	void					Event_GetJointPos( jointHandle_t jointnum );
+	void					Event_GetJointAngle( jointHandle_t jointnum );
 };
 
 #endif /* !__GAME_ENTITY_H__ */

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -100,7 +100,7 @@ R_PreciseCullSurface
 Check the surface for visibility on a per-triangle basis
 for cases when it is going to be VERY expensive to draw (subviews)
 
-If not culled, also returns the bounding box of the surface in 
+If not culled, also returns the bounding box of the surface in
 Normalized Device Coordinates, so it can be used to crop the scissor rect.
 
 OPTIMIZE: we could also take exact portal passing into consideration
@@ -259,7 +259,7 @@ static viewDef_t *R_MirrorViewBySurface( drawSurf_t *drawSurf ) {
 	parms->clipPlanes[0] = -camera.axis[0];
 
 	parms->clipPlanes[0][3] = -( camera.origin * parms->clipPlanes[0].Normal() );
-	
+
 	return parms;
 }
 

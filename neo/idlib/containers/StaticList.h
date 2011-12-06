@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -76,7 +76,7 @@ public:
 
 private:
 	int					num;
-	type 				list[ size ];
+	type				list[ size ];
 };
 
 /*
@@ -322,7 +322,7 @@ ID_INLINE int idStaticList<type,size>::Append( type const & obj ) {
 ================
 idStaticList<type,size>::Insert
 
-Increases the size of the list by at leat one element if necessary 
+Increases the size of the list by at leat one element if necessary
 and inserts the supplied data into it.
 
 Returns the index of the new element, or -1 when list is full.
@@ -465,7 +465,7 @@ ID_INLINE int idStaticList<type,size>::FindNull( void ) const {
 idStaticList<type,size>::IndexOf
 
 Takes a pointer to an element in the list and returns the index of the element.
-This is NOT a guarantee that the object is really in the list. 
+This is NOT a guarantee that the object is really in the list.
 Function will assert in debug builds if pointer is outside the bounds of the list,
 but remains silent in release builds.
 ================
@@ -527,7 +527,7 @@ ID_INLINE bool idStaticList<type,size>::Remove( type const & obj ) {
 	if ( index >= 0 ) {
 		return RemoveIndex( index );
 	}
-	
+
 	return false;
 }
 

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -52,11 +52,11 @@ If you have questions concerning this license or the applicable additional terms
 //     no_namespace: no longer using this option, which avoids variable redifinition compile errors on Vista
 //#define GENERATE_TLH
 #ifdef GENERATE_TLH
-#	import "riched20.dll" raw_interfaces_only, raw_native_types, named_guids, no_auto_exclude, no_implementation, rename( "FindText", "FindShit" ) 
+#	import "riched20.dll" raw_interfaces_only, raw_native_types, named_guids, no_auto_exclude, no_implementation, rename( "FindText", "FindShit" )
 #else
 #	include "riched20.tlh"
 #endif
- 
+
 static const char *		FONT_NAME				= "Courier";
 static const int		FONT_HEIGHT				= 10;
 static const int		FONT_WIDTH				= 8;
@@ -153,7 +153,7 @@ protected:
 	COLORREF				stringColor[2];
 	COLORREF				literalColor;
 	COLORREF				braceHighlightColor;
-	
+
 	typedef enum {
 		CT_WHITESPACE,
 		CT_COMMENT,

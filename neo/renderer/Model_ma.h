@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -51,7 +51,7 @@ typedef struct maTransform_s {
 	idVec3					translate;
 	idVec3					rotate;
 	idVec3					scale;
-	maTransform_s*			parent;	
+	maTransform_s*			parent;
 } maTransform_t;
 
 typedef struct {
@@ -63,7 +63,7 @@ typedef struct {
 } maFace_t;
 
 typedef struct {
-	
+
 	//Transform to be applied
 	maTransform_t*			transform;
 
@@ -132,7 +132,7 @@ typedef struct maModel_s {
 	idList<maMaterial_t *>		materials;
 	idList<maObject_t *>		objects;
 	idHashTable<maTransform_t*> transforms;
-	
+
 	//Material Resolution
 	idHashTable<maFileNode_t*>		fileNodes;
 	idHashTable<maMaterialNode_t*>	materialNodes;

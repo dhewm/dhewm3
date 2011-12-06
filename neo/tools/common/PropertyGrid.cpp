@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -39,7 +39,7 @@ public:
 	rvPropertyGridItem ( )
 	{
 	}
-	
+
 	idStr						mName;
 	idStr						mValue;
 	rvPropertyGrid::EItemType	mType;
@@ -75,7 +75,7 @@ bool rvPropertyGrid::Create ( HWND parent, int id, int style )
 	mStyle = style;
 
 	// Create the List view
-	mWindow = CreateWindowEx ( 0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, (HMENU)id, win32.hInstance, 0 );	
+	mWindow = CreateWindowEx ( 0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, (HMENU)id, win32.hInstance, 0 );
 	mListWndProc = (WNDPROC)GetWindowLong ( mWindow, GWL_WNDPROC );
 	SetWindowLong ( mWindow, GWL_USERDATA, (LONG)this );
 	SetWindowLong ( mWindow, GWL_WNDPROC, (LONG)WndProc );
@@ -87,17 +87,17 @@ bool rvPropertyGrid::Create ( HWND parent, int id, int style )
 	// Set the font of the list box
 	HDC			dc;
 	LOGFONT		lf;
-	
+
 	dc = GetDC ( mWindow );
 	ZeroMemory ( &lf, sizeof(lf) );
 	lf.lfHeight = -MulDiv(8, GetDeviceCaps(dc, LOGPIXELSY), 72);
-	strcpy ( lf.lfFaceName, "MS Shell Dlg" );	
-	SendMessage ( mWindow, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );		
-	SendMessage ( mEdit, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );		
+	strcpy ( lf.lfFaceName, "MS Shell Dlg" );
+	SendMessage ( mWindow, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
+	SendMessage ( mEdit, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
 	ReleaseDC ( mWindow, dc );
 
 	RemoveAllItems ( );
-		
+
 	return true;
 }
 
@@ -124,13 +124,13 @@ void rvPropertyGrid::StartEdit ( int item, bool label )
 {
 	rvPropertyGridItem* gitem;
 	RECT				rItem;
-			
+
 	gitem = (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, item, 0 );
 	if ( NULL == gitem )
 	{
 		return;
 	}
-	
+
 	SendMessage ( mWindow, LB_GETITEMRECT, item, (LPARAM)&rItem );
 	if ( label )
 	{
@@ -144,13 +144,13 @@ void rvPropertyGrid::StartEdit ( int item, bool label )
 	mState = STATE_EDIT;
 	mEditItem = item;
 	mEditLabel = label;
-		
-	SetWindowText ( mEdit, label?gitem->mName:gitem->mValue );					
+
+	SetWindowText ( mEdit, label?gitem->mName:gitem->mValue );
 	MoveWindow ( mEdit, rItem.left, rItem.top + 2,
 				rItem.right - rItem.left,
 				rItem.bottom - rItem.top - 2, TRUE );
-	ShowWindow ( mEdit, SW_SHOW );		
-	
+	ShowWindow ( mEdit, SW_SHOW );
+
 	SetFocus ( mEdit );
 }
 
@@ -166,29 +166,29 @@ void rvPropertyGrid::FinishEdit ( void )
 	char				value[1024];
 	rvPropertyGridItem* item;
 	bool				update;
-	
+
 	if ( mState != STATE_EDIT )
 	{
 		return;
 	}
 
 	assert ( mEditItem >= 0 );
-	
+
 	mState = STATE_FINISHEDIT;
-	
+
 	update = false;
 	item = (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, mEditItem, 0 );
-	assert ( item );													
-						
+	assert ( item );
+
 	GetWindowText ( mEdit, value, 1023 );
-	
+
 	if ( !value[0] )
 	{
 		mState = STATE_EDIT;
 		MessageBeep ( MB_ICONASTERISK );
 		return;
 	}
-	
+
 	if ( !mEditLabel && item->mValue.Cmp ( value ) )
 	{
 		NMPROPGRID nmpg;
@@ -196,7 +196,7 @@ void rvPropertyGrid::FinishEdit ( void )
 		nmpg.hdr.hwndFrom = mWindow;
 		nmpg.hdr.idFrom = GetWindowLong ( mWindow, GWL_ID );
 		nmpg.mName  = item->mName;
-		nmpg.mValue = value;										
+		nmpg.mValue = value;
 
 		if ( !SendMessage ( GetParent ( mWindow ), WM_NOTIFY, 0, (LONG)&nmpg ) )
 		{
@@ -209,7 +209,7 @@ void rvPropertyGrid::FinishEdit ( void )
 		item = (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, mEditItem, 0 );
 		if ( item )
 		{
-			item->mValue = value;						
+			item->mValue = value;
 			update = true;
 		}
 	}
@@ -220,14 +220,14 @@ void rvPropertyGrid::FinishEdit ( void )
 		SetCurSel ( sel );
 		StartEdit ( sel, false );
 		return;
-	}	
+	}
 
 	SetCurSel ( mEditItem );
 
 	mState = STATE_NORMAL;
 	mEditItem = -1;
 
-	ShowWindow ( mEdit, SW_HIDE );	
+	ShowWindow ( mEdit, SW_HIDE );
 	SetFocus ( mWindow );
 }
 
@@ -244,7 +244,7 @@ void rvPropertyGrid::CancelEdit ( void )
 	{
 		if ( !*GetItemValue ( mEditItem ) )
 		{
-			RemoveItem ( mEditItem );			
+			RemoveItem ( mEditItem );
 		}
 	}
 
@@ -252,7 +252,7 @@ void rvPropertyGrid::CancelEdit ( void )
 	mEditItem = -1;
 	mState = STATE_NORMAL;
 	ShowWindow ( mEdit, SW_HIDE );
-	SetFocus ( mWindow );	
+	SetFocus ( mWindow );
 	SetCurSel ( mSelectedItem );
 }
 
@@ -278,9 +278,9 @@ int rvPropertyGrid::AddItem ( const char* name, const char* value, EItemType typ
 	item->mName = name;
 	item->mValue = value;
 	item->mType = type;
-	
+
 	insert = SendMessage(mWindow,LB_GETCOUNT,0,0) - ((mStyle&PGS_ALLOWINSERT)?1:0);
-	
+
 	return SendMessage ( mWindow, LB_INSERTSTRING, insert, (LONG)item );
 }
 
@@ -297,9 +297,9 @@ void rvPropertyGrid::RemoveItem ( int index )
 	{
 		return;
 	}
-	
+
 	delete (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, index, 0 );
-	
+
 	SendMessage ( mWindow, LB_DELETESTRING, index, 0 );
 }
 
@@ -313,15 +313,15 @@ Remove all items from the property grid
 void rvPropertyGrid::RemoveAllItems ( void )
 {
 	int i;
-	
+
 	// free the memory for all the items
 	for ( i = SendMessage ( mWindow, LB_GETCOUNT, 0, 0 ); i > 0; i -- )
-	{		
+	{
 		delete (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, i - 1, 0 );
 	}
 
 	// remove all items from the listbox itself
-	SendMessage ( mWindow, LB_RESETCONTENT, 0, 0 );	
+	SendMessage ( mWindow, LB_RESETCONTENT, 0, 0 );
 
 	if ( mStyle & PGS_ALLOWINSERT )
 	{
@@ -344,16 +344,16 @@ Return name of item at given index
 const char* rvPropertyGrid::GetItemName ( int index )
 {
 	rvPropertyGridItem* item;
-	
+
 	item = (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, index, 0 );
 	if ( !item )
 	{
 		return "";
 	}
-	
+
 	return item->mName;
 }
-	
+
 /*
 ================
 rvPropertyGrid::GetItemValue
@@ -364,13 +364,13 @@ Return value of item at given index
 const char* rvPropertyGrid::GetItemValue ( int index )
 {
 	rvPropertyGridItem* item;
-	
+
 	item = (rvPropertyGridItem*)SendMessage ( mWindow, LB_GETITEMDATA, index, 0 );
 	if ( !item )
 	{
 		return "";
 	}
-	
+
 	return item->mValue;
 }
 
@@ -384,13 +384,13 @@ Window procedure for property grid
 LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
 	rvPropertyGrid* grid = (rvPropertyGrid*) GetWindowLong ( hWnd, GWL_USERDATA );
-	
+
 	switch ( msg )
-	{			
+	{
 		case WM_SETFOCUS:
 //			grid->mEditItem = -1;
 			break;
-			
+
 		case WM_KEYDOWN:
 		{
 			NMKEY nmkey;
@@ -399,10 +399,10 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			nmkey.nVKey = wParam;
 			nmkey.uFlags = HIWORD(lParam);
 			nmkey.hdr.idFrom = GetWindowLong ( hWnd, GWL_ID );
-			SendMessage ( GetParent ( hWnd ), WM_NOTIFY, nmkey.hdr.idFrom, (LPARAM)&nmkey );		
+			SendMessage ( GetParent ( hWnd ), WM_NOTIFY, nmkey.hdr.idFrom, (LPARAM)&nmkey );
 			break;
 		}
-		
+
 		case WM_CHAR:
 		{
 			switch ( wParam )
@@ -416,11 +416,11 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			}
 			break;
 		}
-	
+
 		case WM_KILLFOCUS:
 			grid->mSelectedItem = -1;
 			break;
-					
+
 		case WM_NOTIFY:
 		{
 			NMHDR* hdr;
@@ -439,12 +439,12 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 							case VK_TAB:
 								grid->FinishEdit ( );
 								return 1;
-								
+
 							case VK_ESCAPE:
 								grid->CancelEdit ( );
 								return 1;
 						}
-					}							
+					}
 
 					if ( filter->msg == WM_CHAR || filter->msg == WM_KEYUP )
 					{
@@ -460,7 +460,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			}
 			break;
 		}
-		
+
 		case WM_COMMAND:
 			if ( lParam == (long)grid->mEdit )
 			{
@@ -474,7 +474,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 
 		case WM_LBUTTONDBLCLK:
 			grid->mSelectedItem = SendMessage ( hWnd, LB_ITEMFROMPOINT, 0, lParam );
-			
+
 			// fall through
 
 		case WM_LBUTTONDOWN:
@@ -483,18 +483,18 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			rvPropertyGridItem* gitem;
 			RECT				rItem;
 			POINT				pt;
-			
+
 			if ( grid->mState == rvPropertyGrid::STATE_EDIT )
 			{
 				break;
 			}
-			
+
 			item  = (short)LOWORD(SendMessage ( hWnd, LB_ITEMFROMPOINT, 0, lParam ));
 			if ( item == -1 )
 			{
 				break;
 			}
-			
+
 			gitem = (rvPropertyGridItem*)SendMessage ( hWnd, LB_GETITEMDATA, item, 0 );
 			pt.x  = LOWORD(lParam);
 			pt.y  = HIWORD(lParam);
@@ -511,14 +511,14 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 				}
 			}
 			else if ( grid->mSelectedItem == item )
-			{					
+			{
 				rItem.left = rItem.left + grid->mSplitter + 1;
 				if ( PtInRect ( &rItem, pt) )
 				{
 					grid->StartEdit ( item, false );
 				}
 			}
-			
+
 			if ( grid->mState == rvPropertyGrid::STATE_EDIT )
 			{
 				ClientToScreen ( hWnd, &pt );
@@ -526,10 +526,10 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 				SendMessage ( grid->mEdit, WM_LBUTTONDOWN, wParam, MAKELONG(pt.x,pt.y) );
 				return 0;
 			}
-						
+
 			break;
 		}
-		
+
 		case WM_ERASEBKGND:
 		{
 			RECT rClient;
@@ -537,11 +537,11 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			FillRect ( (HDC)wParam, &rClient, GetSysColorBrush ( COLOR_3DFACE ) );
 			return TRUE;
 		}
-			
+
 		case WM_SETCURSOR:
 		{
 			POINT point;
-			GetCursorPos ( &point );	
+			GetCursorPos ( &point );
 			ScreenToClient ( hWnd, &point );
 			if ( point.x >= grid->mSplitter - 2 && point.x <= grid->mSplitter + 2 )
 			{
@@ -551,7 +551,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			break;
 		}
 	}
-	
+
 	return CallWindowProc ( grid->mListWndProc, hWnd, msg, wParam, lParam );
 }
 
@@ -565,7 +565,7 @@ Handle messages sent to the parent window
 bool rvPropertyGrid::ReflectMessage ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
 	switch ( msg )
-	{					
+	{
 		case WM_COMMAND:
 		{
 			if ( (HWND)lParam == mWindow )
@@ -579,11 +579,11 @@ bool rvPropertyGrid::ReflectMessage ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			}
 			break;
 		}
-	
+
 		case WM_DRAWITEM:
 			HandleDrawItem ( wParam, lParam );
 			return true;
-	
+
 		case WM_MEASUREITEM:
 		{
 			MEASUREITEMSTRUCT* mis = (MEASUREITEMSTRUCT*) lParam;
@@ -591,7 +591,7 @@ bool rvPropertyGrid::ReflectMessage ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -608,7 +608,7 @@ int rvPropertyGrid::HandleDrawItem ( WPARAM wParam, LPARAM lParam )
 	rvPropertyGridItem* item = (rvPropertyGridItem*) dis->itemData;
 	RECT				rTemp;
 	HBRUSH				brush;
-	
+
 	if ( !item )
 	{
 		return 0;
@@ -619,11 +619,11 @@ int rvPropertyGrid::HandleDrawItem ( WPARAM wParam, LPARAM lParam )
 	{
 		brush = GetSysColorBrush ( COLOR_SCROLLBAR );
 		rTemp.right = rTemp.left + 10;
-		FillRect ( dis->hDC, &rTemp, brush );		
+		FillRect ( dis->hDC, &rTemp, brush );
 		rTemp.left = rTemp.right;
 		rTemp.right = dis->rcItem.right;
 	}
-	
+
 	if ( item->mType == PGIT_HEADER )
 	{
 		brush = GetSysColorBrush ( COLOR_SCROLLBAR );
@@ -634,7 +634,7 @@ int rvPropertyGrid::HandleDrawItem ( WPARAM wParam, LPARAM lParam )
 	}
 	else
 	{
-		brush = GetSysColorBrush ( COLOR_WINDOW );		
+		brush = GetSysColorBrush ( COLOR_WINDOW );
 	}
 
 	FillRect ( dis->hDC, &rTemp, brush );
@@ -652,7 +652,7 @@ int rvPropertyGrid::HandleDrawItem ( WPARAM wParam, LPARAM lParam )
 		LineTo ( dis->hDC, dis->rcItem.left + mSplitter, dis->rcItem.bottom );
 	}
 	SelectObject ( dis->hDC, oldpen );
-	DeleteObject ( pen );			
+	DeleteObject ( pen );
 
 	int colorIndex = ( (dis->itemState & ODS_SELECTED ) ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT );
 	SetTextColor ( dis->hDC, GetSysColor ( colorIndex ) );
@@ -665,10 +665,10 @@ int rvPropertyGrid::HandleDrawItem ( WPARAM wParam, LPARAM lParam )
 	rText.left += 2;
 
 	DrawText ( dis->hDC, item->mName, item->mName.Length(), &rText, DT_LEFT|DT_VCENTER|DT_SINGLELINE );
-	
+
 	rText.left = dis->rcItem.left + mSplitter + 2;
 	rText.right = dis->rcItem.right;
 	DrawText ( dis->hDC, item->mValue, item->mValue.Length(), &rText, DT_LEFT|DT_VCENTER|DT_SINGLELINE );
-	
+
 	return 0;
 }

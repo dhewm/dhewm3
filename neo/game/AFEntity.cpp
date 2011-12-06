@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -371,9 +371,9 @@ idAFAttachment::Damage
 Pass damage to body at the bindjoint
 ============
 */
-void idAFAttachment::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir, 
+void idAFAttachment::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir,
 	const char *damageDefName, const float damageScale, const int location ) {
-	
+
 	if ( body ) {
 		body->Damage( inflictor, attacker, dir, damageDefName, damageScale, attachJoint );
 	}
@@ -1623,7 +1623,7 @@ void idAFEntity_Vehicle::Spawn( void ) {
 	steeringWheelJoint = animator.GetJointHandle( steeringWheelJointName );
 
 	spawnArgs.GetFloat( "wheelRadius", "20", wheelRadius );
-	spawnArgs.GetFloat( "steerSpeed", "5", steerSpeed ); 
+	spawnArgs.GetFloat( "steerSpeed", "5", steerSpeed );
 
 	player = NULL;
 	steerAngle = 0.0f;
@@ -2838,7 +2838,7 @@ idRenderModel *idGameEdit::AF_CreateMesh( const idDict &args, idVec3 &meshOrigin
 			modifiedAxis[ jointNum ] = ( bodyAxis[i] * originalJoints[jointNum].ToMat3().Transpose() ).Transpose() * ( newBodyAxis[i] * meshAxis.Transpose() );
 			// FIXME: calculate correct modifiedOrigin
 			modifiedOrigin[ jointNum ] = originalJoints[ jointNum ].ToVec3();
- 		}
+		}
 	}
 
 	// apply joint modifications to the skeleton

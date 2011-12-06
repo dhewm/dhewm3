@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -190,7 +190,7 @@ void EmitBrushPrimitTextureCoordinates(face_t *f, idWinding *w, patchMesh_t *pat
 			(*w)[i][4] = f->brushprimit_texdef.coords[1][0] * x + f->brushprimit_texdef.coords[1][1] * y + f->brushprimit_texdef.coords[1][2];
 		}
 	}
-	
+
 	if (patch) {
 		int j;
 		for ( i = 0; i < patch->width; i++ ) {
@@ -618,7 +618,7 @@ void Face_FitTexture_BrushPrimit(face_t *f, idVec3 mins, idVec3 maxs, float heig
 	idVec3D					Mf[2];
 
 
-	
+
 	//memset(f->brushprimit_texdef.coords, 0, sizeof(f->brushprimit_texdef.coords));
 	//f->brushprimit_texdef.coords[0][0] = 1.0f;
 	//f->brushprimit_texdef.coords[1][1] = 1.0f;
@@ -1125,7 +1125,7 @@ void Face_FlipTexture_BrushPrimit(face_t *f, bool y) {
 	Os *= s;
 	Os /= f->d_texture->GetEditorImage()->uploadWidth;
 
-	
+
 	if (y) {
 		Face_FitTexture_BrushPrimit(f, texS, texT, -Ot, 1.0);
 	} else {
@@ -1167,7 +1167,7 @@ void Face_SetAxialScale_BrushPrimit(face_t *face, bool y) {
 			}
 		}
 	}
-	
+
 	idVec3 len;
 
 	if (g_bAxialMode) {
@@ -1236,4 +1236,3 @@ void Face_SetAxialScale_BrushPrimit(face_t *face, bool y) {
 
 */
 }
-

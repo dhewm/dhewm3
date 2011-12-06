@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -39,7 +39,7 @@ typedef struct
 	NMHDR			hdr;
 	int				mItem;
 	const char*		mName;
-	const char*		mValue;	
+	const char*		mValue;
 
 } NMPROPGRID;
 
@@ -55,7 +55,7 @@ public:
 	};
 
 	rvPropertyGrid ( );
-	
+
 	bool	Create			( HWND parent, int id, int style = 0 );
 
 	void	Move			( int x, int y, int w, int h, BOOL redraw = FALSE );
@@ -63,10 +63,10 @@ public:
 	bool	ReflectMessage	( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 	int		AddItem			( const char* name, const char* value, EItemType type = PGIT_STRING );
-	
+
 	void	RemoveItem		( int index );
 	void	RemoveAllItems	( void );
-	
+
 	void	SetCurSel		( int index );
 	int		GetCurSel		( void );
 
@@ -98,7 +98,7 @@ protected:
 	int			mSplitter;
 	int			mStyle;
 	EState		mState;
-	
+
 private:
 
 	static LRESULT CALLBACK WndProc ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );

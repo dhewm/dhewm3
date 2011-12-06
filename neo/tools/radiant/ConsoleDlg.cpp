@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -40,8 +40,8 @@ IMPLEMENT_DYNCREATE(CConsoleDlg, CDialog)
 CConsoleDlg::CConsoleDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CConsoleDlg::IDD)
 {
-    currentHistoryPosition = -1;
-    currentCommand = "";
+	currentHistoryPosition = -1;
+	currentCommand = "";
 	saveCurrentCommand = true;
 }
 
@@ -124,48 +124,48 @@ BOOL CConsoleDlg::PreTranslateMessage(MSG* pMsg)
 			return TRUE;
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_UP ) {     
-            //save off the current in-progress command so we can get back to it
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_UP ) {
+			//save off the current in-progress command so we can get back to it
 			if ( saveCurrentCommand == true ) {
-                CString str;
-                editInput.GetWindowText ( str );
-                currentCommand = str.GetBuffer ( 0 );
+				CString str;
+				editInput.GetWindowText ( str );
+				currentCommand = str.GetBuffer ( 0 );
 				saveCurrentCommand = false;
 	}
 
 			if ( consoleHistory.Num () > 0 ) {
 				editInput.SetWindowText ( consoleHistory[currentHistoryPosition] );
-            
+
 				int selLocation = consoleHistory[currentHistoryPosition].Length ();
 				editInput.SetSel ( selLocation , selLocation + 1);
 }
 
 			if ( currentHistoryPosition > 0) {
-                --currentHistoryPosition;
-            }
+				--currentHistoryPosition;
+			}
 
 			return TRUE;
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DOWN ) {  
-            int selLocation = 0;
-            if ( currentHistoryPosition < consoleHistory.Num () - 1 ) {
-                ++currentHistoryPosition;
-                editInput.SetWindowText ( consoleHistory[currentHistoryPosition] );
-                selLocation = consoleHistory[currentHistoryPosition].Length ();
-            }
-            else {
-                editInput.SetWindowText ( currentCommand );
-                selLocation = currentCommand.Length ();
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DOWN ) {
+			int selLocation = 0;
+			if ( currentHistoryPosition < consoleHistory.Num () - 1 ) {
+				++currentHistoryPosition;
+				editInput.SetWindowText ( consoleHistory[currentHistoryPosition] );
+				selLocation = consoleHistory[currentHistoryPosition].Length ();
+			}
+			else {
+				editInput.SetWindowText ( currentCommand );
+				selLocation = currentCommand.Length ();
 				currentCommand.Clear ();
 				saveCurrentCommand = true;
-            }
-                        
-            editInput.SetSel ( selLocation , selLocation + 1);
+			}
+
+			editInput.SetSel ( selLocation , selLocation + 1);
 
 			return TRUE;
 		}
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB ) {  
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB ) {
 			common->Printf ( "Command History\n----------------\n" );
 			for ( int i = 0 ; i < consoleHistory.Num ();i++ )
 {
@@ -173,20 +173,20 @@ BOOL CConsoleDlg::PreTranslateMessage(MSG* pMsg)
 			}
 			common->Printf ( "----------------\n" );
 		}
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_NEXT) {  
-			editConsole.LineScroll ( 10 );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_NEXT) {
+			editConsole.LineScroll ( 10 );
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_PRIOR ) {  
-			editConsole.LineScroll ( -10 );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_PRIOR ) {
+			editConsole.LineScroll ( -10 );
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_HOME ) {  
-			editConsole.LineScroll ( -editConsole.GetLineCount() );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_HOME ) {
+			editConsole.LineScroll ( -editConsole.GetLineCount() );
 		}
 
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_END ) {  
-			editConsole.LineScroll ( editConsole.GetLineCount() );	
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_END ) {
+			editConsole.LineScroll ( editConsole.GetLineCount() );
 		}
 	}
 
@@ -212,19 +212,19 @@ void CConsoleDlg::ExecuteCommand ( const idStr& cmd ) {
 		editInput.GetWindowText(str);
 	}
 
-	if ( str != "" ) {			
+	if ( str != "" ) {
 		editInput.SetWindowText("");
-		common->Printf("%s\n", str.GetBuffer(0));		
+		common->Printf("%s\n", str.GetBuffer(0));
 
 		//avoid adding multiple identical commands in a row
 		int index = consoleHistory.Num ();
 
-		if ( index == 0 || str.GetBuffer(0) != consoleHistory[index-1]) {					
+		if ( index == 0 || str.GetBuffer(0) != consoleHistory[index-1]) {
 			//keep the history to 16 commands, removing the oldest command
 			if ( consoleHistory.Num () > 16 ) {
 				consoleHistory.RemoveIndex ( 0 );
 			}
-			currentHistoryPosition = consoleHistory.Append ( str.GetBuffer (0) );    
+			currentHistoryPosition = consoleHistory.Append ( str.GetBuffer (0) );
 		}
 		else {
 			currentHistoryPosition = consoleHistory.Num () - 1;
@@ -257,5 +257,5 @@ void CConsoleDlg::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
 	if ( nState == WA_ACTIVE || nState == WA_CLICKACTIVE )
 	{
 		editInput.SetFocus();
-	}	
+	}
 }

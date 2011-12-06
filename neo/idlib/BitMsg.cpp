@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -423,7 +423,7 @@ idBitMsg::ReadString
 */
 int idBitMsg::ReadString( char *buffer, int bufferSize ) const {
 	int	l, c;
-	
+
 	ReadByteAlign();
 	l = 0;
 	while( 1 ) {
@@ -444,7 +444,7 @@ int idBitMsg::ReadString( char *buffer, int bufferSize ) const {
 			l++;
 		}
 	}
-	
+
 	buffer[l] = 0;
 	return l;
 }
@@ -482,7 +482,7 @@ idBitMsg::ReadNetadr
 */
 void idBitMsg::ReadNetadr( netadr_t *adr ) const {
 	int i;
- 
+
 	adr->type = NA_IP;
 	for ( i = 0; i < 4; i++ ) {
 		adr->ip[ i ] = ReadByte();

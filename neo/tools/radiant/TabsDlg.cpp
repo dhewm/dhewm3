@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -91,18 +91,18 @@ void CTabsDlg::DockWindow ( int ID , bool dock )
 
 	ASSERT ( info );
 	ASSERT ( m_Tabs.GetSafeHwnd() );
-	
+
 	ShowAllWindows ( FALSE );
 
 	if ( !dock )
-	{		
+	{
 		//make a containing window and assign the dialog to it
 		CRect rect;
 		CString classname = AfxRegisterWndClass ( CS_DBLCLKS , 0 , 0 , 0 );
 		info->m_State = DockedWindowInfo::FLOATING;
 
 		info->m_Window->GetWindowRect(rect);
-		info->m_Container.CreateEx ( WS_EX_TOOLWINDOW , classname , info->m_Title , WS_THICKFRAME | WS_SYSMENU | WS_POPUP | WS_CAPTION, rect , this , 0 );		
+		info->m_Container.CreateEx ( WS_EX_TOOLWINDOW , classname , info->m_Title , WS_THICKFRAME | WS_SYSMENU | WS_POPUP | WS_CAPTION, rect , this , 0 );
 		info->m_Window->SetParent ( &info->m_Container );
 		info->m_Window->ShowWindow(TRUE);
 
@@ -113,25 +113,25 @@ void CTabsDlg::DockWindow ( int ID , bool dock )
 		if (info->m_TabControlIndex >= 0 )
 		{
 			m_Tabs.DeleteItem( info->m_TabControlIndex );
-		}		
+		}
 
 		if ( m_Tabs.GetItemCount() > 0 )
 		{
 			m_Tabs.SetCurFocus( 0 );
-		}	
+		}
 
 		CString placementName = info->m_Title + "Placement";
 		LoadWindowPlacement(info->m_Container , placementName);
 	}
 	else
-	{		
-		info->m_State = DockedWindowInfo::DOCKED;		
-	
-		info->m_TabControlIndex = m_Tabs.InsertItem( TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM , 0 , info->m_Title , info->m_ImageID , (LPARAM)info);		
+	{
+		info->m_State = DockedWindowInfo::DOCKED;
 
-		info->m_Window->SetParent ( this );		
+		info->m_TabControlIndex = m_Tabs.InsertItem( TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM , 0 , info->m_Title , info->m_ImageID , (LPARAM)info);
+
+		info->m_Window->SetParent ( this );
 		info->m_Window->ShowWindow (TRUE);
-		
+
 		info->m_Container.SetDockManager( NULL );	//so it doesn't try to call back and redock this window
 		info->m_Container.DestroyWindow ();
 
@@ -140,9 +140,9 @@ void CTabsDlg::DockWindow ( int ID , bool dock )
 
 		//stupid hack to get the window reitself properly
 		rect.DeflateRect(0,0,0,1);
-		MoveWindow(rect);	
+		MoveWindow(rect);
 		rect.InflateRect(0,0,0,1);
-		MoveWindow(rect);	
+		MoveWindow(rect);
 	}
 
 	UpdateTabControlIndices ();
@@ -192,9 +192,9 @@ void CTabsDlg::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 void CTabsDlg::OnLButtonUp(UINT nFlags, CPoint point)
-{	
+{
 	if ( m_DragTabActive && ((abs ( point.x - m_DragDownPoint.x ) > 50) || (abs ( point.y - m_DragDownPoint.y ) > 50)))
-	{	
+	{
 		HandleUndock();
 		m_DragTabActive = false;
 	}
@@ -251,7 +251,7 @@ void CTabsDlg::ShowAllWindows ( bool show )
 		if ( info->m_State == DockedWindowInfo::DOCKED )
 		{
 			info->m_Window->ShowWindow( show );
-		}		
+		}
 	}
 }
 
@@ -260,9 +260,9 @@ void CTabsDlg::FocusWindow ( int ID )
 	DockedWindowInfo* info = NULL;
 	m_Windows.Lookup( (WORD)ID , (void*&)info);
 
-    ASSERT ( info );
+	ASSERT ( info );
 	ASSERT ( info->m_Window );
-	
+
 	if ( info->m_State == DockedWindowInfo::DOCKED )
 	{
 		TabCtrl_SetCurFocus ( m_Tabs.GetSafeHwnd() , info->m_TabControlIndex );
@@ -274,13 +274,13 @@ void CTabsDlg::FocusWindow ( int ID )
 }
 
 void CTabsDlg::UpdateTabControlIndices ()
-{	
+{
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 
 	DockedWindowInfo* info = NULL;
 	int itemCount = m_Tabs.GetItemCount();
-	
+
 	for ( int i = 0 ; i < itemCount ; i ++ )
 	{
 		if ( !m_Tabs.GetItem( i , &item ) )
@@ -306,7 +306,7 @@ void CTabsDlg::OnDestroy()
 		ASSERT( info );
 
 		delete info;
-	}	
+	}
 	CDialog::OnDestroy();
 }
 
@@ -316,7 +316,7 @@ bool CTabsDlg::IsDocked ( CWnd* wnd )
 	bool docked = false;
 	DockedWindowInfo* info = NULL;
 
-	CString placementName; 
+	CString placementName;
 	POSITION pos;
 	WORD wID;
 
@@ -332,11 +332,11 @@ bool CTabsDlg::IsDocked ( CWnd* wnd )
 	return docked;
 }
 
-void CTabsDlg::SaveWindowPlacement( int ID ) 
+void CTabsDlg::SaveWindowPlacement( int ID )
 {
 	DockedWindowInfo* info = NULL;
-	
-	CString placementName; 
+
+	CString placementName;
 	POSITION pos;
 	WORD wID = ID;
 

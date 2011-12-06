@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -76,7 +76,7 @@ void FindDialog::DoDataExchange(CDataExchange* pDX) {
 }
 
 /**
-* Called while the dialog is being initialized to load the find parameters 
+* Called while the dialog is being initialized to load the find parameters
 * from the registry and set the focus to the correct control.
 */
 BOOL FindDialog::OnInitDialog() {
@@ -122,7 +122,7 @@ void FindDialog::LoadFindSettings() {
 	searchData.searchScope = (int)registry.GetFloat("searchScope");
 
 	registry.GetWindowPlacement("findDialog", GetSafeHwnd());
-	
+
 	UpdateData(FALSE);
 }
 
@@ -136,10 +136,8 @@ void FindDialog::SaveFindSettings() {
 	registry.SetString("searchText", searchData.searchText);
 	registry.SetFloat("nameOnly", searchData.nameOnly);
 	registry.SetFloat("searchScope", searchData.searchScope);
-	
+
 	registry.SetWindowPlacement("findDialog", GetSafeHwnd());
 
 	registry.Save();
 }
-
-

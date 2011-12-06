@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,7 +37,7 @@ class CTabsDlg : public CDialog
 //	DECLARE_DYNAMIC ( CTabsDlg )
 	// Construction
 public:
-	
+
 	CTabsDlg(UINT ID ,CWnd* pParent = NULL);	// standard constructor
 
 	typedef void (*pfnOnDockEvent)( bool , int , CWnd* );
@@ -78,7 +78,7 @@ protected:
 			if ( title.GetLength() == 0 )
 			{
 				m_Window->GetWindowText( m_Title );
-				
+
 			}
 			else
 			{
@@ -87,10 +87,10 @@ protected:
 			m_State = DOCKED;
 			m_DockCallback = dockCallback;
 		}
-		
+
 		enum eState {DOCKED,FLOATING} ;
 		CTearoffContainerWindow m_Container;		//the floating window that will hold m_Window when it's undocked
-		CWnd* m_Window;				
+		CWnd* m_Window;
 		CString m_Title;
 		int m_ImageID;
 		int m_ID;
@@ -101,7 +101,7 @@ protected:
 	void ShowAllWindows ( bool show = true );
 
 	void HandleUndock ();
-	void UpdateTabControlIndices ();	
+	void UpdateTabControlIndices ();
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -35,17 +35,17 @@ public:
 	rvGEStatusBar ( );
 
 	bool	Create			( HWND parent, UINT id, bool visible = true );
-	void	Resize			( int width, int height );	
-	
+	void	Resize			( int width, int height );
+
 	HWND	GetWindow		( void );
 
 	void	SetZoom			( int zoom );
 	void	SetTriangles	( int tris );
 	void	SetSimple		( bool simple );
-	
+
 	void	Show			( bool state );
 	void	Update			( void );
-		
+
 protected:
 
 	HWND	mWnd;

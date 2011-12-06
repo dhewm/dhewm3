@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -116,7 +116,7 @@ void idMD5Mesh::ParseMesh( idLexer &parser, int numJoints, const idJointMat *joi
 	parser.ReadToken( &token );
 	shaderName = token;
 
-    shader = declManager->FindMaterial( shaderName );
+	shader = declManager->FindMaterial( shaderName );
 
 	//
 	// parse texture coordinates
@@ -384,7 +384,7 @@ int idMD5Mesh::NearestJoint( int a, int b, int c ) const {
 	}
 
 	// find the first weight for this vertex
- 	weightVertNum = 0;
+	weightVertNum = 0;
 	for( i = 0; weightVertNum < vertNum; i++ ) {
 		weightVertNum += weightIndex[i*2+1];
 	}
@@ -594,7 +594,7 @@ void idRenderModelMD5::Print() const {
 		totalTris += mesh->NumTris();
 		totalWeights += mesh->NumWeights();
 		common->Printf( "%2i: %5i %5i %7i %s\n", i, mesh->NumVerts(), mesh->NumTris(), mesh->NumWeights(), mesh->shader->GetName() );
-	}	
+	}
 	common->Printf( "-----\n" );
 	common->Printf( "%4i verts.\n", totalVerts );
 	common->Printf( "%4i tris.\n", totalTris );
@@ -682,7 +682,7 @@ void idRenderModelMD5::DrawJoints( const renderEntity_t *ent, const struct viewD
 
 	num = ent->numJoints;
 	joint = ent->joints;
-	md5Joint = joints.Ptr();	
+	md5Joint = joints.Ptr();
 	for( i = 0; i < num; i++, joint++, md5Joint++ ) {
 		pos = ent->origin + joint->ToVec3() * ent->axis;
 		if ( md5Joint->parent ) {
@@ -775,9 +775,9 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel( const struct renderEnt
 		// avoid deforming the surface if it will be a nodraw due to a skin remapping
 		// FIXME: may have to still deform clipping hulls
 		const idMaterial *shader = mesh->shader;
-		
+
 		shader = R_RemapShaderBySkin( shader, ent->customSkin, ent->customShader );
-		
+
 		if ( !shader || ( !shader->IsDrawn() && !shader->SurfaceCastsShadow() ) ) {
 			staticModel->DeleteSurfaceWithId( i );
 			mesh->surfaceNum = -1;
@@ -854,7 +854,7 @@ idRenderModelMD5::GetJointHandle
 jointHandle_t idRenderModelMD5::GetJointHandle( const char *name ) const {
 	const idMD5Joint *joint;
 	int	i;
-	
+
 	joint = joints.Ptr();
 	for( i = 0; i < joints.Num(); i++, joint++ ) {
 		if ( idStr::Icmp( joint->name.c_str(), name ) == 0 ) {

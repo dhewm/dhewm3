@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "posix_public.h"
 
 #if defined(_DEBUG)
-// #define ID_VERBOSE_PTHREADS 
+// #define ID_VERBOSE_PTHREADS
 #endif
 
 /*
@@ -60,13 +60,13 @@ Sys_EnterCriticalSection
 */
 void Sys_EnterCriticalSection( int index ) {
 	assert( index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS );
-#ifdef ID_VERBOSE_PTHREADS	
+#ifdef ID_VERBOSE_PTHREADS
 	if ( pthread_mutex_trylock( &global_lock[index] ) == EBUSY ) {
 		Sys_Printf( "busy lock %d in thread '%s'\n", index, Sys_GetThreadName() );
 		if ( pthread_mutex_lock( &global_lock[index] ) == EDEADLK ) {
 			Sys_Printf( "FATAL: DEADLOCK %d, in thread '%s'\n", index, Sys_GetThreadName() );
 		}
-	}	
+	}
 #else
 	pthread_mutex_lock( &global_lock[index] );
 #endif
@@ -133,7 +133,7 @@ Sys_TriggerEvent
 void Sys_TriggerEvent( int index ) {
 	assert( index >= 0 && index < MAX_TRIGGER_EVENTS );
 	Sys_EnterCriticalSection( MAX_LOCAL_CRITICAL_SECTIONS - 1 );
-	if ( waiting[ index ] ) {		
+	if ( waiting[ index ] ) {
 		pthread_cond_signal( &event_cond[ index ] );
 	} else {
 		// emulate windows behaviour: if no thread is waiting, leave the signal on so next wait keeps going
@@ -162,7 +162,7 @@ Sys_CreateThread
 ==================
 */
 void Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, xthreadInfo& info, const char *name, xthreadInfo **threads, int *thread_count ) {
-	Sys_EnterCriticalSection( );		
+	Sys_EnterCriticalSection( );
 	pthread_attr_t attr;
 	pthread_attr_init( &attr );
 	if ( pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE ) != 0 ) {
@@ -287,6 +287,5 @@ void Posix_InitPThreads( ) {
 	// init threads table
 	for ( i = 0; i < MAX_THREADS; i++ ) {
 		g_threads[ i ] = NULL;
-	}	
+	}
 }
-

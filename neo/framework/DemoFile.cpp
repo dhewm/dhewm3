@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -215,18 +215,18 @@ const char *idDemoFile::ReadHashString() {
 	if ( log && fLog ) {
 		const char *text = va( "%s > Reading hash string\n", logStr.c_str() );
 		fLog->Write( text, strlen( text ) );
-	} 
+	}
 
 	ReadInt( index );
 
 	if ( index == -1 ) {
 		// read a new string for the table
 		idStr	*str = new idStr;
-		
+
 		idStr data;
 		ReadString( data );
 		*str = data;
-		
+
 		demoStrings.Append( str );
 
 		return *str;
@@ -262,7 +262,7 @@ void idDemoFile::WriteHashString( const char *str ) {
 	idStr	*copy = new idStr( str );
 //common->Printf( "hash:%i = %s\n", demoStrings.Num(), str );
 	demoStrings.Append( copy );
-	int cmd = -1;	
+	int cmd = -1;
 	WriteInt( cmd );
 	WriteString( str );
 }
@@ -322,7 +322,3 @@ int idDemoFile::Read( void *buffer, int len ) {
 int idDemoFile::Write( const void *buffer, int len ) {
 	return compressor->Write( buffer, len );
 }
-
-
-
-

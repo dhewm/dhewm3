@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -151,7 +151,7 @@ void Map_Snapshot() {
 
 /*
  =======================================================================================================================
-    QE_CheckAutoSave If five minutes have passed since making a change and the map hasn't been saved, save it out.
+	QE_CheckAutoSave If five minutes have passed since making a change and the map hasn't been saved, save it out.
  =======================================================================================================================
  */
 void QE_CheckAutoSave(void) {
@@ -209,7 +209,7 @@ const int	g_nPathFixupCount = sizeof(g_pPathFixups) / sizeof (const char *);
 
 /*
  =======================================================================================================================
-    QE_LoadProject
+	QE_LoadProject
  =======================================================================================================================
  */
 bool QE_LoadProject(char *projectfile) {
@@ -256,7 +256,7 @@ bool QE_LoadProject(char *projectfile) {
 
 /*
  =======================================================================================================================
-    QE_SaveProject £
+	QE_SaveProject £
  =======================================================================================================================
  */
 bool QE_SaveProject(const char *pProjectFile) {
@@ -286,7 +286,7 @@ bool QE_SaveProject(const char *pProjectFile) {
 
 /*
  =======================================================================================================================
-    ConnectEntities Sets target / name on the two entities selected from the first selected to the secon
+	ConnectEntities Sets target / name on the two entities selected from the first selected to the secon
  =======================================================================================================================
  */
 void ConnectEntities(void) {
@@ -437,4 +437,3 @@ void QE_CountBrushesAndUpdateStatusBar(void) {
 		s_didonce = true;
 	}
 }
-

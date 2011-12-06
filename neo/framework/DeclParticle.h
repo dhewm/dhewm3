@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -44,7 +44,7 @@ public:
 	const idDeclTable *		table;
 	float					from;
 	float					to;
-	
+
 	float					Eval( float frac, idRandom &rand ) const;
 	float					Integrate( float frac, idRandom &rand ) const;
 };
@@ -137,36 +137,36 @@ public:
 	float					particleLife;		// total seconds of life for each particle
 	float					timeOffset;			// time offset from system start for the first particle to spawn
 	float					deadTime;			// time after particleLife before respawning
-	
+
 	//-------------------------------	// standard path parms
-		
+
 	prtDistribution_t		distributionType;
 	float					distributionParms[4];
-	
+
 	prtDirection_t			directionType;
 	float					directionParms[4];
-	
+
 	idParticleParm			speed;
 	float					gravity;				// can be negative to float up
 	bool					worldGravity;			// apply gravity in world space
-	bool					randomDistribution;		// randomly orient the quad on emission ( defaults to true ) 
+	bool					randomDistribution;		// randomly orient the quad on emission ( defaults to true )
 	bool					entityColor;			// force color from render entity ( fadeColor is still valid )
-	
+
 	//------------------------------	// custom path will completely replace the standard path calculations
-	
+
 	prtCustomPth_t			customPathType;		// use custom C code routines for determining the origin
 	float					customPathParms[8];
-	
+
 	//--------------------------------
-	
+
 	idVec3					offset;				// offset from origin to spawn all particles, also applies to customPath
-	
+
 	int						animationFrames;	// if > 1, subdivide the texture S axis into frames and crossfade
 	float					animationRate;		// frames per second
 
-	float					initialAngle;		// in degrees, random angle is used if zero ( default ) 
+	float					initialAngle;		// in degrees, random angle is used if zero ( default )
 	idParticleParm			rotationSpeed;		// half the particles will have negative rotation speeds
-	
+
 	prtOrientation_t		orientation;	// view, aimed, or axis fixed
 	float					orientationParms[4];
 
@@ -177,7 +177,7 @@ public:
 	idVec4					fadeColor;			// either 0 0 0 0 for additive, or 1 1 1 0 for blended materials
 	float					fadeInFraction;		// in 0.0 to 1.0 range
 	float					fadeOutFraction;	// in 0.0 to 1.0 range
-	float					fadeIndexFraction;	// in 0.0 to 1.0 range, causes later index smokes to be more faded 
+	float					fadeIndexFraction;	// in 0.0 to 1.0 range, causes later index smokes to be more faded
 
 	bool					hidden;				// for editor use
 	//-----------------------------------

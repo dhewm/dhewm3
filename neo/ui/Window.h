@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -105,7 +105,7 @@ typedef enum {
 } wexpRegister_t;
 
 typedef struct {
-	wexpOpType_t opType;	
+	wexpOpType_t opType;
 	int	a, b, c, d;
 } wexpOp_t;
 
@@ -146,11 +146,11 @@ public:
 	{
 		delete mEvent;
 	}
-	size_t Size() 
+	size_t Size()
 	{
 		return sizeof(*this) + mEvent->Size();
 	}
-	
+
 	idStr				mName;
 	idGuiScriptList*	mEvent;
 };
@@ -368,14 +368,14 @@ protected:
 	float actualX;					// physical coords
 	float actualY;					// ''
 	int	  childID;					// this childs id
-	unsigned int flags;             // visible, focus, mouseover, cursor, border, etc.. 
+	unsigned int flags;             // visible, focus, mouseover, cursor, border, etc..
 	int lastTimeRun;				//
 	idRectangle drawRect;			// overall rect
 	idRectangle clientRect;			// client area
 	idVec2	origin;
 
 	int timeLine;					// time stamp used for various fx
-	float xOffset;			
+	float xOffset;
 	float yOffset;
 	float forceAspectWidth;
 	float forceAspectHeight;
@@ -393,8 +393,8 @@ protected:
 	unsigned char cursor;					//
 	signed char	textAlign;
 
-	idWinBool	noTime;					// 
-	idWinBool	visible;				// 
+	idWinBool	noTime;					//
+	idWinBool	visible;				//
 	idWinBool	noEvents;
 	idWinRectangle rect;				// overall rect
 	idWinVec4	backColor;
@@ -405,17 +405,17 @@ protected:
 	idWinFloat	textScale;
 	idWinFloat	rotate;
 	idWinStr	text;
-	idWinBackground	backGroundName;			// 
+	idWinBackground	backGroundName;			//
 
 	idList<idWinVar*> definedVars;
 	idList<idWinVar*> updateVars;
 
 	idRectangle textRect;			// text extented rect
-	const idMaterial *background;         // background asset  
+	const idMaterial *background;         // background asset
 
 	idWindow *parent;				// parent window
-	idList<idWindow*> children;		// child windows	
-	idList<drawWin_t> drawWindows;		
+	idList<idWindow*> children;		// child windows
+	idList<drawWin_t> drawWindows;
 
 	idWindow *focusedChild;			// if a child window has the focus
 	idWindow *captureChild;			// if a child window has mouse capture
@@ -437,9 +437,9 @@ protected:
 
 	static bool registerIsTemporary[MAX_EXPRESSION_REGISTERS]; // statics to assist during parsing
 
-	idList<wexpOp_t> ops;			   	// evaluate to make expressionRegisters
+	idList<wexpOp_t> ops;				// evaluate to make expressionRegisters
 	idList<float> expressionRegisters;
-	idList<wexpOp_t> *saveOps;			   	// evaluate to make expressionRegisters
+	idList<wexpOp_t> *saveOps;				// evaluate to make expressionRegisters
 	idList<rvNamedEvent*>		namedEvents;		//  added named events
 	idList<float> *saveRegs;
 

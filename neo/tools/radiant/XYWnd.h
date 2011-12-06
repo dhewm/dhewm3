@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -160,9 +160,9 @@ public:
 
 	void UpdateViewDependencies( void );
 
-	void DrawPrecisionCrosshair(); 
+	void DrawPrecisionCrosshair();
 	void CyclePrecisionCrosshairMode();
-	enum 
+	enum
 	{
 		PRECISION_CROSSHAIR_NONE = 0,
 		PRECISION_CROSSHAIR_SNAP = 1,
@@ -197,7 +197,7 @@ protected:
 	int m_axisHoriz; //  <axisHoriz> and <axisVert> are one of AXIS_X, AXIS_Y, AXIS_Z and
 	int m_axisVert;	 //  reflect which axes are represented horizontally and vertically in the 2d view (XY, XZ, etc)
 
-	/// Each of the following _mc fields are stored in map-coordinates, NOT screen-pixels 
+	/// Each of the following _mc fields are stored in map-coordinates, NOT screen-pixels
 	float m_mcWidth;
 	float m_mcHeight;
 	float m_mcLeft;

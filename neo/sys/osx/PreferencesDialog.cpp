@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -39,11 +39,11 @@ static idCVar r_stretched( "r_stretched", "0", CVAR_ARCHIVE | CVAR_BOOL, "Used s
 #define kPref_PrefsDialogOpenAL CFSTR("UseOpenAL")
 
 #ifndef kAppCreator
-#define kAppCreator			 	'DOM3'	// Creator type
+#define kAppCreator				'DOM3'	// Creator type
 #endif
 
-const UInt32 kRes_Stretched 				= (1 << 0);		// set if the resolution is a stretched mode (kCGDisplayModeIsStretched)
-const UInt32 kRes_Safe		 				= (1 << 1);		// еее╩(currently unused) set if the resolution is safe (kCGDisplayModeIsSafeForHardware)
+const UInt32 kRes_Stretched				= (1 << 0);		// set if the resolution is a stretched mode (kCGDisplayModeIsStretched)
+const UInt32 kRes_Safe						= (1 << 1);		// еее╩(currently unused) set if the resolution is safe (kCGDisplayModeIsSafeForHardware)
 
 // Data to be presented and edited in the prefs dialog
 struct PrefInfo
@@ -58,9 +58,9 @@ struct PrefInfo
 	UInt32							prefResFlags;
 	Boolean							prefAlways;
 	Boolean							prefOpenAL;
-	
+
 	bool							okPressed;		// Set to true if the user pressed the OK button
-	
+
 	// The following are private data passed from GameDisplayPreferencesDialog() to it's command handler.
 	WindowRef						window;
 	ControlRef						fullscreenBtn;
@@ -70,9 +70,9 @@ struct PrefInfo
 	ControlRef						chooseMonitorsBtn;
 	ControlRef						alwaysBtn;
 	ControlRef						openALBtn;
-	
+
 	ValidModeCallbackProc			callback;		// To validate display modes
-	
+
 	bool							multiMonitor;	// Does user have multiple monitors
 	std::list<Fixed>				refreshRates;	// List of refresh rates available for the selected monitor
 	SInt32							freqMenuIndex;
@@ -106,7 +106,7 @@ static CGDirectDisplayID GetDisplayIDForScreenIndex( int inScreenIndex ) {
 	OSErr err;
 	int r_screen = -1;
 	CGDisplayCount count;
-	
+
 	err = CGGetActiveDisplayList(0, NULL, &count);
 	if (noErr == err) {
 		CGDirectDisplayID displays[count];
@@ -119,10 +119,10 @@ static CGDirectDisplayID GetDisplayIDForScreenIndex( int inScreenIndex ) {
 	return (CGDirectDisplayID)r_screen;
 }
 
-    
+
 
 void Sys_DoPreferences( void ) {
-	   
+
 	// An NSKeyDown event is not fired if the user holds down Cmd during startup.
 	// Cmd is treated purely as a modifier. To capture the user
 	// holding down Cmd, you would need to override NSApplication's
@@ -132,16 +132,16 @@ void Sys_DoPreferences( void ) {
 	const int kMacKeyCodeCommand = 0x37;
 	KeyMap *keymap = (KeyMap*)&km;
 	GetKeys(*keymap);
-	
+
 	Boolean prefAways, keyFound, useOpenAL;
 	prefAways = CFPreferencesGetAppBooleanValue ( kPref_PrefsDialogAlways, kCFPreferencesCurrentApplication, &keyFound );
 	bool fAlways = prefAways && keyFound;
-		
+
 	if ( fAlways || ( km[kMacKeyCodeCommand>>3] >> ( kMacKeyCodeCommand & 7 ) ) & 1 ) {
 		GameDisplayInfo info;
 		info.mode = cvarSystem->GetCVarBool( "r_fullscreen" ) ? kFullScreen : kWindow;
 		info.displayID = GetDisplayIDForScreenIndex( cvarSystem->GetCVarInteger( "r_screen" ) );
-		
+
 		int w = 800, h = 600;
 		R_GetModeInfo( &w, &h, cvarSystem->GetCVarInteger( "r_mode" ) );
 		info.width = w;
@@ -154,7 +154,7 @@ void Sys_DoPreferences( void ) {
 		info.resFlags = 0;
 		if ( r_stretched.GetBool() )
 			info.resFlags |= kRes_Stretched;
-			
+
 		WindowRef prefWindow;
 		if ( CreateGameDisplayPreferencesDialog( &info, &prefWindow ) == noErr ) {
 			if ( RunGameDisplayPreferencesDialog( &info, prefWindow ) == noErr ) {
@@ -180,14 +180,14 @@ void Sys_DoPreferences( void ) {
 					cvarSystem->SetCVarInteger( "r_aspectRatio", 2 );	// 16:10
 				else
 					cvarSystem->SetCVarInteger( "r_aspectRatio", 0 );	// 4:3
-				
+
 				r_stretched.SetBool( info.resFlags & kRes_Stretched );
 				cvarSystem->SetCVarInteger( "r_screen", GetScreenIndexForDisplayID( info.displayID ) );
 				cvarSystem->SetCVarInteger( "r_minDisplayRefresh", (int)FixedToFloat( info.frequency ) );
 				cvarSystem->SetCVarInteger( "r_maxDisplayRefresh", (int)FixedToFloat( info.frequency ) );
 			}
 			else {
-				Sys_Quit();		
+				Sys_Quit();
 			}
 		}
 	}
@@ -220,13 +220,13 @@ enum
 };
 
 // Control IDs used in the NIB file
-static const ControlID	kFullscreenBtn 		= { 'PREF', 1 };
-static const ControlID	kInAWindowBtn 		= { 'PREF', 2 };
-static const ControlID	kResolutionPopup 	= { 'PREF', 3 };
-static const ControlID	kRefreshRatePopup 	= { 'PREF', 4 };
-static const ControlID	kChooseMonitorsBtn 	= { 'PREF', 5 };
-static const ControlID	kAlwaysBtn 			= { 'PREF', 6 };
-static const ControlID	kOpenALBtn 			= { 'PREF', 7 };
+static const ControlID	kFullscreenBtn		= { 'PREF', 1 };
+static const ControlID	kInAWindowBtn		= { 'PREF', 2 };
+static const ControlID	kResolutionPopup	= { 'PREF', 3 };
+static const ControlID	kRefreshRatePopup	= { 'PREF', 4 };
+static const ControlID	kChooseMonitorsBtn	= { 'PREF', 5 };
+static const ControlID	kAlwaysBtn			= { 'PREF', 6 };
+static const ControlID	kOpenALBtn			= { 'PREF', 7 };
 
 struct Res
 {
@@ -270,7 +270,7 @@ static bool ValidDisplayID (CGDirectDisplayID inDisplayID)
 	unsigned int i;
 	CGDisplayErr err;
 	CGDisplayCount count;
-	
+
 	err = CGGetActiveDisplayList(0, NULL, &count);
 	if (noErr == err)
 	{
@@ -290,7 +290,7 @@ static int BuildResolutionList(CGDirectDisplayID inDisplayID, Res *ioList, Valid
 {
 	std::set<Res> modes;
 	int i, total = 0;
-	
+
 	if (inDisplayID == (CGDirectDisplayID)-1)	// special case, not associated with any display
 	{
 		Res stdModes[] = {	{ 640, 480 }, { 800, 600 }, { 1024, 768 }, { 1152, 768 },
@@ -303,59 +303,59 @@ static int BuildResolutionList(CGDirectDisplayID inDisplayID, Res *ioList, Valid
 		}
 	}
 	else
-	{	
+	{
 		CGDirectDisplayID displayID = inDisplayID ? inDisplayID : kCGDirectMainDisplay;
 		CFArrayRef modeArrayRef = CGDisplayAvailableModes(displayID);
 		CFIndex numModes = CFArrayGetCount(modeArrayRef);
-		
+
 		for (i = 0; i < numModes; i++)
 		{
 			CFDictionaryRef modeRef = (CFDictionaryRef)CFArrayGetValueAtIndex(modeArrayRef, i);
-			
+
 			long value = 0;
 			CFNumberRef valueRef;
 			Boolean success;
-			
+
 			valueRef = (CFNumberRef)CFDictionaryGetValue(modeRef, kCGDisplayBitsPerPixel);
 			success = CFNumberGetValue(valueRef, kCFNumberLongType, &value);
 			int depth = value;
 			if (depth != 32) continue;
-			
+
 			valueRef = (CFNumberRef)CFDictionaryGetValue(modeRef, kCGDisplayWidth);
 			success = CFNumberGetValue(valueRef, kCFNumberLongType, &value);
 			int width = value;
-			
+
 			valueRef = (CFNumberRef)CFDictionaryGetValue(modeRef, kCGDisplayHeight);
 			success = CFNumberGetValue(valueRef, kCFNumberLongType, &value);
 			int height = value;
-			
+
 			UInt32 resFlags = 0;
 			CFBooleanRef boolRef;
 			if (CFDictionaryGetValueIfPresent (modeRef, kCGDisplayModeIsStretched, (const void **)&boolRef))
 				if (CFBooleanGetValue (boolRef))
 					resFlags |= kRes_Stretched;
-			
-			
+
+
 			if (inCallback)
 				success = inCallback(displayID, width, height, depth, 0);
 			else
 				success = true;
-			
+
 			if (success)
 				modes.insert(MakeRes(width, height, depth, resFlags));
 		}
 	}
-	
+
 	total = modes.size();
-	
+
 	if (ioList)
 	{
 		std::set<Res>::iterator it = modes.begin();
 		for (i = 0; it != modes.end(); i++)
 			ioList[i] = *it++;
 	}
-	
-	return total;	
+
+	return total;
 }
 
 
@@ -364,33 +364,33 @@ static int BuildResolutionList(CGDirectDisplayID inDisplayID, Res *ioList, Valid
 static void BuildRefreshRates(CGDirectDisplayID inDisplayID, int inWidth, int inHeight, std::list<Fixed>* inList, ValidModeCallbackProc inCallback)
 {
 	CGDirectDisplayID displayID = inDisplayID ? inDisplayID : kCGDirectMainDisplay;
-	
+
 	CFArrayRef modeArrayRef = CGDisplayAvailableModes(displayID);
 	CFIndex numModes = CFArrayGetCount(modeArrayRef);
 
 	inList->clear();
-	
+
 	for (int i = 0; i < numModes; i++)
 	{
 		CFDictionaryRef modeRef = (CFDictionaryRef)CFArrayGetValueAtIndex(modeArrayRef, i);
-		
+
 		long value = 0;
 		CFNumberRef valueRef;
 		Boolean success;
-		
+
 		valueRef = (CFNumberRef)CFDictionaryGetValue(modeRef, kCGDisplayBitsPerPixel);
 		success = CFNumberGetValue(valueRef, kCFNumberLongType, &value);
 		int depth = value;
 		if (depth != 32) continue;
-		
+
 		valueRef = (CFNumberRef)CFDictionaryGetValue(modeRef, kCGDisplayWidth);
 		success = CFNumberGetValue(valueRef, kCFNumberLongType, &value);
 		int width = value;
-		
+
 		valueRef = (CFNumberRef)CFDictionaryGetValue(modeRef, kCGDisplayHeight);
 		success = CFNumberGetValue(valueRef, kCFNumberLongType, &value);
 		int height = value;
-		
+
 		if (width == inWidth && height == inHeight)
 		{
 			double freqDouble;
@@ -408,9 +408,9 @@ static void BuildRefreshRates(CGDirectDisplayID inDisplayID, int inWidth, int in
 
 	// Disallow 0, which we reserve to mean "automatic"
 	inList->remove(0);
-	
+
 	inList->sort();
-	
+
 	// Remove duplicates - yes they can occur.
 	inList->unique();
 }
@@ -423,14 +423,14 @@ static void BuildRefreshPopupButton(ControlRef inControl, std::list<Fixed>* inLi
 
 	// The menu has two permanent items - "Auto" & a divider line. Delete everything else.
 	DeleteMenuItems(menu, 3, CountMenuItems(menu)-2);
-	
+
 	for (std::list<Fixed>::const_iterator iter = inList->begin(); iter != inList->end(); ++iter)
 	{
 		float value = FixedToFloat(*iter);
 		CFStringRef menuString = CFStringCreateWithFormat (kCFAllocatorDefault, 0, CFSTR("%g Hz"), value);
 		InsertMenuItemTextWithCFString(menu, menuString, CountMenuItems(menu), 0, 0);
 	}
-	
+
 	SetControlMaximum(inControl, CountMenuItems(menu));
 }
 
@@ -452,7 +452,7 @@ static void BuildResolutionPopupButton(ControlRef inControl, CGDirectDisplayID i
 	int count = BuildResolutionList(inDisplayID, NULL, inCallback);
 	Res resList[count];
 	BuildResolutionList(inDisplayID, resList, inCallback);
-	
+
 	// Clear the menu
 	MenuRef menu = GetControlPopupMenuRef(inControl);
 	assert(menu);
@@ -468,7 +468,7 @@ static void BuildResolutionPopupButton(ControlRef inControl, CGDirectDisplayID i
 		InsertMenuItemTextWithCFString (menu, menuString, 0, 0, 0);
 		err = SetMenuItemProperty (menu, 1, kAppCreator, 'Res ', sizeof(resList[count]), &resList[count]);
 	}
-	
+
 	SetControlMaximum(inControl, CountMenuItems(menu));
 }
 
@@ -477,7 +477,7 @@ static void GetResolutionFromPopupMenuItem(ControlRef inControl, MenuItemIndex i
 	MenuRef menu = GetControlPopupMenuRef(inControl);
 	Res res;
 	OSStatus err;
-	
+
 	err = GetMenuItemProperty (menu, inItem, kAppCreator, 'Res ', sizeof(res), NULL, &res);
 	if (!err)
 	{
@@ -498,13 +498,13 @@ static void AdjustResolutionPopupMenu(ControlRef inControl, CGDirectDisplayID in
 		screenX = (int)CGDisplayPixelsWide(inDisplayID);
 		screenY = (int)CGDisplayPixelsHigh(inDisplayID);
 	}
-	
+
 	MenuRef menu = GetControlPopupMenuRef(inControl);
 	int resX, resY, depth;
 	UInt32 resFlags;
 	int count = CountMenuItems(menu);
 	int item;
-		
+
 	for( item = 1; item <= count; item++)
 	{
 		GetResolutionFromPopupMenuItem(inControl, item, &resX, &resY, &depth, &resFlags);
@@ -513,11 +513,11 @@ static void AdjustResolutionPopupMenu(ControlRef inControl, CGDirectDisplayID in
 			DisablePopupMenuItem(inControl, item);
 		else
 			EnablePopupMenuItem(inControl, item);
-			
+
 		if (resX == screenwidth && resY == screenheight && depth == screendepth && resFlags == screenResFlags)
 			SetControlValue(inControl, item);
 	}
-	
+
 	// If we just disabled the current item, then choose something else.
 	if (!IsPopupMenuItemEnabled(inControl, GetControlValue (inControl)))
 	{
@@ -549,9 +549,9 @@ static void AdjustDisplayControls(PrefInfo *prefInfo)
 			EnableControl(prefInfo->chooseMonitorsBtn);
 	}
 	AdjustResolutionPopupMenu(prefInfo->resolutionPopup, prefInfo->prefDisplayID,
-		prefInfo->prefGameDisplayMode == kFullScreen, 
+		prefInfo->prefGameDisplayMode == kFullScreen,
 		prefInfo->prefWidth, prefInfo->prefHeight, prefInfo->prefDepth, prefInfo->prefResFlags);
-	
+
 	// Build new refresh popup and select appropriate rate
 	BuildRefreshRates(prefInfo->prefDisplayID, prefInfo->prefWidth, prefInfo->prefHeight,
 		&prefInfo->refreshRates, prefInfo->callback);
@@ -582,7 +582,7 @@ static void AdjustDisplayControls(PrefInfo *prefInfo)
 static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEvent, void* inUserData )
 {
 	#pragma unused( inHandler )
-	
+
 	HICommand			cmd;
 	OSStatus			result = eventNotHandledErr;
 	PrefInfo*			prefInfo = (PrefInfo*)inUserData;
@@ -595,34 +595,34 @@ static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEv
 	switch ( cmd.commandID )
 	{
 		case kHICommandOK:
-			
+
 			prefInfo->okPressed = true;
-			
+
 			prefInfo->prefAlways = GetControlValue (prefInfo->alwaysBtn);
 			prefInfo->prefOpenAL = GetControlValue (prefInfo->openALBtn);
-			
-			CFPreferencesSetAppValue (kPref_PrefsDialogAlways, 
+
+			CFPreferencesSetAppValue (kPref_PrefsDialogAlways,
 									  prefInfo->prefAlways ? kCFBooleanTrue : kCFBooleanFalse,
 									  kCFPreferencesCurrentApplication);
 
-			CFPreferencesSetAppValue (kPref_PrefsDialogOpenAL, 
+			CFPreferencesSetAppValue (kPref_PrefsDialogOpenAL,
 									  prefInfo->prefOpenAL ? kCFBooleanTrue : kCFBooleanFalse,
 									  kCFPreferencesCurrentApplication);
-			
+
 			CFPreferencesAppSynchronize (kCFPreferencesCurrentApplication);
 
 			QuitAppModalLoopForWindow( prefInfo->window );
 			result = noErr;
 			break;
-		
+
 		case kHICommandCancel:
-			
+
 			prefInfo->okPressed = false;
-			
+
 			QuitAppModalLoopForWindow( prefInfo->window );
 			result = noErr;
 			break;
-		
+
 		case kCmdFullscreen:
 		case kCmdInAWindow:
 			if (cmd.commandID == kCmdFullscreen)
@@ -633,18 +633,18 @@ static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEv
 			SetControlValue (prefInfo->inAWindowBtn, 1 - (prefInfo->prefGameDisplayMode == kFullScreen));
 			if (prefInfo->prefGameDisplayMode == kFullScreen)
 				EnableControl (prefInfo->refreshRatePopup);
-			else 
+			else
 				DisableControl (prefInfo->refreshRatePopup);
 			if (prefInfo->multiMonitor)
 				EnableControl (prefInfo->chooseMonitorsBtn);
 			else
 				DisableControl (prefInfo->chooseMonitorsBtn);
-				
+
 			// Adjust resolutions, refresh rates
 			AdjustDisplayControls(prefInfo);
 			result = noErr;
 			break;
-		
+
 
 		case kCmdChooseMonitors:
 		{
@@ -659,7 +659,7 @@ static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEv
 			// Pick a new resolution
 			int item = GetControlValue(prefInfo->resolutionPopup);
 			GetResolutionFromPopupMenuItem(prefInfo->resolutionPopup, item, &prefInfo->prefWidth, &prefInfo->prefHeight, &prefInfo->prefDepth, &prefInfo->prefResFlags);
-	
+
 			// Adjust refresh menu
 			BuildRefreshRates(prefInfo->prefDisplayID, prefInfo->prefWidth, prefInfo->prefHeight, &prefInfo->refreshRates, prefInfo->callback);
 			BuildRefreshPopupButton(prefInfo->refreshRatePopup, &prefInfo->refreshRates);
@@ -673,7 +673,7 @@ static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEv
 				DisableControl (prefInfo->refreshRatePopup);
 			else
 				EnableControl (prefInfo->refreshRatePopup);
-			
+
 			break;
 		}
 
@@ -694,7 +694,7 @@ static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEv
 		}
 
 
-	}	
+	}
 	return result;
 }
 
@@ -706,14 +706,14 @@ OSStatus CreateGameDisplayPreferencesDialog(const GameDisplayInfo *inGDInfo,
 											WindowRef *outWindow, ValidModeCallbackProc inCallback)
 {
 	OSStatus err = noErr;
-	
+
 	// Build up a structure to pass to the window handler we are about
 	// to install. We store the window itself, as well as the original
 	// states of our settings. We use this to revert if the user clicks
 	// the cancel button.
-	
+
 	static PrefInfo prefInfo;
-	
+
 	prefInfo.prefGameDisplayMode = inGDInfo->mode;
 	prefInfo.prefDisplayID = inGDInfo->displayID;
 	prefInfo.prefWidth = inGDInfo->width;
@@ -723,24 +723,24 @@ OSStatus CreateGameDisplayPreferencesDialog(const GameDisplayInfo *inGDInfo,
 	prefInfo.prefResFlags = inGDInfo->resFlags;
 	prefInfo.window = NULL;
 	prefInfo.okPressed = false;
-	
+
 	Boolean result;
 	Boolean keyFound;
 	result = CFPreferencesGetAppBooleanValue (kPref_PrefsDialogAlways, kCFPreferencesCurrentApplication, &keyFound);
 	prefInfo.prefAlways = result && keyFound;
 	result = CFPreferencesGetAppBooleanValue (kPref_PrefsDialogOpenAL, kCFPreferencesCurrentApplication, &keyFound);
 	prefInfo.prefOpenAL = result && keyFound;
-	
+
 	prefInfo.callback = inCallback;
-	
+
 	// If DoPreferences is called at the start of the game, prefInfo.prefDisplayID needs to be checked
 	// to see if it is still a valid display ID.
-	
+
 	if (!ValidDisplayID(prefInfo.prefDisplayID))
 		prefInfo.prefDisplayID = kCGDirectMainDisplay;	// revert to main
-	
+
 	// Fetch the dialog
-	
+
 	IBNibRef aslNib;
 	CFBundleRef theBundle = CFBundleGetMainBundle();
 	err = CreateNibReferenceWithCFBundle(theBundle, CFSTR("ASLCore"), &aslNib);
@@ -748,9 +748,9 @@ OSStatus CreateGameDisplayPreferencesDialog(const GameDisplayInfo *inGDInfo,
 	if (err != noErr)
 		return err;
 	SetWRefCon(prefInfo.window, (long)&prefInfo);
-	
+
 	// Locate all the controls
-	
+
 	GetControlByID( prefInfo.window, &kFullscreenBtn, &prefInfo.fullscreenBtn );			assert(prefInfo.fullscreenBtn);
 	GetControlByID( prefInfo.window, &kInAWindowBtn, &prefInfo.inAWindowBtn );				assert(prefInfo.inAWindowBtn);
 	GetControlByID( prefInfo.window, &kResolutionPopup, &prefInfo.resolutionPopup );		assert(prefInfo.resolutionPopup);
@@ -758,43 +758,43 @@ OSStatus CreateGameDisplayPreferencesDialog(const GameDisplayInfo *inGDInfo,
 	GetControlByID( prefInfo.window, &kChooseMonitorsBtn, &prefInfo.chooseMonitorsBtn );	assert(prefInfo.chooseMonitorsBtn);
 	GetControlByID( prefInfo.window, &kAlwaysBtn, &prefInfo.alwaysBtn );					assert(prefInfo.alwaysBtn);
 	GetControlByID( prefInfo.window, &kOpenALBtn, &prefInfo.openALBtn );					assert(prefInfo.openALBtn);
-	
-	
-	
+
+
+
 	// Disable the "choose monitor" button if we've only got one to pick from
-	
+
 	prefInfo.multiMonitor = CanUserPickMonitor();
-	
+
 	if (!prefInfo.multiMonitor)
 	{
 		DisableControl (prefInfo.chooseMonitorsBtn);
 		prefInfo.prefDisplayID = 0;
 	}
-	
+
 	// Prepare the resolutions and refresh rates popup menus
 	AdjustDisplayControls(&prefInfo);
-	
+
 	// Set up the controls
-	
+
 	SetControlValue (prefInfo.refreshRatePopup, prefInfo.freqMenuIndex);
 	SetControlValue (prefInfo.fullscreenBtn, prefInfo.prefGameDisplayMode == kFullScreen);
 	SetControlValue (prefInfo.inAWindowBtn, prefInfo.prefGameDisplayMode == kWindow);
 	SetControlValue (prefInfo.alwaysBtn, prefInfo.prefAlways);
 	SetControlValue (prefInfo.openALBtn, prefInfo.prefOpenAL);
 
-	
+
 	// Create our UPP and install the handler.
-	
+
 	EventTypeSpec cmdEvent = { kEventClassCommand, kEventCommandProcess };
 	EventHandlerUPP handler = GetPrefHandlerUPP();
 	InstallWindowEventHandler( prefInfo.window, handler, 1, &cmdEvent, &prefInfo, NULL );
-	
+
 	// Position and show the window
 	RepositionWindow( prefInfo.window, NULL, kWindowAlertPositionOnMainScreen );
-	
+
 	if (outWindow)
 		*outWindow = prefInfo.window;
-	
+
 	return err;
 }
 
@@ -807,23 +807,23 @@ OSStatus CreateGameDisplayPreferencesDialog(const GameDisplayInfo *inGDInfo,
 OSStatus RunGameDisplayPreferencesDialog(GameDisplayInfo *outGDInfo, WindowRef inWindow)
 {
 	PrefInfo *prefInfo = (PrefInfo*)GetWRefCon(inWindow);
-	
+
 	ShowWindow( inWindow );
-	
+
 	// Now we run modally. We will remain here until the PrefHandler
 	// calls QuitAppModalLoopForWindow if the user clicks OK or
 	// Cancel.
-	
+
 	RunAppModalLoopForWindow( inWindow );
-	
+
 	// OK, we're done. Dispose of our window.
 	// TODO: Are we supposed to uninstall event handlers?
 	DisposeWindow( inWindow );
-	
+
 	// Return settings to caller
-	
+
 	if (prefInfo->okPressed)
-	{		
+	{
 		outGDInfo->mode = prefInfo->prefGameDisplayMode;
 		outGDInfo->width = prefInfo->prefWidth;
 		outGDInfo->height = prefInfo->prefHeight;
@@ -832,7 +832,7 @@ OSStatus RunGameDisplayPreferencesDialog(GameDisplayInfo *outGDInfo, WindowRef i
 		outGDInfo->resFlags = prefInfo->prefResFlags;
 		outGDInfo->displayID = prefInfo->prefDisplayID;
 	}
-	
+
 	return prefInfo->okPressed ? noErr : userCanceledErr;
 }
 

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -198,7 +198,7 @@ void idCollisionModelManagerLocal::TraceThroughAxialBSPTree_r( cm_traceWork_t *t
 	else if ( frac2 > 1.0f ) {
 		frac2 = 1.0f;
 	}
-		
+
 	midf = p1f + (p2f - p1f)*frac2;
 
 	mid[0] = p1[0] + frac2*(p2[0] - p1[0]);

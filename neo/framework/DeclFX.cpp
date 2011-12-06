@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -337,7 +337,7 @@ void idDeclFX::ParseSingleFXAction( idLexer &src, idFXSingleAction& FXAction ) {
 			declManager->FindMaterial( FXAction.data );
 			continue;
 		}
-	
+
 		if ( !token.Icmp( "model" ) ) {
 			src.ReadToken( &token );
 			FXAction.data = token;
@@ -418,7 +418,7 @@ bool idDeclFX::Parse( const char *text, const int textLength ) {
 
 	// scan through, identifying each individual parameter
 	while( 1 ) {
-		
+
 		if ( !src.ReadToken( &token ) ) {
 			break;
 		}
@@ -460,7 +460,7 @@ const char *idDeclFX::DefaultDefinition( void ) const {
 	"\t\t"		"duration\t5\n"
 	"\t\t"		"model\t\t_default\n"
 	"\t"	"}\n"
-		"}"; 
+		"}";
 }
 
 /*

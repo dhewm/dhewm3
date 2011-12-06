@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -99,16 +99,16 @@ void ExtendBounds(idVec3 v, idVec3 &vMin, idVec3 &vMax)
 	for (int i = 0 ;i < 3 ;i++)
 	{
 		float	f = v[i];
-		
-    if (f < vMin[i])
-    {
-			vMin[i] = f;
-    }
 
-    if (f > vMax[i])
-    {
+	if (f < vMin[i])
+	{
+			vMin[i] = f;
+	}
+
+	if (f > vMax[i])
+	{
 			vMax[i] = f;
-    }
+	}
 	}
 }
 
@@ -191,7 +191,7 @@ eclass_t *EClass_InitFromDict( const idDict *d, const char *name ) {
 	//if (str.Length()) {
 	//	e->entityModel = renderModelManager->FindModel(str);
 	//}
-	
+
 	str = "";
 
 	// concatenate all editor usage comments
@@ -234,7 +234,7 @@ eclass_t *EClass_InitFromDict( const idDict *d, const char *name ) {
 	e->comments = Mem_CopyString( str.c_str() );
 */
 
-	
+
 	// concatenate all variable comments
 	kv = d->MatchPrefix( "editor_copy" );
 	while (kv) {
@@ -288,7 +288,7 @@ eclass_t *EClass_InitFromDict( const idDict *d, const char *name ) {
 		e->nShowFlags |= ECLASS_PARTICLE;
 	} else if ( idStr::Icmp(e->name, "func_liquid") == 0 ) {
 		e->nShowFlags |= ECLASS_LIQUID;
-	} 
+	}
 
 	return e;
 }
@@ -296,7 +296,7 @@ eclass_t *EClass_InitFromDict( const idDict *d, const char *name ) {
 void EClass_InsertSortedList(eclass_t *&pList, eclass_t *e)
 {
 	eclass_t	*s;
-	
+
 	if (!pList)
 	{
 		pList = e;
@@ -335,7 +335,7 @@ void Eclass_InsertAlphabetized (eclass_t *e)
   EClass_InsertSortedList(eclass, e);
 #else
 	eclass_t	*s;
-	
+
 	if (!eclass)
 	{
 		eclass = e;
@@ -436,7 +436,7 @@ eclass_t* GetCachedModel(entity_t *pEntity, const char *pName, idVec3 &vMin, idV
 			VectorCopy(e->mins, vMin);
 			VectorCopy(e->maxs, vMax);
 			return e;
-	    }
+		}
 	}
 
 	e = (eclass_t*)Mem_ClearedAlloc(sizeof(*e));

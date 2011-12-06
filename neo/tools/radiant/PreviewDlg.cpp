@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -83,7 +83,7 @@ BOOL CPreviewDlg::OnInitDialog()
 	} else {
 		wndPreview.setDrawable(&m_testDrawable);
 	}
-	
+
 	SetMode(currentMode);
 	BuildTree();
 
@@ -106,7 +106,7 @@ void CPreviewDlg::BuildTree() {
 	treeMedia.DeleteAllItems();
 
 	idFileList *files;
-	
+
 	if ( currentMode == GUIS ) {
 		files = fileSystem->ListFilesTree( "guis", ".gui" );
 		AddStrList( "base", files->GetList(), GUIS );
@@ -173,7 +173,7 @@ void CPreviewDlg::AddCommentedItems() {
 		}
 	}
 }
-	
+
 
 
 void CPreviewDlg::AddStrList( const char *root, const idStrList &list, int id ) {
@@ -193,7 +193,7 @@ void CPreviewDlg::AddStrList( const char *root, const idStrList &list, int id ) 
 
 	HTREEITEM	item = base;
 	HTREEITEM	add;
-	
+
 	int		count = list.Num();
 
 	idStr	last, qt;
@@ -492,13 +492,13 @@ void CPreviewDlg::AddSounds(bool rootItems) {
 	idStrList list(1024);
 	idStrList list2(1024);
 	HTREEITEM base = treeMedia.InsertItem("Sound Shaders");
-	 
+
 	for( i = 0; i < declManager->GetNumDecls( DECL_SOUND ); i++ ) {
 		const idSoundShader *poo = declManager->SoundByIndex( i, false );
 		list.AddUnique( poo->GetFileName() );
 	}
 	list.Sort();
-	
+
 	for ( i = 0; i < list.Num(); i++ ) {
 		HTREEITEM child = treeMedia.InsertItem(list[i], base);
 		treeMedia.SetItemData(child, SOUNDPARENT);
@@ -510,7 +510,7 @@ void CPreviewDlg::AddSounds(bool rootItems) {
 				list2.Append( poo->GetName() );
 			}
 		}
-		list2.Sort();		
+		list2.Sort();
 		for (j = 0; j < list2.Num(); j++) {
 			HTREEITEM child2 = treeMedia.InsertItem( list2[j], child );
 			treeMedia.SetItemData(child2, SOUNDS);
@@ -520,12 +520,12 @@ void CPreviewDlg::AddSounds(bool rootItems) {
 
 	idFileList *files;
 	files = fileSystem->ListFilesTree( "sound", ".wav" );
-    AddStrList( "Wave files", files->GetList(), WAVES );
+	AddStrList( "Wave files", files->GetList(), WAVES );
 	fileSystem->FreeFileList( files );
 }
 
 void CPreviewDlg::SetMode( int mode, const char *preSelect ) {
-	
+
 	currentMode = mode;
 	if ( preSelect ) {
 		mediaName = preSelect;
@@ -665,5 +665,5 @@ void CPreviewDlg::AddSkins( bool rootItems ) {
 void CPreviewDlg::OnShowWindow( BOOL bShow, UINT status ) {
 	if ( bShow && AfxGetApp()->GetMainWnd() == GetParent() && GetParent() ) {
 		GetParent()->EnableWindow( FALSE );
-	}		
+	}
 }

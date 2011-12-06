@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -241,8 +241,8 @@ public:
 	// under the assumption that we are rendering out screenshots and the gameTime is going
 	// much slower than real time.
 	// path should not include an extension, and the generated filenames will be:
-	// <path>_left.raw, <path>_right.raw, or <path>_51left.raw, <path>_51right.raw, 
-	// <path>_51center.raw, <path>_51lfe.raw, <path>_51backleft.raw, <path>_51backright.raw, 
+	// <path>_left.raw, <path>_right.raw, or <path>_51left.raw, <path>_51right.raw,
+	// <path>_51center.raw, <path>_51lfe.raw, <path>_51backleft.raw, <path>_51backright.raw,
 	// If only two channel mixing is enabled, the left and right .raw files will also be
 	// combined into a stereo .wav file.
 	virtual void			AVIOpen( const char *path, const char *name ) = 0;

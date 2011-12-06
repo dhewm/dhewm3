@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -75,14 +75,14 @@ public:
 	int		MoveItemAt		( int index, int newIndex );
 	bool	IsItemExpanded	( int index );
 	bool	IsItemEnabled	( int index );
-	
+
 	HWND	GetWindow		( void );
-	
+
 	void	AutoSize		( void );
 
 protected:
 
-	void	RecallLayout	( void );	
+	void	RecallLayout	( void );
 	void	_RemoveItem		( int index );
 	void	_ExpandItem		( RPITEM* item, bool expand );
 	void	_EnableItem		( RPITEM* item, bool enable );
@@ -94,8 +94,8 @@ protected:
 	int		HandleLButtonUp		( WPARAM wParam, LPARAM lParam );
 	int		HandleMouseMove		( WPARAM wParam, LPARAM lParam );
 	int		HandleMouseWheel	( WPARAM wParam, LPARAM lParam );
-	int		HandleMouseActivate	( WPARAM wParam, LPARAM lParam );	
-	int		HandleContextMenu	( WPARAM wParam, LPARAM lParam );	
+	int		HandleMouseActivate	( WPARAM wParam, LPARAM lParam );
+	int		HandleContextMenu	( WPARAM wParam, LPARAM lParam );
 
 	// Datas
 	idList<RPITEM*>	mItems;
@@ -109,15 +109,15 @@ protected:
 	static LRESULT CALLBACK		WindowProc	( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 	static LRESULT CALLBACK		DialogProc	( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 	static LRESULT CALLBACK		ButtonProc	( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
-	
+
 	static LRESULT FAR PASCAL	GetMsgProc	( int nCode, WPARAM wParam, LPARAM lParam );
-	static idList<HWND>	mDialogs;	
+	static idList<HWND>	mDialogs;
 	static HHOOK		mDialogHook;
 };
 
 ID_INLINE int rvRollupPanel::GetItemCount ( void )
 {
-	return mItems.Num(); 
+	return mItems.Num();
 }
 
 ID_INLINE bool rvRollupPanel::IsItemExpanded ( int index )

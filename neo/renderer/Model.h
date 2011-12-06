@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -199,7 +199,7 @@ public:
 	// which can regenerate the data with LoadModel()
 	virtual void				PurgeModel() = 0;
 
-	// resets any model information that needs to be reset on a same level load etc.. 
+	// resets any model information that needs to be reset on a same level load etc..
 	// currently only implemented for liquids
 	virtual void				Reset() = 0;
 

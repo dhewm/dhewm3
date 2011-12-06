@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -146,7 +146,7 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 		if ( f < 0.0f ) {
 			continue;		// shouldn't happen
 		}
-		
+
 		if ( f >= hit.fraction ) {
 			continue;		// have already hit something closer
 		}
@@ -271,7 +271,7 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 
 #ifdef TEST_TRACE
 	trace_timer.Stop();
-	common->Printf( "testVerts:%i c_testPlanes:%i c_testEdges:%i c_intersect:%i msec:%1.4f\n", 
+	common->Printf( "testVerts:%i c_testPlanes:%i c_testEdges:%i c_intersect:%i msec:%1.4f\n",
 					tri->numVerts, c_testPlanes, c_testEdges, c_intersect, trace_timer.Milliseconds() );
 #endif
 

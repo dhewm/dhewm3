@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -245,7 +245,7 @@ public:
 	void					IncreaseRefs( void ) const;
 	void					DecreaseRefs( void ) const;
 	int						NumRefs( void ) const;
-	
+
 	void					CheckModelHierarchy( const idRenderModel *model ) const;
 	void					GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, const int *index, int numIndexes ) const;
 	void					GetSingleFrame( int framenum, idJointQuat *joints, const int *index, int numIndexes ) const;

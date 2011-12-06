@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -61,9 +61,9 @@ ToggleListView::~ToggleListView() {
 
 
 /**
-* Sets the tree icons to dispay for each of the three states. Sets the 
-* icons to display for each of the three states. The values passed in 
-* are the resource name that can be generated using MAKEINTRESOUCE. If 
+* Sets the tree icons to dispay for each of the three states. Sets the
+* icons to display for each of the three states. The values passed in
+* are the resource name that can be generated using MAKEINTRESOUCE. If
 * the value passed in is NULL then an icon will not be drawn for that
 * state.
 * @param disabled The icon to draw when the state is TOGGLE_STATE_DISABLED.
@@ -128,21 +128,21 @@ int ToggleListView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 		return -1;
 
 	CListCtrl& list = GetListCtrl();
-	
+
 	list.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 
 	//Turn off the horizontal scroll bar
 	//Todo: Figure out why the damn scroll bar pops up
 	list.ModifyStyle(WS_HSCROLL, 0L);
-	
-	
+
+
 	//Insert the one column
 	LVCOLUMN col;
 	col.mask = 0;
 	list.InsertColumn(0, &col);
 
 	SetToggleIcons();
-	
+
 	return 0;
 }
 
@@ -160,7 +160,7 @@ void ToggleListView::OnSize(UINT nType, int cx, int cy) {
 * Returns the size of each item in the toggle list.
 */
 void ToggleListView::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
-	lpMeasureItemStruct->itemHeight = TOGGLELIST_ITEMHEIGHT;	
+	lpMeasureItemStruct->itemHeight = TOGGLELIST_ITEMHEIGHT;
 }
 
 /**
@@ -169,13 +169,13 @@ void ToggleListView::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
 void ToggleListView::OnNMClick(NMHDR *pNMHDR, LRESULT *pResult) {
 	CListCtrl& list = GetListCtrl();
 
-	DWORD dwpos = GetMessagePos(); 
+	DWORD dwpos = GetMessagePos();
 
 	LVHITTESTINFO info;
 	info.pt.x = LOWORD(dwpos);
-	info.pt.y = HIWORD(dwpos);		
+	info.pt.y = HIWORD(dwpos);
 
-	::MapWindowPoints(HWND_DESKTOP, pNMHDR->hwndFrom, &info.pt, 1);      
+	::MapWindowPoints(HWND_DESKTOP, pNMHDR->hwndFrom, &info.pt, 1);
 
 	int index = list.HitTest(&info);
 	if ( index != -1 ) {
@@ -191,7 +191,7 @@ void ToggleListView::OnNMClick(NMHDR *pNMHDR, LRESULT *pResult) {
 				} else {
 					SetToggleState(index, TOGGLE_STATE_ON, true);
 				}
-			}												
+			}
 		}
 	}
 	*pResult = 0;
@@ -215,11 +215,11 @@ void ToggleListView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 
 	CListCtrl& ListCtrl=GetListCtrl();
 	int nItem = lpDrawItemStruct->itemID;
-	
+
 	// get item data
 	LV_ITEM lvi;
 	_TCHAR szBuff[MAX_PATH];
-	
+
 	memset(&lvi, 0, sizeof(LV_ITEM));
 	lvi.mask = LVIF_TEXT;
 	lvi.iItem = nItem;
@@ -228,8 +228,8 @@ void ToggleListView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	ListCtrl.GetItem(&lvi);
 
 	RECT rDraw;
-	
-	
+
+
 	CopyRect ( &rDraw, &lpDrawItemStruct->rcItem );
 	rDraw.right = rDraw.left + TOGGLELIST_ITEMHEIGHT;
 	rDraw.top ++;
@@ -262,15 +262,15 @@ void ToggleListView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 			}
 			break;
 	};
-	
+
 	CopyRect ( &rDraw, &lpDrawItemStruct->rcItem );
 	rDraw.left += TOGGLELIST_ITEMHEIGHT;
 	rDraw.left += 1;
 
 	if ( lpDrawItemStruct->itemState & ODS_SELECTED ) {
-		FillRect ( lpDrawItemStruct->hDC, &rDraw, GetSysColorBrush ( COLOR_HIGHLIGHT ) );			
+		FillRect ( lpDrawItemStruct->hDC, &rDraw, GetSysColorBrush ( COLOR_HIGHLIGHT ) );
 	} else {
-		FillRect ( lpDrawItemStruct->hDC, &rDraw, GetSysColorBrush ( COLOR_WINDOW ) ); 
+		FillRect ( lpDrawItemStruct->hDC, &rDraw, GetSysColorBrush ( COLOR_WINDOW ) );
 	}
 
 	rDraw.left += TEXT_OFFSET;
@@ -289,18 +289,14 @@ void ToggleListView::Draw3dRect (HDC hDC, RECT* rect, HBRUSH topLeft, HBRUSH bot
 	RECT rOut;
 
 	SetRect ( &rOut, rect->left, rect->top, rect->right - 1, rect->top + 1 );
-	FillRect ( hDC,&rOut, topLeft ); 
+	FillRect ( hDC,&rOut, topLeft );
 
 	SetRect ( &rOut, rect->left, rect->top, rect->left + 1, rect->bottom );
-	FillRect( hDC,&rOut, topLeft ); 
+	FillRect( hDC,&rOut, topLeft );
 
 	SetRect ( &rOut, rect->right, rect->top, rect->right -1, rect->bottom  );
-	FillRect( hDC,&rOut, bottomRight ); 
+	FillRect( hDC,&rOut, bottomRight );
 
 	SetRect ( &rOut, rect->left, rect->bottom, rect->right, rect->bottom - 1 );
-	FillRect( hDC,&rOut, bottomRight ); 
+	FillRect( hDC,&rOut, bottomRight );
 }
-
-
-
-

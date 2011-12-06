@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -44,48 +44,48 @@ If you have questions concerning this license or the applicable additional terms
 
 class idAudioBufferWIN32 : public idAudioBuffer {
 public:
-    idAudioBufferWIN32( LPDIRECTSOUNDBUFFER apDSBuffer, dword dwDSBufferSize, idWaveFile* pWaveFile=NULL );
-    ~idAudioBufferWIN32();
+	idAudioBufferWIN32( LPDIRECTSOUNDBUFFER apDSBuffer, dword dwDSBufferSize, idWaveFile* pWaveFile=NULL );
+	~idAudioBufferWIN32();
 
-    int FillBufferWithSound( LPDIRECTSOUNDBUFFER pDSB, bool bRepeatWavIfBufferLarger );
+	int FillBufferWithSound( LPDIRECTSOUNDBUFFER pDSB, bool bRepeatWavIfBufferLarger );
 
 	bool Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize );
 	bool Unlock(void *pDSLockedBuffer, dword dwDSLockedBufferSize );
 	bool GetCurrentPosition( ulong *pdwCurrentWriteCursor );
 
-    int Play( dword dwPriority=0, dword dwFlags=0 );
-    int Stop( void );
-    int Reset( void );
-    bool    IsSoundPlaying( void );
+	int Play( dword dwPriority=0, dword dwFlags=0 );
+	int Stop( void );
+	int Reset( void );
+	bool    IsSoundPlaying( void );
 	void SetVolume( float x);
 
-    idWaveFile*			m_pWaveFile;
+	idWaveFile*			m_pWaveFile;
 private:
-    LPDIRECTSOUNDBUFFER		m_apDSBuffer;
-    dword					m_dwDSBufferSize;
+	LPDIRECTSOUNDBUFFER		m_apDSBuffer;
+	dword					m_dwDSBufferSize;
 
-    int RestoreBuffer( LPDIRECTSOUNDBUFFER pDSB, bool* pbWasRestored );
+	int RestoreBuffer( LPDIRECTSOUNDBUFFER pDSB, bool* pbWasRestored );
 };
 
 class idAudioHardwareWIN32 : public idAudioHardware {
 
 public:
-    idAudioHardwareWIN32();
-    ~idAudioHardwareWIN32();
+	idAudioHardwareWIN32();
+	~idAudioHardwareWIN32();
 
-    bool Initialize( );
+	bool Initialize( );
 	bool InitializeSpeakers( byte *buffer, int bufferSize, dword dwPrimaryFreq, dword dwPrimaryBitRate, dword dwSpeakers );
 
 	void SetPrimaryBufferFormat( dword dwPrimaryFreq, dword dwPrimaryBitRate, dword dwSpeakers );
 
-    int Create( idWaveFile* pWaveFile, idAudioBuffer** ppiab );
-    int Create( idAudioBuffer** ppSound, const char* strWaveFileName, dword dwCreationFlags = 0 );
-    int CreateFromMemory( idAudioBufferWIN32** ppSound, byte* pbData, ulong ulDataSize, waveformatextensible_t *pwfx, dword dwCreationFlags = 0 );
+	int Create( idWaveFile* pWaveFile, idAudioBuffer** ppiab );
+	int Create( idAudioBuffer** ppSound, const char* strWaveFileName, dword dwCreationFlags = 0 );
+	int CreateFromMemory( idAudioBufferWIN32** ppSound, byte* pbData, ulong ulDataSize, waveformatextensible_t *pwfx, dword dwCreationFlags = 0 );
 
 	bool Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize );
 	bool Unlock( void *pDSLockedBuffer, dword dwDSLockedBufferSize );
 	bool GetCurrentPosition( ulong *pdwCurrentWriteCursor );
-	
+
 	int				GetNumberOfSpeakers()				{ return numSpeakers; }
 	int				GetMixBufferSize()					{ return MIXBUFFER_SAMPLES * blockAlign; }
 
@@ -95,8 +95,8 @@ public:
 	short* GetMixBuffer( void ) { return NULL; }
 
 private:
-    LPDIRECTSOUND			m_pDS;
-    LPDIRECTSOUNDBUFFER		pDSBPrimary;
+	LPDIRECTSOUND			m_pDS;
+	LPDIRECTSOUNDBUFFER		pDSBPrimary;
 	idAudioBufferWIN32		*speakers;
 
 	int						numSpeakers;
@@ -114,7 +114,7 @@ idAudioHardwareWIN32::idAudioHardware
 ================
 */
 idAudioHardwareWIN32::idAudioHardwareWIN32() {
-    m_pDS = NULL;
+	m_pDS = NULL;
 	pDSBPrimary = NULL;
 	speakers = NULL;
 }
@@ -127,7 +127,7 @@ idAudioHardwareWIN32::~idAudioHardware
 idAudioHardwareWIN32::~idAudioHardwareWIN32() {
 	SAFE_DELETE( speakers );
 	SAFE_RELEASE( pDSBPrimary );
-    SAFE_RELEASE( m_pDS ); 
+	SAFE_RELEASE( m_pDS );
 }
 
 /*
@@ -136,20 +136,20 @@ idAudioHardwareWIN32::Initialize
 ===============
 */
 bool idAudioHardwareWIN32::Initialize( void ) {
-    int             hr;
+	int             hr;
 
 	bufferSize = 0;
 	numSpeakers = 0;
 	blockAlign = 0;
 
-    SAFE_RELEASE( m_pDS );
+	SAFE_RELEASE( m_pDS );
 
-    // Create IDirectSound using the primary sound device
-    if( FAILED( hr = DirectSoundCreate( NULL, &m_pDS, NULL ) )) {
-        return false;
+	// Create IDirectSound using the primary sound device
+	if( FAILED( hr = DirectSoundCreate( NULL, &m_pDS, NULL ) )) {
+		return false;
 	}
 
-    // Set primary buffer format
+	// Set primary buffer format
 	SetPrimaryBufferFormat( PRIMARYFREQ, 16, idSoundSystemLocal::s_numberOfSpeakers.GetInteger() );
 	return true;
 }
@@ -162,11 +162,11 @@ idAudioHardwareWIN32::InitializeSpeakers
 bool idAudioHardwareWIN32::InitializeSpeakers( byte *speakerData, int bufferSize, dword dwPrimaryFreq, dword dwPrimaryBitRate, dword dwSpeakers ) {
 	if ( dwSpeakers == 2 ) {
 		WAVEFORMATEXTENSIBLE wfx;
-		ZeroMemory( &wfx, sizeof(WAVEFORMATEXTENSIBLE) ); 
-		wfx.Format.wFormatTag      = WAVE_FORMAT_PCM; 
-		wfx.Format.nChannels       = 2; 
+		ZeroMemory( &wfx, sizeof(WAVEFORMATEXTENSIBLE) );
+		wfx.Format.wFormatTag      = WAVE_FORMAT_PCM;
+		wfx.Format.nChannels       = 2;
 		wfx.Format.nSamplesPerSec  = dwPrimaryFreq;
-		wfx.Format.wBitsPerSample  = dwPrimaryBitRate; 
+		wfx.Format.wBitsPerSample  = dwPrimaryBitRate;
 		wfx.Format.nBlockAlign     = wfx.Format.wBitsPerSample / 8 * wfx.Format.nChannels;
 		wfx.Format.nAvgBytesPerSec = wfx.Format.nSamplesPerSec * wfx.Format.nBlockAlign;
 		wfx.Format.cbSize = sizeof(WAVEFORMATEX);
@@ -175,10 +175,10 @@ bool idAudioHardwareWIN32::InitializeSpeakers( byte *speakerData, int bufferSize
 
 		common->Printf("sound: STEREO\n");
 	} else {
-		WAVEFORMATEXTENSIBLE 	waveFormatPCMEx;
-		ZeroMemory( &waveFormatPCMEx, sizeof(WAVEFORMATEXTENSIBLE) ); 
+		WAVEFORMATEXTENSIBLE	waveFormatPCMEx;
+		ZeroMemory( &waveFormatPCMEx, sizeof(WAVEFORMATEXTENSIBLE) );
 
- 		waveFormatPCMEx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+		waveFormatPCMEx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 		waveFormatPCMEx.Format.nChannels = 6;
 		waveFormatPCMEx.Format.nSamplesPerSec = dwPrimaryFreq;
 		waveFormatPCMEx.Format.wBitsPerSample  = dwPrimaryBitRate;
@@ -209,42 +209,42 @@ bool idAudioHardwareWIN32::InitializeSpeakers( byte *speakerData, int bufferSize
 /*
 ===============
 idAudioHardwareWIN32::SetPrimaryBufferFormat
-Set primary buffer to a specified format 
+Set primary buffer to a specified format
 For example, to set the primary buffer format to 22kHz stereo, 16-bit
 then:   dwPrimaryChannels = 2
-        dwPrimaryFreq     = 22050, 
-        dwPrimaryBitRate  = 16
+		dwPrimaryFreq     = 22050,
+		dwPrimaryBitRate  = 16
 ===============
 */
 void idAudioHardwareWIN32::SetPrimaryBufferFormat( dword dwPrimaryFreq, dword dwPrimaryBitRate, dword dwSpeakers ) {
-    HRESULT             hr;
+	HRESULT             hr;
 
-    if( m_pDS == NULL ) {
-        return;
+	if( m_pDS == NULL ) {
+		return;
 	}
 
 	ulong cfgSpeakers;
 	m_pDS->GetSpeakerConfig( &cfgSpeakers );
 
-	DSCAPS dscaps; 
-	dscaps.dwSize = sizeof(DSCAPS); 
-    m_pDS->GetCaps(&dscaps); 
+	DSCAPS dscaps;
+	dscaps.dwSize = sizeof(DSCAPS);
+	m_pDS->GetCaps(&dscaps);
 
 	if (dscaps.dwFlags & DSCAPS_EMULDRIVER) {
 		return;
 	}
 
-	// Get the primary buffer 
-    DSBUFFERDESC dsbd;
-    ZeroMemory( &dsbd, sizeof(DSBUFFERDESC) );
-    dsbd.dwSize        = sizeof(DSBUFFERDESC);
-    dsbd.dwFlags       = DSBCAPS_PRIMARYBUFFER;
-    dsbd.dwBufferBytes = 0;
-    dsbd.lpwfxFormat   = NULL;
-       
-	// Obtain write-primary cooperative level. 
+	// Get the primary buffer
+	DSBUFFERDESC dsbd;
+	ZeroMemory( &dsbd, sizeof(DSBUFFERDESC) );
+	dsbd.dwSize        = sizeof(DSBUFFERDESC);
+	dsbd.dwFlags       = DSBCAPS_PRIMARYBUFFER;
+	dsbd.dwBufferBytes = 0;
+	dsbd.lpwfxFormat   = NULL;
+
+	// Obtain write-primary cooperative level.
 	if( FAILED( hr = m_pDS->SetCooperativeLevel(win32.hWnd, DSSCL_PRIORITY ) ) ) {
-        DXTRACE_ERR( TEXT("SetPrimaryBufferFormat"), hr );
+		DXTRACE_ERR( TEXT("SetPrimaryBufferFormat"), hr );
 		return;
 	}
 
@@ -253,13 +253,13 @@ void idAudioHardwareWIN32::SetPrimaryBufferFormat( dword dwPrimaryFreq, dword dw
 	}
 
 	if ( dwSpeakers == 6 && (cfgSpeakers == DSSPEAKER_5POINT1 || cfgSpeakers == DSSPEAKER_SURROUND) ) {
-		WAVEFORMATEXTENSIBLE 	waveFormatPCMEx;
-		ZeroMemory( &waveFormatPCMEx, sizeof(WAVEFORMATEXTENSIBLE) ); 
+		WAVEFORMATEXTENSIBLE	waveFormatPCMEx;
+		ZeroMemory( &waveFormatPCMEx, sizeof(WAVEFORMATEXTENSIBLE) );
 
- 		waveFormatPCMEx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+		waveFormatPCMEx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 		waveFormatPCMEx.Format.nChannels = 6;
 		waveFormatPCMEx.Format.nSamplesPerSec = dwPrimaryFreq;
-		waveFormatPCMEx.Format.wBitsPerSample  = (WORD) dwPrimaryBitRate; 
+		waveFormatPCMEx.Format.wBitsPerSample  = (WORD) dwPrimaryBitRate;
 		waveFormatPCMEx.Format.nBlockAlign = waveFormatPCMEx.Format.wBitsPerSample / 8 * waveFormatPCMEx.Format.nChannels;
 		waveFormatPCMEx.Format.nAvgBytesPerSec = waveFormatPCMEx.Format.nSamplesPerSec * waveFormatPCMEx.Format.nBlockAlign;
 		waveFormatPCMEx.dwChannelMask = KSAUDIO_SPEAKER_5POINT1;
@@ -281,11 +281,11 @@ void idAudioHardwareWIN32::SetPrimaryBufferFormat( dword dwPrimaryFreq, dword dw
 			common->Printf("sound: hardware reported unable to use multisound, defaulted to stereo\n");
 		}
 		WAVEFORMATEX wfx;
-		ZeroMemory( &wfx, sizeof(WAVEFORMATEX) ); 
-		wfx.wFormatTag      = WAVE_FORMAT_PCM; 
-		wfx.nChannels       = 2; 
-		wfx.nSamplesPerSec  = dwPrimaryFreq; 
-		wfx.wBitsPerSample  = (WORD) dwPrimaryBitRate; 
+		ZeroMemory( &wfx, sizeof(WAVEFORMATEX) );
+		wfx.wFormatTag      = WAVE_FORMAT_PCM;
+		wfx.nChannels       = 2;
+		wfx.nSamplesPerSec  = dwPrimaryFreq;
+		wfx.wBitsPerSample  = (WORD) dwPrimaryBitRate;
 		wfx.nBlockAlign     = wfx.wBitsPerSample / 8 * wfx.nChannels;
 		wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 		wfx.cbSize = sizeof(WAVEFORMATEX);
@@ -310,59 +310,59 @@ void idAudioHardwareWIN32::SetPrimaryBufferFormat( dword dwPrimaryFreq, dword dw
 idAudioHardwareWIN32::Create
 ===============
 */
-int idAudioHardwareWIN32::Create( idAudioBuffer** ppSound, 
-                               const char* strWaveFileName, 
+int idAudioHardwareWIN32::Create( idAudioBuffer** ppSound,
+							   const char* strWaveFileName,
 							   dword dwCreationFlags ) {
-    int hr;
-    LPDIRECTSOUNDBUFFER   apDSBuffer     = NULL;
-    dword                 dwDSBufferSize = NULL;
-    idWaveFile*          pWaveFile      = NULL;
+	int hr;
+	LPDIRECTSOUNDBUFFER   apDSBuffer     = NULL;
+	dword                 dwDSBufferSize = NULL;
+	idWaveFile*          pWaveFile      = NULL;
 
-    if( m_pDS == NULL )
-        return -1;
-    if( strWaveFileName == NULL || ppSound == NULL )
-        return -1;
+	if( m_pDS == NULL )
+		return -1;
+	if( strWaveFileName == NULL || ppSound == NULL )
+		return -1;
 
 	pWaveFile = new idWaveFile();
 
-    pWaveFile->Open( strWaveFileName, NULL );
+	pWaveFile->Open( strWaveFileName, NULL );
 
-    if( pWaveFile->GetOutputSize() == 0 )     {
-        // Wave is blank, so don't create it.
-        hr = E_FAIL;
-        goto LFail;
-    }
+	if( pWaveFile->GetOutputSize() == 0 )     {
+		// Wave is blank, so don't create it.
+		hr = E_FAIL;
+		goto LFail;
+	}
 
-    // Make the DirectSound buffer the same size as the wav file
-    dwDSBufferSize = pWaveFile->GetOutputSize();
+	// Make the DirectSound buffer the same size as the wav file
+	dwDSBufferSize = pWaveFile->GetOutputSize();
 
-    // Create the direct sound buffer, and only request the flags needed
-    // since each requires some overhead and limits if the buffer can 
-    // be hardware accelerated
-    DSBUFFERDESC dsbd;
-    memset( &dsbd, 0, sizeof(DSBUFFERDESC) );
-    dsbd.dwSize          = sizeof(DSBUFFERDESC);
-    dsbd.dwFlags         = dwCreationFlags;
-    dsbd.dwBufferBytes   = dwDSBufferSize;
-    dsbd.guid3DAlgorithm = GUID_NULL;
-    dsbd.lpwfxFormat     = (WAVEFORMATEX*)&pWaveFile->mpwfx;
+	// Create the direct sound buffer, and only request the flags needed
+	// since each requires some overhead and limits if the buffer can
+	// be hardware accelerated
+	DSBUFFERDESC dsbd;
+	memset( &dsbd, 0, sizeof(DSBUFFERDESC) );
+	dsbd.dwSize          = sizeof(DSBUFFERDESC);
+	dsbd.dwFlags         = dwCreationFlags;
+	dsbd.dwBufferBytes   = dwDSBufferSize;
+	dsbd.guid3DAlgorithm = GUID_NULL;
+	dsbd.lpwfxFormat     = (WAVEFORMATEX*)&pWaveFile->mpwfx;
 
-    // DirectSound is only guarenteed to play PCM data.  Other
-    // formats may or may not work depending the sound card driver.
-    if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &apDSBuffer, NULL ) ) )
+	// DirectSound is only guarenteed to play PCM data.  Other
+	// formats may or may not work depending the sound card driver.
+	if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &apDSBuffer, NULL ) ) )
 		return -1;
 
-    // Create the sound
-    *ppSound = new idAudioBufferWIN32( apDSBuffer, dwDSBufferSize, pWaveFile );
-    
-    pWaveFile->Close();
+	// Create the sound
+	*ppSound = new idAudioBufferWIN32( apDSBuffer, dwDSBufferSize, pWaveFile );
 
-    return 0;
+	pWaveFile->Close();
+
+	return 0;
 
 LFail:
-    // Cleanup
-    SAFE_DELETE( pWaveFile );
-    return -1;
+	// Cleanup
+	SAFE_DELETE( pWaveFile );
+	return -1;
 }
 
 /*
@@ -371,99 +371,99 @@ idAudioHardwareWIN32::Create
 ===============
 */
 int idAudioHardwareWIN32::Create( idWaveFile* pWaveFile, idAudioBuffer** ppiab ) {
-    int hr;
-    LPDIRECTSOUNDBUFFER   apDSBuffer     = NULL;
-    dword                dwDSBufferSize = NULL;
+	int hr;
+	LPDIRECTSOUNDBUFFER   apDSBuffer     = NULL;
+	dword                dwDSBufferSize = NULL;
 
-    if( m_pDS == NULL )
-        return -1;
+	if( m_pDS == NULL )
+		return -1;
 
-    if( pWaveFile == NULL )
-        return -1;
+	if( pWaveFile == NULL )
+		return -1;
 
 	*ppiab = NULL;
 
-    if( pWaveFile->GetOutputSize() == 0 )     {
-        // Wave is blank, so don't create it.
-        hr = E_FAIL;
-        goto LFail;
-    }
+	if( pWaveFile->GetOutputSize() == 0 )     {
+		// Wave is blank, so don't create it.
+		hr = E_FAIL;
+		goto LFail;
+	}
 
-    // Make the DirectSound buffer the same size as the wav file
-    dwDSBufferSize = pWaveFile->GetOutputSize();
+	// Make the DirectSound buffer the same size as the wav file
+	dwDSBufferSize = pWaveFile->GetOutputSize();
 
-    // Create the direct sound buffer, and only request the flags needed
-    // since each requires some overhead and limits if the buffer can 
-    // be hardware accelerated
-    DSBUFFERDESC dsbd;
-    memset( &dsbd, 0, sizeof(DSBUFFERDESC) );
-    dsbd.dwSize          = sizeof(DSBUFFERDESC);
-    dsbd.dwFlags         = 0;
-    dsbd.dwBufferBytes   = dwDSBufferSize;
-    dsbd.guid3DAlgorithm = GUID_NULL;
-    dsbd.lpwfxFormat     = (WAVEFORMATEX*)&pWaveFile->mpwfx;
+	// Create the direct sound buffer, and only request the flags needed
+	// since each requires some overhead and limits if the buffer can
+	// be hardware accelerated
+	DSBUFFERDESC dsbd;
+	memset( &dsbd, 0, sizeof(DSBUFFERDESC) );
+	dsbd.dwSize          = sizeof(DSBUFFERDESC);
+	dsbd.dwFlags         = 0;
+	dsbd.dwBufferBytes   = dwDSBufferSize;
+	dsbd.guid3DAlgorithm = GUID_NULL;
+	dsbd.lpwfxFormat     = (WAVEFORMATEX*)&pWaveFile->mpwfx;
 
-    // DirectSound is only guarenteed to play PCM data.  Other
-    // formats may or may not work depending the sound card driver.
-    if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &apDSBuffer, NULL ) ) )
+	// DirectSound is only guarenteed to play PCM data.  Other
+	// formats may or may not work depending the sound card driver.
+	if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &apDSBuffer, NULL ) ) )
 		return -1;
 
-    // Create the sound
-    *ppiab = new idAudioBufferWIN32( apDSBuffer, dwDSBufferSize, pWaveFile );
-    
-    return 0;
+	// Create the sound
+	*ppiab = new idAudioBufferWIN32( apDSBuffer, dwDSBufferSize, pWaveFile );
+
+	return 0;
 
 LFail:
-    // Cleanup
-    SAFE_DELETE( pWaveFile );
-    return -1;
+	// Cleanup
+	SAFE_DELETE( pWaveFile );
+	return -1;
 }
 
 //-----------------------------------------------------------------------------
 // Name: idAudioHardwareWIN32::CreateFromMemory()
-// Desc: 
+// Desc:
 //-----------------------------------------------------------------------------
-int idAudioHardwareWIN32::CreateFromMemory( idAudioBufferWIN32** ppSound, 
-                                        byte* pbData,
-                                        ulong  ulDataSize,
-                                        waveformatextensible_t* pwfx,
+int idAudioHardwareWIN32::CreateFromMemory( idAudioBufferWIN32** ppSound,
+										byte* pbData,
+										ulong  ulDataSize,
+										waveformatextensible_t* pwfx,
 										dword dwCreationFlags ) {
-    int hr;
-    LPDIRECTSOUNDBUFFER		apDSBuffer     = NULL;
-    dword					dwDSBufferSize = NULL;
-    idWaveFile*			pWaveFile      = NULL;
+	int hr;
+	LPDIRECTSOUNDBUFFER		apDSBuffer     = NULL;
+	dword					dwDSBufferSize = NULL;
+	idWaveFile*			pWaveFile      = NULL;
 
-    if( m_pDS == NULL )
-        return -1;
-    if( pbData == NULL || ppSound == NULL )
-        return -1;
-
-    pWaveFile = new idWaveFile();
-
-    pWaveFile->OpenFromMemory( (short *)pbData, ulDataSize, (waveformatextensible_t *)pwfx);
-
-
-    // Make the DirectSound buffer the same size as the wav file
-    dwDSBufferSize = ulDataSize;
-
-    // Create the direct sound buffer, and only request the flags needed
-    // since each requires some overhead and limits if the buffer can 
-    // be hardware accelerated
-    DSBUFFERDESC dsbd;
-    memset( &dsbd, 0, sizeof(DSBUFFERDESC) );
-    dsbd.dwSize          = sizeof(DSBUFFERDESC);
-    dsbd.dwFlags         = dwCreationFlags | DSBCAPS_GETCURRENTPOSITION2;
-    dsbd.dwBufferBytes   = dwDSBufferSize;
-    dsbd.guid3DAlgorithm = GUID_NULL;
-    dsbd.lpwfxFormat     = (WAVEFORMATEX *)pwfx;
-
-    if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &apDSBuffer, NULL ) ) )
+	if( m_pDS == NULL )
+		return -1;
+	if( pbData == NULL || ppSound == NULL )
 		return -1;
 
-    // Create the sound
-    *ppSound = new idAudioBufferWIN32( apDSBuffer, dwDSBufferSize, pWaveFile );
+	pWaveFile = new idWaveFile();
 
-    return S_OK;
+	pWaveFile->OpenFromMemory( (short *)pbData, ulDataSize, (waveformatextensible_t *)pwfx);
+
+
+	// Make the DirectSound buffer the same size as the wav file
+	dwDSBufferSize = ulDataSize;
+
+	// Create the direct sound buffer, and only request the flags needed
+	// since each requires some overhead and limits if the buffer can
+	// be hardware accelerated
+	DSBUFFERDESC dsbd;
+	memset( &dsbd, 0, sizeof(DSBUFFERDESC) );
+	dsbd.dwSize          = sizeof(DSBUFFERDESC);
+	dsbd.dwFlags         = dwCreationFlags | DSBCAPS_GETCURRENTPOSITION2;
+	dsbd.dwBufferBytes   = dwDSBufferSize;
+	dsbd.guid3DAlgorithm = GUID_NULL;
+	dsbd.lpwfxFormat     = (WAVEFORMATEX *)pwfx;
+
+	if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &apDSBuffer, NULL ) ) )
+		return -1;
+
+	// Create the sound
+	*ppSound = new idAudioBufferWIN32( apDSBuffer, dwDSBufferSize, pWaveFile );
+
+	return S_OK;
 }
 
 /*
@@ -553,10 +553,10 @@ idAudioBufferWIN32::idAudioBuffer
 */
 idAudioBufferWIN32::idAudioBufferWIN32( LPDIRECTSOUNDBUFFER apDSBuffer, dword dwDSBufferSize, idWaveFile* pWaveFile ) {
 
-    m_apDSBuffer = apDSBuffer;
+	m_apDSBuffer = apDSBuffer;
 
-    m_dwDSBufferSize = dwDSBufferSize;
-    m_pWaveFile      = pWaveFile;
+	m_dwDSBufferSize = dwDSBufferSize;
+	m_pWaveFile      = pWaveFile;
 
 	if (pWaveFile) {
 	    FillBufferWithSound( m_apDSBuffer, false );
@@ -572,7 +572,7 @@ idAudioBufferWIN32::~idAudioBuffer
 */
 idAudioBufferWIN32::~idAudioBufferWIN32() {
 	SAFE_DELETE(m_pWaveFile);
-	SAFE_RELEASE( m_apDSBuffer ); 
+	SAFE_RELEASE( m_apDSBuffer );
 	m_pWaveFile = NULL;
 	m_apDSBuffer = NULL;
 }
@@ -583,150 +583,150 @@ idAudioBufferWIN32::FillBufferWithSound
 ===============
 */
 int idAudioBufferWIN32::FillBufferWithSound( LPDIRECTSOUNDBUFFER pDSB, bool bRepeatWavIfBufferLarger ) {
-    int hr; 
-    void*   pDSLockedBuffer      = NULL; // Pointer to locked buffer memory
-    ulong   dwDSLockedBufferSize = 0;    // Size of the locked DirectSound buffer
-    int		dwWavDataRead        = 0;    // Amount of data read from the wav file 
+	int hr;
+	void*   pDSLockedBuffer      = NULL; // Pointer to locked buffer memory
+	ulong   dwDSLockedBufferSize = 0;    // Size of the locked DirectSound buffer
+	int		dwWavDataRead        = 0;    // Amount of data read from the wav file
 
-    if( pDSB == NULL )
-        return -1;
+	if( pDSB == NULL )
+		return -1;
 
 	// we may not even have a wavefile
 	if (m_pWaveFile==NULL) {
 		return -1;
 	}
 
-    // Make sure we have focus, and we didn't just switch in from
-    // an app which had a DirectSound device
-    if( FAILED( hr = RestoreBuffer( pDSB, NULL ) ) ) {
-        DXTRACE_ERR( TEXT("RestoreBuffer"), hr );
+	// Make sure we have focus, and we didn't just switch in from
+	// an app which had a DirectSound device
+	if( FAILED( hr = RestoreBuffer( pDSB, NULL ) ) ) {
+		DXTRACE_ERR( TEXT("RestoreBuffer"), hr );
 		return -1;
 	}
 
-    // Lock the buffer down
-    if( FAILED( hr = pDSB->Lock( 0, m_dwDSBufferSize, &pDSLockedBuffer, &dwDSLockedBufferSize, NULL, NULL, 0L ) ) ) {
-        DXTRACE_ERR( TEXT("Lock"), hr );
+	// Lock the buffer down
+	if( FAILED( hr = pDSB->Lock( 0, m_dwDSBufferSize, &pDSLockedBuffer, &dwDSLockedBufferSize, NULL, NULL, 0L ) ) ) {
+		DXTRACE_ERR( TEXT("Lock"), hr );
 		return -1;
 	}
 
-    // Reset the wave file to the beginning 
-    m_pWaveFile->ResetFile();
+	// Reset the wave file to the beginning
+	m_pWaveFile->ResetFile();
 
-    if( FAILED( hr = m_pWaveFile->Read( (byte*) pDSLockedBuffer, dwDSLockedBufferSize, &dwWavDataRead ) ) ) {
-        return DXTRACE_ERR( TEXT("Read"), hr );
+	if( FAILED( hr = m_pWaveFile->Read( (byte*) pDSLockedBuffer, dwDSLockedBufferSize, &dwWavDataRead ) ) ) {
+		return DXTRACE_ERR( TEXT("Read"), hr );
 	}
 
-    if( dwWavDataRead == 0 ) {
-        // Wav is blank, so just fill with silence
-        memset( pDSLockedBuffer, (byte)(m_pWaveFile->mpwfx.Format.wBitsPerSample == 8 ? 128 : 0 ), dwDSLockedBufferSize );
-    }  else if( dwWavDataRead < (int)dwDSLockedBufferSize ) {
-        // If the wav file was smaller than the DirectSound buffer, 
-        // we need to fill the remainder of the buffer with data 
-        if( bRepeatWavIfBufferLarger ) {       
-            // Reset the file and fill the buffer with wav data
-            int dwReadSoFar = dwWavDataRead;    // From previous call above.
-            while( dwReadSoFar < (int)dwDSLockedBufferSize ) {  
-                // This will keep reading in until the buffer is full 
-                // for very short files
-                if( FAILED( hr = m_pWaveFile->ResetFile() ) ) {
-                    return DXTRACE_ERR( TEXT("ResetFile"), hr );
+	if( dwWavDataRead == 0 ) {
+		// Wav is blank, so just fill with silence
+		memset( pDSLockedBuffer, (byte)(m_pWaveFile->mpwfx.Format.wBitsPerSample == 8 ? 128 : 0 ), dwDSLockedBufferSize );
+	}  else if( dwWavDataRead < (int)dwDSLockedBufferSize ) {
+		// If the wav file was smaller than the DirectSound buffer,
+		// we need to fill the remainder of the buffer with data
+		if( bRepeatWavIfBufferLarger ) {
+			// Reset the file and fill the buffer with wav data
+			int dwReadSoFar = dwWavDataRead;    // From previous call above.
+			while( dwReadSoFar < (int)dwDSLockedBufferSize ) {
+				// This will keep reading in until the buffer is full
+				// for very short files
+				if( FAILED( hr = m_pWaveFile->ResetFile() ) ) {
+					return DXTRACE_ERR( TEXT("ResetFile"), hr );
 				}
 
-                hr = m_pWaveFile->Read( (byte*)pDSLockedBuffer + dwReadSoFar, dwDSLockedBufferSize - dwReadSoFar, &dwWavDataRead );
-                if( FAILED(hr) ) {
-                    return DXTRACE_ERR( TEXT("Read"), hr );
+				hr = m_pWaveFile->Read( (byte*)pDSLockedBuffer + dwReadSoFar, dwDSLockedBufferSize - dwReadSoFar, &dwWavDataRead );
+				if( FAILED(hr) ) {
+					return DXTRACE_ERR( TEXT("Read"), hr );
 				}
 
-                dwReadSoFar += dwWavDataRead;
-            } 
-        } else {
-            // Don't repeat the wav file, just fill in silence 
-            memset( (byte*) pDSLockedBuffer + dwWavDataRead, (byte)(m_pWaveFile->mpwfx.Format.wBitsPerSample == 8 ? 128 : 0 ), dwDSLockedBufferSize - dwWavDataRead);
-        }
-    }
+				dwReadSoFar += dwWavDataRead;
+			}
+		} else {
+			// Don't repeat the wav file, just fill in silence
+			memset( (byte*) pDSLockedBuffer + dwWavDataRead, (byte)(m_pWaveFile->mpwfx.Format.wBitsPerSample == 8 ? 128 : 0 ), dwDSLockedBufferSize - dwWavDataRead);
+		}
+	}
 
-    // Unlock the buffer, we don't need it anymore.
-    pDSB->Unlock( pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0 );
+	// Unlock the buffer, we don't need it anymore.
+	pDSB->Unlock( pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0 );
 
-    return S_OK;
+	return S_OK;
 }
 
 /*
 ===============
 idAudioBufferWIN32::RestoreBuffer
-Desc: Restores the lost buffer. *pbWasRestored returns true if the buffer was 
-      restored.  It can also NULL if the information is not needed.
+Desc: Restores the lost buffer. *pbWasRestored returns true if the buffer was
+	  restored.  It can also NULL if the information is not needed.
 ===============
 */
 int idAudioBufferWIN32::RestoreBuffer( LPDIRECTSOUNDBUFFER pDSB, bool* pbWasRestored ) {
-    int hr;
+	int hr;
 
-    if( pDSB == NULL ) {
-        return -1;
+	if( pDSB == NULL ) {
+		return -1;
 	}
-    if( pbWasRestored ) {
-        *pbWasRestored = false;
-	}
-
-    ulong dwStatus;
-    if( FAILED( hr = pDSB->GetStatus( &dwStatus ) ) ) {
-        return DXTRACE_ERR( TEXT("GetStatus"), hr );
+	if( pbWasRestored ) {
+		*pbWasRestored = false;
 	}
 
-    if( dwStatus & DSBSTATUS_BUFFERLOST ) {
-        // Since the app could have just been activated, then
-        // DirectSound may not be giving us control yet, so 
-        // the restoring the buffer may fail.  
-        // If it does, sleep until DirectSound gives us control.
-        do {
-            hr = pDSB->Restore();
-            if( hr == DSERR_BUFFERLOST ) {
-                Sleep( 10 );
+	ulong dwStatus;
+	if( FAILED( hr = pDSB->GetStatus( &dwStatus ) ) ) {
+		return DXTRACE_ERR( TEXT("GetStatus"), hr );
+	}
+
+	if( dwStatus & DSBSTATUS_BUFFERLOST ) {
+		// Since the app could have just been activated, then
+		// DirectSound may not be giving us control yet, so
+		// the restoring the buffer may fail.
+		// If it does, sleep until DirectSound gives us control.
+		do {
+			hr = pDSB->Restore();
+			if( hr == DSERR_BUFFERLOST ) {
+				Sleep( 10 );
 			}
 			hr = pDSB->Restore();
-        } while( hr );
+		} while( hr );
 
-        if( pbWasRestored != NULL ) {
-            *pbWasRestored = true;
+		if( pbWasRestored != NULL ) {
+			*pbWasRestored = true;
 		}
 
-        return S_OK;
-    } else {
-        return S_FALSE;
-    }
+		return S_OK;
+	} else {
+		return S_FALSE;
+	}
 }
 
 /*
 ===============
 idAudioBufferWIN32::Play
 Desc: Plays the sound using voice management flags.  Pass in DSBPLAY_LOOPING
-      in the dwFlags to loop the sound
+	  in the dwFlags to loop the sound
 ===============
 */
 int idAudioBufferWIN32::Play( dword dwPriority, dword dwFlags ) {
-    int hr;
-    bool    bRestored;
+	int hr;
+	bool    bRestored;
 
-    if( m_apDSBuffer == NULL ) {
-        return -1;
+	if( m_apDSBuffer == NULL ) {
+		return -1;
 	}
 
-    // Restore the buffer if it was lost
-    if( FAILED( hr = RestoreBuffer( m_apDSBuffer, &bRestored ) ) ) {
-        common->Error( TEXT("RestoreBuffer"), hr );
+	// Restore the buffer if it was lost
+	if( FAILED( hr = RestoreBuffer( m_apDSBuffer, &bRestored ) ) ) {
+		common->Error( TEXT("RestoreBuffer"), hr );
 	}
 
-    if( bRestored ) {
-        // The buffer was restored, so we need to fill it with new data
-        if( FAILED( hr = FillBufferWithSound( m_apDSBuffer, false ) ) ) {
-            common->Error( TEXT("FillBufferWithSound"), hr );
+	if( bRestored ) {
+		// The buffer was restored, so we need to fill it with new data
+		if( FAILED( hr = FillBufferWithSound( m_apDSBuffer, false ) ) ) {
+			common->Error( TEXT("FillBufferWithSound"), hr );
 		}
 
-        // Make DirectSound do pre-processing on sound effects
-        Reset();
-    }
+		// Make DirectSound do pre-processing on sound effects
+		Reset();
+	}
 
-    m_apDSBuffer->Play( 0, dwPriority, dwFlags );
+	m_apDSBuffer->Play( 0, dwPriority, dwFlags );
 	return 0;
 }
 
@@ -737,13 +737,13 @@ Desc: Stops the sound from playing
 ===============
 */
 int idAudioBufferWIN32::Stop() {
-    if( this == NULL || m_apDSBuffer == NULL ) {
-        return -1;
+	if( this == NULL || m_apDSBuffer == NULL ) {
+		return -1;
 	}
 
 	m_apDSBuffer->Stop();
 
-    return 0;
+	return 0;
 }
 
 /*
@@ -753,13 +753,13 @@ Desc: Reset all of the sound buffers
 ===============
 */
 int idAudioBufferWIN32::Reset() {
-    if( m_apDSBuffer == NULL ) {
-        return -1;
+	if( m_apDSBuffer == NULL ) {
+		return -1;
 	}
 
-    m_apDSBuffer->SetCurrentPosition( 0 );
+	m_apDSBuffer->SetCurrentPosition( 0 );
 
-    return 0;
+	return 0;
 }
 
 /*
@@ -769,14 +769,14 @@ Desc: Checks to see if a buffer is playing and returns true if it
 ===============
 */
 bool idAudioBufferWIN32::IsSoundPlaying( ) {
-    if( m_apDSBuffer == NULL ) {
-        return false;
+	if( m_apDSBuffer == NULL ) {
+		return false;
 	}
 
-	if( m_apDSBuffer ) {  
+	if( m_apDSBuffer ) {
 		ulong dwStatus = 0;
-        m_apDSBuffer->GetStatus( &dwStatus );
-        if ( dwStatus & DSBSTATUS_PLAYING ) {
+		m_apDSBuffer->GetStatus( &dwStatus );
+		if ( dwStatus & DSBSTATUS_PLAYING ) {
 			return true;
 		}
 	}
@@ -790,15 +790,15 @@ idAudioBufferWIN32::Lock
 */
 bool idAudioBufferWIN32::Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize ) {
 	int hr;
-    // Restore the buffer if it was lost
-    bool bRestored;
-    if( FAILED( hr = RestoreBuffer( m_apDSBuffer, &bRestored ) ) ) {
-        return false;
+	// Restore the buffer if it was lost
+	bool bRestored;
+	if( FAILED( hr = RestoreBuffer( m_apDSBuffer, &bRestored ) ) ) {
+		return false;
 	}
 
-    // Lock the DirectSound buffer
-    if( FAILED( hr = m_apDSBuffer->Lock( 0, m_dwDSBufferSize, pDSLockedBuffer, dwDSLockedBufferSize, NULL, NULL, 0 ) ) ) {
-        return false;
+	// Lock the DirectSound buffer
+	if( FAILED( hr = m_apDSBuffer->Lock( 0, m_dwDSBufferSize, pDSLockedBuffer, dwDSLockedBufferSize, NULL, NULL, 0 ) ) ) {
+		return false;
 	}
 	return true;
 }
@@ -809,8 +809,8 @@ idAudioBufferWIN32::Unlock
 ===============
 */
 bool idAudioBufferWIN32::Unlock(void *pDSLockedBuffer, dword dwDSLockedBufferSize ) {
-    // Unlock the DirectSound buffer
-    m_apDSBuffer->Unlock( pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0 );
+	// Unlock the DirectSound buffer
+	m_apDSBuffer->Unlock( pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0 );
 	return true;
 }
 
@@ -822,15 +822,15 @@ idAudioBufferWIN32::GetCurrentPosition
 bool idAudioBufferWIN32::GetCurrentPosition( ulong *pdwCurrentWriteCursor ) {
 	int hr;
 
-    // Make sure we have focus, and we didn't just switch in from
-    // an app which had a DirectSound device
-    if( FAILED( hr = RestoreBuffer( m_apDSBuffer, NULL ) ) ) {
-        DXTRACE_ERR( TEXT("RestoreBuffer"), hr );
+	// Make sure we have focus, and we didn't just switch in from
+	// an app which had a DirectSound device
+	if( FAILED( hr = RestoreBuffer( m_apDSBuffer, NULL ) ) ) {
+		DXTRACE_ERR( TEXT("RestoreBuffer"), hr );
 		return false;
 	}
 
-    if( FAILED( hr = m_apDSBuffer->GetCurrentPosition( NULL, pdwCurrentWriteCursor ) ) ) {
-        return false;
+	if( FAILED( hr = m_apDSBuffer->GetCurrentPosition( NULL, pdwCurrentWriteCursor ) ) ) {
+		return false;
 	}
 	return true;
 }

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -80,7 +80,7 @@ idEFXFile::ReadEffect
 */
 bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 	idToken name, token;
-	
+
 	if ( !src.ReadToken( &token ) )
 		return false;
 
@@ -90,18 +90,18 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 		if ( reverb ) {
 			src.ReadTokenOnLine( &token );
 			name = token;
-				
+
 			if ( !src.ReadToken( &token ) ) {
 				Mem_Free( reverb );
 				return false;
 			}
-			
+
 			if ( token != "{" ) {
 				src.Error( "idEFXFile::ReadEffect: { not found, found %s", token.c_str() );
 				Mem_Free( reverb );
 				return false;
 			}
-			
+
 			do {
 				if ( !src.ReadToken( &token ) ) {
 					src.Error( "idEFXFile::ReadEffect: EOF without closing brace" );
@@ -210,7 +210,7 @@ bool idEFXFile::LoadFile( const char *filename, bool OSPath ) {
 		src.Error( "idEFXFile::LoadFile: Unknown file version" );
 		return false;
 	}
-	
+
 	while ( !src.EndOfFile() ) {
 		idSoundEffect *effect = new idSoundEffect;
 		if ( ReadEffect( src, effect ) ) {

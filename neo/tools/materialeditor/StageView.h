@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -44,7 +44,7 @@ class StageView : public ToggleListView, public MaterialView
 public:
 	virtual ~StageView();
 
-	/** 
+	/**
 	* Defines the type of stages
 	*/
 	enum {
@@ -79,29 +79,29 @@ protected:
 	DECLARE_DYNCREATE(StageView)
 
 	afx_msg int				OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void 			OnLvnItemchanged(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 			OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 			OnLvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 			OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void 			OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void 			OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void			OnLvnItemchanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void			OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void			OnLvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void			OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void			OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
 
-	afx_msg void 			OnRenameStage();
-	afx_msg void 			OnDeleteStage();
-	afx_msg void 			OnDeleteAllStages();
-	afx_msg void 			OnAddStage();
-	afx_msg void 			OnAddBumpmapStage();
-	afx_msg void 			OnAddDiffuseStage();
-	afx_msg void 			OnAddSpecualarStage();
+	afx_msg void			OnRenameStage();
+	afx_msg void			OnDeleteStage();
+	afx_msg void			OnDeleteAllStages();
+	afx_msg void			OnAddStage();
+	afx_msg void			OnAddBumpmapStage();
+	afx_msg void			OnAddDiffuseStage();
+	afx_msg void			OnAddSpecualarStage();
 
-	afx_msg void 			OnCopy();
-	afx_msg void 			OnPaste();
-	
-	afx_msg void 			OnLvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 			OnLvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 			OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void			OnCopy();
+	afx_msg void			OnPaste();
+
+	afx_msg void			OnLvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void			OnLvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void			OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	DECLARE_MESSAGE_MAP()
-	
+
 	//Overrides
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 	virtual BOOL			PreCreateWindow(CREATESTRUCT& cs);
@@ -117,7 +117,7 @@ protected:
 
 	MaterialPropTreeView*	m_propView;
 	MaterialDoc*			currentMaterial;
-	
+
 	//Manual handing of the row dragging
 	CImageList*				dragImage;
 	bool					bDragging;
@@ -128,5 +128,3 @@ protected:
 
 	bool					internalChange;
 };
-
-

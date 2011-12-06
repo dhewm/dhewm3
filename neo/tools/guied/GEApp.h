@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -92,19 +92,19 @@ public:
 	HWND				GetMDIFrame				( void );
 	HWND				GetMDIClient			( void );
 	rvGEStatusBar&		GetStatusBar			( void );
-	
+
 	bool				OpenFile				( const char* filename );
 	bool				SaveFile				( const char* filename );
 	bool				NewFile					( void );
-	
-	bool				IsActive				( void );	
+
+	bool				IsActive				( void );
 
 	void				CloseViewer				( void );
 
 	int					ToolWindowActivate		( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 	int					MessageBox				( const char* text, int flags );
-	
+
 protected:
 
 	int						HandleCommand				( WPARAM wParam, LPARAM lParam );
@@ -117,19 +117,19 @@ protected:
 
 	HWND					mMDIFrame;
 	HWND					mMDIClient;
-	HINSTANCE				mInstance;	
+	HINSTANCE				mInstance;
 	rvGEOptions				mOptions;
 	HACCEL					mAccelerators;
 	rvGENavigator			mNavigator;
 	rvGETransformer			mTransformer;
 	rvGEStatusBar			mStatusBar;
 	rvGEProperties			mProperties;
-	
+
 	HMENU					mRecentFileMenu;
-	int						mRecentFileInsertPos;		
-	
+	int						mRecentFileInsertPos;
+
 	rvGEViewer*				mViewer;
-	
+
 	idList<rvGEWorkspace*>	mWorkspaces;
 	idList<HWND>			mToolWindows;
 

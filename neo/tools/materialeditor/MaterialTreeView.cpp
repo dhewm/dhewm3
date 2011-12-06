@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -74,10 +74,10 @@ BEGIN_MESSAGE_MAP(MaterialTreeView, CTreeView)
 	ON_COMMAND(ID_POPUP_PASTE,				OnPaste)
 
 	ON_MESSAGE(MSG_RENAME_FOLDER_COMPLETE, OnRenameFolderComplete)
-	ON_MESSAGE(MSG_RENAME_MATERIAL_COMPLETE, OnRenameMaterialComplete)	
+	ON_MESSAGE(MSG_RENAME_MATERIAL_COMPLETE, OnRenameMaterialComplete)
 END_MESSAGE_MAP()
 
-/** 
+/**
 * Constructor for MaterialTreeView
 */
 MaterialTreeView::MaterialTreeView() {
@@ -87,13 +87,13 @@ MaterialTreeView::MaterialTreeView() {
 	internalChange = false;
 }
 
-/** 
+/**
 * Destructor for MaterialTreeView
 */
 MaterialTreeView::~MaterialTreeView() {
 }
 
-/** 
+/**
 * Clears the tree and rebuilds it.
 * @param includeFile Should the list include the filename
 * @param filename The file to load or NULL to load all files.
@@ -112,7 +112,7 @@ void MaterialTreeView::InitializeMaterialList(bool includeFile, const char* file
 	BuildMaterialList(includeFile, filename);
 }
 
-/** 
+/**
 * Builds the tree of materials.
 * @param includeFile Should the list include the filename
 * @param filename The file to load or NULL to load all files.
@@ -190,7 +190,7 @@ void MaterialTreeView::MV_OnMaterialChange(MaterialDoc* pMaterial) {
 }
 
 /**
-* Called when the material changes have been applied. 
+* Called when the material changes have been applied.
 * @param pMaterial The selected material.
 */
 void MaterialTreeView::MV_OnMaterialApply(MaterialDoc* pMaterial) {
@@ -207,7 +207,7 @@ void MaterialTreeView::MV_OnMaterialApply(MaterialDoc* pMaterial) {
 }
 
 /**
-* Called when the material changes have been saved. 
+* Called when the material changes have been saved.
 * @param pMaterial The saved material.
 */
 void MaterialTreeView::MV_OnMaterialSaved(MaterialDoc* pMaterial) {
@@ -257,7 +257,7 @@ void MaterialTreeView::MV_OnMaterialAdd(MaterialDoc* pMaterial) {
 	}
 
 	list.Append(temp);
-	AddStrList(NULL, &list, treeWithFile);	
+	AddStrList(NULL, &list, treeWithFile);
 
 	//Keep the items sorted
 	HTREEITEM* item = NULL;
@@ -298,7 +298,7 @@ void MaterialTreeView::MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const ch
 	CTreeCtrl& tree = GetTreeCtrl();
 
 	if(!internalChange) {
-		
+
 		//Delete the old tree item
 		HTREEITEM* item = NULL;
 		materialToTree.Get(oldName, &item);
@@ -306,7 +306,7 @@ void MaterialTreeView::MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const ch
 		HTREEITEM tempItem = *item;
 		CleanLookupTrees(tempItem);
 		tree.DeleteItem(tempItem);
-		
+
 
 		//Now add it back
 		idStrList list(1024);
@@ -322,7 +322,7 @@ void MaterialTreeView::MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const ch
 		}
 
 		list.Append(temp);
-		AddStrList(NULL, &list, treeWithFile);	
+		AddStrList(NULL, &list, treeWithFile);
 
 		//Keep the items sorted
 		//item = NULL;
@@ -643,7 +643,7 @@ HTREEITEM MaterialTreeView::AddFolder(const char* name, HTREEITEM parent) {
 	HTREEITEM newItem = tree.InsertItem(name, parent);
 	tree.SetItemImage(newItem, IMAGE_MATERIAL_FOLDER, IMAGE_MATERIAL_FOLDER);
 	tree.SetItemData(newItem, TYPE_MATERIAL_FOLDER);
-	tree.Expand(newItem, TVE_EXPAND); 
+	tree.Expand(newItem, TVE_EXPAND);
 
 	//Make sure the tree is still sorted
 	tree.SortChildren(parent);
@@ -675,7 +675,7 @@ void MaterialTreeView::RenameFolder(HTREEITEM item, const char* name) {
 
 	tree.SetItemText(item, name);
 
-	PostMessage(MSG_RENAME_FOLDER_COMPLETE); 
+	PostMessage(MSG_RENAME_FOLDER_COMPLETE);
 }
 
 /**
@@ -706,7 +706,7 @@ int MaterialTreeView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	CTreeCtrl& tree = GetTreeCtrl();
 	m_image.Create(IDB_ME_TREEBITMAP, 16, 1, RGB(255, 255, 255));
 	tree.SetImageList(&m_image, TVSIL_NORMAL);
-	
+
 	return 0;
 }
 
@@ -714,9 +714,9 @@ int MaterialTreeView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 * Changes the selected material when the select tree item changes.
 */
 void MaterialTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult) {
-	
+
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
-	
+
 	if(pNMTreeView->itemNew.hItem) {
 		CTreeCtrl& tree = GetTreeCtrl();
 
@@ -724,16 +724,16 @@ void MaterialTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult) {
 		if(type == TYPE_MATERIAL) {
 			idStr mediaName = GetMediaPath(pNMTreeView->itemNew.hItem, type);
 			const idMaterial* material = declManager->FindMaterial(mediaName);
-			
+
 			materialDocManager->SetSelectedMaterial(const_cast<idMaterial*>(material));
-			
+
 		} else {
-			
+
 			materialDocManager->SetSelectedMaterial(NULL);
 		}
 
 	} else {
-		
+
 		materialDocManager->SetSelectedMaterial(NULL);
 	}
 
@@ -744,7 +744,7 @@ void MaterialTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult) {
 * Determines if a tree item's label can be edited.
 */
 void MaterialTreeView::OnTvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
-	
+
 	LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
 
 	CTreeCtrl& tree = GetTreeCtrl();
@@ -759,7 +759,7 @@ void MaterialTreeView::OnTvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
 }
 
 /**
-* Makes sure that a rename operation can be performed after a label edit is complete and 
+* Makes sure that a rename operation can be performed after a label edit is complete and
 * performs the folder or material rename.
 */
 void MaterialTreeView::OnTvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -769,7 +769,7 @@ void MaterialTreeView::OnTvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 
 	if(pTVDispInfo->item.pszText) {
-		
+
 		//Convert any edited text to lower case to keep the name canonical
 		idStr newLabel = pTVDispInfo->item.pszText;
 		newLabel.ToLower();
@@ -810,7 +810,7 @@ void MaterialTreeView::OnTvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
 				internalChange = false;
 
 				renamedFolder = pTVDispInfo->item.hItem;
-				PostMessage(MSG_RENAME_MATERIAL_COMPLETE); 
+				PostMessage(MSG_RENAME_MATERIAL_COMPLETE);
 
 				*pResult = 1;
 			}
@@ -826,7 +826,7 @@ void MaterialTreeView::OnTvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult) {
 			affectedMaterials.Clear();
 			GetMaterialPaths(renamedFolder, &affectedMaterials);
 
-			PostMessage(MSG_RENAME_FOLDER_COMPLETE); 
+			PostMessage(MSG_RENAME_FOLDER_COMPLETE);
 
 			RenameMaterialFolderModifier* mod = new RenameMaterialFolderModifier(materialDocManager, pTVDispInfo->item.pszText, this, pTVDispInfo->item.hItem, tree.GetItemText(pTVDispInfo->item.hItem));
 			materialDocManager->AddMaterialUndoModifier(mod);
@@ -1336,7 +1336,7 @@ void MaterialTreeView::OnPaste() {
 		//Paste
 		materialDocManager->PasteMaterial(materialName, filename);
 
-	}	
+	}
 }
 
 /**
@@ -1527,12 +1527,12 @@ void MaterialTreeView::GetMaterialPaths(HTREEITEM item, idList<MaterialTreeItem_
 * @param includeFile If true the materials will be sorted by file.
 */
 void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includeFile) {
-	
+
 	CTreeCtrl& treeMedia = GetTreeCtrl();
 
 	idStr		out, path;
 	HTREEITEM	base = NULL;
-	
+
 	if(root) {
 		base = treeMedia.GetRootItem();
 		if (base) {
@@ -1557,7 +1557,7 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 	idStr	last, qt;
 	for (int i = 0; i < count; i++) {
 		idStr *strItem = &(*list)[i];
-		
+
 
 		idStr name = strItem->c_str();
 
@@ -1620,21 +1620,21 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 				if (quickTree.Get(qt, &check)) {
 					newItem = *check;
 				}
-				
+
 				bool thisisfile = false;
 				if(out == filename) {
 					thisisfile = true;
 					afterFile = true;
 
 				}
-				
+
 				if (newItem == NULL) {
 					newItem = treeMedia.InsertItem(out, item);
 					qt = root;
 					qt += "/";
 					qt += path;
 					quickTree.Set(qt, newItem);
-					
+
 
 					if(!afterFile || thisisfile) {
 						if(thisisfile) {
@@ -1658,7 +1658,7 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 					}
 				}
 
-				
+
 				item = newItem;
 				name.Right(name.Length() - index - 1, out);
 				name = out;
@@ -1701,7 +1701,7 @@ void MaterialTreeView::PopupMenu(CPoint* pt) {
 	CMenu FloatingMenu;
 	VERIFY(FloatingMenu.LoadMenu(IDR_ME_MATERIALTREE_POPUP));
 	CMenu* pPopupMenu = FloatingMenu.GetSubMenu (0);
-	
+
 	DWORD itemType = tree.GetItemData(item);
 
 	//Enable/Disable based on the state
@@ -1792,7 +1792,7 @@ void MaterialTreeView::PopupMenu(CPoint* pt) {
 	} else {
 		pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
-	
+
 	pPopupMenu->TrackPopupMenu (TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt->x, pt->y, &GetTreeCtrl());
 }
 
@@ -1913,14 +1913,3 @@ idStr MaterialTreeView::GetQuicktreePath(HTREEITEM item) {
 	}
 	return qt;
 }
-
-
-
-
-
-
-
-
-
-
-

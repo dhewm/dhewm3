@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -73,7 +73,7 @@ idAngles& idAngles::Normalize180( void ) {
 	if ( pitch > 180.0f ) {
 		pitch -= 360.0f;
 	}
-	
+
 	if ( yaw > 180.0f ) {
 		yaw -= 360.0f;
 	}
@@ -91,7 +91,7 @@ idAngles::ToVectors
 */
 void idAngles::ToVectors( idVec3 *forward, idVec3 *right, idVec3 *up ) const {
 	float sr, sp, sy, cr, cp, cy;
-	
+
 	idMath::SinCos( DEG2RAD( yaw ), sy, cy );
 	idMath::SinCos( DEG2RAD( pitch ), sp, cp );
 	idMath::SinCos( DEG2RAD( roll ), sr, cr );
@@ -116,7 +116,7 @@ idAngles::ToForward
 */
 idVec3 idAngles::ToForward( void ) const {
 	float sp, sy, cp, cy;
-	
+
 	idMath::SinCos( DEG2RAD( yaw ), sy, cy );
 	idMath::SinCos( DEG2RAD( pitch ), sp, cp );
 

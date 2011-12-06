@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -169,12 +169,12 @@ UnpackColor
 void UnpackColor( const dword color, idVec4 &unpackedColor ) {
 #if defined(_WIN32) || defined(__linux__) || (defined(MACOS_X) && defined(__i386__))
 	unpackedColor.Set( ( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ),
-						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ), 
+						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 24 ) & 255 ) * ( 1.0f / 255.0f ) );
 #elif (defined(MACOS_X) && defined(__ppc__))
 	unpackedColor.Set( ( ( color >> 24 ) & 255 ) * ( 1.0f / 255.0f ),
-						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ), 
+						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ) );
 #else
@@ -211,7 +211,7 @@ UnpackColor
 void UnpackColor( const dword color, idVec3 &unpackedColor ) {
 #if defined(_WIN32) || defined(__linux__) || (defined(MACOS_X) && defined(__i386__))
 	unpackedColor.Set( ( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ),
-						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ), 
+						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ) );
 #elif (defined(MACOS_X) && defined(__ppc__))
 	unpackedColor.Set( ( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ),
@@ -346,8 +346,8 @@ float FloatSwap( float f ) {
 		float	f;
 		byte	b[4];
 	} dat1, dat2;
-	
-	
+
+
 	dat1.f = f;
 	dat2.b[0] = dat1.b[3];
 	dat2.b[1] = dat1.b[2];
@@ -412,22 +412,22 @@ void RevBytesSwap( void *bp, int elsize, int elcount ) {
 /*
  =====================================================================
  RevBytesSwap
- 
+
  Reverses byte order in place, then reverses bits in those bytes
- 
+
  INPUTS
  bp       bitfield structure to reverse
  elsize   size of the underlying data type
- 
+
  RESULTS
  Reverses the bitfield of size elsize.
  ===================================================================== */
 void RevBitFieldSwap( void *bp, int elsize) {
 	int i;
 	unsigned char *p, t, v;
-	
+
 	LittleRevBytes( bp, elsize, 1 );
-	
+
 	p = (unsigned char *) bp;
 	while ( elsize-- ) {
 		v = *p;
@@ -525,7 +525,7 @@ Swap_Init
 void Swap_Init( void ) {
 	byte	swaptest[2] = {1,0};
 
-	// set the byte swapping variables in a portable manner	
+	// set the byte swapping variables in a portable manner
 	if ( *(short *)swaptest == 1) {
 		// little endian ex: x86
 		_BigShort = ShortSwap;

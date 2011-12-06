@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -49,17 +49,17 @@ public:
 	MaterialPropTreeView*		m_materialPropertyView;
 	CTabCtrl					m_tabs;
 	CSyntaxRichEditCtrl			m_textView;
-	
+
 public:
 	virtual			~MaterialEditView();
-	
+
 	//MaterialView Interface
 	virtual void	MV_OnMaterialSelectionChange(MaterialDoc* pMaterial);
 	virtual void	MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const char* oldName);
 
 	//SourceModifyOwner Interface
 	virtual idStr GetSourceText();
-	
+
 protected:
 	MaterialEditView();
 	DECLARE_DYNCREATE(MaterialEditView)
@@ -70,13 +70,13 @@ protected:
 	//CFormView Overrides
 	virtual void	DoDataExchange(CDataExchange* pDX);
 	virtual void	OnInitialUpdate();
-	
+
 	//Message Handlers
 	afx_msg int		OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void	OnSize(UINT nType, int cx, int cy);
-	afx_msg void 	OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void	OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
-	DECLARE_MESSAGE_MAP()	
+	DECLARE_MESSAGE_MAP()
 
 protected:
 	bool initHack;

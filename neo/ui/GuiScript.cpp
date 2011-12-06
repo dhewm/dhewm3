@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -61,7 +61,7 @@ void Script_Set(idWindow *window, idList<idGSWinVar> *src) {
 				window->AddCommand(*dest);
 			}
 			return;
-		} 
+		}
 	}
 	(*src)[0].var->Set((*src)[1].var->c_str());
 	(*src)[0].var->SetEval(false);
@@ -186,26 +186,26 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src) {
 	if (src->Num() >= 4) {
 		idWinRectangle *rect = NULL;
 		idWinVec4 *vec4 = dynamic_cast<idWinVec4*>((*src)[0].var);
-		// 
+		//
 		//  added float variable
 		idWinFloat* val = NULL;
-		// 
+		//
 		if (vec4 == NULL) {
 			rect = dynamic_cast<idWinRectangle*>((*src)[0].var);
-			// 
-			//  added float variable					
+			//
+			//  added float variable
 			if ( NULL == rect ) {
 				val = dynamic_cast<idWinFloat*>((*src)[0].var);
 			}
-			// 
+			//
 		}
 		idWinVec4 *from = dynamic_cast<idWinVec4*>((*src)[1].var);
 		idWinVec4 *to = dynamic_cast<idWinVec4*>((*src)[2].var);
 		idWinStr *timeStr = dynamic_cast<idWinStr*>((*src)[3].var);
-		// 
-		//  added float variable					
+		//
+		//  added float variable
 		if (!((vec4 || rect || val) && from && to && timeStr)) {
-			// 
+			//
 			common->Warning("Bad transition in gui %s in window %s\n", window->GetGui()->GetSourceFile(), window->GetName());
 			return;
 		}
@@ -219,16 +219,16 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src) {
 			ac = atof(*acv);
 			dc = atof(*dcv);
 		}
-				
+
 		if (vec4) {
 			vec4->SetEval(false);
 			window->AddTransition(vec4, *from, *to, time, ac, dc);
-			// 
-			//  added float variable					
+			//
+			//  added float variable
 		} else if ( val ) {
 			val->SetEval ( false );
 			window->AddTransition(val, *from, *to, time, ac, dc);
-			// 
+			//
 		} else {
 			rect->SetEval(false);
 			window->AddTransition(rect, *from, *to, time, ac, dc);
@@ -344,7 +344,7 @@ idGuiScript::Parse
 */
 bool idGuiScript::Parse(idParser *src) {
 	int i;
-	
+
 	// first token should be function call
 	// then a potentially variable set of parms
 	// ended with a ;
@@ -355,7 +355,7 @@ bool idGuiScript::Parse(idParser *src) {
 	}
 
 	handler	= NULL;
-	
+
 	for ( i = 0; i < scriptCommandCount ; i++ ) {
 		if ( idStr::Icmp(token, commandList[i].name) == 0 ) {
 			handler = commandList[i].handler;
@@ -367,14 +367,14 @@ bool idGuiScript::Parse(idParser *src) {
 		src->Error("Uknown script call %s", token.c_str());
 	}
 	// now read parms til ;
-	// all parms are read as idWinStr's but will be fixed up later 
+	// all parms are read as idWinStr's but will be fixed up later
 	// to be proper types
 	while (1) {
 		if ( !src->ReadToken(&token) ) {
 			src->Error( "Unexpected end of file" );
 			return false;
 		}
-		
+
 		if (idStr::Icmp(token, ";") == 0) {
 			break;
 		}
@@ -392,12 +392,12 @@ bool idGuiScript::Parse(idParser *src) {
 		parms.Append( wv );
 	}
 
-	// 
+	//
 	//  verify min/max params
 	if ( handler && (parms.Num() < commandList[i].mMinParms || parms.Num() > commandList[i].mMaxParms ) ) {
 		src->Error("incorrect number of parameters for script %s", commandList[i].name );
 	}
-	// 
+	//
 
 	return true;
 }
@@ -453,7 +453,7 @@ void idGuiScript::FixupParms(idWindow *win) {
 		}
 		int parmCount = parms.Num();
 		for (int i = 1; i < parmCount; i++) {
-			idWinStr *str = dynamic_cast<idWinStr*>(parms[i].var);		
+			idWinStr *str = dynamic_cast<idWinStr*>(parms[i].var);
 			if (idStr::Icmpn(*str, "gui::", 5) == 0) {
 
 				//  always use a string here, no point using a float if it is one
@@ -472,12 +472,12 @@ void idGuiScript::FixupParms(idWindow *win) {
 				//	parms[i].var = dest;
 				//	parms[i].own = false;
 				//}
-				// 
+				//
 			} else if ((*str[0]) == '$') {
-				// 
+				//
 				//  dont include the $ when asking for variable
 				dest = win->GetGui()->GetDesktop()->GetWinVarByName((const char*)(*str) + 1, true);
-				// 					
+				//
 				if (dest) {
 					delete parms[i].var;
 					parms[i].var = dest;
@@ -505,15 +505,15 @@ void idGuiScript::FixupParms(idWindow *win) {
 		}
 	} else if (handler == &Script_Transition) {
 		if (parms.Num() < 4) {
-			common->Warning("Window %s in gui %s has a bad transition definition", win->GetName(), win->GetGui()->GetSourceFile()); 
+			common->Warning("Window %s in gui %s has a bad transition definition", win->GetName(), win->GetGui()->GetSourceFile());
 		}
 		idWinStr *str = dynamic_cast<idWinStr*>(parms[0].var);
 		assert(str);
 
-		// 
+		//
 		drawWin_t *destowner;
 		idWinVar *dest = win->GetWinVarByName(*str, true, &destowner );
-		// 
+		//
 
 		if (dest) {
 			delete parms[0].var;
@@ -523,8 +523,8 @@ void idGuiScript::FixupParms(idWindow *win) {
 			common->Warning("Window %s in gui %s: a transition does not have a valid destination var %s", win->GetName(), win->GetGui()->GetSourceFile(),str->c_str());
 		}
 
-		// 
-		//  support variables as parameters		
+		//
+		//  support variables as parameters
 		int c;
 		for ( c = 1; c < 3; c ++ ) {
 			str = dynamic_cast<idWinStr*>(parms[c].var);
@@ -541,15 +541,15 @@ void idGuiScript::FixupParms(idWindow *win) {
 				dest = NULL;
 			}
 
-			if ( dest ) {	
+			if ( dest ) {
 				idWindow* ownerparent;
 				idWindow* destparent;
 				if ( owner ) {
 					ownerparent = owner->simp?owner->simp->GetParent():owner->win->GetParent();
 					destparent  = destowner->simp?destowner->simp->GetParent():destowner->win->GetParent();
 
-					// If its the rectangle they are referencing then adjust it 
-					if ( ownerparent && destparent && 
+					// If its the rectangle they are referencing then adjust it
+					if ( ownerparent && destparent &&
 						(dest == (owner->simp?owner->simp->GetWinVarByName ( "rect" ):owner->win->GetWinVarByName ( "rect" ) ) ) )
 					{
 						idRectangle rect;
@@ -565,11 +565,11 @@ void idGuiScript::FixupParms(idWindow *win) {
 				}
 			} else {
 				v4->Set(*str);
-			}			
-			
+			}
+
 			delete str;
-		}		
-		// 
+		}
+		//
 
 	} else {
 		int c = parms.Num();

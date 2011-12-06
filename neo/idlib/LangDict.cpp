@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -67,11 +67,11 @@ idLangDict::Load
 ============
 */
 bool idLangDict::Load( const char *fileName, bool clear /* _D3XP */ ) {
-	
+
 	if ( clear ) {
 		Clear();
 	}
-	
+
 	const char *buffer = NULL;
 	idLexer src( LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_ALLOWMULTICHARLITERALS | LEXFL_ALLOWBACKSLASHSTRINGCONCAT );
 
@@ -104,7 +104,7 @@ bool idLangDict::Load( const char *fileName, bool clear /* _D3XP */ ) {
 	}
 	idLib::common->Printf( "%i strings read from %s\n", args.Num(), fileName );
 	idLib::fileSystem->FreeFile( (void*)buffer );
-	
+
 	return true;
 }
 
@@ -172,7 +172,7 @@ idLangDict::AddString
 ============
 */
 const char *idLangDict::AddString( const char *str ) {
-	
+
 	if ( ExcludeString( str ) ) {
 		return str;
 	}
@@ -263,7 +263,7 @@ bool idLangDict::ExcludeString( const char *str ) const {
 	if ( i == c ) {
 		return true;
 	}
-	
+
 	return false;
 }
 

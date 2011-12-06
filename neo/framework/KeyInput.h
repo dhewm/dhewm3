@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -115,7 +115,7 @@ typedef enum {
 	K_KP_STAR,
 	K_KP_EQUALS,
 
-	K_MASCULINE_ORDINATOR = 186,	
+	K_MASCULINE_ORDINATOR = 186,
 	// K_MOUSE enums must be contiguous (no char codes in the middle)
 	K_MOUSE1 = 187,
 	K_MOUSE2,

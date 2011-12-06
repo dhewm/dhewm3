@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -47,10 +47,10 @@ public:
 
 	// Write the options to the registery
 	bool			Save				( void );
-	
+
 	// Read the options from the registry
 	bool			Load					( void );
-	
+
 	void			SetSelectionColor		( idVec4& color );
 	void			SetSelectionColor		( COLORREF color );
 	void			SetGridColor			( idVec4& color );
@@ -69,11 +69,11 @@ public:
 	void			AddRecentFile			( const char* filename );
 	int				GetRecentFileCount		( void );
 	const char*		GetRecentFile			( int index );
-	
+
 	idVec4&			GetGridColor			( void );
 	int				GetGridWidth			( void );
 	int				GetGridHeight			( void );
-	bool			GetGridVisible			( void );	
+	bool			GetGridVisible			( void );
 	bool			GetGridSnap				( void );
 	int				GetLastOptionsPage		( void );
 	idVec4&			GetWorkspaceColor		( void );
@@ -89,7 +89,7 @@ public:
 	bool			GetWindowPlacement		( const char* name, HWND hwnd );
 
 	void			SnapRectToGrid			( idRectangle& rect, bool snapLeft = true, bool snapTop = true, bool snapWidth = true, bool snapHeight = true );
-	
+
 protected:
 
 	void				ConvertColor		( COLORREF src, idVec4& dest );
@@ -103,20 +103,20 @@ protected:
 	int					mGridHeight;
 	bool				mGridSnap;
 	bool				mGridVisible;
-	
+
 	idVec4				mWorkspaceColor;
 	idVec4				mSelectionColor;
-	
+
 	bool				mNavigatorVisible;
 	bool				mPropertiesVisible;
 	bool				mTransformerVisible;
 	bool				mStatusBarVisible;
 	bool				mIgnoreDesktopSelect;
-	
+
 	idList<idStr>		mRecentFiles;
-	
-	COLORREF			mCustomColors[16];	
-	
+
+	COLORREF			mCustomColors[16];
+
 	rvRegistryOptions	mRegistry;
 };
 
@@ -311,4 +311,3 @@ ID_INLINE const char* rvGEOptions::GetRecentFile ( int index )
 }
 
 #endif // _GEOPTIONS_H_
-

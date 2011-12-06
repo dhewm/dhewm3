@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -151,7 +151,7 @@ bool idIK::Init( idEntity *self, const char *anim, const idVec3 &modelOffset ) {
 								self->name.c_str(), self->GetPhysics()->GetOrigin().ToString(0) );
 		return false;
 	}
-	
+
 	this->modelOffset = modelOffset;
 
 	return true;
@@ -296,40 +296,40 @@ idIK_Walk::Save
 */
 void idIK_Walk::Save( idSaveGame *savefile ) const {
 	int i;
-	
+
 	idIK::Save( savefile );
 
 	savefile->WriteClipModel( footModel );
 
 	savefile->WriteInt( numLegs );
 	savefile->WriteInt( enabledLegs );
-	for ( i = 0; i < MAX_LEGS; i++ ) 
+	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteInt( footJoints[i] );
-	for ( i = 0; i < MAX_LEGS; i++ ) 
+	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteInt( ankleJoints[i] );
-	for ( i = 0; i < MAX_LEGS; i++ ) 
+	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteInt( kneeJoints[i] );
-	for ( i = 0; i < MAX_LEGS; i++ ) 
+	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteInt( hipJoints[i] );
-	for ( i = 0; i < MAX_LEGS; i++ ) 
+	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteInt( dirJoints[i] );
 	savefile->WriteInt( waistJoint );
-	
+
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteVec3( hipForward[i] );
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteVec3( kneeForward[i] );
-	
+
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteFloat( upperLegLength[i] );
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteFloat( lowerLegLength[i] );
-	
+
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteMat3( upperLegToHipJoint[i] );
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->WriteMat3( lowerLegToKneeJoint[i] );
-	
+
 	savefile->WriteFloat( smoothing );
 	savefile->WriteFloat( waistSmoothing );
 	savefile->WriteFloat( footShift );
@@ -359,7 +359,7 @@ idIK_Walk::Restore
 */
 void idIK_Walk::Restore( idRestoreGame *savefile ) {
 	int i;
-	
+
 	idIK::Restore( savefile );
 
 	savefile->ReadClipModel( footModel );
@@ -377,22 +377,22 @@ void idIK_Walk::Restore( idRestoreGame *savefile ) {
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadInt( (int&)dirJoints[i] );
 	savefile->ReadInt( (int&)waistJoint );
-	
+
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadVec3( hipForward[i] );
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadVec3( kneeForward[i] );
-	
+
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadFloat( upperLegLength[i] );
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadFloat( lowerLegLength[i] );
-	
+
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadMat3( upperLegToHipJoint[i] );
 	for ( i = 0; i < MAX_LEGS; i++ )
 		savefile->ReadMat3( lowerLegToKneeJoint[i] );
-	
+
 	savefile->ReadFloat( smoothing );
 	savefile->ReadFloat( waistSmoothing );
 	savefile->ReadFloat( footShift );
@@ -893,17 +893,17 @@ void idIK_Reach::Save( idSaveGame *savefile ) const {
 		savefile->WriteInt( shoulderJoints[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->WriteInt( dirJoints[i] );
-		
+
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->WriteVec3( shoulderForward[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->WriteVec3( elbowForward[i] );
-		
+
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->WriteFloat( upperArmLength[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->WriteFloat( lowerArmLength[i] );
-		
+
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->WriteMat3( upperArmToShoulderJoint[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
@@ -929,17 +929,17 @@ void idIK_Reach::Restore( idRestoreGame *savefile ) {
 		savefile->ReadInt( (int&)shoulderJoints[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->ReadInt( (int&)dirJoints[i] );
-		
+
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->ReadVec3( shoulderForward[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->ReadVec3( elbowForward[i] );
-		
+
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->ReadFloat( upperArmLength[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->ReadFloat( lowerArmLength[i] );
-		
+
 	for ( i = 0; i <  MAX_ARMS; i++ )
 		savefile->ReadMat3( upperArmToShoulderJoint[i] );
 	for ( i = 0; i <  MAX_ARMS; i++ )

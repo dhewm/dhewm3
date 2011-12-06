@@ -28,7 +28,7 @@ class doomClientProtocol( protocol.ProcessProtocol ):
 
 	def connectionMade( self ):
 		self.logfile.write( 'connectionMade\n' )
-		
+
 	def outReceived( self, data ):
 		print data
 		self.logfile.write( data )
@@ -36,22 +36,22 @@ class doomClientProtocol( protocol.ProcessProtocol ):
 	def errReceived( self, data ):
 		print 'stderr: ' + data
 		self.logfile.write( 'stderr: ' + data )
-		
+
 	def inConnectionLost( self ):
 		self.logfile.write( 'inConnectionLost\n' )
-		
+
 	def outConnectionLost( self ):
 		self.logfile.write( 'outConnectionLost\n' )
-		
+
 	def errConnectionLost( self ):
 		self.logfile.write( 'errConnectionLost\n' )
-		
+
 	def processEnded( self, status_object ):
 		self.logfile.write( 'processEnded %s\n' % repr( status_object ) )
 		self.logfile.write( time.strftime( '%H:%M:%S', time.localtime( time.time() ) ) + '\n' )
 		self.logfile.close()
 		self.deferred.callback( None )
-		
+
 	# mac management
 	def __init__( self, logfilename, deferred ):
 		self.logfilename = logfilename
@@ -138,7 +138,7 @@ class doomService( service.Service ):
 			print 'sleepAVGReply %s%%' % s
 			if ( s == '0' ):
 				# need twice in a row
-				if ( self.state == 2 ):					
+				if ( self.state == 2 ):
 					print 'child process is interactive'
 					self.p_transport.write( 'quit\n' )
 				else:
@@ -167,7 +167,7 @@ class doomService( service.Service ):
 			return
 		defer = utils.getProcessOutput( '/bin/bash', [ '-c', 'cat /proc/%d/status | grep SleepAVG' % self.p_transport.pid ] )
 		defer.addCallback( self.sleepAVGReply )
-		defer.setTimeout( 2, self.sleepAVGTimeout )		
+		defer.setTimeout( 2, self.sleepAVGTimeout )
 
 	def nextMap( self ):
 		self.state = 0
@@ -183,7 +183,7 @@ class doomService( service.Service ):
 			cmdline = [ self.bin ] + self.cmdline
 			if ( name != 'blankrun' ):
 				cmdline += [ '+devmap', name ]
-		print 'Command line: ' + repr( cmdline )		
+		print 'Command line: ' + repr( cmdline )
 		self.deferred = defer.Deferred()
 		self.deferred.addCallback( self.processEnded )
 		self.p_transport = reactor.spawnProcess( doomClientProtocol( logfile, self.deferred ), self.bin, cmdline , path = os.path.dirname( self.bin ), env = os.environ )
@@ -200,7 +200,7 @@ class doomService( service.Service ):
 
 	def stopService( self ):
 		print 'doomService stopService'
-		if ( not self.p_transport.pid is None ):			
+		if ( not self.p_transport.pid is None ):
 			self.p_transport.signalProcess( 'KILL' )
 		# serialize
 		print 'saving status to %s' % self.pickle_file

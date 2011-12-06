@@ -9,12 +9,12 @@ dnl =====================================================
 dnl utils
 dnl =====================================================
 
-define(`forloop', 
+define(`forloop',
 	`pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
 define(`_forloop',
 	`$4`'ifelse($1, `$3', ,
 	`define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
-	
+
 dnl =====================================================
 dnl the gl wgl glX definitions
 dnl =====================================================
@@ -90,9 +90,9 @@ bool GLimp_dlopen() {
 		common->DPrintf("dlopen(%s) failed: %s\n", driverName, dlerror());
 		return false;
 	}
-	
+
 	// dlsym the symbols
-	
+
 define(`dlsym_funcptr', `dll`$2' = ( `$1' ( APIENTRY *)(`$3') ) dlsym( glHandle, "gl`$2'" );')
 define(`safe_dlsym_funcptr', `dlsym_funcptr(`$1', `$2', `$3')
 if (!dll`$2') { GLimp_dlsym_failed("gl`$2'"); return false; }')
@@ -119,11 +119,11 @@ GLimp_dlclose
 void GLimp_dlclose() {
 	if ( !glHandle ) {
 		common->DPrintf("dlclose: GL handle is NULL\n");
-	} else {	
+	} else {
 		dlclose( glHandle );
 		glHandle = NULL;
 	}
-	
+
 define(`reset_funcptr', `qgl`$1' = NULL;')
 forloop(`i', gl_start, gl_end, `reset_funcptr(indir(`f'i`_name'))
 ')

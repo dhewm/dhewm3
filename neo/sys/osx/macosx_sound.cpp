@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,23 +37,23 @@ idCVar s_device( "s_device", "-1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "S
 class idAudioHardwareOSX : public idAudioHardware {
 public:
 	idAudioHardwareOSX();
-    ~idAudioHardwareOSX();
+	~idAudioHardwareOSX();
 
-    bool	Initialize( );
+	bool	Initialize( );
 
 	// OSX driver doesn't support memory map API
 	bool	Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize ) { return false; }
 	bool	Unlock( void *pDSLockedBuffer, dword dwDSLockedBufferSize ) { return false; }
 	bool	GetCurrentPosition( ulong *pdwCurrentWriteCursor ) { return false; }
 	int		GetMixBufferSize( void )  { return 0; }
-	
+
 	int		GetNumberOfSpeakers( void );
 
 	// OSX driver doesn't support write API
 	bool	Flush( void ) { return false; }
 	void	Write( bool ) { }
 	short*	GetMixBuffer( void ) { return NULL; }
-	
+
 private:
 	AudioDeviceID		selectedDevice;
 	bool				activeIOProc;
@@ -65,7 +65,7 @@ private:
 
 	// AudioDevicePropertyListenerProc
 	static OSStatus		DeviceListener(	AudioDeviceID			inDevice,
-	   									UInt32					inChannel,
+										UInt32					inChannel,
 										Boolean					isInput,
 										AudioDevicePropertyID	inPropertyID,
 										void*					inClientData );
@@ -75,7 +75,7 @@ private:
 									  const AudioTimeStamp*		inNow,
 									  const AudioBufferList*	inInputData,
 									  const AudioTimeStamp*		inInputTime,
-									  AudioBufferList*			outOutputData, 
+									  AudioBufferList*			outOutputData,
 									  const AudioTimeStamp*		inOutputTime,
 									  void*						inClientData );
 };
@@ -139,8 +139,8 @@ void idAudioHardwareOSX::Reset() {
 /*
 =================
 idAudioHardwareOSX::InitFailed
-=================	
-*/	
+=================
+*/
 void idAudioHardwareOSX::InitFailed() {
 	Reset();
 	cvarSystem->SetCVarBool( "s_noSound", true );
@@ -171,7 +171,7 @@ OSStatus idAudioHardwareOSX::DeviceIOProc( AudioDeviceID			inDevice,
 										   const AudioTimeStamp*	inNow,
 										   const AudioBufferList*	inInputData,
 										   const AudioTimeStamp*	inInputTime,
-										   AudioBufferList*			outOutputData, 
+										   AudioBufferList*			outOutputData,
 										   const AudioTimeStamp*	inOutputTime,
 										   void*					inClientData ) {
 
@@ -300,7 +300,7 @@ bool idAudioHardwareOSX::Initialize( ) {
 		GetAvailableNominalSampleRates();
 
 		sampleRate = PRIMARYFREQ;
-		common->Printf( "setting rate to: %g\n", sampleRate );		
+		common->Printf( "setting rate to: %g\n", sampleRate );
 		status = AudioDeviceSetProperty( selectedDevice, NULL, 0, false, kAudioDevicePropertyNominalSampleRate, size, &sampleRate );
 		if ( status != kAudioHardwareNoError ) {
 			common->Warning( "AudioDeviceSetProperty %d kAudioDevicePropertyNominalSampleRate %g failed. status: %s", selectedDevice, sampleRate, ExtractStatus( status ) );
@@ -354,7 +354,7 @@ bool idAudioHardwareOSX::Initialize( ) {
 	}
 	UInt32 channels[ 2 ];
 	size = 2 * sizeof( UInt32 );
-	status = AudioDeviceGetProperty( selectedDevice, 0, false, 	kAudioDevicePropertyPreferredChannelsForStereo, &size, &channels );
+	status = AudioDeviceGetProperty( selectedDevice, 0, false,	kAudioDevicePropertyPreferredChannelsForStereo, &size, &channels );
 	if ( status != kAudioHardwareNoError ) {
 		common->Warning( "AudioDeviceGetProperty %d kAudioDevicePropertyPreferredChannelsForStereo failed. status: %s", selectedDevice, ExtractStatus( status ) );
 		InitFailed();
@@ -396,7 +396,7 @@ idAudioHardwareOSX::GetAvailableNominalSampleRates
 void idAudioHardwareOSX::GetAvailableNominalSampleRates( void ) {
 	UInt32				size;
 	OSStatus			status;
-	int			   		i, rangeCount;
+	int					i, rangeCount;
 	AudioValueRange		*rangeArray;
 
 	status = AudioDeviceGetPropertyInfo( selectedDevice, 0, false, kAudioDevicePropertyAvailableNominalSampleRates, &size, NULL );

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -50,7 +50,7 @@ public:
 
 	void			InitializeMaterialList(bool includeFile = true, const char* filename = NULL);
 	void			BuildMaterialList(bool includeFile = true, const char* filename = NULL);
-	
+
 	//Material Interface
 	virtual void	MV_OnMaterialChange(MaterialDoc* pMaterial);
 	virtual void	MV_OnMaterialApply(MaterialDoc* pMaterial);
@@ -59,7 +59,7 @@ public:
 	virtual void	MV_OnMaterialDelete(MaterialDoc* pMaterial);
 	virtual void	MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const char* oldName);
 	virtual void	MV_OnFileReload(const char* filename);
-	
+
 	bool			CanCopy();
 	bool			CanPaste();
 	bool			CanCut();
@@ -75,7 +75,7 @@ public:
 	void			DeleteFolder(HTREEITEM item, bool addUndo = true);
 	HTREEITEM		AddFolder(const char* name, HTREEITEM parent);
 	void			RenameFolder(HTREEITEM item, const char* name);
-	
+
 
 protected:
 	MaterialTreeView();
@@ -97,38 +97,38 @@ protected:
 
 	//Window Messages
 	afx_msg int		OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void 	OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 	OnTvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 	OnTvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 	OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void 	OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnTvnBeginlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnTvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void	OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void	OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void 	OnTvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void 	OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void 	OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void	OnTvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void	OnLButtonUp(UINT nFlags, CPoint point);
 
 	//Menu Commands
-	afx_msg void 	OnApplyMaterial();
-	afx_msg void 	OnApplyFile();
-	afx_msg void 	OnApplyAll();
-	afx_msg void 	OnSaveMaterial();
-	afx_msg void 	OnSaveFile();
-	afx_msg void 	OnSaveAll();
-	afx_msg	void 	OnRenameMaterial();
-	afx_msg	void 	OnAddMaterial();
-	afx_msg	void 	OnAddFolder();
-	afx_msg	void 	OnDeleteMaterial();
-	afx_msg	void 	OnReloadFile();
-	afx_msg	void 	OnCut();
-	afx_msg	void 	OnCopy();
-	afx_msg	void 	OnPaste();
+	afx_msg void	OnApplyMaterial();
+	afx_msg void	OnApplyFile();
+	afx_msg void	OnApplyAll();
+	afx_msg void	OnSaveMaterial();
+	afx_msg void	OnSaveFile();
+	afx_msg void	OnSaveAll();
+	afx_msg	void	OnRenameMaterial();
+	afx_msg	void	OnAddMaterial();
+	afx_msg	void	OnAddFolder();
+	afx_msg	void	OnDeleteMaterial();
+	afx_msg	void	OnReloadFile();
+	afx_msg	void	OnCut();
+	afx_msg	void	OnCopy();
+	afx_msg	void	OnPaste();
 
 	//Internal Messages
 	afx_msg LRESULT OnRenameFolderComplete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRenameMaterialComplete(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	
+
 
 	//Utility methods
 	void			RenameMaterial(HTREEITEM item, const char* originalName);
@@ -138,7 +138,7 @@ protected:
 	void			AddStrList(const char *root, idStrList *list, bool includeFile);
 	void			PopupMenu(CPoint* pt);
 	void			SetItemImage(HTREEITEM item, bool mod, bool apply, bool children);
-	
+
 
 	//Methods for working with the quicktree
 	void			CleanLookupTrees(HTREEITEM item);
@@ -171,5 +171,3 @@ protected:
 
 	bool					internalChange;
 };
-
-

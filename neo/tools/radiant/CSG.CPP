@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -50,7 +50,7 @@ void CSG_MakeHollow (void)
 	{
 		next = b->next;
 
-    if (b->owner->eclass->fixedsize || b->pPatch || b->hiddenBrush || b->modelHandle > 0)
+	if (b->owner->eclass->fixedsize || b->pPatch || b->hiddenBrush || b->modelHandle > 0)
 		  continue;
 
 		for ( f = b->brush_faces; f; f = f->next ) {
@@ -500,7 +500,7 @@ void CSG_Subtract (void)
 			snext = s->next;
 
 			for (i=0 ; i<3 ; i++)
-				if (b->mins[i] >= s->maxs[i] - ON_EPSILON 
+				if (b->mins[i] >= s->maxs[i] - ON_EPSILON
 				|| b->maxs[i] <= s->mins[i] + ON_EPSILON)
 					break;
 			if (i != 3)
@@ -538,7 +538,7 @@ void CSG_Subtract (void)
 			}
 
 			for (i=0 ; i<3 ; i++)
-				if (b->mins[i] >= s->maxs[i] - ON_EPSILON 
+				if (b->mins[i] >= s->maxs[i] - ON_EPSILON
 				|| b->maxs[i] <= s->mins[i] + ON_EPSILON)
 					break;
 			if (i != 3)

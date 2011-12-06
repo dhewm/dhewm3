@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -37,7 +37,7 @@ public:
 	{
 		name = "";
 		shift[0] = shift[1] = 0.0;
-		rotate = 0;	
+		rotate = 0;
 		scale[0] = scale[1] = 0;
 		value = 0;
 	}
@@ -133,7 +133,7 @@ typedef struct qtexture_s
 	int		flags;
 	int		value;
 	int		texture_number;	// gl bind number
-  
+
 	// name of the .shader file
   char  shadername[1024]; // old shader stuff
   bool bFromShader;   // created from a shader
@@ -193,7 +193,7 @@ typedef struct {
 
 
 #define	MIN_PATCH_WIDTH		3
-#define	MIN_PATCH_HEIGHT 	3
+#define	MIN_PATCH_HEIGHT	3
 
 #define	MAX_PATCH_WIDTH		64
 #define	MAX_PATCH_HEIGHT	64
@@ -220,9 +220,9 @@ typedef struct {
 #define PATCH_BEZIER      0x00000000    // default bezier
 #define PATCH_BSPLINE     0x10000000    // bspline
 
-#define PATCH_TYPEMASK     0x00000fff    // 
-#define PATCH_BTYPEMASK    0x0000f000    // 
-#define PATCH_STYLEMASK    0xffff0000    // 
+#define PATCH_TYPEMASK     0x00000fff    //
+#define PATCH_BTYPEMASK    0x0000f000    //
+#define PATCH_STYLEMASK    0xffff0000    //
 
 
 struct brush_s;
@@ -267,7 +267,7 @@ enum {
 	LIGHT_RADIUS,
 	LIGHT_X,
 	LIGHT_Y,
-	LIGHT_Z, 
+	LIGHT_Z,
 	LIGHT_START,
 	LIGHT_END,
 	LIGHT_CENTER
@@ -362,7 +362,7 @@ typedef struct trimodel_t
 
 enum EVAR_TYPES {
 	EVAR_STRING,
-	EVAR_INT,		
+	EVAR_INT,
 	EVAR_FLOAT,
 	EVAR_BOOL,
 	EVAR_COLOR,
@@ -419,8 +419,8 @@ extern	eclass_t	*eclass;
 #define W_CAMERA_IFON	0x0100
 #define W_XZ			0x0200  //--| only used for patch vertex manip stuff
 #define W_YZ			0x0400  //--|
-#define W_MEDIA			0x1000 
-#define W_GAME			0x2000 
+#define W_MEDIA			0x1000
+#define W_GAME			0x2000
 #define	W_ALL			0xFFFFFFFF
 
 // used in some Drawing routines

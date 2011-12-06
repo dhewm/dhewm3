@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -123,7 +123,7 @@ void FreeBrushList (uBrush_t *brushes)
 		next = brushes->next;
 
 		FreeBrush (brushes);
-	}		
+	}
 }
 
 /*
@@ -138,7 +138,7 @@ uBrush_t *CopyBrush (uBrush_t *brush)
 	uBrush_t *newbrush;
 	int			size;
 	int			i;
-	
+
 	size = BrushSizeForSides( brush->numsides );
 
 	newbrush = AllocBrush (brush->numsides);
@@ -217,7 +217,7 @@ bool BoundBrush (uBrush_t *brush) {
 	}
 
 	for ( i = 0; i < 3; i++ ) {
-		if (brush->bounds[0][i] < MIN_WORLD_COORD || brush->bounds[1][i] > MAX_WORLD_COORD 
+		if (brush->bounds[0][i] < MIN_WORLD_COORD || brush->bounds[1][i] > MAX_WORLD_COORD
 			|| brush->bounds[0][i] >= brush->bounds[1][i] ) {
 			return false;
 		}

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -88,14 +88,14 @@ void MaterialEditorInit( void ) {
 	// To create the main window, this code creates a new frame window
 	// object and then sets it as the application's main window object
 	meMainFrame = new MEMainFrame;
-	
+
 	// create and load the frame with its resources
 	meMainFrame->LoadFrame(IDR_ME_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL, NULL);
 
 
 	// hide the doom window by default
 	::ShowWindow ( win32.hWnd, SW_HIDE );
-	
+
 	// The one and only window has been initialized, so show and update it
 	meMainFrame->ShowWindow(SW_SHOW);
 	meMainFrame->UpdateWindow();
@@ -107,7 +107,7 @@ void MaterialEditorInit( void ) {
 void MaterialEditorRun( void ) {
 
 	MSG *msg = AfxGetCurrentMessage();
-	
+
 	while( ::PeekMessage(msg, NULL, NULL, NULL, PM_NOREMOVE) ) {
 		// pump message
 		if ( !AfxGetApp()->PumpMessage() ) {
@@ -119,14 +119,14 @@ void MaterialEditorRun( void ) {
 * Called by the doom engine when the material editor needs to be destroyed.
 */
 void MaterialEditorShutdown( void ) {
-	
+
 	delete meMainFrame;
 
 	delete materialEditorFont;
 
 	meMainFrame = NULL;
 }
- 
+
 /**
 * Allows the doom engine to reflect console output to the material editors console.
 */
@@ -173,4 +173,3 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
-

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -72,7 +72,7 @@ idBlockAlloc<clipLink_t, 1024>	clipLinkAllocator;
 
 static idList<trmCache_s*>		traceModelCache;
 static idHashIndex				traceModelHash;
-	
+
 /*
 ===============
 idClipModel::ClearTraceModelCache
@@ -162,7 +162,7 @@ void idClipModel::SaveTraceModels( idSaveGame *savefile ) {
 	savefile->WriteInt( traceModelCache.Num() );
 	for ( i = 0; i < traceModelCache.Num(); i++ ) {
 		trmCache_t *entry = traceModelCache[i];
-		
+
 		savefile->WriteTraceModel( entry->trm );
 		savefile->WriteFloat( entry->volume );
 		savefile->WriteVec3( entry->centerOfMass );
@@ -185,7 +185,7 @@ void idClipModel::RestoreTraceModels( idRestoreGame *savefile ) {
 
 	for ( i = 0; i < num; i++ ) {
 		trmCache_t *entry = new trmCache_t;
-		
+
 		savefile->ReadTraceModel( entry->trm );
 
 		savefile->ReadFloat( entry->volume );
@@ -667,9 +667,9 @@ clipSector_t *idClip::CreateClipSectors_r( const int depth, const idBounds &boun
 
 	front = bounds;
 	back = bounds;
-	
+
 	front[0][anode->axis] = back[1][anode->axis] = anode->dist;
-	
+
 	anode->children[0] = CreateClipSectors_r( depth+1, front, maxSector );
 	anode->children[1] = CreateClipSectors_r( depth+1, back, maxSector );
 

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -74,7 +74,7 @@ static void R_EmptyLevelImage( idImage *image ) {
 	}
 
 	// FIXME: this won't live past vid mode changes
-	image->GenerateImage( data, MAX_LEVEL_WIDTH, MAX_LEVEL_WIDTH, 
+	image->GenerateImage( data, MAX_LEVEL_WIDTH, MAX_LEVEL_WIDTH,
 		TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY );
 }
 
@@ -138,7 +138,7 @@ bool idMegaTexture::InitFromMegaFile( const char *fileBase ) {
 
 		levels[numLevels].image = globalImages->ImageFromFunction( str, R_EmptyLevelImage );
 		numLevels++;
-		
+
 		if ( width <= TILE_PER_LEVEL && height <= TILE_PER_LEVEL ) {
 			break;
 		}
@@ -238,7 +238,7 @@ void idMegaTexture::BindForViewOrigin( const idVec3 viewOrigin ) {
 			qglProgramLocalParameter4fvARB( GL_VERTEX_PROGRAM_ARB, i, parms );
 		} else {
 			idTextureLevel	*level = &levels[ numLevels-1-i ];
-			
+
 			if ( r_showMegaTexture.GetBool() ) {
 				if ( i & 1 ) {
 					globalImages->blackImage->Bind();
@@ -310,7 +310,7 @@ void idMegaTexture::SetViewOrigin( const idVec3 viewOrigin ) {
 	// convert the viewOrigin to a texture center, which will
 	// be a different conversion for each megaTexture
 	for ( int i = 0 ; i < 2 ; i++ ) {
-		texCenter[i] = 
+		texCenter[i] =
 			viewOrigin[0] * localViewToTextureCenter[i][0] +
 			viewOrigin[1] * localViewToTextureCenter[i][1] +
 			viewOrigin[2] * localViewToTextureCenter[i][2] +
@@ -470,7 +470,7 @@ void idTextureLevel::Invalidate() {
 
 
 typedef struct _TargaHeader {
-	unsigned char 	id_length, colormap_type, image_type;
+	unsigned char	id_length, colormap_type, image_type;
 	unsigned short	colormap_index, colormap_length;
 	unsigned char	colormap_size;
 	unsigned short	x_origin, y_origin, width, height;
@@ -683,7 +683,7 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 	targa_header.id_length = ReadByte( file );
 	targa_header.colormap_type = ReadByte( file );
 	targa_header.image_type = ReadByte( file );
-	
+
 	targa_header.colormap_index = ReadShort( file );
 	targa_header.colormap_length = ReadShort( file );
 	targa_header.colormap_size = ReadByte( file );
@@ -720,7 +720,7 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 	if ( targa_header.id_length != 0 ) {
 		file->Seek( targa_header.id_length, FS_SEEK_CUR );
 	}
-	
+
 	megaTextureHeader_t		mtHeader;
 
 	mtHeader.tileSize = TILE_SIZE;
@@ -731,7 +731,7 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 	outName.StripFileExtension();
 	outName += ".mega";
 
-	common->Printf( "Writing %i x %i size %i tiles to %s.\n", 
+	common->Printf( "Writing %i x %i size %i tiles to %s.\n",
 		mtHeader.tilesWide, mtHeader.tilesHigh, mtHeader.tileSize, outName.c_str() );
 
 	// open the output megatexture file
@@ -749,7 +749,7 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 		common->Printf( "%i blockRowsRemaining\n", blockRowsRemaining );
 		session->UpdateScreen();
 
-		if ( targa_header.image_type == 2 || targa_header.image_type == 3 ) 	{ 
+		if ( targa_header.image_type == 2 || targa_header.image_type == 3 )	{
 			// Uncompressed RGB or gray scale image
 			for( row = 0 ; row < TILE_SIZE ; row++ ) {
 				pixbuf = targa_rgba + row*columns*4;
@@ -822,7 +822,7 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 								common->Error( "LoadTGA( %s ): illegal pixel_size '%d'\n", name, targa_header.pixel_size );
 								break;
 						}
-		
+
 						for( j = 0; j < packetSize; j++ ) {
 							*pixbuf++=red;
 							*pixbuf++=green;
@@ -877,7 +877,7 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 									goto breakOut;
 								}
 								pixbuf = targa_rgba + row*columns*4;
-							}						
+							}
 						}
 					}
 				}
@@ -909,5 +909,3 @@ void idMegaTexture::MakeMegaTexture_f( const idCmdArgs &args ) {
 	}
 #endif
 }
-
-

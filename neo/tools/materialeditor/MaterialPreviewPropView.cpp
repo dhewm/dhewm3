@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -151,7 +151,7 @@ void MaterialPreviewPropView::InitializePropTree( void ) {
 	pCombo->SetItemData( 5, 5 );
 	pCombo->SetItemData( 6, 6 );
 	pCombo->SetItemData( 7, 7 );
-	
+
 	pCombo->SetCurSel( 0 );
 
 	// Custom model entry
@@ -271,7 +271,7 @@ void MaterialPreviewPropView::OnPropertyChangeNotification( NMHDR *nmhdr, LRESUL
 	}
 
 	idStr	itemLabel = item->GetLabelText();
-	
+
 	if ( itemLabel == "Model Type" ) {
 		materialPreview->OnModelChange( item->GetItemValue() );
 

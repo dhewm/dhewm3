@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -239,7 +239,7 @@ void DialogScriptEditor::OpenFile( const char *fileName ) {
 	idStr( fileName ).ExtractFileExtension( extension );
 
 	if ( extension.Icmp( "script" ) == 0 ) {
-        InitScriptEvents();
+		InitScriptEvents();
 		scriptEdit.SetCaseSensitive( true );
 		scriptEdit.LoadKeyWordsFromFile( "editors/script.def" );
 		scriptEdit.SetObjectMemberCallback( GetScriptEvents );
@@ -334,7 +334,7 @@ BOOL DialogScriptEditor::OnInitDialog()  {
 	UpdateStatusBar();
 
 	return FALSE; // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BEGIN_MESSAGE_MAP(DialogScriptEditor, CDialog)
@@ -651,9 +651,9 @@ LRESULT DialogScriptEditor::OnFindDialogMessage( WPARAM wParam, LPARAM lParam ) 
 	}
 
 	if ( findDlg->IsTerminating() ) {
-        findDlg = NULL;
-        return 0;
-    }
+		findDlg = NULL;
+		return 0;
+	}
 
 	if( findDlg->FindNext() ) {
 		findStr = findDlg->GetFindString();
@@ -662,7 +662,7 @@ LRESULT DialogScriptEditor::OnFindDialogMessage( WPARAM wParam, LPARAM lParam ) 
 		searchForward = findDlg->SearchDown() != FALSE;
 
 		OnEditFindNext();
-    }
+	}
 
 	if ( findDlg->ReplaceCurrent() ) {
 		long selStart, selEnd;

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -70,7 +70,7 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 	if ( !formatspec ) {
 		formatspec = "";
 	}
-	
+
 	this->name = command;
 	this->formatspec = formatspec;
 	this->returnType = returnType;
@@ -443,8 +443,8 @@ void idEvent::ClearEventList( void ) {
 	//
 	FreeEvents.Clear();
 	EventQueue.Clear();
-   
-	// 
+
+	//
 	// add the events to the free list
 	//
 	for( i = 0; i < MAX_EVENTS; i++ ) {
@@ -599,7 +599,7 @@ void idEvent::Shutdown( void ) {
 	}
 
 	ClearEventList();
-	
+
 	eventDataAllocator.Shutdown();
 
 	// say it is now shutdown
@@ -766,7 +766,7 @@ void idEvent::Restore( idRestoreGame *savefile ) {
 /*
  ================
  idEvent::ReadTrace
- 
+
  idRestoreGame has a ReadTrace procedure, but unfortunately idEvent wants the material
  string name at the of the data structure rather than in the middle
  ================
@@ -841,7 +841,7 @@ void CreateEventCallbackHandler( void ) {
 				argString[ k ] = j & ( 1 << k ) ? 'f' : 'i';
 			}
 			argString[ i ] = '\0';
-			
+
 			string1.Empty();
 			string2.Empty();
 

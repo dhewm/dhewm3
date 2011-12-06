@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -309,7 +309,7 @@ void idInternalCVar::Set( const char *newValue, bool force, bool fromServer ) {
 			common->Printf( "%s is a synced over the network and cannot be changed on a multiplayer client.\n", nameString.c_str() );
 #if ID_ALLOW_CHEATS
 			common->Printf( "ID_ALLOW_CHEATS override!\n" );
-#else				
+#else
 			return;
 #endif
 		}
@@ -318,10 +318,10 @@ void idInternalCVar::Set( const char *newValue, bool force, bool fromServer ) {
 			common->Printf( "%s cannot be changed in multiplayer.\n", nameString.c_str() );
 #if ID_ALLOW_CHEATS
 			common->Printf( "ID_ALLOW_CHEATS override!\n" );
-#else				
+#else
 			return;
 #endif
-		}	
+		}
 	}
 
 	if ( !newValue ) {

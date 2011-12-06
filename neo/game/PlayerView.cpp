@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -143,7 +143,7 @@ void idPlayerView::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( dvFinishTime );
 	savefile->ReadMaterial( dvMaterial );
 	savefile->ReadInt( kickFinishTime );
-	savefile->ReadAngles( kickAngles );			
+	savefile->ReadAngles( kickAngles );
 	savefile->ReadBool( bfgVision );
 
 	savefile->ReadMaterial( tunnelMaterial );
@@ -279,7 +279,7 @@ void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict *damageDef )
 		blob->x += ( gameLocal.random.RandomInt()&63 ) - 32;
 		blob->y = damageDef->GetFloat( "blob_y" );
 		blob->y += ( gameLocal.random.RandomInt()&63 ) - 32;
-		
+
 		float scale = ( 256 + ( ( gameLocal.random.RandomInt()&63 ) - 32 ) ) / 256.0f;
 		blob->w = damageDef->GetFloat( "blob_width" ) * g_blobSize.GetFloat() * scale;
 		blob->h = damageDef->GetFloat( "blob_height" ) * g_blobSize.GetFloat() * scale;
@@ -361,7 +361,7 @@ void idPlayerView::WeaponFireFeedback( const idDict *weaponDef ) {
 		kickAngles = angles;
 		int	finish = gameLocal.time + g_kickTime.GetFloat() * recoilTime;
 		kickFinishTime = finish;
-	}	
+	}
 
 }
 
@@ -398,7 +398,7 @@ idMat3 idPlayerView::ShakeAxis() const {
 ===================
 idPlayerView::AngleOffset
 
-  kickVector, a world space direction that the attack should 
+  kickVector, a world space direction that the attack should
 ===================
 */
 idAngles idPlayerView::AngleOffset() const {
@@ -460,7 +460,7 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 			if ( blob->finishTime <= gameLocal.time ) {
 				continue;
 			}
-			
+
 			blob->y += blob->driftAmount;
 
 			float	fade = (float)( blob->finishTime - gameLocal.time ) / ( blob->finishTime - blob->startFadeTime );
@@ -517,7 +517,7 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 			renderSystem->SetColor4( 1.0f, 1.0f, 1.0f, 1.0f );
 			renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
 		}
-		
+
 	}
 
 	// test a single material drawn over everything
@@ -549,7 +549,7 @@ void idPlayerView::DoubleVision( idUserInterface *hud, const renderView_t *view,
 	if ( scale > 0.5f ) {
 		scale = 0.5f;
 	}
-	float shift = scale * sin( sqrtf( offset ) * g_dvFrequency.GetFloat() ); 
+	float shift = scale * sin( sqrtf( offset ) * g_dvFrequency.GetFloat() );
 	shift = fabs( shift );
 
 	// if double vision, render to a texture
@@ -717,6 +717,5 @@ void idPlayerView::RenderPlayerView( idUserInterface *hud ) {
 	if ( net_clientLagOMeter.GetBool() && lagoMaterial && gameLocal.isClient ) {
 		renderSystem->SetColor4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderSystem->DrawStretchPic( 10.0f, 380.0f, 64.0f, 64.0f, 0.0f, 0.0f, 1.0f, 1.0f, lagoMaterial );
-	}	
+	}
 }
-

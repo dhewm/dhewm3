@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -72,7 +72,7 @@ public:
 	const char			*NextToken( const char *errorstring = NULL );
 
 	bool				TokenAvailable( void )	{ return currentToken < tokens.Num(); };
-	int					Num( void ) 			{ return tokens.Num(); };
+	int					Num( void )				{ return tokens.Num(); };
 	void				UnGetToken( void )		{ if ( currentToken > 0 ) { currentToken--; } };
 	const char			*GetToken( int index )	{ if ( ( index >= 0 ) && ( index < tokens.Num() ) ) { return tokens[ index ]; } else { return NULL; } };
 	const char			*CurrentToken( void )	{ return GetToken( currentToken ); };
@@ -101,10 +101,10 @@ public:
 class idExportOptions {
 private:
 	idTokenizer				tokens;
-							
+
 	void					Reset( const char *commandline );
-							
-public:						
+
+public:
 	idStr					commandLine;
 	idStr					src;
 	idStr					dest;
@@ -132,9 +132,9 @@ public:
 	float					rotate;
 	float					jointThreshold;
 	int						cycleStart;
-							
+
 							idExportOptions( const char *commandline, const char *ospath );
-							
+
 	bool					jointInExportGroup( const char *jointname );
 };
 
@@ -154,15 +154,15 @@ public:
 	int							index;
 	int							exportNum;
 	bool						keep;
-								
+
 	float						scale;
 	float						invscale;
-								
+
 	MFnDagNode					*dagnode;
 
 	idHierarchy<idExportJoint>	mayaNode;
 	idHierarchy<idExportJoint>	exportNode;
-							
+
 	idVec3						t;
 	idMat3						wm;
 
@@ -176,7 +176,7 @@ public:
 	int							firstComponent;
 	jointFrame_t				baseFrame;
 	int							depth;
-								
+
 								idExportJoint();
 	idExportJoint				&operator=( const idExportJoint &other );
 };
@@ -281,23 +281,23 @@ typedef struct md3Tag_s {
 ** XyzNormals		sizeof( md3XyzNormal_t ) * numVerts * numFrames
 */
 typedef struct {
-	int			ident;				// 
-				
+	int			ident;				//
+
 	char		name[MAX_Q3PATH];	// polyset name
-				
+
 	int			flags;
 	int			numFrames;			// all surfaces in a model should have the same
-				
+
 	int			numShaders;			// all surfaces in a model should have the same
 	int			numVerts;
-				
+
 	int			numTriangles;
 	int			ofsTriangles;
-				
+
 	int			ofsShaders;			// offset from start of md3Surface_t
 	int			ofsSt;				// texture coords are common for all frames
 	int			ofsXyzNormals;		// numVerts * numFrames
-				
+
 	int			ofsEnd;				// next surface follows
 } md3Surface_t;
 
@@ -328,7 +328,7 @@ typedef struct {
 	int			flags;
 
 	int			numFrames;
-	int			numTags;			
+	int			numTags;
 	int			numSurfaces;
 
 	int			numSkins;
@@ -389,7 +389,7 @@ public:
 	int							frameRate;
 	int							numFrames;
 	int							skipjoints;
-	int							export_joints;								
+	int							export_joints;
 	idList<idExportMesh *>		meshes;
 
 								idExportModel();
@@ -424,7 +424,7 @@ private:
 	void					GetBindPose( MObject &jointNode, idExportJoint *joint, float scale );
 	void					GetLocalTransform( idExportJoint *joint, idVec3 &pos, idMat3 &mat );
 	void					GetWorldTransform( idExportJoint *joint, idVec3 &pos, idMat3 &mat, float scale );
-	
+
 	void					CreateJoints( float scale );
 	void					PruneJoints( idStrList &keepjoints, idStr &prefix );
 	void					RenameJoints( idList<idNamePair> &renamejoints, idStr &prefix );

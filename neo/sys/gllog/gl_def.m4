@@ -1096,4 +1096,3 @@ define(`f362_params', ``Display *dpy, GLXDrawable drawable'')
 define(`f363_ret', `GLExtension_t')
 define(`f363_name', `GetProcAddressARB')
 define(`f363_params', ``const GLubyte *procname'')
-

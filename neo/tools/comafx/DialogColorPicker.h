@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -128,7 +128,7 @@ protected:
 	void			DrawMarkers(CDC *pDC);
 	void			TrackPoint(CPoint pt);
 	void			CalcRects();
-		
+
 	BOOL			InCircle(CPoint pt);
 	BOOL			InBright(CPoint pt);
 	BOOL			InOverBright(CPoint pt);
@@ -159,7 +159,7 @@ protected:
 	CRect			brightRect;
 	CRect			overBrightRect;
 
-	HSVType			hsvColor;	
+	HSVType			hsvColor;
 
 	RGBType			color;
 	RGBType			m_OldColor;

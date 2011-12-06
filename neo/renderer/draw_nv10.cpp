@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -62,7 +62,7 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 	const srfTriangles_t	*tri = surf->geo;
 	const shaderStage_t	*lastBumpStage = NULL;
 
-	RB_LogComment( "---------- RB_RenderInteraction %s on %s ----------\n", 
+	RB_LogComment( "---------- RB_RenderInteraction %s on %s ----------\n",
 		lightShader->GetName(), surfaceShader->GetName() );
 
 	// change the matrix and light projection vectors if needed
@@ -78,7 +78,7 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 	// change the scissor if needed
 	if ( r_useScissor.GetBool() && !backEnd.currentScissor.Equals( surf->scissorRect ) ) {
 		backEnd.currentScissor = surf->scissorRect;
-		qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1, 
+		qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 			backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 			backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 			backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
@@ -166,20 +166,20 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 				qglCombinerParameterfvNV( GL_CONSTANT_COLOR0_NV, tr.ambientLightVector.ToFloatPtr() );
 
 				// stage 0 sets primary_color = bump dot constant color
-				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, 
+				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV,
 					GL_CONSTANT_COLOR0_NV, GL_EXPAND_NORMAL_NV, GL_RGB );
-				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, 
+				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
 					GL_TEXTURE0_ARB, GL_EXPAND_NORMAL_NV, GL_RGB );
-				qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB, 
+				qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB,
 					GL_PRIMARY_COLOR_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 					GL_NONE, GL_NONE, GL_TRUE, GL_FALSE, GL_FALSE );
 
 				// stage 1 alpha sets primary_color = primary_color * falloff
-				qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_A_NV, 
+				qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_A_NV,
 					GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_BLUE );
-				qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_B_NV, 
+				qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_B_NV,
 					GL_TEXTURE1_ARB, GL_UNSIGNED_IDENTITY_NV, GL_ALPHA );
-				qglCombinerOutputNV( GL_COMBINER1_NV, GL_ALPHA, 
+				qglCombinerOutputNV( GL_COMBINER1_NV, GL_ALPHA,
 					GL_PRIMARY_COLOR_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 					GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE );
 
@@ -219,7 +219,7 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 
 			// make sure a combiner output doesn't step on the texture
 			qglCombinerParameteriNV( GL_NUM_GENERAL_COMBINERS_NV, 1 );
-			qglCombinerOutputNV( GL_COMBINER0_NV, GL_ALPHA, 
+			qglCombinerOutputNV( GL_COMBINER0_NV, GL_ALPHA,
 				GL_DISCARD_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 				GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE );
 
@@ -243,7 +243,7 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 			//
 			// draw the bump map result onto the alpha channel
 			//
-			GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ZERO | GLS_COLORMASK | GLS_DEPTHMASK 
+			GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ZERO | GLS_COLORMASK | GLS_DEPTHMASK
 				| backEnd.depthFunc );
 
 			// texture 0 will be the per-surface bump map
@@ -266,11 +266,11 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 
 			// stage 0 rgb performs the dot product
 			// SPARE0 = TEXTURE0 dot TEXTURE1
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV,
 				GL_TEXTURE1_ARB, GL_EXPAND_NORMAL_NV, GL_RGB );
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
 				GL_TEXTURE0_ARB, GL_EXPAND_NORMAL_NV, GL_RGB );
-			qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB, 
+			qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB,
 				GL_SPARE0_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 				GL_NONE, GL_NONE, GL_TRUE, GL_FALSE, GL_FALSE );
 
@@ -321,7 +321,7 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 				continue;
 			}
 
-			GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_SRC_ALPHA | GLS_COLORMASK | GLS_DEPTHMASK 
+			GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_SRC_ALPHA | GLS_COLORMASK | GLS_DEPTHMASK
 				| backEnd.depthFunc );
 
 			// texture 0 will be the per-surface bump map
@@ -347,32 +347,32 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 			// stage 0 rgb performs the dot product
 			// GL_PRIMARY_COLOR_NV = ( TEXTURE0 dot TEXTURE1 - 0.5 ) * 2
 			// the scale and bias steepen the specular curve
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV,
 				GL_TEXTURE1_ARB, GL_EXPAND_NORMAL_NV, GL_RGB );
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
 				GL_TEXTURE0_ARB, GL_EXPAND_NORMAL_NV, GL_RGB );
-			qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB, 
+			qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB,
 				GL_PRIMARY_COLOR_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 				GL_SCALE_BY_TWO_NV, GL_BIAS_BY_NEGATIVE_ONE_HALF_NV, GL_TRUE, GL_FALSE, GL_FALSE );
 
 			// stage 0 alpha does nothing
-			qglCombinerOutputNV( GL_COMBINER0_NV, GL_ALPHA, 
+			qglCombinerOutputNV( GL_COMBINER0_NV, GL_ALPHA,
 				GL_DISCARD_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 				GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE );
 
 			// stage 1 rgb does nothing
-			qglCombinerOutputNV( GL_COMBINER1_NV, GL_RGB, 
+			qglCombinerOutputNV( GL_COMBINER1_NV, GL_RGB,
 				GL_PRIMARY_COLOR_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 				GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE );
 
 			// stage 1 alpha takes bump * bump
 			// PRIMARY_COLOR = ( GL_PRIMARY_COLOR_NV * GL_PRIMARY_COLOR_NV - 0.5 ) * 2
 			// the scale and bias steepen the specular curve
-			qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_A_NV, 
+			qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_A_NV,
 				GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_BLUE );
-			qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_B_NV, 
+			qglCombinerInputNV( GL_COMBINER1_NV, GL_ALPHA, GL_VARIABLE_B_NV,
 				GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_BLUE );
-			qglCombinerOutputNV( GL_COMBINER1_NV, GL_ALPHA, 
+			qglCombinerOutputNV( GL_COMBINER1_NV, GL_ALPHA,
 				GL_PRIMARY_COLOR_NV, GL_DISCARD_NV, GL_DISCARD_NV,
 				GL_SCALE_BY_TWO_NV, GL_BIAS_BY_NEGATIVE_ONE_HALF_NV, GL_FALSE, GL_FALSE, GL_FALSE );
 
@@ -412,7 +412,7 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 		//-----------------------------------------------------
 		if ( surfaceStage->lighting == SL_DIFFUSE || surfaceStage->lighting == SL_SPECULAR ) {
 			// don't trash alpha
-			GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_ALPHAMASK | GLS_DEPTHMASK 
+			GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_ALPHAMASK | GLS_DEPTHMASK
 			| backEnd.depthFunc );
 
 			// texture 0 will get the surface color texture
@@ -441,27 +441,27 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 
 			// SPARE0 = TEXTURE0 * PRIMARY_COLOR
 			// SPARE1 = TEXTURE1 * CONSTANT_COLOR
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV,
 				GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB );
 			// variable B will be overriden based on the stage vertexColor option
 			if ( surfaceStage->vertexColor == SVC_MODULATE ) {
-				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, 
+				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
 					GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB );
 				qglEnableClientState( GL_COLOR_ARRAY );
 			} else if ( surfaceStage->vertexColor == SVC_INVERSE_MODULATE ) {
-				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, 
+				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
 					GL_PRIMARY_COLOR_NV, GL_UNSIGNED_INVERT_NV, GL_RGB );
 				qglEnableClientState( GL_COLOR_ARRAY );
 			} else {	// SVC_IGNORE
-				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, 
+				qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
 					GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB );
 				qglDisableClientState( GL_COLOR_ARRAY );
 			}
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_C_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_C_NV,
 				GL_TEXTURE1_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB );
-			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, 
+			qglCombinerInputNV( GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV,
 				GL_CONSTANT_COLOR1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB );
-			qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB, 
+			qglCombinerOutputNV( GL_COMBINER0_NV, GL_RGB,
 				GL_SPARE0_NV, GL_SPARE1_NV, GL_DISCARD_NV,
 				GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE );
 
@@ -583,7 +583,7 @@ static void RB_RenderViewLight( viewLight_t *vLight ) {
 	if ( vLight->globalShadows || vLight->localShadows ) {
 		backEnd.currentScissor = vLight->scissorRect;
 		if ( r_useScissor.GetBool() ) {
-			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1, 
+			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 				backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 				backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 				backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );

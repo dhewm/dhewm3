@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -107,7 +107,7 @@ int	Factorial( int val ) {
 	return fact;
 }
 
-void GeneratePermutedList( int *list, int listLength, int permute ) {	
+void GeneratePermutedList( int *list, int listLength, int permute ) {
 	for ( int i = 0 ; i < listLength ; i++ ) {
 		list[i] = i;
 	}
@@ -274,7 +274,7 @@ void idSoundChannel::GatherChannelSamples( int sampleOffset44k, int sampleCount4
 		sampleCount44k -= len;
 		sampleOffset44k += len;
 	}
-	
+
 	// grab part of the leadin sample
 	idSoundSample *leadin = leadinSample;
 	if ( !leadin || sampleOffset44k < 0 || sampleCount44k <= 0 ) {
@@ -337,10 +337,10 @@ void idSoundChannel::GatherChannelSamples( int sampleOffset44k, int sampleCount4
 /*
 ===============
 idSoundEmitterLocal::idSoundEmitterLocal
-  
+
 ===============
 */
-idSoundEmitterLocal::idSoundEmitterLocal( void ) {	
+idSoundEmitterLocal::idSoundEmitterLocal( void ) {
 	soundWorld = NULL;
 	Clear();
 }
@@ -387,7 +387,7 @@ void idSoundEmitterLocal::Clear( void ) {
 idSoundEmitterLocal::OverrideParms
 ==================
 */
-void idSoundEmitterLocal::OverrideParms( const soundShaderParms_t *base, 
+void idSoundEmitterLocal::OverrideParms( const soundShaderParms_t *base,
 									  const soundShaderParms_t *over, soundShaderParms_t *out ) {
 	if ( !over ) {
 		*out = *base;
@@ -471,7 +471,7 @@ void idSoundEmitterLocal::CheckForCompletion( int current44kHzTime ) {
 
 					// free hardware resources
 					chan->ALStop();
-					
+
 					// if this was an onDemand sound, purge the sample now
 					if ( chan->leadinSample->onDemand ) {
 						chan->leadinSample->PurgeSoundSample();
@@ -687,7 +687,7 @@ int idSoundEmitterLocal::StartSound( const idSoundShader *shader, const s_channe
 
 	// this is the sample time it will be first mixed
 	int start44kHz;
-	
+
 	if ( soundWorld->fpa[0] ) {
 		// if we are recording an AVI demo, don't use hardware time
 		start44kHz = soundWorld->lastAVI44kHz + MIXBUFFER_SAMPLES;
@@ -764,7 +764,7 @@ int idSoundEmitterLocal::StartSound( const idSoundShader *shader, const s_channe
 				if ( idSoundSystemLocal::s_showStartSound.GetInteger() ) {
 					common->Printf( "(override %s)", chan->soundShader->base->GetName() );
 				}
-				
+
 				chan->Stop();
 
 				// if this was an onDemand sound, purge the sample now
@@ -860,7 +860,7 @@ int idSoundEmitterLocal::StartSound( const idSoundShader *shader, const s_channe
 		chan->triggerGame44kHzTime -= diversity * length;
 		chan->triggerGame44kHzTime &= ~7;
 	}
-	
+
 	length *= 1000 / (float)PRIMARYFREQ;
 
 	Sys_LeaveCriticalSection();
@@ -1007,7 +1007,7 @@ void idSoundEmitterLocal::FadeSound( const s_channelType channel, float to, floa
 		}
 
 		// if it is already fading to this volume at this rate, don't change it
-		if ( chan->channelFade.fadeEndVolume == to && 
+		if ( chan->channelFade.fadeEndVolume == to &&
 			chan->channelFade.fadeEnd44kHz - chan->channelFade.fadeStart44kHz == length44kHz ) {
 			continue;
 		}

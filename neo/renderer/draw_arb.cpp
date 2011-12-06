@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -138,7 +138,7 @@ qglDisable( GL_TEXTURE_GEN_Q );
 #endif
 
 #if 0
-GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK 
+GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK
 			| backEnd.depthFunc );
 // the texccords are the non-normalized vector towards the light origin
 GL_SelectTexture( 0 );
@@ -155,7 +155,7 @@ return;
 		//
 		// draw the bump map result onto the alpha channel
 		//
-		GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ZERO | GLS_COLORMASK | GLS_DEPTHMASK 
+		GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ZERO | GLS_COLORMASK | GLS_DEPTHMASK
 			| backEnd.depthFunc );
 
 		// texture 0 will be the per-surface bump map
@@ -204,7 +204,7 @@ return;
 	//
 	//-----------------------------------------------------
 	// don't trash alpha
-	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_ALPHAMASK | GLS_DEPTHMASK 
+	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_ALPHAMASK | GLS_DEPTHMASK
 	| backEnd.depthFunc );
 
 	// texture 0 will get the surface color texture
@@ -291,7 +291,7 @@ static void RB_ARB_DrawThreeTextureInteraction( const drawInteraction_t *din ) {
 	//
 	// bump map dot cubeMap into the alpha channel
 	//
-	GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_COLORMASK | GLS_DEPTHMASK 
+	GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_COLORMASK | GLS_DEPTHMASK
 		| backEnd.depthFunc );
 
 	// texture 0 will be the per-surface bump map
@@ -340,7 +340,7 @@ static void RB_ARB_DrawThreeTextureInteraction( const drawInteraction_t *din ) {
 	//
 	//-----------------------------------------------------
 	// multiply result by alpha, but don't trash alpha
-	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_ALPHAMASK | GLS_DEPTHMASK 
+	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_ALPHAMASK | GLS_DEPTHMASK
 	| backEnd.depthFunc );
 
 	// texture 0 will get the surface color texture
@@ -481,7 +481,7 @@ static void RB_RenderViewLight( viewLight_t *vLight ) {
 	if ( vLight->globalShadows || vLight->localShadows ) {
 		backEnd.currentScissor = vLight->scissorRect;
 		if ( r_useScissor.GetBool() ) {
-			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1, 
+			qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 				backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 				backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 				backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
@@ -526,4 +526,3 @@ void RB_ARB_DrawInteractions( void ) {
 		RB_RenderViewLight( vLight );
 	}
 }
-

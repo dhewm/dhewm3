@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -137,7 +137,7 @@ typedef enum {
 } expRegister_t;
 
 typedef struct {
-	expOpType_t		opType;	
+	expOpType_t		opType;
 	int				a, b, c;
 } expOp_t;
 
@@ -197,7 +197,7 @@ typedef struct {
 	int					numFragmentProgramImages;
 	idImage *			fragmentProgramImages[MAX_FRAGMENT_IMAGES];
 
-	idMegaTexture		*megaTexture;		// handles all the binding and parameter setting 
+	idMegaTexture		*megaTexture;		// handles all the binding and parameter setting
 } newShaderStage_t;
 
 typedef struct {
@@ -300,7 +300,7 @@ const int MAX_SURFACE_TYPES		= 1 << NUM_SURFACE_BITS;
 
 typedef enum {
 	SURFTYPE_NONE,					// default type
-    SURFTYPE_METAL,
+	SURFTYPE_METAL,
 	SURFTYPE_STONE,
 	SURFTYPE_FLESH,
 	SURFTYPE_WOOD,
@@ -508,7 +508,7 @@ public:
 						// get sort order
 	const float			GetSort( void ) const { return sort; }
 						// this is only used by the gui system to force sorting order
-						// on images referenced from tga's instead of materials. 
+						// on images referenced from tga's instead of materials.
 						// this is done this way as there are 2000 tgas the guis use
 	void				SetSort( float s ) const { sort = s; };
 
@@ -575,7 +575,7 @@ public:
 	const int			GetNumRegisters() const { return numRegisters; }
 
 						// regs should point to a float array large enough to hold GetNumRegisters() floats
-	void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS], 
+	void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS],
 											const struct viewDef_s *view, idSoundEmitter *soundEmitter = NULL ) const;
 
 						// if a material only uses constants (no entityParm or globalparm references), this
@@ -633,9 +633,9 @@ private:
 	float				polygonOffset;
 
 	int					contentFlags;		// content flags
-	int					surfaceFlags;		// surface flags	
+	int					surfaceFlags;		// surface flags
 	mutable int			materialFlags;		// material flags
-	
+
 	decalInfo_t			decalInfo;
 
 
@@ -649,7 +649,7 @@ private:
 	materialCoverage_t	coverage;
 	cullType_t			cullType;			// CT_FRONT_SIDED, CT_BACK_SIDED, or CT_TWO_SIDED
 	bool				shouldCreateBackSides;
-	
+
 	bool				fogLight;
 	bool				blendLight;
 	bool				ambientLight;
@@ -659,7 +659,7 @@ private:
 
 	int					numOps;
 	expOp_t *			ops;				// evaluate to make expressionRegisters
-																										
+
 	int					numRegisters;																			//
 	float *				expressionRegisters;
 
@@ -667,7 +667,7 @@ private:
 
 	int					numStages;
 	int					numAmbientStages;
-																										
+
 	shaderStage_t *		stages;
 
 	struct mtrParsingData_s	*pd;			// only used during parsing

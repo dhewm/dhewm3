@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -41,7 +41,7 @@ public:
 
 	// Write the options to the registery
 	bool			Save				( void );
-	
+
 	// Read the options from the registry
 	bool			Load				( void );
 
@@ -71,7 +71,7 @@ public:
 
 	// MRU related methods
 	void			AddRecentFile			( const char* filename );
-	const char*		GetRecentFile			( int index );	
+	const char*		GetRecentFile			( int index );
 	int				GetRecentFileCount		( void );
 
 private:

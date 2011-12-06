@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -130,7 +130,7 @@ int Sys_GetVideoRam( void ) {
 		return retSize;
 	}
 
-	// Switch the security level to IMPERSONATE so that provider will grant access to system-level objects.  
+	// Switch the security level to IMPERSONATE so that provider will grant access to system-level objects.
 	hr = CoSetProxyBlanket( spServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE );
 	if ( hr != S_OK ) {
 		return retSize;
@@ -138,7 +138,7 @@ int Sys_GetVideoRam( void ) {
 
 	// Get the vid controller
 	CComPtr<IEnumWbemClassObject> spEnumInst = NULL;
-	hr = spServices->CreateInstanceEnum( CComBSTR( "Win32_VideoController" ), WBEM_FLAG_SHALLOW, NULL, &spEnumInst ); 
+	hr = spServices->CreateInstanceEnum( CComBSTR( "Win32_VideoController" ), WBEM_FLAG_SHALLOW, NULL, &spEnumInst );
 	if ( hr != WBEM_S_NO_ERROR || spEnumInst == NULL ) {
 		return retSize;
 	}
@@ -250,7 +250,7 @@ char *Sys_GetCurrentUser( void ) {
 	}
 
 	return s_userName;
-}	
+}
 
 
 /*
@@ -600,14 +600,14 @@ void Sym_GetFuncInfo( long addr, idStr &module, idStr &funcName ) {
 						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 						(LPTSTR) &lpMsgBuf,
 						0,
-						NULL 
+						NULL
 						);
 		LocalFree( lpMsgBuf );
 
 		// Couldn't retrieve symbol (no debug info?, can't load dbghelp.dll?)
 		sprintf( funcName, "0x%08x", addr );
 		module = "";
-    }
+	}
 }
 
 #else

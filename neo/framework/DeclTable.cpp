@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -38,7 +38,7 @@ idDeclTable::TableLookup
 float idDeclTable::TableLookup( float index ) const {
 	int iIndex;
 	float iFrac;
-	
+
 	int domain = values.Num() - 1;
 
 	if ( domain <= 1 ) {
@@ -71,7 +71,7 @@ float idDeclTable::TableLookup( float index ) const {
 		// don't need to worry about wrapping the filter
 		return values[iIndex] * ( 1.0f - iFrac ) + values[iIndex + 1] * iFrac;
 	}
-	
+
 	return values[iIndex];
 }
 

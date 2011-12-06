@@ -4,36 +4,36 @@ import os, zipfile, md5, pdb
 
 # sorts in reverse alphabetical order like doom does for searching
 def list_paks( path ):
-    files = os.listdir( path )
-    for i in files:
-        if ( i[-4:] != '.pk4' ):
-            files.remove( i )
+	files = os.listdir( path )
+	for i in files:
+		if ( i[-4:] != '.pk4' ):
+			files.remove( i )
 	files.sort()
 	files.reverse()
-    return files
+	return files
 
 def list_files_in_pak( pak ):
-    files = []
-    zippy = zipfile.ZipFile( pak )
-    files += zippy.namelist()
-    files.sort()
-    return files
+	files = []
+	zippy = zipfile.ZipFile( pak )
+	files += zippy.namelist()
+	files.sort()
+	return files
 
 # no sorting, blunt list of everything
 def list_files_in_paks( path ):
-    files = []
-    zippies = list_paks( path )
-    for fname in zippies:
-        print fname
-        zippy = zipfile.ZipFile( os.path.join( path, fname ) )
-        files += zippy.namelist()
-    # sort and remove dupes
-    dico = {}
-    for f in files:
-        dico[ f ] = 1
-    files = dico.keys()
-    files.sort()
-    return files
+	files = []
+	zippies = list_paks( path )
+	for fname in zippies:
+		print fname
+		zippy = zipfile.ZipFile( os.path.join( path, fname ) )
+		files += zippy.namelist()
+	# sort and remove dupes
+	dico = {}
+	for f in files:
+		dico[ f ] = 1
+	files = dico.keys()
+	files.sort()
+	return files
 
 # build a dictionary of names -> ( pak name, md5 ) from a path of pk4s
 def md5_in_paks( path ):
@@ -93,27 +93,27 @@ def list_updated_files( pak_path, base_path, case_match = False ):
 # find which files are missing in the expanded path, and extract the directories
 # returns ( files, dirs, missing )
 def status_files_for_path( path, infiles ):
-    files = []
-    dirs = []
-    missing = []
-    for i in infiles:
-        test_path = os.path.join( path, i )
-        if ( os.path.isfile( test_path ) ):
-            files.append( i )
-        elif ( os.path.isdir( test_path ) ):
-            dirs.append( i )
-        else:
-            missing.append( i )
-    return ( files, dirs, missing )
+	files = []
+	dirs = []
+	missing = []
+	for i in infiles:
+		test_path = os.path.join( path, i )
+		if ( os.path.isfile( test_path ) ):
+			files.append( i )
+		elif ( os.path.isdir( test_path ) ):
+			dirs.append( i )
+		else:
+			missing.append( i )
+	return ( files, dirs, missing )
 
 # build a pak from a base path and a list of files
 def build_pak( pak, path, files ):
-    zippy = zipfile.ZipFile( pak, 'w', zipfile.ZIP_DEFLATED )
-    for i in files:
-        source_path = os.path.join( path, i )
-        print source_path
-        zippy.write( source_path, i )
-    zippy.close()
+	zippy = zipfile.ZipFile( pak, 'w', zipfile.ZIP_DEFLATED )
+	for i in files:
+		source_path = os.path.join( path, i )
+		print source_path
+		zippy.write( source_path, i )
+	zippy.close()
 
 # process the list of files after a run to update media
 # dds/ -> verify all the .dds are present in zip ( case insensitive )
@@ -238,4 +238,3 @@ def ifind_list( base, files ):
 		else:
 			notfound.append( i )
 	return [ cased, notfound ]
-

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -47,7 +47,7 @@ BEGIN_MESSAGE_MAP(MEMainFrame, CFrameWnd)
 	ON_WM_SIZE()
 
 	ON_NOTIFY(TCN_SELCHANGE, TAB_CONTROL, OnTcnSelChange)
-	
+
 	ON_COMMAND(ID_ME_FILE_EXIT, OnFileExit)
 	ON_COMMAND(ID_ME_FILE_SAVEMATERIAL, OnFileSaveMaterial)
 	ON_COMMAND(ID_ME_FILE_SAVEFILE, OnFileSaveFile)
@@ -55,7 +55,7 @@ BEGIN_MESSAGE_MAP(MEMainFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_ME_FILE_SAVEMATERIAL, OnFileSaveMaterialUpdate )
 	ON_UPDATE_COMMAND_UI(ID_ME_FILE_SAVEFILE, OnFileSaveFileUpdate )
 	ON_UPDATE_COMMAND_UI(ID_ME_FILE_SAVE, OnFileSaveAllUpdate )
-	
+
 	ON_COMMAND(ID_ME_PREVIEW_APPLYCHANGES, OnApplyMaterial)
 	ON_COMMAND(ID_ME_PREVIEW_APPLYFILE, OnApplyFile)
 	ON_COMMAND(ID_ME_PREVIEW_APPLYALL, OnApplyAll)
@@ -81,10 +81,10 @@ BEGIN_MESSAGE_MAP(MEMainFrame, CFrameWnd)
 	ON_COMMAND(ID_ME_EDIT_REDO, OnEditRedo)
 	ON_UPDATE_COMMAND_UI(ID_ME_EDIT_UNDO, OnEditUndoUpdate )
 	ON_UPDATE_COMMAND_UI(ID_ME_EDIT_REDO, OnEditRedoUpdate )
-	
+
 	ON_COMMAND(ID_VIEW_INCLUDEFILENAME, OnViewIncludeFile)
 	ON_COMMAND(ID_PREVIEW_RELOADARBPROGRAMS, OnReloadArbPrograms)
-	ON_COMMAND(ID_PREVIEW_RELOADIMAGES, OnReloadImages )	
+	ON_COMMAND(ID_PREVIEW_RELOADIMAGES, OnReloadImages )
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -99,7 +99,7 @@ static UINT indicators[] =
 * Constructor for MEMainFrame. Initialize some member data and load the options.
 */
 MEMainFrame::MEMainFrame() {
-	
+
 	currentDoc = NULL;
 	m_find = NULL;
 
@@ -128,10 +128,10 @@ void MEMainFrame::PrintConsoleMessage(const char *msg) {
 BOOL MEMainFrame::PreCreateWindow(CREATESTRUCT& cs) {
 	if( !CFrameWnd::PreCreateWindow(cs) )
 		return FALSE;
-	
+
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.lpszClass = AfxRegisterWndClass(0);
-	
+
 	return TRUE;
 }
 
@@ -153,7 +153,7 @@ BOOL MEMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 
 	m_splitterWnd.CreateStatic(this, 2, 1);
 
-	
+
 	m_editSplitter.CreateStatic(&m_splitterWnd, 1, 2, WS_CHILD | WS_VISIBLE | WS_BORDER, m_splitterWnd.IdFromRowCol(0, 0));
 
 	if(!m_editSplitter.CreateView(0, 0, RUNTIME_CLASS(MaterialTreeView), CSize(300, 200), pContext)) {
@@ -210,7 +210,7 @@ BOOL MEMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 		val = 300;
 	m_previewSplitter.SetColumnInfo(0, val, 0);
 
-	
+
 
 	//Register the views with the document manager
 	materialDocManager.RegisterMaterialView(this);
@@ -260,7 +260,7 @@ BOOL MEMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 int MEMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
+
 
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP	| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_ME_MAINFRAME))
@@ -269,7 +269,7 @@ int MEMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 		return -1;      // fail to create
 	}
 
-	
+
 
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,
@@ -352,7 +352,7 @@ void MEMainFrame::OnSize(UINT nType, int cx, int cy)
 }
 
 /**
-* Called when the user changes the editor/console tab selection. This methods shows and hides 
+* Called when the user changes the editor/console tab selection. This methods shows and hides
 * the appropriate windows.
 */
 void MEMainFrame::OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -398,7 +398,7 @@ void MEMainFrame::OnFileSaveMaterial() {
 * Saves the selected file.
 */
 void MEMainFrame::OnFileSaveFile() {
-	
+
 	idStr filename = m_materialTreeView->GetSaveFilename();
 	if(filename.Length() > 0) {
 		materialDocManager.SaveFile(filename);
@@ -453,7 +453,7 @@ void MEMainFrame::OnFileSaveFileUpdate(CCmdUI *pCmdUI) {
 * Enables the Save All menu item if there are any materials that have been modified.
 */
 void MEMainFrame::OnFileSaveAllUpdate(CCmdUI *pCmdUI) {
-	
+
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
 		return;
@@ -480,7 +480,7 @@ void MEMainFrame::OnApplyMaterial() {
 * Applies all modified materials in the selected file.
 */
 void MEMainFrame::OnApplyFile() {
-	
+
 	idStr filename = m_materialTreeView->GetSaveFilename();
 	if(filename.Length() > 0) {
 		materialDocManager.ApplyFile(filename);
@@ -537,12 +537,12 @@ void MEMainFrame::OnApplyFileUpdate(CCmdUI *pCmdUI) {
 * to be applied.
 */
 void MEMainFrame::OnApplyAllUpdate(CCmdUI *pCmdUI) {
-	
+
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
 		return;
 	}
-	
+
 	if(materialDocManager.DoesAnyNeedApply()) {
 		pCmdUI->Enable(TRUE);
 	} else {
@@ -794,7 +794,7 @@ void MEMainFrame::OnEditFindNext() {
 * Performs an undo operation.
 */
 void MEMainFrame::OnEditUndo() {
-	
+
 	//Check for undo operation on special windows
 	CWnd* focus = GetFocus();
 	if(focus) {
@@ -811,7 +811,7 @@ void MEMainFrame::OnEditUndo() {
 * Performs a redo operation.
 */
 void MEMainFrame::OnEditRedo() {
-	
+
 	//Check for redo operation on special windows
 	CWnd* focus = GetFocus();
 	if(focus) {
@@ -828,7 +828,7 @@ void MEMainFrame::OnEditRedo() {
 * Enables the undo menu item if an undo is available.
 */
 void MEMainFrame::OnEditUndoUpdate(CCmdUI *pCmdUI) {
-	
+
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
 		return;
@@ -849,7 +849,7 @@ void MEMainFrame::OnEditUndoUpdate(CCmdUI *pCmdUI) {
 * Enables the redo menu item if a redo is available.
 */
 void MEMainFrame::OnEditRedoUpdate(CCmdUI *pCmdUI) {
-	
+
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
 		return;
@@ -870,9 +870,9 @@ void MEMainFrame::OnEditRedoUpdate(CCmdUI *pCmdUI) {
 * Toggles between including the file into the material list and not.
 */
 void MEMainFrame::OnViewIncludeFile() {
-	
+
 	CMenu* mmenu = GetMenu();
-	
+
 	UINT state = mmenu->GetMenuState(ID_VIEW_INCLUDEFILENAME, MF_BYCOMMAND);
 	ASSERT(state != 0xFFFFFFFF);
 
@@ -897,7 +897,7 @@ void MEMainFrame::OnReloadArbPrograms() {
 * of the editor.
 */
 void MEMainFrame::OnReloadImages() {
-	cmdSystem->BufferCommandText(CMD_EXEC_NOW, "reloadImages");	
+	cmdSystem->BufferCommandText(CMD_EXEC_NOW, "reloadImages");
 }
 
 /**
@@ -933,5 +933,5 @@ void MEMainFrame::FindNext(MaterialSearchData_t* search) {
 * @param pMaterial The newly selected material.
 */
 void MEMainFrame::MV_OnMaterialSelectionChange(MaterialDoc* pMaterial) {
-	
+
 }

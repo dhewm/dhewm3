@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -46,16 +46,16 @@ If you have questions concerning this license or the applicable additional terms
 
   Snaping verts can drag some triangles backwards or collapse them to points,
   which will cause them to be removed.
-  
+
 
   When snapping to ints, a point can move a maximum of sqrt(3)/2 distance
   Two points that were an epsilon apart can then become sqrt(3) apart
 
   A case that causes recursive overflow with point to triangle fixing:
 
-               A
+			   A
 	C            D
-	           B
+			   B
 
   Triangle ABC tests against point D and splits into triangles ADC and DBC
   Triangle DBC then tests against point A again and splits into ABC and ADB
@@ -148,7 +148,7 @@ struct hashVert_s	*GetHashVert( idVec3 &v ) {
 #endif
 	}
 
-	// create a new one 
+	// create a new one
 	hv = (hashVert_t *)Mem_Alloc( sizeof( *hv ) );
 
 	hv->next = hashVerts[block[0]][block[1]][block[2]];
@@ -614,7 +614,7 @@ void	FixGlobalTjunctions( uEntity_t *e ) {
 				} else {
 					axis.Identity();
 				}
-			}		
+			}
 
 			idVec3	origin = entity->mapEntity->epairs.GetVector( "origin" );
 

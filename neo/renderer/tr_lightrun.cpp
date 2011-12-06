@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -187,7 +187,7 @@ void R_CreateEntityRefs( idRenderEntityLocal *def ) {
 		return;
 	}
 
-	if ( r_showUpdates.GetBool() && 
+	if ( r_showUpdates.GetBool() &&
 		( def->referenceBounds[1][0] - def->referenceBounds[0][0] > 1024 ||
 		def->referenceBounds[1][1] - def->referenceBounds[0][1] > 1024 )  ) {
 		common->Printf( "big entityRef: %f,%f\n", def->referenceBounds[1][0] - def->referenceBounds[0][0],
@@ -199,7 +199,7 @@ void R_CreateEntityRefs( idRenderEntityLocal *def ) {
 		v[1] = def->referenceBounds[(i>>1)&1][1];
 		v[2] = def->referenceBounds[(i>>2)&1][2];
 
-		R_LocalPointToGlobal( def->modelMatrix, v, transformed[i] ); 
+		R_LocalPointToGlobal( def->modelMatrix, v, transformed[i] );
 	}
 
 	// bump the view count so we can tell if an
@@ -383,7 +383,7 @@ void R_DeriveLightData( idRenderLightLocal *light ) {
 	if ( !light->parms.pointLight ) {
 		// projected light
 
-		R_SetLightProject( light->lightProject, vec3_origin /* light->parms.origin */, light->parms.target, 
+		R_SetLightProject( light->lightProject, vec3_origin /* light->parms.origin */, light->parms.target,
 			light->parms.right, light->parms.up, light->parms.start, light->parms.end);
 	} else {
 		// point light
@@ -505,7 +505,7 @@ void R_RenderLightFrustum( const renderLight_t &renderLight, idPlane lightFrustu
 	fakeLight.parms = renderLight;
 
 	R_DeriveLightData( &fakeLight );
-	
+
 	R_FreeStaticTriSurf( fakeLight.frustumTris );
 
 	for ( int i = 0 ; i < 6 ; i++ ) {
@@ -572,11 +572,11 @@ void R_CreateLightDefFogPortals( idRenderLightLocal *ldef ) {
 
 			// we only handle a single fog volume covering a portal
 			// this will never cause incorrect drawing, but it may
-			// fail to cull a portal 
+			// fail to cull a portal
 			if ( dp->fogLight ) {
 				continue;
 			}
-			
+
 			if ( WindingCompletelyInsideLight( prt->w, ldef ) ) {
 				dp->fogLight = ldef;
 				dp->nextFoggedPortal = ldef->foggedPortals;
@@ -683,7 +683,7 @@ void R_FreeEntityDefDerivedData( idRenderEntityLocal *def, bool keepDecals, bool
 
 		// put it back on the free list for reuse
 		def->world->areaReferenceAllocator.Free( ref );
-	}	
+	}
 	def->entityRefs = NULL;
 }
 

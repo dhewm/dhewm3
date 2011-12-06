@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -81,7 +81,7 @@ void MaterialDocManager::UnRegisterMaterialView(MaterialView* view) {
 * notifications.
 */
 void MaterialDocManager::UnRegisterAllMaterialViews() {
-	
+
 	//Remove the reference to myself
 	int c = materialViews.Num();
 	for(int i = 0; i < c; i++) {
@@ -112,7 +112,7 @@ void MaterialDocManager::SetSelectedMaterial(idMaterial* material) {
 			change = true;
 		}
 	}
-	
+
 	//Now make the change
 	if(change) {
 		if(currentMaterial) {
@@ -127,7 +127,7 @@ void MaterialDocManager::SetSelectedMaterial(idMaterial* material) {
 		MaterialDoc** tempDoc;
 		if(material && inProgressMaterials.Get(material->GetName(), &tempDoc)) {
 			currentMaterial = *tempDoc;
-			
+
 		} else {
 			currentMaterial = CreateMaterialDoc(material);
 		}
@@ -187,7 +187,7 @@ bool MaterialDocManager::IsAnyModified() {
 * @param addUndo Can this operation be undone.
 */
 void MaterialDocManager::AddMaterial(const char* name, const char* filename, const char* sourceText, bool addUndo) {
-	
+
 	if(addUndo) {
 		AddMaterialModifier* mod = new AddMaterialModifier(this, name, filename);
 		AddMaterialUndoModifier(mod);
@@ -196,9 +196,9 @@ void MaterialDocManager::AddMaterial(const char* name, const char* filename, con
 	MaterialDoc* newDoc = new MaterialDoc();
 	newDoc->manager = this;
 	newDoc->modified = true;
-	
+
 	idMaterial* rendMat = (idMaterial*)declManager->CreateNewDecl(DECL_MATERIAL, name, filename);
-	
+
 	if(sourceText) {
 		rendMat->SetText(sourceText);
 	}
@@ -206,7 +206,7 @@ void MaterialDocManager::AddMaterial(const char* name, const char* filename, con
 	newDoc->SetRenderMaterial(rendMat, true, sourceText ? true : false);
 
 	inProgressMaterials.Set(newDoc->name.c_str(), newDoc);
-	
+
 	NotifyViews(newDoc, MATERIAL_ADD);
 
 	//Force an apply so the text will be generated to match the new file
@@ -215,9 +215,9 @@ void MaterialDocManager::AddMaterial(const char* name, const char* filename, con
 }
 
 /**
-* Used to redo an add material and undo a delete material. 
+* Used to redo an add material and undo a delete material.
 * The undo for adding a material deletes the material. Instead of adding a completely
-* new material RedoAddMaterial finds the one that was just deleted and uses that. 
+* new material RedoAddMaterial finds the one that was just deleted and uses that.
 * @param name The name of the material that was added/deleted.
 * @param clearData Should the material definition be reset to the default definition.
 */
@@ -250,7 +250,7 @@ void MaterialDocManager::RedoAddMaterial(const char* name, bool clearData) {
 * @param addUndo Can this operation be undone.
 */
 void MaterialDocManager::DeleteMaterial(MaterialDoc* material, bool addUndo) {
-	
+
 	assert(material);
 
 	//This will just flag for delete. The actual delete will happen during the save
@@ -278,7 +278,7 @@ void MaterialDocManager::ApplyMaterial(MaterialDoc* materialDoc) {
 * @param filename The file to apply.
 */
 void MaterialDocManager::ApplyFile(const char* filename) {
-	
+
 	for(int i = 0; i < inProgressMaterials.Num(); i++) {
 		MaterialDoc** pDoc = inProgressMaterials.GetIndex(i);
 		if(!strcmp((*pDoc)->renderMaterial->GetFileName(), filename))
@@ -310,7 +310,7 @@ void MaterialDocManager::SaveMaterial(MaterialDoc* material) {
 * @param filename The file to save.
 */
 void MaterialDocManager::SaveFile(const char* filename) {
-	
+
 	for(int i = inProgressMaterials.Num()-1; i >= 0; i--) {
 		MaterialDoc** pDoc = inProgressMaterials.GetIndex(i);
 		if(!strcmp((*pDoc)->renderMaterial->GetFileName(), filename))
@@ -336,9 +336,9 @@ void MaterialDocManager::SaveAllMaterials() {
 * @param filename The file to reload.
 */
 void MaterialDocManager::ReloadFile(const char *filename) {
-	
+
 	declManager->ReloadFile(filename, true);
-			
+
 	//purge the changes of any in progress materials
 	for(int j = inProgressMaterials.Num()-1; j >= 0; j--) {
 		MaterialDoc** pDoc = inProgressMaterials.GetIndex(j);
@@ -347,7 +347,7 @@ void MaterialDocManager::ReloadFile(const char *filename) {
 			inProgressMaterials.Remove((*pDoc)->name);
 		}
 	}
-	
+
 	//Reparse the current material
 	if(currentMaterial) {
 		currentMaterial->SetRenderMaterial(currentMaterial->renderMaterial);
@@ -360,18 +360,18 @@ void MaterialDocManager::ReloadFile(const char *filename) {
 }
 
 /**
-* Creates a MaterialDoc object for the specified material name. If a MaterialDoc 
+* Creates a MaterialDoc object for the specified material name. If a MaterialDoc
 * object already exists then it is used.
 * @param materialName The name of the material for which to create a MaterialDoc object.
 */
 MaterialDoc* MaterialDocManager::CreateMaterialDoc(const char* materialName) {
-	
+
 	const idMaterial* material = declManager->FindMaterial(materialName);
 	return CreateMaterialDoc(const_cast<idMaterial *>(material));
 }
 
 /**
-* Creates a MaterialDoc object for the specified material. If a MaterialDoc 
+* Creates a MaterialDoc object for the specified material. If a MaterialDoc
 * object already exists then it is used.
 * @param material The material for which to create a MaterialDoc object.
 */
@@ -390,7 +390,7 @@ MaterialDoc* MaterialDocManager::CreateMaterialDoc(idMaterial* material) {
 		MaterialDoc* newDoc = new MaterialDoc();
 		newDoc->manager = this;
 		newDoc->SetRenderMaterial(material);
-		
+
 		return newDoc;
 	}
 
@@ -421,7 +421,7 @@ MaterialDoc* MaterialDocManager::GetInProgressDoc(idMaterial* material) {
 * @param cut Is this a cut operation.
 */
 void MaterialDocManager::CopyMaterial(MaterialDoc* materialDoc, bool cut) {
-	
+
 	cutMaterial = cut;
 
 	if(materialDoc)
@@ -457,7 +457,7 @@ idStr MaterialDocManager::GetCopyMaterialName() {
 * @param filename The file to paste the material in.
 */
 void MaterialDocManager::PasteMaterial(const char* name, const char* filename) {
-	
+
 	if(!IsCopyMaterial()) {
 		return;
 	}
@@ -486,7 +486,7 @@ void MaterialDocManager::PasteMaterial(const char* name, const char* filename) {
 
 		ClearCopy();
 	}
-	
+
 }
 
 /**
@@ -500,7 +500,7 @@ void MaterialDocManager::CopyStage(MaterialDoc* materialDoc, int stageNum) {
 
 	copyStageMaterial = materialDoc->name;
 	copyStage = materialDoc->GetStage(stageNum);
-	
+
 	idStr stageName = copyStage.stageData.GetString("name");
 }
 
@@ -592,9 +592,9 @@ void MaterialDocManager::Redo() {
 
 		mod->Redo();
 
-		//Done with the mod because the redo process will set 
+		//Done with the mod because the redo process will set
 		//attributes and create the appropriate redo modifier
-		AddMaterialUndoModifier(mod, false);		
+		AddMaterialUndoModifier(mod, false);
 	}
 }
 
@@ -656,7 +656,7 @@ bool MaterialDocManager::FindMaterial(const char* name, MaterialSearchData_t* se
 
 	//Fast way of finding the material without parsing
 	const idMaterial* material = static_cast<const idMaterial *>(declManager->FindDeclWithoutParsing(DECL_MATERIAL, name, false));
-		
+
 	if(material) {
 
 		int findPos;
@@ -680,7 +680,7 @@ bool MaterialDocManager::FindMaterial(const char* name, MaterialSearchData_t* se
 		if(start != -1) {
 			text = text.Right(text.Length()-start);
 		}
-		
+
 		findPos = text.Find(searchData->searchText, false);
 		if(findPos != -1) {
 			//Todo: Include match whole word

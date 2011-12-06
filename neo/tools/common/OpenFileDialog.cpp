@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -106,7 +106,7 @@ void rvOpenFileDialog::UpdateLookIn ( void )
 
 	// Reset the combo box
 	SendMessage ( mWndLookin, CB_RESETCONTENT, 0, 0 );
-	
+
 	// Setup the common item structure components
 	ZeroMemory ( &item, sizeof(item) );
 	item.mask = CBEIF_TEXT | CBEIF_INDENT | CBEIF_IMAGE | CBEIF_SELECTEDIMAGE;
@@ -122,7 +122,7 @@ void rvOpenFileDialog::UpdateLookIn ( void )
 	while ( path.Length ( ) )
 	{
 		int slash = path.Find ( "/" );
-		
+
 		// Parse out the next subfolder
 		if ( slash != -1 )
 		{
@@ -135,13 +135,13 @@ void rvOpenFileDialog::UpdateLookIn ( void )
 			path.Empty ( );
 		}
 
-		// Add the sub folder				
+		// Add the sub folder
 		item.pszText = (LPSTR)file.c_str();
 		item.iIndent++;
 		item.iItem = item.iIndent;
-		SendMessage ( mWndLookin, CBEM_INSERTITEM, 0, (LPARAM)&item );		
+		SendMessage ( mWndLookin, CBEM_INSERTITEM, 0, (LPARAM)&item );
 	}
-	
+
 	// Set the selection to the last one since thats the deepest folder
 	SendMessage ( mWndLookin, CB_SETCURSEL, item.iIndent, 0 );
 }
@@ -161,9 +161,9 @@ void rvOpenFileDialog::UpdateFileList ( void )
 	HWND		list = GetDlgItem ( mWnd, IDC_TOOLS_FILELIST );
 	int			i;
 	int			filter;
-		
+
 	ListView_DeleteAllItems ( list );
-	
+
 	// Add all the folders first
 	files = fileSystem->ListFiles ( basepath, "/", true );
 	for ( i = 0; i < files->GetNumFiles(); i ++ )
@@ -172,7 +172,7 @@ void rvOpenFileDialog::UpdateFileList ( void )
 		{
 			continue;
 		}
-	
+
 		LVITEM item;
 		item.mask = LVIF_TEXT;
 		item.iItem = ListView_GetItemCount ( list );
@@ -181,11 +181,11 @@ void rvOpenFileDialog::UpdateFileList ( void )
 		ListView_InsertItem ( list, &item );
 	}
 	fileSystem->FreeFileList( files );
-	
+
 	// Add all the files in the current lookin directory that match the
 	// current filters.
 	for ( filter = 0; filter < mFilters.Num(); filter ++ )
-	{	
+	{
 		files = fileSystem->ListFiles( basepath, mFilters[filter], true );
 		for ( i = 0; i < files->GetNumFiles(); i ++ )
 		{
@@ -193,7 +193,7 @@ void rvOpenFileDialog::UpdateFileList ( void )
 			{
 				continue;
 			}
-	
+
 			LVITEM item;
 			item.mask = LVIF_TEXT|LVIF_IMAGE;
 			item.iImage = 2;
@@ -228,7 +228,7 @@ void rvOpenFileDialog::HandleCommandOK ( void )
 		{
 			return;
 		}
-		
+
 		item.iImage = 2;
 	}
 	else
@@ -242,7 +242,7 @@ void rvOpenFileDialog::HandleCommandOK ( void )
 		item.iItem = sel;
 		ListView_GetItem ( mWndFileList, &item );
 	}
-	
+
 	// If the item is a folder then just open that folder
 	if ( item.iImage == 0 )
 	{
@@ -253,7 +253,7 @@ void rvOpenFileDialog::HandleCommandOK ( void )
 			idStr::Copynz( mLookin, temp, sizeof( mLookin ) );
 		}
 		UpdateLookIn ( );
-		UpdateFileList ( );									
+		UpdateFileList ( );
 	}
 	// If the item is a file then build the filename and end the dialog
 	else if ( item.iImage == 2 )
@@ -264,11 +264,11 @@ void rvOpenFileDialog::HandleCommandOK ( void )
 			mFilename.Append ( "/" );
 		}
 		mFilename.Append ( temp );
-		
+
 		// Make sure the file exists
 		if ( mFlags & OFD_MUSTEXIST )
 		{
-			idFile*	file;				
+			idFile*	file;
 			file = fileSystem->OpenFileRead ( mFilename );
 			if ( !file )
 			{
@@ -277,10 +277,10 @@ void rvOpenFileDialog::HandleCommandOK ( void )
 			}
 			fileSystem->CloseFile ( file );
 		}
-				
+
 		EndDialog ( mWnd, 1 );
-	}		
-	
+	}
+
 	return;
 }
 
@@ -301,16 +301,16 @@ void rvOpenFileDialog::HandleInitDialog ( void )
 	mImageList  = ImageList_LoadBitmap ( mInstance, MAKEINTRESOURCE(IDB_TOOLS_OPEN),16,1,RGB(255,255,255) );
 	mBackBitmap = (HBITMAP)LoadImage ( mInstance, MAKEINTRESOURCE(IDB_TOOLS_BACK), IMAGE_BITMAP, 16, 16, LR_DEFAULTCOLOR|LR_LOADMAP3DCOLORS );
 
-	// Attach the image list to the file list and lookin controls		
+	// Attach the image list to the file list and lookin controls
 	ListView_SetImageList ( mWndFileList, mImageList, LVSIL_SMALL );
 	SendMessage( mWndLookin,CBEM_SETIMAGELIST,0,(LPARAM) mImageList );
-	
+
 	// Back button is a bitmap button
 	SendMessage( GetDlgItem ( mWnd, IDC_TOOLS_BACK ), BM_SETIMAGE, IMAGE_BITMAP, (LONG) mBackBitmap );
-	
+
 	// Allow custom titles
 	SetWindowText ( mWnd, mTitle );
-	
+
 	// Custom ok button title
 	if ( mOKTitle.Length ( ) )
 	{
@@ -344,14 +344,14 @@ Handles a selection change within the lookin control
 void rvOpenFileDialog::HandleLookInChange ( void )
 {
 	char	temp[256];
-	int		sel;						
+	int		sel;
 	int		i;
 	idStr	lookin;
-	
+
 	temp[0] = 0;
-	
+
 	sel = SendMessage ( mWndLookin, CB_GETCURSEL, 0, 0 );
-	
+
 	// If something other than base is selected then walk up the list
 	// and build the new lookin path
 	if ( sel >= 1 )
@@ -362,16 +362,16 @@ void rvOpenFileDialog::HandleLookInChange ( void )
 		{
 			SendMessage ( mWndLookin, CB_GETLBTEXT, i, (LPARAM)temp );
 			idStr::snPrintf( mLookin, sizeof( mLookin ), "%s/%s", mLookin, temp );
-		}			
+		}
 	}
 	else
 	{
 		mLookin[0] = 0;
-	}	
+	}
 
 	// Update the controls with the new lookin path
-	UpdateLookIn ( );									
-	UpdateFileList ( );	
+	UpdateLookIn ( );
+	UpdateFileList ( );
 }
 
 /*
@@ -385,7 +385,7 @@ void rvOpenFileDialog::SetFilter ( const char* s )
 {
 	idStr filters = s;
 	idStr filter;
-	
+
 	while ( filters.Length ( ) )
 	{
 		int semi = filters.Find ( ';' );
@@ -399,7 +399,7 @@ void rvOpenFileDialog::SetFilter ( const char* s )
 			filter = filters;
 			filters.Empty ( );
 		}
-		
+
 		mFilters.Append ( filter.c_str() + (filter[0] == '*' ? 1 : 0) );
 	}
 }
@@ -414,10 +414,10 @@ Dialog Procedure for the open file dialog
 INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
 	rvOpenFileDialog* dlg = (rvOpenFileDialog*) GetWindowLong ( wnd, GWL_USERDATA );
-	
+
 	switch ( msg )
 	{
-		case WM_INITDIALOG:			
+		case WM_INITDIALOG:
 			dlg = (rvOpenFileDialog*) lparam;
 			SetWindowLong ( wnd, GWL_USERDATA, lparam );
 			dlg->mWnd = wnd;
@@ -436,7 +436,7 @@ INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lp
 						{
 							NMLISTVIEW* nmlv = (NMLISTVIEW*)nm;
 							if ( nmlv->uNewState & LVIS_SELECTED )
-							{	
+							{
 								// Get the currently selected item
 								LVITEM item;
 								char   temp[256];
@@ -445,8 +445,8 @@ INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lp
 								item.pszText = temp;
 								item.cchTextMax = sizeof(temp)-1;
 								item.iItem = nmlv->iItem;
-								ListView_GetItem ( dlg->mWndFileList, &item );				
-								
+								ListView_GetItem ( dlg->mWndFileList, &item );
+
 								if ( item.iImage == 2 )
 								{
 									SetWindowText ( GetDlgItem ( wnd, IDC_TOOLS_FILENAME ), temp );
@@ -454,7 +454,7 @@ INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lp
 							}
 							break;
 						}
-						
+
 						case NM_DBLCLK:
 							dlg->HandleCommandOK ( );
 							break;
@@ -463,7 +463,7 @@ INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lp
 			}
 			break;
 		}
-			
+
 		case WM_COMMAND:
 			switch ( LOWORD ( wparam ) )
 			{
@@ -472,11 +472,11 @@ INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lp
 					dlg->HandleCommandOK ( );
 					break;
 				}
-				
+
 				case IDCANCEL:
 					EndDialog ( wnd, 0 );
 					break;
-					
+
 				case IDC_TOOLS_BACK:
 				{
 					int sel = SendMessage ( GetDlgItem ( wnd, IDC_TOOLS_LOOKIN ), CB_GETCURSEL, 0, 0 );
@@ -486,19 +486,19 @@ INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lp
 						SendMessage ( GetDlgItem ( wnd, IDC_TOOLS_LOOKIN ), CB_SETCURSEL, sel, 0 );
 						dlg->HandleLookInChange ( );
 					}
-					
+
 					break;
 				}
-					
+
 				case IDC_TOOLS_LOOKIN:
 					if ( HIWORD ( wparam ) == CBN_SELCHANGE )
 					{
-						dlg->HandleLookInChange ( );								
+						dlg->HandleLookInChange ( );
 					}
 					break;
 			}
 			break;
 	}
-	
+
 	return FALSE;
 }

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -57,7 +57,7 @@ public:
 	float		strobeSpeed;
 	bool		rotate;
 	float		rotateSpeed;
-	
+
 	idVec3		lightRadius;
 	bool		castShadows;
 	bool		castSpecular;
@@ -70,8 +70,8 @@ public:
 	void		DefaultPoint();
 	void		FromDict( const idDict *e );
 	void		ToDict( idDict *e );
-    void		ToDictFromDifferences( idDict *e, const idDict *differences );
-    void		ToDictWriteAllInfo( idDict *e );
+	void		ToDictFromDifferences( idDict *e, const idDict *differences );
+	void		ToDictWriteAllInfo( idDict *e );
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ public:
 	float	m_centerX;
 	float	m_centerY;
 	float	m_centerZ;
-    BOOL    m_bIsParallel;
+	BOOL    m_bIsParallel;
 	//}}AFX_DATA
 
 
@@ -169,7 +169,7 @@ protected:
 	afx_msg void OnSelchangeComboTexture();
 	afx_msg void OnCheckCenter();
 	afx_msg void OnCheckParallel();
-    afx_msg void OnApplyDifferences();
+	afx_msg void OnApplyDifferences();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -177,7 +177,7 @@ private:
 	CBitmap					colorBitmap;
 	CBitmap					fogBitmap;
 	CLightInfo				lightInfo;
-    CLightInfo				lightInfoOriginal;
+	CLightInfo				lightInfoOriginal;
 	idVec3					color;
 	idGLDrawableMaterial *	m_drawMaterial;
 };

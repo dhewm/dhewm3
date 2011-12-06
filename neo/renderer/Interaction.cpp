@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -213,7 +213,7 @@ static int R_ChopWinding( clipTri_t clipTris[2], int inNum, const idPlane plane 
 	out->numVerts = 0;
 	for ( i = 0 ; i < in->numVerts ; i++ ) {
 		idVec3 &p1 = in->verts[i];
-		
+
 		if ( sides[i] == SIDE_FRONT ) {
 			out->verts[out->numVerts] = p1;
 			out->numVerts++;
@@ -222,15 +222,15 @@ static int R_ChopWinding( clipTri_t clipTris[2], int inNum, const idPlane plane 
 		if ( sides[i+1] == sides[i] ) {
 			continue;
 		}
-			
+
 		// generate a split point
 		idVec3 &p2 = in->verts[i+1];
-		
+
 		dot = dists[i] / ( dists[i] - dists[i+1] );
 		for ( j = 0; j < 3; j++ ) {
 			mid[j] = p1[j] + dot * ( p2[j] - p1[j] );
 		}
-			
+
 		out->verts[out->numVerts] = mid;
 
 		out->numVerts++;
@@ -277,7 +277,7 @@ The resulting surface will be a subset of the original triangles,
 it will never clip triangles, but it may cull on a per-triangle basis.
 ====================
 */
-static srfTriangles_t *R_CreateLightTris( const idRenderEntityLocal *ent, 
+static srfTriangles_t *R_CreateLightTris( const idRenderEntityLocal *ent,
 									 const srfTriangles_t *tri, const idRenderLightLocal *light,
 									 const idMaterial *shader, srfCullInfo_t &cullInfo ) {
 	int			i;
@@ -858,7 +858,7 @@ void idInteraction::CreateInteraction( const idRenderModel *model ) {
 	for ( int c = 0 ; c < model->NumSurfaces() ; c++ ) {
 		const modelSurface_t	*surf;
 		srfTriangles_t	*tri;
-	
+
 		surf = model->Surface( c );
 
 		tri = surf->geometry;
@@ -1157,13 +1157,13 @@ void idInteraction::AddActiveInteraction( void ) {
 					// there will only be localSurfaces if the light casts shadows and
 					// there are surfaces with NOSELFSHADOW
 					if ( sint->shader->Coverage() == MC_TRANSLUCENT ) {
-						R_LinkLightSurf( &vLight->translucentInteractions, lightTris, 
+						R_LinkLightSurf( &vLight->translucentInteractions, lightTris,
 							vEntity, lightDef, shader, lightScissor, false );
 					} else if ( !lightDef->parms.noShadows && sint->shader->TestMaterialFlag(MF_NOSELFSHADOW) ) {
-						R_LinkLightSurf( &vLight->localInteractions, lightTris, 
+						R_LinkLightSurf( &vLight->localInteractions, lightTris,
 							vEntity, lightDef, shader, lightScissor, false );
 					} else {
-						R_LinkLightSurf( &vLight->globalInteractions, lightTris, 
+						R_LinkLightSurf( &vLight->globalInteractions, lightTris,
 							vEntity, lightDef, shader, lightScissor, false );
 					}
 				}
@@ -1175,7 +1175,7 @@ void idInteraction::AddActiveInteraction( void ) {
 		// the shadows will always have to be added, unless we can tell they
 		// are from a surface in an unconnected area
 		if ( shadowTris ) {
-			
+
 			// check for view specific shadow suppression (player shadows, etc)
 			if ( !r_skipSuppress.GetBool() ) {
 				if ( entityDef->parms.suppressShadowInViewID &&

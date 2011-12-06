@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -580,7 +580,7 @@ void idRenderWorldLocal::CreateLightDefInteractions( idRenderLightLocal *ldef ) 
 			}
 
 			// if any of the edef's interaction match this light, we don't
-			// need to consider it. 
+			// need to consider it.
 			if ( r_useInteractionTable.GetBool() && this->interactionTable ) {
 				// allocating these tables may take several megs on big maps, but it saves 3% to 5% of
 				// the CPU time.  The table is updated at interaction::AllocAndLink() and interaction::UnlinkAndFree()
@@ -655,7 +655,7 @@ void idRenderWorldLocal::CreateLightDefInteractions( idRenderLightLocal *ldef ) 
 R_LinkLightSurf
 =================
 */
-void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const viewEntity_t *space, 
+void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const viewEntity_t *space,
 				   const idRenderLightLocal *light, const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow ) {
 	drawSurf_t		*drawSurf;
 
@@ -896,7 +896,7 @@ void R_AddLightSurfaces( void ) {
 				light->viewCount = -1;
 				continue;
 			}
-			if ( light->parms.allowLightInViewID 
+			if ( light->parms.allowLightInViewID
 			&& light->parms.allowLightInViewID != tr.viewDef->renderView.viewID ) {
 				*ptr = vLight->next;
 				light->viewCount = -1;
@@ -1369,7 +1369,7 @@ static void R_AddAmbientDrawsurfs( viewEntity_t *vEntity ) {
 
 		R_GlobalShaderOverride( &shader );
 
-		if ( !shader ) {	
+		if ( !shader ) {
 			continue;
 		}
 		if ( !shader->IsDrawn() ) {

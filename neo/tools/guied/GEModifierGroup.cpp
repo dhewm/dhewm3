@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -33,18 +33,18 @@ If you have questions concerning this license or the applicable additional terms
 
 rvGEModifierGroup::rvGEModifierGroup ( ) :
 	rvGEModifier ( "Group", NULL )
-{	
+{
 }
 
 rvGEModifierGroup::~rvGEModifierGroup ( )
 {
 	int i;
-	
+
 	for ( i = 0; i < mModifiers.Num(); i ++ )
 	{
 		delete mModifiers[i];
 	}
-	
+
 	mModifiers.Clear ( );
 }
 
@@ -65,7 +65,7 @@ bool rvGEModifierGroup::Append ( rvGEModifier* mod )
 bool rvGEModifierGroup::IsValid ( void )
 {
 	int i;
-	
+
 	for ( i = 0; i < mModifiers.Num(); i ++ )
 	{
 		if ( !mModifiers[i]->IsValid ( ) )
@@ -73,31 +73,31 @@ bool rvGEModifierGroup::IsValid ( void )
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 bool rvGEModifierGroup::Apply ( void )
 {
 	int i;
-	
+
 	for ( i = 0; i < mModifiers.Num(); i ++ )
 	{
 		mModifiers[i]->Apply ( );
 	}
-	
+
 	return true;
 }
 
 bool rvGEModifierGroup::Undo ( void )
 {
 	int i;
-	
+
 	for ( i = 0; i < mModifiers.Num(); i ++ )
 	{
 		mModifiers[i]->Undo ( );
 	}
-	
+
 	return true;
 }
 
@@ -105,12 +105,12 @@ bool rvGEModifierGroup::CanMerge ( rvGEModifier* mergebase )
 {
 	rvGEModifierGroup*	merge = (rvGEModifierGroup*) mergebase;
 	int					i;
-			
+
 	if ( mModifiers.Num() != merge->mModifiers.Num ( ) )
 	{
 		return false;
 	}
-			
+
 	// Double check the merge is possible
 	for ( i = 0; i < mModifiers.Num(); i ++ )
 	{
@@ -118,7 +118,7 @@ bool rvGEModifierGroup::CanMerge ( rvGEModifier* mergebase )
 		{
 			return false;
 		}
-		
+
 		if ( idStr::Icmp ( mModifiers[i]->GetName ( ), merge->mModifiers[i]->GetName ( ) ) )
 		{
 			return false;
@@ -137,12 +137,12 @@ bool rvGEModifierGroup::Merge ( rvGEModifier* mergebase )
 {
 	rvGEModifierGroup*	merge = (rvGEModifierGroup*) mergebase;
 	int					i;
-	
+
 	// Double check the merge is possible
 	for ( i = 0; i < mModifiers.Num(); i ++ )
 	{
 		mModifiers[i]->Merge ( merge->mModifiers[i] );
 	}
-	
+
 	return true;
 }

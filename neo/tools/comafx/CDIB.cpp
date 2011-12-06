@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -42,9 +42,9 @@ If you have questions concerning this license or the applicable additional terms
 #define BIG_DISTANCE 10000000L
 
 #define DIST(r1,g1,b1,r2,g2,b2) \
-	    (long) (3L*(long)((r1)-(r2))*(long)((r1)-(r2)) + \
-		    4L*(long)((g1)-(g2))*(long)((g1)-(g2)) + \
-		    2L*(long)((b1)-(b2))*(long)((b1)-(b2)))
+		(long) (3L*(long)((r1)-(r2))*(long)((r1)-(r2)) + \
+			4L*(long)((g1)-(g2))*(long)((g1)-(g2)) + \
+			2L*(long)((b1)-(b2))*(long)((b1)-(b2)))
 
 
 static unsigned char masktable[] = { 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01 };
@@ -86,7 +86,7 @@ BOOL CDIB::Create(int width,int height,int bits)
 //	ASSERT(bits == 24 || bits == 8);
 
 BITMAPINFOHEADER bmInfo;
-	
+
 	memset(&bmInfo,0,sizeof(BITMAPINFOHEADER));
 	bmInfo.biSize = sizeof(BITMAPINFOHEADER);
 	bmInfo.biWidth = width;
@@ -291,7 +291,7 @@ void CDIB::InitDIB(COLORREF color)
 {
 int i,j;
 unsigned char *ptr;
-	
+
 	if(m_pInfo->bmiHeader.biBitCount == 24)
 	{
 		unsigned char col[3];
@@ -340,13 +340,13 @@ void CDIB::ExpandBlt(int nXDest,int nYDest,int xRatio,int yRatio,CDIB& dibSrc,in
 
 void CDIB::Expand(int nXDest,int nYDest,int xRatio,int yRatio,CDIB& dibSrc,int xSrc,int ySrc,int  nSWidth,int nSHeight)
 {
-int xNum,yNum,xErr,yErr;	
+int xNum,yNum,xErr,yErr;
 int nDWidth,nDHeight;
-	
+
 	nDWidth = nSWidth*xRatio;
 	nDHeight = nSHeight*yRatio;
 
-	nDWidth = nXDest+nDWidth > width ? width-nXDest : nDWidth ; 
+	nDWidth = nXDest+nDWidth > width ? width-nXDest : nDWidth ;
 	nDHeight = nYDest+nDHeight > height ? height-nYDest : nDHeight;
 
 	xNum = nDWidth/xRatio;
@@ -356,7 +356,7 @@ int nDWidth,nDHeight;
 
 unsigned char *buffer,*srcPtr,*destPtr,*ptr;
 int i,j,k;
-	
+
 	buffer = (unsigned char *)malloc(nDWidth+20);
 	if(!buffer) return;
 
@@ -373,13 +373,13 @@ int i,j,k;
 		for(j=0; j < yRatio ; j++,nYDest++)
 		{
 			destPtr = GetLinePtr(nYDest) + nXDest;
-			memcpy(destPtr,buffer,nDWidth);		
+			memcpy(destPtr,buffer,nDWidth);
 		}
 	}
 	for(j=0; j < yErr; j++,nYDest++)
 	{
 		destPtr = GetLinePtr(nYDest) + nXDest;
-		memcpy(destPtr,buffer,nDWidth);		
+		memcpy(destPtr,buffer,nDWidth);
 	}
 	free(buffer);
 }
@@ -387,7 +387,7 @@ int i,j,k;
 void CDIB::StretchBlt(int nXDest,int nYDest,int nDWidth,int nDHeight,CDIB& dibSrc,int xSrc,int ySrc,int  nSWidth,int nSHeight)
 {
 	SetPalette(dibSrc.m_pRGB);
-	nDWidth = nXDest+nDWidth > width ? width-nXDest : nDWidth ; 
+	nDWidth = nXDest+nDWidth > width ? width-nXDest : nDWidth ;
 	nDHeight = nYDest+nDHeight > height ? height-nYDest : nDHeight;
 
 	nSWidth = xSrc+nSWidth > dibSrc.width ? dibSrc.width-xSrc : nSWidth;
@@ -490,7 +490,7 @@ void CDIB::BitBlt(int nXDest,int nYDest,int nWidth,int nHeight,CDIB& dibSrc,int 
 		nHeight += nSrcY;
 		nSrcY=0;
 	}
-	nWidth = nXDest+nWidth > width ? width-nXDest : nWidth ; 
+	nWidth = nXDest+nWidth > width ? width-nXDest : nWidth ;
 	nHeight = nYDest+nHeight > height ? height-nYDest : nHeight;
 
 	nWidth = nSrcX+nWidth > dibSrc.width ? dibSrc.width-nSrcX : nWidth;
@@ -544,7 +544,7 @@ unsigned char *CDIB::GetLinePtr(int line)
 	return ptr;*/
 	return m_pLinePtr[line];
 }
-	
+
 BOOL CDIB::CopyDIB(CDIB& dib)
 {
 	if(Create(dib.m_pInfo->bmiHeader))
@@ -559,7 +559,7 @@ BOOL CDIB::CopyDIB(CDIB& dib)
 void CDIB::ReplaceColor(unsigned char oldColor,unsigned char newColor)
 {
 int i,j;
-unsigned char *ptr;	
+unsigned char *ptr;
 	for(i=0; i < height; i++)
 	{
 		ptr = GetLinePtr(i);
@@ -630,14 +630,14 @@ RGBQUAD *pRgb;
 	width = pHead->biWidth;
 	height = pHead->biHeight;
 	m_nBits = pHead->biBitCount;
-	if(pHead->biCompression != BI_RGB) 
+	if(pHead->biCompression != BI_RGB)
 	{
 		GlobalUnlock(lpVoid);
 		return FALSE;
 	}
 	if(pHead->biBitCount >= 15)
 	{
-		if(pHead->biBitCount != 24) 
+		if(pHead->biBitCount != 24)
 		{
 			GlobalUnlock(lpVoid);
 			return FALSE;
@@ -670,7 +670,7 @@ void CDIB::CreateGammaCurve()
 int i;
 	for(i=0;i<256;++i)
 	{
-	    Gamma[i]=(int)(255 * powf((double)i/255,m_fGamma) + (double)0.5);
+		Gamma[i]=(int)(255 * powf((double)i/255,m_fGamma) + (double)0.5);
 	}
 }
 
@@ -687,7 +687,7 @@ void CDIB::GetPixel(UINT x,UINT y,int& pixel)
 
 BOOL CDIB::Make8Bit(CDIB& dib)
 {
-int nBits;	
+int nBits;
 	ASSERT(Width() == dib.Width());
 	ASSERT(Height() == dib.Height());
 	nBits = dib.GetBitCount();
@@ -775,7 +775,7 @@ unsigned char cols[16];
 		for(j=0 ; j < w; j++,dPtr++)
 		{
 			if(!(j&1)) n = (*sPtr & 0xf0)>>4;
-			else 
+			else
 			{
 				n = *sPtr & 0x0f;
 				sPtr++;
@@ -820,7 +820,7 @@ unsigned int pSize=GetPaletteSize();
 	{
 		if(CachePtr[i])
 		{
-			if(!memcmp((void *)&CacheQuad[i],(void *)pRgb,3)) 
+			if(!memcmp((void *)&CacheQuad[i],(void *)pRgb,3))
 			{
 				return i;
 			}
@@ -829,13 +829,13 @@ unsigned int pSize=GetPaletteSize();
 	for(i=0; i < pSize; i++,pQuad++)
 	{
 		d = Distance(*pRgb,*pQuad);
-		if(!d) 
+		if(!d)
 		{
 			CacheQuad[i]=*pRgb;
 			CachePtr[i]=1;
 			return i;
-		}		
-		if(dist > d) 
+		}
+		if(dist > d)
 		{
 			c = i;
 			dist = d;

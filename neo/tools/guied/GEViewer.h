@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -38,11 +38,11 @@ public:
 	bool				Create		( HWND parent );
 	bool				Destroy		( void );
 	bool				OpenFile	( const char* filename );
-	
+
 	void				RunFrame	( void );
-	
+
 	HWND				GetWindow	( void );
-		
+
 protected:
 
 	void				Render		( HDC dc );
@@ -58,9 +58,9 @@ protected:
 	HWND					mToolbar;
 	int						mLastTime;
 	int						mTime;
-	
+
 	LRESULT		HandlePaint	( WPARAM wParam, LPARAM lParam );
-	
+
 private:
 
 	bool	SetupPixelFormat ( void );

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -1301,12 +1301,12 @@ void idAFConstraint_UniversalJoint::DebugDraw( void ) {
 	d1 = axis1 * body1->GetWorldAxis();
 
 	if ( master ) {
-        a2 = master->GetWorldOrigin() + anchor2 * master->GetWorldAxis();
+		a2 = master->GetWorldOrigin() + anchor2 * master->GetWorldAxis();
 		s2 = shaft2 * master->GetWorldAxis();
 		d2 = axis2 * master->GetWorldAxis();
 	}
 	else {
-        a2 = anchor2;
+		a2 = anchor2;
 		s2 = shaft2;
 		d2 = axis2;
 	}
@@ -5336,7 +5336,7 @@ void idPhysics_AF::Evolve( float timeStep ) {
 	idVec6 force;
 	idRotation rotation;
 	float vSqr, maxLinearVelocity, maxAngularVelocity;
-	
+
 	maxLinearVelocity = af_maxLinearVelocity.GetFloat() / timeStep;
 	maxAngularVelocity = af_maxAngularVelocity.GetFloat() / timeStep;
 

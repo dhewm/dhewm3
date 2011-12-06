@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -33,8 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 /***********************************************************************
 
-  idWeapon  
-	
+  idWeapon
+
 ***********************************************************************/
 
 //
@@ -645,7 +645,7 @@ void idWeapon::Restore( idRestoreGame *savefile ) {
 	for(int i = 0; i < lightCount; i++) {
 		WeaponLight_t newLight;
 		memset(&newLight, 0, sizeof(newLight));
-		
+
 		idStr name;
 		savefile->ReadString( name );
 		strcpy( newLight.name, name.c_str() );
@@ -730,7 +730,7 @@ void idWeapon::Clear( void ) {
 		refSound.referenceSound->Free( true );
 	}
 	memset( &refSound, 0, sizeof( refSound_t ) );
-	
+
 	// setting diversity to 0 results in no random sound.  -1 indicates random.
 	refSound.diversity = -1.0f;
 
@@ -1158,7 +1158,7 @@ void idWeapon::GetWeaponDef( const char *objectname, int ammoinclip ) {
 	if ( !weaponDef->dict.GetString( "weapon_scriptobject", NULL, &objectType ) ) {
 		gameLocal.Error( "No 'weapon_scriptobject' set on '%s'.", objectname );
 	}
-	
+
 	// setup script object
 	if ( !scriptObject.SetType( objectType ) ) {
 		gameLocal.Error( "Script object '%s' not found on weapon '%s'.", objectType, objectname );
@@ -1295,7 +1295,7 @@ void idWeapon::UpdateGUI( void ) {
 	if ( !renderEntity.gui[ 0 ] ) {
 		return;
 	}
-	
+
 	if ( status == WP_HOLSTERED ) {
 		return;
 	}
@@ -1385,7 +1385,7 @@ idWeapon::MuzzleFlashLight
 ================
 */
 void idWeapon::MuzzleFlashLight( void ) {
-	
+
 	if ( !lightOn && ( !g_muzzleFlash.GetBool() || !muzzleFlash.lightRadius[0] ) ) {
 		return;
 	}
@@ -1432,7 +1432,7 @@ bool idWeapon::UpdateSkin( void ) {
 		common->Warning( "Can't find function 'UpdateSkin' in object '%s'", scriptObject.GetTypeName() );
 		return false;
 	}
-	
+
 	// use the frameCommandThread since it's safe to use outside of framecommands
 	gameLocal.frameCommandThread->CallFunction( this, func, true );
 	gameLocal.frameCommandThread->Execute();
@@ -1676,7 +1676,7 @@ void idWeapon::OwnerDied( void ) {
 idWeapon::BeginAttack
 ================
 */
-void idWeapon::BeginAttack( void ) {	
+void idWeapon::BeginAttack( void ) {
 	if ( status != WP_OUTOFAMMO ) {
 		lastAttack = gameLocal.time;
 	}
@@ -1991,7 +1991,7 @@ void idWeapon::MuzzleRise( idVec3 &origin, idMat3 &axis ) {
 	if ( time > muzzle_kick_maxtime ) {
 		time = muzzle_kick_maxtime;
 	}
-	
+
 	amount = ( float )time / ( float )muzzle_kick_maxtime;
 	ang		= muzzle_kick_angles * amount;
 	offset	= muzzle_kick_offset * amount;
@@ -2042,7 +2042,7 @@ void idWeapon::DeconstructScriptObject( void ) {
 	if ( !thread ) {
 		return;
 	}
-	
+
 	// don't bother calling the script object's destructor on map shutdown
 	if ( gameLocal.GameState() == GAMESTATE_SHUTDOWN ) {
 		return;
@@ -2156,7 +2156,7 @@ void idWeapon::PresentWeapon( bool showViewModel ) {
 
 	// hide offset is for dropping the gun when approaching a GUI or NPC
 	// This is simpler to manage than doing the weapon put-away animation
-	if ( gameLocal.time - hideStartTime < hideTime ) {		
+	if ( gameLocal.time - hideStartTime < hideTime ) {
 		float frac = ( float )( gameLocal.time - hideStartTime ) / ( float )hideTime;
 		if ( hideStart < hideEnd ) {
 			frac = 1.0f - frac;
@@ -2689,7 +2689,7 @@ void idWeapon::WriteToSnapshot( idBitMsgDelta &msg ) const {
 idWeapon::ReadFromSnapshot
 ================
 */
-void idWeapon::ReadFromSnapshot( const idBitMsgDelta &msg ) {	
+void idWeapon::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 	ammoClip = msg.ReadBits( ASYNC_PLAYER_INV_CLIP_BITS );
 	worldModel.SetSpawnId( msg.ReadBits( 32 ) );
 	bool snapLight = msg.ReadBits( 1 ) != 0;
@@ -2703,10 +2703,10 @@ void idWeapon::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 			idealState = "Fire";
 		}
 
-        // immediately switch back to idle
-        if ( WEAPON_NETFIRING && !isFiring ) {
-            idealState = "Idle";
-        }
+		// immediately switch back to idle
+		if ( WEAPON_NETFIRING && !isFiring ) {
+			idealState = "Idle";
+		}
 
 		WEAPON_NETFIRING = isFiring;
 	}
@@ -2944,7 +2944,7 @@ idWeapon::Event_AmmoInClip
 */
 void idWeapon::Event_AmmoInClip( void ) {
 	int ammo = AmmoInClip();
-	idThread::ReturnFloat( ammo );	
+	idThread::ReturnFloat( ammo );
 }
 
 /*
@@ -2979,7 +2979,7 @@ idWeapon::Event_ClipSize
 ===============
 */
 void idWeapon::Event_ClipSize( void ) {
-	idThread::ReturnFloat( clipSize );	
+	idThread::ReturnFloat( clipSize );
 }
 
 /*
@@ -3027,7 +3027,7 @@ idWeapon::Event_PlayAnim
 */
 void idWeapon::Event_PlayAnim( int channel, const char *animname ) {
 	int anim;
-	
+
 	anim = animator.GetAnim( animname );
 	if ( !anim ) {
 		gameLocal.Warning( "missing '%s' animation on '%s' (%s)", animname, name.c_str(), GetEntityDefName() );
@@ -3311,13 +3311,13 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 			return;
 		}
 #endif
-		// if this is a power ammo weapon ( currently only the bfg ) then make sure 
+		// if this is a power ammo weapon ( currently only the bfg ) then make sure
 		// we only fire as much power as available in each clip
 		if ( powerAmmo ) {
 			// power comes in as a float from zero to max
 			// if we use this on more than the bfg will need to define the max
 			// in the .def as opposed to just in the script so proper calcs
-			// can be done here. 
+			// can be done here.
 			dmgPower = ( int )dmgPower + 1;
 			if ( dmgPower > ammoClip ) {
 				dmgPower = ammoClip;
@@ -3611,14 +3611,14 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 
 }
 
-/** 
+/**
 * Gives the player a powerup as if it were a weapon shot. It will use the ammo amount specified
 * as ammoRequired.
 */
 void idWeapon::Event_LaunchPowerup( const char* powerup, float duration, int useAmmo ) {
 
 	if ( IsHidden() ) {
-		return; 
+		return;
 	}
 
 	// check if we're out of ammo
@@ -3766,12 +3766,12 @@ void idWeapon::Event_Melee( void ) {
 				&& !owner->PowerUpActive( BERSERK )
 				&& ( (gameLocal.gameType != GAME_TDM ) || gameLocal.serverInfo.GetBool( "si_teamDamage" ) || ( owner->team != static_cast< idPlayer * >( ent )->team ) )
 				) {
-                
+
 #ifdef CTF      /* Code is formed oddly for easy merge */
-                
-                if ( gameLocal.mpGame.IsGametypeFlagBased() )
-                { /* Do nothing ... */ }
-                else
+
+				if ( gameLocal.mpGame.IsGametypeFlagBased() )
+				{ /* Do nothing ... */ }
+				else
 #endif
 				owner->StealWeapon( static_cast< idPlayer * >( ent ) );
 			}
@@ -3934,5 +3934,5 @@ idWeapon::ClientPredictionThink
 ===============
 */
 void idWeapon::ClientPredictionThink( void ) {
-	UpdateAnimation();	
+	UpdateAnimation();
 }

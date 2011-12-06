@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -212,7 +212,7 @@ static optVertex_t *FindOptVertex( idDrawVert *v, optimizeGroup_t *opt ) {
 		common->Error( "MAX_OPT_VERTEXES" );
 		return NULL;
 	}
-	
+
 	numOptVerts++;
 
 	vert = &optVerts[i];
@@ -345,7 +345,7 @@ This should only be called if PointsStraddleLine returned true
 Will return NULL if the lines are colinear
 ====================
 */
-static	optVertex_t *EdgeIntersection( const optVertex_t *p1, const optVertex_t *p2, 
+static	optVertex_t *EdgeIntersection( const optVertex_t *p1, const optVertex_t *p2,
 									  const optVertex_t *l1, const optVertex_t *l2, optimizeGroup_t *opt ) {
 	float	f;
 	idDrawVert	*v;
@@ -715,7 +715,7 @@ static	void RemoveIfColinear( optVertex_t *ov, optIsland_t *island ) {
 	// sliver triangle out of existance, and all the edges
 	// can be removed
 	for ( e = island->edges ; e ; e = e->islandLink ) {
-		if ( ( e->v1 == v1 && e->v2 == v3 ) 
+		if ( ( e->v1 == v1 && e->v2 == v3 )
 		|| ( e->v1 == v3 && e->v2 == v1 ) ) {
 			UnlinkEdge( e, island );
 			RemoveIfColinear( v1, island );
@@ -1183,7 +1183,7 @@ for ( e1 = ov->edges ; e1 ; e1 = e1Next ) {
 						continue;
 					}
 
-					if ( IsTriangleValid( ov, second, middle ) 
+					if ( IsTriangleValid( ov, second, middle )
 						&& IsTriangleValid( ov, middle, third ) ) {
 						break;	// should use the subdivided ones
 					}
@@ -1516,7 +1516,7 @@ void SplitOriginalEdgesAtCrossings( optimizeGroup_t *opt ) {
 			newVert = EdgeIntersection( v1, v2, v3, v4, opt );
 
 			if ( !newVert ) {
-//common->Printf( "lines %i (%i to %i) and %i (%i to %i) are colinear\n", i, v1 - optVerts, v2 - optVerts, 
+//common->Printf( "lines %i (%i to %i) and %i (%i to %i) are colinear\n", i, v1 - optVerts, v2 - optVerts,
 //		   j, v3 - optVerts, v4 - optVerts );	// !@#
 				// colinear, so add both verts of each edge to opposite
 				if ( VertexBetween( v3, v1, v2 ) ) {
@@ -1551,10 +1551,10 @@ void SplitOriginalEdgesAtCrossings( optimizeGroup_t *opt ) {
 			}
 #if 0
 if ( newVert && newVert != v1 && newVert != v2 && newVert != v3 && newVert != v4 ) {
-common->Printf( "lines %i (%i to %i) and %i (%i to %i) cross at new point %i\n", i, v1 - optVerts, v2 - optVerts, 
+common->Printf( "lines %i (%i to %i) and %i (%i to %i) cross at new point %i\n", i, v1 - optVerts, v2 - optVerts,
 		   j, v3 - optVerts, v4 - optVerts, newVert - optVerts );
 } else if ( newVert ) {
-common->Printf( "lines %i (%i to %i) and %i (%i to %i) intersect at old point %i\n", i, v1 - optVerts, v2 - optVerts, 
+common->Printf( "lines %i (%i to %i) and %i (%i to %i) intersect at old point %i\n", i, v1 - optVerts, v2 - optVerts,
 		  j, v3 - optVerts, v4 - optVerts, newVert - optVerts );
 }
 #endif
@@ -1631,7 +1631,7 @@ common->Printf( "lines %i (%i to %i) and %i (%i to %i) intersect at old point %i
 	// check for duplicated edges
 	for ( i = 0 ; i < numOptEdges ; i++ ) {
 		for ( j = i+1 ; j < numOptEdges ; j++ ) {
-			if ( ( optEdges[i].v1 == optEdges[j].v1 && optEdges[i].v2 == optEdges[j].v2 ) 
+			if ( ( optEdges[i].v1 == optEdges[j].v1 && optEdges[i].v2 == optEdges[j].v2 )
 				|| ( optEdges[i].v1 == optEdges[j].v2 && optEdges[i].v2 == optEdges[j].v1 ) ) {
 				common->Printf( "duplicated optEdge\n" );
 			}

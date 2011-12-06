@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -54,8 +54,8 @@ public:
 
 	rvGEWindowWrapper ( idWindow* window, EWindowType type );
 
-	static rvGEWindowWrapper*	GetWrapper ( idWindow* window );	
-		
+	static rvGEWindowWrapper*	GetWrapper ( idWindow* window );
+
 	idWindow*			GetWindow			( void );
 	idDict&				GetStateDict		( void );
 	idDict&				GetVariableDict		( void );
@@ -66,13 +66,13 @@ public:
 	int					GetChildCount		( void );
 	int					GetDepth			( void );
 	idWindow*			GetChild			( int index );
-	
+
 	void				SetRect				( idRectangle& rect );
 	void				SetState			( const idDict& dict );
 	void				SetStateKey			( const char* key, const char* value, bool update = true );
 	void				DeleteStateKey		( const char* key );
 	bool				VerfiyStateKey		( const char* name, const char* value, idStr* result = NULL );
-	
+
 	bool				IsFlippedHorz		( void );
 	bool				IsFlippedVert		( void );
 	bool				IsHidden			( void );
@@ -82,7 +82,7 @@ public:
 
 	bool				CanHaveChildren		( void );
 	bool				CanMoveAndSize		( void );
-	
+
 	void				SetFlippedHorz		( bool f );
 	void				SetFlippedVert		( bool f );
 	void				SetHidden			( bool v );
@@ -96,17 +96,17 @@ public:
 	bool				EnumChildren		( PFNENUMCHILDRENPROC proc, void* data );
 
 	idWindow*			WindowFromPoint		( float x, float y, bool visibleOnly = true );
-	
+
 	void				Finish				( void );
-	
+
 	static EWindowType	StringToWindowType		( const char* string );
 	static const char*	WindowTypeToString		( EWindowType type );
-	
+
 protected:
 
 	void				CalcScreenRect		( void );
 	void				UpdateRect			( void );
-	void				UpdateWindowState 	( void );	
+	void				UpdateWindowState	( void );
 
 	idRectangle		mClientRect;
 	idRectangle		mScreenRect;
@@ -145,16 +145,16 @@ ID_INLINE bool rvGEWindowWrapper::IsFlippedHorz ( void )
 	return mFlippedHorz;
 }
 
-ID_INLINE bool rvGEWindowWrapper::IsFlippedVert ( void ) 
+ID_INLINE bool rvGEWindowWrapper::IsFlippedVert ( void )
 {
 	return mFlippedVert;
 }
 
-ID_INLINE bool rvGEWindowWrapper::IsExpanded ( void ) 
+ID_INLINE bool rvGEWindowWrapper::IsExpanded ( void )
 {
 	return mExpanded;
 }
-	
+
 ID_INLINE void rvGEWindowWrapper::SetFlippedHorz ( bool f )
 {
 	mFlippedHorz = f;

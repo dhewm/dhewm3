@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -282,7 +282,7 @@ void Undo_GeneralStart(char *operation)
 	undo->prev = g_lastundo;
 	undo->next = NULL;
 	g_lastundo = undo;
-	
+
 	undo->time = Sys_DoubleTime();
 	//
 	if (g_undoId > g_undoMaxSize * 2) g_undoId = 1;
@@ -711,7 +711,7 @@ void Undo_Undo(void)
 	{
 		g_undoMemorySize -= Brush_MemorySize(pBrush);
 		Brush_RemoveFromList(pBrush);
-    	Brush_AddToList(pBrush, &active_brushes);
+		Brush_AddToList(pBrush, &active_brushes);
 		for (pEntity = entities.next; pEntity != NULL && pEntity != &entities; pEntity = pEntity->next)
 		{
 			if (pEntity->entityId == pBrush->ownerId)
@@ -729,7 +729,7 @@ void Undo_Undo(void)
 		//Brush_Build(pBrush);
 		Select_Brush(pBrush);
 		pBrush->redoId = redo->id;
-    }
+	}
 	//
 	common->Printf("%s undone.\n", undo->operation);
 	// free the undo
@@ -752,8 +752,8 @@ void Undo_Undo(void)
 	}
 	Sys_EndWait();
 
-    g_bScreenUpdates = true; 
-    Sys_UpdateWindows(W_ALL);
+	g_bScreenUpdates = true;
+	Sys_UpdateWindows(W_ALL);
 }
 
 /*
@@ -851,7 +851,7 @@ void Undo_Redo(void)
 	for (pBrush = redo->brushlist.next; pBrush != NULL && pBrush != &redo->brushlist; pBrush = redo->brushlist.next)
 	{
 		Brush_RemoveFromList(pBrush);
-    	Brush_AddToList(pBrush, &active_brushes);
+		Brush_AddToList(pBrush, &active_brushes);
 		for (pEntity = entities.next; pEntity != NULL && pEntity != &entities; pEntity = pEntity->next)
 		{
 			if (pEntity->entityId == pBrush->ownerId)
@@ -868,7 +868,7 @@ void Undo_Redo(void)
 		//build the brush
 		//Brush_Build(pBrush);
 		Select_Brush(pBrush);
-    }
+	}
 	//
 	Undo_End();
 	//
@@ -878,8 +878,8 @@ void Undo_Redo(void)
 	// free the undo
 	Mem_Free(redo);
 	//
-    g_bScreenUpdates = true; 
-    Sys_UpdateWindows(W_ALL);
+	g_bScreenUpdates = true;
+	Sys_UpdateWindows(W_ALL);
 }
 
 /*

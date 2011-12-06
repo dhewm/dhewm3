@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -277,20 +277,20 @@ void		TriVertsFromOriginal( mapTri_t *tri, const mapTri_t *original ) {
 
 	for ( i = 0 ; i < 3 ; i++ ) {
 		float	a, b, c;
-	
+
 		// find the barycentric coordinates
 		a = idWinding::TriangleArea( tri->v[i].xyz, original->v[1].xyz, original->v[2].xyz ) / denom;
 		b = idWinding::TriangleArea( tri->v[i].xyz, original->v[2].xyz, original->v[0].xyz ) / denom;
 		c = idWinding::TriangleArea( tri->v[i].xyz, original->v[0].xyz, original->v[1].xyz ) / denom;
 
 		// regenerate the interpolated values
-		tri->v[i].st[0] = a * original->v[0].st[0] 
+		tri->v[i].st[0] = a * original->v[0].st[0]
 			 + b * original->v[1].st[0] + c * original->v[2].st[0];
-		tri->v[i].st[1] = a * original->v[0].st[1] 
+		tri->v[i].st[1] = a * original->v[0].st[1]
 			 + b * original->v[1].st[1] + c * original->v[2].st[1];
 
 		for ( j = 0 ; j < 3 ; j++ ) {
-			tri->v[i].normal[j] = a * original->v[0].normal[j] 
+			tri->v[i].normal[j] = a * original->v[0].normal[j]
 				 + b * original->v[1].normal[j] + c * original->v[2].normal[j];
 		}
 		tri->v[i].normal.Normalize();
@@ -353,7 +353,7 @@ mapTri_t *WindingToTriList( const idWinding *w, const mapTri_t *originalTri ) {
 ClipTriList
 ==================
 */
-void	ClipTriList( const mapTri_t *list, const idPlane &plane, float epsilon, 
+void	ClipTriList( const mapTri_t *list, const idPlane &plane, float epsilon,
 						mapTri_t **front, mapTri_t **back ) {
 	const mapTri_t *tri;
 	mapTri_t		*newList;

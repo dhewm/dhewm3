@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -50,7 +50,7 @@ extern	PFNWGLRELEASEPBUFFERDCARBPROC	wglReleasePbufferDCARB;
 extern	PFNWGLDESTROYPBUFFERARBPROC	wglDestroyPbufferARB;
 extern	PFNWGLQUERYPBUFFERARBPROC	wglQueryPbufferARB;
 
-// WGL_ARB_render_texture 
+// WGL_ARB_render_texture
 extern	PFNWGLBINDTEXIMAGEARBPROC		wglBindTexImageARB;
 extern	PFNWGLRELEASETEXIMAGEARBPROC	wglReleaseTexImageARB;
 extern	PFNWGLSETPBUFFERATTRIBARBPROC	wglSetPbufferAttribARB;
@@ -120,7 +120,7 @@ typedef struct {
 
 	HDC				hDC;							// handle to device context
 	HGLRC			hGLRC;						// handle to GL rendering context
-	PIXELFORMATDESCRIPTOR pfd;		
+	PIXELFORMATDESCRIPTOR pfd;
 	int				pixelformat;
 
 	HINSTANCE		hinstOpenGL;	// HINSTANCE for the OpenGL library

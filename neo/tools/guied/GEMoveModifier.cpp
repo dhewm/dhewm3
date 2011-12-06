@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -46,14 +46,14 @@ rvGEMoveModifier::rvGEMoveModifier ( const char* name, idWindow* window, float x
 bool rvGEMoveModifier::Merge ( rvGEModifier* mergebase )
 {
 	rvGEMoveModifier* merge = (rvGEMoveModifier*) mergebase;
-	
+
 	mNewRect = merge->mNewRect;
-	
+
 	return true;
-} 
+}
 
 bool rvGEMoveModifier::Apply ( void )
-{	
+{
 	mWrapper->SetRect ( mNewRect );
 
 	return true;
@@ -62,7 +62,7 @@ bool rvGEMoveModifier::Apply ( void )
 bool rvGEMoveModifier::Undo ( void )
 {
 	mWrapper->SetRect ( mOldRect );
-	
+
 	return true;
 }
 
@@ -72,6 +72,6 @@ bool rvGEMoveModifier::IsValid ( void )
 	{
 		return false;
 	}
-	
+
 	return true;
 }

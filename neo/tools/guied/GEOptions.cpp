@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -49,7 +49,7 @@ rvGEOptions::rvGEOptions() {
 
 	mWorkspaceColor.Set ( 0.0f, 0.0f, 0.0f, 1.0f );
 	mSelectionColor.Set ( 0.5f, 0.5f, 1.0f, 1.0f );
-	
+
 	memset ( mCustomColors, 0, sizeof(mCustomColors) );
 }
 
@@ -73,15 +73,15 @@ bool rvGEOptions::Save ( void )
 {
 	// Write the last page we visited
 	mRegistry.SetLong ( "lastOptionsPage", mLastOptionsPage );
-	
+
 	// Write the grid settings
 	mRegistry.SetVec4 ( "gridColor", idVec4(mGridColor[0],mGridColor[1],mGridColor[2],1.0f) );
 	mRegistry.SetLong ( "gridWidth", mGridWidth );
 	mRegistry.SetLong ( "gridHeight", mGridHeight );
 	mRegistry.SetBool ( "gridSnap", mGridSnap );
 	mRegistry.SetBool ( "gridVisible", mGridVisible );
-		
-	// Tool window states	
+
+	// Tool window states
 	mRegistry.SetBool ( "navigatorVisible", mNavigatorVisible );
 	mRegistry.SetBool ( "PropertiesVisible", mPropertiesVisible );
 	mRegistry.SetBool ( "transformerVisible", mTransformerVisible );
@@ -118,13 +118,13 @@ bool rvGEOptions::Load ( void )
 	// Read the general stuff
 	mLastOptionsPage = mRegistry.GetLong ( "lastOptionsPage" );
 
-	// Read the grid settings	
+	// Read the grid settings
 	mGridColor = mRegistry.GetVec4 ( "gridColor" );
 	mGridWidth = mRegistry.GetLong ( "gridWidth" );
 	mGridHeight = mRegistry.GetLong ( "gridHeight" );
 	mGridSnap  = mRegistry.GetBool ( "gridSnap" );
 	mGridVisible = mRegistry.GetBool ( "gridVisible" );
-		
+
 	// Tool window states
 	mNavigatorVisible = mRegistry.GetBool ( "navigatorVisible" );
 	mPropertiesVisible = mRegistry.GetBool ( "PropertiesVisible" );
@@ -141,7 +141,7 @@ bool rvGEOptions::Load ( void )
 	{
 		mCustomColors[i] = mRegistry.GetLong ( va("customcol%d",i) );
 	}
-	
+
 	return true;
 }
 
@@ -163,13 +163,13 @@ void rvGEOptions::SnapRectToGrid ( idRectangle& rect, bool snapLeft, bool snapTo
 	}
 
 	if ( snapWidth )
-	{					
+	{
 		float offset = (int)(rect.x + rect.w + GetGridWidth() / 2) / GetGridWidth() * GetGridWidth();
 		offset -= rect.x;
 		offset -= rect.w;
 		rect.w += offset;
 	}
-	
+
 	if ( snapTop )
 	{
 		float offset = (int)(rect.y + GetGridHeight() / 2) / GetGridHeight() * GetGridHeight();
@@ -179,12 +179,10 @@ void rvGEOptions::SnapRectToGrid ( idRectangle& rect, bool snapLeft, bool snapTo
 	}
 
 	if ( snapHeight )
-	{					
+	{
 		float offset = (int)(rect.y + rect.h + GetGridHeight() / 2) / GetGridHeight() * GetGridHeight();
 		offset -= rect.y;
 		offset -= rect.h;
 		rect.h += offset;
-	}		
+	}
 }
-
-

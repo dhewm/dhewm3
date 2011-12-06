@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -123,10 +123,10 @@ void idGameEdit::ParseSpawnArgsToRenderLight( const idDict *args, renderLight_t 
 	idMat3 mat;
 	if ( !args->GetMatrix( "light_rotation", "1 0 0 0 1 0 0 0 1", mat ) ) {
 		if ( !args->GetMatrix( "rotation", "1 0 0 0 1 0 0 0 1", mat ) ) {
-	   		args->GetFloat( "angle", "0", angles[ 1 ] );
-   			angles[ 0 ] = 0;
+			args->GetFloat( "angle", "0", angles[ 1 ] );
+			angles[ 0 ] = 0;
 			angles[ 1 ] = idMath::AngleNormalize360( angles[ 1 ] );
-	   		angles[ 2 ] = 0;
+			angles[ 2 ] = 0;
 			mat = angles.ToMat3();
 		}
 	}
@@ -228,7 +228,7 @@ archives object for save game file
 */
 void idLight::Save( idSaveGame *savefile ) const {
 	savefile->WriteRenderLight( renderLight );
-	
+
 	savefile->WriteBool( renderLight.prelightModel != NULL );
 
 	savefile->WriteVec3( localLightOrigin );
@@ -383,7 +383,7 @@ void idLight::Spawn( void ) {
 			int	pos;
 
 			needBroken = false;
-		
+
 			pos = model.Find( "." );
 			if ( pos < 0 ) {
 				pos = model.Length();
@@ -396,7 +396,7 @@ void idLight::Spawn( void ) {
 				brokenModel += &model[ pos ];
 			}
 		}
-	
+
 		// make sure the model gets cached
 		if ( !renderModelManager->CheckModel( brokenModel ) ) {
 			if ( needBroken ) {
@@ -407,7 +407,7 @@ void idLight::Spawn( void ) {
 		}
 
 		GetPhysics()->SetContents( spawnArgs.GetBool( "nonsolid" ) ? 0 : CONTENTS_SOLID );
-	
+
 		// make sure the collision model gets cached
 		idClipModel::CheckModel( brokenModel );
 	}
@@ -1088,7 +1088,7 @@ void idLight::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 		}
 	}
 	UnpackColor( msg.ReadLong(), baseColor );
-	// lightParentEntityNum = msg.ReadBits( GENTITYNUM_BITS );	
+	// lightParentEntityNum = msg.ReadBits( GENTITYNUM_BITS );
 
 /*	// only helps prediction
 	UnpackColor( msg.ReadLong(), fadeFrom );

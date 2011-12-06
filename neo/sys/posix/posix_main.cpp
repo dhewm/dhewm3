@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -156,13 +156,13 @@ Sys_Milliseconds
 ================
 */
 /* base time in seconds, that's our origin
-   timeval:tv_sec is an int: 
+   timeval:tv_sec is an int:
    assuming this wraps every 0x7fffffff - ~68 years since the Epoch (1970) - we're safe till 2038
    using unsigned long data type to work right with Sys_XTimeToSysTime */
 unsigned long sys_timeBase = 0;
 /* current time in ms, using sys_timeBase as origin
    NOTE: sys_timeBase*1000 + curtime -> ms since the Epoch
-     0x7fffffff ms - ~24 days
+	 0x7fffffff ms - ~24 days
 		 or is it 48 days? the specs say int, but maybe it's casted from unsigned int?
 */
 int Sys_Milliseconds( void ) {
@@ -202,20 +202,20 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 	char search[MAX_OSPATH];
 	struct stat st;
 	bool debug;
-	
+
 	list.Clear();
 
 	debug = cvarSystem->GetCVarBool( "fs_debug" );
-	
+
 	if (!extension)
 		extension = "";
-	
+
 	// passing a slash as extension will find directories
 	if (extension[0] == '/' && extension[1] == 0) {
 		extension = "";
 		dironly = true;
 	}
-	
+
 	// search
 	// NOTE: case sensitivity of directory path can screw us up here
 	if ((fdir = opendir(directory)) == NULL) {
@@ -224,7 +224,7 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 		}
 		return -1;
 	}
-	
+
 	while ((d = readdir(fdir)) != NULL) {
 		idStr::snPrintf(search, sizeof(search), "%s/%s", directory, d->d_name);
 		if (stat(search, &st) == -1)
@@ -245,11 +245,11 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 	}
 
 	closedir(fdir);
-	
+
 	if ( debug ) {
 		common->Printf( "Sys_ListFiles: %d entries in %s\n", list.Num(), directory );
 	}
-	
+
 	return list.Num();
 }
 
@@ -460,7 +460,7 @@ char *Sys_GetClipboardData(void) {
 void Sys_SetClipboardData( const char *string ) {
 	Sys_Printf( "TODO: Sys_SetClipboardData\n" );
 }
-	
+
 
 // stub pretty much everywhere - heavy calling
 void Sys_FlushCacheMemory(void *base, int bytes)
@@ -589,11 +589,11 @@ void Posix_InitConsoleInput( void ) {
 		/*
 		  ECHO: don't echo input characters
 		  ICANON: enable canonical mode.  This  enables  the  special
-		  	characters  EOF,  EOL,  EOL2, ERASE, KILL, REPRINT,
-		  	STATUS, and WERASE, and buffers by lines.
+			characters  EOF,  EOL,  EOL2, ERASE, KILL, REPRINT,
+			STATUS, and WERASE, and buffers by lines.
 		  ISIG: when any of the characters  INTR,  QUIT,  SUSP,  or
-		  	DSUSP are received, generate the corresponding signal
-		*/              
+			DSUSP are received, generate the corresponding signal
+		*/
 		tc.c_lflag &= ~(ECHO | ICANON);
 		/*
 		  ISTRIP strip off bit 8
@@ -825,7 +825,7 @@ char *Posix_ConsoleInput( void ) {
 						}
 						// all terms
 						input_field.KeyDownEvent( K_INS );
-						break;						
+						break;
 					}
 					case 52: {
 						ret = read( STDIN_FILENO, &key, 1 );
@@ -857,7 +857,7 @@ char *Posix_ConsoleInput( void ) {
 						tty_FlushIn();
 						assert( hidden );
 						tty_Show();
-						return NULL;						
+						return NULL;
 					}
 					case 65:
 					case 66: {
@@ -883,7 +883,7 @@ char *Posix_ConsoleInput( void ) {
 						int index = -1;
 						if ( history_current == 0 ) {
 							input_field = history_backup;
-						} else {									
+						} else {
 							index = history_start + Min( COMMAND_HISTORY, history_count ) - history_current;
 							index %= COMMAND_HISTORY;
 							assert( index >= 0 && index < COMMAND_HISTORY );

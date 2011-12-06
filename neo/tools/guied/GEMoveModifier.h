@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -36,18 +36,18 @@ public:
 
 	virtual bool		CanMerge	( rvGEModifier* merge );
 	virtual bool		Merge		( rvGEModifier* merge );
-	
+
 	virtual bool		Apply		( void );
 	virtual bool		Undo		( void );
-	
+
 	virtual bool		IsValid		( void );
-	
+
 protected:
 
 	idRectangle		mNewRect;
 	idRectangle		mOldRect;
 };
- 
+
 ID_INLINE bool rvGEMoveModifier::CanMerge ( rvGEModifier* merge )
 {
 	return true;

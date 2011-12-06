@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -175,17 +175,17 @@ void CDialogPDAEditor::OnDestroy() {
 	return CDialog::OnDestroy();
 }
 
-BOOL CDialogPDAEditor::OnInitDialog() 
+BOOL CDialogPDAEditor::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	// Indicate the PDA dialog is opened
 	com_editors |= EDITOR_PDA;
 
 	PopulatePDAList();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CDialogPDAEditor::PreTranslateMessage(MSG* pMsg)
@@ -278,7 +278,7 @@ void CDialogPDAEditor::OnBtnClickedSave()
 		declText += "pda ";
 		declText += pda->GetName();
 		declText += " {\n";
-	
+
 		declText += "\tname    \t\t\"" + shortName + "\"\n";
 		declText += "\tfullname\t\t\"" + fullName + "\"\n";
 		declText += "\ticon    \t\t\"\"\n";
@@ -474,14 +474,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CDialogPDAEditor message handlers
 
-BOOL CDialogPDAEditEmail::OnInitDialog() 
+BOOL CDialogPDAEditEmail::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
 	SetWindowText( "Editing Email: " + name );
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CDialogPDAEditEmail::SetName( CString &_name )
@@ -525,4 +525,3 @@ CString CDialogPDAEditEmail::GetDeclText()
 
 	return declText;
 }
-

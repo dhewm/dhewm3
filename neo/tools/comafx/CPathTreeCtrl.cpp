@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -271,7 +271,7 @@ BOOL CPathTreeCtrl::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult ) 
 
 	*pResult = 0;
 
-	// Do not process the message from built in tooltip 
+	// Do not process the message from built in tooltip
 	if( nID == (UINT)m_hWnd &&
 			(( pNMHDR->code == TTN_NEEDTEXTA && pTTTA->uFlags & TTF_IDISHWND ) ||
 			( pNMHDR->code == TTN_NEEDTEXTW && pTTTW->uFlags & TTF_IDISHWND ) ) ) {

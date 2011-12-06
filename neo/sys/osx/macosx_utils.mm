@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -44,7 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 
 const char *macosx_scanForLibraryDirectory(void)
 {
-    return "/Library/DOOM";
+	return "/Library/DOOM";
 }
 
 // EEEK!
@@ -52,65 +52,65 @@ static long size_save;
 
 void *osxAllocateMemoryNV(long size, float readFrequency, float writeFrequency, float priority)
 {
-    kern_return_t kr;    
-    vm_address_t buffer;
-    
-    kr = vm_allocate(mach_task_self(),
-                    (vm_address_t *)&buffer,
-                    size,
-                    VM_FLAGS_ANYWHERE);
-    if(kr == 0) {
-        size_save = size;
-        return buffer;
-    }
-    else
-    {
-        size_save = 0;
-        return NULL;
-    }
+	kern_return_t kr;
+	vm_address_t buffer;
+
+	kr = vm_allocate(mach_task_self(),
+					(vm_address_t *)&buffer,
+					size,
+					VM_FLAGS_ANYWHERE);
+	if(kr == 0) {
+		size_save = size;
+		return buffer;
+	}
+	else
+	{
+		size_save = 0;
+		return NULL;
+	}
 
 }
 
 void osxFreeMemoryNV(void *pointer)
 {
-    if(size_save) {
-        vm_deallocate(mach_task_self(),
-                      (vm_address_t)pointer,
-                      size_save);
-        size_save = 0;
-    }
+	if(size_save) {
+		vm_deallocate(mach_task_self(),
+					  (vm_address_t)pointer,
+					  size_save);
+		size_save = 0;
+	}
 }
 
 void *osxAllocateMemory(long size)
 {
-    kern_return_t kr;    
-    vm_address_t buffer;
-    
-    size += sizeof( int );
-    kr = vm_allocate(mach_task_self(),
-                    (vm_address_t *)&buffer,
-                    size,
-                    VM_FLAGS_ANYWHERE);
-    if(kr == 0) {
-        int *ptr = buffer;
-        *ptr = size;
-        ptr = ptr + 1;
-        return ptr;
-    }
-    else
-    {
-        return NULL;
-    }
+	kern_return_t kr;
+	vm_address_t buffer;
+
+	size += sizeof( int );
+	kr = vm_allocate(mach_task_self(),
+					(vm_address_t *)&buffer,
+					size,
+					VM_FLAGS_ANYWHERE);
+	if(kr == 0) {
+		int *ptr = buffer;
+		*ptr = size;
+		ptr = ptr + 1;
+		return ptr;
+	}
+	else
+	{
+		return NULL;
+	}
 
 }
 
 void osxFreeMemory(void *pointer)
 {
-    int size;
-    int *ptr = pointer;
-    ptr = ptr - 1;
-    size = *ptr;
-    vm_deallocate(mach_task_self(), (vm_address_t)ptr, size);
+	int size;
+	int *ptr = pointer;
+	ptr = ptr - 1;
+	size = *ptr;
+	vm_deallocate(mach_task_self(), (vm_address_t)ptr, size);
 }
 
 static inline void __eieio(void)
@@ -130,39 +130,39 @@ static inline void __isync(void)
 
 static inline void __dcbf(void *base, unsigned long offset)
 {
-        __asm__ ("dcbf %0, %1"
-                :
-                : "r" (base), "r" (offset)
-                : "r0");
+		__asm__ ("dcbf %0, %1"
+				:
+				: "r" (base), "r" (offset)
+				: "r0");
 }
 
 static inline void __dcbst(void *base, unsigned long offset)
 {
-        __asm__ ("dcbst %0, %1"
-                :
-                : "r" (base), "r" (offset)
-                : "r0");
+		__asm__ ("dcbst %0, %1"
+				:
+				: "r" (base), "r" (offset)
+				: "r0");
 }
 
 static inline void __dcbz(void *base, unsigned long offset)
 {
-        __asm__ ("dcbz %0, %1"
-                :
-                : "r" (base), "r" (offset)
-                : "r0");
+		__asm__ ("dcbz %0, %1"
+				:
+				: "r" (base), "r" (offset)
+				: "r0");
 }
 
 void	Sys_FlushCacheMemory( void *base, int bytes ) {
 	unsigned long i;
-        
-        for(i = 0; i <  bytes; i+= 32) {
-            __dcbf(base,i);
-        }
-        __sync();
-        __isync();
-        __dcbf(base, i);
-        __sync(); 
-        __isync();
-        *(volatile unsigned long *)(base + i);
-        __isync(); 
+
+		for(i = 0; i <  bytes; i+= 32) {
+			__dcbf(base,i);
+		}
+		__sync();
+		__isync();
+		__dcbf(base, i);
+		__sync();
+		__isync();
+		*(volatile unsigned long *)(base + i);
+		__isync();
 }

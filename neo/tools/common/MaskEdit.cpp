@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -55,9 +55,9 @@ LRESULT CALLBACK MaskEdit_WndProc ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 			{
 				return 0;
 			}
-			
+
 			break;
-			
+
 		case WM_DESTROY:
 			delete edit;
 			SetWindowLong ( hWnd, GWL_WNDPROC, (LONG)wndproc );

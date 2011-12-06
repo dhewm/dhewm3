@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -113,7 +113,7 @@ void idRegister::GetFromRegs( float *registers ) {
 	for ( int i = 0; i < regCount; i++ ) {
 		v[i] = registers[regs[i]];
 	}
-	
+
 	switch( type ) {
 		case VEC4: {
 			*dynamic_cast<idWinVec4*>(var) = v;
@@ -194,7 +194,7 @@ void idRegister::WriteToSaveGame( idFile *savefile ) {
 	savefile->Write( &type, sizeof( type ) );
 	savefile->Write( &regCount, sizeof( regCount ) );
 	savefile->Write( &regs[0], sizeof( regs ) );
-	
+
 	len = name.Length();
 	savefile->Write( &len, sizeof( len ) );
 	savefile->Write( name.c_str(), len );

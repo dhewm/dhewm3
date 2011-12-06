@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -134,7 +134,7 @@ void idPhysics_Player::Accelerate( const idVec3 &wishdir, const float wishspeed,
 	if (accelspeed > addspeed) {
 		accelspeed = addspeed;
 	}
-	
+
 	current.velocity += accelspeed * wishdir;
 #else
 	// proper way (avoids strafe jump maxspeed bug), but feels bad
@@ -295,7 +295,7 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 				current.velocity *= 1.0f - idMath::ClampFloat( 0.0f, 1000.0f, totalMass - 20.0f ) * ( 1.0f / 950.0f );
 				pushed = true;
 			}
-	
+
 			current.origin = trace.endpos;
 			time_left -= time_left * trace.fraction;
 
@@ -441,7 +441,7 @@ void idPhysics_Player::Friction( void ) {
 	idVec3	vel;
 	float	speed, newspeed, control;
 	float	drop;
-	
+
 	vel = current.velocity;
 	if ( walking ) {
 		// ignore slope movement, remove all velocity in gravity direction
@@ -1011,7 +1011,7 @@ void idPhysics_Player::CheckGround( void ) {
 		walking = false;
 		return;
 	}
-	
+
 	// slopes that are too steep will not be considered onground
 	if ( ( groundTrace.c.normal * -gravityNormal ) < MIN_WALK_NORMAL ) {
 		if ( debugLevel ) {
@@ -1123,7 +1123,7 @@ void idPhysics_Player::CheckLadder( void ) {
 	idVec3		forward, start, end;
 	trace_t		trace;
 	float		tracedist;
-	
+
 	if ( current.movementTime ) {
 		return;
 	}
@@ -2042,4 +2042,3 @@ void idPhysics_Player::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 		clipModel->Link( gameLocal.clip, self, 0, current.origin, clipModel->GetAxis() );
 	}
 }
-

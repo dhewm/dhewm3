@@ -25,10 +25,10 @@ class idBuffering:
 		if ( retval != 0 or not self.silent ):
 			sys.stdout.write( stdout.getvalue() )
 			sys.stderr.write( stderr.getvalue() )
-		return retval		
+		return retval
 
 class idSetupBase:
-	
+
 	def SimpleCommand( self, cmd ):
 		print cmd
 		ret = commands.getstatusoutput( cmd )
@@ -50,7 +50,7 @@ class idSetupBase:
 		for ( key, val ) in d.items():
 			cmd += '--define=%s="%s" ' % ( key, val )
 		cmd += '%s > %s' % ( file, file_out )
-		self.SimpleCommand( cmd )	
+		self.SimpleCommand( cmd )
 
 	def ExtractProtocolVersion( self ):
 		f = open( 'framework/Licensee.h' )
@@ -73,8 +73,8 @@ class idSetupBase:
 		for i in l:
 			if ( p.match( i ) ):
 				minor = p.match( i ).group(1)
-				break	
-	
+				break
+
 		return '%s.%s' % ( major, minor )
 
 	def ExtractEngineVersion( self ):
@@ -88,7 +88,7 @@ class idSetupBase:
 			if ( p.match( i ) ):
 				version = p.match( i ).group(1)
 				break
-	
+
 		return version
 
 	def ExtractBuildVersion( self ):

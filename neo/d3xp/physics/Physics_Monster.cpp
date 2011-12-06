@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -108,8 +108,8 @@ monsterMoveResult_t idPhysics_Monster::SlideMove( idVec3 &start, idVec3 &velocit
 
 		if ( tr.c.entityNum != ENTITYNUM_NONE ) {
 			blockingEntity = gameLocal.entities[ tr.c.entityNum ];
-		} 
-		
+		}
+
 		// clip the movement delta and velocity
 		move.ProjectOntoPlane( tr.c.normal, OVERCLIP );
 		velocity.ProjectOntoPlane( tr.c.normal, OVERCLIP );
@@ -252,7 +252,7 @@ idPhysics_Monster::idPhysics_Monster( void ) {
 	memset( &current, 0, sizeof( current ) );
 	current.atRest = -1;
 	saved = current;
-	
+
 	delta.Zero();
 	maxStepHeight = 18.0f;
 	minFloorCosine = 0.7f;
@@ -310,7 +310,7 @@ void idPhysics_Monster::Save( idSaveGame *savefile ) const {
 	savefile->WriteBool( fly );
 	savefile->WriteBool( useVelocityMove );
 	savefile->WriteBool( noImpact );
-	
+
 	savefile->WriteInt( (int)moveResult );
 	savefile->WriteObject( blockingEntity );
 }
@@ -501,7 +501,7 @@ bool idPhysics_Monster::Evaluate( int timeStepMSec, int endTimeMSec ) {
 		delta = current.velocity * timeStep;
 		if ( delta != vec3_origin ) {
 			moveResult = idPhysics_Monster::SlideMove( current.origin, current.velocity, delta );
-            delta.Zero();
+			delta.Zero();
 		}
 
 		if ( !fly ) {

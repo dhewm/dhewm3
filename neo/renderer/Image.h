@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -91,30 +91,30 @@ const unsigned long DDSF_MIPMAP          = 0x00400000l;
 #define DDS_MAKEFOURCC(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
 
 typedef struct {
-    unsigned long dwSize;
-    unsigned long dwFlags;
-    unsigned long dwFourCC;
-    unsigned long dwRGBBitCount;
-    unsigned long dwRBitMask;
-    unsigned long dwGBitMask;
-    unsigned long dwBBitMask;
-    unsigned long dwABitMask;
+	unsigned long dwSize;
+	unsigned long dwFlags;
+	unsigned long dwFourCC;
+	unsigned long dwRGBBitCount;
+	unsigned long dwRBitMask;
+	unsigned long dwGBitMask;
+	unsigned long dwBBitMask;
+	unsigned long dwABitMask;
 } ddsFilePixelFormat_t;
 
 typedef struct
 {
-    unsigned long dwSize;
-    unsigned long dwFlags;
-    unsigned long dwHeight;
-    unsigned long dwWidth;
-    unsigned long dwPitchOrLinearSize;
-    unsigned long dwDepth;
-    unsigned long dwMipMapCount;
-    unsigned long dwReserved1[11];
-    ddsFilePixelFormat_t ddspf;
-    unsigned long dwCaps1;
-    unsigned long dwCaps2;
-    unsigned long dwReserved2[3];
+	unsigned long dwSize;
+	unsigned long dwFlags;
+	unsigned long dwHeight;
+	unsigned long dwWidth;
+	unsigned long dwPitchOrLinearSize;
+	unsigned long dwDepth;
+	unsigned long dwMipMapCount;
+	unsigned long dwReserved1[11];
+	ddsFilePixelFormat_t ddspf;
+	unsigned long dwCaps1;
+	unsigned long dwCaps2;
+	unsigned long dwReserved2[3];
 } ddsFileHeader_t;
 
 
@@ -163,14 +163,14 @@ public:
 	// data goes from the bottom to the top line of the image, as OpenGL expects it
 	// These perform an implicit Bind() on the current texture unit
 	// FIXME: should we implement cinematics this way, instead of with explicit calls?
-	void		GenerateImage( const byte *pic, int width, int height, 
-					   textureFilter_t filter, bool allowDownSize, 
+	void		GenerateImage( const byte *pic, int width, int height,
+					   textureFilter_t filter, bool allowDownSize,
 					   textureRepeat_t repeat, textureDepth_t depth );
 	void		Generate3DImage( const byte *pic, int width, int height, int depth,
-						textureFilter_t filter, bool allowDownSize, 
+						textureFilter_t filter, bool allowDownSize,
 						textureRepeat_t repeat, textureDepth_t minDepth );
-	void		GenerateCubeImage( const byte *pic[6], int size, 
-						textureFilter_t filter, bool allowDownSize, 
+	void		GenerateCubeImage( const byte *pic[6], int size,
+						textureFilter_t filter, bool allowDownSize,
 						textureDepth_t depth );
 
 	void		CopyFramebuffer( int x, int y, int width, int height, bool useOversizedBuffer );
@@ -249,7 +249,7 @@ public:
 	int					uploadWidth, uploadHeight, uploadDepth;	// after power of two, downsample, and MAX_TEXTURE_SIZE
 	int					internalFormat;
 
-	idImage 			*cacheUsagePrev, *cacheUsageNext;	// for dynamic cache purging of old images
+	idImage				*cacheUsagePrev, *cacheUsageNext;	// for dynamic cache purging of old images
 
 	idImage *			hashNext;				// for hash chains to speed lookup
 
@@ -412,7 +412,7 @@ public:
 	idImage *			borderClampImage;			// white inside, black outside
 
 	//--------------------------------------------------------
-	
+
 	idImage *			AllocImage( const char *name );
 	void				SetNormalPalette();
 	void				ChangeTextureFilter();
@@ -455,9 +455,9 @@ FIXME: make an "imageBlock" type to hold byte*,width,height?
 ====================================================================
 */
 
-byte *R_Dropsample( const byte *in, int inwidth, int inheight,  
+byte *R_Dropsample( const byte *in, int inwidth, int inheight,
 							int outwidth, int outheight );
-byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,  
+byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,
 							int outwidth, int outheight );
 byte *R_MipMapWithAlphaSpecularity( const byte *in, int width, int height );
 byte *R_MipMap( const byte *in, int width, int height, bool preserveBorder );
@@ -493,4 +493,3 @@ IMAGEPROGRAM
 
 void R_LoadImageProgram( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL );
 const char *R_ParsePastImageProgram( idLexer &src );
-

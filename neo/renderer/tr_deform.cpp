@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -185,7 +185,7 @@ static int edgeVerts[6][2] = {
 	// we need the view direction to project the minor axis of the tube
 	// as the view changes
 	idVec3	localView;
-	R_GlobalPointToLocal( surf->space->modelMatrix, tr.viewDef->renderView.vieworg, localView ); 
+	R_GlobalPointToLocal( surf->space->modelMatrix, tr.viewDef->renderView.vieworg, localView );
 
 	// this srfTriangles_t and all its indexes and caches are in frame
 	// memory, and will be automatically disposed of
@@ -257,7 +257,7 @@ static int edgeVerts[6][2] = {
 			*av2 = *(idDrawVert *)&tri->verts[i2];
 
 			l = 0.5 * lengths[j];
-			
+
 			// cross this with the view direction to get minor axis
 			idVec3	dir = mid[j] - localView;
 			minor.Cross( major, dir );
@@ -390,7 +390,7 @@ static void R_FlareDeform( drawSurf_t *surf ) {
 	newTri->numVerts = 4;
 	newTri->numIndexes = 2*3;
 	newTri->indexes = (glIndex_t *)R_FrameAlloc( newTri->numIndexes * sizeof( newTri->indexes[0] ) );
-	
+
 	idDrawVert *ac = (idDrawVert *)_alloca16( newTri->numVerts * sizeof( idDrawVert ) );
 
 	// find the plane
@@ -528,7 +528,7 @@ static void R_FlareDeform( drawSurf_t *surf ) {
 	newTri->numVerts = 16;
 	newTri->numIndexes = 18*3;
 	newTri->indexes = (glIndex_t *)R_FrameAlloc( newTri->numIndexes * sizeof( newTri->indexes[0] ) );
-	
+
 	idDrawVert *ac = (idDrawVert *)_alloca16( newTri->numVerts * sizeof( idDrawVert ) );
 
 	// find the plane
@@ -587,13 +587,13 @@ static void R_FlareDeform( drawSurf_t *surf ) {
 		idVec3	toEye = tri->verts[ indexes[i] ].xyz - localViewer;
 		toEye.Normalize();
 
-		idVec3	d1 = tri->verts[ indexes[(i+1)%4] ].xyz - localViewer; 
+		idVec3	d1 = tri->verts[ indexes[(i+1)%4] ].xyz - localViewer;
 		d1.Normalize();
 		edgeDir[i][1].Cross( toEye, d1 );
 		edgeDir[i][1].Normalize();
 		edgeDir[i][1] = vec3_origin - edgeDir[i][1];
 
-		idVec3	d2 = tri->verts[ indexes[(i+3)%4] ].xyz - localViewer; 
+		idVec3	d2 = tri->verts[ indexes[(i+3)%4] ].xyz - localViewer;
 		d2.Normalize();
 		edgeDir[i][0].Cross( toEye, d2 );
 		edgeDir[i][0].Normalize();
@@ -673,7 +673,7 @@ static void R_FlareDeform( drawSurf_t *surf ) {
 
 #if 1
 	static glIndex_t	triIndexes[18*3] = {
-		0,4,5,  0,5,6, 0,6,7, 0,7,1, 1,7,8, 1,8,9, 
+		0,4,5,  0,5,6, 0,6,7, 0,7,1, 1,7,8, 1,8,9,
 		15,4,0, 15,0,3, 3,0,1, 3,1,2, 2,1,9, 2,9,10,
 		14,15,3, 14,3,13, 13,3,2, 13,2,12, 12,2,11, 11,2,10
 	};
@@ -845,14 +845,14 @@ static void AddTriangleToIsland_r( const srfTriangles_t *tri, int triangleNum, b
 		if ( usedList[i] ) {
 			continue;
 		}
-		if ( tri->indexes[i*3+0] == a 
-			|| tri->indexes[i*3+1] == a 
-			|| tri->indexes[i*3+2] == a 
-			|| tri->indexes[i*3+0] == b 
-			|| tri->indexes[i*3+1] == b 
-			|| tri->indexes[i*3+2] == b 
-			|| tri->indexes[i*3+0] == c 
-			|| tri->indexes[i*3+1] == c 
+		if ( tri->indexes[i*3+0] == a
+			|| tri->indexes[i*3+1] == a
+			|| tri->indexes[i*3+2] == a
+			|| tri->indexes[i*3+0] == b
+			|| tri->indexes[i*3+1] == b
+			|| tri->indexes[i*3+2] == b
+			|| tri->indexes[i*3+0] == c
+			|| tri->indexes[i*3+1] == c
 			|| tri->indexes[i*3+2] == c ) {
 			AddTriangleToIsland_r( tri, i, usedList, island );
 		}
@@ -1025,7 +1025,7 @@ static void R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 	}
 
 #if 0
-	if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] && 
+	if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] &&
 		viewDef->renderView.time*0.001 >= renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] ) {
 		// the entire system has faded out
 		return NULL;
@@ -1113,7 +1113,7 @@ static void R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 				steppingRandom.RandomInt();
 				steppingRandom2.RandomInt();
 
-				// calculate local age for this index 
+				// calculate local age for this index
 				int	bunchOffset = stage->particleLife * 1000 * stage->spawnBunching * index / totalParticles;
 
 				int particleAge = stageAge - bunchOffset;
@@ -1135,7 +1135,7 @@ static void R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 
 				int	inCycleTime = particleAge - particleCycle * stage->cycleMsec;
 
-				if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] && 
+				if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] &&
 					g.renderView->time - inCycleTime >= renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME]*1000 ) {
 					// don't fire any more particles
 					continue;
@@ -1194,7 +1194,7 @@ static void R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 				// don't increment the verts
 				tri->numVerts += stage->CreateParticle( &g, tri->verts + tri->numVerts );
 			}
-	
+
 			if ( tri->numVerts > 0 ) {
 				// build the index list
 				int	indexes = 0;

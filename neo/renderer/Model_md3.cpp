@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -48,7 +48,7 @@ idRenderModelMD3::InitFromFile
 void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	int					i, j;
 	md3Header_t			*pinmodel;
-    md3Frame_t			*frame;
+	md3Frame_t			*frame;
 	md3Surface_t		*surf;
 	md3Shader_t			*shader;
 	md3Triangle_t		*tri;
@@ -83,60 +83,60 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 
 	memcpy (md3, buffer, LittleLong(pinmodel->ofsEnd) );
 
-    LL(md3->ident);
-    LL(md3->version);
-    LL(md3->numFrames);
-    LL(md3->numTags);
-    LL(md3->numSurfaces);
-    LL(md3->ofsFrames);
-    LL(md3->ofsTags);
-    LL(md3->ofsSurfaces);
-    LL(md3->ofsEnd);
+	LL(md3->ident);
+	LL(md3->version);
+	LL(md3->numFrames);
+	LL(md3->numTags);
+	LL(md3->numSurfaces);
+	LL(md3->ofsFrames);
+	LL(md3->ofsTags);
+	LL(md3->ofsSurfaces);
+	LL(md3->ofsEnd);
 
 	if ( md3->numFrames < 1 ) {
 		common->Warning( "InitFromFile: %s has no frames", fileName );
 		fileSystem->FreeFile( buffer );
 		return;
 	}
-    
+
 	// swap all the frames
-    frame = (md3Frame_t *) ( (byte *)md3 + md3->ofsFrames );
-    for ( i = 0 ; i < md3->numFrames ; i++, frame++) {
-    	frame->radius = LittleFloat( frame->radius );
-        for ( j = 0 ; j < 3 ; j++ ) {
-            frame->bounds[0][j] = LittleFloat( frame->bounds[0][j] );
-            frame->bounds[1][j] = LittleFloat( frame->bounds[1][j] );
-	    	frame->localOrigin[j] = LittleFloat( frame->localOrigin[j] );
-        }
+	frame = (md3Frame_t *) ( (byte *)md3 + md3->ofsFrames );
+	for ( i = 0 ; i < md3->numFrames ; i++, frame++) {
+		frame->radius = LittleFloat( frame->radius );
+		for ( j = 0 ; j < 3 ; j++ ) {
+			frame->bounds[0][j] = LittleFloat( frame->bounds[0][j] );
+			frame->bounds[1][j] = LittleFloat( frame->bounds[1][j] );
+			frame->localOrigin[j] = LittleFloat( frame->localOrigin[j] );
+		}
 	}
 
 	// swap all the tags
-    tag = (md3Tag_t *) ( (byte *)md3 + md3->ofsTags );
-    for ( i = 0 ; i < md3->numTags * md3->numFrames ; i++, tag++) {
-        for ( j = 0 ; j < 3 ; j++ ) {
+	tag = (md3Tag_t *) ( (byte *)md3 + md3->ofsTags );
+	for ( i = 0 ; i < md3->numTags * md3->numFrames ; i++, tag++) {
+		for ( j = 0 ; j < 3 ; j++ ) {
 			tag->origin[j] = LittleFloat( tag->origin[j] );
 			tag->axis[0][j] = LittleFloat( tag->axis[0][j] );
 			tag->axis[1][j] = LittleFloat( tag->axis[1][j] );
 			tag->axis[2][j] = LittleFloat( tag->axis[2][j] );
-        }
+		}
 	}
 
 	// swap all the surfaces
 	surf = (md3Surface_t *) ( (byte *)md3 + md3->ofsSurfaces );
 	for ( i = 0 ; i < md3->numSurfaces ; i++) {
 
-        LL(surf->ident);
-        LL(surf->flags);
-        LL(surf->numFrames);
-        LL(surf->numShaders);
-        LL(surf->numTriangles);
-        LL(surf->ofsTriangles);
-        LL(surf->numVerts);
-        LL(surf->ofsShaders);
-        LL(surf->ofsSt);
-        LL(surf->ofsXyzNormals);
-        LL(surf->ofsEnd);
-		
+		LL(surf->ident);
+		LL(surf->flags);
+		LL(surf->numFrames);
+		LL(surf->numShaders);
+		LL(surf->numTriangles);
+		LL(surf->ofsTriangles);
+		LL(surf->numVerts);
+		LL(surf->ofsShaders);
+		LL(surf->ofsSt);
+		LL(surf->ofsXyzNormals);
+		LL(surf->ofsEnd);
+
 		if ( surf->numVerts > SHADER_MAX_VERTEXES ) {
 			common->Error( "InitFromFile: %s has more than %i verts on a surface (%i)",
 				fileName, SHADER_MAX_VERTEXES, surf->numVerts );
@@ -145,7 +145,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 			common->Error( "InitFromFile: %s has more than %i triangles on a surface (%i)",
 				fileName, SHADER_MAX_INDEXES / 3, surf->numTriangles );
 		}
-	
+
 		// change to surface identifier
 		surf->ident = 0;	//SF_MD3;
 
@@ -162,14 +162,14 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 			surf->name[j-2] = 0;
 		}
 
-        // register the shaders
-        shader = (md3Shader_t *) ( (byte *)surf + surf->ofsShaders );
-        for ( j = 0 ; j < surf->numShaders ; j++, shader++ ) {
-            const idMaterial *sh;
+		// register the shaders
+		shader = (md3Shader_t *) ( (byte *)surf + surf->ofsShaders );
+		for ( j = 0 ; j < surf->numShaders ; j++, shader++ ) {
+			const idMaterial *sh;
 
-            sh = declManager->FindMaterial( shader->name );
+			sh = declManager->FindMaterial( shader->name );
 			shader->shader = sh;
-        }
+		}
 
 		// swap all the triangles
 		tri = (md3Triangle_t *) ( (byte *)surf + surf->ofsTriangles );
@@ -180,28 +180,28 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 		}
 
 		// swap all the ST
-        st = (md3St_t *) ( (byte *)surf + surf->ofsSt );
-        for ( j = 0 ; j < surf->numVerts ; j++, st++ ) {
-            st->st[0] = LittleFloat( st->st[0] );
-            st->st[1] = LittleFloat( st->st[1] );
-        }
+		st = (md3St_t *) ( (byte *)surf + surf->ofsSt );
+		for ( j = 0 ; j < surf->numVerts ; j++, st++ ) {
+			st->st[0] = LittleFloat( st->st[0] );
+			st->st[1] = LittleFloat( st->st[1] );
+		}
 
 		// swap all the XyzNormals
-        xyz = (md3XyzNormal_t *) ( (byte *)surf + surf->ofsXyzNormals );
-        for ( j = 0 ; j < surf->numVerts * surf->numFrames ; j++, xyz++ ) 
+		xyz = (md3XyzNormal_t *) ( (byte *)surf + surf->ofsXyzNormals );
+		for ( j = 0 ; j < surf->numVerts * surf->numFrames ; j++, xyz++ )
 		{
-            xyz->xyz[0] = LittleShort( xyz->xyz[0] );
-            xyz->xyz[1] = LittleShort( xyz->xyz[1] );
-            xyz->xyz[2] = LittleShort( xyz->xyz[2] );
+			xyz->xyz[0] = LittleShort( xyz->xyz[0] );
+			xyz->xyz[1] = LittleShort( xyz->xyz[1] );
+			xyz->xyz[2] = LittleShort( xyz->xyz[2] );
 
-            xyz->normal = LittleShort( xyz->normal );
-        }
+			xyz->normal = LittleShort( xyz->normal );
+		}
 
 
 		// find the next surface
 		surf = (md3Surface_t *)( (byte *)surf + surf->ofsEnd );
 	}
-    
+
 	fileSystem->FreeFile( buffer );
 }
 
@@ -264,7 +264,7 @@ void idRenderModelMD3::LerpMeshVertexes ( srfTriangles_t *tri, const struct md3S
 
 			tri->numVerts++;
 		}
-   	}
+	}
 }
 
 /*
@@ -368,4 +368,3 @@ idBounds idRenderModelMD3::Bounds(const struct renderEntity_s *ent) const {
 
 	return ret;
 }
-

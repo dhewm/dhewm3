@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -42,7 +42,7 @@ idAudioHardwareALSA::DLOpen
 */
 bool idAudioHardwareALSA::DLOpen( void ) {
 	const char *version;
-	
+
 	if ( m_handle ) {
 		return true;
 	}
@@ -57,7 +57,7 @@ bool idAudioHardwareALSA::DLOpen( void ) {
 		common->Printf( "dlsym(\"snd_asoundlib_version\") failed: %s\n", dlerror() );
 		common->Warning( "please consider upgrading alsa to a more recent version." );
 	} else {
-		version = id_snd_asoundlib_version();	
+		version = id_snd_asoundlib_version();
 		common->Printf( "asoundlib version: %s\n", version );
 	}
 	// dlsym the symbols
@@ -105,8 +105,8 @@ void idAudioHardwareALSA::Release() {
 /*
 =================
 idAudioHardwareALSA::InitFailed
-=================	
-*/	
+=================
+*/
 void idAudioHardwareALSA::InitFailed() {
 	Release();
 	cvarSystem->SetCVarBool( "s_noSound", true );
@@ -121,7 +121,7 @@ idAudioHardwareALSA::Initialize
 */
 bool idAudioHardwareALSA::Initialize( void ) {
 	int err;
-	
+
 	common->Printf( "------ Alsa Sound Initialization -----\n" );
 	if ( !DLOpen() ) {
 		InitFailed();
@@ -230,7 +230,7 @@ bool idAudioHardwareALSA::Initialize( void ) {
 	snd_pcm_state_t curstate = id_snd_pcm_state( m_pcm_handle );
 	assert( curstate == SND_PCM_STATE_PREPARED );
 #endif
-	
+
 	common->Printf( "--------------------------------------\n" );
 	return true;
 }
@@ -250,7 +250,7 @@ idAudioHardwareALSA::~idAudioHardwareALSA() {
 =================
 idAudioHardwareALSA::GetMixBufferSize
 =================
-*/	
+*/
 int idAudioHardwareALSA::GetMixBufferSize() {
 	return m_buffer_size;
 }
@@ -259,7 +259,7 @@ int idAudioHardwareALSA::GetMixBufferSize() {
 =================
 idAudioHardwareALSA::GetMixBuffer
 =================
-*/	
+*/
 short* idAudioHardwareALSA::GetMixBuffer() {
 	return (short *)m_buffer;
 }

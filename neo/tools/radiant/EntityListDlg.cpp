@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -46,7 +46,7 @@ CEntityListDlg g_EntityListDlg;
 void CEntityListDlg::ShowDialog() {
 	if (g_EntityListDlg.GetSafeHwnd() == NULL) {
 		g_EntityListDlg.Create(IDD_DLG_ENTITYLIST);
-	} 
+	}
 	g_EntityListDlg.UpdateList();
 	g_EntityListDlg.ShowWindow(SW_SHOW);
 
@@ -82,7 +82,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CEntityListDlg message handlers
 
-void CEntityListDlg::OnSelect() 
+void CEntityListDlg::OnSelect()
 {
 	int index = listEntities.GetCurSel();
 	if (index != LB_ERR) {
@@ -115,10 +115,10 @@ void CEntityListDlg::OnCancel() {
 	DestroyWindow();
 }
 
-BOOL CEntityListDlg::OnInitDialog() 
+BOOL CEntityListDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	UpdateList();
 
 	CRect rct;
@@ -127,9 +127,9 @@ BOOL CEntityListDlg::OnInitDialog()
 	m_lstEntity.InsertColumn(1, "Value", LVCFMT_LEFT, rct.Width() / 2);
 	m_lstEntity.DeleteColumn(2);
 	UpdateData(FALSE);
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CEntityListDlg::OnClose() {
@@ -142,7 +142,7 @@ void CEntityListDlg::OnLbnSelchangeListEntities()
 	if (index != LB_ERR) {
 		m_lstEntity.DeleteAllItems();
 		entity_t* pEntity = reinterpret_cast<entity_t*>(listEntities.GetItemDataPtr(index));
-	    if (pEntity) {
+		if (pEntity) {
 			int count = pEntity->epairs.GetNumKeyVals();
 			for (int i = 0; i < count; i++) {
 				int nParent = m_lstEntity.InsertItem(0, pEntity->epairs.GetKeyVal(i)->GetKey());

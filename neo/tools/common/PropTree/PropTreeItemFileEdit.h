@@ -32,13 +32,13 @@ protected:
 	//{{AFX_MSG(CPropTreeItemFileEdit)
 	//}}AFX_MSG
 
-	afx_msg void 				OnInsertFile();
-	afx_msg void 				OnEditUndo();
-	afx_msg void 				OnEditCut();
-	afx_msg void 				OnEditCopy();
-	afx_msg void 				OnEditPaste();
-	afx_msg void 				OnEditDelete();
-	afx_msg void 				OnEditSelectAll();
+	afx_msg void				OnInsertFile();
+	afx_msg void				OnEditUndo();
+	afx_msg void				OnEditCut();
+	afx_msg void				OnEditCopy();
+	afx_msg void				OnEditPaste();
+	afx_msg void				OnEditDelete();
+	afx_msg void				OnEditSelectAll();
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -51,4 +51,4 @@ public:
 //{{AFX_INSERT_LOCATION}}
 
 
-#endif 
+#endif

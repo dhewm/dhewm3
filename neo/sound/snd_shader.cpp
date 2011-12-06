@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -97,7 +97,7 @@ bool idSoundShader::SetDefaultText( void ) {
 	// if there exists a wav file with the same name
 	if ( 1 ) { //fileSystem->ReadFile( wavname, NULL ) != -1 ) {
 		char generated[2048];
-		idStr::snPrintf( generated, sizeof( generated ), 
+		idStr::snPrintf( generated, sizeof( generated ),
 						"sound %s // IMPLICITLY GENERATED\n"
 						"{\n"
 						"%s\n"
@@ -281,7 +281,7 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 			parms.soundShaderFlags |= SSF_NO_FLICKER;
 		}
 		// plain
-		else if ( !token.Icmp( "plain" ) ) {	
+		else if ( !token.Icmp( "plain" ) ) {
 			// no longer supported
 		}
 		// looping
@@ -352,7 +352,7 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 							token = work;
 						}
 					}
-				} 					
+				}
 				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound( token.c_str(), onDemand );
 				numEntries++;
 			}

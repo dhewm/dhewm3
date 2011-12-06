@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -53,7 +53,7 @@ END_MESSAGE_MAP()
 */
 MaterialEditView::MaterialEditView()
 : CFormView(MaterialEditView::IDD) {
-	
+
 	initHack = false;
 	sourceInit = false;
 	sourceChanged = false;
@@ -145,7 +145,7 @@ void MaterialEditView::GetMaterialSource() {
 			m_textView.SetText(text);
 			sourceInit = false;
 		}
-	}	
+	}
 }
 
 /**
@@ -181,7 +181,7 @@ void MaterialEditView::DoDataExchange(CDataExchange* pDX) {
 * Called by the MFC framework when the view is being created.
 */
 void MaterialEditView::OnInitialUpdate() {
-	
+
 	CFormView::OnInitialUpdate();
 
 	if(!initHack) {
@@ -261,7 +261,7 @@ void MaterialEditView::OnSize(UINT nType, int cx, int cy) {
 }
 
 /**
-* Called when the user changes the properties/text tab selection. This methods shows and hides 
+* Called when the user changes the properties/text tab selection. This methods shows and hides
 * the appropriate windows.
 */
 void MaterialEditView::OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult) {
@@ -276,7 +276,7 @@ void MaterialEditView::OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult) {
 			ApplyMaterialSource();
 
 			m_stageView->RefreshStageList();
-			
+
 			break;
 		case 1:
 			m_editSplitter.ShowWindow(SW_HIDE);
@@ -299,10 +299,3 @@ void MaterialEditView::OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult ) {
 		}
 	}
 }
-
-
-
-
-
-
-

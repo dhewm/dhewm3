@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -77,18 +77,18 @@ void CTearoffContainerWindow::SetDialog ( CWnd* dlg , int ID )
 {
 	m_DialogID = ID;
 	m_ContainedDialog = dlg;
-	
+
 	CRect rect;
 	CPoint point (-10 , -10);
 	m_ContainedDialog->GetWindowRect ( rect );
-	
+
 	rect.OffsetRect(point);	//move the window slightly so you can tell it's been popped up
 
 	//stupid hack to get the window resize itself properly
 	rect.DeflateRect(0,0,0,1);
-	MoveWindow(rect);	
+	MoveWindow(rect);
 	rect.InflateRect(0,0,0,1);
-	MoveWindow(rect);	
+	MoveWindow(rect);
 }
 
 void CTearoffContainerWindow::SetDockManager ( CTabsDlg* dlg )
@@ -97,7 +97,7 @@ void CTearoffContainerWindow::SetDockManager ( CTabsDlg* dlg )
 }
 void CTearoffContainerWindow::OnClose()
 {
-	if ( m_DockManager ) 
+	if ( m_DockManager )
 	{
 		//send it back to the docking window (for now at least)
 		m_DockManager->DockWindow ( m_DialogID , true );
@@ -105,7 +105,7 @@ void CTearoffContainerWindow::OnClose()
 }
 
 
-BOOL CTearoffContainerWindow:: PreTranslateMessage( MSG* pMsg ) 
+BOOL CTearoffContainerWindow:: PreTranslateMessage( MSG* pMsg )
 {
 	if ( pMsg->message == WM_NCLBUTTONUP )
 	{
@@ -124,11 +124,11 @@ BOOL CTearoffContainerWindow:: PreTranslateMessage( MSG* pMsg )
 }
 void CTearoffContainerWindow::OnSize(UINT nType, int cx, int cy)
 {
-	if ( m_ContainedDialog ) 
+	if ( m_ContainedDialog )
 	{
-		m_ContainedDialog->MoveWindow ( 0,0,cx,cy);		
+		m_ContainedDialog->MoveWindow ( 0,0,cx,cy);
 	}
-	
+
 	CWnd::OnSize(nType, cx, cy);
 }
 
@@ -142,7 +142,7 @@ void CTearoffContainerWindow::OnDestroy()
 void CTearoffContainerWindow::OnSetFocus(CWnd* pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
-	if ( m_ContainedDialog ) 
+	if ( m_ContainedDialog )
 	{
 		m_ContainedDialog->SetFocus();
 	}

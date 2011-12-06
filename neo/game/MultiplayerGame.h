@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -108,7 +108,7 @@ public:
 	// checks rules and updates state of the mp game
 	void			Run( void );
 
-	// draws mp hud, scoredboard, etc.. 
+	// draws mp hud, scoredboard, etc..
 	bool			Draw( int clientNum );
 
 	// updates a player vote
@@ -214,7 +214,7 @@ public:
 	void			ProcessVoiceChat( int clientNum, bool team, int index );
 
 	void			Precache( void );
-	
+
 	// throttle UI switch rates
 	void			ThrottleUserInfo( void );
 	void			ToggleSpectate( void );
@@ -312,7 +312,7 @@ private:
 	// updates the passed gui with current score information
 	void			UpdateRankColor( idUserInterface *gui, const char *mask, int i, const idVec3 &vec );
 	void			UpdateScoreboard( idUserInterface *scoreBoard, idPlayer *player );
-	
+
 	void			ClearGuis( void );
 	void			DrawScoreBoard( idPlayer *player );
 	void			UpdateHud( idPlayer *player, idUserInterface *hud );
@@ -368,4 +368,3 @@ ID_INLINE bool idMultiplayerGame::IsInGame( int clientNum ) {
 }
 
 #endif	/* !__MULTIPLAYERGAME_H__ */
-

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -78,14 +78,14 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 	// 6,  7,  8
 	// 9, 10, 11
 
-	/* 
+	/*
 		mov			eax, count
 		mov			edi, constant
 		mov			edx, eax
 		mov			esi, src
 		mov			ecx, dst
-	*/	
-	__m128 xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7; 	// Declare 8 xmm registers. 
+	*/
+	__m128 xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7;	// Declare 8 xmm registers.
 	int count_l4 = count;                                   // count_l4 = eax
 	int count_l1 = count;                                   // count_l1 = edx
 	char *constant_p = (char *)&constant;                   // constant_p = edi
@@ -94,7 +94,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 
 	assert( sizeof( idDrawVert ) == DRAWVERT_SIZE );
 	assert( (int)&((idDrawVert *)0)->xyz == DRAWVERT_XYZ_OFFSET );
-	
+
 	/*
 		and			eax, ~3
 		movss		xmm4, [edi+0]
@@ -112,10 +112,10 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 	xmm5 = _mm_load_ss((float *) (constant_p + 4));
 	xmm5 = _mm_shuffle_ps(xmm5, xmm5, R_SHUFFLEPS( 0, 0, 0, 0 ));
 	xmm6 = _mm_load_ss((float *) (constant_p + 8));
-	xmm6 = _mm_shuffle_ps(xmm6, xmm6, R_SHUFFLEPS( 0, 0, 0, 0 ));	
-	xmm7 = _mm_load_ss((float *) (constant_p + 12));	
- 	xmm7 = _mm_shuffle_ps(xmm7, xmm7, R_SHUFFLEPS( 0, 0, 0, 0 ));	
-	
+	xmm6 = _mm_shuffle_ps(xmm6, xmm6, R_SHUFFLEPS( 0, 0, 0, 0 ));
+	xmm7 = _mm_load_ss((float *) (constant_p + 12));
+	xmm7 = _mm_shuffle_ps(xmm7, xmm7, R_SHUFFLEPS( 0, 0, 0, 0 ));
+
 	/*
 		jz			startVert1
 	*/
@@ -142,14 +142,14 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 			xmm2 = _mm_load_ss((float *) (src_p+count_l4+0*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+8));        // 2,  X,  X,  X
 			xmm0 = _mm_loadh_pi(xmm0, (__m64 *) (src_p+count_l4+0*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+0)); // 3,  X,  0,  1
 			xmm1 = xmm0;							                                                    // 3,  X,  0,  1
-		
-	/*		
+
+	/*
 		movlps		xmm1, [esi+eax+1*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+4]	//  4,  5,  0,  1
 		shufps		xmm2, xmm1, R_SHUFFLEPS( 0, 1, 0, 1 )					//  2,  X,  4,  5
 	*/
 			xmm1 = _mm_loadl_pi(xmm1, (__m64 *) (src_p+count_l4+1*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+4)); // 4,  5,  0,  1
 			xmm2 = _mm_shuffle_ps(xmm2, xmm1, R_SHUFFLEPS( 0, 1, 0, 1 ));                               // 2,  X,  4,  5
-			
+
 	/*
 		movss		xmm3, [esi+eax+3*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+0]	//  9,  X,  X,  X
 		movhps		xmm3, [esi+eax+2*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+0]	//  9,  X,  6,  7
@@ -167,17 +167,17 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 	/*
 		movhps		xmm3, [esi+eax+2*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+8]	// 10, 11,  8,  X
 		shufps		xmm2, xmm3, R_SHUFFLEPS( 0, 3, 2, 1 )					//  2,  5,  8, 11
-	*/		
+	*/
 			xmm3 = _mm_loadh_pi(xmm3, (__m64 *)(src_p+count_l4+2*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+8));  // 10, 11, 8,  X
 			xmm2 = _mm_shuffle_ps(xmm2, xmm3, R_SHUFFLEPS( 0, 3, 2, 1 ));                               // 2,  5,  8,  11
-	
+
 	/*
 		add			ecx, 16
 		add			eax, 4*DRAWVERT_SIZE
 	*/
 			dst_p = dst_p + 16;
 			count_l4 = count_l4 + 4*DRAWVERT_SIZE;
-		
+
 	/*
 		mulps		xmm0, xmm4
 		mulps		xmm1, xmm5
@@ -192,7 +192,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 			xmm0 = _mm_add_ps(xmm0, xmm7);
 			xmm0 = _mm_add_ps(xmm0, xmm1);
 			xmm0 = _mm_add_ps(xmm0, xmm2);
-			
+
 	/*
 		movlps		[ecx-16+0], xmm0
 		movhps		[ecx-16+8], xmm0
@@ -202,7 +202,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 			_mm_storeh_pi((__m64 *) (dst_p-16+8), xmm0);
 		} while(count_l4 < 0);
 	}
-	
+
 	/*
 	startVert1:
 		and			edx, 3
@@ -239,7 +239,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idDrawVe
 			xmm0 = _mm_add_ss(xmm0, xmm1);
 			count_l4 = count_l4 + DRAWVERT_SIZE;
 			xmm0 = _mm_add_ss(xmm0, xmm2);
-			count_l1 = count_l1 - 1;		
+			count_l1 = count_l1 - 1;
 			_mm_store_ss((float *) (dst_p-4), xmm0);
 		} while( count_l1 != 0);
 	}
@@ -265,7 +265,7 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 	int edx;
 	char *min_p;
 	char *max_p;
-	
+
 	/*
 		movss		xmm0, idMath::INFINITY
 		xorps		xmm1, xmm1
@@ -275,7 +275,7 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 		movaps		xmm3, xmm1
 	*/
 		xmm0 = _mm_load_ss(&idMath::INFINITY);
-		// To satisfy the compiler use xmm0 instead. 
+		// To satisfy the compiler use xmm0 instead.
 		xmm1 = _mm_xor_ps(xmm0, xmm0);
 		xmm0 = _mm_shuffle_ps(xmm0, xmm0, R_SHUFFLEPS( 0, 0, 0, 0 ));
 		xmm1 = _mm_sub_ps(xmm1, xmm0);
@@ -322,7 +322,7 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 			xmm4 = _mm_loadh_pi(xmm4, (__m64 *) (src_p+edx+DRAWVERT_XYZ_OFFSET+0) );
 			xmm0 = _mm_min_ps(xmm0, xmm4);
 			xmm1 = _mm_max_ps(xmm1, xmm4);
-		
+
 	/*
 		mov			edx, [edi+eax+4]
 		imul		edx, DRAWVERT_SIZE
@@ -336,8 +336,8 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 			xmm5 = _mm_load_ss((float *) (src_p+edx+DRAWVERT_XYZ_OFFSET+0));
 			xmm5 = _mm_loadh_pi(xmm5, (__m64 *) (src_p+edx+DRAWVERT_XYZ_OFFSET+4) );
 			xmm2 = _mm_min_ps(xmm2, xmm5);
-			xmm3 = _mm_max_ps(xmm3, xmm5);		
-		
+			xmm3 = _mm_max_ps(xmm3, xmm5);
+
 	/*
 		mov			edx, [edi+eax+8]
 		imul		edx, DRAWVERT_SIZE
@@ -352,7 +352,7 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 			xmm6 = _mm_loadh_pi(xmm6, (__m64 *) (src_p+edx+DRAWVERT_XYZ_OFFSET+0) );
 			xmm0 = _mm_min_ps(xmm0, xmm6);
 			xmm1 = _mm_max_ps(xmm1, xmm6);
-		
+
 	/*
 		mov			edx, [edi+eax+12]
 		imul		edx, DRAWVERT_SIZE
@@ -366,7 +366,7 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 			xmm7 = _mm_load_ss((float *) (src_p+edx+DRAWVERT_XYZ_OFFSET+0));
 			xmm7 = _mm_loadh_pi(xmm7, (__m64 *) (src_p+edx+DRAWVERT_XYZ_OFFSET+4) );
 			xmm2 = _mm_min_ps(xmm2, xmm7);
-			xmm3 = _mm_max_ps(xmm3, xmm7);	
+			xmm3 = _mm_max_ps(xmm3, xmm7);
 
 	/*
 		add			eax, 4*4
@@ -393,7 +393,7 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 		indexes_p = indexes_p + count_l;
 		count_l = -count_l;
 	/*
-	loop1:		
+	loop1:
 	*/
 		do{
 	/*
@@ -410,17 +410,17 @@ void VPCALL idSIMD_SSE::MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src,
 			xmm4 = _mm_loadh_pi(xmm4, (__m64 *) (src_p+edx+DRAWVERT_XYZ_OFFSET+0) );
 			xmm0 = _mm_min_ps(xmm0, xmm4);
 			xmm1 = _mm_max_ps(xmm1, xmm4);
-	
+
 	/*
 		add			eax, 4
 		jl			loop1
 	*/
 			count_l = count_l + 4;
 		} while (count_l < 0);
-	
+
 	}
 
-	/*	
+	/*
 	done1:
 		shufps		xmm2, xmm2, R_SHUFFLEPS( 3, 1, 0, 2 )
 		shufps		xmm3, xmm3, R_SHUFFLEPS( 3, 1, 0, 2 )
@@ -489,7 +489,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 	xmm6 = _mm_shuffle_ps(xmm6, xmm6, R_SHUFFLEPS( 0, 0, 0, 0 ));
 	xmm7 = _mm_load_ss((float *) (constant_p+8));
 	xmm7 = _mm_shuffle_ps(xmm7, xmm7, R_SHUFFLEPS( 0, 0, 0, 0 ));
-	
+
 	/*
 		jz			startVert1
 	*/
@@ -503,7 +503,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 		src_p = src_p + count_l4;
 		count_l4 = -count_l4;
 	/*
-	loopVert4:		
+	loopVert4:
 	*/
 		do {
 	/*
@@ -537,14 +537,14 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 			xmm2 = xmm3;
 			xmm2 = _mm_shuffle_ps(xmm2, xmm4, R_SHUFFLEPS( 0, 2, 0, 2 ));
 			xmm3 = _mm_shuffle_ps(xmm3, xmm4, R_SHUFFLEPS( 1, 3, 1, 3 ));
-		
+
 	/*
 		add			ecx, 16
 		add			eax, 4*16
 	*/
 			dst_p = dst_p + 16;
 			count_l4 = count_l4 + 4*16;
-		
+
 	/*
 		mulps		xmm0, xmm5
 		mulps		xmm1, xmm6
@@ -555,11 +555,11 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 	*/
 			xmm0 = _mm_mul_ps(xmm0, xmm5);
 			xmm1 = _mm_mul_ps(xmm1, xmm6);
-			xmm2 = _mm_mul_ps(xmm2, xmm7);		
+			xmm2 = _mm_mul_ps(xmm2, xmm7);
 			xmm0 = _mm_add_ps(xmm0, xmm3);
 			xmm0 = _mm_add_ps(xmm0, xmm1);
-			xmm0 = _mm_add_ps(xmm0, xmm2);		
-		
+			xmm0 = _mm_add_ps(xmm0, xmm2);
+
 	/*
 		movlps		[ecx-16+0], xmm0
 		movhps		[ecx-16+8], xmm0
@@ -567,7 +567,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 	*/
 			_mm_storel_pi((__m64 *) (dst_p-16+0), xmm0);
 			_mm_storeh_pi((__m64 *) (dst_p-16+8), xmm0);
-		} while (count_l4 < 0);	
+		} while (count_l4 < 0);
 	}
 
 	/*
@@ -579,7 +579,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 
 	if(count_l1 != 0) {
 	/*
-	loopVert1:	
+	loopVert1:
 	*/
 		do {
 	/*
@@ -602,11 +602,11 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 			xmm1 = _mm_load_ss((float *) (src_p+count_l4+ 4));
 			xmm2 = _mm_load_ss((float *) (src_p+count_l4+ 8));
 			xmm3 = _mm_load_ss((float *) (src_p+count_l4+12));
-						
+
 			xmm0 = _mm_mul_ss(xmm0, xmm5);
 			xmm1 = _mm_mul_ss(xmm1, xmm6);
 			xmm2 = _mm_mul_ss(xmm2, xmm7);
-			
+
 			xmm0 = _mm_add_ss(xmm0, xmm3);
 			dst_p = dst_p + 4;
 			xmm0 = _mm_add_ss(xmm0, xmm1);
@@ -703,7 +703,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 
 // transpose a 4x3 matrix to memory from 3 xmm registers (reg3 is temporary)
 #define TRANSPOSE_4x3_TO_MEMORY( address, reg0, reg1, reg2, reg3 )								\
-	__asm	movhlps		reg3, reg0 								/* reg3 =  3,  9,  X,  X */		\
+	__asm	movhlps		reg3, reg0								/* reg3 =  3,  9,  X,  X */		\
 	__asm	unpcklps	reg0, reg1								/* reg0 =  0,  1,  6,  7 */		\
 	__asm	unpckhps	reg1, reg2								/* reg1 =  4,  5, 10, 11 */		\
 	__asm	unpcklps	reg2, reg3								/* reg2 =  2,  3,  8,  9 */		\
@@ -2918,7 +2918,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idPlane &constant, const idPlane 
 		shl			ecx, 2
 		lea			eax, [eax+ecx*4]
 		add			edx, ecx
-		neg			ecx		
+		neg			ecx
 
 		movlps		xmm0, [eax+ecx*4]
 		movhps		xmm0, [eax+ecx*4+16]
@@ -3360,7 +3360,7 @@ void VPCALL idSIMD_SSE::Dot( float &dot, const float *src1, const float *src2, c
 	for ( i = 0; i < pre; i++ ) {														\
 		dst[i] = src0[i] CMP c;															\
 	}																					\
- 	for ( i = count - post; i < count; i++ ) {											\
+	for ( i = count - post; i < count; i++ ) {											\
 		dst[i] = src0[i] CMP c;															\
 	}
 
@@ -3456,7 +3456,7 @@ void VPCALL idSIMD_SSE::Dot( float &dot, const float *src1, const float *src2, c
 	for ( i = 0; i < pre; i++ ) {														\
 		dst[i] |= ( src0[i] CMP c ) << BITNUM;											\
 	}																					\
- 	for ( i = count - post; i < count; i++ ) {											\
+	for ( i = count - post; i < count; i++ ) {											\
 		dst[i] |= ( src0[i] CMP c ) << BITNUM;											\
 	}
 
@@ -3628,7 +3628,7 @@ done:
 			min = tmp;
 		}
 	}
- 	for ( i = count - post; i < count; i++ ) {
+	for ( i = count - post; i < count; i++ ) {
 		float tmp = src[i];
 		if ( tmp > max ) {
 			max = tmp;
@@ -4826,7 +4826,7 @@ void VPCALL idSIMD_SSE::MatX_MultiplyVecX( idVecX &dst, const idMatX &mat, const
 					__asm {
 						mov			esi, vPtr
 						mov			edi, mPtr
-                        mov			eax, dstPtr
+						mov			eax, dstPtr
 						movss		xmm0, [esi]
 						mulss		xmm0, [edi]
 						movss		xmm1, [esi+4]
@@ -5572,7 +5572,7 @@ void VPCALL idSIMD_SSE::MatX_MultiplyAddVecX( idVecX &dst, const idMatX &mat, co
 					__asm {
 						mov			esi, vPtr
 						mov			edi, mPtr
-                        mov			eax, dstPtr
+						mov			eax, dstPtr
 						movss		xmm0, [esi]
 						mulss		xmm0, [edi]
 						movss		xmm1, [esi+4]
@@ -6318,7 +6318,7 @@ void VPCALL idSIMD_SSE::MatX_MultiplySubVecX( idVecX &dst, const idMatX &mat, co
 					__asm {
 						mov			esi, vPtr
 						mov			edi, mPtr
-                        mov			eax, dstPtr
+						mov			eax, dstPtr
 						movss		xmm0, [esi]
 						mulss		xmm0, [edi]
 						movss		xmm1, [esi+4]
@@ -9080,7 +9080,7 @@ void VPCALL idSIMD_SSE::MatX_MultiplyMatX( idMatX &dst, const idMatX &m1, const 
 						MUL_Nx6_6x4_ROW( 1 )
 						MUL_Nx6_6x4_ROW( 2 )
 						MUL_Nx6_6x4_ROW( 3 )
-	
+
 						return;
 					}
 					break;
@@ -12655,7 +12655,7 @@ void VPCALL idSIMD_SSE::TracePointCull( byte *cullBits, byte &totalOr, const flo
 
 	done:
 		mov			esi, totalOr
-        mov			byte ptr [esi], dl
+		mov			byte ptr [esi], dl
 		pop			ebx
 	}
 
@@ -12791,7 +12791,7 @@ void VPCALL idSIMD_SSE::DecalPointCull( byte *cullBits, const idPlane *planes, c
 
 		cmpnltps	xmm6, SIMD_SP_zero
 		movmskps	ecx, xmm6
-			
+
 		movaps		xmm6, p0
 		movss		xmm3, [esi+eax+1*DRAWVERT_SIZE+DRAWVERT_XYZ_OFFSET+0]
 		shufps		xmm3, xmm3, R_SHUFFLEPS( 0, 0, 0, 0 )

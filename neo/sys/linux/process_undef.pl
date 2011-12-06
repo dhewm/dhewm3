@@ -17,4 +17,3 @@ foreach (@sorted)
 {
   print "$symbols{$_} : $_\n";
 };
-

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -65,7 +65,7 @@ public:
 	void	SetPreviousImage( const char*filename, NSBitmapImageRep *timage );
 	int		BestCodeword( unsigned char *tempvector, int dimension, VQDATA **codebook );
 private:
-	
+
 	void	VQ( const int numEntries, const int dimension, const unsigned char *vectors, float *snr, VQDATA **codebook, const bool optimize );
 	void	Sort( float *list, int *intIndex, int numElements );
 	void	Segment( int *alist, float *flist, int numElements, float rmse);
@@ -77,14 +77,14 @@ private:
 
 	NSBitmapImageRep	*image;
 	NSBitmapImageRep	*newImage;
-	NSBitmapImageRep 	*previousImage[2];		// the ones in video ram and offscreen ram
+	NSBitmapImageRep	*previousImage[2];		// the ones in video ram and offscreen ram
 	int					numQuadCels;
 	int					whichFrame;
 	int					slop;
-	bool 				detail;
-	int 				onQuad;
+	bool				detail;
+	int					onQuad;
 	int					initRGBtab;
-	quadcel 			*qStatus;
+	quadcel				*qStatus;
 	int					dxMean;
 	int					dyMean;
 	int					codebooksize;

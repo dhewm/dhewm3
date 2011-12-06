@@ -93,7 +93,7 @@ void CPropTreeView::OnSize(UINT nType, int cx, int cy)
 		CView::OnSize(nType, cx, cy);
 
 		if (::IsWindow(m_Tree.GetSafeHwnd()))
-			m_Tree.SetWindowPos(NULL, -1, -1, cx, cy, SWP_NOMOVE|SWP_NOZORDER);	
+			m_Tree.SetWindowPos(NULL, -1, -1, cx, cy, SWP_NOMOVE|SWP_NOZORDER);
 }
 
 

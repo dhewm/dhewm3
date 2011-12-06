@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -61,7 +61,7 @@ typedef struct {
 } srfCullInfo_t;
 
 
-typedef struct {		
+typedef struct {
 	// if lightTris == LIGHT_TRIS_DEFERRED, then the calculation of the
 	// lightTris has been deferred, and must be done if ambientTris is visible
 	srfTriangles_t *		lightTris;
@@ -100,7 +100,7 @@ public:
 	// be present as a surfaceInteraction_t with a NULL ambientTris, but
 	// possibly having a shader to specify the shadow sorting order
 	surfaceInteraction_t *	surfaces;
-	
+
 	// get space from here, if NULL, it is a pre-generated shadow volume from dmap
 	idRenderEntityLocal *	entityDef;
 	idRenderLightLocal *	lightDef;

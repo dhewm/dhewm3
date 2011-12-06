@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -71,14 +71,14 @@ public:
 	idStr					name;
 	idMaterial*				renderMaterial;
 	MEMaterial_t			editMaterial;
-	
+
 	bool					modified;
 	bool					applyWaiting;
 	bool					deleted;
 
 	bool					sourceModify;
 	SourceModifyOwner*		sourceModifyOwner;
-	
+
 public:
 	MaterialDoc(void);
 	~MaterialDoc(void);
@@ -132,12 +132,12 @@ public:
 	void			ApplyMaterialChanges(bool force = false);
 	void			Save();
 	void			Delete();
-	
+
 protected:
 
 	//Internal Notifications
 	void			OnMaterialChanged();
-		
+
 	//Load Material Methods
 	void			ParseMaterialText(const char* source);
 	void			ParseMaterial(idLexer* src);
@@ -153,4 +153,3 @@ protected:
 	void			WriteSpecialMapStage(int stage, idFile_Memory* file);
 	void			WriteMaterialDef(int stage, idFile_Memory* file, int type, int indent);
 };
-

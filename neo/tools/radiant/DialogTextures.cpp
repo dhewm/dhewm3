@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 	#define new DEBUG_NEW
 	#undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
-#endif												    
+#endif
 
 HTREEITEM FindTreeItem(CTreeCtrl *tree, HTREEITEM root, const char *text, HTREEITEM forceParent);
 extern void Select_SetKeyVal(const char *key, const char *val);
@@ -143,7 +143,7 @@ bool CDialogTextures::loadTree( HTREEITEM item, const idStr &name, CWaitDlg *dlg
 		return true;
 	}
 
-	if ( m_treeTextures.ItemHasChildren( item ) ) { 
+	if ( m_treeTextures.ItemHasChildren( item ) ) {
 
 		idStr childName;
 		HTREEITEM nextItem;
@@ -183,7 +183,7 @@ HTREEITEM CDialogTextures::findItem(const char *name, HTREEITEM item, HTREEITEM 
 	if (*foundItem || item == NULL) {
 		return *foundItem;
 	}
-	if (m_treeTextures.ItemHasChildren(item)) { 
+	if (m_treeTextures.ItemHasChildren(item)) {
 		HTREEITEM nextItem;
 		HTREEITEM childItem = m_treeTextures.GetChildItem(item);
 		while (childItem != NULL && *foundItem == NULL) {
@@ -475,13 +475,13 @@ void CDialogTextures::OnClickTreeTextures(NMHDR *pNMHDR, LRESULT *pResult) {
 	GetCursorPos(&pt);
 	m_treeTextures.ScreenToClient(&pt);
 	HTREEITEM item = m_treeTextures.HitTest(pt);
-	
+
 	if (item) {
 		DWORD	dw = m_treeTextures.GetItemData(item);
 		mode = dw;
 		if (mode == SOUNDS) {
 			idStr loadName;
- 			if (!m_treeTextures.ItemHasChildren(item)) {
+			if (!m_treeTextures.ItemHasChildren(item)) {
 				loadName = m_treeTextures.GetItemText(item);
 				idStr actionName = m_treeTextures.GetItemText(item);
 				soundSystem->SetMute( false );
@@ -693,13 +693,13 @@ void CDialogTextures::addSounds(bool rootItems) {
 	idStrList list(1024);
 	idStrList list2(1024);
 	HTREEITEM base = m_treeTextures.InsertItem(TypeNames[SOUNDS]);
-	 
+
 	for(i = 0; i < declManager->GetNumDecls( DECL_SOUND ); i++) {
 		const idSoundShader *poo = declManager->SoundByIndex(i, false);
 		list.AddUnique( poo->GetFileName() );
 	}
 	idStrListSortPaths( list );
-	
+
 	for (i = 0; i < list.Num(); i++) {
 		HTREEITEM child = m_treeTextures.InsertItem(list[i], base);
 		m_treeTextures.SetItemData(child, SOUNDPARENT);
@@ -711,7 +711,7 @@ void CDialogTextures::addSounds(bool rootItems) {
 				list2.Append( poo->GetName() );
 			}
 		}
-		idStrListSortPaths( list2 );		
+		idStrListSortPaths( list2 );
 		for (j = 0; j < list2.Num(); j++) {
 			HTREEITEM child2 = m_treeTextures.InsertItem( list2[j], child );
 			m_treeTextures.SetItemData(child2, SOUNDS);
@@ -720,7 +720,7 @@ void CDialogTextures::addSounds(bool rootItems) {
 	}
 
 }
- 
+
 void CDialogTextures::addStrList( const char *root, const idStrList &list, int id ) {
 	idStr		out, path;
 
@@ -739,7 +739,7 @@ void CDialogTextures::addStrList( const char *root, const idStrList &list, int i
 
 	HTREEITEM	item = base;
 	HTREEITEM	add;
-	
+
 	int		count = list.Num();
 
 	idStr	last, qt;
@@ -827,7 +827,7 @@ void CDialogTextures::addStrList( const char *root, const idStrList &list, int i
  */
 void CDialogTextures::addModels(bool rootItems) {
 	idFileList *files;
-	
+
 	files = fileSystem->ListFilesTree( "models", ".ase|.lwo|.ma", true );
 
 	if ( files->GetNumFiles() ) {
@@ -856,7 +856,7 @@ void CDialogTextures::addGuis( bool rootItems ) {
 void CDialogTextures::addScripts(bool rootItems) {
 /*
 	idFileList *files;
-  
+
 	files = fileSystem->ListFilesExt( "def", ".script" );
 
 	if ( files->GetNumFiles() ) {
@@ -878,7 +878,7 @@ void CDialogTextures::OnDblclkTreeTextures(NMHDR *pNMHDR, LRESULT *pResult) {
 		DWORD dw = m_treeTextures.GetItemData(item);
 		mode = dw;
 		if (mode == SOUNDS) {
- 			if (!m_treeTextures.ItemHasChildren(item)) {
+			if (!m_treeTextures.ItemHasChildren(item)) {
 				idStr shaderName = m_treeTextures.GetItemText(item);
 				Select_SetKeyVal("s_shader", shaderName);
 				entity_t *ent = selected_brushes.next->owner;
@@ -908,7 +908,7 @@ void CDialogTextures::OnPreview() {
 }
 
 
-//void CDialogTextures::OnSave() 
+//void CDialogTextures::OnSave()
 //{
 /*
 	CString str;
@@ -919,20 +919,20 @@ void CDialogTextures::OnPreview() {
 */
 //}
 
-int CDialogTextures::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+int CDialogTextures::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CDialog::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
+
 	// TODO: Add your specialized creation code here
-	
+
 	return 0;
 }
 
-void CDialogTextures::OnSize(UINT nType, int cx, int cy) 
+void CDialogTextures::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
-	
+
 	if (m_btnLoad.GetSafeHwnd() == NULL) {
 		return;
 	}
@@ -953,7 +953,7 @@ void CDialogTextures::OnSize(UINT nType, int cx, int cy)
 	m_chkHideRoot.GetWindowRect(rect3);
 	m_chkHideRoot.SetWindowPos(NULL, right - rect3.Width() * 2, rect.top + 4, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 	m_chkHideRoot.ShowWindow(SW_HIDE);
-	
+
 	int verticalSpace = (rect.Height() - rect2.Height() - 12) / 2;
 
 	m_treeTextures.SetWindowPos(NULL, rect.left + 4, rect.top + 8 + rect2.Height(), (rect.Width() - 8), verticalSpace, SWP_SHOWWINDOW);
@@ -962,12 +962,12 @@ void CDialogTextures::OnSize(UINT nType, int cx, int cy)
 	RedrawWindow();
 }
 
-BOOL CDialogTextures::PreCreateWindow(CREATESTRUCT& cs) 
+BOOL CDialogTextures::PreCreateWindow(CREATESTRUCT& cs)
 {
 	return CDialog::PreCreateWindow(cs);
 }
 
-void CDialogTextures::OnCheckHideroot() 
+void CDialogTextures::OnCheckHideroot()
 {
 	BuildTree();
 }
@@ -1009,7 +1009,7 @@ void CDialogTextures::OnNMRclickTreeTextures(NMHDR *pNMHDR, LRESULT *pResult)
 	GetCursorPos(&pt);
 	m_treeTextures.ScreenToClient(&pt);
 	HTREEITEM item = m_treeTextures.HitTest(pt);
-	
+
 	if (item) {
 		DWORD	dw = m_treeTextures.GetItemData(item);
 		mode = dw;

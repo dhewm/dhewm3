@@ -6,13 +6,13 @@
 //
 //  This material is provided "as is", with absolutely no warranty expressed
 //  or implied. Any use is at your own risk.
-// 
-//  Permission to use or copy this software for any purpose is hereby granted 
+//
+//  Permission to use or copy this software for any purpose is hereby granted
 //  without fee, provided the above notices are retained on all copies.
 //  Permission to modify the code and to distribute modified code is granted,
 //  provided the above notices are retained, and a notice that the code was
 //  modified is included with the above copyright notice.
-// 
+//
 //	If you use this code, drop me an email.  I'd like to know if you find the code
 //	useful.
 
@@ -88,7 +88,7 @@ BOOL CPropTreeList::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UI
 }
 
 
-void CPropTreeList::OnSize(UINT nType, int cx, int cy) 
+void CPropTreeList::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
@@ -151,7 +151,7 @@ void CPropTreeList::UpdateResize()
 }
 
 
-void CPropTreeList::OnPaint() 
+void CPropTreeList::OnPaint()
 {
 	CPaintDC dc(this);
 	CDC memdc;
@@ -212,7 +212,7 @@ void CPropTreeList::OnPaint()
 }
 
 
-BOOL CPropTreeList::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
+BOOL CPropTreeList::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if (nHitTest==HTCLIENT)
 	{
@@ -241,7 +241,7 @@ BOOL CPropTreeList::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 }
 
 
-void CPropTreeList::OnLButtonDown(UINT, CPoint point) 
+void CPropTreeList::OnLButtonDown(UINT, CPoint point)
 {
 	ASSERT(m_pProp!=NULL);
 
@@ -343,7 +343,7 @@ void CPropTreeList::OnLButtonDown(UINT, CPoint point)
 }
 
 
-void CPropTreeList::OnLButtonUp(UINT, CPoint point) 
+void CPropTreeList::OnLButtonUp(UINT, CPoint point)
 {
 	if (m_bColDrag)
 	{
@@ -451,7 +451,7 @@ void CPropTreeList::OnMouseMove(UINT, CPoint point)
 }
 
 
-BOOL CPropTreeList::OnMouseWheel(UINT, short zDelta, CPoint) 
+BOOL CPropTreeList::OnMouseWheel(UINT, short zDelta, CPoint)
 {
 	SCROLLINFO si;
 
@@ -474,7 +474,7 @@ BOOL CPropTreeList::OnMouseWheel(UINT, short zDelta, CPoint)
 }
 
 
-void CPropTreeList::OnKeyDown(UINT nChar, UINT, UINT) 
+void CPropTreeList::OnKeyDown(UINT nChar, UINT, UINT)
 {
 
 	CPropTreeItem* pItem;
@@ -554,13 +554,13 @@ void CPropTreeList::OnKeyDown(UINT nChar, UINT, UINT)
 }
 
 
-UINT CPropTreeList::OnGetDlgCode() 
+UINT CPropTreeList::OnGetDlgCode()
 {
 	return DLGC_WANTARROWS|DLGC_WANTCHARS|DLGC_WANTALLKEYS;
 }
 
 
-void CPropTreeList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar*) 
+void CPropTreeList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 {
 	SCROLLINFO si;
 	CRect rc;
@@ -618,7 +618,7 @@ void CPropTreeList::CheckVisibleFocus()
 	ASSERT(m_pProp!=NULL);
 
 	CPropTreeItem* pItem;
-	
+
 	if ((pItem = m_pProp->GetFocusedItem())==NULL)
 		return;
 

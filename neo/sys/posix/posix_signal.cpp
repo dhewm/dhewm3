@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -72,7 +72,7 @@ Posix_ClearSigs
 void Posix_ClearSigs( ) {
 	struct sigaction action;
 	int i;
-	
+
 	/* Set up the structure */
 	action.sa_handler = SIG_DFL;
 	sigemptyset( &action.sa_mask );
@@ -94,17 +94,17 @@ sig_handler
 */
 static void sig_handler( int signum, siginfo_t *info, void *context ) {
 	static bool double_fault = false;
-	
+
 	if ( double_fault ) {
 		Sys_Printf( "double fault %s, bailing out\n", strsignal( signum ) );
 		Posix_Exit( signum );
 	}
-	
+
 	double_fault = true;
-	
+
 	// NOTE: see sigaction man page, could verbose the whole siginfo_t and print human readable si_code
-	Sys_Printf( "signal caught: %s\nsi_code %d\n", strsignal( signum ), info->si_code );	
-	
+	Sys_Printf( "signal caught: %s\nsi_code %d\n", strsignal( signum ), info->si_code );
+
 #ifndef ID_BT_STUB
 	Sys_Printf( "callstack:\n%s", Sys_GetCallStackCurStr( 30 ) );
 #endif
@@ -112,11 +112,11 @@ static void sig_handler( int signum, siginfo_t *info, void *context ) {
 	if ( fatalError[ 0 ] ) {
 		Sys_Printf( "Was in fatal error shutdown: %s\n", fatalError );
 	}
-	
+
 	Sys_Printf( "Trying to exit gracefully..\n" );
-	
+
 	Posix_SetExit( signum );
-	
+
 	common->Quit();
 }
 
@@ -130,7 +130,7 @@ void Posix_InitSigs( ) {
 	int i;
 
 	fatalError[0] = '\0';
-	
+
 	/* Set up the structure */
 	action.sa_sigaction = sig_handler;
 	sigemptyset( &action.sa_mask );
@@ -153,7 +153,7 @@ void Posix_InitSigs( ) {
 	// if the process is backgrounded (running non interactively)
 	// then SIGTTIN or SIGTOU could be emitted, if not caught, turns into a SIGSTP
 	signal( SIGTTIN, SIG_IGN );
-	signal( SIGTTOU, SIG_IGN );	
+	signal( SIGTTOU, SIG_IGN );
 }
 
 /*

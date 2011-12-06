@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -36,8 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 
 CZClip::CZClip()
-{	
-	LONG 
+{
+	LONG
 	lSize = sizeof(m_bEnabled);
 	if (!LoadRegistryInfo("radiant_ZClipEnabled",	&m_bEnabled, &lSize))
 		m_bEnabled = false;
@@ -106,7 +106,7 @@ void CZClip::SetTop(int iNewZ)
 {
 	m_iZClipTop = iNewZ;
 
-	Legalise();		
+	Legalise();
 }
 
 void CZClip::SetBottom(int iNewZ)
@@ -143,7 +143,7 @@ void CZClip::Paint(void)
 	x = 0;
 	y = m_iZClipTop;
 
-	if (m_bEnabled)	
+	if (m_bEnabled)
 		qglBegin(GL_QUADS);
 	else
 		qglBegin(GL_LINE_LOOP);
@@ -159,7 +159,7 @@ void CZClip::Paint(void)
 	if (m_bEnabled)
 		qglBegin(GL_TRIANGLES);
 	else
-		qglBegin(GL_LINE_LOOP);	
+		qglBegin(GL_LINE_LOOP);
 	qglVertex3f (x,(y+ZCLIP_BAR_THICKNESS),0);
 	qglVertex3f (x-xCam,(y+ZCLIP_BAR_THICKNESS)+(ZCLIP_ARROWHEIGHT/2),0);
 	qglVertex3f (x+xCam,(y+ZCLIP_BAR_THICKNESS)+(ZCLIP_ARROWHEIGHT/2),0);
@@ -171,7 +171,7 @@ void CZClip::Paint(void)
 	x = 0;
 	y = m_iZClipBottom;
 
-	if (m_bEnabled)	
+	if (m_bEnabled)
 		qglBegin(GL_QUADS);
 	else
 		qglBegin(GL_LINE_LOOP);
@@ -186,7 +186,7 @@ void CZClip::Paint(void)
 	if (m_bEnabled)
 		qglBegin(GL_TRIANGLES);
 	else
-		qglBegin(GL_LINE_LOOP);	
+		qglBegin(GL_LINE_LOOP);
 	qglVertex3f (x,(y-ZCLIP_BAR_THICKNESS),0);
 	qglVertex3f (x-xCam,(y-ZCLIP_BAR_THICKNESS)-(ZCLIP_ARROWHEIGHT/2),0);
 	qglVertex3f (x+xCam,(y-ZCLIP_BAR_THICKNESS)-(ZCLIP_ARROWHEIGHT/2),0);
@@ -195,5 +195,3 @@ void CZClip::Paint(void)
 
 
 ///////////////// eof ///////////////////
-
-

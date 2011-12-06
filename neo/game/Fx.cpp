@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -43,7 +43,7 @@ const idEventDef EV_Fx_KillFx( "_killfx" );
 const idEventDef EV_Fx_Action( "_fxAction", "e" );		// implemented by subclasses
 
 CLASS_DECLARATION( idEntity, idEntityFx )
-EVENT( EV_Activate,	   	idEntityFx::Event_Trigger )
+EVENT( EV_Activate,		idEntityFx::Event_Trigger )
 EVENT( EV_Fx_KillFx,	idEntityFx::Event_ClearFx )
 END_CLASS
 
@@ -217,7 +217,7 @@ void idEntityFx::CleanUp( void ) {
 	for( int i = 0; i < fxEffect->events.Num(); i++ ) {
 		const idFXSingleAction& fxaction = fxEffect->events[i];
 		idFXLocalAction& laction = actions[i];
-		CleanUpSingleAction( fxaction, laction );		
+		CleanUpSingleAction( fxaction, laction );
 	}
 }
 
@@ -319,7 +319,7 @@ void idEntityFx::ApplyFade( const idFXSingleAction& fxaction, idFXLocalAction& l
 			laction.renderEntity.shaderParms[SHADERPARM_RED] = (fxaction.fadeInTime) ? fadePct : 1.0f - fadePct;
 			laction.renderEntity.shaderParms[SHADERPARM_GREEN] = (fxaction.fadeInTime) ? fadePct : 1.0f - fadePct;
 			laction.renderEntity.shaderParms[SHADERPARM_BLUE] = (fxaction.fadeInTime) ? fadePct : 1.0f - fadePct;
-	
+
 			gameRenderWorld->UpdateEntityDef( laction.modelDefHandle, &laction.renderEntity );
 		}
 		if ( laction.lightDefHandle != -1 ) {
@@ -383,7 +383,7 @@ void idEntityFx::Run( int time ) {
 				}
 				laction.delay = totalDelay;
 				laction.start = time;
-			} 
+			}
 			continue;
 		}
 
@@ -457,7 +457,7 @@ void idEntityFx::Run( int time ) {
 			case FX_DECAL: {
 				if ( !useAction->decalDropped ) {
 					useAction->decalDropped = true;
-					gameLocal.ProjectDecal( GetPhysics()->GetOrigin(), GetPhysics()->GetGravity(), 8.0f, true, fxaction.size, fxaction.data ); 
+					gameLocal.ProjectDecal( GetPhysics()->GetOrigin(), GetPhysics()->GetGravity(), 8.0f, true, fxaction.size, fxaction.data );
 				}
 				break;
 			}
@@ -759,8 +759,8 @@ idEntityFx::ClientPredictionThink
 =================
 */
 void idEntityFx::ClientPredictionThink( void ) {
-	if ( gameLocal.isNewFrame ) { 
-		Run( gameLocal.time ); 
+	if ( gameLocal.isNewFrame ) {
+		Run( gameLocal.time );
 	}
 	RunPhysics();
 	Present();
@@ -770,7 +770,7 @@ void idEntityFx::ClientPredictionThink( void ) {
 ===============================================================================
 
   idTeleporter
-	
+
 ===============================================================================
 */
 

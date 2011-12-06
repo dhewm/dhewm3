@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ======================================================================
 */
-	
+
 
 #define MA_VERBOSE( x ) { if ( maGlobal.verbose ) { common->Printf x ; } }
 
@@ -74,7 +74,7 @@ void MA_ParseNodeHeader(idParser& parser, maNodeHeader_t* header) {
 }
 
 bool MA_ParseHeaderIndex(maAttribHeader_t* header, int& minIndex, int& maxIndex, const char* headerType, const char* skipString) {
-	
+
 	idParser miniParse;
 	idToken token;
 
@@ -98,7 +98,7 @@ bool MA_ParseHeaderIndex(maAttribHeader_t* header, int& minIndex, int& maxIndex,
 }
 
 bool MA_ParseAttribHeader(idParser &parser, maAttribHeader_t* header) {
-	
+
 	idToken token;
 
 	memset(header, 0, sizeof(maAttribHeader_t));
@@ -188,7 +188,7 @@ bool MA_ParseTransform(idParser& parser) {
 			transform->parent = *parent;
 		}
 	}
-	
+
 	//Add this transform to the list
 	maGlobal.model->transforms.Set(header.name, transform);
 	return true;
@@ -207,18 +207,18 @@ bool MA_ParseVertex(idParser& parser, maAttribHeader_t* header) {
 
 	//Get the start and end index for this attribute
 	int minIndex, maxIndex;
-	if(!MA_ParseHeaderIndex(header, minIndex, maxIndex, "VertexHeader", NULL)) { 
+	if(!MA_ParseHeaderIndex(header, minIndex, maxIndex, "VertexHeader", NULL)) {
 		//This was just a header
 		return true;
 	}
-	
+
 	//Read each vert
 	for(int i = minIndex; i <= maxIndex; i++) {
 		pMesh->vertexes[i].x = parser.ParseFloat();
 		pMesh->vertexes[i].z = parser.ParseFloat();
 		pMesh->vertexes[i].y = -parser.ParseFloat();
 	}
-	
+
 	return true;
 }
 
@@ -320,7 +320,7 @@ bool MA_ParseNormal(idParser& parser, maAttribHeader_t* header) {
 		return true;
 	}
 
-	
+
 	parser.ReadToken(&token);
 	if(!token.Icmp("-")) {
 		idToken tk2;
@@ -334,7 +334,7 @@ bool MA_ParseNormal(idParser& parser, maAttribHeader_t* header) {
 	} else {
 		parser.UnreadToken(&token);
 	}
-	
+
 
 	//Read each vert
 	for(int i = minIndex; i <= maxIndex; i++) {
@@ -468,7 +468,7 @@ bool MA_ParseColor(idParser& parser, maAttribHeader_t* header) {
 }
 
 bool MA_ParseTVert(idParser& parser, maAttribHeader_t* header) {
-	
+
 	maMesh_t* pMesh = &maGlobal.currentObject->mesh;
 	idToken token;
 
@@ -519,10 +519,10 @@ bool MA_ParseTVert(idParser& parser, maAttribHeader_t* header) {
 *	Quick check to see if the vert participates in a shared normal
 */
 bool MA_QuickIsVertShared(int faceIndex, int vertIndex) {
-	
+
 	maMesh_t* pMesh = &maGlobal.currentObject->mesh;
 	int vertNum = pMesh->faces[faceIndex].vertexNum[vertIndex];
-	
+
 	for( int i = 0; i < 3; i++) {
 		int edge = pMesh->faces[faceIndex].edge[i];
 		if(edge < 0) {
@@ -655,7 +655,7 @@ void MA_ParseMesh(idParser& parser) {
 				if(MA_QuickIsVertShared(i, j)) {
 					MA_GetSharedFace(i, j, sharedFace, sharedVert);
 				}
-				
+
 				if(sharedFace != -1) {
 					//Get the normal from the share
 					pMesh->faces[i].vertexNormals[j] = pMesh->faces[sharedFace].vertexNormals[sharedVert];
@@ -678,7 +678,7 @@ void MA_ParseMesh(idParser& parser) {
 			int tmp = pMesh->faces[i].vertexNum[1];
 			pMesh->faces[i].vertexNum[1] = pMesh->faces[i].vertexNum[2];
 			pMesh->faces[i].vertexNum[2] = tmp;
-			
+
 			idVec3 tmpVec = pMesh->faces[i].vertexNormals[1];
 			pMesh->faces[i].vertexNormals[1] = pMesh->faces[i].vertexNormals[2];
 			pMesh->faces[i].vertexNormals[2] = tmpVec;
@@ -696,14 +696,14 @@ void MA_ParseMesh(idParser& parser) {
 	for(int i = 0; i < pMesh->numVertTransforms; i++) {
 		pMesh->vertexes[(int)pMesh->vertTransforms[i].w] +=  pMesh->vertTransforms[i].ToVec3();
 	}
-	
+
 	MA_VERBOSE((va("MESH %s - parent %s\n", header.name, header.parent)));
 	MA_VERBOSE((va("\tverts:%d\n",maGlobal.currentObject->mesh.numVertexes)));
 	MA_VERBOSE((va("\tfaces:%d\n",maGlobal.currentObject->mesh.numFaces)));
 }
 
 void MA_ParseFileNode(idParser& parser) {
-	
+
 	//Get the header info from the node
 	maNodeHeader_t	header;
 	MA_ParseNodeHeader(parser, &header);
@@ -750,7 +750,7 @@ void MA_ParseMaterialNode(idParser& parser) {
 	memset(matNode, 0, sizeof(maMaterialNode_t));
 
 	strcpy(matNode->name, header.name);
-	
+
 	maGlobal.model->materialNodes.Set(matNode->name, matNode);
 }
 
@@ -772,7 +772,7 @@ void MA_ParseCreateNode(idParser& parser) {
 
 
 int MA_AddMaterial(const char* materialName) {
-	
+
 
 	maMaterialNode_t**	destNode;
 	maGlobal.model->materialNodes.Get(materialName, &destNode);
@@ -784,16 +784,16 @@ int MA_AddMaterial(const char* materialName) {
 			matNode = matNode->child;
 		}
 		if(matNode && matNode->file) {
-			
+
 			//Got the file
 			maMaterial_t	*material;
 			material = (maMaterial_t *)Mem_Alloc( sizeof( maMaterial_t ) );
 			memset( material, 0, sizeof( maMaterial_t ) );
-			
+
 			//Remove the OS stuff
 			idStr qPath;
 			qPath = fileSystem->OSPathToRelativePath( matNode->file->path );
-			
+
 			strcpy(material->name, qPath.c_str());
 
 			maGlobal.model->materials.Append( material );
@@ -833,7 +833,7 @@ bool MA_ParseConnectAttr(idParser& parser) {
 	destType = temp.Right(temp.Length()-dot-1);
 
 	if(srcType.Find("oc") != -1) {
-		
+
 		//Is this attribute a material node attribute
 		maMaterialNode_t**	matNode;
 		maGlobal.model->materialNodes.Get(srcName, &matNode);
@@ -862,7 +862,7 @@ bool MA_ParseConnectAttr(idParser& parser) {
 		for(int i = 0; i < maGlobal.model->objects.Num(); i++) {
 			if(!strcmp(maGlobal.model->objects[i]->name, srcName)) {
 				//maGlobal.model->objects[i]->materialRef = MA_AddMaterial(destName);
-				strcpy(maGlobal.model->objects[i]->materialName, destName); 
+				strcpy(maGlobal.model->objects[i]->materialName, destName);
 				break;
 			}
 		}
@@ -908,12 +908,12 @@ void MA_BuildAxisRotation(idMat4& mat, float ang, int axis) {
 }
 
 void MA_ApplyTransformation(maModel_t *model) {
-	
+
 	for(int i = 0; i < model->objects.Num(); i++) {
 		maMesh_t* mesh = &model->objects[i]->mesh;
 		maTransform_t* transform = mesh->transform;
-		
-		
+
+
 
 		while(transform) {
 
@@ -943,10 +943,10 @@ void MA_ApplyTransformation(maModel_t *model) {
 				mesh->vertexes[j] = rotx * mesh->vertexes[j];
 				mesh->vertexes[j] = rotz * mesh->vertexes[j];
 				mesh->vertexes[j] = roty * mesh->vertexes[j];
-				
+
 				mesh->vertexes[j] = mesh->vertexes[j] + transform->translate;
 			}
-			
+
 			transform = transform->parent;
 		}
 	}
@@ -962,16 +962,16 @@ maModel_t *MA_Parse( const char *buffer, const char* filename, bool verbose ) {
 
 	maGlobal.verbose = verbose;
 
-	
-	
-	
+
+
+
 	maGlobal.currentObject = NULL;
 
 	// NOTE: using new operator because aseModel_t contains idList class objects
 	maGlobal.model = new maModel_t;
 	maGlobal.model->objects.Resize( 32, 32 );
 	maGlobal.model->materials.Resize( 32, 32 );
-	
+
 
 	idParser parser;
 	parser.SetFlags(LEXFL_NOSTRINGCONCAT);
@@ -992,7 +992,7 @@ maModel_t *MA_Parse( const char *buffer, const char* filename, bool verbose ) {
 		maGlobal.model->objects[i]->materialRef = MA_AddMaterial(maGlobal.model->objects[i]->materialName);
 	}
 
-	
+
 
 	//Apply Transformation
 	MA_ApplyTransformation(maGlobal.model);
@@ -1047,10 +1047,10 @@ void MA_Free( maModel_t *ma ) {
 	}
 	for ( i = 0; i < ma->objects.Num(); i++ ) {
 		obj = ma->objects[i];
-		
+
 		// free the base nesh
 		mesh = &obj->mesh;
-		
+
 		if ( mesh->vertexes ) {
 			Mem_Free( mesh->vertexes );
 		}

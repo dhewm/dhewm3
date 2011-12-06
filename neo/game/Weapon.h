@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 
 	Player Weapon
-	
+
 ===============================================================================
 */
 
@@ -196,7 +196,7 @@ private:
 	// the view weapon render entity parms
 	idVec3					viewWeaponOrigin;
 	idMat3					viewWeaponAxis;
-	
+
 	// the muzzle bone's position, used for launching projectiles and trailing smoke
 	idVec3					muzzleOrigin;
 	idMat3					muzzleAxis;
@@ -255,7 +255,7 @@ private:
 	bool					isFiring;
 
 	// zoom
-    int						zoomFov;			// variable zoom fov per weapon
+	int						zoomFov;			// variable zoom fov per weapon
 
 	// joints from models
 	jointHandle_t			barrelJointView;
@@ -276,8 +276,8 @@ private:
 	int						weaponSmokeStartTime;	// set to gameLocal.time every weapon fire
 	bool					continuousSmoke;		// if smoke is continuous ( chainsaw )
 	const idDeclParticle *  strikeSmoke;			// striking something in melee
-	int						strikeSmokeStartTime;	// timing	
-	idVec3					strikePos;				// position of last melee strike	
+	int						strikeSmokeStartTime;	// timing
+	idVec3					strikePos;				// position of last melee strike
 	idMat3					strikeAxis;				// axis of last melee strike
 	int						nextStrikeFx;			// used for sound and decal ( may use for strike smoke too )
 

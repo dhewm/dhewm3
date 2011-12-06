@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -260,7 +260,7 @@ public:
 	idDict					persistentLevelInfo;	// contains args that are kept around between levels
 
 	// can be used to automatically effect every material in the world that references globalParms
-	float					globalShaderParms[ MAX_GLOBAL_SHADER_PARMS ];	
+	float					globalShaderParms[ MAX_GLOBAL_SHADER_PARMS ];
 
 	idRandom				random;					// random number generator used throughout the game
 
@@ -274,7 +274,7 @@ public:
 	idTestModel *			testmodel;				// for development testing of models
 	idEntityFx *			testFx;					// for development testing of fx
 
-	idStr					sessionCommand;			// a target_sessionCommand can set this to return something to the session 
+	idStr					sessionCommand;			// a target_sessionCommand can set this to return something to the session
 
 	idMultiplayerGame		mpGame;					// handles rules for standard dm
 

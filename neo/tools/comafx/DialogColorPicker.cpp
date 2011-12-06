@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -40,36 +40,36 @@ If you have questions concerning this license or the applicable additional terms
 
 // Old color picker
 
-class CMyColorDialog : public CColorDialog 
+class CMyColorDialog : public CColorDialog
 {
   DECLARE_DYNCREATE(CMyColorDialog);
-     // Construction
+	 // Construction
 public:
-     CMyColorDialog( COLORREF clrInit = 0, DWORD dwFlags = 0, CWnd *pParentWnd = NULL );
-     virtual int DoModal();
+	 CMyColorDialog( COLORREF clrInit = 0, DWORD dwFlags = 0, CWnd *pParentWnd = NULL );
+	 virtual int DoModal();
 
 protected:
-     enum { NCUSTCOLORS = 16 };
-     static COLORREF	c_CustColors[NCUSTCOLORS];
-     static COLORREF	c_LastCustColors[NCUSTCOLORS];
-     static bool		c_NeedToInitCustColors;
-     static void		InitCustColors();
-     static void		SaveCustColors();
+	 enum { NCUSTCOLORS = 16 };
+	 static COLORREF	c_CustColors[NCUSTCOLORS];
+	 static COLORREF	c_LastCustColors[NCUSTCOLORS];
+	 static bool		c_NeedToInitCustColors;
+	 static void		InitCustColors();
+	 static void		SaveCustColors();
 
 	 // Dialog Data
-     //{{AFX_DATA(CMyColorDialog)
-     //}}AFX_DATA
+	 //{{AFX_DATA(CMyColorDialog)
+	 //}}AFX_DATA
 
 protected:
-     // ClassWizard generate virtual function overrides
-     //{{AFX_VIRTUAL(CMyColorDialog)
-     virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-     //}}AFX_VIRTUAL
+	 // ClassWizard generate virtual function overrides
+	 //{{AFX_VIRTUAL(CMyColorDialog)
+	 virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	 //}}AFX_VIRTUAL
 
 	 // Generated message map functions
-     //{{AFX_MSG(CMyColorDialog)
-     //}}AFX_MSG
-     DECLARE_MESSAGE_MAP()
+	 //{{AFX_MSG(CMyColorDialog)
+	 //}}AFX_MSG
+	 DECLARE_MESSAGE_MAP()
 };
 
 IMPLEMENT_DYNCREATE( CMyColorDialog, CColorDialog )
@@ -109,28 +109,28 @@ void CMyColorDialog::SaveCustColors() {
 	}
 }
 
-CMyColorDialog::CMyColorDialog( COLORREF clrInit, DWORD dwFlags, 
+CMyColorDialog::CMyColorDialog( COLORREF clrInit, DWORD dwFlags,
 		CWnd* pParentWnd) : CColorDialog(clrInit,dwFlags,pParentWnd)
 {
-     //{{AFX_DATA_INIT(CMyColorDialog)
-     //}}AFX_DATA_INIT
-     if (c_NeedToInitCustColors) {
-          InitCustColors();
-     }
-     m_cc.lpCustColors = c_CustColors;
+	 //{{AFX_DATA_INIT(CMyColorDialog)
+	 //}}AFX_DATA_INIT
+	 if (c_NeedToInitCustColors) {
+		  InitCustColors();
+	 }
+	 m_cc.lpCustColors = c_CustColors;
 }
 
 int CMyColorDialog::DoModal() {
-     int code = CColorDialog::DoModal();
-     SaveCustColors();
-     return code;
+	 int code = CColorDialog::DoModal();
+	 SaveCustColors();
+	 return code;
 }
 
 void CMyColorDialog::DoDataExchange(CDataExchange* pDX) {
-     // overridden (calls this base class)
-     CColorDialog::DoDataExchange(pDX);
-     //{{AFX_DATA_MAP(CMyColorDialog)
-     //}}AFX_DATA_MAP
+	 // overridden (calls this base class)
+	 CColorDialog::DoDataExchange(pDX);
+	 //{{AFX_DATA_MAP(CMyColorDialog)
+	 //}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CMyColorDialog, CColorDialog)
@@ -226,7 +226,7 @@ double FindC(LineDesc& l)
 CPoint PointOnLine(CPoint pt1,CPoint pt2,int len,int maxlen )
 {
 	double x,y,m,a,c,C,A;
-	double a2,c2,m2,B;	
+	double a2,c2,m2,B;
 	CPoint opt = pt1;
 	CPoint pt;
 
@@ -245,14 +245,14 @@ CPoint PointOnLine(CPoint pt1,CPoint pt2,int len,int maxlen )
 
 
 		A = 1.0;
-		
+
 		x = pt1.x;
 
 		B = 2.0 * pt1.x;
 
 		x *= x;
 		C = x - a2/(m2 + 1);
-		
+
 		x = (B + idMath::Sqrt(B*B - (4.0*A*C)))/(2.0*A);
 		y = m*x + c;
 		pt = CPoint((int)x,(int)y);
@@ -292,7 +292,7 @@ int Distance(CPoint pt1,CPoint pt2)
 
 	x = (pt1.x - pt2.x);
 	x *= x;
-	
+
 	a = (double)x + (double)y ;
 	a = idMath::Sqrt(a);
 	return (int)a;
@@ -342,7 +342,7 @@ RGBType HSVType::toRGB()
 	}
 
 	double min,max,delta,hue;
-	
+
 	max = v;
 	delta = (max * s)/255.0;
 	min = max - delta;
@@ -406,10 +406,10 @@ HSVType RGBType::toHSV()
 
 	double min,max,delta,temp;
 
-	min = __min(r,__min(g,b));	
+	min = __min(r,__min(g,b));
 	max = __max(r,__max(g,b));
 	delta = max - min;
-	
+
 	hsv.v = (int)max;
 	if(!delta)
 	{
@@ -545,11 +545,11 @@ void CDialogColorPicker::OnLButtonDown(UINT nFlags, CPoint point) {
 			nIndex = BLUE;
 		}
 	}
-	
+
 	CDialog::OnLButtonDown(nFlags, point);
 }
 
-void CDialogColorPicker::OnLButtonUp(UINT nFlags, CPoint point) 
+void CDialogColorPicker::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if(GetCapture() == this)
 	{
@@ -559,7 +559,7 @@ void CDialogColorPicker::OnLButtonUp(UINT nFlags, CPoint point)
 	CDialog::OnLButtonUp(nFlags, point);
 }
 
-void CDialogColorPicker::OnMouseMove(UINT nFlags, CPoint point) 
+void CDialogColorPicker::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if(GetCapture() == this && m_nMouseIn)
 	{
@@ -655,7 +655,7 @@ void CDialogColorPicker::OnMouseMove(UINT nFlags, CPoint point)
 	CDialog::OnMouseMove(nFlags, point);
 }
 
-void CDialogColorPicker::OnPaint() 
+void CDialogColorPicker::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 
@@ -663,10 +663,10 @@ void CDialogColorPicker::OnPaint()
 	DrawRGB(&dc);
 }
 
-BOOL CDialogColorPicker::OnInitDialog() 
+BOOL CDialogColorPicker::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	GetDlgItem(IDC_STATIC_RGB_RECT)->GetWindowRect(&rgbRect);
 	GetDlgItem(IDC_STATIC_HSB_RECT)->GetWindowRect(&hsbRect);
 	ScreenToClient(&rgbRect);
@@ -675,12 +675,12 @@ BOOL CDialogColorPicker::OnInitDialog()
 	GetDlgItem(IDC_STATIC_NEWCOLOR)->GetWindowRect(&NewColorRect);
 	ScreenToClient(&NewColorRect);
 
-	
+
 	CWindowDC dc(NULL);
 	CSize bmSize;
 
 	//	Set Up HSB
-	
+
 	memDC.CreateCompatibleDC(&dc);
 
 	LoadMappedBitmap(m_HsbBitmap,IDB_BITMAP_HSB,bmSize);
@@ -736,7 +736,7 @@ BOOL CDialogColorPicker::OnInitDialog()
 	SetTimer(0, 50, NULL);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CDialogColorPicker::DrawMarkers(CDC *pDC)
@@ -788,7 +788,7 @@ void CDialogColorPicker::TrackPoint(CPoint pt)
 		CClientDC dc(this);
 
 		DrawMarkers(&dc);
-		
+
 		hsvColor.h = (int)RAD2DEG(AngleFromPoint(pt,m_Centre));
 		if(hsvColor.h < 0)
 		{
@@ -869,11 +869,11 @@ void CDialogColorPicker::CalcRects()
 	CPoint pt;
 
 	pt = PtFromAngle(hsvColor.h,hsvColor.s,m_Centre);
-	m_CurrentRect = CRect(pt.x - RECT_WIDTH,pt.y - RECT_WIDTH,pt.x+RECT_WIDTH,pt.y + RECT_WIDTH);	
-	
+	m_CurrentRect = CRect(pt.x - RECT_WIDTH,pt.y - RECT_WIDTH,pt.x+RECT_WIDTH,pt.y + RECT_WIDTH);
+
 	int y;
 
-	y = (int)(((double)hsvColor.v/255)*brightRect.Height()); 	
+	y = (int)(((double)hsvColor.v/255)*brightRect.Height());
 	y = brightRect.bottom - y;
 	brightMark = CRect(brightRect.left - 2, y - 4, brightRect.right+2,y+4);
 }
@@ -929,8 +929,8 @@ void CDialogColorPicker::DrawLines(CDC *pDC)
 
 	/*
 	Draw the following lines :
-		
-		1 -2 
+
+		1 -2
 		2 -3
 		3 - 4
 		4- 5
@@ -950,7 +950,7 @@ void CDialogColorPicker::DrawLines(CDC *pDC)
 	pDC->LineTo(m_Cuboid[6]);
 	pDC->LineTo(m_Cuboid[7]);
 	pDC->LineTo(m_Cuboid[4]);
-	
+
 	pDC->MoveTo(m_Cuboid[1]);
 	pDC->LineTo(m_Cuboid[6]);
 
@@ -1006,8 +1006,8 @@ void CDialogColorPicker::CalcSlopes()
    7 = Blue Axis
 
   Draw the following lines :
-	
-	1 -2 
+
+	1 -2
 	2 -3
 	3 - 4
 	4- 5
@@ -1040,7 +1040,7 @@ void CDialogColorPicker::CalcCuboid()
 	l[3].x = m_Cuboid[1].x;
 	l[3].y = m_Cuboid[1].y;
 	l[3].c = FindC(l[3]);
-	
+
 	l[4].slope = lines[RED].slope;
 	l[4].x = m_Cuboid[3].x;
 	l[4].y = m_Cuboid[3].y;
@@ -1050,7 +1050,7 @@ void CDialogColorPicker::CalcCuboid()
 	l[5].x = m_Cuboid[3].x;
 	l[5].y = m_Cuboid[3].y;
 	l[5].c = FindC(l[5]);
-	
+
 	l[6].slope = lines[GREEN].slope;
 	l[6].x = m_Cuboid[7].x;
 	l[6].y = m_Cuboid[7].y;
@@ -1060,7 +1060,7 @@ void CDialogColorPicker::CalcCuboid()
 	l[10].x = m_Cuboid[1].x;
 	l[10].y = m_Cuboid[1].y;
 	l[10].c = FindC(l[10]);
-	
+
 	l[11].slope = lines[RED].slope;
 	l[11].x = m_Cuboid[7].x;
 	l[11].y = m_Cuboid[7].y;
@@ -1074,14 +1074,14 @@ void CDialogColorPicker::CalcCuboid()
 	l[7].x = m_Cuboid[4].x;
 	l[7].y = m_Cuboid[4].y;
 	l[7].c = FindC(l[7]);
-	
+
 	l[8].slope = lines[BLUE].slope;
 	l[8].x = m_Cuboid[2].x;
 	l[8].y = m_Cuboid[2].y;
 	l[8].c = FindC(l[8]);
 
 	m_Cuboid[5] = Intersection(l[7],l[8]);
-		
+
 }
 
 void CDialogColorPicker::SetSpinVals()
@@ -1110,7 +1110,7 @@ void CDialogColorPicker::SetEditVals()
 
 }
 
-void CDialogColorPicker::OnChangeEditBlue() 
+void CDialogColorPicker::OnChangeEditBlue()
 {
 	int b;
 
@@ -1125,10 +1125,10 @@ void CDialogColorPicker::OnChangeEditBlue()
 	}
 }
 
-void CDialogColorPicker::OnChangeEditGreen() 
+void CDialogColorPicker::OnChangeEditGreen()
 {
 	int g;
-	
+
 	g = GetDlgItemInt(IDC_EDIT_GREEN);
 	if(g != color.g && m_bInitOver)
 	{
@@ -1140,7 +1140,7 @@ void CDialogColorPicker::OnChangeEditGreen()
 	}
 }
 
-void CDialogColorPicker::OnChangeEditRed() 
+void CDialogColorPicker::OnChangeEditRed()
 {
 	int r;
 
@@ -1155,7 +1155,7 @@ void CDialogColorPicker::OnChangeEditRed()
 	}
 }
 
-void CDialogColorPicker::OnChangeEditHue() 
+void CDialogColorPicker::OnChangeEditHue()
 {
 	int h;
 
@@ -1170,7 +1170,7 @@ void CDialogColorPicker::OnChangeEditHue()
 	}
 }
 
-void CDialogColorPicker::OnChangeEditSat() 
+void CDialogColorPicker::OnChangeEditSat()
 {
 	int s;
 
@@ -1185,7 +1185,7 @@ void CDialogColorPicker::OnChangeEditSat()
 	}
 }
 
-void CDialogColorPicker::OnChangeEditVal() 
+void CDialogColorPicker::OnChangeEditVal()
 {
 	int v;
 
@@ -1238,16 +1238,16 @@ void CDialogColorPicker::DrawFilledColor(CDC *pDC,CRect cr,COLORREF c)
 void CDialogColorPicker::LoadMappedBitmap(CBitmap& bitmap,UINT nIdResource,CSize& size)
 {
 	CBitmap *pOldBitmap;
-	
+
 	if(bitmap.GetSafeHandle()) bitmap.DeleteObject();
-	
+
 	if(bitmap.LoadBitmap(nIdResource))
 	{
 
 		int width,height;
 		BITMAP bmInfo;
 
-		::GetObject(bitmap.m_hObject,sizeof(bmInfo),&bmInfo);	
+		::GetObject(bitmap.m_hObject,sizeof(bmInfo),&bmInfo);
 		width = bmInfo.bmWidth;
 		height = bmInfo.bmHeight;
 
@@ -1255,9 +1255,9 @@ void CDialogColorPicker::LoadMappedBitmap(CBitmap& bitmap,UINT nIdResource,CSize
 		COLORREF sourceColor = RGB(192,192,192);
 
 		pOldBitmap = (CBitmap *)memDC.SelectObject(&bitmap);
-	
+
 		int i,j;
-		
+
 		for(i=0; i < height; i++)
 		{
 			for(j=0; j < width; j++)

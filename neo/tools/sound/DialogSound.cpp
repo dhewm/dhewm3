@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -173,7 +173,7 @@ void SoundEditorInit( const idDict *spawnArgs ) {
 
 	g_SoundDialog->ShowWindow( SW_SHOW );
 	g_SoundDialog->SetFocus();
-	
+
 	if ( spawnArgs ) {
 		const char *name = spawnArgs->GetString( "name" );
 		const idDict *dict = gameEdit->MapGetEntityDict( name );
@@ -278,13 +278,13 @@ void CDialogSound::Get( idDict *source ) {
 	source->SetFloat( "s_shakes", shakes );
 }
 
-void CDialogSound::OnBtnSavemap() 
+void CDialogSound::OnBtnSavemap()
 {
 	OnBtnApply();
 	gameEdit->MapSave();
 }
 
-void CDialogSound::OnBtnSwitchtogame() 
+void CDialogSound::OnBtnSwitchtogame()
 {
 	::SetFocus(win32.hWnd);
 }
@@ -315,7 +315,7 @@ void CDialogSound::SetVolume( float vol ) {
 				gameEdit->EntityUpdateChangeableSpawnArgs( list[i], dict2 );
 				fVolume = vol;
 				UpdateData( FALSE );
-			} 
+			}
 		}
 	}
 }
@@ -373,20 +373,20 @@ void CDialogSound::ApplyChanges( bool volumeOnly, bool updateInUseTree ) {
 	}
 }
 
-void CDialogSound::OnBtnApply() 
+void CDialogSound::OnBtnApply()
 {
 	ApplyChanges();
 }
 
-void CDialogSound::OnChangeEditVolume() 
+void CDialogSound::OnChangeEditVolume()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
-	
+
 	// TODO: Add your control notification handler code here
-	
+
 }
 
 HTREEITEM CDialogSound::AddStrList(const char *root, const idStrList &list, int id) {
@@ -471,13 +471,13 @@ void CDialogSound::AddSounds(bool rootItems) {
 	idStrList list(1024);
 	idStrList list2(1024);
 	HTREEITEM base = treeSounds.InsertItem("Sound Shaders");
-	 
+
 	for( i = 0; i < declManager->GetNumDecls( DECL_SOUND ) ; i++ ) {
 		const idSoundShader *poo = declManager->SoundByIndex(i, false);
 		list.AddUnique( poo->GetFileName() );
 	}
 	list.Sort();
-	
+
 	for ( i = 0; i < list.Num(); i++ ) {
 		HTREEITEM child = treeSounds.InsertItem(list[i], base);
 		treeSounds.SetItemData(child, SOUNDPARENT);
@@ -489,7 +489,7 @@ void CDialogSound::AddSounds(bool rootItems) {
 				list2.Append( poo->GetName() );
 			}
 		}
-		list2.Sort();		
+		list2.Sort();
 		for (j = 0; j < list2.Num(); j++) {
 			HTREEITEM child2 = treeSounds.InsertItem( list2[j], child );
 			treeSounds.SetItemData(child2, SOUNDS);
@@ -499,7 +499,7 @@ void CDialogSound::AddSounds(bool rootItems) {
 
 	idFileList *files;
 	files = fileSystem->ListFilesTree( "sound", ".wav|.ogg", true );
-    AddStrList( "Wave files", files->GetList(), WAVES );
+	AddStrList( "Wave files", files->GetList(), WAVES );
 	fileSystem->FreeFileList( files );
 }
 
@@ -555,7 +555,7 @@ void CDialogSound::AddSpeakers() {
 	CString group( "" );
 	if (bGroupOnly && comboGroups.GetCurSel() >= 0) {
 		comboGroups.GetLBText( comboGroups.GetCurSel(), group );
-	} 
+	}
 	int count = gameEdit->MapGetEntitiesMatchingClassWithString( "speaker", group, list.Ptr(), list.Num() );
 
 	for ( int i = 0; i < count; i++ ) {
@@ -563,13 +563,13 @@ void CDialogSound::AddSpeakers() {
 	}
 }
 
-BOOL CDialogSound::OnInitDialog() 
+BOOL CDialogSound::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	// Indicate the sound dialog is opened
 	com_editors |= EDITOR_SOUND;
-	
+
 	inUseTree = NULL;
 	AddSounds(true);
 	AddGroups();
@@ -578,10 +578,10 @@ BOOL CDialogSound::OnInitDialog()
 	SetWaveSize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDialogSound::OnBtnRefresh() 
+void CDialogSound::OnBtnRefresh()
 {
 	CWaitCursor cursor;
 	treeSounds.DeleteAllItems();
@@ -590,7 +590,7 @@ void CDialogSound::OnBtnRefresh()
 	AddSounds(true);
 }
 
-void CDialogSound::OnBtnPlaysound() 
+void CDialogSound::OnBtnPlaysound()
 {
 	if (playSound.GetLength()) {
 		// we might be in either the game or the editor
@@ -599,17 +599,17 @@ void CDialogSound::OnBtnPlaysound()
 			sw->PlayShaderDirectly(playSound);
 		}
 	}
-	
+
 }
 
-void CDialogSound::OnDblclkTreeSounds(NMHDR* pNMHDR, LRESULT* pResult) 
+void CDialogSound::OnDblclkTreeSounds(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = 0;
 	CPoint pt;
 	GetCursorPos( &pt );
 	treeSounds.ScreenToClient( &pt );
 	HTREEITEM item = treeSounds.HitTest( pt );
-	
+
 	if (item) {
 		DWORD dw = treeSounds.GetItemData( item );
 		if ( dw == SOUNDS || dw == INUSESOUNDS ) {
@@ -634,7 +634,7 @@ void CDialogSound::SetWaveSize( const char *p ) {
 	}
 }
 
-void CDialogSound::OnSelchangedTreeSounds(NMHDR* pNMHDR, LRESULT* pResult) 
+void CDialogSound::OnSelchangedTreeSounds(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 	HTREEITEM	item = treeSounds.GetSelectedItem();
@@ -655,22 +655,22 @@ void CDialogSound::OnSelchangedTreeSounds(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 		}
 	}
-	
+
 	*pResult = 0;
 }
 
-void CDialogSound::OnCheckPlay() 
+void CDialogSound::OnCheckPlay()
 {
 	UpdateData(TRUE);
 }
 
-void CDialogSound::OnBtnEdit() 
+void CDialogSound::OnBtnEdit()
 {
 	const idDecl *decl = declManager->FindDeclWithoutParsing( DECL_SOUND, strShader, false );
 
 	if ( decl ) {
 		DialogDeclEditor *declEditor;
-        
+
 		declEditor = new DialogDeclEditor;
 		declEditor->Create( IDD_DIALOG_DECLEDITOR, GetParent() );
 		declEditor->LoadDecl( const_cast<idDecl *>( decl ) );
@@ -679,7 +679,7 @@ void CDialogSound::OnBtnEdit()
 	}
 }
 
-void CDialogSound::OnBtnDrop() 
+void CDialogSound::OnBtnDrop()
 {
 	idStr		classname;
 	idStr		key;
@@ -735,7 +735,7 @@ void CDialogSound::OnBtnDrop()
 	AddSpeakers();
 }
 
-void CDialogSound::OnBtnGroup() 
+void CDialogSound::OnBtnGroup()
 {
 	idList<idEntity*> list;
 
@@ -773,7 +773,7 @@ void CDialogSound::OnBtnGroup()
 
 }
 
-void CDialogSound::OnBtnSavemapas() 
+void CDialogSound::OnBtnSavemapas()
 {
 	CFileDialog dlgSave(FALSE,"map",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,"Map Files (*.map)|*.map||",AfxGetMainWnd());
 	if (dlgSave.DoModal() == IDOK) {
@@ -803,7 +803,7 @@ idStr CDialogSound::RebuildItemName(const char *root, HTREEITEM item) {
 			break;
 		}
 	}
- 	return strParent;
+	return strParent;
 }
 
 
@@ -830,32 +830,32 @@ void CDialogSound::UpdateSelectedOrigin( float x, float y, float z ) {
 	}
 }
 
-void CDialogSound::OnBtnYup() 
+void CDialogSound::OnBtnYup()
 {
 	UpdateSelectedOrigin(0, 8, 0);
 }
 
-void CDialogSound::OnBtnYdn() 
+void CDialogSound::OnBtnYdn()
 {
 	UpdateSelectedOrigin(0, -8, 0);
 }
 
-void CDialogSound::OnBtnXdn() 
+void CDialogSound::OnBtnXdn()
 {
 	UpdateSelectedOrigin(-8, 0, 0);
 }
 
-void CDialogSound::OnBtnXup() 
+void CDialogSound::OnBtnXup()
 {
 	UpdateSelectedOrigin(8, 0, 0);
 }
 
-void CDialogSound::OnBtnZup() 
+void CDialogSound::OnBtnZup()
 {
 	UpdateSelectedOrigin(0, 0, 8);
 }
 
-void CDialogSound::OnBtnZdn() 
+void CDialogSound::OnBtnZdn()
 {
 	UpdateSelectedOrigin(0, 0, -8);
 }
@@ -868,7 +868,7 @@ void CDialogSound::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
 }
 
 
-void CDialogSound::OnCheckGrouponly() 
+void CDialogSound::OnCheckGrouponly()
 {
 	AddSpeakers();
 }
@@ -925,13 +925,13 @@ void CDialogSound::OnBtnUp() {
 	ApplyChanges( true, false );
 }
 
-void CDialogSound::OnBtnRefreshspeakers() 
+void CDialogSound::OnBtnRefreshspeakers()
 {
 	AddGroups();
 	AddSpeakers();
 }
 
-void CDialogSound::OnBtnRefreshwave() 
+void CDialogSound::OnBtnRefreshwave()
 {
 	HTREEITEM	item = treeSounds.GetSelectedItem();
 	if (item && treeSounds.GetItemData( item ) == WAVEDIR) {
@@ -956,7 +956,7 @@ void CDialogSound::OnBtnRefreshwave()
 			treeSounds.SetItemImage( child, 2, 2 );
 		}
 		fileSystem->FreeFileList( files );
-	} 
+	}
 }
 
 BOOL CDialogSound::PreTranslateMessage(MSG* pMsg)

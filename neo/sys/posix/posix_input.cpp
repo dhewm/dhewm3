@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 typedef struct poll_keyboard_event_s
 {
 	int key;
-	bool state;	
+	bool state;
 } poll_keyboard_event_t;
 
 typedef struct poll_mouse_event_s
@@ -105,7 +105,7 @@ int Sys_ReturnKeyboardInputEvent( const int n, int &key, bool &state ) {
 
 void Sys_EndKeyboardInputEvents( void ) {
 	//isn't this were it's supposed to be, was missing some key strokes with it set below
-	poll_keyboard_event_count = 0;	
+	poll_keyboard_event_count = 0;
  }
 
 int Sys_PollMouseInputEvents( void ) {

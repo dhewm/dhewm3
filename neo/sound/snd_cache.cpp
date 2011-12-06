@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -73,7 +73,7 @@ const idSoundSample* idSoundCache::GetObject( const int index ) const {
 	if (index<0 || index>listCache.Num()) {
 		return NULL;
 	}
-	return listCache[index]; 
+	return listCache[index];
 }
 
 /*
@@ -321,7 +321,7 @@ int idSoundSample::LengthIn44kHzSamples( void ) const {
 	} else if ( objectInfo.nSamplesPerSec == 22050 ) {
 		return objectSize << 1;
 	} else {
-		return objectSize << 0;			
+		return objectSize << 0;
 	}
 }
 
@@ -330,7 +330,7 @@ int idSoundSample::LengthIn44kHzSamples( void ) const {
 idSoundSample::MakeDefault
 ===================
 */
-void idSoundSample::MakeDefault( void ) {	
+void idSoundSample::MakeDefault( void ) {
 	int		i;
 	float	v;
 	int		sample;
@@ -361,7 +361,7 @@ void idSoundSample::MakeDefault( void ) {
 		if ( alGetError() != AL_NO_ERROR ) {
 			common->Error( "idSoundCache: error generating OpenAL hardware buffer" );
 		}
-		
+
 		alGetError();
 		alBufferData( openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, nonCacheData, objectMemSize, objectInfo.nSamplesPerSec );
 		if ( alGetError() != AL_NO_ERROR ) {
@@ -431,7 +431,7 @@ idSoundSample::Load
 Loads based on name, possibly doing a MakeDefault if necessary
 ===================
 */
-void idSoundSample::Load( void ) {	
+void idSoundSample::Load( void ) {
 	defaultSound = false;
 	purged = false;
 	hardwareBuffer = false;
@@ -485,7 +485,7 @@ void idSoundSample::Load( void ) {
 	// optionally convert it to 22kHz to save memory
 	CheckForDownSample();
 
-	// create hardware audio buffers 
+	// create hardware audio buffers
 	if ( idSoundSystemLocal::useOpenAL ) {
 		// PCM loads directly
 		if ( objectInfo.wFormatTag == WAVE_FORMAT_TAG_PCM ) {
@@ -524,8 +524,8 @@ void idSoundSample::Load( void ) {
 					hardwareBuffer = true;
 				}
 			}
-		} 
-		
+		}
+
 		// OGG decompressed at load time (when smaller than s_decompressionLimit seconds, 6 seconds by default)
 		if ( objectInfo.wFormatTag == WAVE_FORMAT_TAG_OGG ) {
 #if defined(MACOS_X)
@@ -540,7 +540,7 @@ void idSoundSample::Load( void ) {
 				if ( alIsBuffer( openalBuffer ) ) {
 					idSampleDecoder *decoder = idSampleDecoder::Alloc();
 					float *destData = (float *)soundCacheAllocator.Alloc( ( LengthIn44kHzSamples() + 1 ) * sizeof( float ) );
-					
+
 					// Decoder *always* outputs 44 kHz data
 					decoder->Decode( this, 0, LengthIn44kHzSamples(), destData );
 
@@ -590,7 +590,7 @@ void idSoundSample::Load( void ) {
 						for ( i = 0; i < objectSize; i+=blockSize ) {
 							short min = 32767;
 							short max = -32768;
-							
+
 							int j;
 							for ( j = 0; j < Min( objectSize - i, blockSize ); j++ ) {
 								min = ((short *)destData)[ i + j ] < min ? ((short *)destData)[ i + j ] : min;
@@ -600,7 +600,7 @@ void idSoundSample::Load( void ) {
 							((short *)amplitudeData)[ ( i / blockSize ) * 2     ] = min;
 							((short *)amplitudeData)[ ( i / blockSize ) * 2 + 1 ] = max;
 						}
-						
+
 						hardwareBuffer = true;
 					}
 

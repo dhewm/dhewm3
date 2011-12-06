@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -129,7 +129,7 @@ void CPropertyList::DrawItem(LPDRAWITEMSTRUCT lpDIS) {
 		}
 		dc.DrawEdge(rect2,EDGE_SUNKEN,BF_BOTTOMRIGHT);
 		dc.DrawEdge(rect,EDGE_SUNKEN,BF_BOTTOM);
-		
+
 		if (lpDIS->itemState == ODS_SELECTED) {
 			dc.DrawFocusRect(rect2);
 		}
@@ -207,7 +207,7 @@ void CPropertyList::OnSelchange() {
 		m_nLastBox = 0;
 		if (m_cmbBox) {
 			m_cmbBox.MoveWindow(rect);
-		} else {	
+		} else {
 			rect.bottom += 300;
 			m_cmbBox.Create(CBS_DROPDOWNLIST | WS_VSCROLL | WS_VISIBLE | WS_CHILD | WS_BORDER,rect,this,IDC_PROPCMBBOX);
 			m_cmbBox.SetFont(&m_SSerif8Font);
@@ -216,9 +216,9 @@ void CPropertyList::OnSelchange() {
 		//add the choices for this particular property
 		CString cmbItems = pItem->m_cmbItems;
 		lBoxSelText = pItem->m_curValue;
-		
+
 		m_cmbBox.ResetContent();
-		m_cmbBox.AddString("");		
+		m_cmbBox.AddString("");
 		int i,i2;
 		i=0;
 		while ((i2=cmbItems.Find('|',i)) != -1)	{
@@ -236,7 +236,7 @@ void CPropertyList::OnSelchange() {
 		} else {
 			m_cmbBox.SetCurSel(0);
 		}
-		//m_cmbBox.ShowDropDown();  
+		//m_cmbBox.ShowDropDown();
 	}
 	else if (pItem->m_nItemType==PIT_EDIT) {
 		//display edit box
@@ -245,7 +245,7 @@ void CPropertyList::OnSelchange() {
 		rect.bottom -= 3;
 		if (m_editBox) {
 			m_editBox.MoveWindow(rect);
-		} else {	
+		} else {
 			m_editBox.Create(ES_LEFT | ES_AUTOHSCROLL | WS_VISIBLE | WS_CHILD | WS_BORDER,rect,this,IDC_PROPEDITBOX);
 			m_editBox.SetFont(&m_SSerif8Font);
 		}
@@ -276,7 +276,7 @@ void CPropertyList::DisplayButton(CRect region) {
 
 	if (m_btnCtrl) {
 		m_btnCtrl.MoveWindow(region);
-	} else {	
+	} else {
 		m_btnCtrl.Create("...",BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD,region,this,IDC_PROPBTNCTRL);
 		m_btnCtrl.SetFont(&m_SSerif8Font);
 	}
@@ -330,7 +330,7 @@ void CPropertyList::OnSelchangeCmbBox() {
 void CPropertyList::OnChangeEditBox() {
 	CString newStr;
 	m_editBox.GetWindowText(newStr);
-	
+
 	CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
 	pItem->m_curValue = newStr;
 }
@@ -362,11 +362,11 @@ void CPropertyList::OnButton() {
 		m_btnCtrl.ShowWindow(SW_HIDE);
 		Invalidate();
 	} else if (pItem->m_nItemType == PIT_FILE) {
-		CString SelectedFile; 
+		CString SelectedFile;
 		CString Filter("Gif Files (*.gif)|*.gif||");
-	
+
 		CFileDialog FileDlg(TRUE, NULL, NULL, NULL,	Filter);
-		
+
 		CString currPath = pItem->m_curValue;
 		FileDlg.m_ofn.lpstrTitle = "Select file";
 		if (currPath.GetLength() > 0) {
@@ -379,7 +379,7 @@ void CPropertyList::OnButton() {
 			pItem->m_curValue = SelectedFile;
 			Invalidate();
 		}
-	} else if (pItem->m_nItemType == PIT_FONT) {	
+	} else if (pItem->m_nItemType == PIT_FONT) {
 		CFontDialog FontDlg(NULL,CF_EFFECTS | CF_SCREENFONTS,NULL,this);
 		if(IDOK == FontDlg.DoModal()) {
 			CString faceName = FontDlg.GetFaceName();
@@ -425,7 +425,7 @@ void CPropertyList::OnLButtonUp(UINT nFlags, CPoint point) {
 		//if columns were being resized then this indicates
 		//that mouse is up so resizing is done.  Need to redraw
 		//columns to reflect their new widths.
-		
+
 		m_bTracking = FALSE;
 		//if mouse was captured then release it
 		if (GetCapture()==this) {
@@ -458,7 +458,7 @@ void CPropertyList::OnLButtonDown(UINT nFlags, CPoint point) {
 		windowRect.left += 10; windowRect.right -= 10;
 		//do not let mouse leave the list box boundary
 		::ClipCursor(windowRect);
-		
+
 		if (m_cmbBox) {
 			m_cmbBox.ShowWindow(SW_HIDE);
 		}
@@ -485,7 +485,7 @@ void CPropertyList::OnLButtonDown(UINT nFlags, CPoint point) {
 	}
 }
 
-void CPropertyList::OnMouseMove(UINT nFlags, CPoint point) {	
+void CPropertyList::OnMouseMove(UINT nFlags, CPoint point) {
 	if (m_bTracking) {
 		//move divider line to the mouse pos. if columns are
 		//currently being resized
@@ -525,16 +525,15 @@ void CPropertyList::PreSubclassWindow() {
 
 void CPropertyList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
 	if (m_cmbBox) {
-		m_cmbBox.ShowWindow(SW_HIDE); 
-	} 
-	if (m_editBox) { 
-		m_editBox.ShowWindow(SW_HIDE); 
-	} 
-	if (m_btnCtrl) { 
-		m_btnCtrl.ShowWindow(SW_HIDE); 
-	} 
-	Invalidate(); 
+		m_cmbBox.ShowWindow(SW_HIDE);
+	}
+	if (m_editBox) {
+		m_editBox.ShowWindow(SW_HIDE);
+	}
+	if (m_btnCtrl) {
+		m_btnCtrl.ShowWindow(SW_HIDE);
+	}
+	Invalidate();
 
-	CListBox::OnVScroll(nSBCode, nPos, pScrollBar); 
-} 
-
+	CListBox::OnVScroll(nSBCode, nPos, pScrollBar);
+}

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -32,15 +32,15 @@ If you have questions concerning this license or the applicable additional terms
 
 #if defined(STRICTUNZIP) || defined(STRICTZIPUNZIP)
 /* like the STRICT of WIN32, we define a pointer that cannot be converted
-    from (void*) without cast */
-typedef struct TagunzFile__ { int unused; } unzFile__; 
+	from (void*) without cast */
+typedef struct TagunzFile__ { int unused; } unzFile__;
 typedef unzFile__ *unzFile;
 #else
 typedef void* unzFile;
 #endif
 
 /* tm_unz contain date/time info */
-typedef struct tm_unz_s 
+typedef struct tm_unz_s
 {
 	unsigned int tm_sec;            /* seconds after the minute - [0,59] */
 	unsigned int tm_min;            /* minutes after the hour - [0,59] */
@@ -62,29 +62,29 @@ typedef struct unz_global_info_s
 /* unz_file_info contain information about a file in the zipfile */
 typedef struct unz_file_info_s
 {
-    unsigned long version;              /* version made by                 2 unsigned chars */
-    unsigned long version_needed;       /* version needed to extract       2 unsigned chars */
-    unsigned long flag;                 /* general purpose bit flag        2 unsigned chars */
-    unsigned long compression_method;   /* compression method              2 unsigned chars */
-    unsigned long dosDate;              /* last mod file date in Dos fmt   4 unsigned chars */
-    unsigned long crc;                  /* crc-32                          4 unsigned chars */
-    unsigned long compressed_size;      /* compressed size                 4 unsigned chars */ 
-    unsigned long uncompressed_size;    /* uncompressed size               4 unsigned chars */ 
-    unsigned long size_filename;        /* filename length                 2 unsigned chars */
-    unsigned long size_file_extra;      /* extra field length              2 unsigned chars */
-    unsigned long size_file_comment;    /* file comment length             2 unsigned chars */
+	unsigned long version;              /* version made by                 2 unsigned chars */
+	unsigned long version_needed;       /* version needed to extract       2 unsigned chars */
+	unsigned long flag;                 /* general purpose bit flag        2 unsigned chars */
+	unsigned long compression_method;   /* compression method              2 unsigned chars */
+	unsigned long dosDate;              /* last mod file date in Dos fmt   4 unsigned chars */
+	unsigned long crc;                  /* crc-32                          4 unsigned chars */
+	unsigned long compressed_size;      /* compressed size                 4 unsigned chars */
+	unsigned long uncompressed_size;    /* uncompressed size               4 unsigned chars */
+	unsigned long size_filename;        /* filename length                 2 unsigned chars */
+	unsigned long size_file_extra;      /* extra field length              2 unsigned chars */
+	unsigned long size_file_comment;    /* file comment length             2 unsigned chars */
 
-    unsigned long disk_num_start;       /* disk number start               2 unsigned chars */
-    unsigned long internal_fa;          /* internal file attributes        2 unsigned chars */
-    unsigned long external_fa;          /* external file attributes        4 unsigned chars */
+	unsigned long disk_num_start;       /* disk number start               2 unsigned chars */
+	unsigned long internal_fa;          /* internal file attributes        2 unsigned chars */
+	unsigned long external_fa;          /* external file attributes        4 unsigned chars */
 
-    tm_unz tmu_date;
+	tm_unz tmu_date;
 } unz_file_info;
 
 /* unz_file_info_interntal contain internal info about a file in zipfile*/
 typedef struct unz_file_info_internal_s
 {
-    unsigned long offset_curfile;/* relative offset of static header 4 unsigned chars */
+	unsigned long offset_curfile;/* relative offset of static header 4 unsigned chars */
 } unz_file_info_internal;
 
 typedef void* (*alloc_func) (void* opaque, unsigned int items, unsigned int size);
@@ -93,31 +93,31 @@ typedef void   (*free_func) (void* opaque, void* address);
 struct internal_state;
 
 typedef struct z_stream_s {
-    unsigned char    *next_in;  /* next input unsigned char */
-    unsigned int     avail_in;  /* number of unsigned chars available at next_in */
-    unsigned long    total_in;  /* total nb of input unsigned chars read so */
+	unsigned char    *next_in;  /* next input unsigned char */
+	unsigned int     avail_in;  /* number of unsigned chars available at next_in */
+	unsigned long    total_in;  /* total nb of input unsigned chars read so */
 
-    unsigned char    *next_out; /* next output unsigned char should be put there */
-    unsigned int     avail_out; /* remaining free space at next_out */
-    unsigned long    total_out; /* total nb of unsigned chars output so */
+	unsigned char    *next_out; /* next output unsigned char should be put there */
+	unsigned int     avail_out; /* remaining free space at next_out */
+	unsigned long    total_out; /* total nb of unsigned chars output so */
 
-    char     *msg;      /* last error message, NULL if no error */
-    struct internal_state *state; /* not visible by applications */
+	char     *msg;      /* last error message, NULL if no error */
+	struct internal_state *state; /* not visible by applications */
 
-    alloc_func zalloc;  /* used to allocate the internal state */
-    free_func  zfree;   /* used to free the internal state */
-    unsigned char*     opaque;  /* private data object passed to zalloc and zfree */
+	alloc_func zalloc;  /* used to allocate the internal state */
+	free_func  zfree;   /* used to free the internal state */
+	unsigned char*     opaque;  /* private data object passed to zalloc and zfree */
 
-    int     data_type;  /* best guess about the data type: ascii or binary */
-    unsigned long   adler;      /* adler32 value of the uncompressed data */
-    unsigned long   reserved;   /* reserved for future use */
+	int     data_type;  /* best guess about the data type: ascii or binary */
+	unsigned long   adler;      /* adler32 value of the uncompressed data */
+	unsigned long   reserved;   /* reserved for future use */
 } z_stream;
 
 typedef z_stream *z_streamp;
 
 
 /* file_in_zip_read_info_s contain internal information about a file in zipfile,
-    when reading and decompress it */
+	when reading and decompress it */
 typedef struct
 {
 	char  *read_buffer;         /* internal buffer for compressed data */
@@ -158,8 +158,8 @@ typedef struct
 
 	unz_file_info cur_file_info; /* public info about the current file in zip*/
 	unz_file_info_internal cur_file_info_internal; /* private info about it*/
-    file_in_zip_read_info_s* pfile_in_zip_read; /* structure about the current
-	                                    file if we are decompressing it */
+	file_in_zip_read_info_s* pfile_in_zip_read; /* structure about the current
+										file if we are decompressing it */
 } unz_s;
 
 #define UNZ_OK                                  (0)
@@ -191,11 +191,11 @@ extern unzFile unzReOpen (const char* path, unzFile file);
 
 /*
   Open a Zip file. path contain the full pathname (by example,
-     on a Windows NT computer "c:\\zlib\\zlib111.zip" or on an Unix computer
+	 on a Windows NT computer "c:\\zlib\\zlib111.zip" or on an Unix computer
 	 "zlib/zlib111.zip".
 	 If the zipfile cannot be opened (file don't exist or in not valid), the
 	   return value is NULL.
-     Else, the return value is a unzFile Handle, usable with other function
+	 Else, the return value is a unzFile Handle, usable with other function
 	   of this unzip package.
 */
 
@@ -204,7 +204,7 @@ extern int unzClose (unzFile file);
 /*
   Close a ZipFile opened with unzipOpen.
   If there is files inside the .Zip opened with unzOpenCurrentFile (see later),
-    these files MUST be closed with unzipCloseCurrentFile before call unzipClose.
+	these files MUST be closed with unzipCloseCurrentFile before call unzipClose.
   return UNZ_OK if there is no problem. */
 
 extern int unzGetGlobalInfo (unzFile file, unz_global_info *pglobal_info);
@@ -273,7 +273,7 @@ extern int unzGetCurrentFileInfo (unzFile file, unz_file_info *pfile_info, char 
 /*
   Get Info about the current file
   if pfile_info!=NULL, the *pfile_info structure will contain somes info about
-	    the current file
+		the current file
   if szFileName!=NULL, the filemane string will be copied in szFileName
 			(fileNameBufferSize is the size of the buffer)
   if extraField!=NULL, the extra field information will be copied in extraField
@@ -302,7 +302,7 @@ extern int unzCloseCurrentFile (unzFile file);
   Return UNZ_CRCERROR if all the file was read but the CRC is not good
 */
 
-												
+
 extern int unzReadCurrentFile (unzFile file, void* buf, unsigned len);
 
 /*
@@ -313,7 +313,7 @@ extern int unzReadCurrentFile (unzFile file, void* buf, unsigned len);
   return the number of unsigned char copied if somes unsigned chars are copied
   return 0 if the end of file was reached
   return <0 with error code if there is an error
-    (UNZ_ERRNO for IO error, or zLib error for uncompress error)
+	(UNZ_ERRNO for IO error, or zLib error for uncompress error)
 */
 
 extern long unztell(unzFile file);
@@ -325,7 +325,7 @@ extern long unztell(unzFile file);
 extern int unzeof (unzFile file);
 
 /*
-  return 1 if the end of file was reached, 0 elsewhere 
+  return 1 if the end of file was reached, 0 elsewhere
 */
 
 extern int unzGetLocalExtrafield (unzFile file, void* buf, unsigned len);
@@ -333,13 +333,13 @@ extern int unzGetLocalExtrafield (unzFile file, void* buf, unsigned len);
 /*
   Read extra field from the current file (opened by unzOpenCurrentFile)
   This is the local-header version of the extra field (sometimes, there is
-    more info in the local-header version than in the central-header)
+	more info in the local-header version than in the central-header)
 
   if buf==NULL, it return the size of the local extra field
 
   if buf!=NULL, len is the size of the buffer, the extra header is copied in
 	buf.
-  the return value is the number of unsigned chars copied in buf, or (if <0) 
+  the return value is the number of unsigned chars copied in buf, or (if <0)
 	the error code
 */
 

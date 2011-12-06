@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -35,13 +35,13 @@ If you have questions concerning this license or the applicable additional terms
 
   After parsing, there will be a list of entities that each has
   a list of primitives.
-  
+
   Primitives are either brushes, triangle soups, or model references.
 
   Curves are tesselated to triangle soups at load time, but model
-  references are 
-  Brushes will have 
-  
+  references are
+  Brushes will have
+
 	brushes, each of which has a side definition.
 
 */
@@ -219,7 +219,7 @@ static void AdjustEntityForOrigin( uEntity_t *ent ) {
 
 			plane = dmapGlobals.mapPlanes[s->planenum];
 			plane[3] += plane.Normal() * ent->origin;
-				
+
 			s->planenum = FindFloatPlane( plane );
 
 			s->texVec.v[0][3] += DotProduct( ent->origin, s->texVec.v[0] );
@@ -510,7 +510,7 @@ static void CreateMapLights( const idMapFile *dmapFile ) {
 LoadDMapFile
 ================
 */
-bool LoadDMapFile( const char *filename ) {		
+bool LoadDMapFile( const char *filename ) {
 	primitive_t	*prim;
 	idBounds	mapBounds;
 	int			brushes, triSurfs;
@@ -518,7 +518,7 @@ bool LoadDMapFile( const char *filename ) {
 	int			size;
 
 	common->Printf( "--- LoadDMapFile ---\n" );
-	common->Printf( "loading %s\n", filename ); 
+	common->Printf( "loading %s\n", filename );
 
 	// load and parse the map file into canonical form
 	dmapGlobals.dmapFile = new idMapFile();

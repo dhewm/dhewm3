@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -43,7 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 #define	_3DFXCAMERA_WINDOW_CLASS	"Q3DFXCamera"
 #define	CAMERA_WINDOW_CLASS	"QCamera"
 #define	XY_WINDOW_CLASS	    "QXY"
-#define	Z_WINDOW_CLASS   	"QZ"
+#define	Z_WINDOW_CLASS		"QZ"
 #define	ENT_WINDOW_CLASS	"QENT"
 #define	TEXTURE_WINDOW_CLASS	"QTEX"
 
@@ -165,7 +165,7 @@ enum {
 
 // menu settings
 #define ENTITY_WIRE				0x00001
-#define ENTITY_SKINNED 			0x00002
+#define ENTITY_SKINNED			0x00002
 
 
 #endif

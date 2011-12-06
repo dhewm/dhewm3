@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -78,7 +78,7 @@ public:
 	void			SetFlags(int flag) { m_nFlags = flag; }
 	int				Height() { return height ; }
 	int				Width() { return width ; }
-	unsigned char *GetLinePtr(int line);	
+	unsigned char *GetLinePtr(int line);
 	inline int		GetBitCount() { return m_pInfo->bmiHeader.biBitCount; }
 	BOOL			Make8Bit( CDIB &dib );
 	BOOL			SwitchFromOne( CDIB &dib );
@@ -103,7 +103,7 @@ protected:
 	unsigned char *	m_pBits;
 	PBITMAPINFO		m_pInfo;
 	RGBQUAD *		m_pRGB;
-	void *			m_pVoid; 
+	void *			m_pVoid;
 	BYTE **			m_pLinePtr;
 	int				height;
 	int				bytes;

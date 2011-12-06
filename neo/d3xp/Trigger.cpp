@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 
   idTrigger
-	
+
 ===============================================================================
 */
 
@@ -239,7 +239,7 @@ void idTrigger::Spawn( void ) {
 ===============================================================================
 
   idTrigger_Multi
-	
+
 ===============================================================================
 */
 
@@ -325,7 +325,7 @@ void idTrigger_Multi::Spawn( void ) {
 	spawnArgs.GetFloat( "random", "0", random );
 	spawnArgs.GetFloat( "delay", "0", delay );
 	spawnArgs.GetFloat( "random_delay", "0", random_delay );
-	
+
 	if ( random && ( random >= wait ) && ( wait >= 0 ) ) {
 		random = wait - 1;
 		gameLocal.Warning( "idTrigger_Multi '%s' at (%s) has random >= wait", name.c_str(), GetPhysics()->GetOrigin().ToString(0) );
@@ -515,7 +515,7 @@ void idTrigger_Multi::Event_Touch( idEntity *other, trace_t *trace ) {
 ===============================================================================
 
   idTrigger_EntityName
-	
+
 ===============================================================================
 */
 
@@ -579,7 +579,7 @@ void idTrigger_EntityName::Spawn( void ) {
 	spawnArgs.GetFloat( "random", "0", random );
 	spawnArgs.GetFloat( "delay", "0", delay );
 	spawnArgs.GetFloat( "random_delay", "0", random_delay );
-	
+
 	if ( random && ( random >= wait ) && ( wait >= 0 ) ) {
 		random = wait - 1;
 		gameLocal.Warning( "idTrigger_EntityName '%s' at (%s) has random >= wait", name.c_str(), GetPhysics()->GetOrigin().ToString(0) );
@@ -702,7 +702,7 @@ void idTrigger_EntityName::Event_Touch( idEntity *other, trace_t *trace ) {
 ===============================================================================
 
   idTrigger_Timer
-	
+
 ===============================================================================
 */
 
@@ -846,7 +846,7 @@ void idTrigger_Timer::Event_Use( idEntity *activator ) {
 ===============================================================================
 
   idTrigger_Count
-	
+
 ===============================================================================
 */
 
@@ -936,7 +936,7 @@ void idTrigger_Count::Event_TriggerAction( idEntity *activator ) {
 ===============================================================================
 
   idTrigger_Hurt
-	
+
 ===============================================================================
 */
 
@@ -1076,7 +1076,7 @@ void idTrigger_Fade::Event_Trigger( idEntity *activator ) {
 ===============================================================================
 
   idTrigger_Touch
-	
+
 ===============================================================================
 */
 
@@ -1158,7 +1158,7 @@ void idTrigger_Touch::TouchEntities( void ) {
 		if ( !entity ) {
 			continue;
 		}
-		
+
 		if ( !gameLocal.clip.ContentsModel( cm->GetOrigin(), cm, cm->GetAxis(), -1,
 									clipModel->Handle(), clipModel->GetOrigin(), clipModel->GetAxis() ) ) {
 			continue;

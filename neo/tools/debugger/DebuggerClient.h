@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -68,19 +68,19 @@ public:
 	void						Shutdown				( void );
 	bool						ProcessMessages			( void );
 	bool						WaitFor					( EDebuggerMessage msg, int time );
-	
+
 	bool						IsConnected				( void );
 	bool						IsStopped				( void );
-	
+
 	int							GetActiveBreakpointID	( void );
 	const char*					GetBreakFilename		( void );
 	int							GetBreakLineNumber		( void );
 	rvDebuggerCallstackList&	GetCallstack			( void );
 	rvDebuggerThreadList&		GetThreads				( void );
 	const char*					GetVariableValue		( const char* name, int stackDepth );
-	
+
 	void						InspectVariable			( const char* name, int callstackDepth );
-	
+
 	void						Break					( void );
 	void						Resume					( void );
 	void						StepInto				( void );
@@ -93,7 +93,7 @@ public:
 	int							GetBreakpointCount		( void );
 	rvDebuggerBreakpoint*		GetBreakpoint			( int index );
 	rvDebuggerBreakpoint*		FindBreakpoint			( const char* filename, int linenumber );
-		
+
 protected:
 
 	void						SendMessage				( EDebuggerMessage dbmsg );
@@ -105,27 +105,27 @@ protected:
 	bool						mConnected;
 	netadr_t					mServerAdr;
 	idPort						mPort;
-	
+
 	bool						mBreak;
 	int							mBreakID;
 	int							mBreakLineNumber;
 	idStr						mBreakFilename;
-	
+
 	idDict						mVariables;
 
 	rvDebuggerCallstackList		mCallstack;
-	rvDebuggerThreadList		mThreads;	
+	rvDebuggerThreadList		mThreads;
 	rvDebuggerBreakpointList	mBreakpoints;
 
 	EDebuggerMessage			mWaitFor;
-	
+
 private:
 
 	void		ClearCallstack				( void );
 	void		ClearThreads				( void );
-	
+
 	void		UpdateWatches				( void );
-	
+
 	// Network message handlers
 	void		HandleBreak					( msg_t* msg );
 	void		HandleInspectCallstack		( msg_t* msg );

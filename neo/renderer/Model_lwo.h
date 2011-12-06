@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -291,11 +291,11 @@ typedef struct st_lwClip {
    int            index;
    unsigned int   type;                /* ID_STIL, ID_ISEQ, etc. */
    union {
-      lwClipStill    still;
-      lwClipSeq      seq;
-      lwClipAnim     anim;
-      lwClipXRef     xref;
-      lwClipCycle    cycle;
+	  lwClipStill    still;
+	  lwClipSeq      seq;
+	  lwClipAnim     anim;
+	  lwClipXRef     xref;
+	  lwClipCycle    cycle;
    }              source;
    float          start_time;
    float          duration;
@@ -386,9 +386,9 @@ typedef struct st_lwTexture {
    short          negative;
    short          axis;
    union {
-      lwImageMap     imap;
-      lwProcedural   proc;
-      lwGradient     grad;
+	  lwImageMap     imap;
+	  lwProcedural   proc;
+	  lwGradient     grad;
    }              param;
    lwTMap         tmap;
 } lwTexture;

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -32,10 +32,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "qe3.h"
 
 BOOL CALLBACK EditCommandDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char	key[1024];
@@ -43,27 +43,27 @@ BOOL CALLBACK EditCommandDlgProc (
 	const char	*temp;
 	int		index;
 	HWND	hOwner;
-	
+
 	hOwner = GetParent (hwndDlg);
 
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
 		index = SendDlgItemMessage (hOwner, IDC_CMD_LIST, LB_GETCURSEL, 0, 0);
-    if (index >= 0)
-    {
+	if (index >= 0)
+	{
 		  SendDlgItemMessage(hOwner, IDC_CMD_LIST, LB_GETTEXT, index, (LPARAM) (LPCTSTR) key);
 		  temp = ValueForKey (g_qeglobals.d_project_entity, key);
 		  strcpy (value, temp);
 		  SetDlgItemText(hwndDlg, IDC_CMDMENUTEXT, key);
 		  SetDlgItemText(hwndDlg, IDC_CMDCOMMAND, value);
-    }
+	}
 		return FALSE;
 		break;
 
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) 
-		{ 
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
 			case IDOK:
 				if (!GetDlgItemText(hwndDlg, IDC_CMDMENUTEXT, key, 64))
 				{
@@ -97,20 +97,20 @@ BOOL CALLBACK EditCommandDlgProc (
 }
 
 BOOL CALLBACK AddCommandDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char	key[64];
 	char	value[128];
 
 	switch (uMsg)
-    {
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) 
-		{ 
+	{
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
 			case IDOK:
 				if (!GetDlgItemText(hwndDlg, IDC_CMDMENUTEXT, key, 64))
 				{
@@ -162,10 +162,10 @@ void UpdateBSPCommandList (HWND hwndDlg)
 
 // FIXME: turn this into an MFC dialog
 BOOL CALLBACK ProjectDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char		key[1024];
@@ -173,7 +173,7 @@ BOOL CALLBACK ProjectDlgProc (
 	int			index;
 
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
 		SetDlgItemText(hwndDlg, IDC_PRJBASEPATH, ValueForKey (g_qeglobals.d_project_entity, "basepath"));
 		SetDlgItemText(hwndDlg, IDC_PRJMAPSPATH, ValueForKey (g_qeglobals.d_project_entity, "mapspath"));
@@ -188,9 +188,9 @@ BOOL CALLBACK ProjectDlgProc (
 //		SendMessage( ::GetDlgItem( hwndDlg, IDC_CHECK_BPRIMIT ), BM_SETCHECK, (WPARAM) g_qeglobals.m_bBrushPrimitMode, 0 );
 		return TRUE;
 
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) 
-		{ 
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
 			case IDC_ADDCMD:
 //				DialogBox(g_qeglobals.d_hInstance, (char *)IDD_ADDCMD, g_qeglobals.d_hwndMain, AddCommandDlgProc);
 				DialogBox(g_qeglobals.d_hInstance, (char *)IDD_ADDCMD, hwndDlg, AddCommandDlgProc);
@@ -256,24 +256,24 @@ void DoProjectSettings()
 
 
 BOOL CALLBACK GammaDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char sz[256];
 
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
-		sprintf(sz, "%1.1f", g_qeglobals.d_savedinfo.fGamma);		
+		sprintf(sz, "%1.1f", g_qeglobals.d_savedinfo.fGamma);
 		SetWindowText(GetDlgItem(hwndDlg, IDC_G_EDIT), sz);
 		return TRUE;
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) 
-		{ 
-		
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+
 		case IDOK:
 			GetWindowText(GetDlgItem(hwndDlg, IDC_G_EDIT), sz, 255);
 			g_qeglobals.d_savedinfo.fGamma = atof(sz);
@@ -295,7 +295,7 @@ void DoGamma(void)
 	if ( DialogBox(g_qeglobals.d_hInstance, (char *)IDD_GAMMA, g_pParentWnd->GetSafeHwnd(), GammaDlgProc))
 	{
 	}
-}		
+}
 
 //================================================
 
@@ -345,14 +345,14 @@ void SelectBrush (int entitynum, int brushnum)
 	Sys_UpdateWindows (W_ALL);
 	for (i=0 ; i<3 ; i++)
   {
-    if (g_pParentWnd->GetXYWnd())
-      g_pParentWnd->GetXYWnd()->GetOrigin()[i] = (b->mins[i] + b->maxs[i])/2;
+	if (g_pParentWnd->GetXYWnd())
+	  g_pParentWnd->GetXYWnd()->GetOrigin()[i] = (b->mins[i] + b->maxs[i])/2;
 
-    if (g_pParentWnd->GetXZWnd())
-      g_pParentWnd->GetXZWnd()->GetOrigin()[i] = (b->mins[i] + b->maxs[i])/2;
-    
-    if (g_pParentWnd->GetYZWnd())
-      g_pParentWnd->GetYZWnd()->GetOrigin()[i] = (b->mins[i] + b->maxs[i])/2;
+	if (g_pParentWnd->GetXZWnd())
+	  g_pParentWnd->GetXZWnd()->GetOrigin()[i] = (b->mins[i] + b->maxs[i])/2;
+
+	if (g_pParentWnd->GetYZWnd())
+	  g_pParentWnd->GetYZWnd()->GetOrigin()[i] = (b->mins[i] + b->maxs[i])/2;
   }
 
 	Sys_Status ("Selected.", 0);
@@ -378,23 +378,23 @@ void GetSelectionIndex (int *ent, int *brush)
 	if (b->owner != world_entity)
 	{
 		(*ent)++;
-		for (entity = entities.next ; entity != &entities 
+		for (entity = entities.next ; entity != &entities
 			; entity=entity->next, (*ent)++)
 		;
 	}
 
 	// find brush
-	for (b2=b->owner->brushes.onext 
+	for (b2=b->owner->brushes.onext
 		; b2 != b && b2 != &b->owner->brushes
 		; b2=b2->onext, (*brush)++)
 	;
 }
 
 BOOL CALLBACK FindBrushDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char entstr[256];
@@ -403,7 +403,7 @@ BOOL CALLBACK FindBrushDlgProc (
 	int		ent, brush;
 
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
 		// set entity and brush number
 		GetSelectionIndex (&ent, &brush);
@@ -416,9 +416,9 @@ BOOL CALLBACK FindBrushDlgProc (
 		SetFocus (h);
 		return FALSE;
 
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) 
-		{ 
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
 			case IDOK:
 				GetWindowText(GetDlgItem(hwndDlg, IDC_FIND_ENTITY), entstr, 255);
 				GetWindowText(GetDlgItem(hwndDlg, IDC_FIND_BRUSH), brushstr, 255);
@@ -429,7 +429,7 @@ BOOL CALLBACK FindBrushDlgProc (
 			case IDCANCEL:
 				EndDialog(hwndDlg, 0);
 				return TRUE;
-		}	
+		}
 	}
 	return FALSE;
 }
@@ -439,8 +439,8 @@ BOOL CALLBACK FindBrushDlgProc (
 void DoFind(void)
 {
 	DialogBox(g_qeglobals.d_hInstance, (char *)IDD_FINDBRUSH, g_pParentWnd->GetSafeHwnd(), FindBrushDlgProc);
-}	
-	
+}
+
 /*
 ===================================================
 
@@ -451,10 +451,10 @@ void DoFind(void)
 
 
 BOOL CALLBACK RotateDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char	str[256];
@@ -462,16 +462,16 @@ BOOL CALLBACK RotateDlgProc (
 	float	v;
 
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
 		h = GetDlgItem(hwndDlg, IDC_FIND_ENTITY);
 		SetFocus (h);
 		return FALSE;
 
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) 
-		{ 
-		
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+
 		case IDOK:
 			GetWindowText(GetDlgItem(hwndDlg, IDC_ROTX), str, 255);
 			v = atof(str);
@@ -494,7 +494,7 @@ BOOL CALLBACK RotateDlgProc (
 		case IDCANCEL:
 			EndDialog(hwndDlg, 0);
 			return TRUE;
-		}	
+		}
 	}
 
 	return FALSE;
@@ -506,7 +506,7 @@ void DoRotate(void)
 {
 	DialogBox(g_qeglobals.d_hInstance, (char *)IDD_ROTATE, g_pParentWnd->GetSafeHwnd(), RotateDlgProc);
 }
-		
+
 /*
 ===================================================
 
@@ -518,32 +518,32 @@ void DoRotate(void)
 bool g_bDoCone = false;
 bool g_bDoSphere = false;
 BOOL CALLBACK SidesDlgProc (
-    HWND hwndDlg,	// handle to dialog box
-    UINT uMsg,	// message
-    WPARAM wParam,	// first message parameter
-    LPARAM lParam 	// second message parameter
+	HWND hwndDlg,	// handle to dialog box
+	UINT uMsg,	// message
+	WPARAM wParam,	// first message parameter
+	LPARAM lParam	// second message parameter
    )
 {
 	char str[256];
 	HWND	h;
 
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
 		h = GetDlgItem(hwndDlg, IDC_SIDES);
 		SetFocus (h);
 		return FALSE;
 
-	case WM_COMMAND: 
-		switch (LOWORD(wParam)) { 
-		
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+
 		case IDOK:
 			GetWindowText(GetDlgItem(hwndDlg, IDC_SIDES), str, 255);
-      if (g_bDoCone)
+	  if (g_bDoCone)
 			  Brush_MakeSidedCone(atoi(str));
-      else if (g_bDoSphere)
+	  else if (g_bDoSphere)
 			  Brush_MakeSidedSphere(atoi(str));
-      else
+	  else
 			  Brush_MakeSided (atoi(str));
 
 			EndDialog(hwndDlg, 1);
@@ -552,7 +552,7 @@ BOOL CALLBACK SidesDlgProc (
 		case IDCANCEL:
 			EndDialog(hwndDlg, 0);
 		break;
-	}	
+	}
 	default:
 		return FALSE;
 	}
@@ -565,7 +565,7 @@ void DoSides(bool bCone, bool bSphere, bool bTorus)
   g_bDoSphere = bSphere;
   //g_bDoTorus = bTorus;
 	DialogBox(g_qeglobals.d_hInstance, (char *)IDD_SIDES, g_pParentWnd->GetSafeHwnd(), SidesDlgProc);
-}		
+}
 
 
 //======================================================================
@@ -576,12 +576,12 @@ DoAbout
 ===================
 */
 BOOL CALLBACK AboutDlgProc( HWND hwndDlg,
-						    UINT uMsg,
-						    WPARAM wParam,
-						    LPARAM lParam )
+							UINT uMsg,
+							WPARAM wParam,
+							LPARAM lParam )
 {
 	switch (uMsg)
-    {
+	{
 	case WM_INITDIALOG:
 		{
 			char buffer[1024];
@@ -631,5 +631,3 @@ void DoAbout(void)
 {
 	DialogBox( g_qeglobals.d_hInstance, ( char * ) IDD_ABOUT, g_pParentWnd->GetSafeHwnd(), AboutDlgProc );
 }
-
-

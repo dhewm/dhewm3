@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -1010,7 +1010,7 @@ void idMaterial::ParseFragmentMap( idLexer &src, newShaderStage_t *newStage ) {
 	}
 	str = R_ParsePastImageProgram( src );
 
-	newStage->fragmentProgramImages[unit] = 
+	newStage->fragmentProgramImages[unit] =
 		globalImages->ImageFromFile( str, tf, allowPicmip, trp, td, cubeMap );
 	if ( !newStage->fragmentProgramImages[unit] ) {
 		newStage->fragmentProgramImages[unit] = globalImages->defaultImage;
@@ -1040,7 +1040,7 @@ void idMaterial::MultiplyTextureMatrix( textureStage_t *ts, int registers[2][3] 
 	ts->matrix[0][1] = EmitOp(
 							EmitOp( old[0][0], registers[0][1], OP_TYPE_MULTIPLY ),
 							EmitOp( old[0][1], registers[1][1], OP_TYPE_MULTIPLY ), OP_TYPE_ADD );
-	ts->matrix[0][2] = EmitOp( 
+	ts->matrix[0][2] = EmitOp(
 							EmitOp(
 								EmitOp( old[0][0], registers[0][2], OP_TYPE_MULTIPLY ),
 								EmitOp( old[0][1], registers[1][2], OP_TYPE_MULTIPLY ), OP_TYPE_ADD ),
@@ -1052,7 +1052,7 @@ void idMaterial::MultiplyTextureMatrix( textureStage_t *ts, int registers[2][3] 
 	ts->matrix[1][1] = EmitOp(
 							EmitOp( old[1][0], registers[0][1], OP_TYPE_MULTIPLY ),
 							EmitOp( old[1][1], registers[1][1], OP_TYPE_MULTIPLY ), OP_TYPE_ADD );
-	ts->matrix[1][2] = EmitOp( 
+	ts->matrix[1][2] = EmitOp(
 							EmitOp(
 								EmitOp( old[1][0], registers[0][2], OP_TYPE_MULTIPLY ),
 								EmitOp( old[1][1], registers[1][2], OP_TYPE_MULTIPLY ), OP_TYPE_ADD ),
@@ -1390,13 +1390,13 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 			// this subtracts 0.5, then rotates, then adds 0.5
 			matrix[0][0] = cosReg;
 			matrix[0][1] = EmitOp( GetExpressionConstant( 0 ), sinReg, OP_TYPE_SUBTRACT );
-			matrix[0][2] = EmitOp( EmitOp( EmitOp( GetExpressionConstant( -0.5 ), cosReg, OP_TYPE_MULTIPLY ), 
+			matrix[0][2] = EmitOp( EmitOp( EmitOp( GetExpressionConstant( -0.5 ), cosReg, OP_TYPE_MULTIPLY ),
 										EmitOp( GetExpressionConstant( 0.5 ), sinReg, OP_TYPE_MULTIPLY ), OP_TYPE_ADD ),
 										GetExpressionConstant( 0.5 ), OP_TYPE_ADD );
 
 			matrix[1][0] = sinReg;
 			matrix[1][1] = cosReg;
-			matrix[1][2] = EmitOp( EmitOp( EmitOp( GetExpressionConstant( -0.5 ), sinReg, OP_TYPE_MULTIPLY ), 
+			matrix[1][2] = EmitOp( EmitOp( EmitOp( GetExpressionConstant( -0.5 ), sinReg, OP_TYPE_MULTIPLY ),
 										EmitOp( GetExpressionConstant( -0.5 ), cosReg, OP_TYPE_MULTIPLY ), OP_TYPE_ADD ),
 										GetExpressionConstant( 0.5 ), OP_TYPE_ADD );
 
@@ -1408,33 +1408,33 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 		if ( !token.Icmp( "maskRed" ) ) {
 			ss->drawStateBits |= GLS_REDMASK;
 			continue;
-		}		
+		}
 		if ( !token.Icmp( "maskGreen" ) ) {
 			ss->drawStateBits |= GLS_GREENMASK;
 			continue;
-		}		
+		}
 		if ( !token.Icmp( "maskBlue" ) ) {
 			ss->drawStateBits |= GLS_BLUEMASK;
 			continue;
-		}		
+		}
 		if ( !token.Icmp( "maskAlpha" ) ) {
 			ss->drawStateBits |= GLS_ALPHAMASK;
 			continue;
-		}		
+		}
 		if ( !token.Icmp( "maskColor" ) ) {
 			ss->drawStateBits |= GLS_COLORMASK;
 			continue;
-		}		
+		}
 		if ( !token.Icmp( "maskDepth" ) ) {
 			ss->drawStateBits |= GLS_DEPTHMASK;
 			continue;
-		}		
+		}
 		if ( !token.Icmp( "alphaTest" ) ) {
 			ss->hasAlphaTest = true;
 			ss->alphaTestRegister = ParseExpression( src );
 			coverage = MC_PERFORATED;
 			continue;
-		}		
+		}
 
 		// shorthand for 2D modulated
 		if ( !token.Icmp( "colored" ) ) {
@@ -1473,12 +1473,12 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 			continue;
 		}
 		if ( !token.Icmp( "rgb" ) ) {
-			ss->color.registers[0] = ss->color.registers[1] = 
+			ss->color.registers[0] = ss->color.registers[1] =
 				ss->color.registers[2] = ParseExpression( src );
 			continue;
 		}
 		if ( !token.Icmp( "rgba" ) ) {
-			ss->color.registers[0] = ss->color.registers[1] = 
+			ss->color.registers[0] = ss->color.registers[1] =
 				ss->color.registers[2] = ss->color.registers[3] = ParseExpression( src );
 			continue;
 		}
@@ -1526,7 +1526,7 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 			continue;
 		}
 
-		if (  !token.Icmp( "fragmentMap" ) ) {	
+		if (  !token.Icmp( "fragmentMap" ) ) {
 			ParseFragmentMap( src, &newStage );
 			continue;
 		}
@@ -2167,7 +2167,7 @@ bool idMaterial::Parse( const char *text, const int textLength ) {
 
 	// automatically determine coverage if not explicitly set
 	if ( coverage == MC_BAD ) {
-		// automatically set MC_TRANSLUCENT if we don't have any interaction stages and 
+		// automatically set MC_TRANSLUCENT if we don't have any interaction stages and
 		// the first stage is blended and not an alpha test mask or a subview
 		if ( !numStages ) {
 			// non-visible
@@ -2175,7 +2175,7 @@ bool idMaterial::Parse( const char *text, const int textLength ) {
 		} else if ( numStages != numAmbientStages ) {
 			// we have an interaction draw
 			coverage = MC_OPAQUE;
-		} else if ( 
+		} else if (
 			( pd->parseStages[0].drawStateBits & GLS_DSTBLEND_BITS ) != GLS_DSTBLEND_ZERO ||
 			( pd->parseStages[0].drawStateBits & GLS_SRCBLEND_BITS ) == GLS_SRCBLEND_DST_COLOR ||
 			( pd->parseStages[0].drawStateBits & GLS_SRCBLEND_BITS ) == GLS_SRCBLEND_ONE_MINUS_DST_COLOR ||
@@ -2504,7 +2504,7 @@ texgen_t idMaterial::Texgen() const {
 			}
 		}
 	}
-	
+
 	return TG_EXPLICIT;
 }
 
@@ -2607,7 +2607,7 @@ void idMaterial::CheckForConstantRegisters() {
 		return;
 	}
 
-	// evaluate the registers once, and save them 
+	// evaluate the registers once, and save them
 	constantRegisters = (float *)R_ClearedStaticAlloc( GetNumRegisters() * sizeof( float ) );
 
 	float shaderParms[MAX_ENTITY_SHADER_PARMS];
@@ -2668,7 +2668,7 @@ bool idMaterial::SetDefaultText( void ) {
 	// if there exists an image with the same name
 	if ( 1 ) { //fileSystem->ReadFile( GetName(), NULL ) != -1 ) {
 		char generated[2048];
-		idStr::snPrintf( generated, sizeof( generated ), 
+		idStr::snPrintf( generated, sizeof( generated ),
 						"material %s // IMPLICITLY GENERATED\n"
 						"{\n"
 						"{\n"

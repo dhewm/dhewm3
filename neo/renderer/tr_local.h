@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -53,7 +53,7 @@ const float FOG_ENTER = (FOG_ENTER_SIZE+1.0f)/(FOG_ENTER_SIZE*2);
 class idScreenRect {
 public:
 	short		x1, y1, x2, y2;							// inclusive pixel bounds inside viewport
-    float       zmin, zmax;								// for depth bounds test
+	float       zmin, zmax;								// for depth bounds test
 
 	void		Clear();								// clear to backwards values
 	void		AddPoint( float x, float y );			// adds a point
@@ -312,7 +312,7 @@ typedef struct viewLight_s {
 
 	// true if globalLightOrigin is inside the view frustum, even if it may
 	// be obscured by geometry.  This allows us to skip shadows from non-visible objects
-	bool					viewSeesGlobalLightOrigin;	
+	bool					viewSeesGlobalLightOrigin;
 
 	// if !viewInsideLight, the corresponding bit for each of the shadowFrustum
 	// projection planes that the view is on the negative side of will be set,
@@ -403,7 +403,7 @@ typedef struct viewDef_s {
 	// these are real physical pixel values, possibly scaled and offset from the
 	// renderView x/y/width/height
 
-	struct viewDef_s *	superView;				// never go into an infinite subview loop 
+	struct viewDef_s *	superView;				// never go into an infinite subview loop
 	struct drawSurf_s *	subviewSurface;
 
 	// drawSurfs are the visible surfaces of the viewEntities, sorted
@@ -446,7 +446,7 @@ typedef struct {
 	idVec4				specularColor;	// may have a light color baked into it, will be < tr.backEndRendererMaxLight
 	stageVertexColor_t	vertexColor;	// applies to both diffuse and specular
 
-	int					ambientLight;	// use tr.ambientNormalMap instead of normalization cube map 
+	int					ambientLight;	// use tr.ambientNormalMap instead of normalization cube map
 	// (not a bool just to avoid an uninitialized memory check of the pad region by valgrind)
 
 	// these are loaded into the vertex program
@@ -536,7 +536,7 @@ typedef struct {
 
 	int					memoryHighwater;	// max used on any frame
 
-	// the currently building command list 
+	// the currently building command list
 	// commands can be inserted at the front if needed, as for required
 	// dynamically generated textures
 	emptyCommand_t	*cmdHead, *cmdTail;		// may be of other command type based on commandId
@@ -628,7 +628,7 @@ typedef struct {
 	int		c_shadowVertexes;
 
 	int		c_vboIndexes;
-	float	c_overDraw;	
+	float	c_overDraw;
 
 	float	maxLightValue;	// for light scale
 	int		msec;			// total msec for backend run
@@ -1093,8 +1093,8 @@ void		GLimp_SwapBuffers( void );
 // other system specific cvar checks that happen every frame.
 // This will not be called if 'r_drawBuffer GL_FRONT'
 
-void		GLimp_SetGamma( unsigned short red[256], 
-						    unsigned short green[256],
+void		GLimp_SetGamma( unsigned short red[256],
+							unsigned short green[256],
 							unsigned short blue[256] );
 // Sets the hardware gamma ramps for gamma and brightness adjustment.
 // These are now taken as 16 bit values, so we can take full advantage
@@ -1181,7 +1181,7 @@ viewLight_t *R_SetLightDefViewLight( idRenderLightLocal *def );
 void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const renderEntity_t *renderEntity,
 					const idMaterial *shader, const idScreenRect &scissor );
 
-void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const viewEntity_t *space, 
+void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const viewEntity_t *space,
 				   const idRenderLightLocal *light, const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow );
 
 bool R_CreateAmbientCache( srfTriangles_t *tri, bool needsLighting );
@@ -1251,9 +1251,9 @@ void RB_LeaveDepthHack();
 void RB_DrawElementsImmediate( const srfTriangles_t *tri );
 void RB_RenderTriangleSurface( const srfTriangles_t *tri );
 void RB_T_RenderTriangleSurface( const drawSurf_t *surf );
-void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs, 
+void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs,
 					  void (*triFunc_)( const drawSurf_t *) );
-void RB_RenderDrawSurfChainWithFunction( const drawSurf_t *drawSurfs, 
+void RB_RenderDrawSurfChainWithFunction( const drawSurf_t *drawSurfs,
 										void (*triFunc_)( const drawSurf_t *) );
 void RB_DrawShaderPasses( drawSurf_t **drawSurfs, int numDrawSurfs );
 void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const textureStage_t *texture );
@@ -1451,7 +1451,7 @@ typedef struct {
 	int		totalIndexes;
 } optimizedShadow_t;
 
-optimizedShadow_t SuperOptimizeOccluders( idVec4 *verts, glIndex_t *indexes, int numIndexes, 
+optimizedShadow_t SuperOptimizeOccluders( idVec4 *verts, glIndex_t *indexes, int numIndexes,
 										 idPlane projectionPlane, idVec3 projectionOrigin );
 
 void CleanupOptimizedShadowTris( srfTriangles_t *tri );
@@ -1675,8 +1675,8 @@ TR_SHADOWBOUNDS
 =============================================================
 */
 idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
-									    const idRenderEntityLocal * entityDef,
-									    const viewDef_t * viewDef );
+										const idRenderEntityLocal * entityDef,
+										const viewDef_t * viewDef );
 
 //=============================================
 

@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -113,7 +113,7 @@ void GLimp_SaveGamma() {
 	}
 
 	assert( dpy );
-	
+
 	XF86VidModeGetGammaRampSize( dpy, scrnum, &save_rampsize);
 	save_red = (unsigned short *)malloc(save_rampsize*sizeof(unsigned short));
 	save_green = (unsigned short *)malloc(save_rampsize*sizeof(unsigned short));
@@ -131,9 +131,9 @@ save and restore the original gamma of the system
 void GLimp_RestoreGamma() {
 	if (!save_rampsize)
 		return;
-	
+
 	XF86VidModeSetGammaRamp( dpy, scrnum, save_rampsize, save_red, save_green, save_blue);
-	
+
 	free(save_red); free(save_green); free(save_blue);
 	save_rampsize = 0;
 }
@@ -147,9 +147,9 @@ the size of the gamma ramp can not be changed on X (I need to confirm this)
 =================
 */
 void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned short blue[256]) {
-	if ( dpy ) {		
+	if ( dpy ) {
 		int size;
-		
+
 		GLimp_SaveGamma();
 		XF86VidModeGetGammaRampSize( dpy, scrnum, &size);
 		common->DPrintf("XF86VidModeGetGammaRampSize: %d\n", size);
@@ -168,7 +168,7 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 				r_f -= (float)r_i;
 				l_red[i] = (int)round((1.0f-r_f)*(float)red[r_i]+r_f*(float)red[r_i+1]);
 				l_green[i] = (int)round((1.0f-r_f)*(float)green[r_i]+r_f*(float)green[r_i+1]);
-				l_blue[i] = (int)round((1.0f-r_f)*(float)blue[r_i]+r_f*(float)blue[r_i+1]);				
+				l_blue[i] = (int)round((1.0f-r_f)*(float)blue[r_i]+r_f*(float)blue[r_i+1]);
 			}
 			l_red[size-1] = red[255]; l_green[size-1] = green[255]; l_blue[size-1] = blue[255];
 			XF86VidModeSetGammaRamp( dpy, scrnum, size, l_red, l_green, l_blue );
@@ -181,17 +181,17 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 
 void GLimp_Shutdown() {
 	if ( dpy ) {
-		
+
 		Sys_XUninstallGrabs();
-	
+
 		GLimp_RestoreGamma();
 
 		qglXDestroyContext( dpy, ctx );
-		
+
 #if !defined( ID_GL_HARDLINK )
 		GLimp_dlclose();
 #endif
-		
+
 		XDestroyWindow( dpy, win );
 		if ( vidmode_active ) {
 			XF86VidModeSwitchToMode( dpy, scrnum, vidmodes[0] );
@@ -235,7 +235,7 @@ void GLX_TestDGA() {
 		dga_found = true;
 	}
 #else
-    dga_found = false;
+	dga_found = false;
 #endif
 }
 
@@ -274,7 +274,7 @@ bool GLimp_OpenDisplay( void ) {
 		common->Printf("XInitThreads failed\n");
 		return false;
 	}
-	
+
 	// set up our custom error handler for X failures
 	XSetErrorHandler( &idXErrorHandler );
 
@@ -455,7 +455,7 @@ int GLX_Init(glimpParms_t a) {
 			attrib[ATTR_GREEN_IDX] = 4;
 			attrib[ATTR_BLUE_IDX] = 4;
 		}
-		
+
 		attrib[ATTR_DEPTH_IDX] = tdepthbits;	// default to 24 depth
 		attrib[ATTR_STENCIL_IDX] = tstencilbits;
 
@@ -528,18 +528,18 @@ int GLX_Init(glimpParms_t a) {
 
 	glstring = (const char *) qglGetString(GL_RENDERER);
 	common->Printf("GL_RENDERER: %s\n", glstring);
-	
+
 	glstring = (const char *) qglGetString(GL_EXTENSIONS);
 	common->Printf("GL_EXTENSIONS: %s\n", glstring);
 
 	// FIXME: here, software GL test
 
 	glConfig.isFullscreen = a.fullScreen;
-	
+
 	if ( glConfig.isFullscreen ) {
 		Sys_GrabMouseCursor( true );
 	}
-	
+
 	return true;
 }
 
@@ -563,17 +563,17 @@ bool GLimp_Init( glimpParms_t a ) {
 	if ( !GLimp_OpenDisplay() ) {
 		return false;
 	}
-	
+
 #ifndef ID_GL_HARDLINK
 	if ( !GLimp_dlopen() ) {
 		return false;
 	}
 #endif
-	
+
 	if (!GLX_Init(a)) {
 		return false;
 	}
-	
+
 	return true;
 }
 

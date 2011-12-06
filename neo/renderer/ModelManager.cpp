@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -368,7 +368,7 @@ void idRenderModelManagerLocal::FreeModel( idRenderModel *model ) {
 		common->Error( "idRenderModelManager::FreeModel: can't free the beam model" );
 		return;
 	}
-	if ( model == spriteModel ) { 
+	if ( model == spriteModel ) {
 		common->Error( "idRenderModelManager::FreeModel: can't free the sprite model" );
 		return;
 	}

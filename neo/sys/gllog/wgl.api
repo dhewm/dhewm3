@@ -1,4 +1,4 @@
-int ;qwgl;SwapIntervalEXT; int interval 
+int ;qwgl;SwapIntervalEXT; int interval
 int   ;qwgl;ChoosePixelFormat ;HDC, CONST PIXELFORMATDESCRIPTOR *
 int   ;qwgl;DescribePixelFormat;HDC, int, UINT, LPPIXELFORMATDESCRIPTOR
 int   ;qwgl;GetPixelFormat;HDC

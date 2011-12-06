@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -100,7 +100,7 @@ const int DECL_LEXER_FLAGS	=	LEXFL_NOSTRINGCONCAT |				// multiple strings seper
 
 class idDeclBase {
 public:
-	virtual 				~idDeclBase() {};
+	virtual					~idDeclBase() {};
 	virtual const char *	GetName( void ) const = 0;
 	virtual declType_t		GetType( void ) const = 0;
 	virtual declState_t		GetState( void ) const = 0;
@@ -134,7 +134,7 @@ public:
 							// The constructor should initialize variables such that
 							// an immediate call to FreeData() does no harm.
 							idDecl( void ) { base = NULL; }
-	virtual 				~idDecl( void ) {};
+	virtual					~idDecl( void ) {};
 
 							// Returns the name of the decl.
 	const char *			GetName( void ) const { return base->GetName(); }

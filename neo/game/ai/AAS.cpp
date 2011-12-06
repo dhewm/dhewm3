@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -163,7 +163,7 @@ int idAASLocal::BoundsReachableAreaNum( const idBounds &bounds, const int areaFl
 	if ( !file ) {
 		return 0;
 	}
-	
+
 	return file->BoundsReachableAreaNum( bounds, areaFlags, TFL_INVALID );
 }
 

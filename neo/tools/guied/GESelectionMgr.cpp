@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -54,7 +54,7 @@ void rvGESelectionMgr::Set ( idWindow* window )
 {
 	// Get rid of any current selections
 	Clear ( );
-	
+
 	// Add this selection now
 	return Add ( window );
 }
@@ -69,7 +69,7 @@ Adds the given window to the selection list
 void rvGESelectionMgr::Add ( idWindow* window, bool expand )
 {
 	rvGEWindowWrapper* wrapper;
-	
+
 	wrapper = rvGEWindowWrapper::GetWrapper ( window );
 	assert ( wrapper );
 
@@ -80,9 +80,9 @@ void rvGESelectionMgr::Add ( idWindow* window, bool expand )
 	}
 
 	wrapper->SetSelected ( true );
-	
-	mSelections.Append ( window );		
-	
+
+	mSelections.Append ( window );
+
 	if ( expand && wrapper->Expand ( ) )
 	{
 		gApp.GetNavigator ( ).Update ( );
@@ -92,7 +92,7 @@ void rvGESelectionMgr::Add ( idWindow* window, bool expand )
 	gApp.GetNavigator ( ).Refresh ( );
 	gApp.GetTransformer ( ).Update ( );
 	gApp.GetProperties().Update ( );
-	
+
 	UpdateExpression ( );
 }
 
@@ -106,7 +106,7 @@ Removes the selection from the current workspace
 void rvGESelectionMgr::Remove ( idWindow* window )
 {
 	rvGEWindowWrapper* wrapper;
-	
+
 	wrapper = rvGEWindowWrapper::GetWrapper ( window );
 	assert ( wrapper );
 
@@ -117,14 +117,14 @@ void rvGESelectionMgr::Remove ( idWindow* window )
 	}
 
 	wrapper->SetSelected ( false );
-	
+
 	mSelections.Remove ( window );
 
 	gApp.GetNavigator ( ).UpdateSelections ( );
 	gApp.GetNavigator ( ).Refresh ( );
 	gApp.GetTransformer ( ).Update ( );
 	gApp.GetProperties().Update ( );
-	
+
 	UpdateExpression ( );
 }
 
@@ -145,12 +145,12 @@ void rvGESelectionMgr::Clear ( void )
 	}
 
 	mSelections.Clear ( );
-	
+
 	gApp.GetNavigator ( ).UpdateSelections ( );
 	gApp.GetNavigator ( ).Refresh ( );
 	gApp.GetTransformer ( ).Update ( );
 	gApp.GetProperties().Update ( );
-	
+
 	mExpression = false;
 }
 
@@ -170,32 +170,32 @@ void rvGESelectionMgr::Render ( void )
 
 	qglEnable(GL_BLEND);
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+
 	UpdateRectangle ( );
 
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
-	
+
 	idVec4&	color = gApp.GetOptions().GetSelectionColor ( );
- 	qglColor4f ( color[0],color[1],color[2], 1.0f );
-	
-	qglBegin(GL_LINE_LOOP );	
+	qglColor4f ( color[0],color[1],color[2], 1.0f );
+
+	qglBegin(GL_LINE_LOOP );
 	qglVertex2f ( mRect.x, mRect.y );
 	qglVertex2f ( mRect.x + mRect.w, mRect.y );
 	qglVertex2f ( mRect.x + mRect.w, mRect.y + mRect.h);
 	qglVertex2f ( mRect.x, mRect.y + mRect.h);
-	qglEnd ( );		
+	qglEnd ( );
 
- 	qglColor4f ( color[0],color[1],color[2], 0.75f );
+	qglColor4f ( color[0],color[1],color[2], 0.75f );
 
 	int i;
 	for ( i = 0; i < mSelections.Num(); i ++ )
 	{
 		rvGEWindowWrapper*	wrapper;
 		idRectangle			rect;
-		
+
 		wrapper = rvGEWindowWrapper::GetWrapper ( mSelections[i] );
 		assert ( wrapper );
-		
+
 		rect = wrapper->GetScreenRect ( );
 		mWorkspace->WorkspaceToWindow ( rect );
 
@@ -207,23 +207,23 @@ void rvGESelectionMgr::Render ( void )
 			qglVertex2f ( rect.x + GUIED_GRABSIZE, rect.y );
 			qglVertex2f ( rect.x, rect.y + GUIED_GRABSIZE );
 			qglEnd ( );
-		}			
-			
+		}
+
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
-		qglBegin(GL_LINE_LOOP );	
+		qglBegin(GL_LINE_LOOP );
 		qglVertex2f ( rect.x, rect.y );
 		qglVertex2f ( rect.x + rect.w, rect.y );
 		qglVertex2f ( rect.x + rect.w, rect.y + rect.h);
 		qglVertex2f ( rect.x, rect.y + rect.h);
-		qglEnd ( );		
+		qglEnd ( );
 
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
-		qglBegin( GL_QUADS );	
+		qglBegin( GL_QUADS );
 		qglVertex2f ( rect.x + (rect.w - GUIED_CENTERSIZE) / 2, rect.y + (rect.h - GUIED_CENTERSIZE) / 2 );
 		qglVertex2f ( rect.x + (rect.w + GUIED_CENTERSIZE) / 2, rect.y + (rect.h - GUIED_CENTERSIZE) / 2 );
 		qglVertex2f ( rect.x + (rect.w + GUIED_CENTERSIZE) / 2, rect.y + (rect.h + GUIED_CENTERSIZE) / 2 );
 		qglVertex2f ( rect.x + (rect.w - GUIED_CENTERSIZE) / 2, rect.y + (rect.h + GUIED_CENTERSIZE) / 2 );
-		qglEnd ( );		
+		qglEnd ( );
 	}
 
 	if ( mExpression )
@@ -232,10 +232,10 @@ void rvGESelectionMgr::Render ( void )
 	}
 
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
-	
- 	qglColor4f ( color[0],color[1],color[2], 1.0f );
-	qglBegin(GL_QUADS);	
-	
+
+	qglColor4f ( color[0],color[1],color[2], 1.0f );
+	qglBegin(GL_QUADS);
+
 	// Top Left
 	qglVertex2f ( mRect.x - GUIED_GRABSIZE, mRect.y - GUIED_GRABSIZE );
 	qglVertex2f ( mRect.x - 1, mRect.y - GUIED_GRABSIZE );
@@ -302,28 +302,28 @@ void rvGESelectionMgr::UpdateRectangle ( void )
 	idVec2	point;
 
 	assert ( mWorkspace );
-	
+
 	if ( mSelections.Num ( ) <= 0 )
 	{
 		return;
 	}
-	
+
 	// Start with the first selections retangle
 	mRect = rvGEWindowWrapper::GetWrapper( mSelections[0] )->GetScreenRect ( );
-	
+
 	// Its easier to do the calculates with it being top left and bottom right
 	// so temporarly convert width and height to right and bottom
 	mRect.w += mRect.x;
 	mRect.h += mRect.y;
-	
+
 	// Merge all the rest of the rectangles to make the actual selection rectangle
 	for ( i = 1; i < mSelections.Num(); i ++ )
 	{
 		idRectangle selRect;
 		selRect = rvGEWindowWrapper::GetWrapper ( mSelections[i] )->GetScreenRect ( );
-		
+
 		mRect.w = max(selRect.x+selRect.w,mRect.w);
-		mRect.h = max(selRect.y+selRect.h,mRect.h);		
+		mRect.h = max(selRect.y+selRect.h,mRect.h);
 		mRect.x = min(selRect.x,mRect.x);
 		mRect.y = min(selRect.y,mRect.y);
 	}
@@ -344,7 +344,7 @@ Update whether or not the selection has an expression in it
 void rvGESelectionMgr::UpdateExpression ( void )
 {
 	int i;
-	
+
 	mExpression = false;
 	for ( i = 0; i < mSelections.Num(); i ++ )
 	{
@@ -356,7 +356,7 @@ void rvGESelectionMgr::UpdateExpression ( void )
 			break;
 		}
 	}
-}	
+}
 
 /*
 ================
@@ -380,7 +380,7 @@ rvGESelectionMgr::EHitTest rvGESelectionMgr::HitTest ( float x, float y )
 	{
 		return mExpression?HT_SELECT:HT_MOVE;
 	}
-	
+
 	if ( mExpression )
 	{
 		return HT_NONE;
@@ -449,26 +449,26 @@ idWindow* rvGESelectionMgr::GetBottomMost ( void )
 	idWindow*	bottom;
 	int			depth;
 	int			i;
-	
+
 	depth  = 9999;
 	bottom = NULL;
-	
+
 	// Loop through all the selections and find the bottom most window
 	for ( i = 0; i < mSelections.Num(); i ++ )
 	{
 		idWindow* parent;
 		int		  tempDepth;
-		
+
 		// Calculate the depth of the window by iterating back through the windows parents
 		for ( tempDepth = 0, parent = mSelections[i]; parent; parent = parent->GetParent ( ), tempDepth++ );
-		
-		// If the new depth is less than the current depth then this window is below 
+
+		// If the new depth is less than the current depth then this window is below
 		if ( tempDepth < depth )
 		{
 			depth  = tempDepth;
-			bottom = mSelections[i];	
+			bottom = mSelections[i];
 		}
 	}
-	
+
 	return bottom;
 }

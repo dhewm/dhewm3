@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -61,7 +61,7 @@ BEGIN_MESSAGE_MAP(CEditViewDlg, CDialog)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_BUTTON_GOTO, OnBnClickedButtonGoto)
-     ON_REGISTERED_MESSAGE(FindDialogMessage, OnFindDialogMessage)
+	 ON_REGISTERED_MESSAGE(FindDialogMessage, OnFindDialogMessage)
 END_MESSAGE_MAP()
 
 
@@ -121,7 +121,7 @@ void CEditViewDlg::OnBnClickedButtonOpen() {
 void CEditViewDlg::OnBnClickedButtonSave() {
 	if (fileName.Length()) {
 		CString text;
-        editInfo.GetWindowText(text);
+		editInfo.GetWindowText(text);
 		fileSystem->WriteFile(fileName, text.GetBuffer(0), text.GetLength(), "fs_devpath");
 		if (mode == MATERIALS) {
 			declManager->Reload( false );
@@ -266,7 +266,7 @@ BOOL CEditViewDlg::PreTranslateMessage(MSG* pMsg) {
 		// then replace that selection with a TAB
 		editInfo.ReplaceSel("\t", TRUE);
 		return TRUE;
-	} 
+	}
 
 	return CDialog::PreTranslateMessage(pMsg);
 }
@@ -277,19 +277,19 @@ LRESULT CEditViewDlg::OnFindDialogMessage(WPARAM wParam, LPARAM lParam) {
 	}
 
 	if (findDlg->IsTerminating()) {
-        findDlg = NULL;
-        return 0;
-    }
+		findDlg = NULL;
+		return 0;
+	}
 
 	// If the FR_FINDNEXT flag is set,
 	// call the application-defined search routine
 	// to search for the requested string.
 	if(findDlg->FindNext()) {
 		//read data from dialog
-        findStr = findDlg->GetFindString().GetBuffer(0);
+		findStr = findDlg->GetFindString().GetBuffer(0);
 		CString str;
 		editInfo.GetWindowText(str);
-		editText = str; 
+		editText = str;
 		int start, end;
 		editInfo.GetSel(start, end);
 		start = editText.Find(findStr, false, end);
@@ -298,6 +298,6 @@ LRESULT CEditViewDlg::OnFindDialogMessage(WPARAM wParam, LPARAM lParam) {
 			editInfo.Invalidate();
 			editInfo.RedrawWindow();
 		}
-    }
+	}
 	return 0;
 }

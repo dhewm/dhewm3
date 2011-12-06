@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -415,7 +415,7 @@ void idPathCorner::Event_RandomPath( void ) {
 ===============================================================================
 
   idDamagable
-	
+
 ===============================================================================
 */
 
@@ -465,9 +465,9 @@ void idDamagable::Spawn( void ) {
 	idStr broken;
 
 	health = spawnArgs.GetInt( "health", "5" );
-	spawnArgs.GetInt( "count", "1", count );	
+	spawnArgs.GetInt( "count", "1", count );
 	nextTriggerTime = 0;
-	
+
 	// make sure the model gets cached
 	spawnArgs.GetString( "broken", "", broken );
 	if ( broken.Length() && !renderModelManager->CheckModel( broken ) ) {
@@ -488,7 +488,7 @@ void idDamagable::BecomeBroken( idEntity *activator ) {
 	int		numStates;
 	int		cycle;
 	float	wait;
-	
+
 	if ( gameLocal.time < nextTriggerTime ) {
 		return;
 	}
@@ -579,7 +579,7 @@ void idDamagable::Event_RestoreDamagable( void ) {
 ===============================================================================
 
   idExplodable
-	
+
 ===============================================================================
 */
 
@@ -629,7 +629,7 @@ void idExplodable::Event_Explode( idEntity *activator ) {
 ===============================================================================
 
   idSpring
-	
+
 ===============================================================================
 */
 
@@ -666,7 +666,7 @@ void idSpring::Think( void ) {
 			origin = ent2->GetPhysics()->GetOrigin();
 			end = origin + p2 * axis;
 		}
-		
+
 		gameRenderWorld->DebugLine( idVec4(1, 1, 0, 1), start, end, 0, true );
 	}
 
@@ -734,7 +734,7 @@ void idSpring::Spawn( void ) {
 ===============================================================================
 
   idForceField
-	
+
 ===============================================================================
 */
 
@@ -964,7 +964,7 @@ void idAnimated::Spawn( void ) {
 	float		wait;
 	const char	*joint;
 
-	joint = spawnArgs.GetString( "sound_bone", "origin" ); 
+	joint = spawnArgs.GetString( "sound_bone", "origin" );
 	soundJoint = animator.GetJointHandle( joint );
 	if ( soundJoint == INVALID_JOINT ) {
 		gameLocal.Warning( "idAnimated '%s' at (%s): cannot find joint '%s' for sound playback", name.c_str(), GetPhysics()->GetOrigin().ToString(0), joint );
@@ -1013,7 +1013,7 @@ void idAnimated::Spawn( void ) {
 		animator.CycleAnim( ANIMCHANNEL_ALL, anim2, gameLocal.time, 0 );
 	} else if ( anim ) {
 		// init joints to the first frame of the animation
-		animator.SetFrame( ANIMCHANNEL_ALL, anim, 1, gameLocal.time, 0 );		
+		animator.SetFrame( ANIMCHANNEL_ALL, anim, 1, gameLocal.time, 0 );
 
 		if ( !num_anims ) {
 			blendFrames = 0;
@@ -1074,7 +1074,7 @@ bool idAnimated::StartRagdoll( void ) {
 
 	// start using the AF
 	af.StartFromCurrentPose( spawnArgs.GetInt( "velocityTime", "0" ) );
-	
+
 	return true;
 }
 
@@ -1117,7 +1117,7 @@ void idAnimated::PlayNextAnim( void ) {
 	if ( g_debugCinematic.GetBool() ) {
 		gameLocal.Printf( "%d: '%s' start anim '%s'\n", gameLocal.framenum, GetName(), animname );
 	}
-		
+
 	spawnArgs.GetInt( "cycle", "1", cycle );
 	if ( ( current_anim_index == num_anims ) && spawnArgs.GetBool( "loop_last_anim" ) ) {
 		cycle = -1;
@@ -1269,7 +1269,7 @@ void idAnimated::Event_LaunchMissilesUpdate( int launchjoint, int targetjoint, i
 
 	animator.GetJointTransform( ( jointHandle_t )launchjoint, gameLocal.time, launchPos, axis );
 	launchPos = renderEntity.origin + launchPos * renderEntity.axis;
-	
+
 	animator.GetJointTransform( ( jointHandle_t )targetjoint, gameLocal.time, targetPos, axis );
 	targetPos = renderEntity.origin + targetPos * renderEntity.axis;
 
@@ -1529,7 +1529,7 @@ void idStaticEntity::Event_Activate( idEntity *activator ) {
 
 	renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = -MS2SEC( spawnTime );
 	renderEntity.shaderParms[5] = active;
-	// this change should be a good thing, it will automatically turn on 
+	// this change should be a good thing, it will automatically turn on
 	// lights etc.. when triggered so that does not have to be specifically done
 	// with trigger parms.. it MIGHT break things so need to keep an eye on it
 	renderEntity.shaderParms[ SHADERPARM_MODE ] = ( renderEntity.shaderParms[ SHADERPARM_MODE ] ) ?  0.0f : 1.0f;
@@ -2248,7 +2248,7 @@ void idBeam::Event_Activate( idEntity *activator ) {
 	if ( IsHidden() ) {
 		Show();
 	} else {
-		Hide();		
+		Hide();
 	}
 }
 
@@ -2401,7 +2401,7 @@ void idShaking::Spawn( void ) {
 	physicsObj.SetAxis( GetPhysics()->GetAxis() );
 	physicsObj.SetClipMask( MASK_SOLID );
 	SetPhysics( &physicsObj );
-	
+
 	active = false;
 	if ( !spawnArgs.GetBool( "start_off" ) ) {
 		BeginShaking();
@@ -2530,7 +2530,7 @@ idEarthQuake::Event_Activate
 ================
 */
 void idEarthQuake::Event_Activate( idEntity *activator ) {
-	
+
 	if ( nextTriggerTime > gameLocal.time ) {
 		return;
 	}
@@ -2854,7 +2854,7 @@ void idFuncRadioChatter::Event_Activate( idEntity *activator ) {
 	const char	*sound;
 	const idSoundShader *shader;
 	int length;
-	
+
 	if ( activator->IsType( idPlayer::Type ) ) {
 		player = static_cast<idPlayer *>( activator );
 	} else {
@@ -2869,7 +2869,7 @@ void idFuncRadioChatter::Event_Activate( idEntity *activator ) {
 		player->StartSoundShader( shader, SND_CHANNEL_RADIO, SSF_GLOBAL, false, &length );
 		time = MS2SEC( length + 150 );
 	}
-	// we still put the hud up because this is used with no sound on 
+	// we still put the hud up because this is used with no sound on
 	// certain frame commands when the chatter is triggered
 	PostEventSec( &EV_ResetRadioHud, time, player );
 
@@ -2907,8 +2907,8 @@ idPhantomObjects::idPhantomObjects
 idPhantomObjects::idPhantomObjects() {
 	target			= NULL;
 	end_time		= 0;
-	throw_time 		= 0.0f;
-	shake_time 		= 0.0f;
+	throw_time		= 0.0f;
+	shake_time		= 0.0f;
 	shake_ang.Zero();
 	speed			= 0.0f;
 	min_wait		= 0;
@@ -2959,8 +2959,8 @@ void idPhantomObjects::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( min_wait );
 	savefile->ReadInt( max_wait );
 	target.Restore( savefile );
-	
-	savefile->ReadInt( num );	
+
+	savefile->ReadInt( num );
 	targetTime.SetGranularity( 1 );
 	targetTime.SetNum( num );
 	lastTargetPos.SetGranularity( 1 );
@@ -3029,7 +3029,7 @@ void idPhantomObjects::Event_Activate( idEntity *activator ) {
 	} else {
 		target = static_cast<idActor *>( activator );
 	}
-	
+
 	end_time = gameLocal.time + SEC2MS( spawnArgs.GetFloat( "end_time", "0" ) );
 
 	targetTime.SetNum( targets.Num() );
@@ -3037,7 +3037,7 @@ void idPhantomObjects::Event_Activate( idEntity *activator ) {
 
 	const idVec3 &toPos = target.GetEntity()->GetEyePosition();
 
-    // calculate the relative times of all the objects
+	// calculate the relative times of all the objects
 	time = 0.0f;
 	for( i = 0; i < targetTime.Num(); i++ ) {
 		targetTime[ i ] = SEC2MS( time );
@@ -3095,7 +3095,7 @@ void idPhantomObjects::Think( void ) {
 		if ( !ent ) {
 			continue;
 		}
-		
+
 		if ( ent->fl.hidden ) {
 			// don't throw hidden objects
 			continue;
@@ -3122,7 +3122,7 @@ void idPhantomObjects::Think( void ) {
 		}
 
 		if ( time < 0.0f ) {
-			idAI::PredictTrajectory( entPhys->GetOrigin(), lastTargetPos[ i ], speed, entPhys->GetGravity(), 
+			idAI::PredictTrajectory( entPhys->GetOrigin(), lastTargetPos[ i ], speed, entPhys->GetGravity(),
 				entPhys->GetClipModel(), entPhys->GetClipMask(), 256.0f, ent, targetEnt, ai_debugTrajectory.GetBool() ? 1 : 0, vel );
 			vel *= speed;
 			entPhys->SetLinearVelocity( vel );

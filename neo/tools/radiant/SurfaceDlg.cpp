@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -178,7 +178,7 @@ void CSurfaceDlg::SetTexMods() {
 		selFace = reinterpret_cast < face_t * > (g_ptrSelectedFaces.GetAt(0));
 	} else {
 		if (selected_brushes.next != &selected_brushes) {
-			brush_t *b = selected_brushes.next; 
+			brush_t *b = selected_brushes.next;
 			if (!b->pPatch) {
 				selFace = b->brush_faces;
 			}
@@ -187,7 +187,7 @@ void CSurfaceDlg::SetTexMods() {
 
 	if (selFace) {
 		float rot;
-		Face_GetScale_BrushPrimit(selFace, &m_horzScale, &m_vertScale, &rot);	
+		Face_GetScale_BrushPrimit(selFace, &m_horzScale, &m_vertScale, &rot);
 	} else {
 		m_horzScale = 1.0f;
 		m_vertScale = 1.0f;
@@ -213,16 +213,16 @@ void CSurfaceDlg::UpdateSpinners(bool up, int nID) {
 	float hdiv = 0.0f;
 	float vdiv = 0.0f;
 	switch (nID) {
-		case IDC_SPIN_ROTATE : 
+		case IDC_SPIN_ROTATE :
 			Select_RotateTexture((up) ? m_rotate : -m_rotate);
 			break;
-		case IDC_SPIN_HSCALE : 
+		case IDC_SPIN_HSCALE :
 			m_horzScale += (up) ? 0.1f : -0.1f;
 			hdiv = (m_horzScale == 0.0f) ? 1.0f : m_horzScale;
 			Select_ScaleTexture( 1.0f / hdiv, 0.0f, true, ( m_absolute != FALSE ) );
 			UpdateData(FALSE);
 			break;
-		case IDC_SPIN_VSCALE : 
+		case IDC_SPIN_VSCALE :
 			m_vertScale += (up) ? 0.1f : -0.1f;
 			vdiv = (m_vertScale == 0.0f) ? 1.0f : m_vertScale;
 			Select_ScaleTexture( 0.0f, 1.0f / vdiv, true, ( m_absolute != FALSE ) );
@@ -309,7 +309,7 @@ void DoSurface (void) {
 		g_dlgSurface.SetTexMods ();
 		g_dlgSurface.ShowWindow(SW_SHOW);
 	}
-}		
+}
 
 bool ByeByeSurfaceDialog() {
 	if (g_surfwin) {
@@ -516,37 +516,37 @@ void CSurfaceDlg::OnCheckSubdivide() {
 	Sys_UpdateWindows( W_CAMERA | W_XY );
 }
 
-void CSurfaceDlg::OnChangeEditHorz() 
+void CSurfaceDlg::OnChangeEditHorz()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
-	
+
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 	// turn any patches in explicit subdivides
 	Patch_SubdivideSelected( ( m_subdivide != FALSE ), m_nHorz, m_nVert );
 	Sys_UpdateWindows(W_CAMERA | W_XY);
-		
+
 }
 
-void CSurfaceDlg::OnChangeEditVert() 
+void CSurfaceDlg::OnChangeEditVert()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
-	
+
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 	// turn any patches in explicit subdivides
 	Patch_SubdivideSelected( ( m_subdivide != FALSE ), m_nHorz, m_nVert );
 	Sys_UpdateWindows(W_CAMERA | W_XY);
-	
+
 }
 
-BOOL CSurfaceDlg::PreTranslateMessage(MSG* pMsg) 
+BOOL CSurfaceDlg::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_KEYDOWN) {
 		if (pMsg->wParam == VK_RETURN) {
@@ -568,62 +568,62 @@ BOOL CSurfaceDlg::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-void CSurfaceDlg::OnSetfocusHscale() 
+void CSurfaceDlg::OnSetfocusHscale()
 {
-	focusControl = &m_wndHScale;	
+	focusControl = &m_wndHScale;
 }
 
-void CSurfaceDlg::OnKillfocusHscale() 
-{
-	focusControl = NULL;
-}
-
-void CSurfaceDlg::OnKillfocusVscale() 
+void CSurfaceDlg::OnKillfocusHscale()
 {
 	focusControl = NULL;
 }
 
-void CSurfaceDlg::OnSetfocusVscale() 
-{
-	focusControl = &m_wndVScale;	
-}
-
-void CSurfaceDlg::OnKillfocusEditWidth() 
+void CSurfaceDlg::OnKillfocusVscale()
 {
 	focusControl = NULL;
 }
 
-void CSurfaceDlg::OnSetfocusEditWidth() 
+void CSurfaceDlg::OnSetfocusVscale()
 {
-	focusControl = &m_wndWidth;	
+	focusControl = &m_wndVScale;
 }
 
-void CSurfaceDlg::OnKillfocusEditHeight() 
+void CSurfaceDlg::OnKillfocusEditWidth()
 {
 	focusControl = NULL;
 }
 
-void CSurfaceDlg::OnSetfocusEditHeight() 
+void CSurfaceDlg::OnSetfocusEditWidth()
 {
-	focusControl = &m_wndHeight;	
+	focusControl = &m_wndWidth;
 }
 
-void CSurfaceDlg::OnBtnFlipx() 
+void CSurfaceDlg::OnKillfocusEditHeight()
+{
+	focusControl = NULL;
+}
+
+void CSurfaceDlg::OnSetfocusEditHeight()
+{
+	focusControl = &m_wndHeight;
+}
+
+void CSurfaceDlg::OnBtnFlipx()
 {
 	Select_FlipTexture(false);
 }
 
-void CSurfaceDlg::OnBtnFlipy() 
+void CSurfaceDlg::OnBtnFlipy()
 {
 	Select_FlipTexture(true);
 }
 
-void CSurfaceDlg::OnKillfocusRotate() 
+void CSurfaceDlg::OnKillfocusRotate()
 {
 	focusControl = NULL;
 }
 
-void CSurfaceDlg::OnSetfocusRotate() 
+void CSurfaceDlg::OnSetfocusRotate()
 {
 	focusControl = &m_wndRotateEdit;
 }

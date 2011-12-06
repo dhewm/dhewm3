@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -52,10 +52,10 @@ If you have questions concerning this license or the applicable additional terms
 const float MAX_OBSTACLE_RADIUS			= 256.0f;
 const float PUSH_OUTSIDE_OBSTACLES		= 0.5f;
 const float CLIP_BOUNDS_EPSILON			= 10.0f;
-const int 	MAX_AAS_WALL_EDGES			= 256;
-const int 	MAX_OBSTACLES				= 256;
+const int	MAX_AAS_WALL_EDGES			= 256;
+const int	MAX_OBSTACLES				= 256;
 const int	MAX_PATH_NODES				= 256;
-const int 	MAX_OBSTACLE_PATH			= 64;
+const int	MAX_OBSTACLE_PATH			= 64;
 
 typedef struct obstacle_s {
 	idVec2				bounds[2];
@@ -260,7 +260,7 @@ void GetPointOutsideObstacles( const obstacle_t *obstacles, const int numObstacl
 			return;
 		}
 	}
-	gameLocal.Warning( "GetPointOutsideObstacles: no valid point found" ); 
+	gameLocal.Warning( "GetPointOutsideObstacles: no valid point found" );
 }
 
 /*
@@ -425,7 +425,7 @@ int GetObstacles( const idPhysics *physics, const idAAS *aas, const idEntity *ig
 		lastEdgeNormal.Zero();
 		nextVerts[0] = nextVerts[1] = 0;
 		for ( i = 0; i < numWallEdges && numObstacles < MAX_OBSTACLES; i++ ) {
-            aas->GetEdge( wallEdges[i], start, end );
+			aas->GetEdge( wallEdges[i], start, end );
 			aas->GetEdgeVertexNumbers( wallEdges[i], verts );
 			edgeDir = end.ToVec2() - start.ToVec2();
 			edgeDir.Normalize();
@@ -1337,7 +1337,7 @@ static float HeightForTrajectory( const idVec3 &start, float zVel, float gravity
 	t = zVel / gravity;
 	// maximum height of projectile
 	maxHeight = start.z - 0.5f * gravity * ( t * t );
-	
+
 	return maxHeight;
 }
 

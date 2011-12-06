@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -48,10 +48,10 @@ class CEntKeyFindReplace : public CDialog
 {
 // Construction
 public:
-	CEntKeyFindReplace(CString* p_strFindKey, 
-					   CString* p_strFindValue, 
-					   CString* p_strReplaceKey, 
-					   CString* p_strReplaceValue, 
+	CEntKeyFindReplace(CString* p_strFindKey,
+					   CString* p_strFindValue,
+					   CString* p_strReplaceKey,
+					   CString* p_strReplaceValue,
 					   bool*	p_bWholeStringMatchOnly,
 					   bool*	p_bSelectAllMatchingEnts,
 					   CWnd*	pParent = NULL);   // standard constructor

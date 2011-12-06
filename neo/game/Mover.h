@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -157,7 +157,7 @@ private:
 	void					VectorForDir( float dir, idVec3 &vec );
 	idCurve_Spline<idVec3> *GetSpline( idEntity *splineEntity ) const;
 
-	void					Event_SetCallback( void );	
+	void					Event_SetCallback( void );
 	void					Event_TeamBlocked( idEntity *blockedPart, idEntity *blockingEntity );
 	void					Event_StopMoving( void );
 	void					Event_StopRotating( void );
@@ -479,7 +479,7 @@ public:
 							idMover_Periodic( void );
 
 	void					Spawn( void );
-	
+
 	void					Save( idSaveGame *savefile ) const;
 	void					Restore( idRestoreGame *savefile );
 

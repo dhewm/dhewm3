@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -86,7 +86,7 @@ Sys_GetCallStack
 */
 void Sys_GetCallStack( address_t *callStack, const int callStackSize ) {
 	int i;
-	i = backtrace( (void **)callStack, callStackSize );	
+	i = backtrace( (void **)callStack, callStackSize );
 	while( i < callStackSize ) {
 		callStack[i++] = 0;
 	}
@@ -101,14 +101,14 @@ const char *	Sys_GetCallStackStr( const address_t *callStack, int callStackSize 
 	static char string[MAX_STRING_CHARS*2];
 	char **strings;
 	int i;
-	
+
 	strings = backtrace_symbols( (void **)callStack, callStackSize );
 	string[ 0 ] = '\0';
 	for ( i = 0; i < callStackSize; i++ ) {
 		idStr::snPrintf( string + strlen( string ), MAX_STRING_CHARS*2 - strlen( string ) - 1, "%s\n", strings[ i ] );
 	}
 	free( strings );
-	return string;	
+	return string;
 }
 
 
@@ -120,7 +120,7 @@ Sys_GetCallStackStr
 const char * Sys_GetCallStackCurStr( int depth ) {
 	address_t array[ 32 ];
 	size_t size;
-	
+
 	size = backtrace( (void **)array, Min( 32, depth ) );
 	return Sys_GetCallStackStr( array, (int)size );
 }

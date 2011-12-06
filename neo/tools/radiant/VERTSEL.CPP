@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -89,7 +89,7 @@ int FindEdge(int p1, int p2, face_t *f) {
 void MakeFace (brush_t * b, face_t * f)
 #else
 void MakeFace (face_t * f)
-#endif 
+#endif
 {
 	idWinding	*w;
 	int			i;
@@ -146,7 +146,7 @@ void SetupVertexSelection(void) {
 void SelectFaceEdge (brush_t * b, face_t * f, int p1, int p2)
 #else
 void SelectFaceEdge (face_t * f, int p1, int p2)
-#endif 
+#endif
 {
 	idWinding	*w;
 	int			i, j, k;

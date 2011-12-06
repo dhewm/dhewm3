@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -49,7 +49,7 @@ public:
 	void SetDisablePreview( bool b ) {
 		disablePreview = b;
 	}
-	
+
 	idStr mediaName;
 	int returnCode;
 
@@ -84,7 +84,7 @@ protected:
 	void AddMaterials(bool rootItems);
 	void AddParticles(bool rootItems);
 	void AddSkins( bool rootItems );
-	
+
 	DECLARE_MESSAGE_MAP()
 
 public:

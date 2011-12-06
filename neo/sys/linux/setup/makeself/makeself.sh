@@ -22,13 +22,13 @@
 #         support for non-temporary archives. Ideas thanks to Francois Petitjean
 # - 1.3 : More patches from Bjarni R. Einarsson and Francois Petitjean:
 #         Support for no compression (--nocomp), script is no longer mandatory,
-#         automatic launch in an xterm, optional verbose output, and -target 
+#         automatic launch in an xterm, optional verbose output, and -target
 #         archive option to indicate where to extract the files.
 # - 1.4 : Improved UNIX compatibility (Francois Petitjean)
 #         Automatic integrity checking, support of LSM files (Francois Petitjean)
 # - 1.5 : Many bugfixes. Optionally disable xterm spawning.
 # - 1.5.1 : More bugfixes, added archive options -list and -check.
-# - 1.5.2 : Cosmetic changes to inform the user of what's going on with big 
+# - 1.5.2 : Cosmetic changes to inform the user of what's going on with big
 #           archives (Quake III demo)
 # - 1.5.3 : Check for validity of the DISPLAY variable before launching an xterm.
 #           More verbosity in xterms and check for embedded command's return value.
@@ -66,49 +66,49 @@ MS_VERSION=2.1.4
 MS_COMMAND="$0"
 
 for f in "${1+"$@"}"; do
-    MS_COMMAND="$MS_COMMAND \\\\
-    \\\"$f\\\""
+	MS_COMMAND="$MS_COMMAND \\\\
+	\\\"$f\\\""
 done
 
 # Procedures
 
 MS_Usage()
 {
-    echo "Usage: $0 [params] archive_dir file_name label [startup_script] [args]"
-    echo "params can be one or more of the following :"
-    echo "    --version | -v  : Print out Makeself version number and exit"
-    echo "    --help | -h     : Print out this help message"
-    echo "    --gzip          : Compress using gzip (default if detected)"
-    echo "    --bzip2         : Compress using bzip2 instead of gzip"
-    echo "    --compress      : Compress using the UNIX 'compress' command"
-    echo "    --nocomp        : Do not compress the data"
-    echo "    --notemp        : The archive will create archive_dir in the"
-    echo "                      current directory and uncompress in ./archive_dir"
-    echo "    --copy          : Upon extraction, the archive will first copy itself to"
-    echo "                      a temporary directory"
-    echo "    --append        : Append more files to an existing Makeself archive"
-    echo "                      The label and startup scripts will then be ignored"
-    echo "    --current       : Files will be extracted to the current directory."
-    echo "                      Implies --notemp."
-    echo "    --nomd5         : Don't calculate an MD5 for archive"
-    echo "    --nocrc         : Don't calculate a CRC for archive"
-    echo "    --header file   : Specify location of the header script"
-    echo "    --follow        : Follow the symlinks in the archive"
-    echo "    --nox11         : Disable automatic spawn of a xterm"
-    echo "    --nowait        : Do not wait for user input after executing embedded"
-    echo "                      program from an xterm"
-    echo "    --lsm file      : LSM file describing the package"
-    echo
-    echo "Do not forget to give a fully qualified startup script name"
-    echo "(i.e. with a ./ prefix if inside the archive)."
-    exit 1
+	echo "Usage: $0 [params] archive_dir file_name label [startup_script] [args]"
+	echo "params can be one or more of the following :"
+	echo "    --version | -v  : Print out Makeself version number and exit"
+	echo "    --help | -h     : Print out this help message"
+	echo "    --gzip          : Compress using gzip (default if detected)"
+	echo "    --bzip2         : Compress using bzip2 instead of gzip"
+	echo "    --compress      : Compress using the UNIX 'compress' command"
+	echo "    --nocomp        : Do not compress the data"
+	echo "    --notemp        : The archive will create archive_dir in the"
+	echo "                      current directory and uncompress in ./archive_dir"
+	echo "    --copy          : Upon extraction, the archive will first copy itself to"
+	echo "                      a temporary directory"
+	echo "    --append        : Append more files to an existing Makeself archive"
+	echo "                      The label and startup scripts will then be ignored"
+	echo "    --current       : Files will be extracted to the current directory."
+	echo "                      Implies --notemp."
+	echo "    --nomd5         : Don't calculate an MD5 for archive"
+	echo "    --nocrc         : Don't calculate a CRC for archive"
+	echo "    --header file   : Specify location of the header script"
+	echo "    --follow        : Follow the symlinks in the archive"
+	echo "    --nox11         : Disable automatic spawn of a xterm"
+	echo "    --nowait        : Do not wait for user input after executing embedded"
+	echo "                      program from an xterm"
+	echo "    --lsm file      : LSM file describing the package"
+	echo
+	echo "Do not forget to give a fully qualified startup script name"
+	echo "(i.e. with a ./ prefix if inside the archive)."
+	exit 1
 }
 
 # Default settings
 if type gzip 2>&1 > /dev/null; then
-    COMPRESS=gzip
+	COMPRESS=gzip
 else
-    COMPRESS=Unix
+	COMPRESS=Unix
 fi
 KEEP=n
 CURRENT=n
@@ -123,146 +123,146 @@ LSM_CMD="echo No LSM. >> \"\$archname\""
 
 while true
 do
-    case "$1" in
-    --version | -v)
+	case "$1" in
+	--version | -v)
 	echo Makeself version $MS_VERSION
 	exit 0
 	;;
-    --bzip2)
+	--bzip2)
 	COMPRESS=bzip2
 	shift
 	;;
-    --gzip)
+	--gzip)
 	COMPRESS=gzip
 	shift
 	;;
-    --compress)
+	--compress)
 	COMPRESS=Unix
 	shift
 	;;
-    --nocomp)
+	--nocomp)
 	COMPRESS=none
 	shift
 	;;
-    --notemp)
+	--notemp)
 	KEEP=y
 	shift
 	;;
-    --copy)
+	--copy)
 	COPY=copy
 	shift
 	;;
-    --current)
+	--current)
 	CURRENT=y
 	KEEP=y
 	shift
 	;;
-    --header)
+	--header)
 	HEADER="$2"
 	shift 2
 	;;
-    --follow)
+	--follow)
 	TAR_ARGS=cvfh
 	shift
 	;;
-    --nox11)
+	--nox11)
 	NOX11=y
 	shift
 	;;
-    --nowait)
+	--nowait)
 	shift
 	;;
-    --nomd5)
+	--nomd5)
 	NOMD5=y
 	shift
 	;;
-    --nocrc)
+	--nocrc)
 	NOCRC=y
 	shift
 	;;
-    --append)
+	--append)
 	APPEND=y
 	shift
 	;;
-    --lsm)
+	--lsm)
 	LSM_CMD="cat \"$2\" >> \"\$archname\""
 	shift 2
 	;;
-    -h | --help)
+	-h | --help)
 	MS_Usage
 	;;
-    -*)
+	-*)
 	echo Unrecognized flag : "$1"
 	MS_Usage
 	;;
-    *)
+	*)
 	break
 	;;
-    esac
+	esac
 done
 
 archdir="$1"
 archname="$2"
 
 if test "$APPEND" = y; then
-    if test $# -lt 2; then
+	if test $# -lt 2; then
 	MS_Usage
-    fi
+	fi
 
-    # Gather the info from the original archive
-    OLDENV=`sh "$archname" --dumpconf`
-    if test $? -ne 0; then
+	# Gather the info from the original archive
+	OLDENV=`sh "$archname" --dumpconf`
+	if test $? -ne 0; then
 	echo "Unable to update archive: $archname" >&2
 	exit 1
-    else
+	else
 	eval "$OLDENV"
-    fi
+	fi
 else
-    if test "$KEEP" = n -a $# = 3; then
+	if test "$KEEP" = n -a $# = 3; then
 	echo "ERROR: Making a temporary archive with no embedded command does not make sense!" >&2
 	echo
 	MS_Usage
-    fi
-    # We don't really want to create an absolute directory...
-    if test "$CURRENT" = y; then
+	fi
+	# We don't really want to create an absolute directory...
+	if test "$CURRENT" = y; then
 	archdirname="."
-    else
+	else
 	archdirname=`basename "$1"`
-    fi
+	fi
 
-    if test $# -lt 3; then
+	if test $# -lt 3; then
 	MS_Usage
-    fi
+	fi
 
-    LABEL="$3"
-    SCRIPT="$4"
-    test x$SCRIPT = x || shift 1
-    shift 3
-    SCRIPTARGS="$*"
+	LABEL="$3"
+	SCRIPT="$4"
+	test x$SCRIPT = x || shift 1
+	shift 3
+	SCRIPTARGS="$*"
 fi
 
 if test "$KEEP" = n -a "$CURRENT" = y; then
-    echo "ERROR: It is A VERY DANGEROUS IDEA to try to combine --notemp and --current." >&2
-    exit 1
+	echo "ERROR: It is A VERY DANGEROUS IDEA to try to combine --notemp and --current." >&2
+	exit 1
 fi
 
 case $COMPRESS in
 gzip)
-    GZIP_CMD="gzip -c9"
-    GUNZIP_CMD="gzip -cd"
-    ;;
+	GZIP_CMD="gzip -c9"
+	GUNZIP_CMD="gzip -cd"
+	;;
 bzip2)
-    GZIP_CMD="bzip2 -9"
-    GUNZIP_CMD="bzip2 -d"
-    ;;
+	GZIP_CMD="bzip2 -9"
+	GUNZIP_CMD="bzip2 -d"
+	;;
 Unix)
-    GZIP_CMD="compress -cf"
-    GUNZIP_CMD="exec 2>&-; uncompress -c || test \\\$? -eq 2 || gzip -cd"
-    ;;
+	GZIP_CMD="compress -cf"
+	GUNZIP_CMD="exec 2>&-; uncompress -c || test \\\$? -eq 2 || gzip -cd"
+	;;
 none)
-    GZIP_CMD="cat"
-    GUNZIP_CMD="cat"
-    ;;
+	GZIP_CMD="cat"
+	GUNZIP_CMD="cat"
+	;;
 esac
 
 tmpfile="${TMPDIR:=/tmp}/mkself$$"
@@ -272,25 +272,25 @@ if test -f $HEADER; then
 	archname="$tmpfile"
 	# Generate a fake header to count its lines
 	SKIP=0
-    . $HEADER
-    SKIP=`cat "$tmpfile" |wc -l`
+	. $HEADER
+	SKIP=`cat "$tmpfile" |wc -l`
 	# Get rid of any spaces
 	SKIP=`expr $SKIP`
 	rm -f "$tmpfile"
-    echo Header is $SKIP lines long >&2
+	echo Header is $SKIP lines long >&2
 
 	archname="$oldarchname"
 else
-    echo "Unable to open header file: $HEADER" >&2
-    exit 1
+	echo "Unable to open header file: $HEADER" >&2
+	exit 1
 fi
 
 echo
 
 if test "$APPEND" = n; then
-    if test -f "$archname"; then
+	if test -f "$archname"; then
 		echo "WARNING: Overwriting existing file: $archname" >&2
-    fi
+	fi
 fi
 
 USIZE=`du -ks $archdir | cut -f1`
@@ -340,35 +340,35 @@ else
 fi
 
 if test "$APPEND" = y; then
-    mv "$archname" "$archname".bak || exit
+	mv "$archname" "$archname".bak || exit
 
-    # Prepare entry for new archive
-    filesizes="$filesizes $fsize"
-    CRCsum="$CRCsum $crcsum"
-    MD5sum="$MD5sum $md5sum"
-    USIZE=`expr $USIZE + $OLDUSIZE`
-    # Generate the header
-    . $HEADER
-    # Append the original data
-    tail -n +$OLDSKIP "$archname".bak >> "$archname"
-    # Append the new data
-    cat "$tmpfile" >> "$archname"
+	# Prepare entry for new archive
+	filesizes="$filesizes $fsize"
+	CRCsum="$CRCsum $crcsum"
+	MD5sum="$MD5sum $md5sum"
+	USIZE=`expr $USIZE + $OLDUSIZE`
+	# Generate the header
+	. $HEADER
+	# Append the original data
+	tail -n +$OLDSKIP "$archname".bak >> "$archname"
+	# Append the new data
+	cat "$tmpfile" >> "$archname"
 
-    chmod +x "$archname"
-    rm -f "$archname".bak
-    echo Self-extractible archive \"$archname\" successfully updated.
+	chmod +x "$archname"
+	rm -f "$archname".bak
+	echo Self-extractible archive \"$archname\" successfully updated.
 else
-    filesizes="$fsize"
-    CRCsum="$crcsum"
-    MD5sum="$md5sum"
+	filesizes="$fsize"
+	CRCsum="$crcsum"
+	MD5sum="$md5sum"
 
-    # Generate the header
-    . $HEADER
+	# Generate the header
+	. $HEADER
 
-    # Append the compressed tar data after the stub
-    echo
-    cat "$tmpfile" >> "$archname"
-    chmod +x "$archname"
-    echo Self-extractible archive \"$archname\" successfully created.
+	# Append the compressed tar data after the stub
+	echo
+	cat "$tmpfile" >> "$archname"
+	chmod +x "$archname"
+	echo Self-extractible archive \"$archname\" successfully created.
 fi
 rm -f "$tmpfile"

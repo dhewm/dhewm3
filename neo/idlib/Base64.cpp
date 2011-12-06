@@ -38,17 +38,17 @@ POSSIBILITY OF SUCH DAMAGE.
 idBase64::Encode
 ============
 */
-static const char sixtet_to_base64[] = 
+static const char sixtet_to_base64[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 void idBase64::Encode( const byte *from, int size ) {
 	int i, j;
 	unsigned long w;
 	byte *to;
-	
+
 	EnsureAlloced( 4*(size+3)/3 + 2 ); // ratio and padding + trailing \0
 	to = data;
-	
+
 	w = 0;
 	i = 0;
 	while (size > 0) {
@@ -71,7 +71,7 @@ void idBase64::Encode( const byte *from, int size ) {
 			i = 0;
 		}
 	}
-	
+
 	*to++ = '\0';
 	len = to - data;
 }
@@ -99,7 +99,7 @@ int idBase64::Decode( byte *to ) const {
 	static char base64_to_sixtet[256];
 	static int tab_init = 0;
 	byte *from = data;
-	
+
 	if (!tab_init) {
 		memset( base64_to_sixtet, 0, 256 );
 		for (i = 0; (j = sixtet_to_base64[i]) != '\0'; ++i) {
@@ -161,7 +161,7 @@ void idBase64::Decode( idStr &dest ) const {
 idBase64::Decode
 ============
 */
-void idBase64::Decode( idFile *dest ) const {	
+void idBase64::Decode( idFile *dest ) const {
 	byte *buf = new byte[ DecodeLength()+1 ]; // +1 for trailing \0
 	int out = Decode( buf );
 	dest->Write( buf, out );
@@ -171,7 +171,7 @@ void idBase64::Decode( idFile *dest ) const {
 #if 0
 
 void idBase64_TestBase64() {
-		
+
 	idStr src;
 	idBase64 dest;
 	src = "Encode me in base64";
@@ -184,11 +184,11 @@ void idBase64_TestBase64() {
 	src_dict.SetFloat("float", 0.5f);
 	src_dict.SetBool("bool", true);
 	src_dict.Set("value", "foo");
-	idFile_Memory src_fmem("serialize_dict");	
+	idFile_Memory src_fmem("serialize_dict");
 	src_dict.WriteToFileHandle( &src_fmem );
 	dest.Encode( (const byte *)src_fmem.GetDataPtr(), src_fmem.Length() );
 	idLib::common->Printf( "idDict encoded to %s\n", dest.c_str());
-	
+
 	// now decode to another stream and build back
 	idFile_Memory dest_fmem( "build_back" );
 	dest.Decode( &dest_fmem );
@@ -197,7 +197,7 @@ void idBase64_TestBase64() {
 	dest_dict.ReadFromFileHandle( &dest_fmem );
 	idLib::common->Printf( "idDict reconstructed after base64 decode\n");
 	dest_dict.Print();
-	
+
 	// test idDict read from file - from python generated files, see idDict.py
 	idFile *file = idLib::fileSystem->OpenFileRead("idDict.test");
 	if (file) {

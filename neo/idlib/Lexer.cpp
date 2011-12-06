@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -1385,7 +1385,7 @@ const char *idLexer::ParseBracedSectionExact( idStr &out, int tabs ) {
 	}
 
 	out = "{";
-	depth = 1;	
+	depth = 1;
 	skipWhite = false;
 	doTabs = tabs >= 0;
 
@@ -1416,7 +1416,7 @@ const char *idLexer::ParseBracedSectionExact( idStr &out, int tabs ) {
 			case '}': {
 				depth--;
 				tabs--;
-				break;				
+				break;
 			}
 		}
 
@@ -1598,7 +1598,7 @@ int idLexer::LoadFile( const char *filename, bool OSPath ) {
 		idLib::common->Error("idLexer::LoadFile: another script already loaded");
 		return false;
 	}
-	
+
 	if ( !OSPath && ( baseFolder[0] != '\0' ) ) {
 		pathname = va( "%s/%s", baseFolder, filename );
 	} else {
@@ -1794,4 +1794,3 @@ idLexer::HadError
 bool idLexer::HadError( void ) const {
 	return hadError;
 }
-

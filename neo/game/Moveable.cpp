@@ -2,7 +2,7 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
 This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 
   idMoveable
-	
+
 ===============================================================================
 */
 
@@ -479,7 +479,7 @@ void idMoveable::Event_Activate( idEntity *activator ) {
 	Show();
 
 	if ( !spawnArgs.GetInt( "notPushable" ) ) {
-        physicsObj.EnableImpact();
+		physicsObj.EnableImpact();
 	}
 
 	physicsObj.Activate();
@@ -540,7 +540,7 @@ void idMoveable::Event_EnableDamage( float enable ) {
 ===============================================================================
 
   idBarrel
-	
+
 ===============================================================================
 */
 
@@ -993,7 +993,7 @@ void idExplodingBarrel::Killed( idEntity *inflictor, idEntity *attacker, int dam
 			msg.Init( msgBuf, sizeof( msgBuf ) );
 			msg.WriteLong( gameLocal.time );
 			ServerSendEvent( EVENT_EXPLODE, &msg, false, -1 );
-		}		
+		}
 	}
 
 	// do this before applying radius damage so the ent can trace to any damagable ents nearby
@@ -1006,7 +1006,7 @@ void idExplodingBarrel::Killed( idEntity *inflictor, idEntity *attacker, int dam
 	}
 
 	ExplodingEffects( );
-	
+
 	//FIXME: need to precache all the debris stuff here and in the projectiles
 	const idKeyValue *kv = spawnArgs.MatchPrefix( "def_debris" );
 	// bool first = true;
@@ -1036,7 +1036,7 @@ void idExplodingBarrel::Killed( idEntity *inflictor, idEntity *attacker, int dam
 			debris->Launch();
 			debris->GetRenderEntity()->shaderParms[ SHADERPARM_TIME_OF_DEATH ] = ( gameLocal.time + 1500 ) * 0.001f;
 			debris->UpdateVisuals();
-			
+
 		}
 		kv = spawnArgs.MatchPrefix( "def_debris", kv );
 	}
@@ -1062,7 +1062,7 @@ void idExplodingBarrel::Killed( idEntity *inflictor, idEntity *attacker, int dam
 idExplodingBarrel::Damage
 ================
 */
-void idExplodingBarrel::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir, 
+void idExplodingBarrel::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &dir,
 					  const char *damageDefName, const float damageScale, const int location ) {
 
 	const idDict *damageDef = gameLocal.FindEntityDefDict( damageDefName );
