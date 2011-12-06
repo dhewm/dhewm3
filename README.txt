@@ -1,3 +1,11 @@
+
+This is iodoom3, an enhanced version of the GPL'd version of Doom 3.
+
+Below is the original README from id Software.
+
+
+
+
 Doom 3 GPL source release
 =========================
 
