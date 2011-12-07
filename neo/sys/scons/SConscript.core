@@ -210,7 +210,9 @@ if ( local_dedicated == 0 ):
 		linux/input.cpp \
 		linux/libXNVCtrl/NVCtrl.c'
 else:
-	sys_string += ' linux/dedicated.cpp'
+	sys_string += ' \
+		stub/stub_gl.cpp \
+		linux/dedicated.cpp'
 
 sys_list = scons_utils.BuildList( 'sys', sys_string )
 
@@ -229,7 +231,7 @@ for i in range( len( core_list ) ):
 local_env = g_env.Clone()
 
 if ( local_dedicated == 1 ):
-	local_env.Append( CPPDEFINES = [ 'ID_DEDICATED', 'ID_GL_HARDLINK' ] )
+	local_env.Append( CPPDEFINES = [ 'ID_DEDICATED' ] )
 	# don't enable alsa for a dedicated server binary
 	ALSA = '0'
 
@@ -255,6 +257,9 @@ sound_lib = sound_env.StaticLibrary( 'sound', sound_list )
 
 local_env.Append( LIBS = [ 'pthread', 'jpeg', 'vorbisfile' ] )
 
+if ( local_dedicated == 0 ):
+	local_env.Append( LIBS = [ 'GL' ] )
+
 if (g_os == "Linux"):
 	local_env.Append( LIBS = [ 'dl' ] )
 
@@ -267,7 +272,6 @@ if ( local_dedicated == 0 ):
 
 source_list = core_list
 source_list += idlib_objects
-source_list += [ '../../glimp/sys/scons/libglimp.a' ]
 source_list += sound_lib
 source_list += [ '../../openal/stubs.cpp' ]
 

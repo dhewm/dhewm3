@@ -12,7 +12,7 @@ import scons_utils
 conf_filename='site.conf'
 # choose configuration variables which should be saved between runs
 # ( we handle all those as strings )
-serialized=['CC', 'CXX', 'X86', 'BUILD', 'IDNET_HOST', 'GL_HARDLINK', 'DEDICATED',
+serialized=['CC', 'CXX', 'X86', 'BUILD', 'IDNET_HOST', 'DEDICATED',
 	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK', 'ALSA',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS' ]
@@ -90,10 +90,6 @@ TARGET_DEMO (default 0)
 
 IDNET_HOST (default to source hardcoded)
 	Override builtin IDNET_HOST with your own settings
-
-GL_HARDLINK (default 0)
-	Instead of dynamically loading the OpenGL libraries, use implicit dependencies
-	NOTE: no GL logging capability and no r_glDriver with GL_HARDLINK 1
 
 DEBUG_MEMORY (default 0)
 	Enables memory logging to file
@@ -175,7 +171,6 @@ TARGET_D3XP = '1'
 TARGET_MONO = '0'
 TARGET_DEMO = '0'
 IDNET_HOST = ''
-GL_HARDLINK = '0'
 DEBUG_MEMORY = '0'
 LIBC_MALLOC = '1'
 ID_NOLANADDRESS = '0'
@@ -275,9 +270,6 @@ g_build = '%s/%s-%s' % (BUILD_ROOT, g_cpu, BUILD)
 
 SConsignFile( g_build + '/scons.signatures' )
 
-if ( GL_HARDLINK != '0' ):
-	g_build += '-hardlink'
-
 if ( DEBUG_MEMORY != '0' ):
 	g_build += '-debugmem'
 
@@ -327,9 +319,6 @@ elif ( BUILD == 'release' ):
 else:
 	print 'Unknown build configuration ' + BUILD
 	sys.exit(0)
-
-if ( GL_HARDLINK != '0' ):
-	CORECPPFLAGS.append( '-DID_GL_HARDLINK' )
 
 if ( DEBUG_MEMORY != '0' ):
 	BASECPPFLAGS += [ '-DID_DEBUG_MEMORY', '-DID_REDIRECT_NEWDELETE' ]
@@ -417,8 +406,6 @@ if ( TARGET_CORE == '1' ):
 		local_dedicated = 0
 		Export( 'GLOBALS ' + GLOBALS )
 
-		VariantDir( g_build + '/obj-core/glimp', '.', duplicate = 1 )
-		SConscript( g_build + '/obj-core/glimp/sys/scons/SConscript.gl' )
 		VariantDir( g_build + '/obj-core', '.', duplicate = 0 )
 		idlib_objects = SConscript( g_build + '/obj-core/sys/scons/SConscript.idlib' )
 		Export( 'GLOBALS ' + GLOBALS ) # update idlib_objects
@@ -429,8 +416,6 @@ if ( TARGET_CORE == '1' ):
 		local_dedicated = 1
 		Export( 'GLOBALS ' + GLOBALS )
 
-		VariantDir( g_build + '/dedicated/glimp', '.', duplicate = 1 )
-		SConscript( g_build + '/dedicated/glimp/sys/scons/SConscript.gl' )
 		VariantDir( g_build + '/dedicated', '.', duplicate = 0 )
 		idlib_objects = SConscript( g_build + '/dedicated/sys/scons/SConscript.idlib' )
 		Export( 'GLOBALS ' + GLOBALS )
@@ -476,8 +461,6 @@ if ( TARGET_MONO == '1' ):
 	local_idlibpic = 0
 	local_d3xp = 0
 	Export( 'GLOBALS ' + GLOBALS )
-	VariantDir( g_build + '/mono/glimp', '.', duplicate = 1 )
-	SConscript( g_build + '/mono/glimp/sys/scons/SConscript.gl' )
 	VariantDir( g_build + '/mono', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/mono/sys/scons/SConscript.idlib' )
 	game_objects = SConscript( g_build + '/mono/sys/scons/SConscript.game' )
@@ -494,8 +477,6 @@ if ( TARGET_DEMO == '1' ):
 	local_curl = 0
 	local_d3xp = 0
 	Export( 'GLOBALS ' + GLOBALS )
-	VariantDir( g_build + '/demo/glimp', '.', duplicate = 1 )
-	SConscript( g_build + '/demo/glimp/sys/scons/SConscript.gl' )
 	VariantDir( g_build + '/demo', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/demo/sys/scons/SConscript.idlib' )
 	Export( 'GLOBALS ' + GLOBALS )

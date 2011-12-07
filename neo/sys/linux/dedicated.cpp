@@ -71,21 +71,4 @@ int Sys_GetVideoRam( void ) {
 GL
 ==========
 */
-
-void GLimp_EnableLogging( bool enable ) { }
-
-bool GLimp_Init( glimpParms_t a ) { return true; }
-
-void GLimp_SetGamma( unsigned short red[256],
-					unsigned short green[256],
-					unsigned short blue[256] ) { }
-
-void GLimp_Shutdown( void ) { }
-
-void GLimp_SwapBuffers( void ) { }
-
-void GLimp_DeactivateContext( void ) { }
-
-void GLimp_ActivateContext( void ) { }
-
 bool GLimp_SetScreenParms( glimpParms_t parms ) { return true; }

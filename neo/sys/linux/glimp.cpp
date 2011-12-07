@@ -64,16 +64,14 @@ void GLimp_WakeBackEnd(void *a) {
 	common->DPrintf("GLimp_WakeBackEnd stub\n");
 }
 
-#ifdef ID_GL_HARDLINK
 void GLimp_EnableLogging(bool log) {
 	static bool logging;
 	if (log != logging)
 	{
-		common->DPrintf("GLimp_EnableLogging - disabled at compile time (ID_GL_HARDLINK)\n");
+		common->DPrintf("GLimp_EnableLogging - not available\n");
 		logging = log;
 	}
 }
-#endif
 
 void GLimp_FrontEndSleep() {
 	common->DPrintf("GLimp_FrontEndSleep stub\n");
@@ -187,10 +185,6 @@ void GLimp_Shutdown() {
 		GLimp_RestoreGamma();
 
 		qglXDestroyContext( dpy, ctx );
-
-#if !defined( ID_GL_HARDLINK )
-		GLimp_dlclose();
-#endif
 
 		XDestroyWindow( dpy, win );
 		if ( vidmode_active ) {
@@ -563,12 +557,6 @@ bool GLimp_Init( glimpParms_t a ) {
 		return false;
 	}
 
-#ifndef ID_GL_HARDLINK
-	if ( !GLimp_dlopen() ) {
-		return false;
-	}
-#endif
-
 	if (!GLX_Init(a)) {
 		return false;
 	}
@@ -664,4 +652,34 @@ int Sys_GetVideoRam( void ) {
 	common->Printf( "guess failed, return default low-end VRAM setting ( 64MB VRAM )\n" );
 	run_once = 64;
 	return run_once;
+}
+
+/*
+===================
+GLimp_ExtensionPointer
+===================
+*/
+static void StubFunction( void ) { }
+
+GLExtension_t GLimp_ExtensionPointer( const char *name ) {
+	if ( strstr( name, "wgl" ) == name ) {
+		common->DPrintf( "WARNING: GLimp_ExtensionPointer for '%s'\n", name );
+	}
+#ifdef ID_DEDICATED
+	common->Printf("GLimp_ExtensionPointer %s\n", name);
+	return StubFunction;
+#else
+	GLExtension_t ret;
+	#if defined(__unix__)
+	// for some reason glXGetProcAddressARB doesn't work on RH9?
+	ret = qglXGetProcAddressARB((const GLubyte *) name);
+	if ( !ret ) {
+		common->Printf("glXGetProcAddressARB failed: \"%s\"\n", name);
+		return StubFunction;
+	}
+	#else
+	#error Need OS define
+	#endif
+	return ret;
+#endif
 }
