@@ -432,7 +432,7 @@ const char *Sys_DefaultCDPath( void ) {
 	return "";
 }
 
-long Sys_FileTimeStamp(FILE * fp) {
+ID_TIME_T Sys_FileTimeStamp(FILE * fp) {
 	struct stat st;
 	fstat(fileno(fp), &st);
 	return st.st_mtime;
