@@ -254,7 +254,7 @@ void idTarget_WaitForButton::Think( void ) {
 
 	if ( thinkFlags & TH_THINK ) {
 		player = gameLocal.GetLocalPlayer();
-		if ( player && ( !player->oldButtons & BUTTON_ATTACK ) && ( player->usercmd.buttons & BUTTON_ATTACK ) ) {
+		if ( player && !( player->oldButtons & BUTTON_ATTACK ) && ( player->usercmd.buttons & BUTTON_ATTACK ) ) {
 			player->usercmd.buttons &= ~BUTTON_ATTACK;
 			BecomeInactive( TH_THINK );
 			ActivateTargets( player );
