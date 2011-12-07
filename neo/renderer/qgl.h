@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_GLEXT_LEGACY
 #include <OpenGL/gl.h>
 
-#elif defined( __linux__ )
+#elif defined( __unix__ )
 
 // using our local glext.h
 // http://oss.sgi.com/projects/ogl-sample/ABI/
@@ -544,7 +544,7 @@ extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
 #endif	// _WIN32
 
-#if defined( __linux__ )
+#if defined( __unix__ )
 
 //GLX Functions
 extern XVisualInfo * (*qglXChooseVisual)( Display *dpy, int screen, int *attribList );

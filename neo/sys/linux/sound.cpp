@@ -26,10 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <malloc.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 // OSS sound interface

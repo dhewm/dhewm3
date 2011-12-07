@@ -321,7 +321,7 @@ void idSessionLocal::SetMainMenuGuiVars( void ) {
 
 	guiMsg->SetStateString( "visible_hasxp", fileSystem->HasD3XP() ? "1" : "0" );
 
-#if defined( __linux__ )
+#if defined( __unix__ )
 	guiMainMenu->SetStateString( "driver_prompt", "1" );
 #else
 	guiMainMenu->SetStateString( "driver_prompt", "0" );

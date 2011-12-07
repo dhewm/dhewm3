@@ -2044,7 +2044,7 @@ bool idFrustum::ProjectionBounds( const idBounds &bounds, idBounds &projectionBo
 	return ProjectionBounds( idBox( bounds, vec3_origin, mat3_identity ), projectionBounds );
 }
 
-#ifndef __linux__
+#ifndef __GNUC__
 
 /*
 ============
