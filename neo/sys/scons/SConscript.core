@@ -247,13 +247,16 @@ sound_env.Append( CPPPATH = '/usr/local/lib/oss/include' )
 # store a local copy of the include headers as well for holy build
 sound_env.Append( CPPPATH = '../linux/oss/include' )
 sound_list = [ '../linux/sound.cpp' ]
-if ( ALSA != '0' ):
+if ( g_os == "Linux" and ALSA != '0' ):
 	sound_list.append( '../../sys/linux/sound_alsa.cpp' )
 else:
 	sound_env.Append( CPPDEFINES = 'NO_ALSA' )
 sound_lib = sound_env.StaticLibrary( 'sound', sound_list )
 
-local_env.Append( LIBS = [ 'pthread', 'dl', 'jpeg', 'vorbisfile' ] )
+local_env.Append( LIBS = [ 'pthread', 'jpeg', 'vorbisfile' ] )
+
+if (g_os == "Linux"):
+	local_env.Append( LIBS = [ 'dl' ] )
 
 if ( local_curl == 1 ):
 	local_env.Append( LIBS = [ 'curl', 'z' ] )

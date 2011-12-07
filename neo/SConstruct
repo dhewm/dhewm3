@@ -158,7 +158,7 @@ if len(g_cpu) < 1:
 if len(g_cpu) < 1:
 		g_cpu = 'cpu'
 
-g_os = 'Linux'
+g_os = commands.getoutput('uname -s')
 
 # end system detection ---------------------------
 
@@ -294,9 +294,12 @@ BASECPPFLAGS.append( '-Wno-unknown-pragmas' )
 # this define is necessary to make sure threading support is enabled in X
 CORECPPFLAGS.append( '-DXTHREADS' )
 
-if ( g_os == 'Linux' ):
-	# gcc 4.x option only - only export what we mean to from the game SO
-	BASECPPFLAGS.append( '-fvisibility=hidden' )
+# gcc 4.x option only - only export what we mean to from the game SO
+BASECPPFLAGS.append( '-fvisibility=hidden' )
+
+if ( "BSD" in g_os ):
+	BASECPPFLAGS.append( '-I/usr/local/include' )
+	BASELINKFLAGS.append('-L/usr/local/lib')
 
 if ( g_sdk or SDK != '0' ):
 	BASECPPFLAGS.append( '-D_D3SDK' )
