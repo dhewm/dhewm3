@@ -62,7 +62,7 @@ void idSurface_Polytope::FromPlanes( const idPlane *planes, const int numPlanes 
 		}
 
 		for ( j = 0; j < w.GetNumPoints(); j++ ) {
-			for ( k = 0; k < verts.Num(); j++ ) {
+			for ( k = 0; k < verts.Num(); k++ ) {
 				if ( verts[k].xyz.Compare( w[j].ToVec3(), POLYTOPE_VERTEX_EPSILON ) ) {
 					break;
 				}

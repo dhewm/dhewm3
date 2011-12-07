@@ -3125,9 +3125,9 @@ bool idMatX::IsOrthonormal( const float epsilon ) const {
 
 		ptr2 = mat + i;
 		sum = ptr2[0] * ptr2[0] - 1.0f;
-		for ( i = 1; i < numRows; i++ ) {
+		for ( int j = 1; j < numRows; j++ ) {
 			ptr2 += numColumns;
-			sum += ptr2[i] * ptr2[i];
+			sum += ptr2[i] * ptr2[j];
 		}
 		if ( idMath::Fabs( sum ) > epsilon ) {
 			return false;
