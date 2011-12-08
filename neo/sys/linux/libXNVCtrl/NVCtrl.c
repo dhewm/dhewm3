@@ -7,8 +7,8 @@
 #include "NVCtrlLib.h"
 #include "nv_control.h"
 
-#if !defined(XTRHEADS)
-#warning XTRHEADS not defined -- this libXNVCtrl.a will not be thread safe!
+#if !defined(XTHREADS)
+#warning XTHREADS not defined -- this libXNVCtrl.a will not be thread safe!
 #endif
 
 static XExtensionInfo _nvctrl_ext_info_data;
