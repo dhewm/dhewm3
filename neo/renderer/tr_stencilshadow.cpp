@@ -536,7 +536,7 @@ If one point is clearly clipped by the plane and the
 other point is on the plane, it will be completely removed.
 ===================
 */
-static bool R_ClipLineToLight(	const idVec3 &a, const idVec3 &b, const idPlane frustum[4],
+static bool R_ClipLineToLight(	const idVec3 &a, const idVec3 &b, const idPlane frustum[6],
 						   idVec3 &p1, idVec3 &p2 ) {
 	float	*clip;
 	int		j;
