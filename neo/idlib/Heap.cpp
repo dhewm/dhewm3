@@ -333,7 +333,7 @@ void *idHeap::Allocate16( const dword bytes ) {
 			common->FatalError( "malloc failure for %i", bytes );
 		}
 	}
-	alignedPtr = (byte *) ( ( (int) ptr ) + 15 & ~15 );
+	alignedPtr = (byte *) ( ( ( (int) ptr ) + 15) & ~15 );
 	if ( alignedPtr - ptr < 4 ) {
 		alignedPtr += 16;
 	}

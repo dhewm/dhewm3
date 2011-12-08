@@ -628,7 +628,7 @@ ID_INLINE bool idEntityPtr<type>::IsValid( void ) const {
 template< class type >
 ID_INLINE type *idEntityPtr<type>::GetEntity( void ) const {
 	int entityNum = spawnId & ( ( 1 << GENTITYNUM_BITS ) - 1 );
-	if ( ( gameLocal.spawnIds[ entityNum ] == ( spawnId >> GENTITYNUM_BITS ) ) ) {
+	if ( gameLocal.spawnIds[ entityNum ] == ( spawnId >> GENTITYNUM_BITS ) ) {
 		return static_cast<type *>( gameLocal.entities[ entityNum ] );
 	}
 	return NULL;
