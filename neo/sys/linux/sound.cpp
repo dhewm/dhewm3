@@ -184,6 +184,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 
 	// verify capabilities -----------------------------------------
 
+#if SOUND_VERSION >= 0x040000
 	// may only be available starting with OSS API v4.0
 	// http://www.fi.opensound.com/developer/SNDCTL_SYSINFO.html
 	// NOTE: at OSS API 4.0 headers, replace OSS_SYSINFO with SNDCTL_SYSINFO
@@ -193,6 +194,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 	} else {
 		common->Printf( "%s: %s %s\n", s_device.GetString(), si.product, si.version );
 	}
+#endif
 
 	if ( ioctl( m_audio_fd, SNDCTL_DSP_GETCAPS, &caps ) == -1 ) {
 		common->Warning( "ioctl SNDCTL_DSP_GETCAPS failed - driver too old?" );

@@ -245,9 +245,6 @@ if ( local_curl == 0 ):
 	local_env.Append( CPPDEFINES = [ 'ID_ENABLE_CURL=0' ] )
 
 sound_env = local_env.Clone()
-sound_env.Append( CPPPATH = '/usr/local/lib/oss/include' )
-# store a local copy of the include headers as well for holy build
-sound_env.Append( CPPPATH = '../linux/oss/include' )
 sound_list = [ '../linux/sound.cpp' ]
 if ( g_os == "Linux" and ALSA != '0' ):
 	sound_list.append( '../../sys/linux/sound_alsa.cpp' )
