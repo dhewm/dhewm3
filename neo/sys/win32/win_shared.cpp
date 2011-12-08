@@ -174,7 +174,7 @@ void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
 	MEMORYSTATUSEX statex;
 	unsigned __int64 work;
 
-	memset( &statex, sizeof( statex ), 0 );
+	memset( &statex, 0, sizeof( statex ) );
 	statex.dwLength = sizeof( statex );
 	GlobalMemoryStatusEx( &statex );
 
