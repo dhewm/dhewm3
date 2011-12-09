@@ -214,7 +214,7 @@ type *idBlockAlloc<type,blockSize>::Alloc( void ) {
 
 template<class type, int blockSize>
 void idBlockAlloc<type,blockSize>::Free( type *t ) {
-	element_t *element = (element_t *)( ( (unsigned char *) t ) - ( (int) &((element_t *)0)->t ) );
+	element_t *element = (element_t *)( intptr_t(t) - sizeof(intptr_t) );
 	element->next = free;
 	free = element;
 	active--;
