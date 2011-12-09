@@ -139,7 +139,7 @@ const char *Sys_EXEPath( void ) {
 	len = readlink( linkpath.c_str(), buf, sizeof( buf ) );
 	if ( len == -1 ) {
 		Sys_Printf("couldn't stat exe path link %s\n", linkpath.c_str());
-		buf[ len ] = '\0';
+		buf[ 0 ] = '\0';
 	}
 	return buf;
 }
