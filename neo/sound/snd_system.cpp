@@ -1128,6 +1128,7 @@ void idSoundSystemLocal::EndLevelLoad( const char *mapstring ) {
 	}
 	soundCache->EndLevelLoad();
 
+#if ID_OPENAL_EAX
 	idStr efxname( "efxs/" );
 	idStr mapname( mapstring );
 
@@ -1142,6 +1143,7 @@ void idSoundSystemLocal::EndLevelLoad( const char *mapstring ) {
 	} else {
 		common->Printf("sound: missing %s\n", efxname.c_str() );
 	}
+#endif
 }
 
 /*
