@@ -58,6 +58,10 @@ void idLib::Init( void ) {
 
 	assert( sizeof( bool ) == 1 );
 
+	// assumptions from the scripting compiler/interpreter
+	assert( sizeof( float ) == sizeof( int ) );
+	assert( sizeof( idVec3 ) == sizeof( float ) * 3 );
+
 	// initialize memory manager
 	Mem_Init();
 
