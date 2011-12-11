@@ -73,9 +73,7 @@ ret_list = []
 if ( local_idlibpic == 0 ):
 	for f in idlib_list:
 		ret_list += local_env.StaticObject( source = f )
-	ret_list += local_env_noopt.StaticObject( source = [ '../../idlib/bv/Frustum_gcc.cpp' ] )
 else:
 	for f in idlib_list:
 		ret_list += local_env.SharedObject( source = f )
-	ret_list += local_env_noopt.SharedObject( source = [ '../../idlib/bv/Frustum_gcc.cpp' ] )
 Return( 'ret_list' )
