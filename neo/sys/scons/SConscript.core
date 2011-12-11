@@ -212,7 +212,6 @@ if ( local_dedicated == 0 ):
 else:
 	sys_string += ' \
 		stub/stub_gl.cpp \
-		stub/openal_stub.cpp \
 		linux/dedicated.cpp'
 
 sys_list = scons_utils.BuildList( 'sys', sys_string )
@@ -233,7 +232,8 @@ local_env = g_env.Clone()
 
 if ( local_dedicated == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEDICATED' ] )
-	# don't enable alsa for a dedicated server binary
+	# don't enable openal or alsa for a dedicated server binary
+	OPENAL = '0'
 	ALSA = '0'
 
 if ( local_gamedll == 1 ):
@@ -247,6 +247,10 @@ if ( local_curl == 0 ):
 
 sound_env = local_env.Clone()
 sound_list = [ '../linux/sound.cpp' ]
+if ( OPENAL != '1' ):
+	sound_env.Append( CPPDEFINES = 'ID_OPENAL=0' )
+	sound_list.append( '../../sys/stub/openal_stub.cpp' )
+
 if ( g_os == "Linux" and ALSA != '0' ):
 	sound_list.append( '../../sys/linux/sound_alsa.cpp' )
 else:
@@ -266,7 +270,9 @@ if ( local_curl == 1 ):
 if ( local_dedicated == 0 ):
 	local_env.Append( LIBS = [ 'X11', 'Xext', 'Xxf86vm' ] ) # 'Xxf86dga',
 	local_env.Append( LIBPATH = [ '/usr/X11R6/lib' ] )
-#	local_env.Append( LIBS = [ 'openal' ] )
+
+if ( OPENAL == '1' ):
+	local_env.Append( LIBS = [ 'openal' ] )
 
 source_list = core_list
 source_list += idlib_objects
