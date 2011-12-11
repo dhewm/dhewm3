@@ -5,7 +5,7 @@
 #define __EFXLIBH
 
 #if ID_OPENAL_EAX
-#include "../openal/include/eax4.h"
+#include <eax4.h>
 #endif
 
 
