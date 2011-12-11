@@ -58,9 +58,6 @@ void idLib::Init( void ) {
 
 	assert( sizeof( bool ) == 1 );
 
-	// initialize little/big endian conversion
-	Swap_Init();
-
 	// initialize memory manager
 	Mem_Init();
 
@@ -262,38 +259,12 @@ void idLib::Warning( const char *fmt, ... ) {
 ===============================================================================
 */
 
-// can't just use function pointers, or dll linkage can mess up
-static short	(*_BigShort)( short l );
-static short	(*_LittleShort)( short l );
-static int		(*_BigLong)( int l );
-static int		(*_LittleLong)( int l );
-static float	(*_BigFloat)( float l );
-static float	(*_LittleFloat)( float l );
-static void		(*_BigRevBytes)( void *bp, int elsize, int elcount );
-static void		(*_LittleRevBytes)( void *bp, int elsize, int elcount );
-static void     (*_LittleBitField)( void *bp, int elsize );
-static void		(*_SixtetsForInt)( byte *out, int src );
-static int		(*_IntForSixtets)( byte *in );
-
-short	BigShort( short l ) { return _BigShort( l ); }
-short	LittleShort( short l ) { return _LittleShort( l ); }
-int		BigLong( int l ) { return _BigLong( l ); }
-int		LittleLong( int l ) { return _LittleLong( l ); }
-float	BigFloat( float l ) { return _BigFloat( l ); }
-float	LittleFloat( float l ) { return _LittleFloat( l ); }
-void	BigRevBytes( void *bp, int elsize, int elcount ) { _BigRevBytes( bp, elsize, elcount ); }
-void	LittleRevBytes( void *bp, int elsize, int elcount ){ _LittleRevBytes( bp, elsize, elcount ); }
-void	LittleBitField( void *bp, int elsize ){ _LittleBitField( bp, elsize ); }
-
-void	SixtetsForInt( byte *out, int src) { _SixtetsForInt( out, src ); }
-int		IntForSixtets( byte *in ) { return _IntForSixtets( in ); }
-
 /*
 ================
 ShortSwap
 ================
 */
-short ShortSwap( short l ) {
+ID_INLINE static short ShortSwap( short l ) {
 	byte    b1,b2;
 
 	b1 = l&255;
@@ -304,19 +275,10 @@ short ShortSwap( short l ) {
 
 /*
 ================
-ShortNoSwap
-================
-*/
-short ShortNoSwap( short l ) {
-	return l;
-}
-
-/*
-================
 LongSwap
 ================
 */
-int LongSwap ( int l ) {
+ID_INLINE static int LongSwap ( int l ) {
 	byte    b1,b2,b3,b4;
 
 	b1 = l&255;
@@ -329,19 +291,10 @@ int LongSwap ( int l ) {
 
 /*
 ================
-LongNoSwap
-================
-*/
-int	LongNoSwap( int l ) {
-	return l;
-}
-
-/*
-================
 FloatSwap
 ================
 */
-float FloatSwap( float f ) {
+ID_INLINE static float FloatSwap( float f ) {
 	union {
 		float	f;
 		byte	b[4];
@@ -354,15 +307,6 @@ float FloatSwap( float f ) {
 	dat2.b[2] = dat1.b[1];
 	dat2.b[3] = dat1.b[0];
 	return dat2.f;
-}
-
-/*
-================
-FloatNoSwap
-================
-*/
-float FloatNoSwap( float f ) {
-	return f;
 }
 
 /*
@@ -379,7 +323,7 @@ INPUTS
 RESULTS
    Reverses the byte order in each of elcount elements.
 ===================================================================== */
-void RevBytesSwap( void *bp, int elsize, int elcount ) {
+ID_INLINE static void RevBytesSwap( void *bp, int elsize, int elcount ) {
 	register unsigned char *p, *q;
 
 	p = ( unsigned char * ) bp;
@@ -422,7 +366,7 @@ void RevBytesSwap( void *bp, int elsize, int elcount ) {
  RESULTS
  Reverses the bitfield of size elsize.
  ===================================================================== */
-void RevBitFieldSwap( void *bp, int elsize) {
+ID_INLINE static void RevBitFieldSwap( void *bp, int elsize) {
 	int i;
 	unsigned char *p, t, v;
 
@@ -443,28 +387,10 @@ void RevBitFieldSwap( void *bp, int elsize) {
 
 /*
 ================
-RevBytesNoSwap
-================
-*/
-void RevBytesNoSwap( void *bp, int elsize, int elcount ) {
-	return;
-}
-
-/*
- ================
- RevBytesNoSwap
- ================
- */
-void RevBitFieldNoSwap( void *bp, int elsize ) {
-	return;
-}
-
-/*
-================
 SixtetsForIntLittle
 ================
 */
-void SixtetsForIntLittle( byte *out, int src) {
+ID_INLINE static void SixtetsForIntLittle( byte *out, int src) {
 	byte *b = (byte *)&src;
 	out[0] = ( b[0] & 0xfc ) >> 2;
 	out[1] = ( ( b[0] & 0x3 ) << 4 ) + ( ( b[1] & 0xf0 ) >> 4 );
@@ -478,7 +404,7 @@ SixtetsForIntBig
 TTimo: untested - that's the version from initial base64 encode
 ================
 */
-void SixtetsForIntBig( byte *out, int src) {
+ID_INLINE static void SixtetsForIntBig( byte *out, int src) {
 	for( int i = 0 ; i < 4 ; i++ ) {
 		out[i] = src & 0x3f;
 		src >>= 6;
@@ -490,7 +416,7 @@ void SixtetsForIntBig( byte *out, int src) {
 IntForSixtetsLittle
 ================
 */
-int IntForSixtetsLittle( byte *in ) {
+ID_INLINE static int IntForSixtetsLittle( byte *in ) {
 	int ret = 0;
 	byte *b = (byte *)&ret;
 	b[0] |= in[0] << 2;
@@ -508,7 +434,7 @@ IntForSixtetsBig
 TTimo: untested - that's the version from initial base64 decode
 ================
 */
-int IntForSixtetsBig( byte *in ) {
+ID_INLINE static int IntForSixtetsBig( byte *in ) {
 	int ret = 0;
 	ret |= in[0];
 	ret |= in[1] << 6;
@@ -518,51 +444,128 @@ int IntForSixtetsBig( byte *in ) {
 }
 
 /*
-================
-Swap_Init
-================
-*/
-void Swap_Init( void ) {
-	byte	swaptest[2] = {1,0};
-
-	// set the byte swapping variables in a portable manner
-	if ( *(short *)swaptest == 1) {
-		// little endian ex: x86
-		_BigShort = ShortSwap;
-		_LittleShort = ShortNoSwap;
-		_BigLong = LongSwap;
-		_LittleLong = LongNoSwap;
-		_BigFloat = FloatSwap;
-		_LittleFloat = FloatNoSwap;
-		_BigRevBytes = RevBytesSwap;
-		_LittleRevBytes = RevBytesNoSwap;
-		_LittleBitField = RevBitFieldNoSwap;
-		_SixtetsForInt = SixtetsForIntLittle;
-		_IntForSixtets = IntForSixtetsLittle;
-	} else {
-		// big endian ex: ppc
-		_BigShort = ShortNoSwap;
-		_LittleShort = ShortSwap;
-		_BigLong = LongNoSwap;
-		_LittleLong = LongSwap;
-		_BigFloat = FloatNoSwap;
-		_LittleFloat = FloatSwap;
-		_BigRevBytes = RevBytesNoSwap;
-		_LittleRevBytes = RevBytesSwap;
-		_LittleBitField = RevBitFieldSwap;
-		_SixtetsForInt = SixtetsForIntBig;
-		_IntForSixtets = IntForSixtetsBig;
-	}
-}
-
-/*
 ==========
 Swap_IsBigEndian
 ==========
 */
 bool Swap_IsBigEndian( void ) {
-	byte	swaptest[2] = {1,0};
-	return *(short *)swaptest != 1;
+#if defined(ID_LITTLE_ENDIAN)
+	return false;
+#elif defined(ID_BIG_ENDIAN)
+	return true;
+#else
+#error unknown endianness!
+#endif
+}
+
+short	BigShort( short l ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return ShortSwap(l);
+#elif defined(ID_BIG_ENDIAN)
+	return l;
+#else
+#error unknown endianness!
+#endif
+}
+
+short	LittleShort( short l ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return l;
+#elif defined(ID_BIG_ENDIAN)
+	return ShortSwap(l);
+#else
+#error unknown endianness!
+#endif
+}
+
+int		BigLong( int l ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return LongSwap(l);
+#elif defined(ID_BIG_ENDIAN)
+	return l;
+#else
+#error unknown endianness!
+#endif
+}
+
+int		LittleLong( int l ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return l;
+#elif defined(ID_BIG_ENDIAN)
+	return LongSwap(l);
+#else
+#error unknown endianness!
+#endif
+}
+
+float	BigFloat( float l ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return FloatSwap(l);
+#elif defined(ID_BIG_ENDIAN)
+	return l;
+#else
+#error unknown endianness!
+#endif
+}
+
+float	LittleFloat( float l ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return l;
+#elif defined(ID_BIG_ENDIAN)
+	return FloatSwap(l);
+#else
+#error unknown endianness!
+#endif
+}
+
+void	BigRevBytes( void *bp, int elsize, int elcount ) {
+#if defined(ID_LITTLE_ENDIAN)
+	RevBytesSwap(bp, elsize, elcount);
+#elif defined(ID_BIG_ENDIAN)
+	return;
+#else
+#error unknown endianness!
+#endif
+}
+
+void	LittleRevBytes( void *bp, int elsize, int elcount ){
+#if defined(ID_LITTLE_ENDIAN)
+	return;
+#elif defined(ID_BIG_ENDIAN)
+	RevBytesSwap(bp, elsize, elcount);
+#else
+#error unknown endianness!
+#endif
+}
+
+void	LittleBitField( void *bp, int elsize ){
+#if defined(ID_LITTLE_ENDIAN)
+	return;
+#elif defined(ID_BIG_ENDIAN)
+	RevBitFieldSwap(bp, elsize);
+#else
+#error unknown endianness!
+#endif
+}
+
+void	SixtetsForInt( byte *out, int src) {
+#if defined(ID_LITTLE_ENDIAN)
+	SixtetsForIntLittle(out, src);
+#elif defined(ID_BIG_ENDIAN)
+	SixtetsForIntBig(out, src);
+#else
+#error unknown endianness!
+#endif
+}
+
+int		IntForSixtets( byte *in ) {
+#if defined(ID_LITTLE_ENDIAN)
+	return IntForSixtetsLittle(in);
+#elif defined(ID_BIG_ENDIAN)
+	return IntForSixtetsBig(in);
+#else
+#error unknown endianness!
+#endif
 }
 
 /*
