@@ -30,8 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #define __MATH_MATH_H__
 
 #ifdef MACOS_X
-// for square root estimate instruction
-#include <ppc_intrinsics.h>
 // for FLT_MIN
 #include <float.h>
 #endif
