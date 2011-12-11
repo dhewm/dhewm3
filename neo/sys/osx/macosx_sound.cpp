@@ -438,6 +438,7 @@ int	idAudioHardwareOSX::GetNumberOfSpeakers() {
  ===============
  */
 bool Sys_LoadOpenAL( void ) {
+#if ID_OPENAL
 	OSErr	err;
 	long gestaltOSVersion;
 	err = Gestalt(gestaltSystemVersion, &gestaltOSVersion);
@@ -445,4 +446,7 @@ bool Sys_LoadOpenAL( void ) {
 		return false;
 	}
 	return true;
+#else
+	return false;
+#endif
 }

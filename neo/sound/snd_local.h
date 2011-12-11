@@ -765,10 +765,12 @@ public:
 	ALCcontext				*openalContext;
 	ALsizei					openalSourceCount;
 	openalSource_t			openalSources[256];
+#if ID_OPENAL_EAX
 	EAXSet					alEAXSet;
 	EAXGet					alEAXGet;
 	EAXSetBufferMode		alEAXSetBufferMode;
 	EAXGetBufferMode		alEAXGetBufferMode;
+#endif
 	idEFXFile				EFXDatabase;
 	bool					efxloaded;
 							// latches

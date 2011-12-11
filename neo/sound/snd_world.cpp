@@ -450,7 +450,7 @@ void idSoundWorldLocal::MixLoop( int current44kHz, int numSpeakers, float *final
 		alListenerfv( AL_POSITION, listenerPosition );
 		alListenerfv( AL_ORIENTATION, listenerOrientation );
 
-#if ID_OPENAL
+#if ID_OPENAL_EAX
 		if ( soundSystemLocal.s_useEAXReverb.GetBool() ) {
 			if ( soundSystemLocal.efxloaded ) {
 				idSoundEffect *effect = NULL;
@@ -1745,12 +1745,13 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 				alSourcef( chan->openalSource, AL_GAIN, ( volume ) < ( 1.0f ) ? ( volume ) : ( 1.0f ) );
 			}
 			alSourcei( chan->openalSource, AL_LOOPING, ( looping && chan->soundShader->entries[0]->hardwareBuffer ) ? AL_TRUE : AL_FALSE );
-#if !defined(MACOS_X)
+// TODO is this correct? (was: "!defined(MACOS_X)")
+#if ID_OPENAL_EAX
 			alSourcef( chan->openalSource, AL_REFERENCE_DISTANCE, mind );
 			alSourcef( chan->openalSource, AL_MAX_DISTANCE, maxd );
 #endif
 			alSourcef( chan->openalSource, AL_PITCH, ( slowmoActive && !chan->disallowSlow ) ? ( slowmoSpeed ) : ( 1.0f ) );
-#if ID_OPENAL
+#if ID_OPENAL_EAX
 			long lOcclusion = ( enviroSuitActive ? -1150 : 0);
 			if ( soundSystemLocal.alEAXSet ) {
 				soundSystemLocal.alEAXSet( &EAXPROPERTYID_EAX_Source, EAXSOURCE_OCCLUSION, chan->openalSource, &lOcclusion, sizeof(lOcclusion) );
@@ -1773,9 +1774,11 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 					chan->lastopenalStreamingBuffer[1] = chan->openalStreamingBuffer[1];
 					chan->lastopenalStreamingBuffer[2] = chan->openalStreamingBuffer[2];
 					alGenBuffers( 3, &chan->openalStreamingBuffer[0] );
+#if ID_OPENAL_EAX
 					if ( soundSystemLocal.alEAXSetBufferMode ) {
 						soundSystemLocal.alEAXSetBufferMode( 3, &chan->openalStreamingBuffer[0], alGetEnumValue( ID_ALCHAR "AL_STORAGE_ACCESSIBLE" ) );
 					}
+#endif
 					buffers[0] = chan->openalStreamingBuffer[0];
 					buffers[1] = chan->openalStreamingBuffer[1];
 					buffers[2] = chan->openalStreamingBuffer[2];

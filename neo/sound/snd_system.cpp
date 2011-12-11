@@ -164,7 +164,7 @@ void ListSounds_f( const idCmdArgs &args ) {
 	common->Printf( "%8d total samples loaded\n", totalSamples );
 	common->Printf( "%8d kB total system memory used\n", totalMemory >> 10 );
 #if ID_OPENAL
-	common->Printf( "%8d kB total OpenAL audio memory used\n", ( alGetInteger( alGetEnumValue( (ALubyte*)"AL_EAX_RAM_SIZE" ) ) - alGetInteger( alGetEnumValue( (ALubyte*)"AL_EAX_RAM_FREE" ) ) ) >> 10 );
+	common->Printf( "%8d kB total OpenAL audio memory used\n", ( alGetInteger( alGetEnumValue( "AL_EAX_RAM_SIZE" ) ) - alGetInteger( alGetEnumValue( "AL_EAX_RAM_FREE" ) ) ) >> 10 );
 #endif
 }
 
@@ -344,19 +344,28 @@ void idSoundSystemLocal::Init() {
 			alcMakeContextCurrent( openalContext );
 			common->Printf( "Done.\n" );
 
+#if ID_OPENAL_EAX
 			// try to obtain EAX extensions
 			if ( idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent( ID_ALCHAR "EAX4.0" ) ) {
 				idSoundSystemLocal::s_useOpenAL.SetBool( true );	// EAX presence causes AL enable
 				alEAXSet = (EAXSet)alGetProcAddress( ID_ALCHAR "EAXSet" );
 				alEAXGet = (EAXGet)alGetProcAddress( ID_ALCHAR "EAXGet" );
 				common->Printf( "OpenAL: found EAX 4.0 extension\n" );
+				EAXAvailable = 1;
 			} else {
 				common->Printf( "OpenAL: EAX 4.0 extension not found\n" );
 				idSoundSystemLocal::s_useEAXReverb.SetBool( false );
 				alEAXSet = (EAXSet)NULL;
 				alEAXGet = (EAXGet)NULL;
+				EAXAvailable = 0;
 			}
+#else
+			common->Printf("OpenAL: EAX 4.0 not supported in this build\n");
+			idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+			EAXAvailable = 0;
+#endif
 
+#if ID_OPENAL_EAX
 			// try to obtain EAX-RAM extension - not required for operation
 			if ( alIsExtensionPresent( ID_ALCHAR "EAX-RAM" ) == AL_TRUE ) {
 				alEAXSetBufferMode = (EAXSetBufferMode)alGetProcAddress( ID_ALCHAR "EAXSetBufferMode" );
@@ -367,51 +376,37 @@ void idSoundSystemLocal::Init() {
 				alEAXGetBufferMode = (EAXGetBufferMode)NULL;
 				common->Printf( "OpenAL: no EAX-RAM extension\n" );
 			}
+#endif
 
-			if ( !idSoundSystemLocal::s_useOpenAL.GetBool() ) {
-				common->Printf( "OpenAL: disabling ( no EAX ). Using legacy mixer.\n" );
+			ALuint handle;
+			openalSourceCount = 0;
 
-				alcMakeContextCurrent( NULL );
+			while ( openalSourceCount < 256 ) {
+				alGetError();
+				alGenSources( 1, &handle );
+				if ( alGetError() != AL_NO_ERROR ) {
+					break;
+				} else {
+					// store in source array
+					openalSources[openalSourceCount].handle = handle;
+					openalSources[openalSourceCount].startTime = 0;
+					openalSources[openalSourceCount].chan = NULL;
+					openalSources[openalSourceCount].inUse = false;
+					openalSources[openalSourceCount].looping = false;
 
-				alcDestroyContext( openalContext );
-				openalContext = NULL;
+					// initialise sources
+					alSourcef( handle, AL_ROLLOFF_FACTOR, 0.0f );
 
-				alcCloseDevice( openalDevice );
-				openalDevice = NULL;
-			} else {
-
-				ALuint handle;
-				openalSourceCount = 0;
-
-				while ( openalSourceCount < 256 ) {
-					alGetError();
-					alGenSources( 1, &handle );
-					if ( alGetError() != AL_NO_ERROR ) {
-						break;
-					} else {
-						// store in source array
-						openalSources[openalSourceCount].handle = handle;
-						openalSources[openalSourceCount].startTime = 0;
-						openalSources[openalSourceCount].chan = NULL;
-						openalSources[openalSourceCount].inUse = false;
-						openalSources[openalSourceCount].looping = false;
-
-						// initialise sources
-						alSourcef( handle, AL_ROLLOFF_FACTOR, 0.0f );
-
-						// found one source
-						openalSourceCount++;
-					}
+					// found one source
+					openalSourceCount++;
 				}
-
-				common->Printf( "OpenAL: found %s\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
-				common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
-
-				// adjust source count to allow for at least eight stereo sounds to play
-				openalSourceCount -= 8;
-
-				EAXAvailable = 1;
 			}
+
+			common->Printf( "OpenAL: found %s\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
+			common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
+
+			// adjust source count to allow for at least eight stereo sounds to play
+			openalSourceCount -= 8;
 		}
 	}
 
@@ -1244,7 +1239,7 @@ void idSoundSystemLocal::FreeOpenALSource( ALuint handle ) {
 			if ( openalSources[i].chan ) {
 				openalSources[i].chan->openalSource = 0;
 			}
-#if ID_OPENAL
+#if ID_OPENAL_EAX
 			// Reset source EAX ROOM level when freeing stereo source
 			if ( openalSources[i].stereo && alEAXSet ) {
 				long Room = EAXSOURCE_DEFAULTROOM;
@@ -1423,11 +1418,11 @@ void idSoundSystemLocal::PrintMemInfo( MemInfo_t *mi ) {
 
 /*
 ===============
-idSoundSystemLocal::EAXAvailable
+idSoundSystemLocal::IsEAXAvailable
 ===============
 */
 int idSoundSystemLocal::IsEAXAvailable( void ) {
-#if !ID_OPENAL
+#if !ID_OPENAL || !ID_OPENAL_EAX
 	return -1;
 #else
 	ALCdevice	*device;
