@@ -212,6 +212,7 @@ if ( local_dedicated == 0 ):
 else:
 	sys_string += ' \
 		stub/stub_gl.cpp \
+		stub/openal_stub.cpp \
 		linux/dedicated.cpp'
 
 sys_list = scons_utils.BuildList( 'sys', sys_string )
@@ -270,7 +271,6 @@ if ( local_dedicated == 0 ):
 source_list = core_list
 source_list += idlib_objects
 source_list += sound_lib
-source_list += [ '../../openal/stubs.cpp' ]
 
 source_list += g_env_noopt.StaticObject( '../../tools/compilers/dmap/optimize_gcc.cpp' )
 

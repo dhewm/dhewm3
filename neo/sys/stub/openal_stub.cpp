@@ -25,8 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#include "../sound/snd_local.h"
+#include "../../idlib/precompiled.h"
+#include "../../sound/snd_local.h"
 
 AL_API ALenum AL_APIENTRY alGetError() {
 	return AL_NO_ERROR;
