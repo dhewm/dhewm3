@@ -4,7 +4,7 @@
 #ifndef __EFXLIBH
 #define __EFXLIBH
 
-#include "eax4.h"
+#include "../openal/include/eax4.h"
 
 
 
@@ -16,13 +16,13 @@ class idSoundEffect
 public:
 	idSoundEffect() {
 	};
-	~idSoundEffect() { 
+	~idSoundEffect() {
 		if ( data && datasize ) {
 			Mem_Free( data );
 			data = NULL;
 		}
 	}
-	
+
 	idStr name;
 	int datasize;
 	void *data;
@@ -39,7 +39,7 @@ public:
     // Public data members.
 
 private:
-    
+
 public:
 	idEFXFile();
 	~idEFXFile();
@@ -58,4 +58,3 @@ public:
 
 
 #endif // __EFXLIBH
-
