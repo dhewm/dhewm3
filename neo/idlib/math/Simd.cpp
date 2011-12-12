@@ -61,7 +61,7 @@ idSIMD::InitProcessor
 ============
 */
 void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
-	cpuid_t cpuid;
+	int cpuid;
 	idSIMDProcessor *newProcessor;
 
 	cpuid = idLib::sys->GetProcessorId();
@@ -4105,7 +4105,7 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 	p_generic = generic;
 
 	if ( idStr::Length( args.Argv( 1 ) ) != 0 ) {
-		cpuid_t cpuid = idLib::sys->GetProcessorId();
+		int cpuid = idLib::sys->GetProcessorId();
 		idStr argString = args.Args();
 
 		argString.Replace( " ", "" );

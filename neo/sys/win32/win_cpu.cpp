@@ -531,7 +531,7 @@ static bool HasDAZ( void ) {
 Sys_GetCPUId
 ================
 */
-cpuid_t Sys_GetCPUId( void ) {
+int Sys_GetCPUId( void ) {
 	int flags;
 
 	// verify we're at least a Pentium or 486 with CPUID support
@@ -586,7 +586,7 @@ cpuid_t Sys_GetCPUId( void ) {
 		flags |= CPUID_DAZ;
 	}
 
-	return (cpuid_t)flags;
+	return flags;
 }
 
 

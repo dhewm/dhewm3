@@ -44,7 +44,7 @@ public:
 
 	virtual double			GetClockTicks( void );
 	virtual double			ClockTicksPerSecond( void );
-	virtual cpuid_t			GetProcessorId( void );
+	virtual int				GetProcessorId( void );
 	virtual const char *	GetProcessorString( void );
 	virtual const char *	FPU_GetState( void );
 	virtual bool			FPU_StackIsEmpty( void );

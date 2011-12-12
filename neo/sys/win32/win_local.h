@@ -70,7 +70,7 @@ char	*Sys_GetCurrentUser( void );
 
 void	Win_SetErrorText( const char *text );
 
-cpuid_t	Sys_GetCPUId( void );
+int		Sys_GetCPUId( void );
 
 int		MapKey (int key);
 
@@ -108,7 +108,7 @@ typedef struct {
 
 	OSVERSIONINFOEX	osversion;
 
-	cpuid_t			cpuid;
+	int				cpuid;
 
 	// when we get a windows message, we store the time off so keyboard processing
 	// can know the exact time of an event (not really needed now that we use async direct input)

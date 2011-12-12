@@ -208,7 +208,7 @@ void Sys_Shutdown( void ) {
 Sys_GetProcessorId
 ===============
 */
-cpuid_t Sys_GetProcessorId( void ) {
+int Sys_GetProcessorId( void ) {
 	return CPUID_GENERIC;
 }
 

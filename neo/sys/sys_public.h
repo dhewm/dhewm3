@@ -323,7 +323,7 @@ double			Sys_GetClockTicks( void );
 double			Sys_ClockTicksPerSecond( void );
 
 // returns a selection of the CPUID_* flags
-cpuid_t			Sys_GetProcessorId( void );
+int				Sys_GetProcessorId( void );
 const char *	Sys_GetProcessorString( void );
 
 // returns true if the FPU stack is empty
@@ -593,7 +593,7 @@ public:
 
 	virtual double			GetClockTicks( void ) = 0;
 	virtual double			ClockTicksPerSecond( void ) = 0;
-	virtual cpuid_t			GetProcessorId( void ) = 0;
+	virtual int				GetProcessorId( void ) = 0;
 	virtual const char *	GetProcessorString( void ) = 0;
 	virtual const char *	FPU_GetState( void ) = 0;
 	virtual bool			FPU_StackIsEmpty( void ) = 0;
