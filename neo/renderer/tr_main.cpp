@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef __ppc__
 #include <vecLib/vecLib.h>
 #endif
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(__GNUC__) && defined(__SSE2__)
 #include <xmmintrin.h>
 #endif
 
@@ -468,7 +468,7 @@ void R_AxisToModelMatrix( const idMat3 &axis, const idVec3 &origin, float modelM
 // FIXME: these assume no skewing or scaling transforms
 
 void R_LocalPointToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(__GNUC__) && defined(__SSE2__)
 	__m128 m0, m1, m2, m3;
 	__m128 in0, in1, in2;
 	float i0,i1,i2;
