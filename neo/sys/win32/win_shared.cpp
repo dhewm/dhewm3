@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <io.h>
 #include <conio.h>
 
-#ifndef	ID_DEDICATED
+#if !defined(ID_DEDICATED) && !defined(__MINGW32__)
 #include <comdef.h>
 #include <comutil.h>
 #include <wbemidl.h>
@@ -110,7 +110,7 @@ returns in megabytes
 ================
 */
 int Sys_GetVideoRam( void ) {
-#ifdef	ID_DEDICATED
+#if defined(ID_DEDICATED) || defined(__MINGW32__)
 	return 0;
 #else
 	unsigned int retSize = 64;
