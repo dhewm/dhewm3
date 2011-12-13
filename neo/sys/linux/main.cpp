@@ -208,9 +208,101 @@ void Sys_Shutdown( void ) {
 Sys_GetProcessorId
 ===============
 */
+static char cpustring[13] = "generic\0";
+
+#if defined(__x86_64__) || defined(__i386__)
+#if __x86_64__
+#	define REG_b "rbx"
+#	define REG_S "rsi"
+#elif __i386__
+#	define REG_b "ebx"
+#	define REG_S "esi"
+#endif
+
+#define cpuid(index,eax,ebx,ecx,edx)		\
+	__asm__ volatile						\
+	(	"mov %%" REG_b ", %%" REG_S "\n\t"	\
+		"cpuid\n\t"							\
+		"xchg %%" REG_b ", %%" REG_S		\
+		:	"=a" (eax), "=S" (ebx),			\
+			"=c" (ecx), "=d" (edx)			\
+		: "0" (index));
+
+int Sys_GetProcessorId( void ) {
+	int eax, ebx, ecx, edx;
+	int max_std_level, max_ext_level, std_caps=0, ext_caps=0;
+	union { int i[3]; char c[12]; } vendor;
+
+	int i = CPUID_GENERIC;
+
+	cpuid(0, max_std_level, ebx, ecx, edx);
+	vendor.i[0] = ebx;
+	vendor.i[1] = edx;
+	vendor.i[2] = ecx;
+
+	strncpy(cpustring, vendor.c, 12);
+	cpustring[12] = 0;
+
+	Sys_Printf("Detected '%s' CPU with", cpustring);
+
+	if (max_std_level >= 1) {
+		cpuid(1, eax, ebx, ecx, std_caps);
+
+#ifdef __MMX__
+		if (std_caps & (1<<23)) {
+			Sys_Printf(" MMX");
+			i |= CPUID_MMX;
+		}
+#endif
+#ifdef __SSE__
+		if (std_caps & (1<<25)) {
+			Sys_Printf(" SSE");
+			i |= CPUID_SSE;
+		}
+#endif
+#ifdef __SSE2__
+		if (std_caps & (1<<26)) {
+			Sys_Printf(" SSE2");
+			i |= CPUID_SSE2;
+		}
+#endif
+#ifdef __SSE3__
+		if (ecx & 1) {
+			Sys_Printf(" SSE3");
+			i |= CPUID_SSE3;
+		}
+#endif
+	}
+
+	cpuid(0x80000000, max_ext_level, ebx, ecx, edx);
+
+	if (max_ext_level >= 0x80000001) {
+		cpuid(0x80000001, eax, ebx, ecx, ext_caps);
+
+#ifdef __3dNOW__
+		if (ext_caps & (1U<<31)) {
+			Sys_Printf(" 3DNOW");
+			i |= CPUID_3DNOW;
+		}
+#endif
+#ifdef __MMX__
+		if (ext_caps & (1<<23)) {
+			if (!(i & CPUID_MMX))
+				Sys_Printf(" MMX");
+			i |= CPUID_MMX;
+		}
+#endif
+	}
+
+	Sys_Printf("\n");
+
+	return i;
+}
+#else
 int Sys_GetProcessorId( void ) {
 	return CPUID_GENERIC;
 }
+#endif
 
 /*
 ===============
@@ -218,7 +310,7 @@ Sys_GetProcessorString
 ===============
 */
 const char *Sys_GetProcessorString( void ) {
-	return "generic";
+	return cpustring;
 }
 
 /*
