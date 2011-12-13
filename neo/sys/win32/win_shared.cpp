@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef	ID_DEDICATED
 #include <comdef.h>
 #include <comutil.h>
-#include <Wbemidl.h>
+#include <wbemidl.h>
 
 #pragma comment (lib, "wbemuuid.lib")
 #endif

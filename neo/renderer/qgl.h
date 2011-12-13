@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #if defined( _WIN32 )
 
-#include <gl/gl.h>
+#include <GL/gl.h>
 
 #elif defined( MACOS_X )
 
