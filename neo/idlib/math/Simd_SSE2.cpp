@@ -76,7 +76,7 @@ void VPCALL idSIMD_SSE2::CmpLT( byte *dst, const byte bitNum, const float *src0,
 	int dst_l;
 
 	/* if the float array is not aligned on a 4 byte boundary */
-	if ( ((int) src0) & 3 ) {
+	if ( ptrdiff_t(src0) & 3 ) {
 		/* unaligned memory access */
 		pre = 0;
 		cnt = count >> 2;
@@ -152,8 +152,8 @@ void VPCALL idSIMD_SSE2::CmpLT( byte *dst, const byte bitNum, const float *src0,
 	}
 	else {
 		/* aligned memory access */
-		aligned = (float *) ((((int) src0) + 15) & ~15);
-		if ( (int)aligned > ((int)src0) + count ) {
+		aligned = (float *) ((ptrdiff_t(src0) + 15) & ~15);
+		if ( ptrdiff_t(aligned) > ptrdiff_t(src0) + count ) {
 			pre = count;
 			post = 0;
 		}
