@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 //===============================================================
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 /*
 ============

@@ -53,7 +53,7 @@ const char * idSIMD_SSE3::GetName( void ) const {
 	return "MMX & SSE & SSE2 & SSE3";
 }
 
-#elif defined(_WIN32)
+#elif defined(_MSC_VER)
 
 #include <xmmintrin.h>
 
