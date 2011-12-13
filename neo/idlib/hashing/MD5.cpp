@@ -249,7 +249,7 @@ void MD5_Final( MD5_CTX *ctx, unsigned char digest[16] ) {
 
 	MD5_Transform( ctx->state, (unsigned int *) ctx->in );
 	memcpy( digest, ctx->state, 16 );
-	memset( ctx, 0, sizeof( ctx ) );        /* In case it's sensitive */
+	memset( ctx, 0, sizeof( MD5_CTX ) );        /* In case it's sensitive */
 }
 
 /*
