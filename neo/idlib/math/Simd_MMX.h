@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 class idSIMD_MMX : public idSIMD_Generic {
 public:
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(__GNUC__) && defined(__MMX__)
 	virtual const char * VPCALL GetName( void ) const;
 
 #elif defined(_WIN32)

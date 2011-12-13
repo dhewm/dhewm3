@@ -48,7 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 #define DRAWVERT_TANGENT1_OFFSET	(ptrdiff_t(src) - ptrdiff_t(&src->tangents[1]))
 #define DRAWVERT_COLOR_OFFSET		(ptrdiff_t(src) - ptrdiff_t(&src->color))
 
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(__GNUC__) && defined(__SSE__)
 
 #include <xmmintrin.h>
 
