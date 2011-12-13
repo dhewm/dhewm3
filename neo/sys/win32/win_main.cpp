@@ -91,12 +91,15 @@ Sys_Createthread
 ==================
 */
 void Sys_CreateThread(  xthread_t function, void *parms, xthreadPriority priority, xthreadInfo &info, const char *name, xthreadInfo *threads[MAX_THREADS], int *thread_count ) {
+	DWORD id;
 	HANDLE temp = CreateThread(	NULL,	// LPSECURITY_ATTRIBUTES lpsa,
 									0,		// DWORD cbStack,
-									function,	// LPTHREAD_START_ROUTINE lpStartAddr,
+									(LPTHREAD_START_ROUTINE)function,	// LPTHREAD_START_ROUTINE lpStartAddr,
 									parms,	// LPVOID lpvThreadParm,
 									0,		//   DWORD fdwCreate,
-									&info.threadId);
+									&id);
+
+	info.threadId = id;
 	info.threadHandle = (intptr_t) temp;
 	if (priority == THREAD_HIGHEST) {
 		SetThreadPriority( (HANDLE)info.threadHandle, THREAD_PRIORITY_HIGHEST );		//  we better sleep enough to do this
@@ -677,7 +680,7 @@ Sys_DLL_GetProcAddress
 =====================
 */
 void *Sys_DLL_GetProcAddress( uintptr_t dllHandle, const char *procName ) {
-	return GetProcAddress( (HINSTANCE)dllHandle, procName );
+	return (void *)GetProcAddress( (HINSTANCE)dllHandle, procName );
 }
 
 /*
