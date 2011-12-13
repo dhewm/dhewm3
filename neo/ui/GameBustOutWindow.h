@@ -95,7 +95,7 @@ public:
 public:
 					BOBrick();
 					BOBrick( BOEntity *_ent, float _x, float _y, float _width, float _height );
-					~BOBrick();
+	virtual			~BOBrick();
 
 	virtual void	WriteToSaveGame( idFile *savefile );
 	virtual void	ReadFromSaveGame( idFile *savefile, idGameBustOutWindow *game );
