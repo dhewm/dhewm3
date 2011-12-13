@@ -952,28 +952,24 @@ void Sys_QueMouseEvents( int dwElements ) {
 	int i, value;
 
 	for( i = 0; i < dwElements; i++ ) {
-		if ( polled_didod[i].dwOfs >= DIMOFS_BUTTON0 && polled_didod[i].dwOfs <= DIMOFS_BUTTON7 ) {
+		int diaction = polled_didod[i].dwOfs;
+
+		if ( diaction >= DIMOFS_BUTTON0 && diaction <= DIMOFS_BUTTON7 ) {
 			value = (polled_didod[i].dwData & 0x80) == 0x80;
-			Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_KEY, K_MOUSE1 + ( polled_didod[i].dwOfs - DIMOFS_BUTTON0 ), value, 0, NULL );
-		} else {
-			switch (polled_didod[i].dwOfs) {
-			case DIMOFS_X:
-				value = polled_didod[i].dwData;
-				Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_MOUSE, value, 0, 0, NULL );
-				break;
-			case DIMOFS_Y:
-				value = polled_didod[i].dwData;
-				Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_MOUSE, 0, value, 0, NULL );
-				break;
-			case DIMOFS_Z:
-				value = ( (int) polled_didod[i].dwData ) / WHEEL_DELTA;
-				int key = value < 0 ? K_MWHEELDOWN : K_MWHEELUP;
-				value = abs( value );
-				while( value-- > 0 ) {
-					Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_KEY, key, true, 0, NULL );
-					Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_KEY, key, false, 0, NULL );
-				}
-				break;
+			Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_KEY, K_MOUSE1 + ( diaction - DIMOFS_BUTTON0 ), value, 0, NULL );
+		} else if (diaction == DIMOFS_X) {
+			value = polled_didod[i].dwData;
+			Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_MOUSE, value, 0, 0, NULL );
+		} else if (diaction == DIMOFS_Y) {
+			value = polled_didod[i].dwData;
+			Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_MOUSE, 0, value, 0, NULL );
+		} else if (diaction == DIMOFS_Z) {
+			value = ( (int) polled_didod[i].dwData ) / WHEEL_DELTA;
+			int key = value < 0 ? K_MWHEELDOWN : K_MWHEELUP;
+			value = abs( value );
+			while( value-- > 0 ) {
+				Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_KEY, key, true, 0, NULL );
+				Sys_QueEvent( polled_didod[i].dwTimeStamp, SE_KEY, key, false, 0, NULL );
 			}
 		}
 	}
@@ -1018,16 +1014,17 @@ int Sys_ReturnMouseInputEvent( const int n, int &action, int &value ) {
 		return 1;
 	}
 
-	switch( diaction ) {
-		case DIMOFS_X:
+	if ( diaction == DIMOFS_X) {
 			value = polled_didod[n].dwData;
 			action = M_DELTAX;
 			return 1;
-		case DIMOFS_Y:
+	}
+	if ( diaction == DIMOFS_Y) {
 			value = polled_didod[n].dwData;
 			action = M_DELTAY;
 			return 1;
-		case DIMOFS_Z:
+	}
+	if ( diaction == DIMOFS_Z) {
 			// mouse wheel actions are impulses, without a specific up / down
 			value = ( (int) polled_didod[n].dwData ) / WHEEL_DELTA;
 			action = M_DELTAZ;
