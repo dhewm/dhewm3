@@ -207,7 +207,9 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			endif()
 		endif()
 
-		set(sys_libs ${sys_libs} pthread)
+		if (NOT MINGW)
+			set(sys_libs ${sys_libs} pthread)
+		endif()
 
 		if (os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
@@ -215,6 +217,23 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	endif()
 else()
 	message(FATAL_ERROR "Unsupported compiler")
+endif()
+
+# mingw and msvc
+if (WIN32)
+	add_definitions(-DWINVER=0x0501)
+	add_definitions(-D_WIN32_WINNT=0x0501)
+
+	set(sys_libs ${sys_libs}
+		dinput8
+		dsound
+		ksuser
+		dxguid
+		dxerr8
+		winmm
+		iphlpapi
+		wsock32
+	)
 endif()
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}.${cpu}")
@@ -646,6 +665,26 @@ if (APPLE)
 		sys/osx/macosx_misc.mm
 #		sys/osx/macosx_utils.mm
 #		sys/osx/macosx_sys.mm
+	)
+elseif (WIN32)
+	set(src_sys_base
+		sys/sys_local.cpp
+		sys/win32/win_cpu.cpp
+#		sys/win32/win_gamma.cpp
+		sys/win32/win_glimp.cpp
+		sys/win32/win_input.cpp
+		sys/win32/win_main.cpp
+		sys/win32/win_net.cpp
+		sys/win32/win_qgl.cpp
+		sys/win32/win_shared.cpp
+		sys/win32/win_snd.cpp
+		sys/win32/win_syscon.cpp
+		sys/win32/win_taskkeyhook.cpp
+		sys/win32/win_wndproc.cpp
+	)
+
+	set(src_sys_core
+		${src_stub_util}
 	)
 else()
 	set(src_sys_base

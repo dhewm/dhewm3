@@ -37,29 +37,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _WIN32
 
+#if defined(_MFC_VER) && !defined(_D3SDK) && !defined(GAME_DLL)
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// prevent auto literal to string conversion
-
-#ifndef _D3SDK
-#ifndef GAME_DLL
-
-#define WINVER				0x501
-
-#if 0
-// Dedicated server hits unresolved when trying to link this way now. Likely because of the 2010/Win7 transition? - TTimo
-
-#ifdef	ID_DEDICATED
-// dedicated sets windows version here
-#define	_WIN32_WINNT WINVER
-#define	WIN32_LEAN_AND_MEAN
-#else
-// non-dedicated includes MFC and sets windows version here
-#include "../tools/comafx/StdAfx.h"			// this will go away when MFC goes away
-#endif
-
-#else
-
 #include "../tools/comafx/StdAfx.h"
-
 #endif
 
 #include <winsock2.h>
@@ -71,9 +51,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <dsound.h>
 #include <dinput.h>
-
-#endif /* !GAME_DLL */
-#endif /* !_D3SDK */
 
 #pragma warning(disable : 4100)				// unreferenced formal parameter
 #pragma warning(disable : 4244)				// conversion to smaller type, possible loss of data

@@ -46,20 +46,26 @@ If you have questions concerning this license or the applicable additional terms
 #define	CPUSTRING						"x86"
 #define CPU_EASYARGS					1
 
-#define ALIGN16( x )					__declspec(align(16)) x
-#define PACKED
-
 #define _alloca16( x )					((void *)((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15))
 
 #define PATHSEPERATOR_STR				"\\"
 #define PATHSEPERATOR_CHAR				'\\'
 
+#ifdef _MSC_VER
+#define ALIGN16( x )					__declspec(align(16)) x
+#define PACKED							__attribute__((packed))
 #define ID_INLINE						__forceinline
 #define ID_STATIC_TEMPLATE				static
-
 #define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
+#else
+#define ALIGN16( x )					x __attribute__ ((aligned (16)))
+#define PACKED
+#define ID_INLINE						inline
+#define ID_STATIC_TEMPLATE
+#define assertmem( x, y )
+#endif
 
-#define THREAD_RETURN_TYPE				dword
+#define THREAD_RETURN_TYPE				DWORD
 
 #if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 	#define ID_LITTLE_ENDIAN			1
