@@ -670,9 +670,6 @@ void GLimp_SetGamma(unsigned short red[256],
 
 /*****************************************************************************/
 
-#pragma mark -
-#pragma mark ¥ ATI_fragment_shader
-
 static GLuint sGeneratingProgram = 0;
 static int sCurrentPass;
 static char sConstString[4096];
@@ -1177,7 +1174,6 @@ void glAlphaFragmentOp2ATI (GLenum op, GLuint dst, GLuint dstMod, GLuint arg1, G
 void glAlphaFragmentOp3ATI (GLenum op, GLuint dst, GLuint dstMod, GLuint arg1, GLuint arg1Rep, GLuint arg1Mod, GLuint arg2, GLuint arg2Rep, GLuint arg2Mod, GLuint arg3, GLuint arg3Rep, GLuint arg3Mod) {
 	glColorFragmentOp3ATI ( op, dst, GL_ALPHA, dstMod, arg1, arg1Rep, arg1Mod, arg2, arg2Rep, arg2Mod, arg3, arg3Rep, arg3Mod);
 }
-#pragma mark -
 
 GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	NSSymbol symbol;

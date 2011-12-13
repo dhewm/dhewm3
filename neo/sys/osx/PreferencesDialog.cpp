@@ -78,9 +78,6 @@ struct PrefInfo
 	SInt32							freqMenuIndex;
 };
 
-
-#pragma mark -
-
 bool R_GetModeInfo( int *width, int *height, int mode );
 
 static int GetScreenIndexForDisplayID( CGDirectDisplayID inDisplayID ) {
@@ -202,8 +199,6 @@ void Sys_DoPreferences( void ) {
 	}
 }
 
-
-#pragma mark -
 
 #define EnablePopupMenuItem(inControl,inMenuItem)		EnableMenuItem(GetControlPopupMenuRef(inControl),inMenuItem)
 #define DisablePopupMenuItem(inControl,inMenuItem)		DisableMenuItem(GetControlPopupMenuRef(inControl),inMenuItem)
@@ -577,12 +572,8 @@ static void AdjustDisplayControls(PrefInfo *prefInfo)
 		EnableControl (prefInfo->refreshRatePopup);
 }
 
-#pragma mark -
-
-static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEvent, void* inUserData )
+static pascal OSStatus PrefHandler( EventHandlerCallRef, EventRef inEvent, void* inUserData )
 {
-	#pragma unused( inHandler )
-
 	HICommand			cmd;
 	OSStatus			result = eventNotHandledErr;
 	PrefInfo*			prefInfo = (PrefInfo*)inUserData;
@@ -697,8 +688,6 @@ static pascal OSStatus PrefHandler( EventHandlerCallRef inHandler, EventRef inEv
 	}
 	return result;
 }
-
-#pragma mark -
 
 static DEFINE_ONE_SHOT_HANDLER_GETTER(PrefHandler)
 

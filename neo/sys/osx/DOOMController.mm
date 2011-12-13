@@ -838,10 +838,6 @@ int main( int argc, const char *argv[] ) {
 	return NSApplicationMain( argc, argv );
 }
 
-
-#pragma mark -
-
-
 bool FormatRegCode(const char* inRegCode, char* outRegCode)
 {
 	// Clean up the reg code. Remove spaces. Accept only numbers/letters.
@@ -866,9 +862,8 @@ bool FormatRegCode(const char* inRegCode, char* outRegCode)
  RegCodeHandler
  ===============
  */
-static pascal OSStatus RegCodeHandler( EventHandlerCallRef inHandler, EventRef inEvent, void* inUserData )
+static pascal OSStatus RegCodeHandler( EventHandlerCallRef, EventRef inEvent, void* inUserData )
 {
-#pragma unused( inHandler )
 #if 1
 	// FIXME: the CD key API has changed for startup check support and expansion pack key support
 	return noErr;
