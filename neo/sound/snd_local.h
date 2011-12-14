@@ -770,7 +770,6 @@ public:
 	idEFXFile				EFXDatabase;
 	bool					efxloaded;
 							// latches
-	static bool				useOpenAL;
 	static bool				useEAXReverb;
 							// mark available during initialization, or through an explicit test
 	static int				EAXAvailable;

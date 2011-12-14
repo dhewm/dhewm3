@@ -84,7 +84,6 @@ idCVar idSoundSystemLocal::s_muteEAXReverb( "s_muteEAXReverb", "0", CVAR_SOUND |
 idCVar idSoundSystemLocal::s_decompressionLimit( "s_decompressionLimit", "6", CVAR_SOUND | CVAR_INTEGER | CVAR_ROM, "specifies maximum uncompressed sample length in seconds" );
 #endif
 
-bool idSoundSystemLocal::useOpenAL = true;
 bool idSoundSystemLocal::useEAXReverb = false;
 int idSoundSystemLocal::EAXAvailable = -1;
 
@@ -1223,7 +1222,8 @@ void idSoundSystemLocal::DoEnviroSuit( float* samples, int numSamples, int numSp
 	float out[10000], *out_p = out + 2;
 	float in[10000], *in_p = in + 2;
 
-	assert( !idSoundSystemLocal::useOpenAL );
+	// TODO port to OpenAL
+	assert( false );
 
 	if ( !fxList.Num() ) {
 		for ( int i = 0; i < 6; i++ ) {

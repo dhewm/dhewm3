@@ -222,28 +222,25 @@ idSoundChannel::ALStop
 ===================
 */
 void idSoundChannel::ALStop( void ) {
-	if ( idSoundSystemLocal::useOpenAL ) {
+	if ( alIsSource( openalSource ) ) {
+		alSourceStop( openalSource );
+		alSourcei( openalSource, AL_BUFFER, 0 );
+		soundSystemLocal.FreeOpenALSource( openalSource );
+	}
 
-		if ( alIsSource( openalSource ) ) {
-			alSourceStop( openalSource );
-			alSourcei( openalSource, AL_BUFFER, 0 );
-			soundSystemLocal.FreeOpenALSource( openalSource );
+	if ( openalStreamingBuffer[0] && openalStreamingBuffer[1] && openalStreamingBuffer[2] ) {
+		alGetError();
+		alDeleteBuffers( 3, &openalStreamingBuffer[0] );
+		if ( alGetError() == AL_NO_ERROR ) {
+			openalStreamingBuffer[0] = openalStreamingBuffer[1] = openalStreamingBuffer[2] = 0;
 		}
+	}
 
-		if ( openalStreamingBuffer[0] && openalStreamingBuffer[1] && openalStreamingBuffer[2] ) {
-			alGetError();
-			alDeleteBuffers( 3, &openalStreamingBuffer[0] );
-			if ( alGetError() == AL_NO_ERROR ) {
-				openalStreamingBuffer[0] = openalStreamingBuffer[1] = openalStreamingBuffer[2] = 0;
-			}
-		}
-
-		if ( lastopenalStreamingBuffer[0] && lastopenalStreamingBuffer[1] && lastopenalStreamingBuffer[2] ) {
-			alGetError();
-			alDeleteBuffers( 3, &lastopenalStreamingBuffer[0] );
-			if ( alGetError() == AL_NO_ERROR ) {
-				lastopenalStreamingBuffer[0] = lastopenalStreamingBuffer[1] = lastopenalStreamingBuffer[2] = 0;
-			}
+	if ( lastopenalStreamingBuffer[0] && lastopenalStreamingBuffer[1] && lastopenalStreamingBuffer[2] ) {
+		alGetError();
+		alDeleteBuffers( 3, &lastopenalStreamingBuffer[0] );
+		if ( alGetError() == AL_NO_ERROR ) {
+			lastopenalStreamingBuffer[0] = lastopenalStreamingBuffer[1] = lastopenalStreamingBuffer[2] = 0;
 		}
 	}
 }
@@ -452,7 +449,7 @@ void idSoundEmitterLocal::CheckForCompletion( int current44kHzTime ) {
 			if ( !( chan->parms.soundShaderFlags & SSF_LOOPING ) ) {
 				ALint state = AL_PLAYING;
 
-				if ( idSoundSystemLocal::useOpenAL && alIsSource( chan->openalSource ) ) {
+				if ( alIsSource( chan->openalSource ) ) {
 					alGetSourcei( chan->openalSource, AL_SOURCE_STATE, &state );
 				}
 				idSlowChannel slow = GetSlowChannel( chan );
