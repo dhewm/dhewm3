@@ -199,7 +199,6 @@ sys_string = ' \
 	posix/posix_main.cpp \
 	posix/posix_signal.cpp \
 	posix/posix_threads.cpp \
-	linux/stack.cpp \
 	linux/main.cpp \
 	stub/util_stub.cpp'
 

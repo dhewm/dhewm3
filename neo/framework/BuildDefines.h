@@ -96,19 +96,6 @@ If you have questions concerning this license or the applicable additional terms
 	#define	ID_ALLOW_TOOLS
 #endif
 
-// don't do backtraces in release builds.
-// atm, we have no useful way to reconstruct the trace, so let's leave it off
-#define ID_BT_STUB
-#ifndef ID_BT_STUB
-	#if defined( __unix__ )
-		#if defined( _DEBUG )
-			#define ID_BT_STUB
-		#endif
-	#else
-		#define ID_BT_STUB
-	#endif
-#endif
-
 #ifndef ID_ENFORCE_KEY
 #	if !defined( ID_DEDICATED ) && !defined( ID_DEMO_BUILD )
 #		define ID_ENFORCE_KEY 1

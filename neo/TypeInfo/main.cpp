@@ -221,11 +221,6 @@ void			idSysLocal::FPU_SetDAZ( bool enable ) {}
 bool			idSysLocal::LockMemory( void *ptr, int bytes ) { return false; }
 bool			idSysLocal::UnlockMemory( void *ptr, int bytes ) { return false; }
 
-void			idSysLocal::GetCallStack( address_t *callStack, const int callStackSize ) { memset( callStack, 0, callStackSize * sizeof( callStack[0] ) ); }
-const char *	idSysLocal::GetCallStackStr( const address_t *callStack, const int callStackSize ) { return ""; }
-const char *	idSysLocal::GetCallStackCurStr( int depth ) { return ""; }
-void			idSysLocal::ShutdownSymbols( void ) {}
-
 uintptr_t		idSysLocal::DLL_Load( const char *dllName ) { return 0; }
 void *			idSysLocal::DLL_GetProcAddress( uintptr_t dllHandle, const char *procName ) { return NULL; }
 void			idSysLocal::DLL_Unload( uintptr_t dllHandle ) { }
