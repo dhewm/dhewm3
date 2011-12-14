@@ -31,17 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-#include "cg_explicit.h"
-
-CGcontext cg_context;
-
-#if 0
-static void cg_error_callback( void ) {
-	CGerror i = cgGetError();
-	common->Printf( "Cg error (%d): %s\n", i, cgGetErrorString(i) );
-}
-#endif
-
 /*
 =========================================================================================
 

@@ -41,11 +41,9 @@ renderer_string = ' \
 	RenderWorld_load.cpp \
 	RenderWorld_portals.cpp \
 	VertexCache.cpp \
-	cg_explicit.cpp \
 	draw_arb.cpp \
 	draw_arb2.cpp \
 	draw_common.cpp \
-	draw_exp_stub.cpp \
 	draw_nv10.cpp \
 	draw_nv20.cpp \
 	draw_r200.cpp \

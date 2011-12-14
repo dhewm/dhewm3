@@ -260,11 +260,9 @@ set(src_renderer
 	renderer/RenderWorld_load.cpp
 	renderer/RenderWorld_portals.cpp
 	renderer/VertexCache.cpp
-	renderer/cg_explicit.cpp
 	renderer/draw_arb.cpp
 	renderer/draw_arb2.cpp
 	renderer/draw_common.cpp
-	renderer/draw_exp_stub.cpp
 	renderer/draw_nv10.cpp
 	renderer/draw_nv20.cpp
 	renderer/draw_r200.cpp
