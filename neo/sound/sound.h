@@ -290,11 +290,6 @@ public:
 	// shutdown routine
 	virtual	void			Shutdown( void ) = 0;
 
-	// call ClearBuffer if there is a chance that the AsyncUpdate won't get called
-	// for 20+ msec, which would cause a stuttering repeat of the current
-	// buffer contents
-	virtual void			ClearBuffer( void ) = 0;
-
 	// sound is attached to the window, and must be recreated when the window is changed
 	virtual bool			InitHW( void ) = 0;
 	virtual bool			ShutdownHW( void ) = 0;

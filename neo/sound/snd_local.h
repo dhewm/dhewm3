@@ -606,7 +606,6 @@ public:
 
 	void					Shutdown( void );
 	void					Init( idRenderWorld *rw );
-	void					ClearBuffer( void );
 
 	// update
 	void					ForegroundUpdate( int currentTime );
@@ -683,7 +682,6 @@ public:
 
 	// shutdown routine
 	virtual	void			Shutdown( void );
-	virtual void			ClearBuffer( void );
 
 	// sound is attached to the window, and must be recreated when the window is changed
 	virtual bool			ShutdownHW( void );
@@ -731,7 +729,6 @@ public:
 	ALuint					AllocOpenALSource( idSoundChannel *chan, bool looping, bool stereo );
 	void					FreeOpenALSource( ALuint handle );
 
-	idAudioHardware *		snd_audio_hw;
 	idSoundCache *			soundCache;
 
 	idSoundWorldLocal *		currentSoundWorld;	// the one to mix each async tic
