@@ -431,22 +431,3 @@ idAudioHardwareOSX::GetNumberOfSpeakers
 int	idAudioHardwareOSX::GetNumberOfSpeakers() {
 	return idSoundSystemLocal::s_numberOfSpeakers.GetInteger();
 }
-
-/*
- ===============
- Sys_LoadOpenAL
- ===============
- */
-bool Sys_LoadOpenAL( void ) {
-#if ID_OPENAL
-	OSErr	err;
-	long gestaltOSVersion;
-	err = Gestalt(gestaltSystemVersion, &gestaltOSVersion);
-	if ( err || gestaltOSVersion < 0x1040 ) {
-		return false;
-	}
-	return true;
-#else
-	return false;
-#endif
-}

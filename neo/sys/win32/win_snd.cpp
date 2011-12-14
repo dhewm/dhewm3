@@ -502,27 +502,6 @@ bool idAudioHardwareWIN32::GetCurrentPosition( ulong *pdwCurrentWriteCursor ) {
 
 /*
 ===============
-Sys_LoadOpenAL
-===============
-*/
-bool Sys_LoadOpenAL( void ) {
-#if ID_OPENAL
-	return true;
-#else
-	return false;
-#endif
-}
-
-/*
-===============
-Sys_FreeOpenAL
-===============
-*/
-void Sys_FreeOpenAL( void ) {
-}
-
-/*
-===============
 idAudioBufferWIN32::idAudioBuffer
 ===============
 */

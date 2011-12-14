@@ -1038,10 +1038,3 @@ void Sys_Error(const char *error, ...) {
 
 	Posix_Exit( EXIT_FAILURE );
 }
-
-/*
-===============
-Sys_FreeOpenAL
-===============
-*/
-void Sys_FreeOpenAL( void ) { }

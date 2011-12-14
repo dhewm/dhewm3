@@ -335,79 +335,75 @@ void idSoundSystemLocal::Init() {
 	common->StartupVariable( "s_useEAXReverb", true );
 
 	if ( idSoundSystemLocal::s_useOpenAL.GetBool() || idSoundSystemLocal::s_useEAXReverb.GetBool() ) {
-		if ( !Sys_LoadOpenAL() ) {
-			idSoundSystemLocal::s_useOpenAL.SetBool( false );
+		common->Printf( "Setup OpenAL device and context... " );
+		openalDevice = alcOpenDevice( NULL );
+		openalContext = alcCreateContext( openalDevice, NULL );
+		alcMakeContextCurrent( openalContext );
+		common->Printf( "Done.\n" );
+
+#if ID_OPENAL_EAX
+		// try to obtain EAX extensions
+		if ( idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent( ID_ALCHAR "EAX4.0" ) ) {
+			idSoundSystemLocal::s_useOpenAL.SetBool( true );	// EAX presence causes AL enable
+			alEAXSet = (EAXSet)alGetProcAddress( ID_ALCHAR "EAXSet" );
+			alEAXGet = (EAXGet)alGetProcAddress( ID_ALCHAR "EAXGet" );
+			common->Printf( "OpenAL: found EAX 4.0 extension\n" );
+			EAXAvailable = 1;
 		} else {
-			common->Printf( "Setup OpenAL device and context... " );
-			openalDevice = alcOpenDevice( NULL );
-			openalContext = alcCreateContext( openalDevice, NULL );
-			alcMakeContextCurrent( openalContext );
-			common->Printf( "Done.\n" );
-
-#if ID_OPENAL_EAX
-			// try to obtain EAX extensions
-			if ( idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent( ID_ALCHAR "EAX4.0" ) ) {
-				idSoundSystemLocal::s_useOpenAL.SetBool( true );	// EAX presence causes AL enable
-				alEAXSet = (EAXSet)alGetProcAddress( ID_ALCHAR "EAXSet" );
-				alEAXGet = (EAXGet)alGetProcAddress( ID_ALCHAR "EAXGet" );
-				common->Printf( "OpenAL: found EAX 4.0 extension\n" );
-				EAXAvailable = 1;
-			} else {
-				common->Printf( "OpenAL: EAX 4.0 extension not found\n" );
-				idSoundSystemLocal::s_useEAXReverb.SetBool( false );
-				alEAXSet = (EAXSet)NULL;
-				alEAXGet = (EAXGet)NULL;
-				EAXAvailable = 0;
-			}
-#else
-			common->Printf("OpenAL: EAX 4.0 not supported in this build\n");
+			common->Printf( "OpenAL: EAX 4.0 extension not found\n" );
 			idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+			alEAXSet = (EAXSet)NULL;
+			alEAXGet = (EAXGet)NULL;
 			EAXAvailable = 0;
+		}
+#else
+		common->Printf("OpenAL: EAX 4.0 not supported in this build\n");
+		idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+		EAXAvailable = 0;
 #endif
 
 #if ID_OPENAL_EAX
-			// try to obtain EAX-RAM extension - not required for operation
-			if ( alIsExtensionPresent( ID_ALCHAR "EAX-RAM" ) == AL_TRUE ) {
-				alEAXSetBufferMode = (EAXSetBufferMode)alGetProcAddress( ID_ALCHAR "EAXSetBufferMode" );
-				alEAXGetBufferMode = (EAXGetBufferMode)alGetProcAddress( ID_ALCHAR "EAXGetBufferMode" );
-				common->Printf( "OpenAL: found EAX-RAM extension, %dkB\\%dkB\n", alGetInteger( alGetEnumValue( ID_ALCHAR "AL_EAX_RAM_FREE" ) ) / 1024, alGetInteger( alGetEnumValue( ID_ALCHAR "AL_EAX_RAM_SIZE" ) ) / 1024 );
-			} else {
-				alEAXSetBufferMode = (EAXSetBufferMode)NULL;
-				alEAXGetBufferMode = (EAXGetBufferMode)NULL;
-				common->Printf( "OpenAL: no EAX-RAM extension\n" );
-			}
+		// try to obtain EAX-RAM extension - not required for operation
+		if ( alIsExtensionPresent( ID_ALCHAR "EAX-RAM" ) == AL_TRUE ) {
+			alEAXSetBufferMode = (EAXSetBufferMode)alGetProcAddress( ID_ALCHAR "EAXSetBufferMode" );
+			alEAXGetBufferMode = (EAXGetBufferMode)alGetProcAddress( ID_ALCHAR "EAXGetBufferMode" );
+			common->Printf( "OpenAL: found EAX-RAM extension, %dkB\\%dkB\n", alGetInteger( alGetEnumValue( ID_ALCHAR "AL_EAX_RAM_FREE" ) ) / 1024, alGetInteger( alGetEnumValue( ID_ALCHAR "AL_EAX_RAM_SIZE" ) ) / 1024 );
+		} else {
+			alEAXSetBufferMode = (EAXSetBufferMode)NULL;
+			alEAXGetBufferMode = (EAXGetBufferMode)NULL;
+			common->Printf( "OpenAL: no EAX-RAM extension\n" );
+		}
 #endif
 
-			ALuint handle;
-			openalSourceCount = 0;
+		ALuint handle;
+		openalSourceCount = 0;
 
-			while ( openalSourceCount < 256 ) {
-				alGetError();
-				alGenSources( 1, &handle );
-				if ( alGetError() != AL_NO_ERROR ) {
-					break;
-				} else {
-					// store in source array
-					openalSources[openalSourceCount].handle = handle;
-					openalSources[openalSourceCount].startTime = 0;
-					openalSources[openalSourceCount].chan = NULL;
-					openalSources[openalSourceCount].inUse = false;
-					openalSources[openalSourceCount].looping = false;
+		while ( openalSourceCount < 256 ) {
+			alGetError();
+			alGenSources( 1, &handle );
+			if ( alGetError() != AL_NO_ERROR ) {
+				break;
+			} else {
+				// store in source array
+				openalSources[openalSourceCount].handle = handle;
+				openalSources[openalSourceCount].startTime = 0;
+				openalSources[openalSourceCount].chan = NULL;
+				openalSources[openalSourceCount].inUse = false;
+				openalSources[openalSourceCount].looping = false;
 
-					// initialise sources
-					alSourcef( handle, AL_ROLLOFF_FACTOR, 0.0f );
+				// initialise sources
+				alSourcef( handle, AL_ROLLOFF_FACTOR, 0.0f );
 
-					// found one source
-					openalSourceCount++;
-				}
+				// found one source
+				openalSourceCount++;
 			}
-
-			common->Printf( "OpenAL: found %s\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
-			common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
-
-			// adjust source count to allow for at least eight stereo sounds to play
-			openalSourceCount -= 8;
 		}
+
+		common->Printf( "OpenAL: found %s\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
+		common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
+
+		// adjust source count to allow for at least eight stereo sounds to play
+		openalSourceCount -= 8;
 	}
 
 	useOpenAL = idSoundSystemLocal::s_useOpenAL.GetBool();
@@ -474,8 +470,6 @@ void idSoundSystemLocal::Shutdown() {
 		alcCloseDevice( openalDevice );
 		openalDevice = NULL;
 	}
-
-	Sys_FreeOpenAL();
 
 	idSampleDecoder::Shutdown();
 }
@@ -1434,10 +1428,6 @@ int idSoundSystemLocal::IsEAXAvailable( void ) {
 		return EAXAvailable;
 	}
 
-	if ( !Sys_LoadOpenAL() ) {
-		EAXAvailable = 2;
-		return 2;
-	}
 	// when dynamically loading the OpenAL subsystem, we need to get a context before alIsExtensionPresent would work
 	device = alcOpenDevice( NULL );
 	context = alcCreateContext( device, NULL );
