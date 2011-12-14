@@ -68,7 +68,6 @@ const float SND_EPSILON				= 1.0f / 32768.0f;	// if volume is below this, it wil
 
 const int ROOM_SLICES_IN_BUFFER		= 10;
 
-class idAudioHardware;
 class idAudioBuffer;
 class idWaveFile;
 class idSoundCache;
@@ -219,38 +218,6 @@ private:
 	int				OpenOGG( const char* strFileName, waveformatex_t* pwfx = NULL );
 	int				ReadOGG( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead );
 	int				CloseOGG( void );
-};
-
-
-/*
-===================================================================================
-
-idAudioHardware
-
-===================================================================================
-*/
-
-class idAudioHardware {
-public:
-	static idAudioHardware *Alloc();
-
-	virtual					~idAudioHardware();
-
-	virtual bool			Initialize( ) = 0;
-
-	virtual bool			Lock( void **pDSLockedBuffer, ulong *dwDSLockedBufferSize ) = 0;
-	virtual bool			Unlock( void *pDSLockedBuffer, dword dwDSLockedBufferSize ) = 0;
-	virtual bool			GetCurrentPosition( ulong *pdwCurrentWriteCursor ) = 0;
-
-	// try to write as many sound samples to the device as possible without blocking and prepare for a possible new mixing call
-	// returns wether there is *some* space for writing available
-	virtual bool			Flush( void ) = 0;
-
-	virtual void			Write( bool flushing ) = 0;
-
-	virtual int				GetNumberOfSpeakers( void )= 0;
-	virtual int				GetMixBufferSize( void ) = 0;
-	virtual short*			GetMixBuffer( void ) = 0;
 };
 
 

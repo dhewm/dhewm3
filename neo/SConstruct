@@ -13,7 +13,7 @@ conf_filename='site.conf'
 # choose configuration variables which should be saved between runs
 # ( we handle all those as strings )
 serialized=['CC', 'CXX', 'X86', 'BUILD', 'IDNET_HOST', 'DEDICATED',
-	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK', 'OPENAL', 'ALSA',
+	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS' ]
 
@@ -109,12 +109,6 @@ ID_MCHECK (default 2)
 	note that Doom has it's own block allocator/checking
 	this should not be considered a replacement, but an additional tool
 
-OPENAL (default 1)
-	enable OpenAL sound backend support
-
-ALSA (default 1)
-	enable ALSA sound backend support
-
 SETUP (default 0, not saved)
 	build a setup. implies release build
 
@@ -179,8 +173,6 @@ LIBC_MALLOC = '1'
 ID_NOLANADDRESS = '0'
 ID_MCHECK = '2'
 BUILD_ROOT = 'build'
-OPENAL = '1'
-ALSA = '1'
 SETUP = '0'
 SDK = '0'
 NOCONF = '0'
@@ -382,7 +374,7 @@ local_idlibpic = 0
 # switch between base game build and d3xp game build
 local_d3xp = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os g_cpu g_build ID_MCHECK OPENAL ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os g_cpu g_build ID_MCHECK idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
 
 # end general configuration ----------------------
 

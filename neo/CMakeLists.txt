@@ -21,10 +21,6 @@ cmake_minimum_required(VERSION 2.6)
 # ID_NOLANADDRESS	-DID_NOLANADDRESS
 # ID_MCHECK			-DID_MCHECK
 
-# don't add these as options at all
-# ALSA				remove all sound backends except openal
-# OPENAL			will always be enabled
-
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
 set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 
@@ -108,8 +104,6 @@ if (CURL)
 else()
 	add_definitions(-DID_ENABLE_CURL=0)
 endif()
-
-add_definitions(-DNO_ALSA)
 
 # compiler specific flags
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -197,7 +191,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			message(FATAL_ERROR "Unsupported CPU architecture for OSX")
 		endif()
 
-		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework OpenAL -framework CoreAudio -framework IOKit")
+		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework OpenAL -framework IOKit")
 	else()
 		if (cpu STREQUAL "x86" AND X86)
 			add_definitions(-m32)
@@ -223,7 +217,6 @@ if (WIN32)
 
 	set(sys_libs ${sys_libs}
 		dinput8
-		dsound
 		ksuser
 		dxguid
 		dxerr8
@@ -655,7 +648,6 @@ if (APPLE)
 		sys/osx/PickMonitor.cpp
 		sys/osx/PreferencesDialog.cpp
 		sys/osx/macosx_guids.cpp
-		sys/osx/macosx_sound.cpp
 		sys/osx/DOOMController.mm
 		sys/osx/macosx_event.mm
 		sys/osx/macosx_glimp.mm
@@ -674,7 +666,6 @@ elseif (WIN32)
 		sys/win32/win_net.cpp
 		sys/win32/win_qgl.cpp
 		sys/win32/win_shared.cpp
-		sys/win32/win_snd.cpp
 		sys/win32/win_syscon.cpp
 		sys/win32/win_taskkeyhook.cpp
 		sys/win32/win_wndproc.cpp
@@ -690,7 +681,6 @@ else()
 		sys/posix/posix_signal.cpp
 		sys/posix/posix_threads.cpp
 		sys/posix/posix_main.cpp
-		sys/linux/sound.cpp
 		sys/linux/main.cpp
 	)
 
