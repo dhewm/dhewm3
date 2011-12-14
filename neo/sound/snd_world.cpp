@@ -550,7 +550,7 @@ void idSoundWorldLocal::AVIOpen( const char *path, const char *name ) {
 
 	lastAVI44kHz = game44kHz - game44kHz % MIXBUFFER_SAMPLES;
 
-	if ( soundSystemLocal.snd_audio_hw->GetNumberOfSpeakers() == 6 ) {
+	if ( idSoundSystemLocal::s_numberOfSpeakers.GetInteger() == 6 ) {
 		fpa[0] = fileSystem->OpenFileWrite( aviDemoPath + "channel_51_left.raw" );
 		fpa[1] = fileSystem->OpenFileWrite( aviDemoPath + "channel_51_right.raw" );
 		fpa[2] = fileSystem->OpenFileWrite( aviDemoPath + "channel_51_center.raw" );
@@ -581,11 +581,7 @@ void idSoundWorldLocal::AVIUpdate() {
 		return;
 	}
 
-	if ( !soundSystemLocal.snd_audio_hw ) {
-		numSpeakers = 2;
-	} else {
-		numSpeakers = soundSystemLocal.snd_audio_hw->GetNumberOfSpeakers();
-	}
+	numSpeakers = idSoundSystemLocal::s_numberOfSpeakers.GetInteger();
 
 	float	mix[MIXBUFFER_SAMPLES*6+16];
 	float	*mix_p = (float *)((( intptr_t)mix + 15 ) & ~15);	// SIMD align
@@ -639,7 +635,7 @@ void idSoundWorldLocal::AVIClose( void ) {
 			fpa[i] = NULL;
 		}
 	}
-	if ( soundSystemLocal.snd_audio_hw->GetNumberOfSpeakers() == 2 ) {
+	if ( idSoundSystemLocal::s_numberOfSpeakers.GetInteger() == 2 ) {
 		// convert it to a wave file
 		idFile *rL, *lL, *wO;
 		idStr	name;

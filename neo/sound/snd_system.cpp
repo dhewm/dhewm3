@@ -476,6 +476,13 @@ idSoundSystemLocal::InitHW
 ===============
 */
 bool idSoundSystemLocal::InitHW() {
+	int numSpeakers = s_numberOfSpeakers.GetInteger();
+
+	if (numSpeakers != 2 && numSpeakers != 6) {
+		common->Warning("invalid value for s_numberOfSpeakers. Use either 2 or 6");
+		numSpeakers = 2;
+		s_numberOfSpeakers.SetInteger(numSpeakers);
+	}
 
 	if ( s_noSound.GetBool() ) {
 		return false;
@@ -498,9 +505,11 @@ bool idSoundSystemLocal::InitHW() {
 		if ( snd_audio_hw->GetNumberOfSpeakers() == 0 ) {
 			return false;
 		}
-		// put the real number in there
-		s_numberOfSpeakers.SetInteger( snd_audio_hw->GetNumberOfSpeakers() );
+		numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
 	}
+
+	// put the real number in there
+	s_numberOfSpeakers.SetInteger(numSpeakers);
 
 	isInitialized = true;
 	shutdown = false;
@@ -590,7 +599,7 @@ int idSoundSystemLocal::AsyncMix( int soundTime, float *mixBuffer ) {
 	}
 
 	inTime = Sys_Milliseconds();
-	numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
+	numSpeakers = s_numberOfSpeakers.GetInteger();
 
 	// let the active sound world mix all the channels in unless muted or avi demo recording
 	if ( !muted && currentSoundWorld && !currentSoundWorld->fpa[0] ) {
@@ -654,7 +663,7 @@ int idSoundSystemLocal::AsyncUpdate( int inTime ) {
 	soundStats.runs++;
 	soundStats.activeSounds = 0;
 
-	int	numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
+	int	numSpeakers = s_numberOfSpeakers.GetInteger();
 
 	nextWriteBlock++;
 	nextWriteBlock %= ROOM_SLICES_IN_BUFFER;
@@ -755,7 +764,7 @@ int idSoundSystemLocal::AsyncUpdateWrite( int inTime ) {
 	}
 
 	int sampleTime = dwCurrentBlock * MIXBUFFER_SAMPLES;
-	int numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
+	int numSpeakers = s_numberOfSpeakers.GetInteger();
 
 	if ( useOpenAL ) {
 		// enable audio hardware caching
@@ -837,7 +846,7 @@ cinData_t idSoundSystemLocal::ImageForTime( const int milliseconds, const bool w
 	float *accum = finalMixBuffer;	// unfortunately, these are already clamped
 	int time = Sys_Milliseconds();
 
-	int numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
+	int numSpeakers = s_numberOfSpeakers.GetInteger();
 
 	if ( !waveform ) {
 		for( j = 0; j < numSpeakers; j++ ) {
