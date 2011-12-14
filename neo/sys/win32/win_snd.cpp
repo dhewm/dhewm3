@@ -36,8 +36,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../sound/snd_local.h"
 #include "win_local.h"
 
-#include "idal.cpp"
-
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
 #define SAFE_DELETE_ARRAY(p) { if(p) { delete[] (p);   (p)=NULL; } }
 #define SAFE_RELEASE(p)      { if(p) { (p)->Release(); (p)=NULL; } }
@@ -502,8 +500,6 @@ bool idAudioHardwareWIN32::GetCurrentPosition( ulong *pdwCurrentWriteCursor ) {
 	return false;
 }
 
-static HMODULE hOpenAL = NULL;
-
 /*
 ===============
 Sys_LoadOpenAL
@@ -511,23 +507,6 @@ Sys_LoadOpenAL
 */
 bool Sys_LoadOpenAL( void ) {
 #if ID_OPENAL
-	const char *sym;
-
-	if ( hOpenAL ) {
-		return true;
-	}
-
-	hOpenAL = LoadLibrary( idSoundSystemLocal::s_libOpenAL.GetString() );
-	if ( !hOpenAL ) {
-		common->Warning( "LoadLibrary %s failed.", idSoundSystemLocal::s_libOpenAL.GetString() );
-		return false;
-	}
-	if ( ( sym = InitializeIDAL( hOpenAL ) ) ) {
-		common->Warning( "GetProcAddress %s failed.", sym );
-		FreeLibrary( hOpenAL );
-		hOpenAL = NULL;
-		return false;
-	}
 	return true;
 #else
 	return false;
@@ -540,10 +519,6 @@ Sys_FreeOpenAL
 ===============
 */
 void Sys_FreeOpenAL( void ) {
-	if ( hOpenAL ) {
-		FreeLibrary( hOpenAL );
-		hOpenAL = NULL;
-	}
 }
 
 /*

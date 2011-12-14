@@ -33,7 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _WIN32
 #include <al.h>
 #include <alc.h>
-#include "../sys/win32/idal.h"
 // broken OpenAL SDK ?
 #define ID_ALCHAR (ALubyte *)
 #elif defined( MACOS_X )
