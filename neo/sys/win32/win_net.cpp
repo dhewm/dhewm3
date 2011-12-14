@@ -72,7 +72,7 @@ net_interface	netint[MAX_INTERFACES];
 NET_ErrorString
 ====================
 */
-char *NET_ErrorString( void ) {
+const char *NET_ErrorString( void ) {
 	int		code;
 
 	code = WSAGetLastError();
