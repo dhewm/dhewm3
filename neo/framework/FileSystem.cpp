@@ -850,7 +850,7 @@ search paths.
 */
 const char *idFileSystemLocal::OSPathToRelativePath( const char *OSPath ) {
 	static char relativePath[MAX_STRING_CHARS];
-	char *s, *base;
+	const char *s, *base;
 
 	// skip a drive letter?
 
@@ -871,7 +871,7 @@ const char *idFileSystemLocal::OSPathToRelativePath( const char *OSPath ) {
 	}
 #else
 	// look for the first complete directory name
-	base = (char *)strstr( OSPath, BASE_GAMEDIR );
+	base = strstr( OSPath, BASE_GAMEDIR );
 	while ( base ) {
 		char c1 = '\0', c2;
 		if ( base > OSPath ) {
@@ -895,7 +895,7 @@ const char *idFileSystemLocal::OSPathToRelativePath( const char *OSPath ) {
 			fsgame = fs_game_base.GetString();
 		}
 		if ( base == NULL && fsgame && strlen( fsgame ) ) {
-			base = (char *)strstr( OSPath, fsgame );
+			base = strstr( OSPath, fsgame );
 			while ( base ) {
 				char c1 = '\0', c2;
 				if ( base > OSPath ) {
