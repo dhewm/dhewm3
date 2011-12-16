@@ -97,6 +97,9 @@ for i in range( len( game_list ) ):
 local_env = g_game_env.Clone()
 if ( local_d3xp ):
 	local_env.Append( CPPDEFINES = [ '_D3XP', 'CTF' ] )
+	local_env.Append( CPPFLAGS = [ '-Id3xp' ] )
+else:
+	local_env.Append( CPPFLAGS = [ '-Igame' ] )
 
 if ( local_demo == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEMO_BUILD' ] )
