@@ -33,8 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 
 //-----------------------------------------------------
 
-#define ID_TIME_T time_t
-
 #ifdef _WIN32
 
 #if defined(_MFC_VER) && !defined(_D3SDK) && !defined(GAME_DLL)
@@ -55,8 +53,6 @@ If you have questions concerning this license or the applicable additional terms
 #pragma warning(disable : 4996)				// unsafe string operations
 
 #include <malloc.h>							// no malloc.h on mac or unix
-#include <windows.h>						// for qgl.h
-#undef FindText								// stupid namespace poluting Microsoft monkeys
 
 #endif /* _WIN32 */
 
@@ -82,6 +78,7 @@ If you have questions concerning this license or the applicable additional terms
 //-----------------------------------------------------
 
 // non-portable system services
+#include "../sys/platform.h"
 #include "../sys/sys_public.h"
 
 // id lib
