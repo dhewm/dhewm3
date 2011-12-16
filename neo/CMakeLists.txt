@@ -392,10 +392,6 @@ set(src_tools
 	tools/guied/GEWindowWrapper_stub.cpp
 )
 
-set(src_typeinfo
-	TypeInfo/TypeInfoGen.cpp
-)
-
 set(src_idlib
 	idlib/bv/Bounds.cpp
 	idlib/bv/Frustum.cpp
@@ -604,7 +600,6 @@ set(src_core
 	${src_snd}
 	${src_ui}
 	${src_tools}
-	${src_typeinfo}
 	${src_idlib}
 )
 
