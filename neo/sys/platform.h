@@ -216,4 +216,27 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ID_TIME_T time_t
 
+typedef unsigned char			byte;		// 8 bits
+typedef unsigned short			word;		// 16 bits
+typedef unsigned int			dword;		// 32 bits
+typedef unsigned int			uint;
+typedef unsigned long			ulong;
+
+typedef int						qhandle_t;
+
+#ifndef NULL
+#define NULL					((void *)0)
+#endif
+
+#ifndef BIT
+#define BIT( num )				( 1 << ( num ) )
+#endif
+
+#define	MAX_STRING_CHARS		1024		// max length of a string
+
+// maximum world size
+#define MAX_WORLD_COORD			( 128 * 1024 )
+#define MIN_WORLD_COORD			( -128 * 1024 )
+#define MAX_WORLD_SIZE			( MAX_WORLD_COORD - MIN_WORLD_COORD )
+
 #endif
