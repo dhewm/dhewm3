@@ -303,6 +303,9 @@ bool idAASBuild::GetAreaForLeafNode( idBrushBSPNode *node, int *areaNum ) {
 	area.numFaces = 0;
 	area.reach = NULL;
 	area.rev_reach = NULL;
+	area.bounds.Zero();
+	area.center.Zero();
+	area.travelFlags = 0;
 
 	for ( p = node->GetPortals(); p; p = p->Next(s) ) {
 		s = (p->GetNode(1) == node);

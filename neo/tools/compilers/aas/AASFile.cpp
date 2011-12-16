@@ -974,6 +974,11 @@ bool idAASFileLocal::ParseAreas( idLexer &src ) {
 		area.numFaces = src.ParseInt();
 		area.cluster = src.ParseInt();
 		area.clusterAreaNum = src.ParseInt();
+		area.reach = NULL;
+		area.rev_reach = NULL;
+		area.bounds.Zero();
+		area.center.Zero();
+		area.travelFlags = 0;
 		src.ExpectTokenString( ")" );
 		areas.Append( area );
 		ParseReachabilities( src, i );

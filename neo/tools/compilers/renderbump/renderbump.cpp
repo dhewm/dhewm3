@@ -636,7 +636,7 @@ static void RasterizeTriangle( const srfTriangles_t *lowMesh, const idVec3 *lowM
 	byte	*localDest, *globalDest, *colorDest;
 	float	edge[3][3];
 	idVec3	sampledNormal;
-	byte	sampledColor[4];
+	byte	sampledColor[4] = { };
 	idVec3	point, normal, traceNormal, tangents[2];
 	float	baseArea, totalArea;
 	int		r, g, b;

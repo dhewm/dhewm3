@@ -91,6 +91,7 @@ void R_SurfaceToTextureAxis( const srfTriangles_t *tri, idVec3 &origin, idVec3 a
 
 	area = d0[3] * d1[4] - d0[4] * d1[3];
 	if ( area == 0.0 ) {
+		origin.Zero();
 		axis[0].Zero();
 		axis[1].Zero();
 		axis[2].Zero();
