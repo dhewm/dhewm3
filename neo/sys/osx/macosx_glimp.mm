@@ -27,22 +27,20 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // -*- mode: objc -*-
-#import "../../idlib/precompiled.h"
-
-#import "../../renderer/tr_local.h"
-
-#import "macosx_glimp.h"
-
-#import "macosx_local.h"
-#import "macosx_sys.h"
-#import "macosx_display.h"
-
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 
 #import <mach-o/dyld.h>
 #import <mach/mach.h>
 #import <mach/mach_error.h>
+
+#import "sys/platform.h"
+#import "framework/Licensee.h"
+#import "renderer/tr_local.h"
+#import "sys/osx/macosx_glimp.h"
+#import "sys/osx/macosx_local.h"
+#import "sys/osx/macosx_sys.h"
+#import "sys/osx/macosx_display.h"
 
 static idCVar r_minDisplayRefresh( "r_minDisplayRefresh", "0", CVAR_ARCHIVE | CVAR_INTEGER, "" );
 static idCVar r_maxDisplayRefresh( "r_maxDisplayRefresh", "0", CVAR_ARCHIVE | CVAR_INTEGER, "" );

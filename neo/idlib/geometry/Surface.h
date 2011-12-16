@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SURFACE_H__
 #define __SURFACE_H__
 
+#include "idlib/containers/List.h"
+#include "idlib/geometry/DrawVert.h"
+#include "idlib/math/Plane.h"
+
 /*
 ===============================================================================
 

@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAMEWINDOW_H__
 #define __GAMEWINDOW_H__
 
+#include "ui/Window.h"
+
 class idGameWindowProxy : public idWindow {
 public:
 				idGameWindowProxy( idDeviceContext *d, idUserInterfaceLocal *gui );

@@ -1,6 +1,6 @@
+#include "sys/platform.h"
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "idlib/hashing/MD4.h"
 
 /*
    RSA Data Security, Inc., MD4 message-digest algorithm. (RFC1320)

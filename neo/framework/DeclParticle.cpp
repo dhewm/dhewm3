@@ -26,8 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/geometry/DrawVert.h"
+#include "framework/File.h"
+#include "renderer/RenderWorld.h"
+
+#include "framework/DeclParticle.h"
 
 struct ParticleParmDesc {
 	const char *name;

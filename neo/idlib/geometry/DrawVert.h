@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DRAWVERT_H__
 #define __DRAWVERT_H__
 
+#include "idlib/math/Vector.h"
+
 /*
 ===============================================================================
 

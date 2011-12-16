@@ -29,6 +29,14 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_PLAYERVIEW_H__
 #define __GAME_PLAYERVIEW_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/Dict.h"
+#include "renderer/Material.h"
+#include "renderer/RenderWorld.h"
+
+class idSaveGame;
+class idRestoreGame;
+
 /*
 ===============================================================================
 

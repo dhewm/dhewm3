@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __AASFILE_H__
 #define __AASFILE_H__
 
+#include "idlib/containers/PlaneSet.h"
+#include "idlib/bv/Bounds.h"
+#include "idlib/Dict.h"
+
 /*
 ===============================================================================
 

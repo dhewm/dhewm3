@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __HASHINDEX_H__
 #define __HASHINDEX_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/Str.h"
+
 /*
 ===============================================================================
 

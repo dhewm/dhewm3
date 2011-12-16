@@ -26,11 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Common.h"
+#include "framework/KeyInput.h"
 
-#include "win_local.h"
-
+#include "sys/win32/win_local.h"
 
 #define DINPUT_BUFFERSIZE           256
 

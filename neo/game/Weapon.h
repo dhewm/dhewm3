@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_WEAPON_H__
 #define __GAME_WEAPON_H__
 
+#include "script/Script_Thread.h"
+#include "Entity.h"
+#include "Light.h"
+#include "Actor.h"
+
 /*
 ===============================================================================
 

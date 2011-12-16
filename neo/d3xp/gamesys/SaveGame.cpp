@@ -26,12 +26,16 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/BuildVersion.h"
+#include "framework/DeclSkin.h"
+#include "renderer/ModelManager.h"
 
-#include "../Game_local.h"
+#include "physics/Clip.h"
+#include "Entity.h"
+#include "Game_local.h"
 
-#include "TypeInfo.h"
+#include "SaveGame.h"
 
 /*
 Save game related helper classes.

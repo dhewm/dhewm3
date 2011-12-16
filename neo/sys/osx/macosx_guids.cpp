@@ -1,6 +1,5 @@
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
 #define INITGUID
 
-#include "../../sound/snd_local.h"
+#include "sound/snd_local.h"

@@ -26,13 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Timer.h"
 
 #include "Game_local.h"
 
-#define MAX_BOUNDS_AREAS	16
+#include "Pvs.h"
 
+#define MAX_BOUNDS_AREAS	16
 
 typedef struct pvsPassage_s {
 	byte *				canSee;		// bit set for all portals that can be seen through this passage

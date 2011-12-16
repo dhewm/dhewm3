@@ -26,10 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+#include "Player.h"
 
-#include "Game_local.h"
+#include "Mover.h"
 
 // a mover will update any gui entities in it's target list with
 // a key/val pair of "mover" "state" from below.. guis can represent

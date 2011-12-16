@@ -25,10 +25,11 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "snd_local.h"
+#include "sys/platform.h"
+#include "framework/FileSystem.h"
+
+#include "sound/snd_local.h"
 
 #define USE_SOUND_CACHE_ALLOCATOR
 
@@ -37,7 +38,6 @@ static idDynamicBlockAlloc<byte, 1<<20, 1<<10>	soundCacheAllocator;
 #else
 static idDynamicAlloc<byte, 1<<20, 1<<10>		soundCacheAllocator;
 #endif
-
 
 /*
 ===================

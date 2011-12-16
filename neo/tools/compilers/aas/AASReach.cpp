@@ -26,12 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
-#include "AASFile.h"
-#include "AASFile_local.h"
-#include "AASReach.h"
+#include "tools/compilers/aas/AASReach.h"
 
 #define INSIDEUNITS							2.0f
 #define INSIDEUNITS_WALKEND					0.5f
@@ -39,7 +36,6 @@ If you have questions concerning this license or the applicable additional terms
 #define INSIDEUNITS_SWIMEND					0.5f
 #define INSIDEUNITS_FLYEND					0.5f
 #define INSIDEUNITS_WATERJUMP				15.0f
-
 
 /*
 ================

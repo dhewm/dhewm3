@@ -26,8 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#include <Carbon/Carbon.h>
+#include "sys/platform.h"
 #include "PickMonitor.h"
 
 //====================================================================================

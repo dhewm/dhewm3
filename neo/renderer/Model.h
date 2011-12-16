@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MODEL_H__
 #define __MODEL_H__
 
+#include "idlib/bv/Bounds.h"
+#include "renderer/Material.h"
+
 /*
 ===============================================================================
 

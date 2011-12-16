@@ -27,24 +27,22 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // -*- mode: objc -*-
-#import "../../idlib/precompiled.h"
-
-#import "macosx_local.h"
-#import "macosx_sys.h"
-
-#import "macosx_common.h"
-#import "dlfcn.h"
-
 #import <AppKit/AppKit.h>
 
 #import <sys/types.h>
-#import <unistd.h>
 #import <sys/param.h>
 #import <sys/mount.h>
 #import <sys/wait.h>
+#import <unistd.h>
+#import <dlfcn.h>
+
+#import "sys/platform.h"
+#import "sys/osx/macosx_common.h"
+#import "sys/osx/macosx_local.h"
+#import "sys/osx/macosx_sys.h"
 
 #ifdef OMNI_TIMER
-#import "macosx_timers.h"
+#import "sys/osx/macosx_timers.h"
 #endif
 
 void	Sys_Init (void);

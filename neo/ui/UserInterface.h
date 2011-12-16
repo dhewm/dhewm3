@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __USERINTERFACE_H__
 #define __USERINTERFACE_H__
 
+#include "idlib/Dict.h"
+#include "ui/ListGUI.h"
+
 /*
 ===============================================================================
 

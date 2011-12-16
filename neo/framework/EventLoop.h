@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __EVENTLOOP_H__
 #define __EVENTLOOP_H__
 
+#include "framework/File.h"
+#include "framework/Session.h"
+#include "sys/sys_public.h"
+
 /*
 ===============================================================================
 

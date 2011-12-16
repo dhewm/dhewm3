@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_ROTATION_H__
 #define __MATH_ROTATION_H__
 
+#include "idlib/math/Matrix.h"
+
 /*
 ===============================================================================
 
@@ -38,13 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-
-class idAngles;
-class idQuat;
-class idMat3;
-
 class idRotation {
-
 	friend class idAngles;
 	friend class idQuat;
 	friend class idMat3;

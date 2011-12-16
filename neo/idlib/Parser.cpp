@@ -26,8 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Lib.h"
+#include "framework/Common.h"
+
+#include "idlib/Parser.h"
 
 //#define DEBUG_EVAL
 #define MAX_DEFINEPARMS				128

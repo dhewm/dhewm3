@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BRUSH_H__
 #define __BRUSH_H__
 
+#include "idlib/containers/PlaneSet.h"
+#include "idlib/geometry/Winding.h"
+
 /*
 ===============================================================================
 

@@ -26,10 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Unzip.h"
+#include "framework/FileSystem.h"
 
-#include "Unzip.h"
+#include "framework/File.h"
 
 #define	MAX_PRINT_MSG		4096
 

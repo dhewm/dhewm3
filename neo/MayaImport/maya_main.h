@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MAYA_MAIN_H__
 #define __MAYA_MAIN_H__
 
+#include "framework/FileSystem.h"
+
+class idCommon;
+class idSys;
+
 /*
 ==============================================================
 

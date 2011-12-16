@@ -26,16 +26,16 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
 //#pragma optimize( "", off )
 
-#include "dmap.h"
 #ifdef WIN32
 #include <windows.h>
 #include <GL/gl.h>
 #endif
+
+#include "tools/compilers/dmap/dmap.h"
 
 /*
 

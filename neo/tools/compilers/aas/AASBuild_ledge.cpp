@@ -26,10 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
-#include "AASBuild_local.h"
+#include "tools/compilers/aas/AASBuild_local.h"
 
 #define LEDGE_EPSILON		0.1f
 

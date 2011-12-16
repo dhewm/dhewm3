@@ -26,12 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
-#include "Simd_Generic.h"
-#include "Simd_MMX.h"
-
+#include "idlib/math/Simd_MMX.h"
 
 //===============================================================
 //

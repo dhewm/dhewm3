@@ -26,6 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "sys/platform.h"
+#include "renderer/tr_local.h"
+
+#include "renderer/Image.h"
+
 /*
 
 all uncompressed
@@ -47,17 +52,6 @@ Manager
 ->List
 ->Print
 ->Reload( bool force )
-
-*/
-
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-// tr_imageprogram.c
-
-#include "tr_local.h"
-
-/*
 
 Anywhere that an image name is used (diffusemaps, bumpmaps, specularmaps, lights, etc),
 an imageProgram can be specified.

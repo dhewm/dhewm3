@@ -25,10 +25,12 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "tr_local.h"
+#include "sys/platform.h"
+#include "renderer/GuiModel.h"
+#include "ui/UserInterface.h"
+
+#include "renderer/tr_local.h"
 
 /*
 ==========================================================================================

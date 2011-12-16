@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __LISTGUILOCAL_H__
 #define __LISTGUILOCAL_H__
 
+#include "idlib/containers/List.h"
+#include "ui/ListGUI.h"
+
 /*
 ===============================================================================
 

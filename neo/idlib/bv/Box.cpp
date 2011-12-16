@@ -26,8 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+
+#include "idlib/bv/Box.h"
 
 idBox box_zero( vec3_zero, vec3_zero, mat3_identity );
 

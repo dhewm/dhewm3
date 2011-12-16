@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_FX_H__
 #define __GAME_FX_H__
 
+#include "renderer/RenderWorld.h"
+
+#include "Entity.h"
+
 /*
 ===============================================================================
 

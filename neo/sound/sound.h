@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SOUND__
 #define __SOUND__
 
+#include "idlib/math/Vector.h"
+#include "framework/DeclManager.h"
+#include "framework/DemoFile.h"
+#include "renderer/Cinematic.h"
+
 /*
 ===============================================================================
 

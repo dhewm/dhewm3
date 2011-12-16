@@ -34,7 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#include "CollisionModel.h"
+#include "idlib/math/Pluecker.h"
+#include "cm/CollisionModel.h"
 
 #define MIN_NODE_SIZE						64.0f
 #define MAX_NODE_POLYGONS					128

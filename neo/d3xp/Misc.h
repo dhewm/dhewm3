@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_MISC_H__
 #define __GAME_MISC_H__
 
+#include "physics/Physics_Parametric.h"
+#include "physics/Force_Field.h"
+#include "physics/Force_Spring.h"
 
 /*
 ===============================================================================

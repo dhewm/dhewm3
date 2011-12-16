@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DICT_H__
 #define __DICT_H__
 
+#include "idlib/containers/StrPool.h"
+#include "idlib/math/Angles.h"
+#include "idlib/math/Matrix.h"
+#include "idlib/Str.h"
+#include "idlib/Parser.h"
+
 /*
 ===============================================================================
 

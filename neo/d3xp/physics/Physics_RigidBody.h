@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __PHYSICS_RIGIDBODY_H__
 #define __PHYSICS_RIGIDBODY_H__
 
+#include "idlib/math/Ode.h"
+
+#include "physics/Physics_Base.h"
+
 /*
 ===================================================================================
 

@@ -28,6 +28,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __LISTWINDOW_H
 #define __LISTWINDOW_H
 
+#include "idlib/containers/StrList.h"
+#include "idlib/containers/HashTable.h"
+#include "ui/Window.h"
+
 class idSliderWindow;
 
 enum {

@@ -8,8 +8,11 @@
 #include <eax4.h>
 #endif
 
-
-
+#include "idlib/containers/List.h"
+#include "idlib/Str.h"
+#include "idlib/Lexer.h"
+#include "idlib/Heap.h"
+#include "sound/sound.h"
 
 ///////////////////////////////////////////////////////////
 // Class definitions.

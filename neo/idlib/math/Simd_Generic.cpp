@@ -26,11 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/geometry/DrawVert.h"
+#include "idlib/geometry/JointTransform.h"
+#include "idlib/math/Vector.h"
+#include "idlib/math/Plane.h"
+#include "idlib/math/Matrix.h"
+#include "renderer/Model.h"
 
-#include "Simd_Generic.h"
-
+#include "idlib/math/Simd_Generic.h"
 
 //===============================================================
 //

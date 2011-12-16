@@ -25,10 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../idlib/precompiled.h"
-#include "../posix/posix_public.h"
-#include "../sys_local.h"
-#include "local.h"
 
 #include <pthread.h>
 #include <errno.h>
@@ -40,6 +36,14 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef ID_MCHECK
 #include <mcheck.h>
 #endif
+
+#include "sys/platform.h"
+#include "framework/Licensee.h"
+#include "framework/FileSystem.h"
+#include "sys/posix/posix_public.h"
+#include "sys/sys_local.h"
+
+#include "sys/linux/local.h"
 
 static idStr	basepath;
 static idStr	savepath;

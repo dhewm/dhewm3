@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_TARGET_H__
 #define __GAME_TARGET_H__
 
+#include "idlib/math/Interpolate.h"
+
+#include "Entity.h"
 
 /*
 ===============================================================================

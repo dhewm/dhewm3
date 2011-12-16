@@ -26,10 +26,16 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "framework/async/AsyncNetwork.h"
+#include "framework/FileSystem.h"
+#include "framework/Console.h"
+#include "framework/Game.h"
+#include "sound/sound.h"
+#include "ui/UserInterface.h"
 
-#include "Session_local.h"
+#include "framework/Session_local.h"
 
 idCVar	idSessionLocal::gui_configServerRate( "gui_configServerRate", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_ROM | CVAR_INTEGER, "" );
 

@@ -29,6 +29,16 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SESSIONLOCAL_H__
 #define __SESSIONLOCAL_H__
 
+#include "idlib/containers/StrList.h"
+#include "idlib/Dict.h"
+#include "framework/Session.h"
+#include "framework/UsercmdGen.h"
+#include "framework/KeyInput.h"
+#include "framework/DeclEntityDef.h"
+#include "renderer/RenderSystem.h"
+#include "renderer/RenderWorld.h"
+#include "ui/ListGUI.h"
+
 /*
 
 IsConnectedToServer();

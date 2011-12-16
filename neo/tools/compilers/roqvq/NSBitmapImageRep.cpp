@@ -25,10 +25,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "roq.h"
+#include "sys/platform.h"
+
+#include "tools/compilers/roqvq/roq.h"
 
 void R_LoadImage( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2 );
 

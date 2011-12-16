@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BASE64_H__
 #define __BASE64_H__
 
+#include "idlib/Str.h"
+
 /*
 ===============================================================================
 

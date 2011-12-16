@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __HASHTABLE_H__
 #define __HASHTABLE_H__
 
+#include "idlib/math/Math.h"
+#include "idlib/Str.h"
+
 /*
 ===============================================================================
 

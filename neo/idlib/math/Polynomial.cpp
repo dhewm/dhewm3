@@ -26,8 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Str.h"
+
+#include "idlib/math/Polynomial.h"
 
 const float EPSILON		= 1e-6f;
 

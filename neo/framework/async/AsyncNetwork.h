@@ -29,10 +29,14 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __ASYNCNETWORK_H__
 #define __ASYNCNETWORK_H__
 
-#include "MsgChannel.h"
-#include "AsyncServer.h"
-#include "ServerScan.h"
-#include "AsyncClient.h"
+#include "idlib/BitMsg.h"
+#include "framework/async/MsgChannel.h"
+#include "framework/async/AsyncClient.h"
+#include "framework/async/AsyncServer.h"
+#include "framework/Compressor.h"
+#include "framework/Licensee.h"
+#include "framework/CVarSystem.h"
+#include "framework/UsercmdGen.h"
 
 /*
 ===============================================================================

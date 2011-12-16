@@ -26,11 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "renderer/VertexCache.h"
+#include "renderer/tr_local.h"
 
-#include "tr_local.h"
-#include "Model_local.h"
+#include "renderer/Model_local.h"
 
 // decalFade	filter 5 0.1
 // polygonOffset

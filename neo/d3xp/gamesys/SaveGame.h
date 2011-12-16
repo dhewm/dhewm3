@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SAVEGAME_H__
 #define __SAVEGAME_H__
 
+#include "framework/DeclFX.h"
+#include "framework/Game.h"
+#include "renderer/Model.h"
+#include "renderer/RenderSystem.h"
+
+#include "gamesys/Class.h"
+
 /*
 
 Save game related helper classes.

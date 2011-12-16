@@ -26,10 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Timer.h"
 
-#include "../Game_local.h"
+#include "script/Script_Thread.h"
+#include "Game_local.h"
+
+#include "script/Script_Compiler.h"
 
 #define FUNCTION_PRIORITY	2
 #define INT_PRIORITY		2

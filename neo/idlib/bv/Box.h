@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BV_BOX_H__
 #define __BV_BOX_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/bv/Bounds.h"
+
 /*
 ===============================================================================
 

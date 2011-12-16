@@ -26,11 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "sys/platform.h"
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "tr_local.h"
+#include "renderer/tr_local.h"
 
 #define FILESIZE_fontInfo_t (20548)
 

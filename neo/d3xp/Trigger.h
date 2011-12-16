@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_TRIGGER_H__
 #define __GAME_TRIGGER_H__
 
+#include "gamesys/Event.h"
+#include "Entity.h"
+
 extern const idEventDef EV_Enable;
 extern const idEventDef EV_Disable;
 

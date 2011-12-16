@@ -26,11 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Session.h"
+#include "renderer/RenderWorld.h"
 
-#include "snd_local.h"
-
+#include "sound/snd_local.h"
 
 /*
 ===================

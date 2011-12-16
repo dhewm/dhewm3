@@ -26,14 +26,23 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "framework/Licensee.h"
+#include "framework/Console.h"
+#include "framework/Session.h"
+#include "renderer/VertexCache.h"
+#include "renderer/ModelManager.h"
+#include "renderer/RenderWorld_local.h"
+#include "renderer/GuiModel.h"
+#include "sound/sound.h"
+#include "ui/UserInterface.h"
 
-#include "tr_local.h"
+#include "renderer/tr_local.h"
 
 // Vista OpenGL wrapper check
 #ifdef _WIN32
-#include "../sys/win32/win_local.h"
+#include "sys/win32/win_local.h"
 #endif
 
 // functions that are not called every frame

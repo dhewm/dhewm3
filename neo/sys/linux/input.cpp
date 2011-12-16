@@ -25,11 +25,14 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../idlib/precompiled.h"
-#include "../posix/posix_public.h"
-#include "local.h"
 
 #include <pthread.h>
+
+#include "sys/platform.h"
+#include "framework/KeyInput.h"
+#include "sys/posix/posix_public.h"
+
+#include "sys/linux/local.h"
 
 idCVar in_mouse( "in_mouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "" );
 idCVar in_dgamouse( "in_dgamouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "" );

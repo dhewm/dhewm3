@@ -28,9 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __LINUX_LOCAL_H__
 #define __LINUX_LOCAL_H__
 
-extern glconfig_t glConfig;
-
-// glimp.cpp
+#include <X11/Xlib.h>
 
 //#define ID_ENABLE_DGA
 
@@ -39,6 +37,9 @@ extern glconfig_t glConfig;
 #endif
 #include <X11/extensions/xf86vmode.h>
 #include <X11/XKBlib.h>
+
+#include "renderer/RenderSystem.h"
+#include "renderer/tr_local.h"
 
 extern Display *dpy;
 extern Window win;

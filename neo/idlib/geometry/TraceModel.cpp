@@ -26,11 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Common.h"
 
-#include "TraceModel.h"
-
+#include "idlib/geometry/TraceModel.h"
 
 /*
 ============

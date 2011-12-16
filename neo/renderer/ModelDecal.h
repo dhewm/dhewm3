@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MODELDECAL_H__
 #define __MODELDECAL_H__
 
+#include "idlib/geometry/DrawVert.h"
+#include "idlib/geometry/Winding.h"
+
 /*
 ===============================================================================
 

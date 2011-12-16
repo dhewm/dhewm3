@@ -26,17 +26,18 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "renderer/ModelManager.h"
+#include "renderer/tr_local.h"
+
+#include "tools/compilers/compiler_public.h"
 
 #ifdef WIN32
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "../../../sys/win32/win_local.h"
+#include "sys/win32/win_local.h"
 #endif
-
-#include "../../../renderer/tr_local.h"
 
 /*
 

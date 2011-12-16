@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __ASYNCSERVER_H__
 #define __ASYNCSERVER_H__
 
+#include "framework/UsercmdGen.h"
+
 /*
 ===============================================================================
 

@@ -25,21 +25,28 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-/*
 
-Invisible entities that affect other entities or the world when activated.
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "renderer/ModelManager.h"
 
-*/
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+#include "Light.h"
+#include "Player.h"
+#include "Mover.h"
+#include "Misc.h"
+#include "WorldSpawn.h"
+#include "Sound.h"
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "Game_local.h"
+#include "Target.h"
 
 /*
 ===============================================================================
 
 idTarget
+
+Invisible entities that affect other entities or the world when activated.
 
 ===============================================================================
 */

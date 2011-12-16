@@ -29,7 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __WINVAR_H__
 #define __WINVAR_H__
 
-#include "Rectangle.h"
+#include "framework/File.h"
+#include "ui/Rectangle.h"
 
 extern const char *VAR_GUIPREFIX;
 

@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __FORCE_H__
 #define __FORCE_H__
 
+#include "gamesys/Class.h"
+
 /*
 ===============================================================================
 

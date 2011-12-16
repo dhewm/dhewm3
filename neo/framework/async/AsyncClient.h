@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __ASYNCCLIENT_H__
 #define __ASYNCCLIENT_H__
 
+#include "framework/async/MsgChannel.h"
+#include "framework/async/ServerScan.h"
+#include "framework/UsercmdGen.h"
+#include "framework/FileSystem.h"
+#include "framework/Session.h"
+
 /*
 ===============================================================================
 

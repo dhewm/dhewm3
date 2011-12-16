@@ -26,8 +26,26 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "idlib/Timer.h"
+#include "framework/async/NetworkSystem.h"
+#include "framework/BuildVersion.h"
+#include "framework/DeclEntityDef.h"
+#include "framework/FileSystem.h"
+#include "renderer/ModelManager.h"
+
+#include "gamesys/SysCvar.h"
+#include "gamesys/SysCmds.h"
+#include "script/Script_Thread.h"
+#include "ai/AI.h"
+#include "anim/Anim_Testmodel.h"
+#include "Camera.h"
+#include "SmokeParticles.h"
+#include "Player.h"
+#include "WorldSpawn.h"
+#include "Misc.h"
+#include "Trigger.h"
 
 #include "Game_local.h"
 

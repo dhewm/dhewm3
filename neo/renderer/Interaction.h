@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __INTERACTION_H__
 #define __INTERACTION_H__
 
+#include "idlib/bv/Frustum.h"
+#include "renderer/Model.h"
+#include "renderer/tr_local.h"
+
 /*
 ===============================================================================
 

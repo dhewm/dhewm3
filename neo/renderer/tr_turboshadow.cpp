@@ -26,14 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
-#include "tr_local.h"
+#include "renderer/tr_local.h"
 
 int	c_turboUsedVerts;
 int c_turboUnusedVerts;
-
 
 /*
 =====================

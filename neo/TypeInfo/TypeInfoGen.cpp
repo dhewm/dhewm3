@@ -25,10 +25,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "TypeInfoGen.h"
+#include "sys/platform.h"
+
+#include "TypeInfo/TypeInfoGen.h"
 
 #define TYPE_INFO_GEN_VERSION		"1.0"
 

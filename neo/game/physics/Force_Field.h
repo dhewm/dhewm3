@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __FORCE_FIELD_H__
 #define __FORCE_FIELD_H__
 
+#include "physics/Force.h"
+#include "physics/Clip.h"
+#include "Entity.h"
+#include "AFEntity.h"
+
 /*
 ===============================================================================
 

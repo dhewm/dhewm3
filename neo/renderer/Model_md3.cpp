@@ -25,12 +25,12 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "tr_local.h"
-#include "Model_local.h"
-#include "Model_md3.h"
+#include "sys/platform.h"
+#include "renderer/tr_local.h"
+#include "renderer/Model_local.h"
+
+#include "renderer/Model_md3.h"
 
 /***********************************************************************
 

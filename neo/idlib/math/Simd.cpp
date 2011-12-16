@@ -26,22 +26,35 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../precompiled.h"
-#pragma hdrstop
+#if MACOS_X
+#include <stdlib.h>
+#include <unistd.h>			// this is for sleep()
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <mach/mach_time.h>
+#endif
 
-#include "Simd_Generic.h"
-#include "Simd_MMX.h"
-#include "Simd_3DNow.h"
-#include "Simd_SSE.h"
-#include "Simd_SSE2.h"
-#include "Simd_SSE3.h"
-#include "Simd_AltiVec.h"
+#include "sys/platform.h"
+#include "idlib/geometry/DrawVert.h"
+#include "idlib/geometry/JointTransform.h"
+#include "idlib/math/Simd_Generic.h"
+#include "idlib/math/Simd_MMX.h"
+#include "idlib/math/Simd_3DNow.h"
+#include "idlib/math/Simd_SSE.h"
+#include "idlib/math/Simd_SSE2.h"
+#include "idlib/math/Simd_SSE3.h"
+#include "idlib/math/Simd_AltiVec.h"
+#include "idlib/math/Plane.h"
+#include "idlib/bv/Bounds.h"
+#include "idlib/Lib.h"
+#include "framework/Common.h"
+#include "renderer/Model.h"
 
+#include "idlib/math/Simd.h"
 
 idSIMDProcessor	*	processor = NULL;			// pointer to SIMD processor
 idSIMDProcessor *	generic = NULL;				// pointer to generic SIMD implementation
 idSIMDProcessor *	SIMDProcessor = NULL;
-
 
 /*
 ================
@@ -168,12 +181,6 @@ long saved_ebx = 0;
 	__asm cpuid
 
 #elif MACOS_X
-
-#include <stdlib.h>
-#include <unistd.h>			// this is for sleep()
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <mach/mach_time.h>
 
 double ticksPerNanosecond;
 

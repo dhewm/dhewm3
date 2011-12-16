@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLSKIN_H__
 #define __DECLSKIN_H__
 
+#include "idlib/containers/StrList.h"
+#include "framework/DeclManager.h"
+#include "renderer/Material.h"
+
 /*
 ===============================================================================
 

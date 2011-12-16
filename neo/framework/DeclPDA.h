@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLPDA_H__
 #define __DECLPDA_H__
 
+#include "idlib/containers/StrList.h"
+#include "framework/DeclManager.h"
+
 /*
 ===============================================================================
 

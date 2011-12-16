@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __CLIP_H__
 #define __CLIP_H__
 
+#include "idlib/geometry/TraceModel.h"
+#include "cm/CollisionModel.h"
+
+class idSaveGame;
+class idRestoreGame;
+
 /*
 ===============================================================================
 
@@ -41,7 +47,6 @@ If you have questions concerning this license or the applicable additional terms
 #define JOINT_HANDLE_TO_CLIPMODEL_ID( id )	( -1 - id )
 
 class idClip;
-class idClipModel;
 class idEntity;
 
 

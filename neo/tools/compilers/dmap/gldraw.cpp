@@ -26,18 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "dmap.h"
+#include "sys/platform.h"
+#include "tools/compilers/dmap/dmap.h"
 
 #ifdef WIN32
-#include <windows.h>
+#include "sys/win32/win_local.h"
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 //#include <GL/glaux.h>
-
-#define	WIN_SIZE	1024
 
 void Draw_ClearWindow( void ) {
 

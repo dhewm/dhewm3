@@ -26,11 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "renderer/RenderSystem.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "Player.h"
+#include "Fx.h"
+#include "SmokeParticles.h"
 
+#include "Item.h"
 
 /*
 ===============================================================================

@@ -26,14 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
 #define OV_EXCLUDE_STATIC_CALLBACKS
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
-#include "snd_local.h"
+#include "sys/platform.h"
+#include "framework/FileSystem.h"
+
+#include "sound/snd_local.h"
 
 /*
 ===================================================================================

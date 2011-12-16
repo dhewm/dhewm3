@@ -26,11 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/geometry/JointTransform.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
 
+#include "AF.h"
 
 /*
 ===============================================================================

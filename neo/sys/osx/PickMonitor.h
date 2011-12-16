@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef PICKMONITOR_H
 #define PICKMONITOR_H
 
+#include <Carbon/Carbon.h>
+
 OSStatus PickMonitor (DisplayIDType *inOutDisplayID, WindowRef parentWindow);
 Boolean	CanUserPickMonitor (void);
 

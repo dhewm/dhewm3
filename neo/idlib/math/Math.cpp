@@ -26,9 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
+#include "idlib/math/Math.h"
 
 const float	idMath::PI				= 3.14159265358979323846f;
 const float	idMath::TWO_PI			= 2.0f * PI;

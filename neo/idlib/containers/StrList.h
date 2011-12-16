@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __STRLIST_H__
 #define __STRLIST_H__
 
+#include "idlib/containers/List.h"
+#include "idlib/Str.h"
+
 /*
 ===============================================================================
 

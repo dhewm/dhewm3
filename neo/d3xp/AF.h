@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_AF_H__
 #define __GAME_AF_H__
 
+#include "idlib/Parser.h"
+#include "framework/DeclAF.h"
+#include "renderer/Model.h"
+
+#include "physics/Physics_AF.h"
+#include "Entity.h"
+#include "anim/Anim.h"
 
 /*
 ===============================================================================

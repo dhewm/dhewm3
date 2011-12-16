@@ -26,8 +26,16 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/CmdArgs.h"
+#include "framework/async/AsyncNetwork.h"
+#include "framework/Licensee.h"
+#include "framework/UsercmdGen.h"
+#include "renderer/tr_local.h"
+#include "sys/win32/rc/CreateResourceIDs.h"
+#include "sys/sys_local.h"
+
+#include "sys/win32/win_local.h"
 
 #include <errno.h>
 #include <float.h>
@@ -41,11 +49,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
-
-#include "../sys_local.h"
-#include "win_local.h"
-#include "rc/CreateResourceIDs.h"
-#include "../../renderer/tr_local.h"
 
 idCVar Win32Vars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );

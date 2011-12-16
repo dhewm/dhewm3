@@ -26,17 +26,19 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "framework/async/AsyncNetwork.h"
+#include "framework/Licensee.h"
+#include "framework/Game.h"
+#include "framework/Session_local.h"
+#include "sound/sound.h"
 
-#include "AsyncNetwork.h"
-
-#include "../Session_local.h"
+#include "framework/async/AsyncClient.h"
 
 const int SETUP_CONNECTION_RESEND_TIME	= 1000;
 const int EMPTY_RESEND_TIME				= 500;
 const int PREDICTION_FAST_ADJUST		= 4;
-
 
 /*
 ==================

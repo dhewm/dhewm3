@@ -28,6 +28,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MARKERWINDOW_H
 #define __MARKERWINDOW_H
 
+#include "framework/Session.h"
+#include "ui/Window.h"
+
 class idUserInterfaceLocal;
 
 typedef struct {

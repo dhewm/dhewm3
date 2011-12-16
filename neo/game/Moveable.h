@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_MOVEABLE_H__
 #define __GAME_MOVEABLE_H__
 
+#include "physics/Physics_RigidBody.h"
+#include "script/Script_Thread.h"
+#include "gamesys/Event.h"
+#include "Entity.h"
+#include "Player.h"
+#include "Projectile.h"
+
 /*
 ===============================================================================
 

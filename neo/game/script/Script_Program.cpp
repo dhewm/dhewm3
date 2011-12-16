@@ -26,10 +26,18 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/hashing/MD4.h"
+#include "framework/FileSystem.h"
 
-#include "../Game_local.h"
+#include "gamesys/Event.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Compiler.h"
+#include "script/Script_Thread.h"
+#include "Entity.h"
+#include "Game_local.h"
+
+#include "script/Script_Program.h"
 
 // simple types.  function types are dynamically allocated
 idTypeDef	type_void( ev_void, &def_void, "void", 0, NULL );

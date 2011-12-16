@@ -45,11 +45,13 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Timer.h"
+#include "renderer/Model.h"
+#include "renderer/ModelManager.h"
+#include "renderer/RenderWorld.h"
 
-#include "CollisionModel_local.h"
-
+#include "cm/CollisionModel_local.h"
 
 idCollisionModelManagerLocal	collisionModelManagerLocal;
 idCollisionModelManager *		collisionModelManager = &collisionModelManagerLocal;

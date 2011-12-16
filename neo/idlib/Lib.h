@@ -29,7 +29,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __LIB_H__
 #define __LIB_H__
 
-
 /*
 ===============================================================================
 
@@ -46,6 +45,11 @@ If you have questions concerning this license or the applicable additional terms
 
 ===============================================================================
 */
+
+class idSys;
+class idCommon;
+class idCVarSystem;
+class idFileSystem;
 
 class idLib {
 public:
@@ -134,88 +138,5 @@ public:
 // move from Math.h to keep gcc happy
 template<class T> ID_INLINE T	Max( T x, T y ) { return ( x > y ) ? x : y; }
 template<class T> ID_INLINE T	Min( T x, T y ) { return ( x < y ) ? x : y; }
-
-/*
-===============================================================================
-
-	idLib headers.
-
-===============================================================================
-*/
-
-// memory management and arrays
-#include "Heap.h"
-#include "containers/List.h"
-
-// math
-#include "math/Simd.h"
-#include "math/Math.h"
-#include "math/Random.h"
-#include "math/Complex.h"
-#include "math/Vector.h"
-#include "math/Matrix.h"
-#include "math/Angles.h"
-#include "math/Quat.h"
-#include "math/Rotation.h"
-#include "math/Plane.h"
-#include "math/Pluecker.h"
-#include "math/Polynomial.h"
-#include "math/Extrapolate.h"
-#include "math/Interpolate.h"
-#include "math/Curve.h"
-#include "math/Ode.h"
-#include "math/Lcp.h"
-
-// bounding volumes
-#include "bv/Sphere.h"
-#include "bv/Bounds.h"
-#include "bv/Box.h"
-#include "bv/Frustum.h"
-
-// geometry
-#include "geometry/DrawVert.h"
-#include "geometry/JointTransform.h"
-#include "geometry/Winding.h"
-#include "geometry/Winding2D.h"
-#include "geometry/Surface.h"
-#include "geometry/Surface_Patch.h"
-#include "geometry/Surface_Polytope.h"
-#include "geometry/Surface_SweptSpline.h"
-#include "geometry/TraceModel.h"
-
-// text manipulation
-#include "Str.h"
-#include "Token.h"
-#include "Lexer.h"
-#include "Parser.h"
-#include "Base64.h"
-#include "CmdArgs.h"
-
-// containers
-#include "containers/BTree.h"
-#include "containers/BinSearch.h"
-#include "containers/HashIndex.h"
-#include "containers/HashTable.h"
-#include "containers/StaticList.h"
-#include "containers/LinkList.h"
-#include "containers/Hierarchy.h"
-#include "containers/Queue.h"
-#include "containers/Stack.h"
-#include "containers/StrList.h"
-#include "containers/StrPool.h"
-#include "containers/VectorSet.h"
-#include "containers/PlaneSet.h"
-
-// hashing
-#include "hashing/CRC32.h"
-#include "hashing/MD4.h"
-#include "hashing/MD5.h"
-
-// misc
-#include "Dict.h"
-#include "LangDict.h"
-#include "BitMsg.h"
-#include "MapFile.h"
-#include "Timer.h"
 
 #endif	/* !__LIB_H__ */

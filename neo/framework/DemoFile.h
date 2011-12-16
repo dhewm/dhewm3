@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DEMOFILE_H__
 #define __DEMOFILE_H__
 
+#include "framework/File.h"
+#include "framework/Compressor.h"
+
+class idRenderWorld;
+
 /*
 ===============================================================================
 

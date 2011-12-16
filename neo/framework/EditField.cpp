@@ -26,8 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Common.h"
+#include "framework/KeyInput.h"
+#include "renderer/RenderSystem.h"
+
+#include "framework/EditField.h"
 
 static autoComplete_t	globalAutoComplete;
 

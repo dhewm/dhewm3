@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BV_SPHERE_H__
 #define __BV_SPHERE_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/math/Plane.h"
+#include "idlib/math/Rotation.h"
+
 /*
 ===============================================================================
 

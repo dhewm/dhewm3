@@ -26,10 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "framework/Console.h"
+#include "framework/Game.h"
+#include "renderer/RenderSystem.h"
+#include "sound/sound.h"
 
-#include "AsyncNetwork.h"
+#include "framework/async/AsyncNetwork.h"
 
 idAsyncServer		idAsyncNetwork::server;
 idAsyncClient		idAsyncNetwork::client;

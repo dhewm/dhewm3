@@ -27,17 +27,13 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // -*- mode: objc -*-
-#import "../../idlib/precompiled.h"
-
 #import <Foundation/Foundation.h>
 #import <mach/mach.h>
 #import <mach/vm_map.h>
 
-
-#define CD_MOUNT_NAME "DOOM"
-
-#include "macosx_local.h"
-#include "macosx_sys.h"
+#import "sys/platform.h"
+#import "sys/osx/macosx_local.h"
+#import "sys/osx/macosx_sys.h"
 
 //extern "C" void *vm_allocate(unsigned, unsigned*, unsigned, int);
 //extern "C" void vm_deallocate(unsigned, unsigned*, unsigned);

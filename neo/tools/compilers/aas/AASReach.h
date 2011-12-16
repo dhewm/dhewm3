@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __AASREACH_H__
 #define __AASREACH_H__
 
+#include "idlib/MapFile.h"
+#include "tools/compilers/aas/AASFile_local.h"
+
 /*
 ===============================================================================
 

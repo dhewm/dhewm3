@@ -26,16 +26,18 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
-
 #ifdef _D3XP
 
-#include "../Game_local.h"
+#include "sys/platform.h"
+#include "gamesys/SysCvar.h"
+#include "gamesys/SaveGame.h"
+#include "physics/Physics.h"
+#include "Game_local.h"
+
+#include "physics/Force_Grab.h"
 
 CLASS_DECLARATION( idForce, idForce_Grab )
 END_CLASS
-
 
 /*
 ================

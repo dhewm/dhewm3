@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_BRITTLEFRACTURE_H__
 #define __GAME_BRITTLEFRACTURE_H__
 
+#include "physics/Physics_RigidBody.h"
+#include "physics/Physics_StaticMulti.h"
+#include "physics/Clip.h"
+#include "Entity.h"
 
 /*
 ===============================================================================

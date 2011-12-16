@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_CAMERA_H__
 #define __GAME_CAMERA_H__
 
+#include "idlib/math/Quat.h"
+
+#include "Entity.h"
 
 /*
 ===============================================================================

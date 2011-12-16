@@ -26,16 +26,18 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "tr_local.h"
 #ifdef __ppc__
 #include <vecLib/vecLib.h>
 #endif
 #if defined(__GNUC__) && defined(__SSE2__)
 #include <xmmintrin.h>
 #endif
+
+#include "sys/platform.h"
+#include "framework/Session.h"
+#include "renderer/RenderWorld_local.h"
+
+#include "renderer/tr_local.h"
 
 //====================================================================
 

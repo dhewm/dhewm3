@@ -26,10 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/math/Interpolate.h"
+#include "renderer/Cinematic.h"
+#include "renderer/tr_local.h"
+#include "ui/Window.h"
+#include "ui/UserInterface.h"
+#include "sound/sound.h"
 
-#include "tr_local.h"
+#include "renderer/Material.h"
 
 /*
 

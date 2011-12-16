@@ -25,17 +25,20 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
+#include "sys/platform.h"
+#include "script/Script_Program.h"
+#include "Entity.h"
+#include "Game_local.h"
+
+#include "Event.h"
+
 /*
 sys_event.cpp
 
 Event are used for scheduling tasks and for linking script commands.
 
 */
-
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "../Game_local.h"
 
 #define MAX_EVENTSPERFRAME			4096
 //#define CREATE_EVENT_CODE

@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BV_FRUSTUM_H__
 #define __BV_FRUSTUM_H__
 
+#include "idlib/geometry/Winding.h"
+#include "idlib/math/Vector.h"
+#include "idlib/bv/Bounds.h"
+#include "idlib/bv/Box.h"
+
 /*
 ===============================================================================
 

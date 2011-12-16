@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
+#include "idlib/containers/StrList.h"
+#include "framework/File.h"
+
 /*
 ===============================================================================
 

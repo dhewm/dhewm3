@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __FILE_H__
 #define __FILE_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/BitMsg.h"
+
 /*
 ==============================================================
 

@@ -25,23 +25,22 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-/*
 
-  SecurityCamera.cpp
+#include "sys/platform.h"
+#include "gamesys/SysCvar.h"
+#include "physics/Physics_RigidBody.h"
+#include "Entity.h"
+#include "Light.h"
+#include "Player.h"
+#include "Fx.h"
 
-  Security camera that triggers targets when player is in view
-
-*/
-
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "Game_local.h"
-
+#include "SecurityCamera.h"
 
 /***********************************************************************
 
   idSecurityCamera
+
+  Security camera that triggers targets when player is in view
 
 ***********************************************************************/
 

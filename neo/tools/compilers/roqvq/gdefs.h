@@ -34,7 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 
 typedef unsigned char byte;
 typedef unsigned short word;
-#pragma once
 
 #define	dabs(a) (((a)<0) ? -(a) : (a))
 #define CLAMP(v,l,h) ((v)<(l) ? (l) : (v)>(h) ? (h) : v)

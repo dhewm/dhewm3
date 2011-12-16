@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __PHYSICS_H__
 #define __PHYSICS_H__
 
+#include "idlib/BitMsg.h"
+
+#include "gamesys/Class.h"
+#include "physics/Clip.h"
+#include "GameBase.h"
+
 /*
 ===============================================================================
 

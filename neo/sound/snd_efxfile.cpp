@@ -25,10 +25,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "snd_local.h"
+#include "sys/platform.h"
+
+#include "sound/snd_local.h"
 
 /*
 ===============

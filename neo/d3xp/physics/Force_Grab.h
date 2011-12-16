@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _D3XP
 
+#include "physics/Force.h"
+
 /*
 ===============================================================================
 

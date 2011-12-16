@@ -26,8 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/math/Vector.h"
+#include "idlib/Heap.h"
+#include "framework/Common.h"
+
+#include "idlib/Str.h"
 
 #if !defined( ID_REDIRECT_NEWDELETE ) && !defined( MACOS_X )
 	#define USE_STRING_DATA_ALLOCATOR

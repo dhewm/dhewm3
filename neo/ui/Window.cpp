@@ -26,28 +26,27 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "DeviceContext.h"
-#include "Window.h"
-#include "UserInterfaceLocal.h"
-#include "EditWindow.h"
-#include "ChoiceWindow.h"
-#include "SliderWindow.h"
-#include "BindWindow.h"
-#include "ListWindow.h"
-#include "RenderWindow.h"
-#include "MarkerWindow.h"
-#include "FieldWindow.h"
-
-#include "GameSSDWindow.h"
-#include "GameBearShootWindow.h"
-#include "GameBustOutWindow.h"
-
-//
+#include "sys/platform.h"
+#include "idlib/containers/HashTable.h"
+#include "framework/UsercmdGen.h"
+#include "framework/KeyInput.h"
+#include "ui/DeviceContext.h"
+#include "ui/UserInterfaceLocal.h"
+#include "ui/EditWindow.h"
+#include "ui/ChoiceWindow.h"
+#include "ui/SliderWindow.h"
+#include "ui/BindWindow.h"
+#include "ui/ListWindow.h"
+#include "ui/RenderWindow.h"
+#include "ui/MarkerWindow.h"
+#include "ui/FieldWindow.h"
+#include "ui/GameSSDWindow.h"
+#include "ui/GameBearShootWindow.h"
+#include "ui/GameBustOutWindow.h"
 //  gui editor is more integrated into the window now
-#include "../tools/guied/GEWindowWrapper.h"
+#include "tools/guied/GEWindowWrapper.h"
+
+#include "ui/Window.h"
 
 bool idWindow::registerIsTemporary[MAX_EXPRESSION_REGISTERS];		// statics to assist during parsing
 //float idWindow::shaderRegisters[MAX_EXPRESSION_REGISTERS];

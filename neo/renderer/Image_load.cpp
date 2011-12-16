@@ -26,10 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/hashing/MD4.h"
+#include "renderer/tr_local.h"
 
-#include "tr_local.h"
+#include "renderer/Image.h"
 
 /*
 PROBLEM: compressed textures may break the zero clamp rule!

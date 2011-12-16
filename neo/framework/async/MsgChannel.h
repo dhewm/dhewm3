@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MSGCHANNEL_H__
 #define __MSGCHANNEL_H__
 
+#include "sys/sys_public.h"
+
+class idCompressor;
 
 /*
 ===============================================================================

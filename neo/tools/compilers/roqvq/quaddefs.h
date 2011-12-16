@@ -28,8 +28,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __quaddefs_h__
 #define __quaddefs_h__
 
-#pragma once
-
 #define DEP 0
 #define FCC 1
 #define CCC 2

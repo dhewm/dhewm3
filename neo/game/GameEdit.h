@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_EDIT_H__
 #define __GAME_EDIT_H__
 
+#include "framework/DeclPDA.h"
+
+#include "physics/Force_Drag.h"
+#include "Entity.h"
+
+class Player;
 
 /*
 ===============================================================================

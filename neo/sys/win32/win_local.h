@@ -29,8 +29,24 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __WIN_LOCAL_H__
 #define __WIN_LOCAL_H__
 
-#include <windows.h>
-#include "../../renderer/wglext.h"		// windows OpenGL extensions
+#if defined(_MFC_VER) && !defined(_D3SDK) && !defined(GAME_DLL)
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// prevent auto literal to string conversion
+#include "tools/comafx/StdAfx.h"
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <mmsystem.h>
+#include <mmreg.h>
+
+#define DIRECTINPUT_VERSION  0x0800			// was 0x0700 with the old mssdk
+#include <dinput.h>
+
+#include <GL/gl.h>
+
+#include "framework/CVarSystem.h"
+#include "renderer/wglext.h"		// windows OpenGL extensions
+#include "sys/sys_public.h"
 
 // WGL_ARB_extensions_string
 extern	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;

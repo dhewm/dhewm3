@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_IK_H__
 #define __GAME_IK_H__
 
+#include "Entity.h"
+
+class idSaveGame;
+class idRestoreGame;
+
 /*
 ===============================================================================
 

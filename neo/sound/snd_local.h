@@ -44,7 +44,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <AL/alc.h>
 #define ID_ALCHAR
 #endif
-#include "efxlib.h"
+
+#include "framework/UsercmdGen.h"
+#include "sound/efxlib.h"
+#include "sound/sound.h"
 
 // demo sound commands
 typedef enum {

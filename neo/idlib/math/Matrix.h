@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_MATRIX_H__
 #define __MATH_MATRIX_H__
 
+#include "idlib/math/Vector.h"
+
 /*
 ===============================================================================
 

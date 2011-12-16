@@ -25,20 +25,19 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
+#include "sys/platform.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+
+#include "Class.h"
+
 /*
 
 Base class for all C++ objects.  Provides fast run-time type checking and run-time
 instancing of objects.
 
 */
-
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "../Game_local.h"
-
-#include "TypeInfo.h"
-
 
 /***********************************************************************
 

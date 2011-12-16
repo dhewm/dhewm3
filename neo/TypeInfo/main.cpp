@@ -26,11 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#include "../sys/sys_local.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "sys/sys_local.h"
 
-#include "TypeInfoGen.h"
+#include "TypeInfo/TypeInfoGen.h"
 
 idSession *			session = NULL;
 idDeclManager *		declManager = NULL;

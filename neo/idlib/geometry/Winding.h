@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __WINDING_H__
 #define __WINDING_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/bv/Bounds.h"
+
 /*
 ===============================================================================
 

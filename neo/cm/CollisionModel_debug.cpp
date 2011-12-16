@@ -34,11 +34,15 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Timer.h"
+#include "framework/Common.h"
+#include "framework/Session.h"
+#include "renderer/Material.h"
+#include "renderer/RenderWorld.h"
+#include "sys/sys_public.h"
 
-#include "CollisionModel_local.h"
-
+#include "cm/CollisionModel_local.h"
 
 /*
 ===============================================================================
@@ -361,8 +365,6 @@ static int max_rotation = -999999;
 static int num_rotation = 0;
 static idVec3 start;
 static idVec3 *testend;
-
-#include "../sys/sys_public.h"
 
 void idCollisionModelManagerLocal::DebugOutput( const idVec3 &origin ) {
 	int i, k, t;

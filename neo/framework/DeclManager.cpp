@@ -26,8 +26,24 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/containers/List.h"
+#include "idlib/containers/HashIndex.h"
+#include "idlib/hashing/MD5.h"
+#include "idlib/BitMsg.h"
+#include "framework/FileSystem.h"
+#include "framework/CVarSystem.h"
+#include "framework/DeclAF.h"
+#include "framework/DeclEntityDef.h"
+#include "framework/DeclFX.h"
+#include "framework/DeclPDA.h"
+#include "framework/DeclParticle.h"
+#include "framework/DeclSkin.h"
+#include "framework/DeclTable.h"
+#include "renderer/Material.h"
+#include "sound/sound.h"
+
+#include "framework/DeclManager.h"
 
 /*
 

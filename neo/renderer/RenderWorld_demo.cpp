@@ -25,10 +25,20 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "tr_local.h"
+#include "sys/platform.h"
+#include "idlib/geometry/JointTransform.h"
+#include "framework/DeclSkin.h"
+#include "framework/DemoFile.h"
+#include "framework/EventLoop.h"
+#include "framework/Session.h"
+#include "renderer/GuiModel.h"
+#include "renderer/ModelManager.h"
+#include "renderer/RenderWorld_local.h"
+#include "ui/UserInterface.h"
+#include "sound/sound.h"
+
+#include "renderer/tr_local.h"
 
 //#define WRITE_GUIS
 

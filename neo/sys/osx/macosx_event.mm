@@ -27,11 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // -*- mode: objc -*-
-#import "../../idlib/precompiled.h"
-
-#import "macosx_local.h"
-#import "macosx_sys.h"
-
 #import <AppKit/NSCursor.h>
 #import <AppKit/NSWindow.h>
 #import <AppKit/NSScreen.h>
@@ -49,7 +44,13 @@ If you have questions concerning this license or the applicable additional terms
 #import <sys/types.h>
 #import <sys/time.h>
 #import <unistd.h>
-#include <pthread.h>
+#import <pthread.h>
+
+#import "sys/platform.h"
+#import "framework/Common.h"
+#import "framework/KeyInput.h"
+#import "sys/osx/macosx_local.h"
+#import "sys/osx/macosx_sys.h"
 
 static NSDate  *distantPast		= NULL;
 static bool		inputActive		= false;

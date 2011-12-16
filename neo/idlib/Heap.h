@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __HEAP_H__
 #define __HEAP_H__
 
+#include "idlib/Lib.h"
+#include "sys/sys_public.h"
+
 /*
 ===============================================================================
 

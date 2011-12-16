@@ -1,6 +1,6 @@
+#include "sys/platform.h"
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "idlib/hashing/CRC32.h"
 
 /*
    CRC-32

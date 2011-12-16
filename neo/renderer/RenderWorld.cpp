@@ -26,10 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Session.h"
+#include "framework/DeclSkin.h"
+#include "renderer/GuiModel.h"
+#include "renderer/RenderWorld_local.h"
 
-#include "tr_local.h"
+#include "renderer/tr_local.h"
 
 /*
 ===================

@@ -26,10 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "physics/Force.h"
+#include "Entity.h"
 
-#include "../Game_local.h"
+#include "physics/Physics_Base.h"
 
 CLASS_DECLARATION( idPhysics, idPhysics_Base )
 END_CLASS

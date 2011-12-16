@@ -1,6 +1,7 @@
+#include "sys/platform.h"
+#include "idlib/Lib.h"
 
-#include "../precompiled.h"
-#pragma hdrstop
+#include "idlib/hashing/MD5.h"
 
 /*
    MD5 Message Digest Algorithm. (RFC1321)

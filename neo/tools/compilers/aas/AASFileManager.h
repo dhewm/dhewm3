@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __AASFILEMANAGER_H__
 #define __AASFILEMANAGER_H__
 
+#include "tools/compilers/aas/AASFile.h"
+
 /*
 ===============================================================================
 

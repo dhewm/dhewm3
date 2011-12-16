@@ -26,6 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifndef __IMAGE_H__
+#define __IMAGE_H__
+
+#include "idlib/containers/List.h"
+#include "framework/FileSystem.h"
+#include "renderer/Material.h"
+#include "renderer/qgl.h"
+
 /*
 ====================================================================
 
@@ -493,3 +501,5 @@ IMAGEPROGRAM
 
 void R_LoadImageProgram( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL );
 const char *R_ParsePastImageProgram( idLexer &src );
+
+#endif

@@ -25,16 +25,16 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../idlib/precompiled.h"
-#pragma hdrstop
 
-#include "../framework/Session_local.h"
-#include "../renderer/Image.h"
+#include "sys/platform.h"
+#include "framework/Session_local.h"
+#include "renderer/Image.h"
+#include "sound/sound.h"
+#include "ui/DeviceContext.h"
+#include "ui/Window.h"
+#include "ui/UserInterfaceLocal.h"
 
-#include "DeviceContext.h"
-#include "Window.h"
-#include "UserInterfaceLocal.h"
-#include "GameBustOutWindow.h"
+#include "ui/GameBustOutWindow.h"
 
 #define BALL_RADIUS		12.f
 #define BALL_SPEED		250.f

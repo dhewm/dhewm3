@@ -26,10 +26,28 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/containers/HashTable.h"
+#include "idlib/LangDict.h"
+#include "idlib/MapFile.h"
+#include "cm/CollisionModel.h"
+#include "framework/async/AsyncNetwork.h"
+#include "framework/async/NetworkSystem.h"
+#include "framework/BuildVersion.h"
+#include "framework/Licensee.h"
+#include "framework/Console.h"
+#include "framework/Session.h"
+#include "framework/Game.h"
+#include "framework/KeyInput.h"
+#include "framework/EventLoop.h"
+#include "renderer/Image.h"
+#include "renderer/Model.h"
+#include "renderer/ModelManager.h"
+#include "renderer/RenderSystem.h"
+#include "tools/compilers/compiler_public.h"
+#include "tools/compilers/aas/AASFileManager.h"
 
-#include "../renderer/Image.h"
+#include "framework/Common.h"
 
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256

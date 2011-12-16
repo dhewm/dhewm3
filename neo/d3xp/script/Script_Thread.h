@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_THREAD_H__
 #define __SCRIPT_THREAD_H__
 
+#include "script/Script_Interpreter.h"
+#include "gamesys/Class.h"
+#include "gamesys/Event.h"
+
 extern const idEventDef EV_Thread_Execute;
 extern const idEventDef EV_Thread_SetCallback;
 extern const idEventDef EV_Thread_TerminateThread;

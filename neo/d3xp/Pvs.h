@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_PVS_H__
 #define __GAME_PVS_H__
 
+#include "idlib/geometry/Winding.h"
+#include "idlib/math/Vector.h"
+#include "idlib/bv/Bounds.h"
+
 /*
 ===================================================================================
 

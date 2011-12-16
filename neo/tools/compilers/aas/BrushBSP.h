@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BRUSHBSP_H__
 #define __BRUSHBSP_H__
 
+#include "idlib/containers/VectorSet.h"
+#include "idlib/containers/StrList.h"
+#include "idlib/geometry/Winding.h"
+#include "idlib/MapFile.h"
+#include "tools/compilers/aas/Brush.h"
+
 /*
 ===============================================================================
 

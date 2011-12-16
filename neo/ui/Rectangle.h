@@ -27,6 +27,10 @@ If you have questions concerning this license or the applicable additional terms
 */
 #ifndef IDRECTANGLE_H_
 #define IDRECTANGLE_H_
+
+#include "idlib/containers/List.h"
+#include "idlib/math/Vector.h"
+
 //
 // simple rectangle
 //

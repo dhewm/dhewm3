@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_POLYNOMIAL_H__
 #define __MATH_POLYNOMIAL_H__
 
+#include "idlib/math/Complex.h"
+#include "idlib/Heap.h"
+
 /*
 ===============================================================================
 

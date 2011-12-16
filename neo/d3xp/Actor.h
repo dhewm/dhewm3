@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_ACTOR_H__
 #define __GAME_ACTOR_H__
 
+#include "AFEntity.h"
+#include "IK.h"
+#include "PlayerView.h"
+
 /*
 ===============================================================================
 

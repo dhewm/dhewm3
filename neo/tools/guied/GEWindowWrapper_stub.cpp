@@ -25,16 +25,15 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
-#include "../../ui/EditWindow.h"
-#include "../../ui/ListWindow.h"
-#include "../../ui/BindWindow.h"
-#include "../../ui/RenderWindow.h"
-#include "../../ui/ChoiceWindow.h"
+#include "ui/EditWindow.h"
+#include "ui/ListWindow.h"
+#include "ui/BindWindow.h"
+#include "ui/RenderWindow.h"
+#include "ui/ChoiceWindow.h"
 
-#include "GEWindowWrapper.h"
+#include "tools/guied/GEWindowWrapper.h"
 
 static rvGEWindowWrapper stub_wrap( NULL, rvGEWindowWrapper::WT_UNKNOWN );
 

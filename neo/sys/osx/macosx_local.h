@@ -1,7 +1,7 @@
 
 #include <sys/wait.h>
 
-#include "../sys_public.h"
+#include "sys/sys_public.h"
 
 void	OutputDebugString( const char *text );
 

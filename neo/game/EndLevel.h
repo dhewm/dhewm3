@@ -26,6 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifndef __GAME_ENDLEVEL_H__
+#define __GAME_ENDLEVEL_H__
+
+#include "Entity.h"
+
 class idTarget_EndLevel : public idEntity {
 public:
 	CLASS_PROTOTYPE( idTarget_EndLevel );
@@ -63,3 +68,5 @@ private:
 
 	void	Event_Trigger( idEntity *activator );
 };
+
+#endif

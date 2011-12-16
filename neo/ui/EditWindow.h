@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __EDITWINDOW_H__
 #define __EDITWINDOW_H__
 
-#include "Window.h"
+#include "ui/Window.h"
 
 const int MAX_EDITFIELD = 4096;
 

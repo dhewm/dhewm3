@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "ui/UserInterface.h"
+
 class idWindow;
 
 class idUserInterfaceLocal : public idUserInterface {

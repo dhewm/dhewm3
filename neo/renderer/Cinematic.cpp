@@ -26,12 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
 #include <jpeglib.h>
 
-#include "tr_local.h"
+#include "framework/FileSystem.h"
+#include "renderer/tr_local.h"
+#include "sound/sound.h"
+
+#include "renderer/Cinematic.h"
 
 #define CIN_system	1
 #define CIN_loop	2

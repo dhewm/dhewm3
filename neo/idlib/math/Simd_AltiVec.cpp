@@ -26,14 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-
-#include "../precompiled.h"
-#pragma hdrstop
-
-#include "Simd_Generic.h"
-#include "Simd_AltiVec.h"
 #include <math.h>
 #include <float.h>
+
+#include "sys/platform.h"
+
+#include "idlib/math/Simd_AltiVec.h"
 
 // Doom3 SIMD Library version 0.5
 // Patrick Flanagan (pflanagan@apple.com)

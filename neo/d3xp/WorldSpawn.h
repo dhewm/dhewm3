@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_WORLDSPAWN_H__
 #define __GAME_WORLDSPAWN_H__
 
+#include "Entity.h"
+
 /*
 ===============================================================================
 

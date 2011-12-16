@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __NETWORKSYSTEM_H__
 #define __NETWORKSYSTEM_H__
 
+#include "idlib/BitMsg.h"
 
 /*
 ===============================================================================

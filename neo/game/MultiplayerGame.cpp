@@ -26,10 +26,19 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/BitMsg.h"
+#include "idlib/Str.h"
+#include "idlib/LangDict.h"
+#include "framework/async/NetworkSystem.h"
+#include "framework/FileSystem.h"
+#include "ui/UserInterface.h"
 
+#include "gamesys/SysCvar.h"
+#include "Player.h"
 #include "Game_local.h"
+
+#include "MultiplayerGame.h"
 
 // could be a problem if players manage to go down sudden deaths till this .. oh well
 #define LASTMAN_NOLIVES -20

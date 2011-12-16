@@ -26,8 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/containers/StrList.h"
+#include "framework/Common.h"
+#include "framework/FileSystem.h"
+#include "framework/DeclManager.h"
+#include "framework/Session.h"
+
+#include "framework/CmdSystem.h"
 
 /*
 ===============================================================================

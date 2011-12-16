@@ -26,8 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../renderer/tr_local.h"
-
+#include "idlib/containers/PlaneSet.h"
+#include "idlib/MapFile.h"
+#include "cm/CollisionModel.h"
+#include "renderer/tr_local.h"
 
 typedef struct primitive_s {
 	struct primitive_s *next;

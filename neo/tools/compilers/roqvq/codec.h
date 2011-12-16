@@ -28,6 +28,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __codec_h__
 #define __codec_h__
 
+#include "tools/compilers/roqvq/gdefs.h"
+#include "tools/compilers/roqvq/roq.h"
+#include "tools/compilers/roqvq/quaddefs.h"
+
 #define MAXERRORMAX 200
 #define IPSIZE int
 const float MOTION_MIN = 1.0f;
@@ -37,10 +41,6 @@ const float MIN_SNR = 3.0f;
 #define JUSTMOTION	1
 
 #define VQDATA		double
-
-#include "gdefs.h"
-#include "roq.h"
-#include "quaddefs.h"
 
 class codec {
 public:

@@ -26,8 +26,19 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/math/Vector.h"
+#include "framework/async/AsyncNetwork.h"
+#include "framework/BuildVersion.h"
+#include "framework/CVarSystem.h"
+#include "framework/Session.h"
+#include "framework/EditField.h"
+#include "framework/KeyInput.h"
+#include "framework/EventLoop.h"
+#include "renderer/RenderSystem.h"
+#include "sound/sound.h"
+
+#include "framework/Console.h"
 
 void SCR_DrawTextLeftAlign( float &y, const char *text, ... ) id_attribute((format(printf,2,3)));
 void SCR_DrawTextRightAlign( float &y, const char *text, ... ) id_attribute((format(printf,2,3)));

@@ -26,18 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+
+#include "sys/win32/win_local.h"
 
 //
 // This file implements the low-level keyboard hook that traps the task keys.
 //
-
-//#define _WIN32_WINNT 0x0500 // for KBDLLHOOKSTRUCT
-#include <windows.h>
-#include "win_local.h"
-
-#define DLLEXPORT __declspec(dllexport)
 
 // Magic registry key/value for "Remove Task Manager" policy.
 LPCTSTR KEY_DisableTaskMgr = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System";

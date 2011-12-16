@@ -26,12 +26,23 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "framework/async/NetworkSystem.h"
+#include "framework/FileSystem.h"
 
-#include "../Game_local.h"
+#include "gamesys/TypeInfo.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+#include "ai/AI.h"
+#include "anim/Anim_Testmodel.h"
+#include "Entity.h"
+#include "Moveable.h"
+#include "WorldSpawn.h"
+#include "Fx.h"
+#include "Misc.h"
 
-#include "TypeInfo.h"
+#include "SysCmds.h"
 
 /*
 ==================

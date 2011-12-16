@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_MOVER_H__
 #define __GAME_MOVER_H__
 
+#include "physics/Physics_Parametric.h"
+#include "Entity.h"
+
 extern const idEventDef EV_TeamBlocked;
 extern const idEventDef EV_PartBlocked;
 extern const idEventDef EV_ReachedPos;

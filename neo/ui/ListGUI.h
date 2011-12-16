@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __LISTGUI_H__
 #define __LISTGUI_H__
 
+#include "idlib/Str.h"
+
+class idUserInterface;
+
 /*
 ===============================================================================
 

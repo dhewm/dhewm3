@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_RANDOM_H__
 #define __MATH_RANDOM_H__
 
+#include "idlib/math/Math.h"
+
 /*
 ===============================================================================
 

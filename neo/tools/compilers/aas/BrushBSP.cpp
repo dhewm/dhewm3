@@ -26,12 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/FileSystem.h"
 
-#include "Brush.h"
-#include "BrushBSP.h"
-
+#include "tools/compilers/aas/BrushBSP.h"
 
 #define BSP_GRID_SIZE					512.0f
 #define SPLITTER_EPSILON				0.1f
@@ -42,7 +40,6 @@ If you have questions concerning this license or the applicable additional terms
 #define PORTAL_PLANE_DIST_EPSILON		0.01f
 
 //#define OUPUT_BSP_STATS_PER_GRID_CELL
-
 
 //===============================================================
 //

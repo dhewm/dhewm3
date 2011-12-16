@@ -26,6 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "idlib/containers/List.h"
+#include "idlib/geometry/DrawVert.h"
+#include "renderer/Model.h"
+
+class idDemoFile;
 
 typedef struct {
 	const idMaterial	*material;

@@ -26,9 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/math/Vector.h"
+#include "framework/Common.h"
+#include "renderer/ModelManager.h"
 
+#include "framework/DeclFX.h"
 
 /*
 =================

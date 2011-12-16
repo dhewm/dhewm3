@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_VECTOR_H__
 #define __MATH_VECTOR_H__
 
+#include "idlib/math/Math.h"
+#include "idlib/math/Random.h"
+#include "idlib/math/Simd.h"
+#include "idlib/Heap.h"
+
 /*
 ===============================================================================
 

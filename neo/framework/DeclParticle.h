@@ -29,6 +29,14 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLPARTICLE_H__
 #define __DECLPARTICLE_H__
 
+#include "idlib/containers/List.h"
+#include "idlib/math/Vector.h"
+#include "idlib/math/Matrix.h"
+#include "idlib/math/Random.h"
+#include "idlib/bv/Bounds.h"
+#include "framework/DeclManager.h"
+#include "framework/DeclTable.h"
+
 /*
 ===============================================================================
 

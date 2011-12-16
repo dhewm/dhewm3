@@ -28,6 +28,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_COMPILER_H__
 #define __SCRIPT_COMPILER_H__
 
+#include "idlib/Parser.h"
+
+#include "script/Script_Program.h"
+
 const char * const RESULT_STRING = "<RESULT>";
 
 typedef struct opcode_s {

@@ -29,8 +29,15 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __TR_LOCAL_H__
 #define __TR_LOCAL_H__
 
-#include "Image.h"
-#include "MegaTexture.h"
+class idScreenRect; // yay for include recursion
+
+#include "renderer/Image.h"
+#include "renderer/Interaction.h"
+#include "renderer/MegaTexture.h"
+#include "renderer/ModelDecal.h"
+#include "renderer/ModelOverlay.h"
+#include "renderer/RenderSystem.h"
+#include "renderer/RenderWorld.h"
 
 class idRenderWorldLocal;
 
@@ -92,11 +99,6 @@ SURFACES
 
 ==============================================================================
 */
-
-#include "ModelDecal.h"
-#include "ModelOverlay.h"
-#include "Interaction.h"
-
 
 // drawSurf_t structures command the back end to render surfaces
 // a given srfTriangles_t may be used with multiple viewEntity_t,
@@ -1679,9 +1681,5 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 										const viewDef_t * viewDef );
 
 //=============================================
-
-#include "RenderWorld_local.h"
-#include "GuiModel.h"
-#include "VertexCache.h"
 
 #endif /* !__TR_LOCAL_H__ */

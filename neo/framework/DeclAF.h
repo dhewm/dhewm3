@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLAF_H__
 #define __DECLAF_H__
 
+#include "idlib/containers/List.h"
+#include "idlib/math/Matrix.h"
+#include "idlib/math/Angles.h"
+#include "idlib/Str.h"
+#include "idlib/Lexer.h"
+#include "framework/DeclManager.h"
+
 /*
 ===============================================================================
 

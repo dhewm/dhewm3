@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../idlib/precompiled.h"
-#include "../sys_local.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -42,7 +40,13 @@ If you have questions concerning this license or the applicable additional terms
 #include <signal.h>
 #include <fcntl.h>
 
-#include "posix_public.h"
+#include "sys/platform.h"
+#include "idlib/containers/StrList.h"
+#include "framework/KeyInput.h"
+#include "framework/EditField.h"
+#include "sys/sys_local.h"
+
+#include "sys/posix/posix_public.h"
 
 #define					MAX_OSPATH 256
 #define					COMMAND_HISTORY 64

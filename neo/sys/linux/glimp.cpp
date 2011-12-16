@@ -25,18 +25,22 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../idlib/precompiled.h"
-#include "../../renderer/tr_local.h"
-#include "local.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <X11/Xlib.h>
 extern "C" {
 #	include "libXNVCtrl/NVCtrlLib.h"
 }
+
+#include "sys/platform.h"
+#include "framework/Licensee.h"
+#include "renderer/tr_local.h"
+
+#include "sys/linux/local.h"
 
 idCVar sys_videoRam( "sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512 );
 

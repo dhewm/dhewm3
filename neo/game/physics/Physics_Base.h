@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __PHYSICS_BASE_H__
 #define __PHYSICS_BASE_H__
 
+#include "physics/Physics.h"
+#include "Game_local.h"
+
 /*
 ===============================================================================
 

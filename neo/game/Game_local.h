@@ -31,6 +31,26 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "GameBase.h"
 
+#include "idlib/containers/StrList.h"
+#include "idlib/containers/LinkList.h"
+#include "idlib/BitMsg.h"
+#include "framework/Game.h"
+
+#include "gamesys/SaveGame.h"
+#include "physics/Clip.h"
+#include "physics/Push.h"
+#include "script/Script_Program.h"
+#include "ai/AAS.h"
+#include "anim/Anim.h"
+#include "Pvs.h"
+#include "MultiplayerGame.h"
+
+#ifdef ID_DEBUG_UNINITIALIZED_MEMORY
+// This is real evil but allows the code to inspect arbitrary class variables.
+#define private		public
+#define protected	public
+#endif
+
 /*
 ===============================================================================
 
@@ -38,12 +58,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===============================================================================
 */
-
-#ifdef ID_DEBUG_UNINITIALIZED_MEMORY
-// This is real evil but allows the code to inspect arbitrary class variables.
-#define private		public
-#define protected	public
-#endif
+class idDeclEntityDef;
+class idRenderWorld;
+class idSoundWorld;
+class idUserInterface;
 
 extern idRenderWorld *				gameRenderWorld;
 extern idSoundWorld *				gameSoundWorld;
@@ -55,41 +73,29 @@ class idPlayer;
 class idCamera;
 class idWorldspawn;
 class idTestModel;
-class idAAS;
-class idAI;
 class idSmokeParticles;
 class idEntityFx;
 class idTypeInfo;
-class idProgram;
 class idThread;
 class idEditEntities;
 class idLocationEntity;
 
 //============================================================================
-
-#include "gamesys/Event.h"
-#include "gamesys/Class.h"
-#include "gamesys/SysCvar.h"
-#include "gamesys/SysCmds.h"
-#include "gamesys/SaveGame.h"
-#include "gamesys/DebugGraph.h"
-
-#include "script/Script_Program.h"
-
-#include "anim/Anim.h"
-
-#include "ai/AAS.h"
-
-#include "physics/Clip.h"
-#include "physics/Push.h"
-
-#include "Pvs.h"
-#include "MultiplayerGame.h"
-
-//============================================================================
-
 extern const int NUM_RENDER_PORTAL_BITS;
 
+void gameError( const char *fmt, ... );
+
+extern idRenderWorld *				gameRenderWorld;
+extern idSoundWorld *				gameSoundWorld;
+
+extern const int NUM_RENDER_PORTAL_BITS;
+/*
+===============================================================================
+
+	Local implementation of the public game interface.
+
+===============================================================================
+*/
 typedef struct entityState_s {
 	int						entityNumber;
 	idBitMsg				state;
@@ -555,6 +561,13 @@ extern idAnimManager		animationLib;
 
 //============================================================================
 
+class idGameError : public idException {
+public:
+	idGameError( const char *text ) : idException( text ) {}
+};
+
+//============================================================================
+
 template< class type >
 ID_INLINE idEntityPtr<type>::idEntityPtr() {
 	spawnId = 0;
@@ -615,14 +628,6 @@ ID_INLINE int idEntityPtr<type>::GetEntityNum( void ) const {
 
 //============================================================================
 
-class idGameError : public idException {
-public:
-	idGameError( const char *text ) : idException( text ) {}
-};
-
-//============================================================================
-
-
 //
 // these defines work for all startsounds from all entity types
 // make sure to change script/doom_defs.script if you add any channels, or change their order
@@ -649,57 +654,5 @@ typedef enum {
 extern const float	DEFAULT_GRAVITY;
 extern const idVec3	DEFAULT_GRAVITY_VEC3;
 extern const int	CINEMATIC_SKIP_DELAY;
-
-//============================================================================
-
-#include "physics/Force.h"
-#include "physics/Force_Constant.h"
-#include "physics/Force_Drag.h"
-#include "physics/Force_Field.h"
-#include "physics/Force_Spring.h"
-#include "physics/Physics.h"
-#include "physics/Physics_Static.h"
-#include "physics/Physics_StaticMulti.h"
-#include "physics/Physics_Base.h"
-#include "physics/Physics_Actor.h"
-#include "physics/Physics_Monster.h"
-#include "physics/Physics_Player.h"
-#include "physics/Physics_Parametric.h"
-#include "physics/Physics_RigidBody.h"
-#include "physics/Physics_AF.h"
-
-#include "SmokeParticles.h"
-
-#include "Entity.h"
-#include "GameEdit.h"
-#include "AF.h"
-#include "IK.h"
-#include "AFEntity.h"
-#include "Misc.h"
-#include "Actor.h"
-#include "Projectile.h"
-#include "Weapon.h"
-#include "Light.h"
-#include "WorldSpawn.h"
-#include "Item.h"
-#include "PlayerView.h"
-#include "PlayerIcon.h"
-#include "Player.h"
-#include "Mover.h"
-#include "Camera.h"
-#include "Moveable.h"
-#include "Target.h"
-#include "Trigger.h"
-#include "Sound.h"
-#include "Fx.h"
-#include "SecurityCamera.h"
-#include "BrittleFracture.h"
-
-#include "ai/AI.h"
-#include "anim/Anim_Testmodel.h"
-
-#include "script/Script_Compiler.h"
-#include "script/Script_Interpreter.h"
-#include "script/Script_Thread.h"
 
 #endif	/* !__GAME_LOCAL_H__ */

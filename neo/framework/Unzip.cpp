@@ -1,7 +1,8 @@
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Heap.h"
+#include "idlib/Lib.h"
 
-#include "Unzip.h"
+#include "framework/Unzip.h"
 
 /* unzip.h -- IO for uncompress .zip files using zlib
    Version 0.15 beta, Mar 19th, 1998,

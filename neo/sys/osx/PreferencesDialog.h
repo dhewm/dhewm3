@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 
+#include <Carbon/Carbon.h>
+
 enum GameDisplayMode
 {
 	kInactive,
@@ -67,6 +69,5 @@ OSStatus CreateGameDisplayPreferencesDialog(
 OSStatus RunGameDisplayPreferencesDialog(
 							GameDisplayInfo *outGDInfo,
 							WindowRef inWindow);
-
 
 #endif // PREFERENCESDIALOG_H

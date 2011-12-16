@@ -1,4 +1,4 @@
-#import "../posix/posix_public.h"
+#import "sys/posix/posix_public.h"
 
 #import <Foundation/NSGeometry.h>
 @class NSEvent, NSOpenGLContext, NSWindow;

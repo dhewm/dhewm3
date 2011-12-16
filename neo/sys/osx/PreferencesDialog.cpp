@@ -26,12 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#include <Carbon/Carbon.h>
-#include "PreferencesDialog.h"
-#include "PickMonitor.h"
 #include <list>
 #include <set>
+
+#include "sys/platform.h"
+#include "framework/CVarSystem.h"
+#include "sys/osx/PickMonitor.h"
+
+#include "PreferencesDialog.h"
 
 static idCVar r_stretched( "r_stretched", "0", CVAR_ARCHIVE | CVAR_BOOL, "Used stretched resolution" );
 

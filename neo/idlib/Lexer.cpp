@@ -26,8 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/Heap.h"
+#include "framework/Common.h"
+#include "framework/FileSystem.h"
+
+#include "idlib/Lexer.h"
 
 #define PUNCTABLE
 

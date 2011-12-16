@@ -26,11 +26,17 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "gamesys/SysCvar.h"
+#include "physics/Physics_Monster.h"
+#include "ai/AI.h"
+#include "Player.h"
+#include "Light.h"
+#include "WorldSpawn.h"
+#include "Sound.h"
+#include "Misc.h"
 
-#include "Game_local.h"
-
+#include "GameEdit.h"
 
 /*
 ===============================================================================
