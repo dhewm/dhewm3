@@ -600,7 +600,6 @@ set(src_core
 	${src_snd}
 	${src_ui}
 	${src_tools}
-	${src_idlib}
 )
 
 set(src_stub_openal		sys/stub/openal_stub.cpp)
@@ -671,6 +670,11 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+add_library(idlib${cpu} STATIC ${src_idlib})
+if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
+	set_target_properties(idlib${cpu} PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
+
 if (CORE)
 	add_executable(doom3.${cpu}
 		${src_core}
@@ -681,6 +685,7 @@ if (CORE)
 	set_target_properties(doom3.${cpu} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
 	set_target_properties(doom3.${cpu} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(doom3.${cpu}
+		idlib${cpu}
 		${X11_X11_LIB} ${X11_Xext_LIB} ${Xxf86vm}
 		${OPENGL_gl_LIBRARY}
 		${OPENAL_LIBRARY}
@@ -706,6 +711,7 @@ if (DEDICATED)
 	set_target_properties(doom3ded.${cpu} PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
 	set_target_properties(doom3ded.${cpu} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(doom3ded.${cpu}
+		idlib${cpu}
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}
 		${CURL_LIBRARY}
@@ -715,19 +721,21 @@ if (DEDICATED)
 endif()
 
 if (GAME)
-	add_library(game${cpu} SHARED ${src_game} ${src_idlib})
+	add_library(game${cpu} SHARED ${src_game})
 	set_target_properties(game${cpu} PROPERTIES PREFIX "")
 	set_target_properties(game${cpu} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
 	set_target_properties(game${cpu} PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/game")
 	set_target_properties(game${cpu} PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(game${cpu} PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(game${cpu} idlib${cpu})
 endif()
 
 if (D3XP)
-	add_library(game${cpu}-d3xp SHARED ${src_d3xp} ${src_idlib})
+	add_library(game${cpu}-d3xp SHARED ${src_d3xp})
 	set_target_properties(game${cpu}-d3xp PROPERTIES PREFIX "")
 	set_target_properties(game${cpu}-d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
 	set_target_properties(game${cpu}-d3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/d3xp")
 	set_target_properties(game${cpu}-d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(game${cpu}-d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(game${cpu}-d3xp idlib${cpu})
 endif()
