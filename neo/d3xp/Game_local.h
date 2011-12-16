@@ -29,6 +29,14 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_LOCAL_H__
 #define	__GAME_LOCAL_H__
 
+// default scripts
+#define SCRIPT_DEFAULTDEFS			"script/doom_defs.script"
+#define SCRIPT_DEFAULT				"script/doom_main.script"
+#define SCRIPT_DEFAULTFUNC			"doom_main"
+
+#define TIME_GROUP1		0
+#define TIME_GROUP2		1
+
 /*
 ===============================================================================
 

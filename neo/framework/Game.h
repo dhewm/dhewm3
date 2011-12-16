@@ -37,11 +37,6 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-// default scripts
-#define SCRIPT_DEFAULTDEFS			"script/doom_defs.script"
-#define SCRIPT_DEFAULT				"script/doom_main.script"
-#define SCRIPT_DEFAULTFUNC			"doom_main"
-
 typedef struct {
 	char		sessionCommand[MAX_STRING_CHARS];	// "map", "disconnect", "victory", etc
 	int			consistencyHash;					// used to check for network game divergence
@@ -65,9 +60,6 @@ typedef enum {
 	ESC_MAIN,		// start main menu GUI
 	ESC_GUI			// set an explicit GUI
 } escReply_t;
-
-#define TIME_GROUP1		0
-#define TIME_GROUP2		1
 
 class idGame {
 public:

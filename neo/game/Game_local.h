@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_LOCAL_H__
 #define	__GAME_LOCAL_H__
 
+// default scripts
+#define SCRIPT_DEFAULTDEFS			"script/doom_defs.script"
+#define SCRIPT_DEFAULT				"script/doom_main.script"
+#define SCRIPT_DEFAULTFUNC			"doom_main"
 /*
 ===============================================================================
 
@@ -563,15 +567,15 @@ private:
 	void					DumpOggSounds( void );
 	void					GetShakeSounds( const idDict *dict );
 
-	void					SelectTimeGroup( int timeGroup );
-	int						GetTimeGroupTime( int timeGroup );
-	void					GetBestGameType( const char* map, const char* gametype, char buf[ MAX_STRING_CHARS ] );
+	virtual void			SelectTimeGroup( int timeGroup );
+	virtual int				GetTimeGroupTime( int timeGroup );
+	virtual void			GetBestGameType( const char* map, const char* gametype, char buf[ MAX_STRING_CHARS ] );
 
 	void					Tokenize( idStrList &out, const char *in );
 
 	void					UpdateLagometer( int aheadOfServer, int dupeUsercmds );
 
-	void					GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] );
+	virtual void			GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] );
 };
 
 //============================================================================
