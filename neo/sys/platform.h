@@ -196,6 +196,18 @@ If you have questions concerning this license or the applicable additional terms
 #define id_attribute(x)
 #endif
 
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <assert.h>
+#include <time.h>
+#include <ctype.h>
+#include <typeinfo>
+#include <errno.h>
+#include <math.h>
+
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

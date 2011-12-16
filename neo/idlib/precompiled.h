@@ -63,18 +63,6 @@ If you have questions concerning this license or the applicable additional terms
 	#define NDEBUG
 #endif
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <assert.h>
-#include <time.h>
-#include <ctype.h>
-#include <typeinfo>
-#include <errno.h>
-#include <math.h>
-
 //-----------------------------------------------------
 
 // non-portable system services
