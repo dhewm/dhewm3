@@ -102,15 +102,15 @@ typedef enum {
 	M_DELTAZ
 } sys_mEvents;
 
-typedef struct sysEvent_s {
+struct sysEvent_t {
 	sysEventType_t	evType;
 	int				evValue;
 	int				evValue2;
 	int				evPtrLength;		// bytes of data pointed to by evPtr, for journaling
 	void *			evPtr;				// this must be manually freed if not NULL
-} sysEvent_t;
+};
 
-typedef struct sysMemoryStats_s {
+struct sysMemoryStats_t {
 	int memoryLoad;
 	int totalPhysical;
 	int availPhysical;
@@ -119,7 +119,7 @@ typedef struct sysMemoryStats_s {
 	int totalVirtual;
 	int availVirtual;
 	int availExtendedVirtual;
-} sysMemoryStats_t;
+};
 
 template<class type> class idList;		// for Sys_ListFiles
 

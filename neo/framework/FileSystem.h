@@ -109,14 +109,14 @@ typedef struct fileDownload_s {
 	void *				buffer;
 } fileDownload_t;
 
-typedef struct backgroundDownload_s {
-	struct backgroundDownload_s	*next;	// set by the fileSystem
+struct backgroundDownload_t {
+	backgroundDownload_t	*next;	// set by the fileSystem
 	dlType_t			opcode;
 	idFile *			f;
 	fileDownload_t		file;
 	urlDownload_t		url;
 	volatile bool		completed;
-} backgroundDownload_t;
+};
 
 // file list for directory listings
 class idFileList {
