@@ -29,38 +29,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __ASYNCNETWORK_H__
 #define __ASYNCNETWORK_H__
 
-/*
-DOOM III gold:	33
-1.1 beta patch:	34
-1.1 patch:		35
-1.2 XP:			36-39
-1.3 patch:		40
-1.3.1:			41
-*/
-const int ASYNC_PROTOCOL_MINOR		= 41;
-const int ASYNC_PROTOCOL_VERSION	= ( ASYNC_PROTOCOL_MAJOR << 16 ) + ASYNC_PROTOCOL_MINOR;
-#define MAJOR_VERSION(v) ( v >> 16 )
-
-const int MAX_ASYNC_CLIENTS			= 32;
-
-const int MAX_USERCMD_BACKUP		= 256;
-const int MAX_USERCMD_DUPLICATION	= 25;
-const int MAX_USERCMD_RELAY			= 10;
-
-// index 0 is hardcoded to be the idnet master
-// which leaves 4 to user customization
-const int MAX_MASTER_SERVERS		= 5;
-
-const int MAX_NICKLEN				= 32;
-
-// max number of servers that will be scanned for at a single IP address
-const int MAX_SERVER_PORTS			= 8;
-
-// special game init ids
-const int GAME_INIT_ID_INVALID		= -1;
-const int GAME_INIT_ID_MAP_LOAD		= -2;
-
-
 #include "MsgChannel.h"
 #include "AsyncServer.h"
 #include "ServerScan.h"
