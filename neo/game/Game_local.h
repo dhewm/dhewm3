@@ -29,10 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_LOCAL_H__
 #define	__GAME_LOCAL_H__
 
-// default scripts
-#define SCRIPT_DEFAULTDEFS			"script/doom_defs.script"
-#define SCRIPT_DEFAULT				"script/doom_main.script"
-#define SCRIPT_DEFAULTFUNC			"doom_main"
+#include "GameBase.h"
+
 /*
 ===============================================================================
 
@@ -40,18 +38,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===============================================================================
 */
-
-#define LAGO_IMG_WIDTH 64
-#define LAGO_IMG_HEIGHT 64
-#define LAGO_WIDTH	64
-#define LAGO_HEIGHT	44
-#define LAGO_MATERIAL	"textures/sfx/lagometer"
-#define LAGO_IMAGE		"textures/sfx/lagometer.tga"
-
-// if set to 1 the server sends the client PVS with snapshots and the client compares against what it sees
-#ifndef ASYNC_WRITE_PVS
-	#define ASYNC_WRITE_PVS 0
-#endif
 
 #ifdef ID_DEBUG_UNINITIALIZED_MEMORY
 // This is real evil but allows the code to inspect arbitrary class variables.
@@ -61,9 +47,6 @@ If you have questions concerning this license or the applicable additional terms
 
 extern idRenderWorld *				gameRenderWorld;
 extern idSoundWorld *				gameSoundWorld;
-
-// the "gameversion" client command will print this plus compile date
-#define	GAME_VERSION		"baseDOOM-1"
 
 // classes used by idGameLocal
 class idEntity;
@@ -82,16 +65,7 @@ class idThread;
 class idEditEntities;
 class idLocationEntity;
 
-#define	MAX_CLIENTS				32
-#define	GENTITYNUM_BITS			12
-#define	MAX_GENTITIES			(1<<GENTITYNUM_BITS)
-#define	ENTITYNUM_NONE			(MAX_GENTITIES-1)
-#define	ENTITYNUM_WORLD			(MAX_GENTITIES-2)
-#define	ENTITYNUM_MAX_NORMAL	(MAX_GENTITIES-2)
-
 //============================================================================
-
-void gameError( const char *fmt, ... );
 
 #include "gamesys/Event.h"
 #include "gamesys/Class.h"
@@ -113,10 +87,6 @@ void gameError( const char *fmt, ... );
 #include "MultiplayerGame.h"
 
 //============================================================================
-
-#define MAX_GAME_MESSAGE_SIZE	8192
-#define MAX_ENTITY_STATE_SIZE	512
-#define ENTITY_PVS_SIZE			((MAX_GENTITIES+31)>>5)
 
 extern const int NUM_RENDER_PORTAL_BITS;
 
@@ -676,18 +646,6 @@ typedef enum {
 	SND_CHANNEL_DAMAGE
 } gameSoundChannel_t;
 
-// content masks
-#define	MASK_ALL					(-1)
-#define	MASK_SOLID					(CONTENTS_SOLID)
-#define	MASK_MONSTERSOLID			(CONTENTS_SOLID|CONTENTS_MONSTERCLIP|CONTENTS_BODY)
-#define	MASK_PLAYERSOLID			(CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_BODY)
-#define	MASK_DEADSOLID				(CONTENTS_SOLID|CONTENTS_PLAYERCLIP)
-#define	MASK_WATER					(CONTENTS_WATER)
-#define	MASK_OPAQUE					(CONTENTS_OPAQUE)
-#define	MASK_SHOT_RENDERMODEL		(CONTENTS_SOLID|CONTENTS_RENDERMODEL)
-#define	MASK_SHOT_BOUNDINGBOX		(CONTENTS_SOLID|CONTENTS_BODY)
-
-#define DEFAULT_GRAVITY_STRING		"1066"
 extern const float	DEFAULT_GRAVITY;
 extern const idVec3	DEFAULT_GRAVITY_VEC3;
 extern const int	CINEMATIC_SKIP_DELAY;
