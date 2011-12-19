@@ -115,11 +115,3 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef ID_OPENAL_EAX
 #	define ID_OPENAL_EAX 0
 #endif
-
-#ifndef ID_ALLOW_D3XP
-#	if defined( MACOS_X )
-#		define ID_ALLOW_D3XP 0
-#	else
-#		define ID_ALLOW_D3XP 1
-#	endif
-#endif
