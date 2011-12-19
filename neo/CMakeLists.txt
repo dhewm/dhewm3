@@ -134,8 +134,6 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_definitions(-fvisibility=hidden)
 	endif()
 
-	add_definitions(-Wno-unknown-pragmas)
-
 	# TODO fix these warnings
 	add_definitions(-Wno-sign-compare)
 	add_definitions(-Wno-switch)
