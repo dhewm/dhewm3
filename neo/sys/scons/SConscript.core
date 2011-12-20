@@ -193,6 +193,7 @@ ui_list = scons_utils.BuildList( 'ui', ui_string )
 
 sys_string = ' \
 	sys_local.cpp \
+	threads.cpp \
 	posix/posix_net.cpp \
 	posix/posix_main.cpp \
 	posix/posix_signal.cpp \

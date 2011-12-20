@@ -2783,6 +2783,8 @@ idCommonLocal::Init
 =================
 */
 void idCommonLocal::Init( int argc, char **argv ) {
+	Sys_InitThreads();
+
 	try {
 
 		// set interface pointers used by idLib
@@ -2928,6 +2930,8 @@ void idCommonLocal::Shutdown( void ) {
 
 	// shutdown idLib
 	idLib::ShutDown();
+
+	Sys_ShutdownThreads();
 }
 
 /*

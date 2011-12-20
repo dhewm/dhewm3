@@ -614,6 +614,7 @@ set(src_sys_dedicated	sys/linux/dedicated.cpp)
 
 if (APPLE)
 	set(src_sys_base
+		sys/threads.cpp
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_signal.cpp
@@ -635,6 +636,7 @@ if (APPLE)
 	)
 elseif (WIN32)
 	set(src_sys_base
+		sys/threads.cpp
 		sys/sys_local.cpp
 		sys/win32/win_cpu.cpp
 #		sys/win32/win_gamma.cpp
@@ -654,6 +656,7 @@ elseif (WIN32)
 	)
 else()
 	set(src_sys_base
+		sys/threads.cpp
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_signal.cpp

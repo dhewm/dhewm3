@@ -157,56 +157,6 @@ const char* Sys_GetThreadName(int *index) {
 	return "main";
 }
 
-
-/*
-==================
-Sys_EnterCriticalSection
-==================
-*/
-void Sys_EnterCriticalSection( int index ) {
-	assert( index >= 0 && index < MAX_CRITICAL_SECTIONS );
-	if ( TryEnterCriticalSection( &win32.criticalSections[index] ) == 0 ) {
-		EnterCriticalSection( &win32.criticalSections[index] );
-//		Sys_DebugPrintf( "busy lock '%s' in thread '%s'\n", lock->name, Sys_GetThreadName() );
-	}
-}
-
-/*
-==================
-Sys_LeaveCriticalSection
-==================
-*/
-void Sys_LeaveCriticalSection( int index ) {
-	assert( index >= 0 && index < MAX_CRITICAL_SECTIONS );
-	LeaveCriticalSection( &win32.criticalSections[index] );
-}
-
-/*
-==================
-Sys_WaitForEvent
-==================
-*/
-void Sys_WaitForEvent( int index ) {
-	assert( index == 0 );
-	if ( !win32.backgroundDownloadSemaphore ) {
-		win32.backgroundDownloadSemaphore = CreateEvent( NULL, TRUE, FALSE, NULL );
-	}
-	WaitForSingleObject( win32.backgroundDownloadSemaphore, INFINITE );
-	ResetEvent( win32.backgroundDownloadSemaphore );
-}
-
-/*
-==================
-Sys_TriggerEvent
-==================
-*/
-void Sys_TriggerEvent( int index ) {
-	assert( index == 0 );
-	SetEvent( win32.backgroundDownloadSemaphore );
-}
-
-
-
 #pragma optimize( "", on )
 
 #ifdef DEBUG
@@ -1234,10 +1184,6 @@ int main(int argc, char *argv[]) {
 
 	// no abort/retry/fail errors
 	SetErrorMode( SEM_FAILCRITICALERRORS );
-
-	for ( int i = 0; i < MAX_CRITICAL_SECTIONS; i++ ) {
-		InitializeCriticalSection( &win32.criticalSections[i] );
-	}
 
 	// get the initial time base
 	Sys_Milliseconds();

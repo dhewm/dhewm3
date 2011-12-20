@@ -383,13 +383,17 @@ void				Sys_DestroyThread( xthreadInfo& info ); // sets threadHandle back to 0
 // if index != NULL, set the index in g_threads array (use -1 for "main" thread)
 const char *		Sys_GetThreadName( int *index = 0 );
 
-const int MAX_CRITICAL_SECTIONS		= 4;
+extern void Sys_InitThreads();
+extern void Sys_ShutdownThreads();
+
+const int MAX_CRITICAL_SECTIONS		= 5;
 
 enum {
 	CRITICAL_SECTION_ZERO = 0,
 	CRITICAL_SECTION_ONE,
 	CRITICAL_SECTION_TWO,
-	CRITICAL_SECTION_THREE
+	CRITICAL_SECTION_THREE,
+	CRITICAL_SECTION_SYS
 };
 
 void				Sys_EnterCriticalSection( int index = CRITICAL_SECTION_ZERO );

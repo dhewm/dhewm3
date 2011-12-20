@@ -47,105 +47,6 @@ If you have questions concerning this license or the applicable additional terms
 
 /*
 ======================================================
-locks
-======================================================
-*/
-
-// we use an extra lock for the local stuff
-const int MAX_LOCAL_CRITICAL_SECTIONS = MAX_CRITICAL_SECTIONS + 1;
-static pthread_mutex_t global_lock[ MAX_LOCAL_CRITICAL_SECTIONS ];
-
-/*
-==================
-Sys_EnterCriticalSection
-==================
-*/
-void Sys_EnterCriticalSection( int index ) {
-	assert( index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS );
-#ifdef ID_VERBOSE_PTHREADS
-	if ( pthread_mutex_trylock( &global_lock[index] ) == EBUSY ) {
-		Sys_Printf( "busy lock %d in thread '%s'\n", index, Sys_GetThreadName() );
-		if ( pthread_mutex_lock( &global_lock[index] ) == EDEADLK ) {
-			Sys_Printf( "FATAL: DEADLOCK %d, in thread '%s'\n", index, Sys_GetThreadName() );
-		}
-	}
-#else
-	pthread_mutex_lock( &global_lock[index] );
-#endif
-}
-
-/*
-==================
-Sys_LeaveCriticalSection
-==================
-*/
-void Sys_LeaveCriticalSection( int index ) {
-	assert( index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS );
-#ifdef ID_VERBOSE_PTHREADS
-	if ( pthread_mutex_unlock( &global_lock[index] ) == EPERM ) {
-		Sys_Printf( "FATAL: NOT LOCKED %d, in thread '%s'\n", index, Sys_GetThreadName() );
-	}
-#else
-	pthread_mutex_unlock( &global_lock[index] );
-#endif
-}
-
-/*
-======================================================
-wait and trigger events
-we use a single lock to manipulate the conditions, MAX_LOCAL_CRITICAL_SECTIONS-1
-
-the semantics match the win32 version. signals raised while no one is waiting stay raised until a wait happens (which then does a simple pass-through)
-
-NOTE: we use the same mutex for all the events. I don't think this would become much of a problem
-cond_wait unlocks atomically with setting the wait condition, and locks it back before exiting the function
-the potential for time wasting lock waits is very low
-======================================================
-*/
-
-pthread_cond_t	event_cond[ MAX_TRIGGER_EVENTS ];
-bool			signaled[ MAX_TRIGGER_EVENTS ];
-bool			waiting[ MAX_TRIGGER_EVENTS ];
-
-/*
-==================
-Sys_WaitForEvent
-==================
-*/
-void Sys_WaitForEvent( int index ) {
-	assert( index >= 0 && index < MAX_TRIGGER_EVENTS );
-	Sys_EnterCriticalSection( MAX_LOCAL_CRITICAL_SECTIONS - 1 );
-	assert( !waiting[ index ] );	// WaitForEvent from multiple threads? that wouldn't be good
-	if ( signaled[ index ] ) {
-		// emulate windows behaviour: signal has been raised already. clear and keep going
-		signaled[ index ] = false;
-	} else {
-		waiting[ index ] = true;
-		pthread_cond_wait( &event_cond[ index ], &global_lock[ MAX_LOCAL_CRITICAL_SECTIONS - 1 ] );
-		waiting[ index ] = false;
-	}
-	Sys_LeaveCriticalSection( MAX_LOCAL_CRITICAL_SECTIONS - 1 );
-}
-
-/*
-==================
-Sys_TriggerEvent
-==================
-*/
-void Sys_TriggerEvent( int index ) {
-	assert( index >= 0 && index < MAX_TRIGGER_EVENTS );
-	Sys_EnterCriticalSection( MAX_LOCAL_CRITICAL_SECTIONS - 1 );
-	if ( waiting[ index ] ) {
-		pthread_cond_signal( &event_cond[ index ] );
-	} else {
-		// emulate windows behaviour: if no thread is waiting, leave the signal on so next wait keeps going
-		signaled[ index ] = true;
-	}
-	Sys_LeaveCriticalSection( MAX_LOCAL_CRITICAL_SECTIONS - 1 );
-}
-
-/*
-======================================================
 thread create and destroy
 ======================================================
 */
@@ -268,22 +169,6 @@ Posix_InitPThreads
 */
 void Posix_InitPThreads( ) {
 	int i;
-	pthread_mutexattr_t attr;
-
-	// init critical sections
-	for ( i = 0; i < MAX_LOCAL_CRITICAL_SECTIONS; i++ ) {
-		pthread_mutexattr_init( &attr );
-		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_ERRORCHECK );
-		pthread_mutex_init( &global_lock[i], &attr );
-		pthread_mutexattr_destroy( &attr );
-	}
-
-	// init event sleep/triggers
-	for ( i = 0; i < MAX_TRIGGER_EVENTS; i++ ) {
-		pthread_cond_init( &event_cond[ i ], NULL );
-		signaled[i] = false;
-		waiting[i] = false;
-	}
 
 	// init threads table
 	for ( i = 0; i < MAX_THREADS; i++ ) {
