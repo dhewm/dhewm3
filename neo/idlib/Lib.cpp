@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <unistd.h>
 #endif
 
+#include <SDL_endian.h>
+
 #include "sys/platform.h"
 #include "idlib/math/Vector.h"
 #include "idlib/math/Polynomial.h"
@@ -159,12 +161,10 @@ dword PackColor( const idVec4 &color ) {
 	dz = ColorFloatToByte( color.z );
 	dw = ColorFloatToByte( color.w );
 
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return ( dx << 0 ) | ( dy << 8 ) | ( dz << 16 ) | ( dw << 24 );
-#elif defined(ID_BIG_ENDIAN)
-	return ( dx << 24 ) | ( dy << 16 ) | ( dz << 8 ) | ( dw << 0 );
 #else
-#error unknown endianness!
+	return ( dx << 24 ) | ( dy << 16 ) | ( dz << 8 ) | ( dw << 0 );
 #endif
 }
 
@@ -174,18 +174,16 @@ UnpackColor
 ================
 */
 void UnpackColor( const dword color, idVec4 &unpackedColor ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	unpackedColor.Set( ( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 24 ) & 255 ) * ( 1.0f / 255.0f ) );
-#elif defined(ID_BIG_ENDIAN)
+#else
 	unpackedColor.Set( ( ( color >> 24 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ) );
-#else
-#error unknown endianness!
 #endif
 }
 
@@ -201,12 +199,10 @@ dword PackColor( const idVec3 &color ) {
 	dy = ColorFloatToByte( color.y );
 	dz = ColorFloatToByte( color.z );
 
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return ( dx << 0 ) | ( dy << 8 ) | ( dz << 16 );
-#elif defined(ID_BIG_ENDIAN)
-	return ( dy << 16 ) | ( dz << 8 ) | ( dx << 0 );
 #else
-#error unknown endianness!
+	return ( dy << 16 ) | ( dz << 8 ) | ( dx << 0 );
 #endif
 }
 
@@ -216,16 +212,14 @@ UnpackColor
 ================
 */
 void UnpackColor( const dword color, idVec3 &unpackedColor ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	unpackedColor.Set( ( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ) );
-#elif defined(ID_BIG_ENDIAN)
+#else
 	unpackedColor.Set( ( ( color >> 16 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 8 ) & 255 ) * ( 1.0f / 255.0f ),
 						( ( color >> 0 ) & 255 ) * ( 1.0f / 255.0f ) );
-#else
-#error unknown endianness!
 #endif
 }
 
@@ -271,52 +265,19 @@ void idLib::Warning( const char *fmt, ... ) {
 
 /*
 ================
-ShortSwap
-================
-*/
-ID_INLINE static short ShortSwap( short l ) {
-	byte    b1,b2;
-
-	b1 = l&255;
-	b2 = (l>>8)&255;
-
-	return (b1<<8) + b2;
-}
-
-/*
-================
-LongSwap
-================
-*/
-ID_INLINE static int LongSwap ( int l ) {
-	byte    b1,b2,b3,b4;
-
-	b1 = l&255;
-	b2 = (l>>8)&255;
-	b3 = (l>>16)&255;
-	b4 = (l>>24)&255;
-
-	return ((int)b1<<24) + ((int)b2<<16) + ((int)b3<<8) + b4;
-}
-
-/*
-================
 FloatSwap
 ================
 */
 ID_INLINE static float FloatSwap( float f ) {
 	union {
 		float	f;
-		byte	b[4];
-	} dat1, dat2;
+		unsigned int u;
+	} id_attribute((may_alias)) dat;
 
+	dat.f = f;
+	dat.u = SDL_Swap32(dat.u);
 
-	dat1.f = f;
-	dat2.b[0] = dat1.b[3];
-	dat2.b[1] = dat1.b[2];
-	dat2.b[2] = dat1.b[1];
-	dat2.b[3] = dat1.b[0];
-	return dat2.f;
+	return dat.f;
 }
 
 /*
@@ -459,122 +420,82 @@ Swap_IsBigEndian
 ==========
 */
 bool Swap_IsBigEndian( void ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return false;
-#elif defined(ID_BIG_ENDIAN)
-	return true;
 #else
-#error unknown endianness!
+	return true;
 #endif
 }
 
 short	BigShort( short l ) {
-#if defined(ID_LITTLE_ENDIAN)
-	return ShortSwap(l);
-#elif defined(ID_BIG_ENDIAN)
-	return l;
-#else
-#error unknown endianness!
-#endif
+	return SDL_SwapBE16(l);
 }
 
 short	LittleShort( short l ) {
-#if defined(ID_LITTLE_ENDIAN)
-	return l;
-#elif defined(ID_BIG_ENDIAN)
-	return ShortSwap(l);
-#else
-#error unknown endianness!
-#endif
+	return SDL_SwapLE16(l);
 }
 
 int		BigLong( int l ) {
-#if defined(ID_LITTLE_ENDIAN)
-	return LongSwap(l);
-#elif defined(ID_BIG_ENDIAN)
-	return l;
-#else
-#error unknown endianness!
-#endif
+	return SDL_SwapBE32(l);
 }
 
 int		LittleLong( int l ) {
-#if defined(ID_LITTLE_ENDIAN)
-	return l;
-#elif defined(ID_BIG_ENDIAN)
-	return LongSwap(l);
-#else
-#error unknown endianness!
-#endif
+	return SDL_SwapLE32(l);
 }
 
 float	BigFloat( float l ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return FloatSwap(l);
-#elif defined(ID_BIG_ENDIAN)
-	return l;
 #else
-#error unknown endianness!
+	return l;
 #endif
 }
 
 float	LittleFloat( float l ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return l;
-#elif defined(ID_BIG_ENDIAN)
-	return FloatSwap(l);
 #else
-#error unknown endianness!
+	return FloatSwap(l);
 #endif
 }
 
 void	BigRevBytes( void *bp, int elsize, int elcount ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	RevBytesSwap(bp, elsize, elcount);
-#elif defined(ID_BIG_ENDIAN)
-	return;
 #else
-#error unknown endianness!
+	return;
 #endif
 }
 
 void	LittleRevBytes( void *bp, int elsize, int elcount ){
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return;
-#elif defined(ID_BIG_ENDIAN)
-	RevBytesSwap(bp, elsize, elcount);
 #else
-#error unknown endianness!
+	RevBytesSwap(bp, elsize, elcount);
 #endif
 }
 
 void	LittleBitField( void *bp, int elsize ){
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return;
-#elif defined(ID_BIG_ENDIAN)
-	RevBitFieldSwap(bp, elsize);
 #else
-#error unknown endianness!
+	RevBitFieldSwap(bp, elsize);
 #endif
 }
 
 void	SixtetsForInt( byte *out, int src) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	SixtetsForIntLittle(out, src);
-#elif defined(ID_BIG_ENDIAN)
-	SixtetsForIntBig(out, src);
 #else
-#error unknown endianness!
+	SixtetsForIntBig(out, src);
 #endif
 }
 
 int		IntForSixtets( byte *in ) {
-#if defined(ID_LITTLE_ENDIAN)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	return IntForSixtetsLittle(in);
-#elif defined(ID_BIG_ENDIAN)
-	return IntForSixtetsBig(in);
 #else
-#error unknown endianness!
+	return IntForSixtetsBig(in);
 #endif
 }
 

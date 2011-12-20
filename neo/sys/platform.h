@@ -68,10 +68,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define THREAD_RETURN_TYPE			DWORD
 
-#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
-	#define ID_LITTLE_ENDIAN			1
-#endif
-
 #endif
 
 
@@ -171,26 +167,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
-
-#if !defined(ID_LITTLE_ENDIAN) && !defined(ID_BIG_ENDIAN)
-	#if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__)
-		#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-			#define ID_LITTLE_ENDIAN
-		#endif
-	#elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__)
-		#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-			#define ID_BIG_ENDIAN
-		#endif
-	#endif
-#endif
-
-#if !defined(ID_LITTLE_ENDIAN) && !defined(ID_BIG_ENDIAN)
-	#if defined(__i386__) || defined(__x86_64__)
-		#define ID_LITTLE_ENDIAN		1
-	#elif defined(__ppc__)
-		#define ID_BIG_ENDIAN			1
-	#endif
-#endif
 
 #ifdef __GNUC__
 #define id_attribute(x) __attribute__(x)
