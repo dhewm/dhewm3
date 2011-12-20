@@ -85,6 +85,9 @@ include_directories(${OPENAL_INCLUDE_DIR})
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
+find_package(SDL REQUIRED)
+include_directories(${SDL_INCLUDE_DIR})
+
 if (UNIX AND NOT APPLE)
 	find_package(X11 REQUIRED)
 	add_definitions(-DXTHREADS)
@@ -694,6 +697,7 @@ if (CORE)
 		${VORBIS_LIBRARIES}
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
+		${SDL_LIBRARY}
 		${sys_libs}
 	)
 endif()
@@ -716,6 +720,7 @@ if (DEDICATED)
 		${VORBIS_LIBRARIES}
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
+		${SDL_LIBRARY}
 		${sys_libs}
 	)
 endif()

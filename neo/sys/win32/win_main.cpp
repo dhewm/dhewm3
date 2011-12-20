@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/stat.h>
 #endif
 
+#include <SDL_main.h>
+
 idCVar Win32Vars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::in_mouse( "in_mouse", "1", CVAR_SYSTEM | CVAR_BOOL, "enable mouse input" );
@@ -65,8 +67,6 @@ idCVar Win32Vars_t::win_timerUpdate( "win_timerUpdate", "0", CVAR_SYSTEM | CVAR_
 idCVar Win32Vars_t::win_allowMultipleInstances( "win_allowMultipleInstances", "0", CVAR_SYSTEM | CVAR_BOOL, "allow multiple instances running concurrently" );
 
 Win32Vars_t	win32;
-
-static char		sys_cmdline[MAX_STRING_CHARS];
 
 // not a hard limit, just what we keep track of for debugging
 xthreadInfo *g_threads[MAX_THREADS];
@@ -1220,16 +1220,14 @@ int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, 
 WinMain
 ==================
 */
-int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow ) {
-
+int main(int argc, char *argv[]) {
 	const HCURSOR hcurSave = ::SetCursor( LoadCursor( 0, IDC_WAIT ) );
 
 	Sys_SetPhysicalWorkMemory( 192 << 20, 1024 << 20 );
 
 	Sys_GetCurrentMemoryStatus( exeLaunchMemoryStats );
 
-	win32.hInstance = hInstance;
-	idStr::Copynz( sys_cmdline, lpCmdLine, sizeof( sys_cmdline ) );
+	win32.hInstance = GetModuleHandle(NULL);
 
 	// done before Com/Sys_Init since we need this for error output
 	Sys_CreateConsole();
@@ -1252,7 +1250,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 //	Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
 	Sys_FPU_SetPrecision( FPU_PRECISION_DOUBLE_EXTENDED );
 
-	common->Init( 0, NULL, lpCmdLine );
+	if ( argc > 1 ) {
+		common->Init( argc-1, &argv[1] );
+	} else {
+		common->Init( 0, NULL );
+	}
 
 #if TEST_FPU_EXCEPTIONS != 0
 	common->Printf( Sys_FPU_GetState() );
@@ -1281,7 +1283,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	::SetCursor( hcurSave );
 
 	// Launch the script debugger
-	if ( strstr( lpCmdLine, "+debugger" ) ) {
+	if ( strstr( GetCommandLine(), "+debugger" ) ) {
 		// DebuggerClientInit( lpCmdLine );
 		return 0;
 	}

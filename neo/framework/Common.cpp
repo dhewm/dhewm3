@@ -133,7 +133,7 @@ class idCommonLocal : public idCommon {
 public:
 								idCommonLocal( void );
 
-	virtual void				Init( int argc, const char **argv, const char *cmdline );
+	virtual void				Init( int argc, char **argv );
 	virtual void				Shutdown( void );
 	virtual void				Quit( void );
 	virtual bool				IsInitialized( void ) const;
@@ -181,7 +181,7 @@ private:
 	void						InitRenderSystem( void );
 	void						InitSIMD( void );
 	bool						AddStartupCommands( void );
-	void						ParseCommandLine( int argc, const char **argv );
+	void						ParseCommandLine( int argc, char **argv );
 	void						ClearCommandLine( void );
 	bool						SafeMode( void );
 	void						CheckToolMode( void );
@@ -834,7 +834,7 @@ idCmdArgs	com_consoleLines[MAX_CONSOLE_LINES];
 idCommonLocal::ParseCommandLine
 ==================
 */
-void idCommonLocal::ParseCommandLine( int argc, const char **argv ) {
+void idCommonLocal::ParseCommandLine( int argc, char **argv ) {
 	int i;
 
 	com_numConsoleLines = 0;
@@ -2782,7 +2782,7 @@ void idCommonLocal::SetMachineSpec( void ) {
 idCommonLocal::Init
 =================
 */
-void idCommonLocal::Init( int argc, const char **argv, const char *cmdline ) {
+void idCommonLocal::Init( int argc, char **argv ) {
 	try {
 
 		// set interface pointers used by idLib
@@ -2798,12 +2798,6 @@ void idCommonLocal::Init( int argc, const char **argv, const char *cmdline ) {
 		ClearWarnings( GAME_NAME " initialization" );
 
 		// parse command line options
-		idCmdArgs args;
-		if ( cmdline ) {
-			// tokenize if the OS doesn't do it for us
-			args.TokenizeString( cmdline, true );
-			argv = args.GetArgs( &argc );
-		}
 		ParseCommandLine( argc, argv );
 
 		// init console command system

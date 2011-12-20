@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <mcheck.h>
 #endif
 
+#include <SDL_main.h>
+
 #include "sys/platform.h"
 #include "framework/Licensee.h"
 #include "framework/FileSystem.h"
@@ -645,7 +647,7 @@ void abrt_func( mcheck_status status ) {
 main
 ===============
 */
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
 #ifdef ID_MCHECK
 	// must have -lmcheck linkage
 	mcheck( abrt_func );
@@ -655,9 +657,9 @@ int main(int argc, const char **argv) {
 	Posix_EarlyInit( );
 
 	if ( argc > 1 ) {
-		common->Init( argc-1, &argv[1], NULL );
+		common->Init( argc-1, &argv[1] );
 	} else {
-		common->Init( 0, NULL, NULL );
+		common->Init( 0, NULL );
 	}
 
 	Posix_LateInit( );

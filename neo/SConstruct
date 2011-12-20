@@ -287,7 +287,10 @@ BASECPPFLAGS.append( '-fvisibility=hidden' )
 
 if ( "BSD" in g_os ):
 	BASECPPFLAGS.append( '-I/usr/local/include' )
+	BASECPPFLAGS.append( '-I/usr/local/include/SDL' )
 	BASELINKFLAGS.append('-L/usr/local/lib')
+else:
+	BASECPPFLAGS.append( '-I/usr/include/SDL' )
 
 BASECPPFLAGS.append( '-I.' )
 

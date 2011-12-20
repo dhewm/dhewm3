@@ -240,7 +240,7 @@ if ( local_demo == 1 ):
 if ( local_curl == 0 ):
 	local_env.Append( CPPDEFINES = [ 'ID_ENABLE_CURL=0' ] )
 
-local_env.Append( LIBS = [ 'pthread', 'jpeg', 'vorbisfile' ] )
+local_env.Append( LIBS = [ 'SDL', 'SDLmain', 'pthread', 'jpeg', 'vorbisfile' ] )
 
 if ( local_dedicated == 0 ):
 	local_env.Append( LIBS = [ 'GL' ] )

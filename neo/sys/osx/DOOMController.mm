@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 #import <ucontext.h>
 #import <mach/thread_status.h>
 
+#import <SDL_main.h>
+
 #import "sys/platform.h"
 #import "idlib/Str.h"
 #import "framework/Licensee.h"
@@ -243,7 +245,7 @@ extern void CL_Quit_f(void);
 {
 	NSAutoreleasePool *pool;
 	int argc = 0;
-	const char *argv[MAX_ARGC];
+	char *argv[MAX_ARGC];
 	NSProcessInfo *processInfo;
 	NSArray *arguments;
 	unsigned int argumentIndex, argumentCount;
@@ -338,9 +340,9 @@ extern void CL_Quit_f(void);
 	// Finder passes the process serial number as only argument after the program path
 	// nuke it if we see it
 	if ( argc > 1 && strncmp( argv[ 1 ], "-psn", 4 ) ) {
-		common->Init( argc-1, &argv[1], NULL );
+		common->Init( argc-1, &argv[1] );
 	} else {
-		common->Init( 0, NULL, NULL );
+		common->Init( 0, NULL );
 	}
 
 	Posix_LateInit( );
@@ -837,8 +839,8 @@ void OSX_GetVideoCard( int& outVendorId, int& outDeviceId )
 main
 ===============
 */
-int main( int argc, const char *argv[] ) {
-	return NSApplicationMain( argc, argv );
+int main( int argc, char *argv[] ) {
+	return NSApplicationMain( argc, (const char **)argv );
 }
 
 bool FormatRegCode(const char* inRegCode, char* outRegCode)
