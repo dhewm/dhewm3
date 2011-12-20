@@ -90,9 +90,7 @@ void Posix_Exit(int ret) {
 	}
 	// at this point, too late to catch signals
 	Posix_ClearSigs();
-	if ( asyncThread.threadHandle ) {
-		Sys_DestroyThread( asyncThread );
-	}
+
 	// process spawning. it's best when it happens after everything has shut down
 	if ( exit_spawn[0] ) {
 		Sys_DoStartProcess( exit_spawn, false );
@@ -542,7 +540,6 @@ Posix_EarlyInit
 ===============
 */
 void Posix_EarlyInit( void ) {
-	memset( &asyncThread, 0, sizeof( asyncThread ) );
 	exit_spawn[0] = '\0';
 	Posix_InitSigs();
 	// set the base time
@@ -563,7 +560,6 @@ void Posix_LateInit( void ) {
 #ifndef ID_DEDICATED
 	common->Printf( "%d MB Video Memory\n", Sys_GetVideoRam() );
 #endif
-	Posix_StartAsyncThread( );
 }
 
 /*

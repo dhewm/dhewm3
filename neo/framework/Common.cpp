@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <SDL.h>
+
 #include "sys/platform.h"
 #include "idlib/containers/HashTable.h"
 #include "idlib/LangDict.h"
@@ -218,11 +220,12 @@ private:
 #ifdef ID_WRITE_VERSION
 	idCompressor *				config_compressor;
 #endif
+
+	SDL_TimerID					async_timer;
 };
 
 idCommonLocal	commonLocal;
 idCommon *		common = &commonLocal;
-
 
 /*
 ==================
@@ -248,6 +251,8 @@ idCommonLocal::idCommonLocal( void ) {
 #ifdef ID_WRITE_VERSION
 	config_compressor = NULL;
 #endif
+
+	async_timer = NULL;
 }
 
 /*
@@ -2777,12 +2782,31 @@ void idCommonLocal::SetMachineSpec( void ) {
 	com_videoRam.SetInteger( vidRam );
 }
 
+static unsigned int async_tick;
+
+static unsigned int AsyncTimer(unsigned int interval, void *) {
+	common->Async();
+	Sys_TriggerEvent(TRIGGER_EVENT_ONE);
+	async_tick++;
+
+	// calculate the next interval to get as close to 60fps as possible
+	unsigned int now = SDL_GetTicks();
+	unsigned int tick = async_tick * 1000 / 60;
+
+	if (now >= tick)
+		return 1;
+
+	return tick - now;
+}
+
 /*
 =================
 idCommonLocal::Init
 =================
 */
 void idCommonLocal::Init( int argc, char **argv ) {
+	SDL_Init(SDL_INIT_TIMER);
+
 	Sys_InitThreads();
 
 	try {
@@ -2879,6 +2903,12 @@ void idCommonLocal::Init( int argc, char **argv ) {
 	catch( idException & ) {
 		Sys_Error( "Error during initialization" );
 	}
+
+	async_tick = (SDL_GetTicks() >> 4) + 1;
+	async_timer = SDL_AddTimer(16, AsyncTimer, NULL);
+
+	if (!async_timer)
+		Sys_Error("Error while starting the async timer");
 }
 
 
@@ -2888,8 +2918,12 @@ idCommonLocal::Shutdown
 =================
 */
 void idCommonLocal::Shutdown( void ) {
-
 	com_shuttingDown = true;
+
+	if (async_timer) {
+		SDL_RemoveTimer(async_timer);
+		async_timer = NULL;
+	}
 
 	idAsyncNetwork::server.Kill();
 	idAsyncNetwork::client.Shutdown();

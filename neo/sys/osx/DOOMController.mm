@@ -978,23 +978,6 @@ static OSErr DoRegCodeDialog( char* ioRegCode1 )
 	return regCodeInfo.okPressed ? (OSErr)noErr : (OSErr)userCanceledErr;
 }
 
-/*
-=================
-Sys_AsyncThread
-=================
-*/
-THREAD_RETURN_TYPE Sys_AsyncThread( void * ) {
-	while ( 1 ) {
-		usleep( 16666 );
-		common->Async();
-		Sys_TriggerEvent( TRIGGER_EVENT_ONE );
-		pthread_testcancel();
-	}
-
-	return (THREAD_RETURN_TYPE) 0;
-}
-
-
 #if defined(__ppc__)
 
 /*

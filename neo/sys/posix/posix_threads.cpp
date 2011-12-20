@@ -140,28 +140,6 @@ const char* Sys_GetThreadName( int *index ) {
 }
 
 /*
-=========================================================
-Async Thread
-=========================================================
-*/
-
-xthreadInfo asyncThread;
-
-/*
-=================
-Posix_StartAsyncThread
-=================
-*/
-void Posix_StartAsyncThread() {
-	if ( asyncThread.threadHandle == 0 ) {
-		Sys_CreateThread( Sys_AsyncThread, NULL, THREAD_NORMAL, asyncThread, "Async", g_threads, &g_thread_count );
-	} else {
-		common->Printf( "Async thread already running\n" );
-	}
-	common->Printf( "Async thread started\n" );
-}
-
-/*
 ==================
 Posix_InitPThreads
 ==================

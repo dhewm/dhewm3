@@ -60,66 +60,6 @@ void Sys_InitScanTable( void ) {
 }
 
 /*
-=================
-Sys_AsyncThread
-=================
-*/
-THREAD_RETURN_TYPE Sys_AsyncThread( void * ) {
-	int now;
-	int next;
-	int	want_sleep;
-
-	// multi tick compensate for poor schedulers (Linux 2.4)
-	int ticked, to_ticked;
-	now = Sys_Milliseconds();
-	ticked = now >> 4;
-	while (1) {
-		// sleep
-		now = Sys_Milliseconds();
-		next = ( now & 0xFFFFFFF0 ) + 0x10;
-		want_sleep = ( next-now-1 ) * 1000;
-		if ( want_sleep > 0 ) {
-			usleep( want_sleep ); // sleep 1ms less than true target
-		}
-
-		// compensate if we slept too long
-		now = Sys_Milliseconds();
-		to_ticked = now >> 4;
-
-		// show ticking statistics - every 100 ticks, print a summary
-		#if 0
-			#define STAT_BUF 100
-			static int stats[STAT_BUF];
-			static int counter = 0;
-			// how many ticks to play
-			stats[counter] = to_ticked - ticked;
-			counter++;
-			if (counter == STAT_BUF) {
-				Sys_DebugPrintf("\n");
-				for( int i = 0; i < STAT_BUF; i++) {
-					if ( ! (i & 0xf) ) {
-						Sys_DebugPrintf("\n");
-					}
-					Sys_DebugPrintf( "%d ", stats[i] );
-				}
-				Sys_DebugPrintf("\n");
-				counter = 0;
-			}
-		#endif
-
-		while ( ticked < to_ticked ) {
-			common->Async();
-			ticked++;
-			Sys_TriggerEvent( TRIGGER_EVENT_ONE );
-		}
-		// thread exit
-		pthread_testcancel();
-	}
-
-	return (THREAD_RETURN_TYPE) 0;
-}
-
-/*
  ==============
  Sys_DefaultSavePath
  ==============
