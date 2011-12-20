@@ -179,7 +179,9 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			set(ldflags ${ldflags} "-m32")
 		endif()
 
-		if (NOT MINGW)
+		if (MINGW)
+			set(ldflags ${ldflags} "-mwindows")
+		else()
 			set(sys_libs ${sys_libs} pthread)
 		endif()
 
