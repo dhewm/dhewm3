@@ -184,8 +184,6 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 
 		if (MINGW)
 			set(ldflags ${ldflags} "-mwindows")
-		else()
-			set(sys_libs ${sys_libs} pthread)
 		endif()
 
 		if (os STREQUAL "linux")
@@ -618,7 +616,6 @@ if (APPLE)
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_signal.cpp
-		sys/posix/posix_threads.cpp
 		sys/posix/posix_main.cpp
 	)
 
@@ -660,7 +657,6 @@ else()
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_signal.cpp
-		sys/posix/posix_threads.cpp
 		sys/posix/posix_main.cpp
 		sys/linux/main.cpp
 	)

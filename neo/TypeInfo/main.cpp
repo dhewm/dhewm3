@@ -188,10 +188,7 @@ int				Sys_ListFiles( const char *directory, const char *extension, idStrList &l
 
 #endif
 
-xthreadInfo *	g_threads[MAX_THREADS];
-int				g_thread_count;
-
-void			Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, xthreadInfo &info, const char *name, xthreadInfo *threads[MAX_THREADS], int *thread_count ) {}
+void			Sys_CreateThread( xthread_t function, void *parms, xthreadInfo &info, const char *name ) {}
 void			Sys_DestroyThread( xthreadInfo& info ) {}
 
 void			Sys_EnterCriticalSection( int index ) {}

@@ -34,7 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <pwd.h>
-#include <pthread.h>
 #include <dlfcn.h>
 #include <termios.h>
 #include <signal.h>
@@ -544,7 +543,6 @@ void Posix_EarlyInit( void ) {
 	Posix_InitSigs();
 	// set the base time
 	Sys_Milliseconds();
-	Posix_InitPThreads();
 }
 
 /*

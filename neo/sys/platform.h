@@ -66,8 +66,6 @@ If you have questions concerning this license or the applicable additional terms
 #define assertmem( x, y )
 #endif
 
-#define THREAD_RETURN_TYPE			DWORD
-
 #endif
 
 
@@ -106,8 +104,6 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_STATIC_TEMPLATE
 
 #define assertmem( x, y )
-
-#define THREAD_RETURN_TYPE			void *
 
 #endif
 
@@ -162,8 +158,6 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_STATIC_TEMPLATE
 
 #define assertmem( x, y )
-
-#define THREAD_RETURN_TYPE			void *
 
 #endif
 

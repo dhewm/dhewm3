@@ -26,8 +26,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <pthread.h>
-
 #include "sys/platform.h"
 #include "framework/KeyInput.h"
 #include "sys/posix/posix_public.h"

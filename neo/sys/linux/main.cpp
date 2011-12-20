@@ -26,7 +26,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <pthread.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>

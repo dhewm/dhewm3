@@ -406,7 +406,7 @@ public:
 	static void				TouchFileList_f( const idCmdArgs &args );
 
 private:
-	friend THREAD_RETURN_TYPE	BackgroundDownloadThread( void *parms );
+	friend int				BackgroundDownloadThread( void *pexit );
 
 	searchpath_t *			searchPaths;
 	int						readCount;			// total bytes read
@@ -433,6 +433,7 @@ private:
 	backgroundDownload_t *	backgroundDownloads;
 	backgroundDownload_t	defaultBackgroundDownload;
 	xthreadInfo				backgroundThread;
+	bool					backgroundThread_exit;
 
 	idList<pack_t *>		serverPaks;
 	bool					loadedFileFromDir;		// set to true once a file was loaded from a directory - can't switch to pure anymore
@@ -520,6 +521,7 @@ idFileSystemLocal::idFileSystemLocal( void ) {
 	loadedFileFromDir = false;
 	restartGamePakChecksum = 0;
 	memset( &backgroundThread, 0, sizeof( backgroundThread ) );
+	backgroundThread_exit = false;
 	addonPaks = NULL;
 }
 
@@ -2924,6 +2926,11 @@ Frees all resources and closes all files
 void idFileSystemLocal::Shutdown( bool reloading ) {
 	searchpath_t *sp, *next, *loop;
 
+	backgroundThread_exit = true;
+	Sys_TriggerEvent();
+	Sys_DestroyThread(backgroundThread);
+	backgroundThread_exit = false;
+
 	gameFolder.Clear();
 
 	serverPaks.Clear();
@@ -3619,8 +3626,10 @@ BackgroundDownload
 Reads part of a file from a background thread.
 ===================
 */
-THREAD_RETURN_TYPE BackgroundDownloadThread( void *parms ) {
-	while( 1 ) {
+int BackgroundDownloadThread( void *pexit ) {
+	bool *exit = (bool *)pexit;
+
+	while (!(*exit)) {
 		Sys_EnterCriticalSection();
 		backgroundDownload_t	*bgl = fileSystemLocal.backgroundDownloads;
 		if ( !bgl ) {
@@ -3732,7 +3741,7 @@ THREAD_RETURN_TYPE BackgroundDownloadThread( void *parms ) {
 #endif
 		}
 	}
-	return (THREAD_RETURN_TYPE) 0;
+	return 0;
 }
 
 /*
@@ -3742,10 +3751,7 @@ idFileSystemLocal::StartBackgroundReadThread
 */
 void idFileSystemLocal::StartBackgroundDownloadThread() {
 	if ( !backgroundThread.threadHandle ) {
-		Sys_CreateThread( BackgroundDownloadThread, NULL, THREAD_NORMAL, backgroundThread, "backgroundDownload", g_threads, &g_thread_count );
-		if ( !backgroundThread.threadHandle ) {
-			common->Warning( "idFileSystemLocal::StartBackgroundDownloadThread: failed" );
-		}
+		Sys_CreateThread( BackgroundDownloadThread, &backgroundThread_exit, backgroundThread, "backgroundDownload" );
 	} else {
 		common->Printf( "background thread already running\n" );
 	}

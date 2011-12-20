@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include <SDL_mutex.h>
+#include <SDL_thread.h>
 
 #include "sys/platform.h"
 #include "framework/Common.h"
@@ -37,6 +38,9 @@ static SDL_mutex	*mutex[MAX_CRITICAL_SECTIONS] = { };
 static SDL_cond		*cond[MAX_TRIGGER_EVENTS] = { };
 static bool			signaled[MAX_TRIGGER_EVENTS] = { };
 static bool			waiting[MAX_TRIGGER_EVENTS] = { };
+
+static xthreadInfo	*thread[MAX_THREADS] = { };
+static size_t		thread_count = 0;
 
 /*
 ==================
@@ -66,6 +70,12 @@ void Sys_InitThreads() {
 		signaled[i] = false;
 		waiting[i] = false;
 	}
+
+	// threads
+	for (int i = 0; i < MAX_THREADS; i++)
+		thread[i] = NULL;
+
+	thread_count = 0;
 }
 
 /*
@@ -74,6 +84,16 @@ Sys_ShutdownThreads
 ==================
 */
 void Sys_ShutdownThreads() {
+	// threads
+	for (int i = 0; i < MAX_THREADS; i++) {
+		if (!thread[i])
+			continue;
+
+		Sys_Printf("WARNING: Thread '%s' still running\n", thread[i]->name);
+		SDL_KillThread(thread[i]->threadHandle);
+		thread[i] = NULL;
+	}
+
 	// events
 	for (int i = 0; i < MAX_TRIGGER_EVENTS; i++) {
 		SDL_DestroyCond(cond[i]);
@@ -169,4 +189,100 @@ void Sys_TriggerEvent(int index) {
 	}
 
 	Sys_LeaveCriticalSection(CRITICAL_SECTION_SYS);
+}
+
+/*
+==================
+Sys_CreateThread
+==================
+*/
+void Sys_CreateThread(xthread_t function, void *parms, xthreadInfo& info, const char *name) {
+	Sys_EnterCriticalSection();
+
+	SDL_Thread *t = SDL_CreateThread(function, parms);
+
+	if (!t) {
+		common->Error("ERROR: SDL_thread for '%s' failed\n", name);
+		Sys_LeaveCriticalSection();
+		return;
+	}
+
+	info.name = name;
+	info.threadHandle = t;
+	info.threadId = SDL_GetThreadID(t);
+
+	if (thread_count < MAX_THREADS)
+		thread[thread_count++] = &info;
+	else
+		common->DPrintf("WARNING: MAX_THREADS reached\n");
+
+	Sys_LeaveCriticalSection();
+}
+
+/*
+==================
+Sys_DestroyThread
+==================
+*/
+void Sys_DestroyThread(xthreadInfo& info) {
+	assert(info.threadHandle);
+
+	SDL_WaitThread(info.threadHandle, NULL);
+
+	info.name = NULL;
+	info.threadHandle = NULL;
+	info.threadId = 0;
+
+	Sys_EnterCriticalSection();
+
+	for (int i = 0; i < thread_count; i++) {
+		if (&info == thread[i]) {
+			thread[i] = NULL;
+
+			int j;
+			for (j = i + 1; j < thread_count; j++)
+				thread[j - 1] = thread[j];
+
+			thread[j - 1] = NULL;
+			thread_count--;
+
+			break;
+		}
+	}
+
+	Sys_LeaveCriticalSection( );
+}
+
+/*
+==================
+Sys_GetThreadName
+find the name of the calling thread
+==================
+*/
+const char *Sys_GetThreadName(int *index) {
+	const char *name;
+
+	Sys_EnterCriticalSection();
+
+	unsigned int id = SDL_ThreadID();
+
+	for (int i = 0; i < thread_count; i++) {
+		if (id == thread[i]->threadId) {
+			if (index)
+				*index = i;
+
+			name = thread[i]->name;
+
+			Sys_LeaveCriticalSection();
+
+			return name;
+		}
+	}
+
+	if (index)
+		*index = -1;
+
+	Sys_LeaveCriticalSection();
+
+	return "main";
 }

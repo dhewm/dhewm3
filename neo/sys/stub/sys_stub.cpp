@@ -56,7 +56,7 @@ double Sys_ClockTicksPerSecond( void ) {
 void	Sys_Sleep( int msec ) {
 }
 
-void	Sys_CreateThread(  xthread_t function, void *parms, xthreadPriority priority, xthreadInfo& info ) {
+void	Sys_CreateThread( xthread_t function, void *parms, xthreadInfo& info, const char *name ) {
 }
 
 void Sys_DestroyThread( xthreadInfo& info ) {

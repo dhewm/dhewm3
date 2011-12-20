@@ -41,7 +41,6 @@ void		Posix_EarlyInit( );
 // called after common has been initialized
 void		Posix_LateInit( );
 
-void		Posix_InitPThreads( );
 void		Posix_InitSigs( );
 void		Posix_ClearSigs( );
 

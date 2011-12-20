@@ -44,7 +44,6 @@ If you have questions concerning this license or the applicable additional terms
 #import <sys/types.h>
 #import <sys/time.h>
 #import <unistd.h>
-#import <pthread.h>
 
 #import "sys/platform.h"
 #import "framework/Common.h"

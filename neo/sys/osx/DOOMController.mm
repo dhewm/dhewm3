@@ -28,7 +28,6 @@ If you have questions concerning this license or the applicable additional terms
 
 // -*- mode: objc -*-
 #import <unistd.h>
-#import <pthread.h>
 
 #import <Foundation/Foundation.h>
 #import <Carbon/Carbon.h>

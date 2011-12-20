@@ -68,15 +68,7 @@ idCVar Win32Vars_t::win_allowMultipleInstances( "win_allowMultipleInstances", "0
 
 Win32Vars_t	win32;
 
-// not a hard limit, just what we keep track of for debugging
-xthreadInfo *g_threads[MAX_THREADS];
-
-int g_thread_count = 0;
-
 static sysMemoryStats_t exeLaunchMemoryStats;
-
-static	xthreadInfo	threadInfo;
-static	HANDLE		hTimer;
 
 /*
 ================
@@ -89,72 +81,11 @@ void Sys_GetExeLaunchMemoryStatus( sysMemoryStats_t &stats ) {
 
 /*
 ==================
-Sys_Createthread
-==================
-*/
-void Sys_CreateThread(  xthread_t function, void *parms, xthreadPriority priority, xthreadInfo &info, const char *name, xthreadInfo *threads[MAX_THREADS], int *thread_count ) {
-	DWORD id;
-	HANDLE temp = CreateThread(	NULL,	// LPSECURITY_ATTRIBUTES lpsa,
-									0,		// DWORD cbStack,
-									(LPTHREAD_START_ROUTINE)function,	// LPTHREAD_START_ROUTINE lpStartAddr,
-									parms,	// LPVOID lpvThreadParm,
-									0,		//   DWORD fdwCreate,
-									&id);
-
-	info.threadId = id;
-	info.threadHandle = (intptr_t) temp;
-	if (priority == THREAD_HIGHEST) {
-		SetThreadPriority( (HANDLE)info.threadHandle, THREAD_PRIORITY_HIGHEST );		//  we better sleep enough to do this
-	} else if (priority == THREAD_ABOVE_NORMAL ) {
-		SetThreadPriority( (HANDLE)info.threadHandle, THREAD_PRIORITY_ABOVE_NORMAL );
-	}
-	info.name = name;
-	if ( *thread_count < MAX_THREADS ) {
-		threads[(*thread_count)++] = &info;
-	} else {
-		common->DPrintf("WARNING: MAX_THREADS reached\n");
-	}
-}
-
-/*
-==================
-Sys_DestroyThread
-==================
-*/
-void Sys_DestroyThread( xthreadInfo& info ) {
-	WaitForSingleObject( (HANDLE)info.threadHandle, INFINITE);
-	CloseHandle( (HANDLE)info.threadHandle );
-	info.threadHandle = 0;
-}
-
-/*
-==================
 Sys_Sentry
 ==================
 */
 void Sys_Sentry() {
 	int j = 0;
-}
-
-/*
-==================
-Sys_GetThreadName
-==================
-*/
-const char* Sys_GetThreadName(int *index) {
-	size_t id = GetCurrentThreadId();
-	for( int i = 0; i < g_thread_count; i++ ) {
-		if ( id == g_threads[i]->threadId ) {
-			if ( index ) {
-				*index = i;
-			}
-			return g_threads[i]->name;
-		}
-	}
-	if ( index ) {
-		*index = -1;
-	}
-	return "main";
 }
 
 #pragma optimize( "", on )

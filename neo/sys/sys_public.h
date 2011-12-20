@@ -358,28 +358,21 @@ void			Sys_ShutdownNetworking( void );
 ==============================================================
 */
 
-typedef THREAD_RETURN_TYPE (*xthread_t)( void * );
+struct SDL_Thread;
 
-typedef enum {
-	THREAD_NORMAL,
-	THREAD_ABOVE_NORMAL,
-	THREAD_HIGHEST
-} xthreadPriority;
+typedef int (*xthread_t)( void * );
 
 typedef struct {
-	const char *	name;
-	intptr_t		threadHandle;
-	size_t			threadId;
+	const char		*name;
+	SDL_Thread		*threadHandle;
+	unsigned int	threadId;
 } xthreadInfo;
 
-extern xthreadInfo *g_threads[MAX_THREADS];
-extern int			g_thread_count;
-
-void				Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, xthreadInfo &info, const char *name, xthreadInfo *threads[MAX_THREADS], int *thread_count );
+void				Sys_CreateThread( xthread_t function, void *parms, xthreadInfo &info, const char *name );
 void				Sys_DestroyThread( xthreadInfo& info ); // sets threadHandle back to 0
 
 // find the name of the calling thread
-// if index != NULL, set the index in g_threads array (use -1 for "main" thread)
+// if index != NULL, set the index in threads array (use -1 for "main" thread)
 const char *		Sys_GetThreadName( int *index = 0 );
 
 extern void Sys_InitThreads();
