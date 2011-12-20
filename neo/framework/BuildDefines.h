@@ -147,3 +147,7 @@ DOOM III gold:	33
 // special game init ids
 #define GAME_INIT_ID_INVALID	(-1)
 #define GAME_INIT_ID_MAP_LOAD	(-2)
+
+// threads
+
+#define MAX_THREADS				(10)

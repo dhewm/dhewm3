@@ -52,7 +52,6 @@ thread create and destroy
 */
 
 // not a hard limit, just what we keep track of for debugging
-#define MAX_THREADS 10
 xthreadInfo *g_threads[MAX_THREADS];
 
 int g_thread_count = 0;

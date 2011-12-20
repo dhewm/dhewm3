@@ -372,7 +372,6 @@ typedef struct {
 	size_t			threadId;
 } xthreadInfo;
 
-const int MAX_THREADS				= 10;
 extern xthreadInfo *g_threads[MAX_THREADS];
 extern int			g_thread_count;
 
