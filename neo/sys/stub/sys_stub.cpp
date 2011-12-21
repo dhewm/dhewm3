@@ -106,11 +106,6 @@ void idPort::SendPacket( const netadr_t to, const void *data, int size ) {
 
 //==========================================================
 
-double	idTimer::base;
-
-void idTimer::InitBaseClockTicks( void ) const {
-}
-
 //==========================================================
 
 void _glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {

@@ -3331,7 +3331,7 @@ void idCollisionModelManagerLocal::BuildModels( const idMapFile *mapFile ) {
 	common->Printf( "collision data:\n" );
 	common->Printf( "%6i models\n", numModels );
 	PrintModelInfo( &model );
-	common->Printf( "%.0f msec to load collision data.\n", timer.Milliseconds() );
+	common->Printf( "%u msec to load collision data.\n", timer.Milliseconds() );
 }
 
 

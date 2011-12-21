@@ -355,19 +355,20 @@ static idCVar cm_testLength(		"cm_testLength",		"1024",					CVAR_GAME | CVAR_FLO
 static idCVar cm_testRadius(		"cm_testRadius",		"64",					CVAR_GAME | CVAR_FLOAT,		"" );
 static idCVar cm_testAngle(			"cm_testAngle",			"60",					CVAR_GAME | CVAR_FLOAT,		"" );
 
-static int total_translation;
-static int min_translation = 999999;
-static int max_translation = -999999;
+static unsigned int total_translation;
+static unsigned int min_translation = 999999;
+static unsigned int max_translation = 0;
 static int num_translation = 0;
-static int total_rotation;
-static int min_rotation = 999999;
-static int max_rotation = -999999;
+static unsigned int total_rotation;
+static unsigned int min_rotation = 999999;
+static unsigned int max_rotation = 0;
 static int num_rotation = 0;
 static idVec3 start;
 static idVec3 *testend;
 
 void idCollisionModelManagerLocal::DebugOutput( const idVec3 &origin ) {
-	int i, k, t;
+	int i, k;
+	unsigned int t;
 	char buf[128];
 	idVec3 end;
 	idAngles boxAngles;
@@ -384,7 +385,7 @@ void idCollisionModelManagerLocal::DebugOutput( const idVec3 &origin ) {
 	if ( cm_testReset.GetBool() || ( cm_testWalk.GetBool() && !start.Compare( start ) ) ) {
 		total_translation = total_rotation = 0;
 		min_translation = min_rotation = 999999;
-		max_translation = max_rotation = -999999;
+		max_translation = max_rotation = 0;
 		num_translation = num_rotation = 0;
 		cm_testReset.SetBool( false );
 	}
@@ -440,7 +441,7 @@ void idCollisionModelManagerLocal::DebugOutput( const idVec3 &origin ) {
 	} else {
 		sprintf( buf, "%4d", cm_testTimes.GetInteger() );
 	}
-	common->Printf("%s translations: %4d milliseconds, (min = %d, max = %d, av = %1.1f)\n", buf, t, min_translation, max_translation, (float) total_translation / num_translation );
+	common->Printf("%s translations: %4u milliseconds, (min = %u, max = %u, av = %1.1f)\n", buf, t, min_translation, max_translation, (float) total_translation / num_translation );
 
 	if ( cm_testRandomMany.GetBool() ) {
 		// if many traces in one random direction

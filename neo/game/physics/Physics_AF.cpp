@@ -6381,7 +6381,7 @@ bool idPhysics_AF::Evaluate( int timeStepMSec, int endTimeMSec ) {
 	timer_total.Stop();
 
 	if ( af_showTimings.GetInteger() == 1 ) {
-		gameLocal.Printf( "%12s: t %1.4f pc %2d, %1.4f ac %2d %1.4f lcp %1.4f cd %1.4f\n",
+		gameLocal.Printf( "%12s: t %u pc %2d, %u ac %2d %u lcp %u cd %u\n",
 						self->name.c_str(),
 						timer_total.Milliseconds(),
 						numPrimary, timer_pc.Milliseconds(),
@@ -6391,7 +6391,7 @@ bool idPhysics_AF::Evaluate( int timeStepMSec, int endTimeMSec ) {
 	else if ( af_showTimings.GetInteger() == 2 ) {
 		numArticulatedFigures++;
 		if ( endTimeMSec > lastTimerReset ) {
-			gameLocal.Printf( "af %d: t %1.4f pc %2d, %1.4f ac %2d %1.4f lcp %1.4f cd %1.4f\n",
+			gameLocal.Printf( "af %d: t %u pc %2d, %u ac %2d %u lcp %u cd %u\n",
 							numArticulatedFigures,
 							timer_total.Milliseconds(),
 							numPrimary, timer_pc.Milliseconds(),

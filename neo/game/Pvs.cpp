@@ -842,7 +842,7 @@ void idPVS::Init( void ) {
 
 	timer.Stop();
 
-	gameLocal.Printf( "%5.0f msec to calculate PVS\n", timer.Milliseconds() );
+	gameLocal.Printf( "%5u msec to calculate PVS\n", timer.Milliseconds() );
 	gameLocal.Printf( "%5d areas\n", numAreas );
 	gameLocal.Printf( "%5d portals\n", numPortals );
 	gameLocal.Printf( "%5d areas visible on average\n", totalVisibleAreas / numAreas );
