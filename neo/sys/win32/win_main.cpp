@@ -856,14 +856,10 @@ void Sys_Init( void ) {
 
 		string.Clear();
 
-		if ( win32.cpuid & CPUID_AMD ) {
-			string += "AMD CPU";
-		} else if ( win32.cpuid & CPUID_INTEL ) {
-			string += "Intel CPU";
-		} else if ( win32.cpuid & CPUID_UNSUPPORTED ) {
+		if ( win32.cpuid & CPUID_UNSUPPORTED ) {
 			string += "unsupported CPU";
 		} else {
-			string += "generic CPU";
+			string += "CPU";
 		}
 
 		string += " with ";
@@ -882,9 +878,6 @@ void Sys_Init( void ) {
 		if ( win32.cpuid & CPUID_SSE3 ) {
 			string += "SSE3 & ";
 		}
-		if ( win32.cpuid & CPUID_HTT ) {
-			string += "HTT & ";
-		}
 		string.StripTrailing( " & " );
 		string.StripTrailing( " with " );
 		win32.sys_cpustring.SetString( string );
@@ -897,10 +890,6 @@ void Sys_Init( void ) {
 		while( src.ReadToken( &token ) ) {
 			if ( token.Icmp( "generic" ) == 0 ) {
 				id |= CPUID_GENERIC;
-			} else if ( token.Icmp( "intel" ) == 0 ) {
-				id |= CPUID_INTEL;
-			} else if ( token.Icmp( "amd" ) == 0 ) {
-				id |= CPUID_AMD;
 			} else if ( token.Icmp( "mmx" ) == 0 ) {
 				id |= CPUID_MMX;
 			} else if ( token.Icmp( "3dnow" ) == 0 ) {
@@ -911,8 +900,6 @@ void Sys_Init( void ) {
 				id |= CPUID_SSE2;
 			} else if ( token.Icmp( "sse3" ) == 0 ) {
 				id |= CPUID_SSE3;
-			} else if ( token.Icmp( "htt" ) == 0 ) {
-				id |= CPUID_HTT;
 			}
 		}
 		if ( id == CPUID_NONE ) {

@@ -117,55 +117,6 @@ static void CPUID( int func, unsigned regs[4] ) {
 
 /*
 ================
-IsAMD
-================
-*/
-static bool IsAMD( void ) {
-	char pstring[16];
-	char processorString[13];
-
-	// get name of processor
-	CPUID( 0, ( unsigned int * ) pstring );
-	processorString[0] = pstring[4];
-	processorString[1] = pstring[5];
-	processorString[2] = pstring[6];
-	processorString[3] = pstring[7];
-	processorString[4] = pstring[12];
-	processorString[5] = pstring[13];
-	processorString[6] = pstring[14];
-	processorString[7] = pstring[15];
-	processorString[8] = pstring[8];
-	processorString[9] = pstring[9];
-	processorString[10] = pstring[10];
-	processorString[11] = pstring[11];
-	processorString[12] = 0;
-
-	if ( strcmp( processorString, "AuthenticAMD" ) == 0 ) {
-		return true;
-	}
-	return false;
-}
-
-/*
-================
-HasCMOV
-================
-*/
-static bool HasCMOV( void ) {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 15 of EDX denotes CMOV existence
-	if ( regs[_REG_EDX] & ( 1 << 15 ) ) {
-		return true;
-	}
-	return false;
-}
-
-/*
-================
 Has3DNow
 ================
 */
@@ -261,176 +212,7 @@ static bool HasSSE3( void ) {
 
 /*
 ================
-LogicalProcPerPhysicalProc
-================
-*/
-#define NUM_LOGICAL_BITS   0x00FF0000     // EBX[23:16] Bit 16-23 in ebx contains the number of logical
-										  // processors per physical processor when execute cpuid with
-										  // eax set to 1
-static unsigned char LogicalProcPerPhysicalProc( void ) {
-#ifdef _MSC_VER
-	unsigned int regebx = 0;
-	__asm {
-		mov eax, 1
-		cpuid
-		mov regebx, ebx
-	}
-	return (unsigned char) ((regebx & NUM_LOGICAL_BITS) >> 16);
-#else
-	return 0;
-#endif
-}
-
-/*
-================
-GetAPIC_ID
-================
-*/
-#define INITIAL_APIC_ID_BITS  0xFF000000  // EBX[31:24] Bits 24-31 (8 bits) return the 8-bit unique
-										  // initial APIC ID for the processor this code is running on.
-										  // Default value = 0xff if HT is not supported
-static unsigned char GetAPIC_ID( void ) {
-#ifdef _MSC_VER
-	unsigned int regebx = 0;
-	__asm {
-		mov eax, 1
-		cpuid
-		mov regebx, ebx
-	}
-	return (unsigned char) ((regebx & INITIAL_APIC_ID_BITS) >> 24);
-#else
-	return '\0';
-#endif
-}
-
-/*
-================
-CPUCount
-
-	logicalNum is the number of logical CPU per physical CPU
-	physicalNum is the total number of physical processor
-	returns one of the HT_* flags
-================
-*/
-#define HT_NOT_CAPABLE				0
-#define HT_ENABLED					1
-#define HT_DISABLED					2
-#define HT_SUPPORTED_NOT_ENABLED	3
-#define HT_CANNOT_DETECT			4
-
-int CPUCount( int &logicalNum, int &physicalNum ) {
-	int statusFlag;
-	SYSTEM_INFO info;
-
-	physicalNum = 1;
-	logicalNum = 1;
-	statusFlag = HT_NOT_CAPABLE;
-
-	info.dwNumberOfProcessors = 0;
-	GetSystemInfo (&info);
-
-	// Number of physical processors in a non-Intel system
-	// or in a 32-bit Intel system with Hyper-Threading technology disabled
-	physicalNum = info.dwNumberOfProcessors;
-
-	unsigned char HT_Enabled = 0;
-
-	logicalNum = LogicalProcPerPhysicalProc();
-
-	if ( logicalNum >= 1 ) {	// > 1 doesn't mean HT is enabled in the BIOS
-		HANDLE hCurrentProcessHandle;
-		DWORD  dwProcessAffinity;
-		DWORD  dwSystemAffinity;
-		DWORD  dwAffinityMask;
-
-		// Calculate the appropriate  shifts and mask based on the
-		// number of logical processors.
-
-		unsigned char i = 1, PHY_ID_MASK  = 0xFF, PHY_ID_SHIFT = 0;
-
-		while( i < logicalNum ) {
-			i *= 2;
-			PHY_ID_MASK  <<= 1;
-			PHY_ID_SHIFT++;
-		}
-
-		hCurrentProcessHandle = GetCurrentProcess();
-		GetProcessAffinityMask( hCurrentProcessHandle, &dwProcessAffinity, &dwSystemAffinity );
-
-		// Check if available process affinity mask is equal to the
-		// available system affinity mask
-		if ( dwProcessAffinity != dwSystemAffinity ) {
-			statusFlag = HT_CANNOT_DETECT;
-			physicalNum = -1;
-			return statusFlag;
-		}
-
-		dwAffinityMask = 1;
-		while ( dwAffinityMask != 0 && dwAffinityMask <= dwProcessAffinity ) {
-			// Check if this CPU is available
-			if ( dwAffinityMask & dwProcessAffinity ) {
-				if ( SetProcessAffinityMask( hCurrentProcessHandle, dwAffinityMask ) ) {
-					unsigned char APIC_ID, LOG_ID, PHY_ID;
-
-					Sleep( 0 ); // Give OS time to switch CPU
-
-					APIC_ID = GetAPIC_ID();
-					LOG_ID  = APIC_ID & ~PHY_ID_MASK;
-					PHY_ID  = APIC_ID >> PHY_ID_SHIFT;
-
-					if ( LOG_ID != 0 ) {
-						HT_Enabled = 1;
-					}
-				}
-			}
-			dwAffinityMask = dwAffinityMask << 1;
-		}
-
-		// Reset the processor affinity
-		SetProcessAffinityMask( hCurrentProcessHandle, dwProcessAffinity );
-
-		if ( logicalNum == 1 ) {  // Normal P4 : HT is disabled in hardware
-			statusFlag = HT_DISABLED;
-		} else {
-			if ( HT_Enabled ) {
-				// Total physical processors in a Hyper-Threading enabled system.
-				physicalNum /= logicalNum;
-				statusFlag = HT_ENABLED;
-			} else {
-				statusFlag = HT_SUPPORTED_NOT_ENABLED;
-			}
-		}
-	}
-	return statusFlag;
-}
-
-/*
-================
-HasHTT
-================
-*/
-static bool HasHTT( void ) {
-	unsigned regs[4];
-	int logicalNum, physicalNum, HTStatusFlag;
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 28 of EDX denotes HTT existence
-	if ( !( regs[_REG_EDX] & ( 1 << 28 ) ) ) {
-		return false;
-	}
-
-	HTStatusFlag = CPUCount( logicalNum, physicalNum );
-	if ( HTStatusFlag != HT_ENABLED ) {
-		return false;
-	}
-	return true;
-}
-
-/*
-================
-HasHTT
+HasDAZ
 ================
 */
 static bool HasDAZ( void ) {
@@ -476,13 +258,6 @@ int Sys_GetCPUId( void ) {
 		return CPUID_UNSUPPORTED;
 	}
 
-	// check for an AMD
-	if ( IsAMD() ) {
-		flags = CPUID_AMD;
-	} else {
-		flags = CPUID_INTEL;
-	}
-
 	// check for Multi Media Extensions
 	if ( HasMMX() ) {
 		flags |= CPUID_MMX;
@@ -506,16 +281,6 @@ int Sys_GetCPUId( void ) {
 	// check for Streaming SIMD Extensions 3 aka Prescott's New Instructions
 	if ( HasSSE3() ) {
 		flags |= CPUID_SSE3;
-	}
-
-	// check for Hyper-Threading Technology
-	if ( HasHTT() ) {
-		flags |= CPUID_HTT;
-	}
-
-	// check for Conditional Move (CMOV) and fast floating point comparison (FCOMI) instructions
-	if ( HasCMOV() ) {
-		flags |= CPUID_CMOV;
 	}
 
 	// check for Denormals-Are-Zero mode
