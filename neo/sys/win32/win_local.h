@@ -86,8 +86,6 @@ char	*Sys_GetCurrentUser( void );
 
 void	Win_SetErrorText( const char *text );
 
-int		Sys_GetCPUId( void );
-
 int		MapKey (int key);
 
 
@@ -123,8 +121,6 @@ struct Win32Vars_t {
 	bool			mouseGrabbed;		// current state of grab and hide
 
 	OSVERSIONINFOEX	osversion;
-
-	int				cpuid;
 
 	// when we get a windows message, we store the time off so keyboard processing
 	// can know the exact time of an event (not really needed now that we use async direct input)

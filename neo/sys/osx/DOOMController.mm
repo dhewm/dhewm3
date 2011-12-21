@@ -464,22 +464,6 @@ void Sys_Shutdown( void ) {
 	Posix_Shutdown();
 }
 
-
-/*
-===============
-Sys_GetProcessorId
-===============
-*/
-int Sys_GetProcessorId( void ) {
-	int cpuid = CPUID_GENERIC;
-#if defined(__ppc__)
-	cpuid |= CPUID_ALTIVEC;
-#elif defined(__i386__)
-	cpuid |= CPUID_MMX | CPUID_SSE | CPUID_SSE2 | CPUID_SSE3;
-#endif
-	return cpuid;
-}
-
 /*
 ===============
 Sys_FPU_EnableExceptions

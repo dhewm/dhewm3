@@ -858,15 +858,6 @@ void Sys_Shutdown( void ) {
 	CoUninitialize();
 }
 
-/*
-================
-Sys_GetProcessorId
-================
-*/
-int Sys_GetProcessorId( void ) {
-	return win32.cpuid;
-}
-
 //=======================================================================
 
 //#define SET_THREAD_AFFINITY
