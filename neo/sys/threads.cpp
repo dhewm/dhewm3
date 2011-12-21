@@ -28,6 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <SDL_mutex.h>
 #include <SDL_thread.h>
+#include <SDL_timer.h>
 
 #include "sys/platform.h"
 #include "framework/Common.h"
@@ -49,6 +50,15 @@ Sys_Sleep
 */
 void Sys_Sleep(int msec) {
 	SDL_Delay(msec);
+}
+
+/*
+================
+Sys_Milliseconds
+================
+*/
+unsigned int Sys_Milliseconds() {
+	return SDL_GetTicks();
 }
 
 /*

@@ -841,7 +841,7 @@ typedef struct udpMsg_s {
 	byte				data[MAX_UDP_MSG_SIZE];
 	netadr_t			address;
 	int					size;
-	int					time;
+	unsigned int		time;
 	struct udpMsg_s *	next;
 } udpMsg_t;
 

@@ -39,9 +39,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #define	MAX_OSPATH			256
 
-static	int		frameNum;
+static	unsigned int		frameNum;
 
-int Sys_Milliseconds( void ) {
+unsigned int Sys_Milliseconds( void ) {
 	return frameNum * 16;
 }
 

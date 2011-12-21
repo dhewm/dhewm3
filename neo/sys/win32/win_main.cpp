@@ -1037,9 +1037,6 @@ int main(int argc, char *argv[]) {
 	// no abort/retry/fail errors
 	SetErrorMode( SEM_FAILCRITICALERRORS );
 
-	// get the initial time base
-	Sys_Milliseconds();
-
 #ifdef DEBUG
 	// disable the painfully slow MS heap check every 1024 allocs
 	_CrtSetDbgFlag( 0 );
