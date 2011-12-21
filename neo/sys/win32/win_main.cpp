@@ -323,15 +323,6 @@ void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
 
 /*
 ==============
-Sys_Sleep
-==============
-*/
-void Sys_Sleep( int msec ) {
-	Sleep( msec );
-}
-
-/*
-==============
 Sys_ShowWindow
 ==============
 */

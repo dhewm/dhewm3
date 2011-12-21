@@ -43,6 +43,15 @@ static xthreadInfo	*thread[MAX_THREADS] = { };
 static size_t		thread_count = 0;
 
 /*
+==============
+Sys_Sleep
+==============
+*/
+void Sys_Sleep(int msec) {
+	SDL_Delay(msec);
+}
+
+/*
 ==================
 Sys_InitThreads
 ==================

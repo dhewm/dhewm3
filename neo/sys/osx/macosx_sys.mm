@@ -62,10 +62,6 @@ int main(int argc, char *argv[]) {
 
 //===========================================================================
 
-void Sys_Sleep( const int time ) {
-	sleep( time );
-}
-
 void EditorPrintConsole( const char *test ) {
 }
 

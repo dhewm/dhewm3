@@ -143,11 +143,8 @@ void			Sys_Printf( const char *msg, ... )id_attribute((format(printf,1,2)));
 void			Sys_DebugPrintf( const char *fmt, ... )id_attribute((format(printf,1,2)));
 void			Sys_DebugVPrintf( const char *fmt, va_list arg );
 
-// a decent minimum sleep time to avoid going below the process scheduler speeds
-#define			SYS_MINSLEEP	20
-
 // allow game to yield CPU time
-// NOTE: due to SYS_MINSLEEP this is very bad portability karma, and should be completely removed
+// NOTE: due to SDL_TIMESLICE this is very bad portability karma, and should be completely removed
 void			Sys_Sleep( int msec );
 
 // Sys_Milliseconds should only be used for profiling purposes,

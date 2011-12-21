@@ -439,22 +439,6 @@ ID_TIME_T Sys_FileTimeStamp(FILE * fp) {
 	return st.st_mtime;
 }
 
-void Sys_Sleep(int msec) {
-	if ( msec < 20 ) {
-		static int last = 0;
-		int now = Sys_Milliseconds();
-		if ( now - last > 1000 ) {
-			Sys_Printf("WARNING: Sys_Sleep - %d < 20 msec is not portable\n", msec);
-			last = now;
-		}
-		// ignore that sleep call, keep going
-		return;
-	}
-	// use nanosleep? keep sleeping if signal interrupt?
-	if (usleep(msec * 1000) == -1)
-		Sys_Printf("usleep: %s\n", strerror(errno));
-}
-
 char *Sys_GetClipboardData(void) {
 	Sys_Printf( "TODO: Sys_GetClipboardData\n" );
 	return NULL;
