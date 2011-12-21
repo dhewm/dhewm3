@@ -475,7 +475,7 @@ int Sys_GetProcessorId( void ) {
 #if defined(__ppc__)
 	cpuid |= CPUID_ALTIVEC;
 #elif defined(__i386__)
-	cpuid |= CPUID_MMX | CPUID_SSE | CPUID_SSE2 | CPUID_SSE3 | CPUID_FTZ | CPUID_DAZ;
+	cpuid |= CPUID_MMX | CPUID_SSE | CPUID_SSE2 | CPUID_SSE3;
 #endif
 	return cpuid;
 }
@@ -903,63 +903,3 @@ static OSErr DoRegCodeDialog( char* ioRegCode1 )
 
 	return regCodeInfo.okPressed ? (OSErr)noErr : (OSErr)userCanceledErr;
 }
-
-#if defined(__ppc__)
-
-/*
- ================
- Sys_FPU_SetDAZ
- ================
- */
-void Sys_FPU_SetDAZ( bool enable ) {
-}
-
-/*
- ================
- Sys_FPU_SetFTZ
- ================
- */
-void Sys_FPU_SetFTZ( bool enable ) {
-}
-
-
-#elif defined(__i386__)
-
-#include <xmmintrin.h>
-
-/*
- ================
- Sys_FPU_SetDAZ
- ================
- */
-void Sys_FPU_SetDAZ( bool enable ) {
-	uint32_t dwData;
-	uint32_t enable_l = (uint32_t) enable;
-
-	enable_l = enable_l & 1;
-	enable_l = enable_l << 6;
-	dwData = _mm_getcsr(); // store MXCSR to dwData
-	dwData = dwData & 0xffbf;
-	dwData = dwData | enable_l;
-	_mm_setcsr(dwData); // load MXCSR with dwData
-}
-
-/*
- ================
- Sys_FPU_SetFTZ
- ================
- */
-void Sys_FPU_SetFTZ( bool enable ) {
-
-	uint32_t dwData;
-	uint32_t enable_l = (uint32_t) enable;
-
-	enable_l = enable_l & 1;
-	enable_l = enable_l << 15;
-	dwData = _mm_getcsr(); // store MXCSR to dwData
-	dwData = dwData & 0x7fff;
-	dwData = dwData | enable_l;
-	_mm_setcsr(dwData); // load MXCSR with dwData
-}
-
-#endif

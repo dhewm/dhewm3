@@ -39,8 +39,6 @@ typedef enum {
 	CPUID_SSE2							= 0x00080,	// Streaming SIMD Extensions 2
 	CPUID_SSE3							= 0x00100,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
 	CPUID_ALTIVEC						= 0x00200,	// AltiVec
-	CPUID_FTZ							= 0x04000,	// Flush-To-Zero mode (denormal results are flushed to zero)
-	CPUID_DAZ							= 0x08000	// Denormals-Are-Zero mode (denormal source operands are set to zero)
 } cpuid_t;
 
 typedef enum {
@@ -169,10 +167,10 @@ void			Sys_FPU_SetPrecision( int precision );
 // sets the FPU rounding mode
 void			Sys_FPU_SetRounding( int rounding );
 
-// sets Flush-To-Zero mode (only available when CPUID_FTZ is set)
+// sets Flush-To-Zero mode
 void			Sys_FPU_SetFTZ( bool enable );
 
-// sets Denormals-Are-Zero mode (only available when CPUID_DAZ is set)
+// sets Denormals-Are-Zero mode
 void			Sys_FPU_SetDAZ( bool enable );
 
 // returns amount of system ram

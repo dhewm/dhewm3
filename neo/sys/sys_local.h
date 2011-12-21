@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/RenderSystem.h"
 #include "sound/sound.h"
+#include "sys/sys_public.h"
 
 /*
 ==============================================================

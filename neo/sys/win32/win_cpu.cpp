@@ -212,40 +212,6 @@ static bool HasSSE3( void ) {
 
 /*
 ================
-HasDAZ
-================
-*/
-static bool HasDAZ( void ) {
-#ifdef _MSC_VER
-	__declspec(align(16)) unsigned char FXSaveArea[512];
-	unsigned char *FXArea = FXSaveArea;
-	DWORD dwMask = 0;
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 24 of EDX denotes support for FXSAVE
-	if ( !( regs[_REG_EDX] & ( 1 << 24 ) ) ) {
-		return false;
-	}
-
-	memset( FXArea, 0, sizeof( FXSaveArea ) );
-
-	__asm {
-		mov		eax, FXArea
-		FXSAVE	[eax]
-	}
-
-	dwMask = *(DWORD *)&FXArea[28];						// Read the MXCSR Mask
-	return ( ( dwMask & ( 1 << 6 ) ) == ( 1 << 6 ) );	// Return if the DAZ bit is set
-#else
-	return false;
-#endif
-}
-
-/*
-================
 Sys_GetCPUId
 ================
 */
@@ -270,7 +236,7 @@ int Sys_GetCPUId( void ) {
 
 	// check for Streaming SIMD Extensions
 	if ( HasSSE() ) {
-		flags |= CPUID_SSE | CPUID_FTZ;
+		flags |= CPUID_SSE;
 	}
 
 	// check for Streaming SIMD Extensions 2
@@ -281,11 +247,6 @@ int Sys_GetCPUId( void ) {
 	// check for Streaming SIMD Extensions 3 aka Prescott's New Instructions
 	if ( HasSSE3() ) {
 		flags |= CPUID_SSE3;
-	}
-
-	// check for Denormals-Are-Zero mode
-	if ( HasDAZ() ) {
-		flags |= CPUID_DAZ;
 	}
 
 	return flags;
@@ -608,52 +569,6 @@ void Sys_FPU_SetRounding( int rounding ) {
 		or			bx, cx
 		mov			word ptr [eax], bx
 		fldcw		word ptr [eax]
-	}
-#endif
-}
-
-/*
-================
-Sys_FPU_SetDAZ
-================
-*/
-void Sys_FPU_SetDAZ( bool enable ) {
-#ifdef _MSC_VER
-	DWORD dwData;
-
-	_asm {
-		movzx	ecx, byte ptr enable
-		and		ecx, 1
-		shl		ecx, 6
-		STMXCSR	dword ptr dwData
-		mov		eax, dwData
-		and		eax, ~(1<<6)	// clear DAX bit
-		or		eax, ecx		// set the DAZ bit
-		mov		dwData, eax
-		LDMXCSR	dword ptr dwData
-	}
-#endif
-}
-
-/*
-================
-Sys_FPU_SetFTZ
-================
-*/
-void Sys_FPU_SetFTZ( bool enable ) {
-#ifdef _MSC_VER
-	DWORD dwData;
-
-	_asm {
-		movzx	ecx, byte ptr enable
-		and		ecx, 1
-		shl		ecx, 15
-		STMXCSR	dword ptr dwData
-		mov		eax, dwData
-		and		eax, ~(1<<15)	// clear FTZ bit
-		or		eax, ecx		// set the FTZ bit
-		mov		dwData, eax
-		LDMXCSR	dword ptr dwData
 	}
 #endif
 }
