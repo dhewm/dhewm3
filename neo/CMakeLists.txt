@@ -120,15 +120,12 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	endif()
 
 	set(CMAKE_C_FLAGS_DEBUG "-g -D_DEBUG -O1")
-	set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
-	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
 	set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
 	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
+
+	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
 
 	add_definitions(-fno-strict-aliasing)
 
@@ -182,17 +179,26 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			set(ldflags ${ldflags} "-m32")
 		endif()
 
-		if (MINGW)
-			set(ldflags ${ldflags} "-mwindows")
-		endif()
-
 		if (os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
 		endif()
 	endif()
+elseif (MSVC)
+	add_definitions(/W4)
+	add_definitions(/wd4714) # 'function' marked as __forceinline not inlined
+	add_definitions(/wd4996) # 'function': was declared deprecated
+	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi")
+	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi")
+	set(CMAKE_C_FLAGS_MINSIZEREL "/Ox /Oy /Os")
 else()
 	message(FATAL_ERROR "Unsupported compiler")
 endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
+set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
 
 # mingw and msvc
 if (WIN32)
@@ -203,11 +209,16 @@ if (WIN32)
 		dinput8
 		ksuser
 		dxguid
-		dxerr8
 		winmm
 		iphlpapi
 		wsock32
 	)
+
+	if (MINGW)
+		list(APPEND sys_libs dxerr8)
+	else()
+		list(APPEND sys_libs dxerr)
+	endif()
 endif()
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}.${cpu}")
@@ -681,7 +692,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MING
 endif()
 
 if (CORE)
-	add_executable(doom3.${cpu}
+	add_executable(doom3.${cpu} WIN32
 		${src_core}
 		${src_sys_base}
 		${src_sys_core}
@@ -705,7 +716,7 @@ if (CORE)
 endif()
 
 if (DEDICATED)
-	add_executable(doom3ded.${cpu}
+	add_executable(doom3ded.${cpu} WIN32
 		${src_core}
 		${src_stub_openal}
 		${src_stub_gl}
