@@ -2755,8 +2755,6 @@ idCommonLocal::SetMachineSpec
 =================
 */
 void idCommonLocal::SetMachineSpec( void ) {
-	int cpu = Sys_GetProcessorId();
-	double ghz = Sys_ClockTicksPerSecond() * 0.000000001f;
 	int vidRam = Sys_GetVideoRam();
 	int sysRam = Sys_GetSystemRam();
 	bool oldCard = false;
@@ -2764,15 +2762,18 @@ void idCommonLocal::SetMachineSpec( void ) {
 
 	renderSystem->GetCardCaps( oldCard, nv10or20 );
 
-	Printf( "Detected\n \t%.2f GHz CPU\n\t%i MB of System memory\n\t%i MB of Video memory on %s\n\n", ghz, sysRam, vidRam, ( oldCard ) ? "a less than optimal video architecture" : "an optimal video architecture" );
+	if (oldCard)
+		Printf( "Detected\n\t%i MB of System memory\n\t%i MB of Video memory on a less than optimal video architecture\n\n", sysRam, vidRam );
+	else
+		Printf( "Detected\n\t%i MB of System memory\n\t%i MB of Video memory on an optimal video architecture\n\n", sysRam, vidRam );
 
-	if ( ghz >= 2.75f && vidRam >= 512 && sysRam >= 1024 && !oldCard ) {
+	if ( vidRam >= 512 && sysRam >= 1024 && !oldCard ) {
 		Printf( "This system qualifies for Ultra quality!\n" );
 		com_machineSpec.SetInteger( 3 );
-	} else if ( ghz >= ( ( cpu & CPUID_AMD ) ? 1.9f : 2.19f ) && vidRam >= 256 && sysRam >= 512 && !oldCard ) {
+	} else if ( vidRam >= 256 && sysRam >= 512 && !oldCard ) {
 		Printf( "This system qualifies for High quality!\n" );
 		com_machineSpec.SetInteger( 2 );
-	} else if ( ghz >= ( ( cpu & CPUID_AMD ) ? 1.1f : 1.25f ) && vidRam >= 128 && sysRam >= 384 ) {
+	} else if ( vidRam >= 128 && sysRam >= 384 ) {
 		Printf( "This system qualifies for Medium quality.\n" );
 		com_machineSpec.SetInteger( 1 );
 	} else {
