@@ -413,6 +413,7 @@ public:
 	virtual void			DebugPrintf( const char *fmt, ... )id_attribute((format(printf,2,3))) = 0;
 	virtual void			DebugVPrintf( const char *fmt, va_list arg ) = 0;
 
+	virtual unsigned int	GetMilliseconds( void ) = 0;
 	virtual double			GetClockTicks( void ) = 0;
 	virtual double			ClockTicksPerSecond( void ) = 0;
 	virtual int				GetProcessorId( void ) = 0;

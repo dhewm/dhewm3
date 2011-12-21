@@ -53,6 +53,10 @@ void idSysLocal::DebugVPrintf( const char *fmt, va_list arg ) {
 	Sys_DebugVPrintf( fmt, arg );
 }
 
+unsigned int idSysLocal::GetMilliseconds( void ) {
+	return Sys_Milliseconds();
+}
+
 double idSysLocal::GetClockTicks( void ) {
 	return Sys_GetClockTicks();
 }
