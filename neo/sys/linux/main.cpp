@@ -153,8 +153,6 @@ void Sys_Shutdown( void ) {
 Sys_GetProcessorId
 ===============
 */
-static char cpustring[13] = "generic\0";
-
 #if defined(__x86_64__) || defined(__i386__)
 #if __x86_64__
 #	define REG_b "rbx"
@@ -176,19 +174,10 @@ static char cpustring[13] = "generic\0";
 int Sys_GetProcessorId( void ) {
 	int eax, ebx, ecx, edx;
 	int max_std_level, max_ext_level, std_caps=0, ext_caps=0;
-	union { int i[3]; char c[12]; } vendor;
 
 	int i = CPUID_GENERIC;
 
 	cpuid(0, max_std_level, ebx, ecx, edx);
-	vendor.i[0] = ebx;
-	vendor.i[1] = edx;
-	vendor.i[2] = ecx;
-
-	strncpy(cpustring, vendor.c, 12);
-	cpustring[12] = 0;
-
-	Sys_Printf("Detected '%s' CPU with", cpustring);
 
 	if (max_std_level >= 1) {
 		cpuid(1, eax, ebx, ecx, std_caps);
@@ -248,15 +237,6 @@ int Sys_GetProcessorId( void ) {
 	return CPUID_GENERIC;
 }
 #endif
-
-/*
-===============
-Sys_GetProcessorString
-===============
-*/
-const char *Sys_GetProcessorString( void ) {
-	return cpustring;
-}
 
 /*
 ===============

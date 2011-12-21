@@ -147,7 +147,6 @@ unsigned int	Sys_Milliseconds( void );
 
 // returns a selection of the CPUID_* flags
 int				Sys_GetProcessorId( void );
-const char *	Sys_GetProcessorString( void );
 
 // returns true if the FPU stack is empty
 bool			Sys_FPU_StackIsEmpty( void );
@@ -405,7 +404,6 @@ public:
 
 	virtual unsigned int	GetMilliseconds( void ) = 0;
 	virtual int				GetProcessorId( void ) = 0;
-	virtual const char *	GetProcessorString( void ) = 0;
 	virtual const char *	FPU_GetState( void ) = 0;
 	virtual bool			FPU_StackIsEmpty( void ) = 0;
 	virtual void			FPU_SetFTZ( bool enable ) = 0;

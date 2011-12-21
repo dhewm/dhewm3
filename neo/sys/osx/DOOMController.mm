@@ -482,22 +482,6 @@ int Sys_GetProcessorId( void ) {
 
 /*
 ===============
-Sys_GetProcessorString
-===============
-*/
-const char *Sys_GetProcessorString( void ) {
-#if defined(__ppc__)
-	return "ppc CPU with AltiVec extensions";
-#elif defined(__i386__)
-	return "x86 CPU with MMX/SSE/SSE2/SSE3 extensions";
-#else
-	#error
-	return NULL;
-#endif
-}
-
-/*
-===============
 Sys_FPU_EnableExceptions
 http://developer.apple.com/documentation/mac/PPCNumerics/PPCNumerics-154.html
 http://developer.apple.com/documentation/Performance/Conceptual/Mac_OSX_Numerics/Mac_OSX_Numerics.pdf

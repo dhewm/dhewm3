@@ -1800,7 +1800,6 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	} else {
 		common->Printf( "N/A\n" );
 	}
-	common->Printf( "CPU: %s\n", Sys_GetProcessorString() );
 
 	const char *active[2] = { "", " (ACTIVE)" };
 	common->Printf( "ARB path ENABLED%s\n", active[tr.backEndRenderer == BE_ARB] );

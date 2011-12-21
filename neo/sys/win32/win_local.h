@@ -152,7 +152,6 @@ struct Win32Vars_t {
 	// desktop gamma is saved here for restoration at exit
 
 	static idCVar	sys_arch;
-	static idCVar	sys_cpustring;
 	static idCVar	in_mouse;
 	static idCVar	win_allowAltTab;
 	static idCVar	win_notaskkeys;

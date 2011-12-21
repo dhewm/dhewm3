@@ -208,7 +208,6 @@ void			idSysLocal::DebugVPrintf( const char *fmt, va_list arg ) {}
 double			idSysLocal::GetClockTicks( void ) { return 0.0; }
 double			idSysLocal::ClockTicksPerSecond( void ) { return 1.0; }
 int				idSysLocal::GetProcessorId( void ) { return 0; }
-const char *	idSysLocal::GetProcessorString( void ) { return ""; }
 const char *	idSysLocal::FPU_GetState( void ) { return ""; }
 bool			idSysLocal::FPU_StackIsEmpty( void ) { return true; }
 void			idSysLocal::FPU_SetFTZ( bool enable ) {}

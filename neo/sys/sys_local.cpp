@@ -61,10 +61,6 @@ int idSysLocal::GetProcessorId( void ) {
 	return Sys_GetProcessorId();
 }
 
-const char *idSysLocal::GetProcessorString( void ) {
-	return Sys_GetProcessorString();
-}
-
 const char *idSysLocal::FPU_GetState( void ) {
 	return Sys_FPU_GetState();
 }
