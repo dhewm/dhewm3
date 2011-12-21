@@ -151,10 +151,6 @@ void			Sys_Sleep( int msec );
 // any game related timing information should come from event timestamps
 unsigned int	Sys_Milliseconds( void );
 
-// for accurate performance testing
-double			Sys_GetClockTicks( void );
-double			Sys_ClockTicksPerSecond( void );
-
 // returns a selection of the CPUID_* flags
 int				Sys_GetProcessorId( void );
 const char *	Sys_GetProcessorString( void );
@@ -414,8 +410,6 @@ public:
 	virtual void			DebugVPrintf( const char *fmt, va_list arg ) = 0;
 
 	virtual unsigned int	GetMilliseconds( void ) = 0;
-	virtual double			GetClockTicks( void ) = 0;
-	virtual double			ClockTicksPerSecond( void ) = 0;
 	virtual int				GetProcessorId( void ) = 0;
 	virtual const char *	GetProcessorString( void ) = 0;
 	virtual const char *	FPU_GetState( void ) = 0;

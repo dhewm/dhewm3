@@ -46,8 +46,6 @@ public:
 	virtual void			DebugVPrintf( const char *fmt, va_list arg );
 
 	virtual unsigned int	GetMilliseconds( void );
-	virtual double			GetClockTicks( void );
-	virtual double			ClockTicksPerSecond( void );
 	virtual int				GetProcessorId( void );
 	virtual const char *	GetProcessorString( void );
 	virtual const char *	FPU_GetState( void );

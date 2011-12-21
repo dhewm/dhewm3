@@ -57,14 +57,6 @@ unsigned int idSysLocal::GetMilliseconds( void ) {
 	return Sys_Milliseconds();
 }
 
-double idSysLocal::GetClockTicks( void ) {
-	return Sys_GetClockTicks();
-}
-
-double idSysLocal::ClockTicksPerSecond( void ) {
-	return Sys_ClockTicksPerSecond();
-}
-
 int idSysLocal::GetProcessorId( void ) {
 	return Sys_GetProcessorId();
 }

@@ -45,14 +45,6 @@ unsigned int Sys_Milliseconds( void ) {
 	return frameNum * 16;
 }
 
-double Sys_GetClockTicks( void ) {
-	return frameNum * 16.0;
-}
-
-double Sys_ClockTicksPerSecond( void ) {
-	return 1000.0;
-}
-
 void	Sys_Sleep( int msec ) {
 }
 

@@ -852,8 +852,6 @@ void Sys_Init( void ) {
 	if ( !idStr::Icmp( win32.sys_cpustring.GetString(), "detect" ) ) {
 		idStr string;
 
-		common->Printf( "%1.0f MHz ", Sys_ClockTicksPerSecond() / 1000000.0f );
-
 		win32.cpuid = Sys_GetCPUId();
 
 		string.Clear();
