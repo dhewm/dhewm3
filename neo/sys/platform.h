@@ -54,13 +54,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _MSC_VER
 #define ALIGN16( x )				__declspec(align(16)) x
-#define PACKED						__attribute__((packed))
+#define PACKED
 #define ID_INLINE					__forceinline
 #define ID_STATIC_TEMPLATE			static
 #define assertmem( x, y )			assert( _CrtIsValidPointer( x, y, true ) )
 #else
 #define ALIGN16( x )				x __attribute__ ((aligned (16)))
-#define PACKED
+#define PACKED						__attribute__((packed))
 #define ID_INLINE					inline
 #define ID_STATIC_TEMPLATE
 #define assertmem( x, y )
@@ -168,7 +168,10 @@ If you have questions concerning this license or the applicable additional terms
 #define id_attribute(x)
 #endif
 
-#include <inttypes.h>
+#if !defined(_MSC_VER)
+	// MSVC does not provide this C99 header
+	#include <inttypes.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

@@ -91,8 +91,11 @@ returns in megabytes
 ================
 */
 int Sys_GetVideoRam( void ) {
-#if defined(ID_DEDICATED) || defined(__MINGW32__)
+#if defined(ID_DEDICATED)
 	return 0;
+#elif !defined(_MFC_VER)
+	// no <atlbase.h> (MinGW, VS Express etc.), so assume the min. req. 64Mb
+	return 64;
 #else
 	unsigned int retSize = 64;
 
