@@ -221,7 +221,7 @@ tools_list = scons_utils.BuildList( 'tools', tools_string )
 
 core_list = framework_list + renderer_list + ui_list \
 	+ cm_list + dmap_list + renderbump_list + aas_list + roq_list \
-	+ snd_list + sys_list + tools_list + [ 'TypeInfo/TypeInfoGen.cpp' ]
+	+ snd_list + sys_list + tools_list
 
 for i in range( len( core_list ) ):
 	core_list[ i ] = '../../' + core_list[ i ]
