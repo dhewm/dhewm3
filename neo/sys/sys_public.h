@@ -151,9 +151,6 @@ int				Sys_GetProcessorId( void );
 // returns true if the FPU stack is empty
 bool			Sys_FPU_StackIsEmpty( void );
 
-// empties the FPU stack
-void			Sys_FPU_ClearStack( void );
-
 // returns the FPU state as a string
 const char *	Sys_FPU_GetState( void );
 

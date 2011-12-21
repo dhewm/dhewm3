@@ -428,9 +428,6 @@ bool Sys_FPU_StackIsEmpty( void ) {
 	return true;
 }
 
-void Sys_FPU_ClearStack( void ) {
-}
-
 const char *Sys_FPU_GetState( void ) {
 	return "";
 }

@@ -144,31 +144,6 @@ empty:
 
 /*
 ===============
-Sys_FPU_ClearStack
-===============
-*/
-void Sys_FPU_ClearStack( void ) {
-#ifdef _MSC_VER
-	__asm {
-		mov			eax, statePtr
-		fnstenv		[eax]
-		mov			eax, [eax+8]
-		xor			eax, 0xFFFFFFFF
-		mov			edx, (3<<14)
-	emptyStack:
-		mov			ecx, eax
-		and			ecx, edx
-		jz			done
-		fstp		st
-		shr			edx, 2
-		jmp			emptyStack
-	done:
-	}
-#endif
-}
-
-/*
-===============
 Sys_FPU_GetState
 
   gets the FPU state without changing the state
