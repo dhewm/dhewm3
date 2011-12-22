@@ -479,6 +479,16 @@ void idLight::SetColor( float red, float green, float blue ) {
 idLight::SetColor
 ================
 */
+void idLight::SetColor( const idVec3 &color ) {
+	baseColor = color;
+	SetLightLevel();
+}
+
+/*
+================
+idLight::SetColor
+================
+*/
 void idLight::SetColor( const idVec4 &color ) {
 	baseColor = color.ToVec3();
 	renderLight.shaderParms[ SHADERPARM_ALPHA ]		= color[ 3 ];

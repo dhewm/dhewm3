@@ -64,6 +64,7 @@ public:
 
 	void			SaveState( idDict *args );
 	virtual void	SetColor( float red, float green, float blue );
+	virtual void	SetColor( const idVec3 &color );
 	virtual void	SetColor( const idVec4 &color );
 	virtual void	GetColor( idVec3 &out ) const;
 	virtual void	GetColor( idVec4 &out ) const;
