@@ -111,9 +111,10 @@ in this Software without prior written authorization of the copyright holder.
 
 JPEG library
 -----------------------------------------------------------------------------
-neo/renderer/jpeg-6/*
+neo/renderer/jpeg-6/*, renderer/Image_files.cpp
 
-Copyright (C) 1991-1995, Thomas G. Lane
+This software is copyright (C) 1991-2011, Thomas G. Lane, Guido Vollbeding.
+All Rights Reserved except as specified below.
 
 Permission is hereby granted to use, copy, modify, and distribute this
 software (or portions thereof) for any purpose, without fee, subject to these

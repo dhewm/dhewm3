@@ -25,6 +25,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
 set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 
 include(CheckCXXCompilerFlag)
+include(CheckFunctionExists)
 
 option(CORE			"Build the core" ON)
 option(GAME			"Build the base game code" ON)
@@ -69,6 +70,13 @@ endif()
 # libs
 find_package(JPEG REQUIRED)
 include_directories(${JPEG_INCLUDE_DIR})
+
+set(CMAKE_REQUIRED_INCLUDES ${JPEG_INCLUDE_DIR})
+set(CMAKE_REQUIRED_LIBRARIES ${JPEG_LIBRARY})
+CHECK_FUNCTION_EXISTS("jpeg_mem_src" jpeg_has_mem_src)
+if (jpeg_has_mem_src)
+	add_definitions(-DHAVE_JPEG_MEM_SRC)
+endif ()
 
 find_package(OGG REQUIRED)
 include_directories(${OGG_INCLUDE_DIR})
