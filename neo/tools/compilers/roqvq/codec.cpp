@@ -322,7 +322,7 @@ void codec::Segment( int *alist, float *flist, int numElements, float rmse)
 int	codec::BestCodeword( unsigned char *tempvector, int dimension, VQDATA **codebook )
 {
 	VQDATA dist;
-	VQDATA bestDist = HUGE;
+	VQDATA bestDist = HUGE_VAL;
 	VQDATA tempvq[64];
 	int bestIndex = -1;
 
@@ -1505,7 +1505,7 @@ void codec::VQ( const int numEntries, const int dimension, const unsigned char *
 		//
 		// find the closest two and eliminate one
 		//
-		double bestDist = HUGE;
+		double bestDist = HUGE_VAL;
 		double dist, simport;
 		int bestIndex = -1;
 		int bestOtherIndex = 0;
@@ -1571,7 +1571,7 @@ void codec::VQ( const int numEntries, const int dimension, const unsigned char *
 		// until we have reduced it to 256 entries, find one to toss
 		//
 		do {
-			bestDist = HUGE;
+			bestDist = HUGE_VAL;
 			bestIndex = -1;
 			bestOtherIndex = -1;
 			if (optimize) {
@@ -1586,7 +1586,7 @@ void codec::VQ( const int numEntries, const int dimension, const unsigned char *
 				}
 			}
 			if (bestIndex == -1 || !optimize) {
-				bestDist = HUGE;
+				bestDist = HUGE_VAL;
 				bestIndex = -1;
 				bestOtherIndex = 0;
 				aentries = 0;
