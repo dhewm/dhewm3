@@ -362,4 +362,4 @@ void VPCALL idSIMD_SSE3::TransformVerts( idDrawVert *verts, const int numVerts, 
 #endif
 }
 
-#endif /* _WIN32 */
+#endif /* _MSC_VER */

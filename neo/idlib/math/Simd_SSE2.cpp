@@ -872,4 +872,4 @@ void VPCALL idSIMD_SSE2::MixedSoundToSamples( short *samples, const float *mixBu
 	}
 }
 
-#endif /* _WIN32 */
+#endif /* _MSC_VER */

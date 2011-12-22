@@ -290,4 +290,4 @@ $memcpy_final:
 	}
 }
 
-#endif /* _WIN32 */
+#endif /* _MSC_VER */

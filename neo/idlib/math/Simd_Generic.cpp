@@ -49,7 +49,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _DEBUG
 #define NODEFAULT	default: assert( 0 )
-#elif _WIN32
+#elif _MSC_VER
 #define NODEFAULT	default: __assume( 0 )
 #else
 #define NODEFAULT
