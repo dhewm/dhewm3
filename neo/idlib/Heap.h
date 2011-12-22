@@ -170,8 +170,8 @@ public:
 
 private:
 	typedef struct element_s {
-		struct element_s *	next;
 		type				t;
+		struct element_s *	next;
 	} element_t;
 	typedef struct block_s {
 		element_t			elements[blockSize];
@@ -217,7 +217,7 @@ type *idBlockAlloc<type,blockSize>::Alloc( void ) {
 
 template<class type, int blockSize>
 void idBlockAlloc<type,blockSize>::Free( type *t ) {
-	element_t *element = (element_t *)( intptr_t(t) - sizeof(intptr_t) );
+	element_t *element = (element_t *)t;
 	element->next = free;
 	free = element;
 	active--;
