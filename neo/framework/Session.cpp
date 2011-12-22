@@ -2595,19 +2595,6 @@ void idSessionLocal::Frame() {
 		minTic = latchedTicNumber;
 	}
 
-	// FIXME: deserves a cleanup and abstraction
-#if defined( _WIN32 )
-	// Spin in place if needed.  The game should yield the cpu if
-	// it is running over 60 hz, because there is fundamentally
-	// nothing useful for it to do.
-	while( 1 ) {
-		latchedTicNumber = com_ticNumber;
-		if ( latchedTicNumber >= minTic ) {
-			break;
-		}
-		Sys_Sleep( 1 );
-	}
-#else
 	while( 1 ) {
 		latchedTicNumber = com_ticNumber;
 		if ( latchedTicNumber >= minTic ) {
@@ -2615,7 +2602,6 @@ void idSessionLocal::Frame() {
 		}
 		Sys_WaitForEvent( TRIGGER_EVENT_ONE );
 	}
-#endif
 
 	if ( authEmitTimeout ) {
 		// waiting for a game auth
