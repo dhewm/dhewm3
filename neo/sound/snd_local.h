@@ -91,9 +91,6 @@ class idSoundWorldLocal;
 #ifdef WIN32
 #pragma pack(1)
 #endif
-#ifdef __MWERKS__
-#pragma pack (push, 1)
-#endif
 struct waveformatex_s {
 	word    wFormatTag;        /* format type */
 	word    nChannels;         /* number of channels (i.e. mono, stereo...) */
@@ -168,9 +165,6 @@ typedef mminfo_s mminfo_t;
 
 #ifdef WIN32
 #pragma pack()
-#endif
-#ifdef __MWERKS__
-#pragma pack (pop)
 #endif
 
 /*

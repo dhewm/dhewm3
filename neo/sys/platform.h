@@ -84,12 +84,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ALIGN16( x )				x __attribute__ ((aligned (16)))
 
-#ifdef __MWERKS__
-#define PACKED
-#include <alloca.h>
-#else
 #define PACKED						__attribute__((packed))
-#endif
 
 #define _alloca						alloca
 #define _alloca16( x )				((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
