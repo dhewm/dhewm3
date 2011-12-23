@@ -138,9 +138,10 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-fno-strict-aliasing)
 
 	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
-	if (cxx_has_fvisibility)
-		add_definitions(-fvisibility=hidden)
+	if (NOT cxx_has_fvisibility)
+		message(FATAL_ERROR "Compiler does not support -fvisibility")
 	endif()
+	add_definitions(-fvisibility=hidden)
 
 	# TODO fix these warnings
 	add_definitions(-Wno-sign-compare)

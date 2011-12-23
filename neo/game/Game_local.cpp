@@ -98,11 +98,7 @@ const char *idGameLocal::sufaceTypeNames[ MAX_SURFACE_TYPES ] = {
 GetGameAPI
 ============
 */
-#if __GNUC__ >= 4
-#pragma GCC visibility push(default)
-#endif
-extern "C" gameExport_t *GetGameAPI( gameImport_t *import ) {
-
+extern "C" ID_GAME_API gameExport_t *GetGameAPI( gameImport_t *import ) {
 	if ( import->version == GAME_API_VERSION ) {
 
 		// set interface pointers used by the game
@@ -134,9 +130,6 @@ extern "C" gameExport_t *GetGameAPI( gameImport_t *import ) {
 
 	return &gameExport;
 }
-#if __GNUC__ >= 4
-#pragma GCC visibility pop
-#endif
 
 /*
 ===========
