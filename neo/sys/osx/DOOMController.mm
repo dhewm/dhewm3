@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #import <OpenGL/gl.h>
 
 #import <fenv.h>
-#import <ucontext.h>
+#import <sys/ucontext.h>
 #import <mach/thread_status.h>
 
 #import <SDL_main.h>
