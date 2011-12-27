@@ -652,7 +652,7 @@ void idEvent::Save( idSaveGame *savefile ) {
 					break;
 				case D_EVENT_STRING :
 					s.Clear();
-					s.Append(reinterpret_cast<char *>(dataPtr), MAX_STRING_LEN);
+					s.Append(reinterpret_cast<char *>(dataPtr));
 					savefile->WriteString(s);
 					size += MAX_STRING_LEN;
 					break;
