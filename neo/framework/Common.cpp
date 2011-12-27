@@ -2783,16 +2783,13 @@ void idCommonLocal::SetMachineSpec( void ) {
 	com_videoRam.SetInteger( vidRam );
 }
 
-static unsigned int async_tick;
-
 static unsigned int AsyncTimer(unsigned int interval, void *) {
 	common->Async();
 	Sys_TriggerEvent(TRIGGER_EVENT_ONE);
-	async_tick++;
 
 	// calculate the next interval to get as close to 60fps as possible
 	unsigned int now = SDL_GetTicks();
-	unsigned int tick = async_tick * 1000 / 60;
+	unsigned int tick = com_ticNumber * USERCMD_MSEC;
 
 	if (now >= tick)
 		return 1;
@@ -2905,8 +2902,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		Sys_Error( "Error during initialization" );
 	}
 
-	async_tick = (SDL_GetTicks() >> 4) + 1;
-	async_timer = SDL_AddTimer(16, AsyncTimer, NULL);
+	async_timer = SDL_AddTimer(USERCMD_MSEC, AsyncTimer, NULL);
 
 	if (!async_timer)
 		Sys_Error("Error while starting the async timer");
