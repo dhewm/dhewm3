@@ -621,6 +621,7 @@ void idEvent::Save( idSaveGame *savefile ) {
 	byte *dataPtr;
 	bool validTrace;
 	const char	*format;
+	idStr s;
 
 	savefile->WriteInt( EventQueue.Num() );
 
@@ -648,6 +649,12 @@ void idEvent::Save( idSaveGame *savefile ) {
 				case D_EVENT_VECTOR :
 					savefile->WriteVec3( *reinterpret_cast<idVec3 *>( dataPtr ) );
 					size += sizeof( idVec3 );
+					break;
+				case D_EVENT_STRING :
+					s.Clear();
+					s.Append(reinterpret_cast<char *>(dataPtr), MAX_STRING_LEN);
+					savefile->WriteString(s);
+					size += MAX_STRING_LEN;
 					break;
 				case D_EVENT_TRACE :
 					validTrace = *reinterpret_cast<bool *>( dataPtr );
@@ -685,6 +692,7 @@ void idEvent::Restore( idRestoreGame *savefile ) {
 	byte *dataPtr;
 	idEvent	*event;
 	const char	*format;
+	idStr s;
 
 	savefile->ReadInt( num );
 
@@ -740,6 +748,11 @@ void idEvent::Restore( idRestoreGame *savefile ) {
 					case D_EVENT_VECTOR :
 						savefile->ReadVec3( *reinterpret_cast<idVec3 *>( dataPtr ) );
 						size += sizeof( idVec3 );
+						break;
+					case D_EVENT_STRING :
+						savefile->ReadString(s);
+						idStr::Copynz(reinterpret_cast<char *>(dataPtr), s, MAX_STRING_LEN);
+						size += MAX_STRING_LEN;
 						break;
 					case D_EVENT_TRACE :
 						savefile->ReadBool( *reinterpret_cast<bool *>( dataPtr ) );
