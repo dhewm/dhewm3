@@ -616,6 +616,13 @@ set(src_stub_util		sys/stub/util_stub.cpp)
 set(src_sys_dedicated	sys/linux/dedicated.cpp)
 
 if (APPLE)
+	set(OSX_RESOURCE_FILES
+			"${CMAKE_CURRENT_SOURCE_DIR}/sys/osx/Doom3.icns"
+			"${CMAKE_CURRENT_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
+	)
+
+	set_source_files_properties(${OSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
@@ -631,6 +638,8 @@ if (APPLE)
 		sys/glimp_ati_fragment_shader.cpp
 		sys/osx/DOOMController.mm
 		sys/osx/macosx_misc.mm
+		sys/osx/SDLMain.m
+		${OSX_RESOURCE_FILES}
 	)
 elseif (WIN32)
 	set(src_sys_base
@@ -676,7 +685,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MING
 endif()
 
 if (CORE)
-	add_executable(doom3 WIN32
+	add_executable(doom3 WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_sys_base}
 		${src_sys_core}
@@ -684,6 +693,7 @@ if (CORE)
 
 	set_target_properties(doom3 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
 	set_target_properties(doom3 PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(doom3 PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 
 	target_link_libraries(doom3
 		idlib
@@ -700,7 +710,7 @@ if (CORE)
 endif()
 
 if (DEDICATED)
-	add_executable(doom3ded WIN32
+	add_executable(doom3ded WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_stub_openal}
 		${src_stub_gl}
