@@ -52,7 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 static void		GLW_InitExtensions( void );
 
 // WGL_ARB_extensions_string
-PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
+static PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
 
 // WGL_EXT_swap_interval
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;

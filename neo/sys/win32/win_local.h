@@ -48,9 +48,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/wglext.h"		// windows OpenGL extensions
 #include "sys/sys_public.h"
 
-// WGL_ARB_extensions_string
-extern	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
-
 // WGL_EXT_swap_interval
 extern	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 
