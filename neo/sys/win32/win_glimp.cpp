@@ -306,16 +306,6 @@ static void GLW_GetWGLExtensionsWithFakeWindow( void ) {
 
 /*
 ====================
-GLW_WM_CREATE
-====================
-*/
-void GLW_WM_CREATE( HWND hWnd ) {
-}
-
-
-
-/*
-====================
 GLW_InitDriver
 
 Set the pixelformat for the window before it is
