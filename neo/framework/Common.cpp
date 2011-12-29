@@ -2797,6 +2797,14 @@ idCommonLocal::Init
 =================
 */
 void idCommonLocal::Init( int argc, char **argv ) {
+#ifdef ID_DEDICATED
+	// we want to use the SDL event queue for dedicated servers. That
+	// requires video to be initialized, so we just use the dummy
+	// driver for headless boxen
+	char dummy[] = "SDL_VIDEODRIVER=dummy\0";
+	SDL_putenv(dummy);
+#endif
+
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
 		Sys_Error("Error while initializing SDL: %s", SDL_GetError());
 

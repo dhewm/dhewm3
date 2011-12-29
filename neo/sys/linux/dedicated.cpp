@@ -33,32 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/linux/local.h"
 
 /*
-==========
-input
-==========
-*/
-
-void Sys_InitInput( void ) { }
-
-void Sys_ShutdownInput( void ) { }
-
-void Sys_GrabMouseCursor( bool ) { }
-
-int Sys_PollMouseInputEvents( void ) { return 0; }
-
-void Sys_EndMouseInputEvents( void ) { }
-
-int Sys_ReturnMouseInputEvent( const int n, int &action, int &value ) { return 0; }
-
-int Sys_PollKeyboardInputEvents( void ) { return 0; }
-
-void Sys_EndKeyboardInputEvents( void ) { }
-
-int Sys_ReturnKeyboardInputEvent( const int n, int &action, bool &state ) { return 0; }
-
-unsigned char Sys_MapCharForKey( int key ) { return (unsigned char)key; }
-
-/*
 ================
 Sys_GetVideoRam
 returns in megabytes

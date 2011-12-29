@@ -36,13 +36,6 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
-#ifdef __unix__
-// workaround until events are ported to sdl
-Display *dpy = NULL;
-Window win = 0;
-bool dga_found = false;
-#endif
-
 /*
 ===================
 GLimp_Init
@@ -165,19 +158,6 @@ bool GLimp_Init(glimpParms_t parms) {
 	}
 
 	glConfig.wgl_extensions_string = "";
-
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-
-	if (SDL_GetWMInfo(&info)) {
-#if defined(__unix__)
-		// workaround until events are ported to sdl
-		if (info.subsystem == SDL_SYSWM_X11) {
-			dpy = info.info.x11.display;
-			win = info.info.x11.window;
-		}
-#endif
-	}
 
 	return true;
 }

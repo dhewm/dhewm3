@@ -675,6 +675,7 @@ else()
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
+		sys/events.cpp
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_signal.cpp
@@ -685,8 +686,6 @@ else()
 	set(src_sys_core
 		${src_stub_util}
 		sys/glimp.cpp
-		sys/posix/posix_input.cpp
-		sys/linux/input.cpp
 	)
 endif()
 

@@ -223,6 +223,7 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 	return list.Num();
 }
 
+#ifdef MACOS_X
 /*
 ============================================================================
 EVENT LOOP
@@ -298,6 +299,7 @@ Sys_ClearEvents
 void Sys_ClearEvents( void ) {
 	eventHead = eventTail = 0;
 }
+#endif
 
 /*
 ================
@@ -912,6 +914,7 @@ char *Sys_ConsoleInput( void ) {
 	return NULL;
 }
 
+#ifdef MACOS_X
 /*
 called during frame loops, pacifier updates etc.
 this is only for console input polling and misc mouse grab tasks
@@ -929,6 +932,7 @@ void Sys_GenerateEvents( void ) {
 		Posix_QueEvent( SE_CONSOLE, 0, 0, len, b );
 	}
 }
+#endif
 
 /*
 ===============

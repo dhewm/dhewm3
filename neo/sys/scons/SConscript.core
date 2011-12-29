@@ -204,8 +204,7 @@ sys_string = ' \
 if ( local_dedicated == 0 ):
 	sys_string += ' \
 		glimp.cpp \
-		posix/posix_input.cpp \
-		linux/input.cpp'
+		events.cpp'
 else:
 	sys_string += ' \
 		stub/stub_gl.cpp \

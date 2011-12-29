@@ -50,15 +50,6 @@ static idStr	basepath;
 static idStr	savepath;
 
 /*
-===========
-Sys_InitScanTable
-===========
-*/
-void Sys_InitScanTable( void ) {
-	common->DPrintf( "TODO: Sys_InitScanTable\n" );
-}
-
-/*
  ==============
  Sys_DefaultSavePath
  ==============
@@ -126,15 +117,6 @@ const char *Sys_DefaultBasePath(void) {
 	}
 	common->Printf( "WARNING: using hardcoded default base path\n" );
 	return LINUX_DEFAULT_PATH;
-}
-
-/*
-===============
-Sys_GetConsoleKey
-===============
-*/
-unsigned char Sys_GetConsoleKey( bool shifted ) {
-	return shifted ? '~' : '`';
 }
 
 /*
