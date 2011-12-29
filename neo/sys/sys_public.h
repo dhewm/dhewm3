@@ -198,6 +198,7 @@ void			Sys_DLL_Unload( uintptr_t dllHandle );
 void			Sys_GenerateEvents( void );
 sysEvent_t		Sys_GetEvent( void );
 void			Sys_ClearEvents( void );
+char			*Sys_ConsoleInput( void );
 
 // input is tied to windows, so it needs to be started up and shut down whenever
 // the main window is recreated

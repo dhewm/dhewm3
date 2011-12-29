@@ -63,7 +63,6 @@ void	Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptr
 void	Sys_CreateConsole( void );
 void	Sys_DestroyConsole( void );
 
-char	*Sys_ConsoleInput (void);
 char	*Sys_GetCurrentUser( void );
 
 void	Win_SetErrorText( const char *text );
