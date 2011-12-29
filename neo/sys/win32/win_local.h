@@ -52,22 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 extern	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 
 // WGL_ARB_pixel_format
-extern	PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
-extern	PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
 extern	PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
-
-// WGL_ARB_pbuffer
-extern	PFNWGLCREATEPBUFFERARBPROC	wglCreatePbufferARB;
-extern	PFNWGLGETPBUFFERDCARBPROC	wglGetPbufferDCARB;
-extern	PFNWGLRELEASEPBUFFERDCARBPROC	wglReleasePbufferDCARB;
-extern	PFNWGLDESTROYPBUFFERARBPROC	wglDestroyPbufferARB;
-extern	PFNWGLQUERYPBUFFERARBPROC	wglQueryPbufferARB;
-
-// WGL_ARB_render_texture
-extern	PFNWGLBINDTEXIMAGEARBPROC		wglBindTexImageARB;
-extern	PFNWGLRELEASETEXIMAGEARBPROC	wglReleaseTexImageARB;
-extern	PFNWGLSETPBUFFERATTRIBARBPROC	wglSetPbufferAttribARB;
-
 
 #define	MAX_OSPATH			256
 

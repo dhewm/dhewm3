@@ -55,6 +55,22 @@ polygon offset factor causes occasional texture holes from highly angled texture
 
 */
 
+// WGL_ARB_pixel_format
+static PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
+static PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
+
+// WGL_ARB_pbuffer
+static PFNWGLCREATEPBUFFERARBPROC	wglCreatePbufferARB;
+static PFNWGLGETPBUFFERDCARBPROC	wglGetPbufferDCARB;
+static PFNWGLRELEASEPBUFFERDCARBPROC	wglReleasePbufferDCARB;
+static PFNWGLDESTROYPBUFFERARBPROC	wglDestroyPbufferARB;
+static PFNWGLQUERYPBUFFERARBPROC	wglQueryPbufferARB;
+
+// WGL_ARB_render_texture
+static PFNWGLBINDTEXIMAGEARBPROC		wglBindTexImageARB;
+static PFNWGLRELEASETEXIMAGEARBPROC	wglReleaseTexImageARB;
+static PFNWGLSETPBUFFERATTRIBARBPROC	wglSetPbufferAttribARB;
+
 static	bool		initialized;
 
 static	int lightBufferSize = 1024;
@@ -507,6 +523,22 @@ void R_Exp_Allocate( void ) {
 	int	pbiAttributes[] = {0, 0};
 
 	initialized = true;
+
+	// WGL_ARB_pixel_format
+	wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)GLimp_ExtensionPointer("wglGetPixelFormatAttribivARB");
+	wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)GLimp_ExtensionPointer("wglGetPixelFormatAttribfvARB");
+
+	// WGL_ARB_pbuffer
+	wglCreatePbufferARB = (PFNWGLCREATEPBUFFERARBPROC)GLimp_ExtensionPointer("wglCreatePbufferARB");
+	wglGetPbufferDCARB = (PFNWGLGETPBUFFERDCARBPROC)GLimp_ExtensionPointer("wglGetPbufferDCARB");
+	wglReleasePbufferDCARB = (PFNWGLRELEASEPBUFFERDCARBPROC)GLimp_ExtensionPointer("wglReleasePbufferDCARB");
+	wglDestroyPbufferARB = (PFNWGLDESTROYPBUFFERARBPROC)GLimp_ExtensionPointer("wglDestroyPbufferARB");
+	wglQueryPbufferARB = (PFNWGLQUERYPBUFFERARBPROC)GLimp_ExtensionPointer("wglQueryPbufferARB");
+
+	// WGL_ARB_render_texture
+	wglBindTexImageARB = (PFNWGLBINDTEXIMAGEARBPROC)GLimp_ExtensionPointer("wglBindTexImageARB");
+	wglReleaseTexImageARB = (PFNWGLRELEASETEXIMAGEARBPROC)GLimp_ExtensionPointer("wglReleaseTexImageARB");
+	wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)GLimp_ExtensionPointer("wglSetPbufferAttribARB");
 
 #if 1
 	//
