@@ -2797,7 +2797,8 @@ idCommonLocal::Init
 =================
 */
 void idCommonLocal::Init( int argc, char **argv ) {
-	SDL_Init(SDL_INIT_TIMER);
+	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
+		Sys_Error("Error while initializing SDL: %s", SDL_GetError());
 
 	Sys_InitThreads();
 
@@ -2899,7 +2900,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 	async_timer = SDL_AddTimer(USERCMD_MSEC, AsyncTimer, NULL);
 
 	if (!async_timer)
-		Sys_Error("Error while starting the async timer");
+		Sys_Error("Error while starting the async timer: %s", SDL_GetError());
 }
 
 

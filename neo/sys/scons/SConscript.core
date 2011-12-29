@@ -203,10 +203,9 @@ sys_string = ' \
 
 if ( local_dedicated == 0 ):
 	sys_string += ' \
-		linux/glimp.cpp \
+		glimp.cpp \
 		posix/posix_input.cpp \
-		linux/input.cpp \
-		linux/libXNVCtrl/NVCtrl.c'
+		linux/input.cpp'
 else:
 	sys_string += ' \
 		stub/stub_gl.cpp \

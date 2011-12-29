@@ -67,10 +67,3 @@ returns in megabytes
 int Sys_GetVideoRam( void ) {
 	return 64;
 }
-
-/*
-==========
-GL
-==========
-*/
-bool GLimp_SetScreenParms( glimpParms_t parms ) { return true; }

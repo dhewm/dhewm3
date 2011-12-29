@@ -98,7 +98,6 @@ include_directories(${SDL_INCLUDE_DIR})
 
 if (UNIX AND NOT APPLE)
 	find_package(X11 REQUIRED)
-	add_definitions(-DXTHREADS)
 	include_directories(${X11_INCLUDE_DIR})
 
 	if (os MATCHES ".*bsd" OR os STREQUAL "dragonfly")
@@ -685,10 +684,9 @@ else()
 
 	set(src_sys_core
 		${src_stub_util}
+		sys/glimp.cpp
 		sys/posix/posix_input.cpp
-		sys/linux/glimp.cpp
 		sys/linux/input.cpp
-		sys/linux/libXNVCtrl/NVCtrl.c
 	)
 endif()
 

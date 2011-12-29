@@ -279,8 +279,6 @@ BASECPPFLAGS.append( '-pipe' )
 # warn all
 BASECPPFLAGS.append( '-Wall' )
 BASECPPFLAGS.append( '-Wno-unknown-pragmas' )
-# this define is necessary to make sure threading support is enabled in X
-CORECPPFLAGS.append( '-DXTHREADS' )
 
 # gcc 4.x option only - only export what we mean to from the game SO
 BASECPPFLAGS.append( '-fvisibility=hidden' )
