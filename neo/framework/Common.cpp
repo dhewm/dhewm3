@@ -199,7 +199,6 @@ private:
 	bool						com_fullyInitialized;
 	bool						com_refreshOnPrint;		// update the screen every print for dmap
 	int							com_errorEntered;		// 0, ERP_DROP, etc
-	bool						com_shuttingDown;
 
 	idFile *					logFile;
 
@@ -236,7 +235,6 @@ idCommonLocal::idCommonLocal( void ) {
 	com_fullyInitialized = false;
 	com_refreshOnPrint = false;
 	com_errorEntered = 0;
-	com_shuttingDown = false;
 
 	logFile = NULL;
 
@@ -2608,10 +2606,6 @@ idCommonLocal::Async
 =================
 */
 void idCommonLocal::Async( void ) {
-	if ( com_shuttingDown ) {
-		return;
-	}
-
 	int	msec = Sys_Milliseconds();
 	if ( !lastTicMsec ) {
 		lastTicMsec = msec - USERCMD_MSEC;
@@ -2915,8 +2909,6 @@ idCommonLocal::Shutdown
 =================
 */
 void idCommonLocal::Shutdown( void ) {
-	com_shuttingDown = true;
-
 	if (async_timer) {
 		SDL_RemoveTimer(async_timer);
 		async_timer = NULL;
