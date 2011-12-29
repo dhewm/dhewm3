@@ -363,6 +363,13 @@ If you have questions concerning this license or the applicable additional terms
 #define qglVertexPointer glVertexPointer
 #define qglViewport glViewport
 
+#ifdef _WIN32
+#define qwglCreateContext wglCreateContext
+#define qwglDeleteContext wglDeleteContext
+#define qwglMakeCurrent	wglMakeCurrent
+#define qwglSwapBuffers SwapBuffers
+#define qwglGetProcAddress wglGetProcAddress
+#else
 #ifdef GLX_VERSION_1_1 // catch all for any GLX-aware situation
 #define qglXChooseVisual glXChooseVisual
 #define qglXCreateContext glXCreateContext
@@ -370,4 +377,5 @@ If you have questions concerning this license or the applicable additional terms
 #define qglXMakeCurrent glXMakeCurrent
 #define qglXSwapBuffers glXSwapBuffers
 #define qglXGetProcAddressARB glXGetProcAddressARB
+#endif
 #endif

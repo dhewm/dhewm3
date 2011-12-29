@@ -117,8 +117,6 @@ struct Win32Vars_t {
 	PIXELFORMATDESCRIPTOR pfd;
 	int				pixelformat;
 
-	HINSTANCE		hinstOpenGL;	// HINSTANCE for the OpenGL library
-
 	int				desktopBitsPixel;
 	int				desktopWidth, desktopHeight;
 

@@ -115,16 +115,6 @@ PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
 #define WGL_SAMPLE_BUFFERS_ARB             0x2041
 #define WGL_SAMPLES_ARB                    0x2042
 
-
-
-//
-// function declaration
-//
-bool QGL_Init( const char *dllname );
-void     QGL_Shutdown( void );
-
-
-
 /*
 ========================
 GLimp_GetOldGammaRamp
@@ -743,7 +733,15 @@ static bool GLW_SetFullScreen( glimpParms_t parms ) {
 	return false;
 }
 
+/*
+==================
+GLimp_EnableLogging
 
+==================
+*/
+void GLimp_EnableLogging( bool enable ) {
+	common->DPrintf("GLimp_EnableLogging - not available\n");
+}
 
 /*
 ===================
@@ -761,7 +759,6 @@ parameters and try again.
 ===================
 */
 bool GLimp_Init( glimpParms_t parms ) {
-	const char	*driverName;
 	HDC		hDC;
 
 	common->Printf( "Initializing OpenGL subsystem\n" );
@@ -788,15 +785,6 @@ bool GLimp_Init( glimpParms_t parms ) {
 
 	// this will load the dll and set all our qgl* function pointers,
 	// but doesn't create a window
-
-	// r_glDriver is only intended for using instrumented OpenGL
-	// dlls.  Normal users should never have to use it, and it is
-	// not archived.
-	driverName = r_glDriver.GetString()[0] ? r_glDriver.GetString() : "opengl32";
-	if ( !QGL_Init( driverName ) ) {
-		common->Printf( "^3GLimp_Init() could not load r_glDriver \"%s\"^0\n", driverName );
-		return false;
-	}
 
 	// getting the wgl extensions involves creating a fake window to get a context,
 	// which is pretty disgusting, and seems to mess with the AGP VAR allocation
@@ -919,10 +907,8 @@ void GLimp_Shutdown( void ) {
 	common->Printf( "Shutting down OpenGL subsystem\n" );
 
 	// set current context to NULL
-	if ( qwglMakeCurrent ) {
-		retVal = qwglMakeCurrent( NULL, NULL ) != 0;
-		common->Printf( "...wglMakeCurrent( NULL, NULL ): %s\n", success[retVal] );
-	}
+	retVal = qwglMakeCurrent( NULL, NULL ) != 0;
+	common->Printf( "...wglMakeCurrent( NULL, NULL ): %s\n", success[retVal] );
 
 	// delete HGLRC
 	if ( win32.hGLRC ) {
@@ -955,9 +941,6 @@ void GLimp_Shutdown( void ) {
 
 	// restore gamma
 	GLimp_RestoreGamma();
-
-	// shutdown QGL subsystem
-	QGL_Shutdown();
 }
 
 

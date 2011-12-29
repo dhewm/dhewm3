@@ -1673,11 +1673,7 @@ PurgeImage
 */
 void idImage::PurgeImage() {
 	if ( texnum != TEXTURE_NOT_LOADED ) {
-#ifdef _WIN32
-		// sometimes is NULL when exiting with an error
-		if ( qglDeleteTextures )
-#endif
-			qglDeleteTextures( 1, &texnum );	// this should be the ONLY place it is ever called!
+		qglDeleteTextures( 1, &texnum );	// this should be the ONLY place it is ever called!
 		texnum = TEXTURE_NOT_LOADED;
 	}
 

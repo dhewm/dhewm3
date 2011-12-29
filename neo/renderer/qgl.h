@@ -166,7 +166,7 @@ extern PFNGLDEPTHBOUNDSEXTPROC              qglDepthBoundsEXT;
 //===========================================================================
 
 // non-windows systems will just redefine qgl* to gl*
-#ifndef _WIN32
+#if 1
 
 #include "qgl_linked.h"
 
@@ -540,6 +540,6 @@ extern int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
 extern BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
-#endif	// _WIN32
+#endif
 
 #endif

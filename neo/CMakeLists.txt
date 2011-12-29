@@ -663,7 +663,6 @@ elseif (WIN32)
 		sys/win32/win_input.cpp
 		sys/win32/win_main.cpp
 		sys/win32/win_net.cpp
-		sys/win32/win_qgl.cpp
 		sys/win32/win_shared.cpp
 		sys/win32/win_syscon.cpp
 		sys/win32/win_taskkeyhook.cpp
