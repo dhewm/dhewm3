@@ -236,6 +236,24 @@ static byte mapkey(SDLKey key) {
 	return 0;
 }
 
+static void PushConsoleEvent(const char *s) {
+	char *b;
+	size_t len;
+
+	len = strlen(s) + 1;
+	b = (char *)Mem_Alloc(len);
+	strcpy(b, s);
+
+	SDL_Event event;
+
+	event.type = SDL_USEREVENT;
+	event.user.code = SE_CONSOLE;
+	event.user.data1 = (void *)len;
+	event.user.data2 = b;
+
+	SDL_PushEvent(&event);
+}
+
 static void GrabInput(bool grab, bool hide_cursor, bool set_state) {
 #if defined(ID_DEDICATED)
 	return;
@@ -436,6 +454,10 @@ sysEvent_t Sys_GetEvent() {
 
 			return res;
 
+		case SDL_QUIT:
+			PushConsoleEvent("quit");
+			return res_none;
+
 		case SDL_USEREVENT:
 			switch (ev.user.code) {
 			case SE_CONSOLE:
@@ -479,23 +501,8 @@ Sys_GenerateEvents
 void Sys_GenerateEvents() {
 	char *s = Sys_ConsoleInput();
 
-	if (s) {
-		char *b;
-		size_t len;
-
-		len = strlen(s) + 1;
-		b = (char *)Mem_Alloc(len);
-		strcpy(b, s);
-
-		SDL_Event event;
-
-		event.type = SDL_USEREVENT;
-		event.user.code = SE_CONSOLE;
-		event.user.data1 = (void *)len;
-		event.user.data2 = b;
-
-		SDL_PushEvent(&event);
-	}
+	if (s)
+		PushConsoleEvent(s);
 
 	SDL_PumpEvents();
 }
