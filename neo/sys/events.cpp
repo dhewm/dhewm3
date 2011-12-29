@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/Heap.h"
 #include "framework/Common.h"
 #include "framework/KeyInput.h"
+#include "renderer/RenderSystem.h"
 
 #include "sys/sys_public.h"
 
@@ -392,6 +393,13 @@ sysEvent_t Sys_GetEvent() {
 			return res_none;
 
 		case SDL_KEYDOWN:
+			if (ev.key.keysym.sym == SDLK_RETURN && (ev.key.keysym.mod & KMOD_LALT) > 0) {
+				cvarSystem->SetCVarBool("r_fullscreen", !renderSystem->IsFullScreen());
+				PushConsoleEvent("vid_restart");
+				return res_none;
+			}
+
+			// fall through
 		case SDL_KEYUP:
 			key = mapkey(ev.key.keysym.sym);
 
