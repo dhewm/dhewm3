@@ -166,13 +166,6 @@ struct Win32Vars_t {
 	LPDIRECTINPUTDEVICE8	g_pMouse;
 	LPDIRECTINPUTDEVICE8	g_pKeyboard;
 
-	HANDLE			renderCommandsEvent;
-	HANDLE			renderCompletedEvent;
-	HANDLE			renderActiveEvent;
-	HANDLE			renderThreadHandle;
-	unsigned long	renderThreadId;
-	void			(*glimpRenderThread)( void );
-	void			*smpData;
 	int				wglErrors;
 	// SMP acceleration vars
 

@@ -1436,25 +1436,6 @@ bool Sys_Unhide() {
 	return true;
 }
 
-bool GLimp_SpawnRenderThread( void (*function)( void ) ) {
-	return false;
-}
-
-void *GLimp_RendererSleep(void) {
-	return NULL;
-}
-
-void GLimp_FrontEndSleep(void) { }
-
-void GLimp_WakeRenderer( void *data ) { }
-
-void *GLimp_BackEndSleep( void ) {
-	return NULL;
-}
-
-void GLimp_WakeBackEnd( void *data ) {
-}
-
 // enable / disable context is just for the r_skipRenderContext debug option
 void GLimp_DeactivateContext( void ) {
 	[NSOpenGLContext clearCurrentContext];

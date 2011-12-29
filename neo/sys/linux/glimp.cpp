@@ -64,10 +64,6 @@ static bool vidmode_active = false;
 static int save_rampsize = 0;
 static unsigned short *save_red, *save_green, *save_blue;
 
-void GLimp_WakeBackEnd(void *a) {
-	common->DPrintf("GLimp_WakeBackEnd stub\n");
-}
-
 void GLimp_EnableLogging(bool log) {
 	static bool logging;
 	if (log != logging)
@@ -75,20 +71,6 @@ void GLimp_EnableLogging(bool log) {
 		common->DPrintf("GLimp_EnableLogging - not available\n");
 		logging = log;
 	}
-}
-
-void GLimp_FrontEndSleep() {
-	common->DPrintf("GLimp_FrontEndSleep stub\n");
-}
-
-void *GLimp_BackEndSleep() {
-	common->DPrintf("GLimp_BackEndSleep stub\n");
-	return 0;
-}
-
-bool GLimp_SpawnRenderThread(void (*a) ()) {
-	common->DPrintf("GLimp_SpawnRenderThread stub\n");
-	return false;
 }
 
 void GLimp_ActivateContext() {

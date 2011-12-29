@@ -377,12 +377,7 @@ void glVertex4sv(const GLshort *v){};
 void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer){};
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height){};
 
-void GLimp_WakeBackEnd(void*a) {};
 void GLimp_EnableLogging(bool) {};
-void GLimp_FrontEndSleep() {};
-void GLimp_ActivateContext() {};
-void GLimp_DeactivateContext() {};
-bool GLimp_SpawnRenderThread(void (*a)()) {return false;};
 
 static void StubFunction( void ) {};
 GLExtension_t GLimp_ExtensionPointer( const char *a) { return StubFunction; };
@@ -391,4 +386,3 @@ bool GLimp_Init(glimpParms_t a) {return true;};
 void GLimp_SetGamma(unsigned short*a, unsigned short*b, unsigned short*c) {};
 void GLimp_Shutdown() {};
 void GLimp_SwapBuffers() {};
-void *GLimp_BackEndSleep() {return 0;};

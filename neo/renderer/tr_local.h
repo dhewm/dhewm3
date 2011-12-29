@@ -1103,13 +1103,7 @@ void		GLimp_SetGamma( unsigned short red[256],
 // of dacs with >8 bits of precision
 
 
-bool		GLimp_SpawnRenderThread( void (*function)( void ) );
 // Returns false if the system only has a single processor
-
-void *		GLimp_BackEndSleep( void );
-void		GLimp_FrontEndSleep( void );
-void		GLimp_WakeBackEnd( void *data );
-// these functions implement the dual processor syncronization
 
 void		GLimp_ActivateContext( void );
 void		GLimp_DeactivateContext( void );
