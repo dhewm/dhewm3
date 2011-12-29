@@ -99,7 +99,6 @@ typedef struct {
 static WinConData s_wcd;
 
 static LONG WINAPI ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	char *cmdString;
 	static bool s_timePolarity;
 
 	switch (uMsg) {
@@ -110,8 +109,7 @@ static LONG WINAPI ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		break;
 		case WM_CLOSE:
 			if ( cvarSystem->IsInitialized() && com_skipRenderer.GetBool() ) {
-				cmdString = Mem_CopyString( "quit" );
-				Sys_QueEvent( 0, SE_CONSOLE, 0, 0, strlen( cmdString ) + 1, cmdString );
+				cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
 			} else if ( s_wcd.quitOnClose ) {
 				PostQuitMessage( 0 );
 			} else {
@@ -148,8 +146,7 @@ static LONG WINAPI ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				if ( s_wcd.quitOnClose ) {
 					PostQuitMessage( 0 );
 				} else {
-					cmdString = Mem_CopyString( "quit" );
-					Sys_QueEvent( 0, SE_CONSOLE, 0, 0, strlen( cmdString ) + 1, cmdString );
+					cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
 				}
 			} else if ( wParam == CLEAR_ID ) {
 				SendMessage( s_wcd.hwndBuffer, EM_SETSEL, 0, -1 );
