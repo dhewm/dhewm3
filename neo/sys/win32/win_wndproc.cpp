@@ -180,92 +180,6 @@ static byte s_scantoshift[128] =
 };
 
 
-/*
-=======
-MapKey
-
-Map from windows to Doom keynums
-=======
-*/
-int MapKey (int key)
-{
-	int result;
-	int modified;
-	bool is_extended;
-
-	modified = ( key >> 16 ) & 255;
-
-	if ( modified > 127 )
-		return 0;
-
-	if ( key & ( 1 << 24 ) ) {
-		is_extended = true;
-	}
-	else {
-		is_extended = false;
-	}
-
-	//Check for certain extended character codes.
-	//The specific case we are testing is the numpad / is not being translated
-	//properly for localized builds.
-	if(is_extended) {
-		switch(modified) {
-			case 0x35: //Numpad /
-				return K_KP_SLASH;
-		}
-	}
-
-	const unsigned char *scanToKey = Sys_GetScanTable();
-	result = scanToKey[modified];
-
-	// common->Printf( "Key: 0x%08x Modified: 0x%02x Extended: %s Result: 0x%02x\n", key, modified, (is_extended?"Y":"N"), result);
-
-	if ( is_extended ) {
-		switch ( result )
-		{
-		case K_PAUSE:
-			return K_KP_NUMLOCK;
-		case 0x0D:
-			return K_KP_ENTER;
-		case 0x2F:
-			return K_KP_SLASH;
-		case 0xAF:
-			return K_KP_PLUS;
-		case K_KP_STAR:
-			return K_PRINT_SCR;
-		case K_ALT:
-			return K_RIGHT_ALT;
-		}
-	}
-	else {
-		switch ( result )
-		{
-		case K_HOME:
-			return K_KP_HOME;
-		case K_UPARROW:
-			return K_KP_UPARROW;
-		case K_PGUP:
-			return K_KP_PGUP;
-		case K_LEFTARROW:
-			return K_KP_LEFTARROW;
-		case K_RIGHTARROW:
-			return K_KP_RIGHTARROW;
-		case K_END:
-			return K_KP_END;
-		case K_DOWNARROW:
-			return K_KP_DOWNARROW;
-		case K_PGDN:
-			return K_KP_PGDN;
-		case K_INS:
-			return K_KP_INS;
-		case K_DEL:
-			return K_KP_DEL;
-		}
-	}
-
-	return result;
-}
-
 
 /*
 ====================
@@ -386,7 +300,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 			}
 			// fall through for other keys
 		case WM_KEYDOWN:
-			key = MapKey( lParam );
+			key = Win_MapKey( lParam );
 			if ( key == K_CTRL || key == K_ALT || key == K_RIGHT_ALT ) {
 				// let direct-input handle this because windows sends Alt-Gr
 				// as two events (ctrl then alt)
@@ -397,7 +311,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 
 		case WM_SYSKEYUP:
 		case WM_KEYUP:
-			key = MapKey( lParam );
+			key = Win_MapKey( lParam );
 			if ( key == K_PRINT_SCR ) {
 				// don't queue printscreen keys.  Since windows doesn't send us key
 				// down events for this, we handle queueing them with DirectInput

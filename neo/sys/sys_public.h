@@ -205,7 +205,6 @@ char			*Sys_ConsoleInput( void );
 void			Sys_InitInput( void );
 void			Sys_ShutdownInput( void );
 void			Sys_InitScanTable( void );
-const unsigned char *Sys_GetScanTable( void );
 unsigned char	Sys_GetConsoleKey( bool shifted );
 // map a scancode key to a char
 // does nothing on win32, as SE_KEY == SE_CHAR there

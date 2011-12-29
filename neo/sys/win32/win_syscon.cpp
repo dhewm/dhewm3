@@ -206,7 +206,7 @@ LONG WINAPI InputLineWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 		break;
 
 	case WM_KEYDOWN:
-		key = MapKey( lParam );
+		key = Win_MapKey( lParam );
 
 		// command history
 		if ( ( key == K_UPARROW ) || ( key == K_KP_UPARROW ) ) {
@@ -234,7 +234,7 @@ LONG WINAPI InputLineWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 		break;
 
 	case WM_CHAR:
-		key = MapKey( lParam );
+		key = Win_MapKey( lParam );
 
 		GetWindowText( s_wcd.hwndInputLine, s_wcd.consoleField.GetBuffer(), MAX_EDIT_LINE );
 		SendMessage( s_wcd.hwndInputLine, EM_GETSEL, (WPARAM) NULL, (LPARAM) &cursor );

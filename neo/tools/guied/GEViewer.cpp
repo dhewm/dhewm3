@@ -179,7 +179,7 @@ static int MapKey (int key)
 		is_extended = false;
 	}
 
-	const unsigned char *scanToKey = Sys_GetScanTable();
+	const unsigned char *scanToKey = Win_GetScanTable();
 	result = scanToKey[modified];
 
 	// common->Printf( "Key: 0x%08x Modified: 0x%02x Extended: %s Result: 0x%02x\n", key, modified, (is_extended?"Y":"N"), result);

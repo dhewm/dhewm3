@@ -67,7 +67,8 @@ char	*Sys_GetCurrentUser( void );
 
 void	Win_SetErrorText( const char *text );
 
-int		MapKey (int key);
+const unsigned char *Win_GetScanTable( void );
+int		Win_MapKey (int key);
 
 
 // Input subsystem
