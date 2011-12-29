@@ -2964,6 +2964,8 @@ void idCommonLocal::Shutdown( void ) {
 	idLib::ShutDown();
 
 	Sys_ShutdownThreads();
+
+	SDL_Quit();
 }
 
 /*
