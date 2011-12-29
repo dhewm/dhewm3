@@ -525,8 +525,6 @@ void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		return;
 	}
 
-	RB_LogComment( "---------- RB_STD_FillDepthBuffer ----------\n" );
-
 	// enable the second texture for mirror plane clipping if needed
 	if ( backEnd.viewDef->numClipPlanes ) {
 		GL_SelectTexture( 1 );
@@ -978,8 +976,6 @@ int RB_STD_DrawShaderPasses( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		return numDrawSurfs;
 	}
 
-	RB_LogComment( "---------- RB_STD_DrawShaderPasses ----------\n" );
-
 	// if we are about to draw the first surface that needs
 	// the rendering in a texture, copy it over
 	if ( drawSurfs[0]->material->GetSort() >= SS_POST_PROCESS ) {
@@ -1183,8 +1179,6 @@ void RB_StencilShadowPass( const drawSurf_t *drawSurfs ) {
 		return;
 	}
 
-	RB_LogComment( "---------- RB_StencilShadowPass ----------\n" );
-
 	globalImages->BindNull();
 	qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
 
@@ -1302,7 +1296,6 @@ static void RB_BlendLight( const drawSurf_t *drawSurfs,  const drawSurf_t *drawS
 	if ( r_skipBlendLights.GetBool() ) {
 		return;
 	}
-	RB_LogComment( "---------- RB_BlendLight ----------\n" );
 
 	lightShader = backEnd.vLight->lightShader;
 	regs = backEnd.vLight->shaderRegisters;
@@ -1418,8 +1411,6 @@ static void RB_FogPass( const drawSurf_t *drawSurfs,  const drawSurf_t *drawSurf
 	const idMaterial	*lightShader;
 	const shaderStage_t	*stage;
 	const float			*regs;
-
-	RB_LogComment( "---------- RB_FogPass ----------\n" );
 
 	// create a surface for the light frustom triangles, which are oriented drawn side out
 	frustumTris = backEnd.vLight->frustumTris;
@@ -1539,8 +1530,6 @@ void RB_STD_FogAllLights( void ) {
 		return;
 	}
 
-	RB_LogComment( "---------- RB_STD_FogAllLights ----------\n" );
-
 	qglDisable( GL_STENCIL_TEST );
 
 	for ( vLight = backEnd.viewDef->viewLights ; vLight ; vLight = vLight->next ) {
@@ -1607,8 +1596,6 @@ void RB_STD_LightScale( void ) {
 		return;
 	}
 
-	RB_LogComment( "---------- RB_STD_LightScale ----------\n" );
-
 	// the scissor may be smaller than the viewport for subviews
 	if ( r_useScissor.GetBool() ) {
 		qglScissor( backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
@@ -1667,8 +1654,6 @@ RB_STD_DrawView
 void	RB_STD_DrawView( void ) {
 	drawSurf_t	 **drawSurfs;
 	int			numDrawSurfs;
-
-	RB_LogComment( "---------- RB_STD_DrawView ----------\n" );
 
 	backEnd.depthFunc = GLS_DEPTHFUNC_EQUAL;
 

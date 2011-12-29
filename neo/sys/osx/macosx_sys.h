@@ -48,8 +48,6 @@ typedef struct
 	bool				_ctx_is_current;
 	NSWindow			*window;
 
-	FILE				*log_fp;
-
 	unsigned int		bufferSwapCount;
 	unsigned int		glPauseCount;
 } glwstate_t;

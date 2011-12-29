@@ -377,8 +377,6 @@ void glVertex4sv(const GLshort *v){};
 void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer){};
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height){};
 
-void GLimp_EnableLogging(bool) {};
-
 static void StubFunction( void ) {};
 GLExtension_t GLimp_ExtensionPointer( const char *a) { return StubFunction; };
 

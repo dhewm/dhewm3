@@ -792,8 +792,6 @@ public:
 	drawSurfsCommand_t		lockSurfacesCmd;	// use this when r_lockSurfaces = 1
 
 	viewEntity_t			identitySpace;		// can use if we don't know viewDef->worldSpace is valid
-	FILE *					logFile;			// for logging GL calls and frame breaks
-
 	int						stencilIncr, stencilDecr;	// GL_INCR / INCR_WRAP_EXT, GL_DECR / GL_DECR_EXT
 
 	renderCrop_t			renderCrops[MAX_RENDER_CROPS];
@@ -832,7 +830,6 @@ extern idCVar r_swapInterval;			// changes wglSwapIntarval
 extern idCVar r_offsetFactor;			// polygon offset parameter
 extern idCVar r_offsetUnits;			// polygon offset parameter
 extern idCVar r_singleTriangle;			// only draw a single triangle per primitive
-extern idCVar r_logFile;				// number of frames to emit GL logs
 extern idCVar r_clear;					// force screen clear every frame
 extern idCVar r_shadows;				// enable shadows
 extern idCVar r_subviewOnly;			// 1 = don't render main view, allowing subviews to be debugged
@@ -1113,9 +1110,6 @@ void		GLimp_DeactivateContext( void );
 // most OpenGL implementations, this will result in all OpenGL calls
 // being immediate returns, which lets us guage how much time is
 // being spent inside OpenGL.
-
-void		GLimp_EnableLogging( bool enable );
-
 
 /*
 ====================================================================
@@ -1603,9 +1597,6 @@ TR_BACKEND
 
 void RB_SetDefaultGLState( void );
 void RB_SetGL2D( void );
-
-// write a comment to the r_logFile if it is enabled
-void RB_LogComment( const char *comment, ... ) id_attribute((format(printf,1,2)));
 
 void RB_ShowImages( void );
 

@@ -476,8 +476,6 @@ static void RB_RenderViewLight( viewLight_t *vLight ) {
 		return;
 	}
 
-	RB_LogComment( "---------- RB_RenderViewLight 0x%p ----------\n", vLight );
-
 	// clear the stencil buffer if needed
 	if ( vLight->globalShadows || vLight->localShadows ) {
 		backEnd.currentScissor = vLight->scissorRect;

@@ -2335,8 +2335,6 @@ void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		return;
 	}
 
-	RB_LogComment( "---------- RB_RenderDebugTools ----------\n" );
-
 	GL_State( GLS_DEFAULT );
 	backEnd.currentScissor = backEnd.viewDef->scissor;
 	qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,

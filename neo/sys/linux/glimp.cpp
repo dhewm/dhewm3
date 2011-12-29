@@ -64,15 +64,6 @@ static bool vidmode_active = false;
 static int save_rampsize = 0;
 static unsigned short *save_red, *save_green, *save_blue;
 
-void GLimp_EnableLogging(bool log) {
-	static bool logging;
-	if (log != logging)
-	{
-		common->DPrintf("GLimp_EnableLogging - not available\n");
-		logging = log;
-	}
-}
-
 void GLimp_ActivateContext() {
 	assert( dpy );
 	assert( ctx );

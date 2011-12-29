@@ -288,8 +288,6 @@ void RB_R200_DrawInteractions( void ) {
 
 		backEnd.vLight = vLight;
 
-		RB_LogComment( "---------- RB_RenderViewLight 0x%p ----------\n", vLight );
-
 		// clear the stencil buffer if needed
 		if ( vLight->globalShadows || vLight->localShadows ) {
 			backEnd.currentScissor = vLight->scissorRect;

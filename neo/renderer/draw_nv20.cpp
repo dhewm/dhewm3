@@ -61,7 +61,6 @@ GL_SelectTextureNoClient
 void GL_SelectTextureNoClient( int unit ) {
 	backEnd.glState.currenttmu = unit;
 	qglActiveTextureARB( GL_TEXTURE0_ARB + unit );
-	RB_LogComment( "glActiveTextureARB( %i )\n", unit );
 }
 
 /*
@@ -144,8 +143,6 @@ it will have to be done on an itterated basis
 ==================
 */
 static void RB_NV20_DI_BumpAndLightPass( const drawInteraction_t *din, bool monoLightShader ) {
-	RB_LogComment( "---------- RB_NV_BumpAndLightPass ----------\n" );
-
 	GL_State( GLS_COLORMASK | GLS_DEPTHMASK | backEnd.depthFunc );
 
 	// texture 0 is the normalization cube map
@@ -259,8 +256,6 @@ RB_NV20_DI_DiffuseColorPass
 ==================
 */
 static void RB_NV20_DI_DiffuseColorPass( const drawInteraction_t *din ) {
-	RB_LogComment( "---------- RB_NV20_DiffuseColorPass ----------\n" );
-
 	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_ALPHAMASK
 		| backEnd.depthFunc );
 
@@ -412,8 +407,6 @@ RB_NV20_DI_SpecularColorPass
 ==================
 */
 static void RB_NV20_DI_SpecularColorPass( const drawInteraction_t *din ) {
-	RB_LogComment( "---------- RB_NV20_SpecularColorPass ----------\n" );
-
 	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_ALPHAMASK
 		| backEnd.depthFunc );
 
@@ -555,8 +548,6 @@ RB_NV20_DI_DiffuseAndSpecularColorPass
 ==================
 */
 static void RB_NV20_DI_DiffuseAndSpecularColorPass( const drawInteraction_t *din ) {
-	RB_LogComment( "---------- RB_NV20_DI_DiffuseAndSpecularColorPass ----------\n" );
-
 	GL_State( GLS_SRCBLEND_DST_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | backEnd.depthFunc );
 
 	// texture 0 is the normalization cube map for the half angle
@@ -777,8 +768,6 @@ void RB_NV20_DrawInteractions( void ) {
 		}
 
 		backEnd.vLight = vLight;
-
-		RB_LogComment( "---------- RB_RenderViewLight 0x%p ----------\n", vLight );
 
 		// clear the stencil buffer if needed
 		if ( vLight->globalShadows || vLight->localShadows ) {

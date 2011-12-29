@@ -43,8 +43,6 @@ may touch, including the editor.
 void RB_SetDefaultGLState( void ) {
 	int		i;
 
-	RB_LogComment( "--- R_SetDefaultGLState ---\n" );
-
 	qglClearDepth( 1.0f );
 	qglColor4f (1,1,1,1);
 
@@ -101,23 +99,6 @@ void RB_SetDefaultGLState( void ) {
 }
 
 
-/*
-====================
-RB_LogComment
-====================
-*/
-void RB_LogComment( const char *comment, ... ) {
-   va_list marker;
-
-	if ( !tr.logFile ) {
-		return;
-	}
-
-	fprintf( tr.logFile, "// " );
-	va_start( marker, comment );
-	vfprintf( tr.logFile, comment, marker );
-	va_end( marker );
-}
 
 
 //=============================================================================
@@ -141,7 +122,6 @@ void GL_SelectTexture( int unit ) {
 
 	qglActiveTextureARB( GL_TEXTURE0_ARB + unit );
 	qglClientActiveTextureARB( GL_TEXTURE0_ARB + unit );
-	RB_LogComment( "glActiveTextureARB( %i );\nglClientActiveTextureARB( %i );\n", unit, unit );
 
 	backEnd.glState.currenttmu = unit;
 }
@@ -554,8 +534,6 @@ const void	RB_SwapBuffers( const void *data ) {
 		qglFinish();
 	}
 
-	RB_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
-
 	// don't flip if drawing to front buffer
 	if ( !r_frontBuffer.GetBool() ) {
 		GLimp_SwapBuffers();
@@ -577,8 +555,6 @@ const void	RB_CopyRender( const void *data ) {
 	if ( r_skipCopyTexture.GetBool() ) {
 		return;
 	}
-
-	RB_LogComment( "***************** RB_CopyRender *****************\n" );
 
 	if (cmd->image) {
 		cmd->image->CopyFramebuffer( cmd->x, cmd->y, cmd->imageWidth, cmd->imageHeight, false );

@@ -122,8 +122,6 @@ struct Win32Vars_t {
 
 	bool			cdsFullscreen;
 
-	FILE			*log_fp;
-
 	unsigned short	oldHardwareGamma[3][256];
 	// desktop gamma is saved here for restoration at exit
 

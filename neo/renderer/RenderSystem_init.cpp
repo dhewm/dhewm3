@@ -131,7 +131,6 @@ idCVar r_useInteractionCulling( "r_useInteractionCulling", "1", CVAR_RENDERER | 
 idCVar r_useInteractionScissors( "r_useInteractionScissors", "2", CVAR_RENDERER | CVAR_INTEGER, "1 = use a custom scissor rectangle for each shadow interaction, 2 = also crop using portal scissors", -2, 2, idCmdSystem::ArgCompletion_Integer<-2,2> );
 idCVar r_useShadowCulling( "r_useShadowCulling", "1", CVAR_RENDERER | CVAR_BOOL, "try to cull shadows from partially visible lights" );
 idCVar r_useFrustumFarDistance( "r_useFrustumFarDistance", "0", CVAR_RENDERER | CVAR_FLOAT, "if != 0 force the view frustum far distance to this distance" );
-idCVar r_logFile( "r_logFile", "0", CVAR_RENDERER | CVAR_INTEGER, "number of frames to emit GL logs" );
 idCVar r_clear( "r_clear", "2", CVAR_RENDERER, "force screen clear every frame, 1 = purple, 2 = black, 'r g b' = custom" );
 idCVar r_offsetFactor( "r_offsetfactor", "0", CVAR_RENDERER | CVAR_FLOAT, "polygon offset parameter" );
 idCVar r_offsetUnits( "r_offsetunits", "-600", CVAR_RENDERER | CVAR_FLOAT, "polygon offset parameter" );
@@ -2102,7 +2101,6 @@ void idRenderSystemLocal::Clear( void ) {
 	memset( &pc, 0, sizeof( pc ) );
 	memset( &lockSurfacesCmd, 0, sizeof( lockSurfacesCmd ) );
 	memset( &identitySpace, 0, sizeof( identitySpace ) );
-	logFile = NULL;
 	stencilIncr = 0;
 	stencilDecr = 0;
 	memset( renderCrops, 0, sizeof( renderCrops ) );
@@ -2190,13 +2188,6 @@ void idRenderSystemLocal::Shutdown( void ) {
 	idCinematic::ShutdownCinematic( );
 
 	globalImages->Shutdown();
-
-	// close the r_logFile
-	if ( logFile ) {
-		fprintf( logFile, "*** CLOSING LOG ***\n" );
-		fclose( logFile );
-		logFile = 0;
-	}
 
 	// free frame memory
 	R_ShutdownFrameData();

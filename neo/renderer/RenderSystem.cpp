@@ -288,9 +288,6 @@ static void R_CheckCvars( void ) {
 		r_brightness.ClearModified();
 		R_SetColorMappings();
 	}
-
-	// check for changes to logging state
-	GLimp_EnableLogging( r_logFile.GetInteger() != 0 );
 }
 
 /*

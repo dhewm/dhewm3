@@ -342,7 +342,6 @@ GL_SelectTextureNoClient
 static void GL_SelectTextureNoClient( int unit ) {
 	backEnd.glState.currenttmu = unit;
 	qglActiveTextureARB( GL_TEXTURE0_ARB + unit );
-	RB_LogComment( "glActiveTextureARB( %i )\n", unit );
 }
 
 
@@ -1888,8 +1887,6 @@ void R_EXP_RenderViewDepthImage( void ) {
 			backEnd.viewDef->viewport.y1,  backEnd.viewDef->viewport.x2 -  backEnd.viewDef->viewport.x1 + 1,
 			backEnd.viewDef->viewport.y2 -  backEnd.viewDef->viewport.y1 + 1 );
 	} else {
-		RB_LogComment( "---------- R_EXP_RenderViewDepthImage ----------\n" );
-
 		if ( r_sb_usePbuffer.GetBool() ) {
 			GL_CheckErrors();
 			// set the current openGL drawable to the shadow buffer

@@ -62,9 +62,6 @@ static void RB_RenderInteraction( const drawSurf_t *surf ) {
 	const srfTriangles_t	*tri = surf->geo;
 	const shaderStage_t	*lastBumpStage = NULL;
 
-	RB_LogComment( "---------- RB_RenderInteraction %s on %s ----------\n",
-		lightShader->GetName(), surfaceShader->GetName() );
-
 	// change the matrix and light projection vectors if needed
 	if ( surf->space != backEnd.currentSpace ) {
 		backEnd.currentSpace = surf->space;
@@ -576,8 +573,6 @@ static void RB_RenderViewLight( viewLight_t *vLight ) {
 	if ( vLight->lightShader->IsBlendLight() ) {
 		return;
 	}
-
-	RB_LogComment( "---------- RB_RenderViewLight 0x%p ----------\n", vLight );
 
 	// clear the stencil buffer if needed
 	if ( vLight->globalShadows || vLight->localShadows ) {
