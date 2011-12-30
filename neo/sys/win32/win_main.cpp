@@ -220,6 +220,8 @@ void Sys_Error( const char *error, ... ) {
 	vsprintf( text, error, argptr );
 	va_end( argptr);
 
+	printf("%s", text);
+
 	Conbuf_AppendText( text );
 	Conbuf_AppendText( "\n" );
 
@@ -274,6 +276,8 @@ void Sys_Printf( const char *fmt, ... ) {
 	va_end(argptr);
 	msg[sizeof(msg)-1] = '\0';
 
+	printf("%s", msg);
+
 	if ( win32.win_outputDebugString.GetBool() ) {
 		OutputDebugString( msg );
 	}
@@ -297,6 +301,8 @@ void Sys_DebugPrintf( const char *fmt, ... ) {
 	msg[ sizeof(msg)-1 ] = '\0';
 	va_end( argptr );
 
+	printf("%s", msg);
+
 	OutputDebugString( msg );
 }
 
@@ -310,6 +316,8 @@ void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
 
 	idStr::vsnPrintf( msg, MAXPRINTMSG-1, fmt, arg );
 	msg[ sizeof(msg)-1 ] = '\0';
+
+	printf("%s", msg);
 
 	OutputDebugString( msg );
 }
