@@ -214,19 +214,10 @@ if (WIN32)
 	add_definitions(-D_WIN32_WINNT=0x0501)
 
 	set(sys_libs ${sys_libs}
-		dinput8
-		ksuser
-		dxguid
 		winmm
 		iphlpapi
 		wsock32
 	)
-
-	if (MINGW)
-		list(APPEND sys_libs dxerr8)
-	else()
-		list(APPEND sys_libs dxerr)
-	endif()
 endif()
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}.${cpu}")
@@ -655,17 +646,15 @@ elseif (WIN32)
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
+		sys/glimp.cpp
+		sys/events.cpp
 		sys/sys_local.cpp
 		sys/win32/win_cpu.cpp
-#		sys/win32/win_gamma.cpp
-		sys/win32/win_glimp.cpp
 		sys/win32/win_input.cpp
 		sys/win32/win_main.cpp
 		sys/win32/win_net.cpp
 		sys/win32/win_shared.cpp
 		sys/win32/win_syscon.cpp
-		sys/win32/win_taskkeyhook.cpp
-		sys/win32/win_wndproc.cpp
 	)
 
 	set(src_sys_core

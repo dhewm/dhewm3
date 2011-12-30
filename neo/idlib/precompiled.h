@@ -44,9 +44,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <mmsystem.h>
 #include <mmreg.h>
 
-#define DIRECTINPUT_VERSION  0x0800			// was 0x0700 with the old mssdk
-#include <dinput.h>
-
 #pragma warning(disable : 4100)				// unreferenced formal parameter
 #pragma warning(disable : 4244)				// conversion to smaller type, possible loss of data
 #pragma warning(disable : 4714)				// function marked as __forceinline not inlined

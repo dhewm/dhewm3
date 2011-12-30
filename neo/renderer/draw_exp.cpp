@@ -56,6 +56,9 @@ polygon offset factor causes occasional texture holes from highly angled texture
 */
 
 // WGL_ARB_pixel_format
+static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
+
+// WGL_ARB_pixel_format
 static PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
 static PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
 
@@ -522,6 +525,9 @@ void R_Exp_Allocate( void ) {
 	int	pbiAttributes[] = {0, 0};
 
 	initialized = true;
+
+	// WGL_ARB_pixel_format
+	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)GLimp_ExtensionPointer("wglChoosePixelFormatARB");
 
 	// WGL_ARB_pixel_format
 	wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)GLimp_ExtensionPointer("wglGetPixelFormatAttribivARB");

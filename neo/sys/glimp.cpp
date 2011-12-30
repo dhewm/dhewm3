@@ -34,6 +34,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#ifdef _WIN32
+#include "sys/win32/win_local.h"
+#endif
+
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
 /*
@@ -161,6 +165,25 @@ bool GLimp_Init(glimpParms_t parms) {
 	}
 
 	glConfig.wgl_extensions_string = "";
+
+#ifdef _WIN32
+	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)GLimp_ExtensionPointer("wglGetExtensionsStringARB");
+
+	if (wglGetExtensionsStringARB)
+		glConfig.wgl_extensions_string = (const char *)wglGetExtensionsStringARB(wglGetCurrentDC());
+
+	// the editors still rely on these vars
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+
+	if (SDL_GetWMInfo(&info)) {
+		win32.hDC = wglGetCurrentDC();
+		win32.hGLRC = info.hglrc;
+	}
+
+	win32.pixelformat = GetPixelFormat(win32.hDC);
+	DescribePixelFormat(win32.hDC, win32.pixelformat, sizeof(win32.pfd), &win32.pfd);
+#endif
 
 	return true;
 }

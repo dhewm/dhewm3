@@ -307,8 +307,11 @@ void Sys_ShutdownInput() {
 Sys_InitScanTable
 ===========
 */
+// Windows has its own version due to the tools
+#ifndef _WIN32
 void Sys_InitScanTable() {
 }
+#endif
 
 /*
 ===============
