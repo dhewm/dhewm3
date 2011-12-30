@@ -144,24 +144,3 @@ Sys_SetPhysicalWorkMemory
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
 	::SetProcessWorkingSetSize( GetCurrentProcess(), minBytes, maxBytes );
 }
-
-/*
-================
-Sys_GetCurrentUser
-================
-*/
-char *Sys_GetCurrentUser( void ) {
-	static char s_userName[1024];
-	unsigned long size = sizeof( s_userName );
-
-
-	if ( !GetUserName( s_userName, &size ) ) {
-		strcpy( s_userName, "player" );
-	}
-
-	if ( !s_userName[0] ) {
-		strcpy( s_userName, "player" );
-	}
-
-	return s_userName;
-}

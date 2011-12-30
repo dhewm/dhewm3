@@ -53,8 +53,6 @@ If you have questions concerning this license or the applicable additional terms
 void	Sys_CreateConsole( void );
 void	Sys_DestroyConsole( void );
 
-char	*Sys_GetCurrentUser( void );
-
 void	Win_SetErrorText( const char *text );
 
 const unsigned char *Win_GetScanTable( void );
@@ -80,8 +78,6 @@ struct Win32Vars_t {
 	PIXELFORMATDESCRIPTOR pfd;
 	int				pixelformat;
 
-	static idCVar	sys_arch;
-	static idCVar	win_username;
 	static idCVar	win_outputDebugString;
 	static idCVar	win_outputEditString;
 	static idCVar	win_viewlog;
