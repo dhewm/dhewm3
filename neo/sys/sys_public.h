@@ -247,9 +247,6 @@ int				Sys_ListFiles( const char *directory, const char *extension, idList<class
 // know early if we are performing a fatal error shutdown so the error message doesn't get lost
 void			Sys_SetFatalError( const char *error );
 
-// display perference dialog
-void			Sys_DoPreferences( void );
-
 /*
 ==============================================================
 

@@ -2977,9 +2977,6 @@ void idCommonLocal::InitGame( void ) {
 	// if any archived cvars are modified after this, we will trigger a writing of the config file
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 
-	// cvars are initialized, but not the rendering system. Allow preference startup dialog
-	Sys_DoPreferences();
-
 	// init the user command input code
 	usercmdGen->Init();
 

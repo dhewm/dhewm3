@@ -623,8 +623,6 @@ if (APPLE)
 	set(src_sys_core
 		sys/glimp.cpp
 		sys/glimp_ati_fragment_shader.cpp
-		sys/osx/PickMonitor.cpp
-		sys/osx/PreferencesDialog.cpp
 		sys/osx/DOOMController.mm
 		sys/osx/macosx_misc.mm
 	)

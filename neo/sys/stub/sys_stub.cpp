@@ -197,9 +197,6 @@ const char *Sys_NetAdrToString( const netadr_t a ) {
 	return s;
 }
 
-void Sys_DoPreferences( void ) {
-}
-
 int main( int argc, char **argv ) {
 	// combine the args into a windows-style command line
 	char	cmdline[4096];

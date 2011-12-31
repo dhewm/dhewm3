@@ -284,13 +284,6 @@ void idSysLocal::OpenURL( const char *url, bool quit ) {
 }
 
 /*
- ==================
- Sys_DoPreferences
- ==================
- */
-void Sys_DoPreferences( void ) { }
-
-/*
 ===============
 mem consistency stuff
 ===============

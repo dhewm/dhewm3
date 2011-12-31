@@ -747,11 +747,3 @@ Sys_SetFatalError
 */
 void Sys_SetFatalError( const char *error ) {
 }
-
-/*
-==================
-Sys_DoPreferences
-==================
-*/
-void Sys_DoPreferences( void ) {
-}
