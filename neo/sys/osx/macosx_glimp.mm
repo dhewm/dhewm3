@@ -1303,52 +1303,6 @@ unsigned long Sys_QueryVideoMemory() {
 	return maxVRAM;
 }
 
-
-// We will set the Sys_IsHidden global to cause input to be handle differently (we'll just let NSApp handle events in this case).  We also will unbind the GL context and restore the video mode.
-bool Sys_Hide() {
-	if ( isHidden ) {
-		// Eh?
-		return false;
-	}
-
-	if ( !r_fullscreen.GetBool() ) {
-		// We only support hiding in fullscreen mode right now
-		return false;
-	}
-
-	isHidden = true;
-
-	// Don't need to store the current gamma since we always keep it around in glw_state.inGameTable.
-
-	Sys_FadeScreen(Sys_DisplayToUse());
-
-	// Disassociate the GL context from the screen
-	// Have to call both to actually deallocate kernel resources and free the NSSurface
-	CGLClearDrawable(OSX_GetCGLContext());
-	[OSX_GetNSGLContext() clearDrawable];
-
-	// Restore the original video mode
-	_GLimp_RestoreOriginalVideoSettings();
-
-	// Restore the original gamma if needed.
-	//    if (glConfig.deviceSupportsGamma) {
-	//        CGDisplayRestoreColorSyncSettings();
-	//    }
-
-	// Release the screen(s)
-	ReleaseAllDisplays();
-
-	Sys_UnfadeScreens();
-
-	// Shut down the input system so the mouse and keyboard settings are restore to normal
-	Sys_ShutdownInput();
-
-	// Hide the application so that when the user clicks on our app icon, we'll get an unhide notification
-	[NSApp hide: nil];
-
-	return true;
-}
-
 CGDisplayErr Sys_CaptureActiveDisplays(void) {
 	CGDisplayErr err;
 	CGDisplayCount displayIndex;
@@ -1360,56 +1314,6 @@ CGDisplayErr Sys_CaptureActiveDisplays(void) {
 	    return err;
 	}
 	return CGDisplayNoErr;
-}
-
-bool Sys_Unhide() {
-	CGDisplayErr err;
-	CGLError glErr;
-
-	if ( !isHidden) {
-		// Eh?
-		return false;
-	}
-
-	Sys_FadeScreens();
-
-	// Capture the screen(s)
-	err = Sys_CaptureActiveDisplays();
-	if (err != CGDisplayNoErr) {
-		Sys_UnfadeScreens();
-		common->Printf(  "Unhide failed -- cannot capture the display again.\n" );
-		return false;
-	}
-
-	// Restore the game mode
-	err = CGDisplaySwitchToMode(glw_state.display, (CFDictionaryRef)glw_state.gameMode);
-	if ( err != CGDisplayNoErr ) {
-		ReleaseAllDisplays();
-		Sys_UnfadeScreens();
-		common->Printf(  "Unhide failed -- Unable to set display mode\n" );
-		return false;
-	}
-
-	// Reassociate the GL context and the screen
-	glErr = CGLSetFullScreen(OSX_GetCGLContext());
-	if (glErr) {
-		ReleaseAllDisplays();
-		Sys_UnfadeScreens();
-		common->Printf(  "Unhide failed: CGLSetFullScreen -> %d (%s)\n", err, CGLErrorString(glErr));
-		return false;
-	}
-
-	// Restore the current context
-	[OSX_GetNSGLContext() makeCurrentContext];
-
-	// Restore the gamma that the game had set
-	Sys_UnfadeScreen(Sys_DisplayToUse(), &glw_state.inGameTable);
-
-	// Restore the input system (last so if something goes wrong we don't eat the mouse)
-	Sys_InitInput();
-
-	isHidden = false;
-	return true;
 }
 
 // enable / disable context is just for the r_skipRenderContext debug option

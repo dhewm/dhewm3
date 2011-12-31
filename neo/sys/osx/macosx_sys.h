@@ -11,10 +11,6 @@ CGDirectDisplayID Sys_DisplayToUse(void);
 void SetProgramPath(char *path);
 void Sys_SetMouseInputRect(CGRect newRect);
 
-// In macosx_glimp.m
-bool Sys_Hide();
-bool Sys_Unhide();
-
 typedef struct {
 	CGDirectDisplayID     display;
 	CGTableCount          tableSize;
