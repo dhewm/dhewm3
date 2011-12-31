@@ -63,7 +63,3 @@ do { \
   [NSOpenGLContext clearCurrentContext]; \
   glw_state._ctx_is_current = NO; \
 } while (0)
-
-
-void Sys_PauseGL();
-void Sys_ResumeGL();

@@ -418,36 +418,6 @@ static bool CreateGameWindow(  glimpParms_t parms ) {
 	return true;
 }
 
-// This can be used to temporarily disassociate the GL context from the screen so that CoreGraphics can be used to draw to the screen.
-void Sys_PauseGL () {
-	if (!glw_state.glPauseCount) {
-		qglFinish (); // must do this to ensure the queue is complete
-
-		// Have to call both to actually deallocate kernel resources and free the NSSurface
-		CGLClearDrawable(OSX_GetCGLContext());
-		[OSX_GetNSGLContext() clearDrawable];
-	}
-	glw_state.glPauseCount++;
-}
-
-// This can be used to reverse the pausing caused by Sys_PauseGL()
-void Sys_ResumeGL () {
-	if (glw_state.glPauseCount) {
-		glw_state.glPauseCount--;
-		if (!glw_state.glPauseCount) {
-			if (!glConfig.isFullscreen) {
-				[OSX_GetNSGLContext() setView: [glw_state.window contentView]];
-			} else {
-				CGLError err;
-
-				err = CGLSetFullScreen(OSX_GetCGLContext());
-				if (err)
-					common->Printf("CGLSetFullScreen -> %d (%s)\n", err, CGLErrorString(err));
-			}
-		}
-	}
-}
-
 /*
 ===================
 GLimp_Init
