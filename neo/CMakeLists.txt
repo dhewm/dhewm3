@@ -631,6 +631,7 @@ if (APPLE)
 	)
 
 	set(src_sys_core
+		sys/glimp_ati_fragment_shader.cpp
 		sys/posix/posix_input.cpp
 		sys/osx/PickMonitor.cpp
 		sys/osx/PreferencesDialog.cpp
