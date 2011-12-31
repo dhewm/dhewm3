@@ -223,84 +223,6 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 	return list.Num();
 }
 
-#ifdef MACOS_X
-/*
-============================================================================
-EVENT LOOP
-============================================================================
-*/
-
-#define	MAX_QUED_EVENTS		256
-#define	MASK_QUED_EVENTS	( MAX_QUED_EVENTS - 1 )
-
-static sysEvent_t eventQue[MAX_QUED_EVENTS];
-static int eventHead, eventTail;
-
-/*
-================
-Posix_QueEvent
-
-ptr should either be null, or point to a block of data that can be freed later
-================
-*/
-void Posix_QueEvent( sysEventType_t type, int value, int value2,
-				  int ptrLength, void *ptr ) {
-	sysEvent_t *ev;
-
-	ev = &eventQue[eventHead & MASK_QUED_EVENTS];
-	if (eventHead - eventTail >= MAX_QUED_EVENTS) {
-		common->Printf( "Posix_QueEvent: overflow\n" );
-		// we are discarding an event, but don't leak memory
-		// TTimo: verbose dropped event types?
-		if (ev->evPtr) {
-			Mem_Free(ev->evPtr);
-			ev->evPtr = NULL;
-		}
-		eventTail++;
-	}
-
-	eventHead++;
-
-	ev->evType = type;
-	ev->evValue = value;
-	ev->evValue2 = value2;
-	ev->evPtrLength = ptrLength;
-	ev->evPtr = ptr;
-
-#if 0
-	common->Printf( "Event %d: %d %d\n", ev->evType, ev->evValue, ev->evValue2 );
-#endif
-}
-
-/*
-================
-Sys_GetEvent
-================
-*/
-sysEvent_t Sys_GetEvent(void) {
-	static sysEvent_t ev;
-
-	// return if we have data
-	if (eventHead > eventTail) {
-		eventTail++;
-		return eventQue[(eventTail - 1) & MASK_QUED_EVENTS];
-	}
-	// return the empty event with the current time
-	memset(&ev, 0, sizeof(ev));
-
-	return ev;
-}
-
-/*
-================
-Sys_ClearEvents
-================
-*/
-void Sys_ClearEvents( void ) {
-	eventHead = eventTail = 0;
-}
-#endif
-
 /*
 ================
 Posix_Cwd
@@ -913,26 +835,6 @@ char *Sys_ConsoleInput( void ) {
 	}
 	return NULL;
 }
-
-#ifdef MACOS_X
-/*
-called during frame loops, pacifier updates etc.
-this is only for console input polling and misc mouse grab tasks
-the actual mouse and keyboard input is in the Sys_Poll logic
-*/
-void Sys_GenerateEvents( void ) {
-	char *s;
-	if ( ( s = Sys_ConsoleInput() ) ) {
-		char *b;
-		int len;
-
-		len = strlen( s ) + 1;
-		b = (char *)Mem_Alloc( len );
-		strcpy( b, s );
-		Posix_QueEvent( SE_CONSOLE, 0, 0, len, b );
-	}
-}
-#endif
 
 /*
 ===============

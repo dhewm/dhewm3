@@ -44,16 +44,11 @@ If you have questions concerning this license or the applicable additional terms
 #import "idlib/Str.h"
 #import "framework/Licensee.h"
 #import "framework/Common.h"
-#import "sys/osx/macosx_local.h"
-#import "sys/osx/macosx_sys.h"
+#import "sys/posix/posix_public.h"
 
 #import "DOOMController.h"
 
-#define	MAX_KEYS		256
-
 static idStr			savepath;
-
-extern	bool	key_overstrikeMode;
 
 #define TEST_FPU_EXCEPTIONS			\
 FPU_EXCEPTION_INVALID_OPERATION |		\
@@ -95,16 +90,6 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 		Sys_Error( (const char *)[ [ localException reason ] cString ] );
 	} NS_ENDHANDLER;
 	Sys_Quit();
-}
-
-- (void)applicationWillHide:(NSNotification *)notification;
-{
-	Sys_ShutdownInput();
-}
-
-- (void)applicationWillUnhide:(NSNotification *)notification;
-{
-	Sys_InitInput();
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
@@ -573,37 +558,6 @@ int Sys_GetSystemRam( void ) {
 	}
 	else
 		return 1024;
-}
-
-/*
-================
-Sys_GetVideoRam
-returns in megabytes
-================
-*/
-int Sys_GetVideoRam( void ) {
-	unsigned int i;
-	CFTypeRef typeCode;
-	long vramStorage = 64;
-	const short MAXDISPLAYS = 8;
-	CGDisplayCount displayCount;
-	io_service_t dspPorts[MAXDISPLAYS];
-	CGDirectDisplayID displays[MAXDISPLAYS];
-
-	CGGetOnlineDisplayList( MAXDISPLAYS, displays, &displayCount );
-
-	for ( i = 0; i < displayCount; i++ ) {
-		if ( Sys_DisplayToUse() == displays[i] ) {
-			dspPorts[i] = CGDisplayIOServicePort(displays[i]);
-			typeCode = IORegistryEntryCreateCFProperty( dspPorts[i], CFSTR("IOFBMemorySize"), kCFAllocatorDefault, kNilOptions );
-			if( typeCode && CFGetTypeID( typeCode ) == CFNumberGetTypeID() ) {
-				CFNumberGetValue( ( CFNumberRef )typeCode, kCFNumberSInt32Type, &vramStorage );
-				vramStorage /= (1024*1024);
-			}
-		}
-	}
-
-	return vramStorage;
 }
 
 bool OSX_GetCPUIdentification( int& cpuId, bool& oldArchitecture )

@@ -33,8 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Licensee.h"
 
 #include "renderer/tr_local.h"
-
-#ifdef _WIN32
+#if defined(MACOS_X)
+#include "sys/glimp_ati_fragment_shader.h"
+#elif defined(_WIN32)
 #include "sys/win32/win_local.h"
 #endif
 
@@ -251,6 +252,13 @@ GLimp_ExtensionPointer
 */
 GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	assert(SDL_WasInit(SDL_INIT_VIDEO));
+
+#ifdef MACOS_X
+	// special case for ATI_fragment_shader calls to map to ATI_text_fragment_shader routines
+	GLExtension_t res = GLimp_ExtensionPointer_ATI_fragment_shader(name);
+	if (res)
+		return res;
+#endif
 
 	return (GLExtension_t)SDL_GL_GetProcAddress(name);
 }

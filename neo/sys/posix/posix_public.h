@@ -33,7 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_public.h"
 
-void		Posix_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
 const char*	Posix_Cwd( void );
 
 // called first thing. does InitSigs and various things
@@ -48,10 +47,6 @@ void		Posix_Exit( int ret );
 void		Posix_SetExit(int ret); // override the exit code
 void		Posix_SetExitSpawn( const char *exeName ); // set the process to be spawned when we quit
 
-bool		Posix_AddKeyboardPollEvent( int key, bool state );
-bool		Posix_AddMousePollEvent( int action, int value );
-
-void		Posix_PollInput( void );
 void		Posix_InitConsoleInput( void );
 void		Posix_Shutdown( void );
 
