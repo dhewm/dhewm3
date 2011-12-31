@@ -455,13 +455,6 @@ GLimp_Init
 Don't return unless OpenGL has been properly initialized
 ===================
 */
-
-#ifdef OMNI_TIMER
-static void GLImp_Dump_Stamp_List_f(void) {
-	OTStampListDumpToFile(glThreadStampList, "/tmp/gl_stamps");
-}
-#endif
-
 bool GLimp_Init( glimpParms_t parms ) {
 	char *buf;
 
@@ -1226,11 +1219,6 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 
 	return (GLExtension_t)(NSAddressOfSymbol(symbol));
 }
-
-void * wglGetProcAddress(const char *name) {
-	return (void *)GLimp_ExtensionPointer( name );
-}
-
 
 /*
 ** GLW_InitExtensions

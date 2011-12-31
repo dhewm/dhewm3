@@ -6,19 +6,10 @@
 #import <ApplicationServices/ApplicationServices.h>
 #import <OpenGL/CGLTypes.h>
 
-// sys
-
-const char *macosx_scanForLibraryDirectory(void);
-
 // In macosx_input.m
-void Sys_InitInput(void);
-void Sys_ShutdownInput(void);
 CGDirectDisplayID Sys_DisplayToUse(void);
-//extern void osxQuit();
 void SetProgramPath(char *path);
 void Sys_SetMouseInputRect(CGRect newRect);
-
-void Sys_AnnoyingBanner();
 
 // In macosx_glimp.m
 bool Sys_Hide();

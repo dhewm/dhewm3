@@ -44,7 +44,6 @@ If you have questions concerning this license or the applicable additional terms
 #import "idlib/Str.h"
 #import "framework/Licensee.h"
 #import "framework/Common.h"
-#import "sys/osx/macosx_common.h"
 #import "sys/osx/macosx_local.h"
 #import "sys/osx/macosx_sys.h"
 
@@ -136,12 +135,10 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 }
 
 extern void CL_Quit_f(void);
-//extern void SetProgramPath(const char *path);
 
 
 - (IBAction)requestTerminate:(id)sender;
 {
-	//osxQuit();
 	common->Quit();
 }
 
@@ -333,11 +330,6 @@ extern void CL_Quit_f(void);
 	[NSApp activateIgnoringOtherApps:YES];
 
 	while (1) {
-#ifdef OMNI_TIMER
-		OTPeriodicTimerReset();
-		OTNodeStart(RootNode);
-#endif
-
 		// maintain exceptions in case system calls are turning them off (is that needed)
 		//Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
 
@@ -346,9 +338,6 @@ extern void CL_Quit_f(void);
 		// We should think about doing this less frequently than every frame
 		[pool release];
 		pool = [[NSAutoreleasePool alloc] init];
-#ifdef OMNI_TIMER
-		OTNodeStop(RootNode);
-#endif
 	}
 
 	[pool release];

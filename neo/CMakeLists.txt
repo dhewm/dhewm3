@@ -634,13 +634,10 @@ if (APPLE)
 		sys/posix/posix_input.cpp
 		sys/osx/PickMonitor.cpp
 		sys/osx/PreferencesDialog.cpp
-		sys/osx/macosx_guids.cpp
 		sys/osx/DOOMController.mm
 		sys/osx/macosx_event.mm
 		sys/osx/macosx_glimp.mm
 		sys/osx/macosx_misc.mm
-#		sys/osx/macosx_utils.mm
-#		sys/osx/macosx_sys.mm
 	)
 elseif (WIN32)
 	set(src_sys_base
