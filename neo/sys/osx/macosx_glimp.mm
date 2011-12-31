@@ -128,8 +128,6 @@ bool GLimp_SetMode(  glimpParms_t parms ) {
 	qglClear( GL_COLOR_BUFFER_BIT );
 	GLimp_SwapBuffers();
 
-	Sys_UnfadeScreen( Sys_DisplayToUse(), NULL );
-
 	CheckErrors();
 
 	return true;
@@ -288,9 +286,6 @@ static bool CreateGameWindow(  glimpParms_t parms ) {
 			common->Printf(  "Unable to find requested display mode.\n");
 			return false;
 		}
-
-		// Fade all screens to black
-		//        Sys_FadeScreens();
 
 		err = Sys_CaptureActiveDisplays();
 		if ( err != CGDisplayNoErr ) {
@@ -536,8 +531,6 @@ void GLimp_Shutdown( void ) {
 
 	common->Printf("----- Shutting down GL -----\n");
 
-	Sys_FadeScreen(Sys_DisplayToUse());
-
 	if (OSX_GetNSGLContext()) {
 #ifndef USE_CGLMACROS
 		OSX_GLContextClearCurrent();
@@ -551,8 +544,6 @@ void GLimp_Shutdown( void ) {
 	}
 
 	_GLimp_RestoreOriginalVideoSettings();
-
-	Sys_UnfadeScreens();
 
 	// Restore the original gamma if needed.
 	//    if (glConfig.deviceSupportsGamma) {
@@ -1444,194 +1435,6 @@ void Sys_StoreGammaTables() {
 		table->display = displays[displayIndex];
 		Sys_GetGammaTable(table);
 	}
-}
-
-
-//  This isn't a mathematically correct fade, but we don't care that much.
-void Sys_SetScreenFade(glwgamma_t *table, float fraction) {
-	CGTableCount tableSize;
-	CGGammaValue *red, *blue, *green;
-	CGTableCount gammaIndex;
-
-	//    if (!glConfig.deviceSupportsGamma)
-	//        return;
-
-	if (!(tableSize = table->tableSize))
-		// we couldn't get the table for this display for some reason
-		return;
-
-	//    common->Printf("0x%08x %f\n", table->display, fraction);
-
-	red = glw_state.tempTable.red;
-	green = glw_state.tempTable.green;
-	blue = glw_state.tempTable.blue;
-	if (glw_state.tempTable.tableSize < tableSize) {
-		glw_state.tempTable.tableSize = tableSize;
-		red = (float *)realloc(red, sizeof(*red) * tableSize);
-		green = (float *)realloc(green, sizeof(*green) * tableSize);
-		blue = (float *)realloc(blue, sizeof(*blue) * tableSize);
-		glw_state.tempTable.red = red;
-		glw_state.tempTable.green = green;
-		glw_state.tempTable.blue = blue;
-	}
-
-	for (gammaIndex = 0; gammaIndex < table->tableSize; gammaIndex++) {
-		red[gammaIndex] = table->red[gammaIndex] * fraction;
-		blue[gammaIndex] = table->blue[gammaIndex] * fraction;
-		green[gammaIndex] = table->green[gammaIndex] * fraction;
-	}
-
-	CGSetDisplayTransferByTable(table->display, table->tableSize, red, green, blue);
-}
-
-// Fades all the active displays at the same time.
-
-#define FADE_DURATION 0.5
-void Sys_FadeScreens() {
-	CGDisplayCount displayIndex;
-	int stepIndex;
-	glwgamma_t *table;
-	NSTimeInterval start, current;
-	float time;
-
-	//   if (!glConfig.deviceSupportsGamma)
-	//        return;
-
-	common->Printf("Fading all displays\n");
-
-	start = [NSDate timeIntervalSinceReferenceDate];
-	time = 0.0;
-	while (time != FADE_DURATION) {
-		current = [NSDate timeIntervalSinceReferenceDate];
-		time = current - start;
-		if (time > FADE_DURATION)
-			time = FADE_DURATION;
-
-		for (displayIndex = 0; displayIndex < glw_state.displayCount; displayIndex++) {
-			table = &glw_state.originalDisplayGammaTables[displayIndex];
-			Sys_SetScreenFade(table, 1.0 - time / FADE_DURATION);
-		}
-	}
-}
-
-void Sys_FadeScreen(CGDirectDisplayID display) {
-	CGDisplayCount displayIndex;
-	glwgamma_t *table;
-	int stepIndex;
-
-	common->Printf( "FIXME: Sys_FadeScreen\n" );
-
-	return;
-
-	//    if (!glConfig.deviceSupportsGamma)
-	//        return;
-
-	common->Printf("Fading display 0x%08x\n", display);
-
-	for (displayIndex = 0; displayIndex < glw_state.displayCount; displayIndex++) {
-		if (display == glw_state.originalDisplayGammaTables[displayIndex].display) {
-			NSTimeInterval start, current;
-			float time;
-
-			start = [NSDate timeIntervalSinceReferenceDate];
-			time = 0.0;
-
-			table = &glw_state.originalDisplayGammaTables[displayIndex];
-			while (time != FADE_DURATION) {
-				current = [NSDate timeIntervalSinceReferenceDate];
-				time = current - start;
-				if (time > FADE_DURATION)
-					time = FADE_DURATION;
-
-				Sys_SetScreenFade(table, 1.0 - time / FADE_DURATION);
-			}
-			return;
-		}
-	}
-
-	common->Printf("Unable to find display to fade it\n");
-}
-
-void Sys_UnfadeScreens() {
-	CGDisplayCount displayIndex;
-	int stepIndex;
-	glwgamma_t *table;
-	NSTimeInterval start, current;
-	float time;
-
-	common->Printf( "FIXME: Sys_UnfadeScreens\n" );
-
-	return;
-
-	//    if (!glConfig.deviceSupportsGamma)
-	//        return;
-
-	common->Printf("Unfading all displays\n");
-
-	start = [NSDate timeIntervalSinceReferenceDate];
-	time = 0.0;
-	while (time != FADE_DURATION) {
-		current = [NSDate timeIntervalSinceReferenceDate];
-		time = current - start;
-		if (time > FADE_DURATION)
-			time = FADE_DURATION;
-
-		for (displayIndex = 0; displayIndex < glw_state.displayCount; displayIndex++) {
-			table = &glw_state.originalDisplayGammaTables[displayIndex];
-			Sys_SetScreenFade(table, time / FADE_DURATION);
-		}
-	}
-}
-
-void Sys_UnfadeScreen(CGDirectDisplayID display, glwgamma_t *table) {
-	CGDisplayCount displayIndex;
-	int stepIndex;
-
-	common->Printf( "FIXME: Sys_UnfadeScreen\n" );
-
-	return;
-	//    if (!glConfig.deviceSupportsGamma)
-	//        return;
-
-	common->Printf("Unfading display 0x%08x\n", display);
-
-	if (table) {
-		CGTableCount i;
-
-		common->Printf("Given table:\n");
-		for (i = 0; i < table->tableSize; i++) {
-			common->Printf("  %f %f %f\n", table->red[i], table->blue[i], table->green[i]);
-		}
-	}
-
-	// Search for the original gamma table for the display
-	if (!table) {
-		for (displayIndex = 0; displayIndex < glw_state.displayCount; displayIndex++) {
-			if (display == glw_state.originalDisplayGammaTables[displayIndex].display) {
-				table = &glw_state.originalDisplayGammaTables[displayIndex];
-				break;
-			}
-		}
-	}
-
-	if (table) {
-		NSTimeInterval start, current;
-		float time;
-
-		start = [NSDate timeIntervalSinceReferenceDate];
-		time = 0.0;
-
-		while (time != FADE_DURATION) {
-			current = [NSDate timeIntervalSinceReferenceDate];
-			time = current - start;
-			if (time > FADE_DURATION)
-				time = FADE_DURATION;
-			Sys_SetScreenFade(table, time / FADE_DURATION);
-		}
-		return;
-	}
-
-	common->Printf("Unable to find display to unfade it\n");
 }
 
 #define MAX_DISPLAYS 128
