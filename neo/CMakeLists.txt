@@ -96,17 +96,6 @@ include_directories(${OPENGL_INCLUDE_DIR})
 find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 
-if (UNIX AND NOT APPLE)
-	find_package(X11 REQUIRED)
-	include_directories(${X11_INCLUDE_DIR})
-
-	if (os MATCHES ".*bsd" OR os STREQUAL "dragonfly")
-		set(Xxf86vm /usr/local/lib/libXxf86vm.so)
-	else()
-		set(Xxf86vm Xxf86vm)
-	endif()
-endif()
-
 if (CURL)
 	find_package(CURL REQUIRED)
 	add_definitions(-DID_ENABLE_CURL=1)
@@ -693,7 +682,6 @@ if (CORE)
 	set_target_properties(doom3.${cpu} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(doom3.${cpu}
 		idlib${cpu}
-		${X11_X11_LIB} ${X11_Xext_LIB} ${Xxf86vm}
 		${OPENGL_gl_LIBRARY}
 		${OPENAL_LIBRARY}
 		${OGG_LIBRARIES}
