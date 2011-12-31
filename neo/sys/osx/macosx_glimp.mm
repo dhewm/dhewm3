@@ -46,7 +46,6 @@ static idCVar r_minDisplayRefresh( "r_minDisplayRefresh", "0", CVAR_ARCHIVE | CV
 static idCVar r_maxDisplayRefresh( "r_maxDisplayRefresh", "0", CVAR_ARCHIVE | CVAR_INTEGER, "" );
 static idCVar r_screen( "r_screen", "-1", CVAR_ARCHIVE | CVAR_INTEGER, "which display to use" );
 
-static void				GLW_InitExtensions( void );
 static bool				CreateGameWindow( glimpParms_t parms );
 static unsigned long	Sys_QueryVideoMemory();
 CGDisplayErr		Sys_CaptureActiveDisplays(void);
@@ -453,8 +452,6 @@ bool GLimp_Init( glimpParms_t parms ) {
 
 	//	Cvar_Set( "r_lastValidRenderer", glConfig.renderer_string );
 	free(buf);
-
-	GLW_InitExtensions();
 
 	/*
 #ifndef USE_CGLMACROS
@@ -1181,11 +1178,6 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	return (GLExtension_t)(NSAddressOfSymbol(symbol));
 }
 
-/*
-** GLW_InitExtensions
-*/
-void GLW_InitExtensions( void ) { }
-
 #define MAX_RENDERER_INFO_COUNT 128
 
 // Returns zero if there are no hardware renderers.  Otherwise, returns the max memory across all renderers (on the presumption that the screen that we'll use has the most memory).
@@ -1414,8 +1406,6 @@ void Sys_GetGammaTable(glwgamma_t *table) {
 		table->tableSize = 0;
 	}
 }
-
-void Sys_SetGammaTable(glwgamma_t *table) { }
 
 void Sys_StoreGammaTables() {
 	// Store the original gamma for all monitors so that we can fade and unfade them all
