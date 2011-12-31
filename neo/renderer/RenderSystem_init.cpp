@@ -1836,18 +1836,6 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 		common->Printf( "glFinish not forced\n" );
 	}
 
-#ifdef _WIN32
-// WGL_EXT_swap_interval
-typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
-extern	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
-
-	if ( r_swapInterval.GetInteger() && wglSwapIntervalEXT ) {
-		common->Printf( "Forcing swapInterval %i\n", r_swapInterval.GetInteger() );
-	} else {
-		common->Printf( "swapInterval not forced\n" );
-	}
-#endif
-
 	bool tss = glConfig.twoSidedStencilAvailable || glConfig.atiTwoSidedStencilAvailable;
 
 	if ( !r_useTwoSidedStencil.GetBool() && tss ) {

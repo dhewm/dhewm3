@@ -129,6 +129,9 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, parms.multiSamples ? 1 : 0);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, parms.multiSamples);
 
+		if (SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, r_swapInterval.GetInteger()) < 0)
+			common->Warning("SDL_GL_SWAP_CONTROL not supported");
+
 		surf = SDL_SetVideoMode(parms.width, parms.height, colorbits, flags);
 		if (!surf) {
 			common->DPrintf("Couldn't set GL mode %d/%d/%d: %s",
