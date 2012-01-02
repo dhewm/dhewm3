@@ -568,11 +568,7 @@ vidmode_t r_vidModes[] = {
 };
 static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
-#if MACOS_X
-bool R_GetModeInfo( int *width, int *height, int mode ) {
-#else
 static bool R_GetModeInfo( int *width, int *height, int mode ) {
-#endif
 	vidmode_t	*vm;
 
 	if ( mode < -1 ) {
