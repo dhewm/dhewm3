@@ -519,7 +519,7 @@ static void R_FlareDeform( drawSurf_t *surf ) {
 
 	if ( tri->numVerts != 4 || tri->numIndexes != 6 ) {
 		//FIXME: temp hack for flares on tripleted models
-		common->Warning( "R_FlareDeform: not a single quad" );
+		common->DPrintf( "R_FlareDeform: not a single quad\n" );
 		return;
 	}
 
