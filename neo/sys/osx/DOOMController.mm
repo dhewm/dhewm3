@@ -26,27 +26,20 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-// -*- mode: objc -*-
-#import <unistd.h>
+#include <sys/param.h>
+#include <sys/ucontext.h>
+#include <unistd.h>
+#include <fenv.h>
+#include <mach/thread_status.h>
+#include <AppKit/AppKit.h>
 
-#import <Foundation/Foundation.h>
-#import <Carbon/Carbon.h>
-#import <AppKit/AppKit.h>
-#import <OpenGL/gl.h>
+#include <SDL_main.h>
 
-#import <fenv.h>
-#import <sys/ucontext.h>
-#import <mach/thread_status.h>
+#include "sys/platform.h"
+#include "idlib/Str.h"
+#include "framework/Common.h"
 
-#import <SDL_main.h>
-
-#import "sys/platform.h"
-#import "idlib/Str.h"
-#import "framework/Licensee.h"
-#import "framework/Common.h"
-#import "sys/posix/posix_public.h"
-
-static idStr			savepath;
+#include "sys/posix/posix_public.h"
 
 #define TEST_FPU_EXCEPTIONS			\
 FPU_EXCEPTION_INVALID_OPERATION |		\
@@ -63,23 +56,24 @@ Sys_EXEPath
 ==============
 */
 const char *Sys_EXEPath( void ) {
-	static char exepath[ 1024 ];
-	strncpy( exepath, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], 1024 );
+	static char exepath[ MAXPATHLEN ];
+	strncpy( exepath, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
 	return exepath;
 }
 
 /*
- ==========
- Sys_DefaultSavePath
- ==========
- */
+==========
+Sys_DefaultSavePath
+==========
+*/
 const char *Sys_DefaultSavePath(void) {
+	static char savepath[ MAXPATHLEN ];
 #if defined( ID_DEMO_BUILD )
 	sprintf( savepath, "%s/Library/Application Support/Doom 3 Demo", [NSHomeDirectory() cString] );
 #else
 	sprintf( savepath, "%s/Library/Application Support/Doom 3", [NSHomeDirectory() cString] );
 #endif
-	return savepath.c_str();
+	return savepath;
 }
 
 /*
@@ -88,12 +82,14 @@ Sys_DefaultBasePath
 ==========
 */
 const char *Sys_DefaultBasePath(void) {
-	static char basepath[ 1024 ];
-	strncpy( basepath, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], 1024 );
+	static char basepath[ MAXPATHLEN ];
+
+	strncpy( basepath, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
 	char *snap = strrchr( basepath, '/' );
 	if ( snap ) {
 		*snap = '\0';
 	}
+
 	return basepath;
 }
 
@@ -103,7 +99,6 @@ Sys_Shutdown
 ===============
 */
 void Sys_Shutdown( void ) {
-	savepath.Clear();
 	Posix_Shutdown();
 }
 
