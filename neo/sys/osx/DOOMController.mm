@@ -46,8 +46,6 @@ If you have questions concerning this license or the applicable additional terms
 #import "framework/Common.h"
 #import "sys/posix/posix_public.h"
 
-#import "DOOMController.h"
-
 static idStr			savepath;
 
 #define TEST_FPU_EXCEPTIONS			\
@@ -58,249 +56,6 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 /* FPU_EXCEPTION_NUMERIC_UNDERFLOW | */		\
 /* FPU_EXCEPTION_INEXACT_RESULT | */		\
 0
-
-@interface DOOMController (Private)
-- (void)quakeMain;
-@end
-
-@implementation DOOMController
-
-/*
-+ (void)initialize;
-{
-	static bool initialized = NO;
-
-	[super initialize];
-	if ( initialized ) {
-		return;
-	}
-	initialized = YES;
-}
-*/
-
-#define MAX_ARGC 1024
-
-#if 0
-// Actions
-
-- (IBAction)paste:(id)sender;
-{
-	int shiftWasDown, insertWasDown;
-	unsigned int currentTime;
-
-	currentTime = Sys_Milliseconds();
-	// Save the original keyboard state
-	shiftWasDown = keys[K_SHIFT].down;
-	insertWasDown = keys[K_INS].down;
-	// Fake a Shift-Insert keyboard event
-	keys[K_SHIFT].down = true;
-	Posix_QueEvent(currentTime, SE_KEY, K_INS, true, 0, NULL);
-	Posix_QueEvent(currentTime, SE_KEY, K_INS, false, 0, NULL);
-	// Restore the original keyboard state
-	keys[K_SHIFT].down = shiftWasDown;
-	keys[K_INS].down = insertWasDown;
-}
-
-extern void CL_Quit_f(void);
-
-
-- (IBAction)requestTerminate:(id)sender;
-{
-	common->Quit();
-}
-
-- (void)showBanner;
-{
-	static bool hasShownBanner = NO;
-
-	if (!hasShownBanner) {
-		//cvar_t *showBanner;
-
-		hasShownBanner = YES;
-		//showBanner = Cvar_Get("cl_showBanner", "1", 0);
-		//if ( showBanner->integer != 0 ) {
-		if ( true ) {
-			NSPanel *splashPanel;
-			NSImage *bannerImage;
-			NSRect bannerRect;
-			NSImageView *bannerImageView;
-
-			bannerImage = [[NSImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForImageResource:@"banner.jpg"]];
-			bannerRect = NSMakeRect(0.0, 0.0, [bannerImage size].width, [bannerImage size].height);
-
-			splashPanel = [[NSPanel alloc] initWithContentRect:bannerRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
-
-			bannerImageView = [[NSImageView alloc] initWithFrame:bannerRect];
-			[bannerImageView setImage:bannerImage];
-			[splashPanel setContentView:bannerImageView];
-			[bannerImageView release];
-
-			[splashPanel center];
-			[splashPanel setHasShadow:YES];
-			[splashPanel orderFront: nil];
-			[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:2.5]];
-			[splashPanel close];
-
-			[bannerImage release];
-		}
-	}
-}
-
-// Services
-
-- (void)connectToServer:(NSPasteboard *)pasteboard userData:(NSString *)data error:(NSString **)error;
-{
-	NSArray *pasteboardTypes;
-
-	pasteboardTypes = [pasteboard types];
-	if ([pasteboardTypes containsObject:NSStringPboardType]) {
-		NSString *requestedServer;
-
-		requestedServer = [pasteboard stringForType:NSStringPboardType];
-		if (requestedServer) {
-			Cbuf_AddText( va( "connect %s\n", [requestedServer cString]));
-			return;
-		}
-	}
-	*error = @"Unable to connect to server:  could not find string on pasteboard";
-}
-
-- (void)performCommand:(NSPasteboard *)pasteboard userData:(NSString *)data error:(NSString **)error;
-{
-	NSArray *pasteboardTypes;
-
-	pasteboardTypes = [pasteboard types];
-	if ([pasteboardTypes containsObject:NSStringPboardType]) {
-		NSString *requestedCommand;
-
-		requestedCommand = [pasteboard stringForType:NSStringPboardType];
-		if (requestedCommand) {
-			Cbuf_AddText(va("%s\n", [requestedCommand cString]));
-			return;
-		}
-	}
-	*error = @"Unable to perform command:  could not find string on pasteboard";
-}
-
-#endif // commented out all the banners and actions
-
-@end
-
-@implementation DOOMController (Private)
-
-- (void)quakeMain
-{
-	NSAutoreleasePool *pool;
-	int argc = 0;
-	char *argv[MAX_ARGC];
-	NSProcessInfo *processInfo;
-	NSArray *arguments;
-	unsigned int argumentIndex, argumentCount;
-	//const char *cddir;
-	//NSFileManager *defaultManager;
-	//bool tryAgain;
-
-	pool = [[NSAutoreleasePool alloc] init];
-
-	[NSApp setServicesProvider:self];
-
-	processInfo = [NSProcessInfo processInfo];
-	arguments = [processInfo arguments];
-	argumentCount = [arguments count];
-	for (argumentIndex = 0; argumentIndex < argumentCount; argumentIndex++) {
-		argv[argc++] = strdup([[arguments objectAtIndex:argumentIndex] cString]);
-	}
-	if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]]) {
-		Sys_Error("Could not access application resources");
-	}
-	//cddir = macosx_scanForLibraryDirectory();
-	/*
-	do {
-		tryAgain = NO;
-		defaultManager = [NSFileManager defaultManager];
-		if (![defaultManager fileExistsAtPath:@"./base/default.cfg"] && (!cddir || *cddir == '\0' || ![defaultManager fileExistsAtPath:[NSString stringWithFormat:@"%s/baseq3/pak0.pk3", cddir]])) {
-			NSString *message;
-
-			if (!cddir || *cddir == '\0') {
-				message = [NSString stringWithFormat:@"Could not find DOOM levels."];
-			} else if (![defaultManager fileExistsAtPath:[NSString stringWithFormat:@"%s", cddir]]) {
-				message = [NSString stringWithFormat:@"Could not find DOOM levels:  '%s' does not exist.", cddir];
-			} else {
-				message = [NSString stringWithFormat:@"Could not find DOOM levels:  '%s' is not a complete DOOM installation.", cddir];
-			}
-			switch (NSRunAlertPanel(@"DOOM", @"%@", @"Quit", @"Find...", nil, message)) {
-				case NSAlertDefaultReturn:
-				default:
-					Sys_Quit();
-					break;
-				case NSAlertAlternateReturn:
-					tryAgain = YES;
-					break;
-			}
-			if (tryAgain) {
-				NSOpenPanel *openPanel;
-				int result;
-
-				openPanel = [NSOpenPanel openPanel];
-				[openPanel setAllowsMultipleSelection:NO];
-				[openPanel setCanChooseDirectories:YES];
-				[openPanel setCanChooseFiles:NO];
-				result = [openPanel runModalForDirectory:nil file:nil];
-				if (result == NSOKButton) {
-					NSArray *filenames;
-
-					filenames = [openPanel filenames];
-					if ([filenames count] == 1) {
-						NSString *cdPath;
-
-						cdPath = [filenames objectAtIndex:0];
-						[[NSUserDefaults standardUserDefaults] setObject:cdPath forKey:@"CDPath"];
-						cddir = strdup([cdPath cString]);
-					}
-				}
-			}
-		}
-	} while (tryAgain);
-	*/
-/*
-	if (cddir && *cddir != '\0') {
-		SetProgramPath([[[NSString stringWithCString:cddir] stringByAppendingPathComponent:@"/x"] cString]);
-	}
-*/
-
-	//Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
-
-	Posix_EarlyInit( );
-
-	// need strncmp, can't use idlib before init
-#undef strncmp
-	// Finder passes the process serial number as only argument after the program path
-	// nuke it if we see it
-	if ( argc > 1 && strncmp( argv[ 1 ], "-psn", 4 ) ) {
-		common->Init( argc-1, &argv[1] );
-	} else {
-		common->Init( 0, NULL );
-	}
-
-	Posix_LateInit( );
-
-	[NSApp activateIgnoringOtherApps:YES];
-
-	while (1) {
-		// maintain exceptions in case system calls are turning them off (is that needed)
-		//Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
-
-		common->Frame();
-
-		// We should think about doing this less frequently than every frame
-		[pool release];
-		pool = [[NSAutoreleasePool alloc] init];
-	}
-
-	[pool release];
-}
-
-@end
 
 /*
 ==============
@@ -591,5 +346,36 @@ main
 ===============
 */
 int main( int argc, char *argv[] ) {
-	return NSApplicationMain( argc, (const char **)argv );
+	NSAutoreleasePool *pool;
+
+	pool = [[NSAutoreleasePool alloc] init];
+
+	if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]])
+		Sys_Error("Could not access application resources");
+
+	//Sys_FPU_EnableExceptions(TEST_FPU_EXCEPTIONS);
+
+	Posix_EarlyInit();
+
+	if (argc > 1)
+		common->Init(argc - 1, &argv[1]);
+	else
+		common->Init(0, NULL);
+
+	Posix_LateInit();
+
+	[NSApp activateIgnoringOtherApps:YES];
+
+	while (1) {
+		// maintain exceptions in case system calls are turning them off (is that needed)
+		//Sys_FPU_EnableExceptions(TEST_FPU_EXCEPTIONS);
+
+		common->Frame();
+
+		// We should think about doing this less frequently than every frame
+		[pool release];
+		pool = [[NSAutoreleasePool alloc] init];
+	}
+
+	[pool release];
 }
