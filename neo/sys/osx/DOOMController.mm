@@ -81,12 +81,6 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 
 #define MAX_ARGC 1024
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
-{
-	common->Quit();
-	return NSTerminateLater;	// we never reach this
-}
-
 #if 0
 // Actions
 
