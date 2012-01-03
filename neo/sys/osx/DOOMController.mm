@@ -61,7 +61,6 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 
 @interface DOOMController (Private)
 - (void)quakeMain;
-- (BOOL)checkOS;
 @end
 
 @implementation DOOMController
@@ -273,16 +272,6 @@ extern void CL_Quit_f(void);
 
 	Posix_EarlyInit( );
 
-#ifndef _DEBUG
-	if ( [self checkOS] == FALSE) {
-		common->Quit();
-	}
-
-	if ( [self checkDVD] == FALSE) {
-		common->Quit();
-	}
-#endif
-
 	// need strncmp, can't use idlib before init
 #undef strncmp
 	// Finder passes the process serial number as only argument after the program path
@@ -309,25 +298,6 @@ extern void CL_Quit_f(void);
 	}
 
 	[pool release];
-}
-
-- (BOOL)checkOS
-{
-	OSErr	err;
-	long gestaltOSVersion;
-	err = Gestalt(gestaltSystemVersion, &gestaltOSVersion);
-	if ( err || gestaltOSVersion < 0x1038 ) {
-		NSBundle *thisBundle = [ NSBundle mainBundle ];
-		NSString *messsage = [ thisBundle localizedStringForKey:@"InsufficientOS" value:@"No translation" table:nil ];
-		NSRunAlertPanel(@GAME_NAME, messsage, nil, nil, nil);
-		return FALSE;
-	}
-	return TRUE;
-}
-
-- (BOOL)checkDVD
-{
-	return TRUE;
 }
 
 @end
