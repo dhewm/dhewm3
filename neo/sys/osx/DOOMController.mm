@@ -81,17 +81,6 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 
 #define MAX_ARGC 1024
 
-- (void)applicationDidFinishLaunching:(NSNotification *)notification;
-{
-	NS_DURING {
-		NSAssert(sizeof(bool) == 1, @"sizeof(bool) should equal 1 byte");
-		[self quakeMain];
-	} NS_HANDLER {
-		Sys_Error( (const char *)[ [ localException reason ] cString ] );
-	} NS_ENDHANDLER;
-	Sys_Quit();
-}
-
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
 	common->Quit();
