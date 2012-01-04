@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_public.h"
 
 const char *kbdNames[] = {
-	"english", "french", "german", "italian", "turkish", NULL
+	"english", "french", "german", "italian", "spanish", "turkish", NULL
 };
 
 idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
@@ -334,6 +334,9 @@ unsigned char Sys_GetConsoleKey(bool shifted) {
 			} else if (!lang.Icmp("italian")) {
 				keys[0] = '\\';
 				keys[1] = '|';
+			} else if (!lang.Icmp("spanish")) {
+				keys[0] = 186; // º
+				keys[1] = 170; // ª
 			} else if (!lang.Icmp("turkish")) {
 				keys[0] = '"';
 				keys[1] = 233; // é
@@ -407,8 +410,18 @@ sysEvent_t Sys_GetEvent() {
 			key = mapkey(ev.key.keysym.sym);
 
 			if (!key) {
-				common->Warning("unmapped SDL key %d", ev.key.keysym.sym);
-				return res_none;
+				unsigned char c;
+
+				// check if its an unmapped console key
+				if (ev.key.keysym.unicode == (c = Sys_GetConsoleKey(false))) {
+					key = c;
+				} else if (ev.key.keysym.unicode == (c = Sys_GetConsoleKey(true))) {
+					key = c;
+				} else {
+					if (ev.type == SDL_KEYDOWN)
+						common->Warning("unmapped SDL key %d (0x%x)", ev.key.keysym.sym, ev.key.keysym.unicode);
+					return res_none;
+				}
 			}
 
 			res.evType = SE_KEY;
