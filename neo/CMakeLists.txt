@@ -70,6 +70,19 @@ if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
+# precompiled libraries from the doom3-libs repo
+if (DOOM3LIBS)
+	if (CMAKE_CROSSCOMPILING)
+		set(CMAKE_FIND_ROOT_PATH ${DOOM3LIBS})
+	else()
+		set(ENV{CMAKE_PREFIX_PATH} ${DOOM3LIBS})
+	endif()
+
+	# these are too stupid, give them a hint
+	set(ENV{OPENALDIR} ${DOOM3LIBS})
+	set(ENV{SDLDIR} ${DOOM3LIBS})
+endif()
+
 # libs
 find_package(JPEG REQUIRED)
 include_directories(${JPEG_INCLUDE_DIR})
