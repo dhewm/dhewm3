@@ -29,26 +29,70 @@ Note that Doom 3 and Doom 3: Resurrection of Evil are available from the Steam s
 http://store.steampowered.com/app/9050/
 http://store.steampowered.com/app/9070/
 
-Compiling on win32:
--------------------
+Compiling
+---------
 
-A project file for Microsoft Visual Studio 2010 is provided in neo\doom.sln
-We expect the solution file is compatible with the Express releases
+The build system is based on CMake: http://cmake.org/
 
-You will need the Microsoft DirectX SDK installed as well.
-If it does not reside in "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)"
-you will need to update the project files accordingly.
+Required libraries are not part of the tree. These are:
+- libjpeg (minimum v6, v8 recommended)
+- libogg
+- libvorbis
+- libvorbisfile (may be part of libvorbis)
+- OpenAL (OpenAL Soft recommended, Creative's and Apple's versions are made of fail)
+- SDL v1.2
+- libcurl (optional, required for server downloads)
 
-Compiling on GNU/Linux x86:
----------------------------
+For UNIX like system these libraries need to be installed (including the
+developer files). It is recommended to use the software management tools of
+your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
 
-The build system on GNU/Linux is based on SCons: http://www.scons.org/
-Issue the scons command in the neo/ folder.
+For Windows there are two options:
+1) Use the provided binaries (recommended, see below)
+2) Compile these libraries yourself
 
-Compiling on MacOS X:
----------------------------
+Create a distinct build folder outside of this source repository and issue
+the cmake command there, pointing it at the neo/ folder from this repository:
+cmake /path/to/repository/neo
 
-XCode 3.2 project is under neo/sys/osx/
+Using the provided Windows binaries:
+------------------------------------
+Get a clone of the latest binaries here: https://github.com/dhewg/doom3-libs
+
+There are two subfolder:
+- 32bit binaries are located in "i686-w64-mingw32"
+- 64bit binaries are located in "x86_64-w64-mingw32"
+
+Issue the appropriate command from the build folder, for example:
+
+cmake -G "Visual Studio 10" -DDOOM3LIBS=/path/to/doom3-libs/i686-w64-mingw32 /path/to/repository/neo
+cmake -G "Visual Studio 10 Win64" -DDOOM3LIBS=/path/to/doom3-libs/x86_64-w64-mingw32 /path/to/repository/neo
+
+The binaries are compatible with mingw-w64 and all MSVC versions.
+
+Cross compiling:
+----------------
+
+For cross compiling a CMake Toolchain file is required.
+For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
+
+< --- cut --- >
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_SYSTEM_PROCESSOR i686)
+
+set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
+set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
+set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
+
+set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+< --- cut --- >
+
+Then point CMake at your Toolchain file:
+cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDOOM3LIBS=/path/to/doom3-libs/i686-w64-mingw32 /path/to/repository/neo
 
 Back End Rendering of Stencil Shadows:
 --------------------------------------
