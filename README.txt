@@ -237,7 +237,6 @@ Copyright (C) 1995-1998 Mark Adler
 OpenGL headers
 ---------------------------------------------------------------------------
 lines	file(s)
-5920	neo/renderer/glext.h
 613		neo/renderer/wglext.h
 
 /*
