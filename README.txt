@@ -63,7 +63,7 @@ Back End Rendering of Stencil Shadows:
 --------------------------------------
 
 The Doom 3 GPL source code release does not include functionality enabling rendering
-of stencil shadows via the “depth fail” method, a functionality commonly known as 
+of stencil shadows via the “depth fail” method, a functionality commonly known as
 "Carmack's Reverse".
 
 MayaImport:
@@ -116,7 +116,7 @@ We specifically permit and encourage the use of this software as the basis of
 commercial products, provided that all warranty or liability claims are
 assumed by the product vendor.
 
-PropTree 
+PropTree
 ---------------------------------------------------------------------------
 neo/tools/common/PropTree/*
 
@@ -126,13 +126,13 @@ http://www.gonavi.com
 
 This material is provided "as is", with absolutely no warranty expressed
 or implied. Any use is at your own risk.
- 
-Permission to use or copy this software for any purpose is hereby granted 
+
+Permission to use or copy this software for any purpose is hereby granted
 without fee, provided the above notices are retained on all copies.
 Permission to modify the code and to distribute modified code is granted,
 provided the above notices are retained, and a notice that the code was
 modified is included with the above copyright notice.
- 
+
 If you use this code, drop me an email.  I'd like to know if you find the code
 useful.
 
@@ -247,21 +247,21 @@ lines	file(s)
 ** this file except in compliance with the License. You may obtain a copy
 ** of the License at Silicon Graphics, Inc., attn: Legal Services, 1600
 ** Amphitheatre Parkway, Mountain View, CA 94043-1351, or at:
-** 
+**
 ** http://oss.sgi.com/projects/FreeB
-** 
+**
 ** Note that, as provided in the License, the Software is distributed on an
 ** "AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS
 ** DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND
 ** CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
 ** PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-** 
+**
 ** Original Code. The Original Code is: OpenGL Sample Implementation,
 ** Version 1.2.1, released January 26, 2000, developed by Silicon Graphics,
 ** Inc. The Original Code is Copyright (c) 1991-2002 Silicon Graphics, Inc.
 ** Copyright in any portions created by third parties is as indicated
 ** elsewhere herein. All Rights Reserved.
-** 
+**
 ** Additional Notice Provisions: This software was created using the
 ** OpenGL(R) version 1.2.1 Sample Implementation published by SGI, but has
 ** not been independently verified as being compliant with the OpenGL(R)
@@ -304,7 +304,7 @@ lines	file(s)
  */
 
 makeself - Make self-extractable archives on Unix
---------------------------------------------------------------------------- 
+---------------------------------------------------------------------------
 neo/sys/linux/setup/makeself/*, neo/sys/linux/setup/makeself/README
 Copyright (c) Stéphane Peter
 Licensing: GPL v2
