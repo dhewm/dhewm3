@@ -667,6 +667,7 @@ elseif (WIN32)
 		sys/win32/win_net.cpp
 		sys/win32/win_shared.cpp
 		sys/win32/win_syscon.cpp
+		sys/win32/SDL_win32_main.c
 	)
 
 	set(src_sys_core
