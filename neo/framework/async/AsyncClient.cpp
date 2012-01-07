@@ -2006,7 +2006,7 @@ void idAsyncClient::HandleDownloads( void ) {
 						idStr fullPath = f->GetFullPath();
 						fileSystem->CloseFile( f );
 						if ( session->MessageBox( MSG_YESNO, common->GetLanguageDict()->GetString ( "#str_04331" ), common->GetLanguageDict()->GetString ( "#str_04332" ), true, "yes" )[0] ) {
-							if ( updateMime == FILE_EXEC ) {
+							if ( updateMime == DL_FILE_EXEC ) {
 								sys->StartProcess( fullPath, true );
 							} else {
 								sys->OpenURL( va( "file://%s", fullPath.c_str() ), true );

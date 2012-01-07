@@ -87,8 +87,8 @@ typedef enum {
 } dlStatus_t;
 
 typedef enum {
-	FILE_EXEC,
-	FILE_OPEN
+	DL_FILE_EXEC,
+	DL_FILE_OPEN
 } dlMime_t;
 
 typedef enum {
