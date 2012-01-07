@@ -201,6 +201,10 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	endif()
 elseif (MSVC)
 	add_definitions(/W4)
+	add_definitions(/wd4100) # unreferenced formal parameter
+	add_definitions(/wd4127) # conditional expression is constant
+	add_definitions(/wd4244) # possible loss of data
+	add_definitions(/wd4245) # signed/unsigned mismatch
 	add_definitions(/wd4714) # 'function' marked as __forceinline not inlined
 	add_definitions(/wd4996) # 'function': was declared deprecated
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
