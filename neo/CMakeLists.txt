@@ -188,7 +188,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			message(FATAL_ERROR "Unsupported CPU architecture for OSX")
 		endif()
 
-		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework OpenAL -framework IOKit")
+		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework IOKit")
 	else()
 		if (cpu STREQUAL "x86" AND X86)
 			add_definitions(-m32)

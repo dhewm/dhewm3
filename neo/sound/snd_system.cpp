@@ -338,6 +338,12 @@ void idSoundSystemLocal::Init() {
 	alcMakeContextCurrent( openalContext );
 	common->Printf( "Done.\n" );
 
+	// log openal info
+	common->Printf( "AL_VERSION: %s\n", alGetString(AL_VERSION));
+	common->Printf( "AL_VENDOR: %s\n", alGetString(AL_VENDOR));
+	common->Printf( "AL_RENDERER: %s\n", alGetString(AL_RENDERER));
+	common->Printf( "AL_EXTENSIONS: %s\n", alGetString(AL_EXTENSIONS));
+
 #if ID_OPENAL_EAX
 	// try to obtain EAX extensions
 	if ( idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent( ID_ALCHAR "EAX4.0" ) ) {
