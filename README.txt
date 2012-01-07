@@ -84,7 +84,7 @@ EXCLUDED CODE:  The code described below and contained in the Doom 3 GPL Source 
 
 JPEG library
 -----------------------------------------------------------------------------
-neo/renderer/jpeg-6/*, renderer/Image_files.cpp
+neo/renderer/jpeg_memory_src.*
 
 This software is copyright (C) 1991-2011, Thomas G. Lane, Guido Vollbeding.
 All Rights Reserved except as specified below.
@@ -107,11 +107,14 @@ These conditions apply to any software derived from or based on the IJG code,
 not just to the unmodified library.  If you use our work, you ought to
 acknowledge us.
 
-NOTE: unfortunately the README that came with our copy of the library has
-been lost, so the one from release 6b is included instead. There are a few
-'glue type' modifications to the library to make it easier to use from
-the engine, but otherwise the dependency can be easily cleaned up to a
-better release of the library.
+Permission is NOT granted for the use of any IJG author's name or company name
+in advertising or publicity relating to this software or products derived from
+it.  This software may be referred to only as "the Independent JPEG Group's
+software".
+
+We specifically permit and encourage the use of this software as the basis of
+commercial products, provided that all warranty or liability claims are
+assumed by the product vendor.
 
 OggVorbis 
 ---------------------------------------------------------------------------

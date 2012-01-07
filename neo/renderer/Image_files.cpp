@@ -28,9 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/platform.h"
 
-#include <jpeglib.h>
-#include <jerror.h>
-
+#include "renderer/jpeg_memory_src.h"
 #include "renderer/tr_local.h"
 
 #include "renderer/Image.h"
@@ -42,42 +40,6 @@ This file only has a single entry point:
 void R_LoadImage( const char *name, byte **pic, int *width, int *height, bool makePowerOf2 );
 
 */
-
-/*
- * Include file for users of JPEG library.
- * You will need to have included system headers that define at least
- * the typedefs FILE and size_t before you can include jpeglib.h.
- * (stdio.h is sufficient on ANSI-conforming systems.)
- * You may also wish to include "jerror.h".
- */
-
-extern "C" {
-	// hooks from jpeg lib to our system
-
-	void jpg_Error( const char *fmt, ... ) {
-		va_list		argptr;
-		char		msg[2048];
-
-		va_start (argptr,fmt);
-		vsprintf (msg,fmt,argptr);
-		va_end (argptr);
-
-		common->FatalError( "%s", msg );
-	}
-
-	void jpg_Printf( const char *fmt, ... ) {
-		va_list		argptr;
-		char		msg[2048];
-
-		va_start (argptr,fmt);
-		vsprintf (msg,fmt,argptr);
-		va_end (argptr);
-
-		common->Printf( "%s", msg );
-	}
-
-}
-
 
 /*
 ================
@@ -788,92 +750,6 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 }
 
 /*
-=========================================================
-
-JPG LOADING
-
-Interfaces with the huge libjpeg
-=========================================================
-*/
-
-#ifdef HAVE_JPEG_MEM_SRC
-#define j_mem_src jpeg_mem_src
-#else
-static void init_mem_source(j_decompress_ptr cinfo)
-{
-	/* no work necessary here */
-}
-
-static boolean fill_mem_input_buffer(j_decompress_ptr cinfo)
-{
-	static JOCTET mybuffer[4];
-
-	/* The whole JPEG data is expected to reside in the supplied memory
-	 * buffer, so any request for more data beyond the given buffer size
-	 * is treated as an error.
-	 */
-	WARNMS(cinfo, JWRN_JPEG_EOF);
-	/* Insert a fake EOI marker */
-	mybuffer[0] = (JOCTET) 0xFF;
-	mybuffer[1] = (JOCTET) JPEG_EOI;
-
-	cinfo->src->next_input_byte = mybuffer;
-	cinfo->src->bytes_in_buffer = 2;
-
-	return TRUE;
-}
-
-static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
-{
-	struct jpeg_source_mgr *src = cinfo->src;
-
-	if (num_bytes > 0) {
-		while (num_bytes > (long)src->bytes_in_buffer) {
-			num_bytes -= (long)src->bytes_in_buffer;
-			(void)(*src->fill_input_buffer) (cinfo);
-			/* note we assume that fill_input_buffer will never return FALSE,
-			 * so suspension need not be handled.
-			 */
-		}
-		src->next_input_byte += (size_t)num_bytes;
-		src->bytes_in_buffer -= (size_t)num_bytes;
-	}
-}
-
-static void term_source(j_decompress_ptr cinfo)
-{
-	/* no work necessary here */
-}
-
-static void j_mem_src(j_decompress_ptr cinfo, unsigned char *inbuffer, unsigned long insize)
-{
-	struct jpeg_source_mgr *src;
-
-	if (inbuffer == NULL || insize == 0)	/* Treat empty input as fatal error */
-		ERREXIT(cinfo, JERR_INPUT_EMPTY);
-
-	/* The source object is made permanent so that a series of JPEG images
-	 * can be read from the same buffer by calling jpeg_mem_src only before
-	 * the first one.
-	 */
-	if (cinfo->src == NULL) {	/* first time for this JPEG object? */
-		cinfo->src = (struct jpeg_source_mgr *)
-			(*cinfo->mem->alloc_small)((j_common_ptr)cinfo, JPOOL_PERMANENT,
-										sizeof(struct jpeg_source_mgr));
-	}
-
-	src = cinfo->src;
-	src->init_source = init_mem_source;
-	src->fill_input_buffer = fill_mem_input_buffer;
-	src->skip_input_data = skip_input_data;
-	src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
-	src->term_source = term_source;
-	src->bytes_in_buffer = (size_t)insize;
-	src->next_input_byte = (JOCTET *)inbuffer;
-}
-#endif
-
-/*
 =============
 LoadJPG
 =============
@@ -948,7 +824,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
   /* Step 2: specify data source (eg, a file) */
 
-  j_mem_src(&cinfo, fbuffer, len);
+  jpeg_memory_src(&cinfo, fbuffer, len);
 
   /* Step 3: read file parameters with jpeg_read_header() */
 

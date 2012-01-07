@@ -235,6 +235,7 @@ endif()
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}.${cpu}")
 
 set(src_renderer
+	renderer/jpeg_memory_src.cpp
 	renderer/Cinematic.cpp
 	renderer/GuiModel.cpp
 	renderer/Image_files.cpp
