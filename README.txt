@@ -269,11 +269,6 @@ lines	file(s)
 ** version 1.2.1 Specification.
 */
 
-OSS headers
----------------------------------------------------------------------------
-neo/sys/linux/oss/*
-Copyright by 4Front Technologies 1993-2004
-
 Brandelf utility
 ---------------------------------------------------------------------------
 lines	file(s)
