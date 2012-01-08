@@ -58,9 +58,6 @@ void	Win_SetErrorText( const char *text );
 const unsigned char *Win_GetScanTable( void );
 int		Win_MapKey (int key);
 
-// window procedure
-LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 void Conbuf_AppendText( const char *msg );
 
 struct Win32Vars_t {
