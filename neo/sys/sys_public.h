@@ -176,10 +176,6 @@ int				Sys_GetVideoRam( void );
 // returns amount of drive space in path
 int				Sys_GetDriveFreeSpace( const char *path );
 
-// returns memory stats
-void			Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats );
-void			Sys_GetExeLaunchMemoryStatus( sysMemoryStats_t &stats );
-
 // lock and unlock memory
 bool			Sys_LockMemory( void *ptr, int bytes );
 bool			Sys_UnlockMemory( void *ptr, int bytes );

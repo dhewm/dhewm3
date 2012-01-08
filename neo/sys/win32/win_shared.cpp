@@ -75,49 +75,6 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 	return ret;
 }
 
-
-/*
-================
-Sys_GetCurrentMemoryStatus
-
-	returns OS mem info
-	all values are in kB except the memoryload
-================
-*/
-void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
-	MEMORYSTATUSEX statex;
-	unsigned __int64 work;
-
-	memset( &statex, 0, sizeof( statex ) );
-	statex.dwLength = sizeof( statex );
-	GlobalMemoryStatusEx( &statex );
-
-	memset( &stats, 0, sizeof( stats ) );
-
-	stats.memoryLoad = statex.dwMemoryLoad;
-
-	work = statex.ullTotalPhys >> 20;
-	stats.totalPhysical = *(int*)&work;
-
-	work = statex.ullAvailPhys >> 20;
-	stats.availPhysical = *(int*)&work;
-
-	work = statex.ullAvailPageFile >> 20;
-	stats.availPageFile = *(int*)&work;
-
-	work = statex.ullTotalPageFile >> 20;
-	stats.totalPageFile = *(int*)&work;
-
-	work = statex.ullTotalVirtual >> 20;
-	stats.totalVirtual = *(int*)&work;
-
-	work = statex.ullAvailVirtual >> 20;
-	stats.availVirtual = *(int*)&work;
-
-	work = statex.ullAvailExtendedVirtual >> 20;
-	stats.availExtendedVirtual = *(int*)&work;
-}
-
 /*
 ================
 Sys_LockMemory
