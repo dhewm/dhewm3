@@ -36,8 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_public.h"
 
-#ifdef NO_SSE
-#undef NO_SSE
+#ifdef NO_CPUID
+#undef NO_CPUID
 #endif
 
 #if defined(__GNUC__)
@@ -210,7 +210,7 @@ int Sys_GetProcessorId( void ) {
 	if (SDL_HasSSE2())
 		flags |= CPUID_SSE2;
 
-#ifndef NO_SSE
+#ifndef NO_CPUID
 	// there is no SDL_HasSSE3() in SDL 1.2
 	if (HasSSE3())
 		flags |= CPUID_SSE3;
