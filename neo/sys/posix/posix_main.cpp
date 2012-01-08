@@ -386,16 +386,6 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 }
 
 /*
-================
-Sys_AlreadyRunning
-return true if there is a copy of D3 running already
-================
-*/
-bool Sys_AlreadyRunning( void ) {
-	return false;
-}
-
-/*
 ===============
 Posix_EarlyInit
 ===============

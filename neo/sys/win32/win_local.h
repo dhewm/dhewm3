@@ -81,7 +81,6 @@ struct Win32Vars_t {
 	static idCVar	win_outputDebugString;
 	static idCVar	win_outputEditString;
 	static idCVar	win_viewlog;
-	static idCVar	win_allowMultipleInstances;
 };
 
 extern Win32Vars_t	win32;

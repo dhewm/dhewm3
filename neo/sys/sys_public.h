@@ -123,8 +123,6 @@ void			Sys_Shutdown( void );
 void			Sys_Error( const char *error, ...);
 void			Sys_Quit( void );
 
-bool			Sys_AlreadyRunning( void );
-
 // note that this isn't journaled...
 char *			Sys_GetClipboardData( void );
 void			Sys_SetClipboardData( const char *string );

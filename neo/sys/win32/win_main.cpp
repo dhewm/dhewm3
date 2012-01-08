@@ -55,7 +55,6 @@ If you have questions concerning this license or the applicable additional terms
 idCVar Win32Vars_t::win_outputDebugString( "win_outputDebugString", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_outputEditString( "win_outputEditString", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_viewlog( "win_viewlog", "0", CVAR_SYSTEM | CVAR_INTEGER, "" );
-idCVar Win32Vars_t::win_allowMultipleInstances( "win_allowMultipleInstances", "0", CVAR_SYSTEM | CVAR_BOOL, "allow multiple instances running concurrently" );
 
 Win32Vars_t	win32;
 
@@ -438,25 +437,6 @@ void Sys_DLL_Unload( uintptr_t dllHandle ) {
 		);
 		Sys_Error( "Sys_DLL_Unload: FreeLibrary failed - %s (%d)", lpMsgBuf, lastError );
 	}
-}
-
-/*
-================
-Sys_AlreadyRunning
-
-returns true if there is a copy of D3 running already
-================
-*/
-bool Sys_AlreadyRunning( void ) {
-#ifndef DEBUG
-	if ( !win32.win_allowMultipleInstances.GetBool() ) {
-		HANDLE hMutexOneInstance = ::CreateMutex( NULL, FALSE, "DOOM3" );
-		if ( ::GetLastError() == ERROR_ALREADY_EXISTS || ::GetLastError() == ERROR_ACCESS_DENIED ) {
-			return true;
-		}
-	}
-#endif
-	return false;
 }
 
 /*

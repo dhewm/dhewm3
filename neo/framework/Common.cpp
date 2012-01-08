@@ -2798,10 +2798,6 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		// override cvars from command line
 		StartupVariable( NULL, false );
 
-		if ( !idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning() ) {
-			Sys_Quit();
-		}
-
 		// initialize processor specific SIMD implementation
 		InitSIMD();
 
