@@ -336,13 +336,6 @@ void Sys_SetClipboardData( const char *string ) {
 	Sys_Printf( "TODO: Sys_SetClipboardData\n" );
 }
 
-
-// stub pretty much everywhere - heavy calling
-void Sys_FlushCacheMemory(void *base, int bytes)
-{
-//  Sys_Printf("Sys_FlushCacheMemory stub\n");
-}
-
 bool Sys_FPU_StackIsEmpty( void ) {
 	return true;
 }
