@@ -276,7 +276,10 @@ int Sys_GetVideoRam() {
 
 	common->Printf("guessing video ram (use +set sys_videoRam to force)\n");
 
-	const SDL_VideoInfo *vi = SDL_GetVideoInfo();
+	Uint32 vram = SDL_GetVideoInfo()->video_mem;
 
-	return vi->video_mem;
+	if (!vram)
+		vram = 64;
+
+	return vram;
 }
