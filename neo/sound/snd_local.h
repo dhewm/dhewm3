@@ -33,15 +33,18 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _WIN32
 #include <al.h>
 #include <alc.h>
+#include <alext.h>
 // broken OpenAL SDK ?
 #define ID_ALCHAR (ALubyte *)
 #elif defined( MACOS_X )
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
+#include <OpenAL/alext.h>
 #define ID_ALCHAR
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <AL/alext.h>
 #define ID_ALCHAR
 #endif
 
@@ -595,7 +598,8 @@ public:
 	idVec3					listenerQU;			// position in "quake units"
 	int						listenerArea;
 	idStr					listenerAreaName;
-	int						listenerEnvironmentID;
+	ALuint					listenerEffect;
+	ALuint					listenerSlot;
 
 	int						gameMsec;
 	int						game44kHz;
@@ -679,7 +683,7 @@ public:
 
 	virtual void			PrintMemInfo( MemInfo_t *mi );
 
-	virtual int				IsEAXAvailable( void );
+	virtual int				IsEFXAvailable( void );
 
 	//-------------------------
 
@@ -725,19 +729,22 @@ public:
 	ALCcontext				*openalContext;
 	ALsizei					openalSourceCount;
 	openalSource_t			openalSources[256];
-#if ID_OPENAL_EAX
-	EAXSet					alEAXSet;
-	EAXGet					alEAXGet;
-	EAXSetBufferMode		alEAXSetBufferMode;
-	EAXGetBufferMode		alEAXGetBufferMode;
-#endif
+
+	LPALGENEFFECTS			alGenEffects;
+	LPALDELETEEFFECTS		alDeleteEffects;
+	LPALEFFECTI				alEffecti;
+	LPALEFFECTF				alEffectf;
+	LPALEFFECTFV			alEffectfv;
+	LPALGENAUXILIARYEFFECTSLOTS		alGenAuxiliaryEffectSlots;
+	LPALDELETEAUXILIARYEFFECTSLOTS	alDeleteAuxiliaryEffectSlots;
+	LPALAUXILIARYEFFECTSLOTI		alAuxiliaryEffectSloti;
+
 	idEFXFile				EFXDatabase;
 	bool					efxloaded;
 							// latches
-	static bool				useEAXReverb;
+	static bool				useEFXReverb;
 							// mark available during initialization, or through an explicit test
-	static int				EAXAvailable;
-
+	static int				EFXAvailable;
 
 	static idCVar			s_noSound;
 	static idCVar			s_quadraticFalloff;
@@ -767,7 +774,6 @@ public:
 	static idCVar			s_libOpenAL;
 	static idCVar			s_useOpenAL;
 	static idCVar			s_useEAXReverb;
-	static idCVar			s_muteEAXReverb;
 	static idCVar			s_decompressionLimit;
 
 	static idCVar			s_slowAttenuate;

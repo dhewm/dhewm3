@@ -4,62 +4,35 @@
 #ifndef __EFXLIBH
 #define __EFXLIBH
 
-#if ID_OPENAL_EAX
-#include <eax4.h>
-#endif
-
 #include "idlib/containers/List.h"
 #include "idlib/Str.h"
 #include "idlib/Lexer.h"
 #include "idlib/Heap.h"
 #include "sound/sound.h"
 
-///////////////////////////////////////////////////////////
-// Class definitions.
-class idSoundEffect
-{
-public:
-	idSoundEffect() {
-	};
-	~idSoundEffect() {
-		if ( data && datasize ) {
-			Mem_Free( data );
-			data = NULL;
-		}
-	}
+struct idSoundEffect {
+	idSoundEffect();
+	~idSoundEffect();
+
+	bool alloc();
 
 	idStr name;
-	int datasize;
-	void *data;
+	ALuint effect;
 };
 
-class idEFXFile
-{
-private:
-
-protected:
-    // Protected data members.
-
-public:
-    // Public data members.
-
-private:
-
+class idEFXFile {
 public:
 	idEFXFile();
 	~idEFXFile();
 
-	bool FindEffect( idStr &name, idSoundEffect **effect, int *index );
-	bool ReadEffect( idLexer &lexer, idSoundEffect *effect );
+	bool FindEffect( idStr &name, ALuint *effect );
 	bool LoadFile( const char *filename, bool OSPath = false );
-	void UnloadFile( void );
 	void Clear( void );
+
+private:
+	bool ReadEffect( idLexer &lexer, idSoundEffect *effect );
 
 	idList<idSoundEffect *>effects;
 };
-///////////////////////////////////////////////////////////
-
-
-
 
 #endif // __EFXLIBH

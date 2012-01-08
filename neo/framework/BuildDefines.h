@@ -104,10 +104,6 @@ If you have questions concerning this license or the applicable additional terms
 #	endif
 #endif
 
-#ifndef ID_OPENAL_EAX
-#	define ID_OPENAL_EAX 0
-#endif
-
 // async network
 
 /*

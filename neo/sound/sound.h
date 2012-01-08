@@ -341,8 +341,8 @@ public:
 	// prints memory info
 	virtual void			PrintMemInfo( MemInfo_t *mi ) = 0;
 
-	// is EAX support present - -1: disabled at compile time, 0: no suitable hardware, 1: ok, 2: failed to load OpenAL DLL
-	virtual int				IsEAXAvailable( void ) = 0;
+	// is EFX support present - -1: disabled at compile time, 0: no suitable hardware, 1: ok
+	virtual int				IsEFXAvailable( void ) = 0;
 };
 
 extern idSoundSystem	*soundSystem;

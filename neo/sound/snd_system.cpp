@@ -69,22 +69,19 @@ idCVar idSoundSystemLocal::s_enviroSuitVolumeScale( "s_enviroSuitVolumeScale", "
 idCVar idSoundSystemLocal::s_skipHelltimeFX( "s_skipHelltimeFX", "0", CVAR_SOUND | CVAR_BOOL, "" );
 
 #if ID_OPENAL
-// off by default. OpenAL DLL gets loaded on-demand
 idCVar idSoundSystemLocal::s_libOpenAL( "s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "Deprecated, kept for compability" );
 idCVar idSoundSystemLocal::s_useOpenAL( "s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "Deprecated, kept for compability" );
-idCVar idSoundSystemLocal::s_useEAXReverb( "s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EAX reverb" );
-idCVar idSoundSystemLocal::s_muteEAXReverb( "s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL, "mute eax reverb" );
+idCVar idSoundSystemLocal::s_useEAXReverb( "s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EFX reverb" );
 idCVar idSoundSystemLocal::s_decompressionLimit( "s_decompressionLimit", "6", CVAR_SOUND | CVAR_INTEGER | CVAR_ARCHIVE, "specifies maximum uncompressed sample length in seconds" );
 #else
 idCVar idSoundSystemLocal::s_libOpenAL( "s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL is not supported in this build" );
 idCVar idSoundSystemLocal::s_useOpenAL( "s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "OpenAL is not supported in this build" );
-idCVar idSoundSystemLocal::s_useEAXReverb( "s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "EAX not available in this build" );
-idCVar idSoundSystemLocal::s_muteEAXReverb( "s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "mute eax reverb" );
+idCVar idSoundSystemLocal::s_useEAXReverb( "s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "EFX not available in this build" );
 idCVar idSoundSystemLocal::s_decompressionLimit( "s_decompressionLimit", "6", CVAR_SOUND | CVAR_INTEGER | CVAR_ROM, "specifies maximum uncompressed sample length in seconds" );
 #endif
 
-bool idSoundSystemLocal::useEAXReverb = false;
-int idSoundSystemLocal::EAXAvailable = -1;
+bool idSoundSystemLocal::useEFXReverb = false;
+int idSoundSystemLocal::EFXAvailable = -1;
 
 idSoundSystemLocal	soundSystemLocal;
 idSoundSystem	*soundSystem  = &soundSystemLocal;
@@ -161,9 +158,6 @@ void ListSounds_f( const idCmdArgs &args ) {
 	common->Printf( "%8d total sounds\n", totalSounds );
 	common->Printf( "%8d total samples loaded\n", totalSamples );
 	common->Printf( "%8d kB total system memory used\n", totalMemory >> 10 );
-#if ID_OPENAL
-	common->Printf( "%8d kB total OpenAL audio memory used\n", ( alGetInteger( alGetEnumValue( "AL_EAX_RAM_SIZE" ) ) - alGetInteger( alGetEnumValue( "AL_EAX_RAM_FREE" ) ) ) >> 10 );
-#endif
 }
 
 /*
@@ -330,9 +324,9 @@ void idSoundSystemLocal::Init() {
 
 	// set up openal device and context
 	common->StartupVariable( "s_useOpenAL", true );
-	common->StartupVariable( "s_useEAXReverb", true );
 
 	common->Printf( "Setup OpenAL device and context... " );
+
 	openalDevice = alcOpenDevice( NULL );
 	openalContext = alcCreateContext( openalDevice, NULL );
 	alcMakeContextCurrent( openalContext );
@@ -344,38 +338,33 @@ void idSoundSystemLocal::Init() {
 	common->Printf( "AL_RENDERER: %s\n", alGetString(AL_RENDERER));
 	common->Printf( "AL_EXTENSIONS: %s\n", alGetString(AL_EXTENSIONS));
 
-#if ID_OPENAL_EAX
-	// try to obtain EAX extensions
-	if ( idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent( ID_ALCHAR "EAX4.0" ) ) {
-		alEAXSet = (EAXSet)alGetProcAddress( ID_ALCHAR "EAXSet" );
-		alEAXGet = (EAXGet)alGetProcAddress( ID_ALCHAR "EAXGet" );
-		common->Printf( "OpenAL: found EAX 4.0 extension\n" );
-		EAXAvailable = 1;
-	} else {
-		common->Printf( "OpenAL: EAX 4.0 extension not found\n" );
-		idSoundSystemLocal::s_useEAXReverb.SetBool( false );
-		alEAXSet = (EAXSet)NULL;
-		alEAXGet = (EAXGet)NULL;
-		EAXAvailable = 0;
-	}
-#else
-	common->Printf("OpenAL: EAX 4.0 not supported in this build\n");
-	idSoundSystemLocal::s_useEAXReverb.SetBool( false );
-	EAXAvailable = 0;
-#endif
+	// try to obtain EFX extensions
+	if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
+		common->Printf( "OpenAL: found EFX extension\n" );
+		EFXAvailable = 1;
 
-#if ID_OPENAL_EAX
-	// try to obtain EAX-RAM extension - not required for operation
-	if ( alIsExtensionPresent( ID_ALCHAR "EAX-RAM" ) == AL_TRUE ) {
-		alEAXSetBufferMode = (EAXSetBufferMode)alGetProcAddress( ID_ALCHAR "EAXSetBufferMode" );
-		alEAXGetBufferMode = (EAXGetBufferMode)alGetProcAddress( ID_ALCHAR "EAXGetBufferMode" );
-		common->Printf( "OpenAL: found EAX-RAM extension, %dkB\\%dkB\n", alGetInteger( alGetEnumValue( ID_ALCHAR "AL_EAX_RAM_FREE" ) ) / 1024, alGetInteger( alGetEnumValue( ID_ALCHAR "AL_EAX_RAM_SIZE" ) ) / 1024 );
+		alGenEffects = (LPALGENEFFECTS)alGetProcAddress("alGenEffects");
+		alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress("alDeleteEffects");
+		alEffecti = (LPALEFFECTI)alGetProcAddress("alEffecti");
+		alEffectf = (LPALEFFECTF)alGetProcAddress("alEffectf");
+		alEffectfv = (LPALEFFECTFV)alGetProcAddress("alEffectfv");
+		alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
+		alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
+		alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress("alAuxiliaryEffectSloti");
 	} else {
-		alEAXSetBufferMode = (EAXSetBufferMode)NULL;
-		alEAXGetBufferMode = (EAXGetBufferMode)NULL;
-		common->Printf( "OpenAL: no EAX-RAM extension\n" );
+		common->Printf( "OpenAL: EFX extension not found\n" );
+		EFXAvailable = 0;
+		idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+
+		alGenEffects = NULL;
+		alDeleteEffects = NULL;
+		alEffecti = NULL;
+		alEffectf = NULL;
+		alEffectfv = NULL;
+		alGenAuxiliaryEffectSlots = NULL;
+		alDeleteAuxiliaryEffectSlots = NULL;
+		alAuxiliaryEffectSloti = NULL;
 	}
-#endif
 
 	ALuint handle;
 	openalSourceCount = 0;
@@ -403,11 +392,13 @@ void idSoundSystemLocal::Init() {
 
 	common->Printf( "OpenAL: found %s\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
 	common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
+	common->Printf( "ALC_EXTENSIONS: %s\n", alcGetString(openalDevice, ALC_EXTENSIONS));
 
 	// adjust source count to allow for at least eight stereo sounds to play
 	openalSourceCount -= 8;
 
-	useEAXReverb = idSoundSystemLocal::s_useEAXReverb.GetBool();
+	useEFXReverb = idSoundSystemLocal::s_useEAXReverb.GetBool();
+	efxloaded = false;
 
 	cmdSystem->AddCommand( "listSounds", ListSounds_f, CMD_FL_SOUND, "lists all sounds" );
 	cmdSystem->AddCommand( "listSoundDecoders", ListSoundDecoders_f, CMD_FL_SOUND, "list active sound decoders" );
@@ -427,7 +418,7 @@ idSoundSystemLocal::Shutdown
 void idSoundSystemLocal::Shutdown() {
 	ShutdownHW();
 
-	// EAX or not, the list needs to be cleared
+	// EFX or not, the list needs to be cleared
 	EFXDatabase.Clear();
 
 	efxloaded = false;
@@ -991,7 +982,7 @@ void idSoundSystemLocal::BeginLevelLoad() {
 	soundCache->BeginLevelLoad();
 
 	if ( efxloaded ) {
-		EFXDatabase.UnloadFile();
+		EFXDatabase.Clear();
 		efxloaded = false;
 	}
 }
@@ -1007,7 +998,9 @@ void idSoundSystemLocal::EndLevelLoad( const char *mapstring ) {
 	}
 	soundCache->EndLevelLoad();
 
-#if ID_OPENAL_EAX
+	if (!useEFXReverb)
+		return;
+
 	idStr efxname( "efxs/" );
 	idStr mapname( mapstring );
 
@@ -1022,7 +1015,6 @@ void idSoundSystemLocal::EndLevelLoad( const char *mapstring ) {
 	} else {
 		common->Printf("sound: missing %s\n", efxname.c_str() );
 	}
-#endif
 }
 
 /*
@@ -1120,13 +1112,7 @@ void idSoundSystemLocal::FreeOpenALSource( ALuint handle ) {
 			if ( openalSources[i].chan ) {
 				openalSources[i].chan->openalSource = 0;
 			}
-#if ID_OPENAL_EAX
-			// Reset source EAX ROOM level when freeing stereo source
-			if ( openalSources[i].stereo && alEAXSet ) {
-				long Room = EAXSOURCE_DEFAULTROOM;
-				alEAXSet( &EAXPROPERTYID_EAX_Source, EAXSOURCE_ROOM, openalSources[i].handle, &Room, sizeof(Room));
-			}
-#endif
+
 			// Initialize structure
 			openalSources[i].startTime = 0;
 			openalSources[i].chan = NULL;
@@ -1300,35 +1286,13 @@ void idSoundSystemLocal::PrintMemInfo( MemInfo_t *mi ) {
 
 /*
 ===============
-idSoundSystemLocal::IsEAXAvailable
+idSoundSystemLocal::IsEFXAvailable
 ===============
 */
-int idSoundSystemLocal::IsEAXAvailable( void ) {
-#if !ID_OPENAL || !ID_OPENAL_EAX
+int idSoundSystemLocal::IsEFXAvailable( void ) {
+#if !ID_OPENAL
 	return -1;
 #else
-	ALCdevice	*device;
-	ALCcontext	*context;
-
-	if ( EAXAvailable != -1 ) {
-		return EAXAvailable;
-	}
-
-	// when dynamically loading the OpenAL subsystem, we need to get a context before alIsExtensionPresent would work
-	device = alcOpenDevice( NULL );
-	context = alcCreateContext( device, NULL );
-	alcMakeContextCurrent( context );
-	if ( alIsExtensionPresent( ID_ALCHAR "EAX4.0" ) ) {
-		alcMakeContextCurrent( NULL );
-		alcDestroyContext( context );
-		alcCloseDevice( device );
-		EAXAvailable = 1;
-		return 1;
-	}
-	alcMakeContextCurrent( NULL );
-	alcDestroyContext( context );
-	alcCloseDevice( device );
-	EAXAvailable = 0;
-	return 0;
+	return EFXAvailable;
 #endif
 }
