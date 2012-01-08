@@ -13,7 +13,7 @@ conf_filename='site.conf'
 # choose configuration variables which should be saved between runs
 # ( we handle all those as strings )
 serialized=['CC', 'CXX', 'X86', 'BUILD', 'IDNET_HOST', 'DEDICATED',
-	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK',
+	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS' ]
 
@@ -102,13 +102,6 @@ ID_NOLANADDRESS (default 0)
 	Don't recognize any IP as LAN address. This is useful when debugging network
 	code where LAN / not LAN influences application behaviour
 
-ID_MCHECK (default 2)
-	Perform heap consistency checking
-	0: on in Debug / off in Release
-	1 forces on, 2 forces off
-	note that Doom has it's own block allocator/checking
-	this should not be considered a replacement, but an additional tool
-
 SETUP (default 0, not saved)
 	build a setup. implies release build
 
@@ -171,7 +164,6 @@ IDNET_HOST = ''
 DEBUG_MEMORY = '0'
 LIBC_MALLOC = '1'
 ID_NOLANADDRESS = '0'
-ID_MCHECK = '2'
 BUILD_ROOT = 'build'
 SETUP = '0'
 SDK = '0'
@@ -297,12 +289,8 @@ if ( g_sdk or SDK != '0' ):
 
 if ( BUILD == 'debug-all' ):
 	OPTCPPFLAGS = [ '-g', '-D_DEBUG' ]
-	if ( ID_MCHECK == '0' ):
-		ID_MCHECK = '1'
 elif ( BUILD == 'debug' ):
 	OPTCPPFLAGS = [ '-g', '-O1', '-D_DEBUG' ]
-	if ( ID_MCHECK == '0' ):
-		ID_MCHECK = '1'
 elif ( BUILD == 'release' ):
 	# -fomit-frame-pointer: "-O also turns on -fomit-frame-pointer on machines where doing so does not interfere with debugging."
 	#   on x86 have to set it explicitely
@@ -313,8 +301,6 @@ elif ( BUILD == 'release' ):
 	if (g_cpu == 'x86'):
 		OPTCPPFLAGS.append('-march=pentium3')
 
-	if ( ID_MCHECK == '0' ):
-		ID_MCHECK = '2'
 else:
 	print 'Unknown build configuration ' + BUILD
 	sys.exit(0)
@@ -330,9 +316,6 @@ if ( len( IDNET_HOST ) ):
 
 if ( ID_NOLANADDRESS != '0' ):
 	CORECPPFLAGS.append( '-DID_NOLANADDRESS' )
-
-if ( ID_MCHECK == '1' ):
-	BASECPPFLAGS.append( '-DID_MCHECK' )
 
 # TODO fix these warnings
 BASECPPFLAGS.append('-Wno-sign-compare')
@@ -377,7 +360,7 @@ local_idlibpic = 0
 # switch between base game build and d3xp game build
 local_d3xp = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os g_cpu g_build ID_MCHECK idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os g_cpu g_build idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp OPTCPPFLAGS'
 
 # end general configuration ----------------------
 

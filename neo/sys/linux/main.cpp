@@ -32,10 +32,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/types.h>
 #include <fcntl.h>
 
-#ifdef ID_MCHECK
-#include <mcheck.h>
-#endif
-
 #include <SDL_main.h>
 
 #include "sys/platform.h"
@@ -285,40 +281,10 @@ void idSysLocal::OpenURL( const char *url, bool quit ) {
 
 /*
 ===============
-mem consistency stuff
-===============
-*/
-
-#ifdef ID_MCHECK
-
-const char *mcheckstrings[] = {
-	"MCHECK_DISABLED",
-	"MCHECK_OK",
-	"MCHECK_FREE",	// block freed twice
-	"MCHECK_HEAD",	// memory before the block was clobbered
-	"MCHECK_TAIL"	// memory after the block was clobbered
-};
-
-void abrt_func( mcheck_status status ) {
-	Sys_Printf( "memory consistency failure: %s\n", mcheckstrings[ status + 1 ] );
-	Posix_SetExit( EXIT_FAILURE );
-	common->Quit();
-}
-
-#endif
-
-/*
-===============
 main
 ===============
 */
 int main(int argc, char **argv) {
-#ifdef ID_MCHECK
-	// must have -lmcheck linkage
-	mcheck( abrt_func );
-	Sys_Printf( "memory consistency checking enabled\n" );
-#endif
-
 	Posix_EarlyInit( );
 
 	if ( argc > 1 ) {
