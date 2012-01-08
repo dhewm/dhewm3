@@ -27,8 +27,13 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "sys/platform.h"
+#include "idlib/math/Math.h"
 
 #include "sound/snd_local.h"
+
+static inline ALdouble mB_to_gain(ALdouble millibels) {
+	return idMath::Pow(10.0, millibels / 2000.0);
+}
 
 idSoundEffect::idSoundEffect() :
 	effect(0) {
@@ -148,17 +153,19 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 		// http://repo.or.cz/w/dsound-openal.git/blob/HEAD:/primary.c#l1795
 		// which are marked with a FIXME, so this is maybe not 100% correct
 		if ( token == "environment" ) {
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_GAIN, src.ParseInt());
+			// <+KittyCat> the "environment" token should be ignored (efx has nothing equatable to it)
+			src.ParseInt();
 		} else if ( token == "environment size" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DENSITY, src.ParseFloat());
+			float size = src.ParseFloat();
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DENSITY, ((size < 2.0f) ? (size - 1.0f) : 1.0f));
 		} else if ( token == "environment diffusion" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DIFFUSION, src.ParseFloat());
 		} else if ( token == "room" ) {
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_GAIN, src.ParseInt());
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_GAIN, mB_to_gain(src.ParseInt()));
 		} else if ( token == "room hf" ) {
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_GAINHF, src.ParseInt());
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_GAINHF, mB_to_gain(src.ParseInt()));
 		} else if ( token == "room lf" ) {
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_GAINLF, src.ParseInt());
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_GAINLF, mB_to_gain(src.ParseInt()));
 		} else if ( token == "decay time" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DECAY_TIME, src.ParseFloat());
 		} else if ( token == "decay hf ratio" ) {
@@ -166,7 +173,7 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 		} else if ( token == "decay lf ratio" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DECAY_LFRATIO, src.ParseFloat());
 		} else if ( token == "reflections" ) {
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_REFLECTIONS_GAIN, src.ParseInt());
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_REFLECTIONS_GAIN, mB_to_gain(src.ParseInt()));
 		} else if ( token == "reflections delay" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_REFLECTIONS_DELAY, src.ParseFloat());
 		} else if ( token == "reflections pan" ) {
@@ -176,7 +183,7 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 			fv[2] = src.ParseFloat();
 			soundSystemLocal.alEffectfv(e, AL_EAXREVERB_REFLECTIONS_PAN, fv);
 		} else if ( token == "reverb" ) {
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_LATE_REVERB_GAIN, src.ParseInt());
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_LATE_REVERB_GAIN, mB_to_gain(src.ParseInt()));
 		} else if ( token == "reverb delay" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_LATE_REVERB_DELAY, src.ParseFloat());
 		} else if ( token == "reverb pan" ) {
@@ -194,7 +201,7 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 		} else if ( token == "modulation depth" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_MODULATION_DEPTH, src.ParseFloat());
 		} else if ( token == "air absorption hf" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, src.ParseFloat());
+			soundSystemLocal.alEffectf(e, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, mB_to_gain(src.ParseFloat()));
 		} else if ( token == "hf reference" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_HFREFERENCE, src.ParseFloat());
 		} else if ( token == "lf reference" ) {
@@ -202,7 +209,11 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 		} else if ( token == "room rolloff factor" ) {
 			soundSystemLocal.alEffectf(e, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, src.ParseFloat());
 		} else if ( token == "flags" ) {
-			src.ParseInt(); // TODO no idea what to do with this
+			src.ReadTokenOnLine( &token );
+			unsigned int flags = token.GetUnsignedLongValue();
+
+			soundSystemLocal.alEffecti(e, AL_EAXREVERB_DECAY_HFLIMIT, (flags & 0x20) ? AL_TRUE : AL_FALSE);
+			// the other SCALE flags have no equivalent in efx
 		} else {
 			src.ReadTokenOnLine( &token );
 			src.Error( "idEFXFile::ReadEffect: Invalid parameter in reverb definition" );
