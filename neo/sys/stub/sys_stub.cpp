@@ -122,10 +122,6 @@ sysEvent_t	Sys_GetEvent( void ) {
 void	Sys_Mkdir( const char *path ) {
 }
 
-const char *Sys_DefaultCDPath(void) {
-	return "";
-}
-
 const char *Sys_DefaultBasePath(void) {
 	return "";
 }

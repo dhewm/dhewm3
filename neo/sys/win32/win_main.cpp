@@ -253,15 +253,6 @@ const char *Sys_Cwd( void ) {
 
 /*
 ==============
-Sys_DefaultCDPath
-==============
-*/
-const char *Sys_DefaultCDPath( void ) {
-	return "";
-}
-
-/*
-==============
 Sys_DefaultBasePath
 ==============
 */

@@ -2857,9 +2857,6 @@ void idFileSystemLocal::Init( void ) {
 	if ( fs_savepath.GetString()[0] == '\0' ) {
 		fs_savepath.SetString( Sys_DefaultSavePath() );
 	}
-	if ( fs_cdpath.GetString()[0] == '\0' ) {
-		fs_cdpath.SetString( Sys_DefaultCDPath() );
-	}
 
 	if ( fs_devpath.GetString()[0] == '\0' ) {
 #ifdef WIN32

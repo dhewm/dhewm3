@@ -321,11 +321,6 @@ void Sys_ShowConsole( int visLevel, bool quitOnClose ) { }
 
 // ---------------------------------------------------------------------------
 
-// only relevant when specified on command line
-const char *Sys_DefaultCDPath( void ) {
-	return "";
-}
-
 ID_TIME_T Sys_FileTimeStamp(FILE * fp) {
 	struct stat st;
 	fstat(fileno(fp), &st);

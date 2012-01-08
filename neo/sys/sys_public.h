@@ -235,7 +235,6 @@ void			Sys_Mkdir( const char *path );
 ID_TIME_T			Sys_FileTimeStamp( FILE *fp );
 // NOTE: do we need to guarantee the same output on all platforms?
 const char *	Sys_TimeStampToStr( ID_TIME_T timeStamp );
-const char *	Sys_DefaultCDPath( void );
 const char *	Sys_DefaultBasePath( void );
 const char *	Sys_DefaultSavePath( void );
 const char *	Sys_EXEPath( void );
