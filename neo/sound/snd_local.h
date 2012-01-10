@@ -732,11 +732,13 @@ public:
 
 	LPALGENEFFECTS			alGenEffects;
 	LPALDELETEEFFECTS		alDeleteEffects;
+	LPALISEFFECT			alIsEffect;
 	LPALEFFECTI				alEffecti;
 	LPALEFFECTF				alEffectf;
 	LPALEFFECTFV			alEffectfv;
 	LPALGENAUXILIARYEFFECTSLOTS		alGenAuxiliaryEffectSlots;
 	LPALDELETEAUXILIARYEFFECTSLOTS	alDeleteAuxiliaryEffectSlots;
+	LPALISAUXILIARYEFFECTSLOT		alIsAuxiliaryEffectSlot;
 	LPALAUXILIARYEFFECTSLOTI		alAuxiliaryEffectSloti;
 
 	idEFXFile				EFXDatabase;

@@ -49,14 +49,14 @@ void idSoundWorldLocal::Init( idRenderWorld *renderWorld ) {
 	listenerArea = 0;
 	listenerAreaName = "Undefined";
 
-	if (idSoundSystemLocal::useEFXReverb) {
+	if (idSoundSystemLocal::useEFXReverb && !soundSystemLocal.alIsAuxiliaryEffectSlot(listenerSlot)) {
 		alGetError();
 
 		soundSystemLocal.alGenAuxiliaryEffectSlots(1, &listenerSlot);
 		ALuint e = alGetError();
 		if (e != AL_NO_ERROR) {
-			common->Warning("idSoundWorldLocal::Init: alGenAuxiliaryEffectSlots failed: %u", e);
-			listenerSlot = 0;
+			common->Warning("idSoundWorldLocal::Init: alGenAuxiliaryEffectSlots failed: 0x%x", e);
+			listenerSlot = AL_EFFECTSLOT_NULL;
 		}
 	}
 
@@ -118,9 +118,10 @@ void idSoundWorldLocal::Shutdown() {
 
 	AVIClose();
 
-	if (idSoundSystemLocal::useEFXReverb && listenerSlot) {
+	if (idSoundSystemLocal::useEFXReverb && soundSystemLocal.alIsAuxiliaryEffectSlot(listenerSlot)) {
+		soundSystemLocal.alAuxiliaryEffectSloti(listenerSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECTSLOT_NULL);
 		soundSystemLocal.alDeleteAuxiliaryEffectSlots(1, &listenerSlot);
-		listenerSlot = 0;
+		listenerSlot = AL_EFFECTSLOT_NULL;
 	}
 
 	for ( i = 0; i < emitters.Num(); i++ ) {
@@ -465,23 +466,25 @@ void idSoundWorldLocal::MixLoop( int current44kHz, int numSpeakers, float *final
 	alListenerfv( AL_POSITION, listenerPosition );
 	alListenerfv( AL_ORIENTATION, listenerOrientation );
 
-	if (idSoundSystemLocal::useEFXReverb) {
-		if ( soundSystemLocal.efxloaded ) {
-			ALuint effect;
-			idStr defaultStr( "default" );
-			idStr listenerAreaStr( listenerArea );
+	if (idSoundSystemLocal::useEFXReverb && soundSystemLocal.efxloaded) {
+		ALuint effect = 0;
+		idStr s(listenerArea);
 
-			soundSystemLocal.EFXDatabase.FindEffect( listenerAreaStr, &effect );
-			if (!effect)
-				soundSystemLocal.EFXDatabase.FindEffect( listenerAreaName, &effect );
-			if (!effect)
-				soundSystemLocal.EFXDatabase.FindEffect( defaultStr, &effect );
+		bool found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+		if (!found) {
+			s = listenerAreaName;
+			found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+		}
+		if (!found) {
+			s = "default";
+			found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+		}
 
-			// only update if change in settings
-			if ( listenerEffect != effect ) {
-				listenerEffect = effect;
-				soundSystemLocal.alAuxiliaryEffectSloti(listenerSlot, AL_EFFECTSLOT_EFFECT, effect);
-			}
+		// only update if change in settings
+		if (found && listenerEffect != effect) {
+			EFXprintf("Switching to EFX '%s' (#%u)\n", s.c_str(), effect);
+			listenerEffect = effect;
+			soundSystemLocal.alAuxiliaryEffectSloti(listenerSlot, AL_EFFECTSLOT_EFFECT, effect);
 		}
 	}
 
@@ -1748,12 +1751,8 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 #endif
 			alSourcef( chan->openalSource, AL_PITCH, ( slowmoActive && !chan->disallowSlow ) ? ( slowmoSpeed ) : ( 1.0f ) );
 
-			if (idSoundSystemLocal::useEFXReverb) {
-				if (listenerSlot)
-					alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, AL_FILTER_NULL);
-				else
-					alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
-			}
+			if (idSoundSystemLocal::useEFXReverb)
+				alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, AL_FILTER_NULL);
 
 #if 0 // TODO how to port this to efx?
 			long lOcclusion = ( enviroSuitActive ? -1150 : 0);

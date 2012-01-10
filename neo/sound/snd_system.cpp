@@ -345,11 +345,13 @@ void idSoundSystemLocal::Init() {
 
 		alGenEffects = (LPALGENEFFECTS)alGetProcAddress("alGenEffects");
 		alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress("alDeleteEffects");
+		alIsEffect = (LPALISEFFECT)alGetProcAddress("alIsEffect");
 		alEffecti = (LPALEFFECTI)alGetProcAddress("alEffecti");
 		alEffectf = (LPALEFFECTF)alGetProcAddress("alEffectf");
 		alEffectfv = (LPALEFFECTFV)alGetProcAddress("alEffectfv");
 		alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
 		alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
+		alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress("alIsAuxiliaryEffectSlot");;
 		alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress("alAuxiliaryEffectSloti");
 	} else {
 		common->Printf( "OpenAL: EFX extension not found\n" );
@@ -358,11 +360,13 @@ void idSoundSystemLocal::Init() {
 
 		alGenEffects = NULL;
 		alDeleteEffects = NULL;
+		alIsEffect = NULL;
 		alEffecti = NULL;
 		alEffectf = NULL;
 		alEffectfv = NULL;
 		alGenAuxiliaryEffectSlots = NULL;
 		alDeleteAuxiliaryEffectSlots = NULL;
+		alIsAuxiliaryEffectSlot = NULL;
 		alAuxiliaryEffectSloti = NULL;
 	}
 

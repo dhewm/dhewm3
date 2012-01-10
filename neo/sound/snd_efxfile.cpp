@@ -40,7 +40,7 @@ idSoundEffect::idSoundEffect() :
 }
 
 idSoundEffect::~idSoundEffect() {
-	if (effect)
+	if (soundSystemLocal.alIsEffect(effect))
 	    soundSystemLocal.alDeleteEffects(1, &effect);
 }
 
@@ -50,12 +50,16 @@ bool idSoundEffect::alloc() {
 	ALenum e;
 
 	soundSystemLocal.alGenEffects(1, &effect);
-	if ((e = alGetError()) != AL_NO_ERROR) {
+	e = alGetError();
+	if (e != AL_NO_ERROR) {
+		common->Warning("idSoundEffect::alloc: alGenEffects failed: 0x%x", e);
 		return false;
 	}
 
 	soundSystemLocal.alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
-	if ((e = alGetError()) != AL_NO_ERROR) {
+	e = alGetError();
+	if (e != AL_NO_ERROR) {
+		common->Warning("idSoundEffect::alloc: alEffecti failed: 0x%x", e);
 		return false;
 	}
 
@@ -111,6 +115,43 @@ bool idEFXFile::FindEffect( idStr &name, ALuint *effect ) {
 idEFXFile::ReadEffect
 ===============
 */
+#define efxi(param, value)													\
+	do {																	\
+		ALint _v = value;													\
+		EFXprintf("alEffecti(" #param ", %d)\n", _v);						\
+		soundSystemLocal.alEffecti(effect->effect, param, _v);				\
+		err = alGetError();													\
+		if (err != AL_NO_ERROR)												\
+			common->Warning("alEffecti(" # param ", %d) "					\
+							"failed: 0x%x", _v, err);						\
+	} while (false)
+
+#define efxf(param, value)													\
+	do {																	\
+		ALfloat _v = value;													\
+		EFXprintf("alEffectf(" #param ", %.3f)\n", _v);						\
+		soundSystemLocal.alEffectf(effect->effect, param, _v);				\
+		err = alGetError();													\
+		if (err != AL_NO_ERROR)												\
+			common->Warning("alEffectf(" # param ", %.3f) "					\
+							"failed: 0x%x", _v, err);						\
+	} while (false)
+
+#define efxfv(param, value0, value1, value2)								\
+	do {																	\
+		ALfloat _v[3];														\
+		_v[0] = value0;														\
+		_v[1] = value1;														\
+		_v[2] = value2;														\
+		EFXprintf("alEffectfv(" #param ", %.3f, %.3f, %.3f)\n",				\
+					_v[0], _v[1], _v[2]);									\
+		soundSystemLocal.alEffectfv(effect->effect, param, _v);				\
+		err = alGetError();													\
+		if (err != AL_NO_ERROR)												\
+			common->Warning("alEffectfv(" # param ", %.3f, %.3f, %.3f) "	\
+							"failed: 0x%x",	_v[0], _v[1], _v[2], err);		\
+	} while (false)
+
 bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 	idToken name, token;
 
@@ -136,6 +177,10 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 		return false;
 	}
 
+	ALenum err;
+	alGetError();
+	EFXprintf("Loading EFX effect '%s' (#%u)\n", name.c_str(), effect->effect);
+
 	do {
 		if ( !src.ReadToken( &token ) ) {
 			src.Error( "idEFXFile::ReadEffect: EOF without closing brace" );
@@ -147,72 +192,59 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 			break;
 		}
 
-		ALuint e = effect->effect;
-
-		// mappings taken from
-		// http://repo.or.cz/w/dsound-openal.git/blob/HEAD:/primary.c#l1795
-		// which are marked with a FIXME, so this is maybe not 100% correct
 		if ( token == "environment" ) {
 			// <+KittyCat> the "environment" token should be ignored (efx has nothing equatable to it)
 			src.ParseInt();
 		} else if ( token == "environment size" ) {
 			float size = src.ParseFloat();
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DENSITY, ((size < 2.0f) ? (size - 1.0f) : 1.0f));
+			efxf(AL_EAXREVERB_DENSITY, (size < 2.0f) ? (size - 1.0f) : 1.0f);
 		} else if ( token == "environment diffusion" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DIFFUSION, src.ParseFloat());
+			efxf(AL_EAXREVERB_DIFFUSION, src.ParseFloat());
 		} else if ( token == "room" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_GAIN, mB_to_gain(src.ParseInt()));
+			efxf(AL_EAXREVERB_GAIN, mB_to_gain(src.ParseInt()));
 		} else if ( token == "room hf" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_GAINHF, mB_to_gain(src.ParseInt()));
+			efxf(AL_EAXREVERB_GAINHF, mB_to_gain(src.ParseInt()));
 		} else if ( token == "room lf" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_GAINLF, mB_to_gain(src.ParseInt()));
+			efxf(AL_EAXREVERB_GAINLF, mB_to_gain(src.ParseInt()));
 		} else if ( token == "decay time" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DECAY_TIME, src.ParseFloat());
+			efxf(AL_EAXREVERB_DECAY_TIME, src.ParseFloat());
 		} else if ( token == "decay hf ratio" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DECAY_HFRATIO, src.ParseFloat());
+			efxf(AL_EAXREVERB_DECAY_HFRATIO, src.ParseFloat());
 		} else if ( token == "decay lf ratio" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_DECAY_LFRATIO, src.ParseFloat());
+			efxf(AL_EAXREVERB_DECAY_LFRATIO, src.ParseFloat());
 		} else if ( token == "reflections" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_REFLECTIONS_GAIN, mB_to_gain(src.ParseInt()));
+			efxf(AL_EAXREVERB_REFLECTIONS_GAIN, mB_to_gain(src.ParseInt()));
 		} else if ( token == "reflections delay" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_REFLECTIONS_DELAY, src.ParseFloat());
+			efxf(AL_EAXREVERB_REFLECTIONS_DELAY, src.ParseFloat());
 		} else if ( token == "reflections pan" ) {
-			float fv[3];
-			fv[0] = src.ParseFloat();
-			fv[1] = src.ParseFloat();
-			fv[2] = src.ParseFloat();
-			soundSystemLocal.alEffectfv(e, AL_EAXREVERB_REFLECTIONS_PAN, fv);
+			efxfv(AL_EAXREVERB_REFLECTIONS_PAN, src.ParseFloat(), src.ParseFloat(), src.ParseFloat());
 		} else if ( token == "reverb" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_LATE_REVERB_GAIN, mB_to_gain(src.ParseInt()));
+			efxf(AL_EAXREVERB_LATE_REVERB_GAIN, mB_to_gain(src.ParseInt()));
 		} else if ( token == "reverb delay" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_LATE_REVERB_DELAY, src.ParseFloat());
+			efxf(AL_EAXREVERB_LATE_REVERB_DELAY, src.ParseFloat());
 		} else if ( token == "reverb pan" ) {
-			float fv[3];
-			fv[0] = src.ParseFloat();
-			fv[1] = src.ParseFloat();
-			fv[2] = src.ParseFloat();
-			soundSystemLocal.alEffectfv(e, AL_EAXREVERB_LATE_REVERB_PAN, fv);
+			efxfv(AL_EAXREVERB_LATE_REVERB_PAN, src.ParseFloat(), src.ParseFloat(), src.ParseFloat());
 		} else if ( token == "echo time" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_ECHO_TIME, src.ParseFloat());
+			efxf(AL_EAXREVERB_ECHO_TIME, src.ParseFloat());
 		} else if ( token == "echo depth" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_ECHO_DEPTH, src.ParseFloat());
+			efxf(AL_EAXREVERB_ECHO_DEPTH, src.ParseFloat());
 		} else if ( token == "modulation time" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_MODULATION_TIME, src.ParseFloat());
+			efxf(AL_EAXREVERB_MODULATION_TIME, src.ParseFloat());
 		} else if ( token == "modulation depth" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_MODULATION_DEPTH, src.ParseFloat());
+			efxf(AL_EAXREVERB_MODULATION_DEPTH, src.ParseFloat());
 		} else if ( token == "air absorption hf" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, mB_to_gain(src.ParseFloat()));
+			efxf(AL_EAXREVERB_AIR_ABSORPTION_GAINHF, mB_to_gain(src.ParseFloat()));
 		} else if ( token == "hf reference" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_HFREFERENCE, src.ParseFloat());
+			efxf(AL_EAXREVERB_HFREFERENCE, src.ParseFloat());
 		} else if ( token == "lf reference" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_LFREFERENCE, src.ParseFloat());
+			efxf(AL_EAXREVERB_LFREFERENCE, src.ParseFloat());
 		} else if ( token == "room rolloff factor" ) {
-			soundSystemLocal.alEffectf(e, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, src.ParseFloat());
+			efxf(AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, src.ParseFloat());
 		} else if ( token == "flags" ) {
 			src.ReadTokenOnLine( &token );
 			unsigned int flags = token.GetUnsignedLongValue();
 
-			soundSystemLocal.alEffecti(e, AL_EAXREVERB_DECAY_HFLIMIT, (flags & 0x20) ? AL_TRUE : AL_FALSE);
+			efxi(AL_EAXREVERB_DECAY_HFLIMIT, (flags & 0x20) ? AL_TRUE : AL_FALSE);
 			// the other SCALE flags have no equivalent in efx
 		} else {
 			src.ReadTokenOnLine( &token );
