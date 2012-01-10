@@ -349,6 +349,11 @@ void idSoundSystemLocal::Init() {
 		alEffecti = (LPALEFFECTI)alGetProcAddress("alEffecti");
 		alEffectf = (LPALEFFECTF)alGetProcAddress("alEffectf");
 		alEffectfv = (LPALEFFECTFV)alGetProcAddress("alEffectfv");
+		alGenFilters = (LPALGENFILTERS)alGetProcAddress("alGenFilters");
+		alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress("alDeleteFilters");
+		alIsFilter = (LPALISFILTER)alGetProcAddress("alIsFilter");
+		alFilteri = (LPALFILTERI)alGetProcAddress("alFilteri");
+		alFilterf = (LPALFILTERF)alGetProcAddress("alFilterf");
 		alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
 		alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
 		alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress("alIsAuxiliaryEffectSlot");;
@@ -364,6 +369,11 @@ void idSoundSystemLocal::Init() {
 		alEffecti = NULL;
 		alEffectf = NULL;
 		alEffectfv = NULL;
+		alGenFilters = NULL;
+		alDeleteFilters = NULL;
+		alIsFilter = NULL;
+		alFilteri = NULL;
+		alFilterf = NULL;
 		alGenAuxiliaryEffectSlots = NULL;
 		alDeleteAuxiliaryEffectSlots = NULL;
 		alIsAuxiliaryEffectSlot = NULL;

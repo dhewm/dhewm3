@@ -49,14 +49,31 @@ void idSoundWorldLocal::Init( idRenderWorld *renderWorld ) {
 	listenerArea = 0;
 	listenerAreaName = "Undefined";
 
-	if (idSoundSystemLocal::useEFXReverb && !soundSystemLocal.alIsAuxiliaryEffectSlot(listenerSlot)) {
-		alGetError();
+	if (idSoundSystemLocal::useEFXReverb) {
+		if (!soundSystemLocal.alIsAuxiliaryEffectSlot(listenerSlot)) {
+			alGetError();
 
-		soundSystemLocal.alGenAuxiliaryEffectSlots(1, &listenerSlot);
-		ALuint e = alGetError();
-		if (e != AL_NO_ERROR) {
-			common->Warning("idSoundWorldLocal::Init: alGenAuxiliaryEffectSlots failed: 0x%x", e);
-			listenerSlot = AL_EFFECTSLOT_NULL;
+			soundSystemLocal.alGenAuxiliaryEffectSlots(1, &listenerSlot);
+			ALuint e = alGetError();
+			if (e != AL_NO_ERROR) {
+				common->Warning("idSoundWorldLocal::Init: alGenAuxiliaryEffectSlots failed: 0x%x", e);
+				listenerSlot = AL_EFFECTSLOT_NULL;
+			}
+		}
+
+		if (!soundSystemLocal.alIsFilter(listenerFilter)) {
+			alGetError();
+
+			soundSystemLocal.alGenFilters(1, &listenerFilter);
+			ALuint e = alGetError();
+			if (e != AL_NO_ERROR) {
+				common->Warning("idSoundWorldLocal::Init: alGenFilters failed: 0x%x", e);
+				listenerFilter = AL_FILTER_NULL;
+			} else {
+				soundSystemLocal.alFilteri(listenerFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+				// EAX occusion value was -1150; pow(10.0, -1150/2000.0)
+				soundSystemLocal.alFilterf(listenerFilter, AL_LOWPASS_GAINHF, 0.266073f);
+			}
 		}
 	}
 
@@ -118,10 +135,17 @@ void idSoundWorldLocal::Shutdown() {
 
 	AVIClose();
 
-	if (idSoundSystemLocal::useEFXReverb && soundSystemLocal.alIsAuxiliaryEffectSlot(listenerSlot)) {
-		soundSystemLocal.alAuxiliaryEffectSloti(listenerSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECTSLOT_NULL);
-		soundSystemLocal.alDeleteAuxiliaryEffectSlots(1, &listenerSlot);
-		listenerSlot = AL_EFFECTSLOT_NULL;
+	if (idSoundSystemLocal::useEFXReverb) {
+		if (soundSystemLocal.alIsAuxiliaryEffectSlot(listenerSlot)) {
+			soundSystemLocal.alAuxiliaryEffectSloti(listenerSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECTSLOT_NULL);
+			soundSystemLocal.alDeleteAuxiliaryEffectSlots(1, &listenerSlot);
+			listenerSlot = AL_EFFECTSLOT_NULL;
+		}
+
+		if (soundSystemLocal.alIsFilter(listenerFilter)) {
+			soundSystemLocal.alDeleteFilters(1, &listenerFilter);
+			listenerFilter = AL_FILTER_NULL;
+		}
 	}
 
 	for ( i = 0; i < emitters.Num(); i++ ) {
@@ -1752,14 +1776,8 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 			alSourcef( chan->openalSource, AL_PITCH, ( slowmoActive && !chan->disallowSlow ) ? ( slowmoSpeed ) : ( 1.0f ) );
 
 			if (idSoundSystemLocal::useEFXReverb)
-				alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, AL_FILTER_NULL);
+				alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, enviroSuitActive ? listenerFilter : AL_FILTER_NULL);
 
-#if 0 // TODO how to port this to efx?
-			long lOcclusion = ( enviroSuitActive ? -1150 : 0);
-			if ( soundSystemLocal.alEAXSet ) {
-				soundSystemLocal.alEAXSet( &EAXPROPERTYID_EAX_Source, EAXSOURCE_OCCLUSION, chan->openalSource, &lOcclusion, sizeof(lOcclusion) );
-			}
-#endif
 			if ( ( !looping && chan->leadinSample->hardwareBuffer ) || ( looping && chan->soundShader->entries[0]->hardwareBuffer ) ) {
 				// handle uncompressed (non streaming) single shot and looping sounds
 				if ( chan->triggered ) {
