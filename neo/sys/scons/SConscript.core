@@ -10,6 +10,7 @@ Import( 'GLOBALS' )
 Import( GLOBALS )
 
 renderer_string = ' \
+	jpeg_memory_src.cpp \
 	Cinematic.cpp \
 	GuiModel.cpp \
 	Image_files.cpp \
