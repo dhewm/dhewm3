@@ -755,6 +755,7 @@ public:
 	static int				EFXAvailable;
 
 	static idCVar			s_noSound;
+	static idCVar			s_device;
 	static idCVar			s_quadraticFalloff;
 	static idCVar			s_drawSounds;
 	static idCVar			s_minVolume6;

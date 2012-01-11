@@ -35,6 +35,7 @@ idCVar idSoundSystemLocal::s_noSound( "s_noSound", "1", CVAR_SOUND | CVAR_BOOL |
 #else
 idCVar idSoundSystemLocal::s_noSound( "s_noSound", "0", CVAR_SOUND | CVAR_BOOL | CVAR_NOCHEAT, "" );
 #endif
+idCVar idSoundSystemLocal::s_device( "s_device", "default", CVAR_SOUND | CVAR_NOCHEAT | CVAR_ARCHIVE, "the audio device to use ('default' for the default audio device)" );
 idCVar idSoundSystemLocal::s_quadraticFalloff( "s_quadraticFalloff", "1", CVAR_SOUND | CVAR_BOOL, "" );
 idCVar idSoundSystemLocal::s_drawSounds( "s_drawSounds", "0", CVAR_SOUND | CVAR_INTEGER, "", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
 idCVar idSoundSystemLocal::s_showStartSound( "s_showStartSound", "0", CVAR_SOUND | CVAR_BOOL, "" );
@@ -325,12 +326,47 @@ void idSoundSystemLocal::Init() {
 	// set up openal device and context
 	common->StartupVariable( "s_useOpenAL", true );
 
-	common->Printf( "Setup OpenAL device and context... " );
+	common->Printf( "Setup OpenAL device and context\n" );
 
-	openalDevice = alcOpenDevice( NULL );
+	const char *device = s_device.GetString();
+	if (strlen(device) < 1)
+		device = NULL;
+	else if (!idStr::Icmp(device, "default"))
+		device = NULL;
+
+	if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT")) {
+		const char *devs = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+		bool found = false;
+
+		while (devs && *devs) {
+			common->Printf("OpenAL: found device '%s'", devs);
+
+			if (device && !idStr::Icmp(devs, device)) {
+				common->Printf(" (ACTIVE)\n");
+				found = true;
+			} else {
+				common->Printf("\n");
+			}
+
+			devs += strlen(devs) + 1;
+		}
+
+		if (device && !found) {
+			common->Printf("OpenAL: device %s not found, using default\n", device);
+			device = NULL;
+		}
+	}
+
+	openalDevice = alcOpenDevice( device );
+	if (!openalDevice && device) {
+		common->Printf("OpenAL: failed to open device '%s' (0x%x), using default\n", device, alGetError());
+		openalDevice = alcOpenDevice( NULL );
+	}
+
+	common->Printf( "OpenAL: using '%s'\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
+
 	openalContext = alcCreateContext( openalDevice, NULL );
 	alcMakeContextCurrent( openalContext );
-	common->Printf( "Done.\n" );
 
 	// log openal info
 	common->Printf( "AL_VERSION: %s\n", alGetString(AL_VERSION));
@@ -404,7 +440,6 @@ void idSoundSystemLocal::Init() {
 		}
 	}
 
-	common->Printf( "OpenAL: found %s\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
 	common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
 	common->Printf( "ALC_EXTENSIONS: %s\n", alcGetString(openalDevice, ALC_EXTENSIONS));
 
