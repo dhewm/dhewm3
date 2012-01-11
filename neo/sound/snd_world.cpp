@@ -71,7 +71,12 @@ void idSoundWorldLocal::Init( idRenderWorld *renderWorld ) {
 				listenerFilter = AL_FILTER_NULL;
 			} else {
 				soundSystemLocal.alFilteri(listenerFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
-				// EAX occusion value was -1150; pow(10.0, -1150/2000.0)
+				// original EAX occusion value was -1150
+				// default OCCLUSIONLFRATIO is 0.25
+
+				// pow(10.0, (-1150*0.25)/2000.0)
+				soundSystemLocal.alFilterf(listenerFilter, AL_LOWPASS_GAIN, 0.718208f);
+				// pow(10.0, -1150/2000.0)
 				soundSystemLocal.alFilterf(listenerFilter, AL_LOWPASS_GAINHF, 0.266073f);
 			}
 		}
@@ -1775,8 +1780,15 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 #endif
 			alSourcef( chan->openalSource, AL_PITCH, ( slowmoActive && !chan->disallowSlow ) ? ( slowmoSpeed ) : ( 1.0f ) );
 
-			if (idSoundSystemLocal::useEFXReverb)
-				alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, enviroSuitActive ? listenerFilter : AL_FILTER_NULL);
+			if (idSoundSystemLocal::useEFXReverb) {
+				if (enviroSuitActive) {
+					alSourcei(chan->openalSource, AL_DIRECT_FILTER, listenerFilter);
+					alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, listenerFilter);
+				} else {
+					alSource3i(chan->openalSource, AL_AUXILIARY_SEND_FILTER, listenerSlot, 0, AL_FILTER_NULL);
+				}
+			}
+
 
 			if ( ( !looping && chan->leadinSample->hardwareBuffer ) || ( looping && chan->soundShader->entries[0]->hardwareBuffer ) ) {
 				// handle uncompressed (non streaming) single shot and looping sounds
