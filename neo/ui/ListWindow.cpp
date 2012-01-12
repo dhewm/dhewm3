@@ -387,22 +387,22 @@ void idListWindow::PostParse() {
 		r.x = tabStops[i];
 		r.w = (i < c - 1) ? tabStops[i+1] - r.x - tabBorder : -1;
 		r.align = (doAligns) ? tabAligns[i] : 0;
-		if(tabVAligns.Num() > 0) {
+		if(tabVAligns.Num() > 0 && i < tabVAligns.Num()) {
 			r.valign = tabVAligns[i];
 		} else {
 			r.valign = 0;
 		}
-		if(tabTypes.Num() > 0) {
+		if(tabTypes.Num() > 0 && i < tabTypes.Num()) {
 			r.type = tabTypes[i];
 		} else {
 			r.type = TAB_TYPE_TEXT;
 		}
-		if(tabSizes.Num() > 0) {
+		if(tabSizes.Num() > 0 && i < tabSizes.Num() ) {
 			r.iconSize = tabSizes[i];
 		} else {
 			r.iconSize.Zero();
 		}
-		if(tabIconVOffsets.Num() > 0 ) {
+		if(tabIconVOffsets.Num() > 0 && i < tabIconVOffsets.Num()) {
 			r.iconVOffset = tabIconVOffsets[i];
 		} else {
 			r.iconVOffset = 0;
