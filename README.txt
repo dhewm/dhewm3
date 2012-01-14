@@ -12,6 +12,14 @@ ABOUT
 
 dhewm 3 is a Doom 3 GPL source modification.
 
+The goal of dhewm 3 is bring DOOM 3 with the help of SDL to all suitable
+plaforms.
+Bugs present in the original DOOM 3 will be fixed (when identified) without
+altering the original gameplay.
+
+The project is hosted at: https://github.com/dhewm
+Report bugs here: https://github.com/dhewm/dhewm3/issues
+
 
 GENERAL NOTES
 =============
