@@ -1,6 +1,9 @@
 #ifndef __DOOM3_CONFIG_H__
 #define __DOOM3_CONFIG_H__
 
+#define BUILD_OS				"@os@"
+#define BUILD_CPU				"@cpu@"
+
 #cmakedefine HAVE_JPEG_MEM_SRC
 
 #cmakedefine ID_ENABLE_CURL

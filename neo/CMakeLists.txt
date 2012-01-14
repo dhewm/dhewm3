@@ -233,7 +233,7 @@ configure_file(
     "${CMAKE_BINARY_DIR}/config.h"
 )
 
-message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}.${cpu}")
+message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
 
 set(src_renderer
 	renderer/jpeg_memory_src.cpp
