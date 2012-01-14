@@ -116,11 +116,6 @@ const char *Sys_Cwd( void ) {
 	_getcwd( cwd, sizeof( cwd ) - 1 );
 	cwd[sizeof( cwd ) - 1] = 0;
 
-	int i = idStr::FindText( cwd, CD_BASEDIR, false );
-	if ( i >= 0 ) {
-		cwd[i + strlen( CD_BASEDIR )] = '\0';
-	}
-
 	return cwd;
 }
 
