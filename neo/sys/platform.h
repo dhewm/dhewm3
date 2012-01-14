@@ -44,7 +44,6 @@ If you have questions concerning this license or the applicable additional terms
 #if defined(WIN32) || defined(_WIN32)
 
 #define BUILD_OS_ID					0
-#define CPU_EASYARGS				1
 
 #define _alloca16( x )				((void *)((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15))
 
@@ -82,11 +81,6 @@ If you have questions concerning this license or the applicable additional terms
 #if defined(MACOS_X) || defined(__APPLE__)
 
 #define BUILD_OS_ID					1
-#ifdef __ppc__
-	#define CPU_EASYARGS			0
-#elif defined(__i386__)
-	#define CPU_EASYARGS			1
-#endif
 
 #ifdef GAME_DLL
 #define ID_GAME_API					__attribute__((visibility ("default")))
@@ -119,16 +113,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef __unix__
 
 #define BUILD_OS_ID					2
-
-#ifdef __i386__
-	#define CPU_EASYARGS			1
-#elif defined(__x86_64__)
-	#define CPU_EASYARGS			0
-#elif defined(__ppc__)
-	#define CPU_EASYARGS			0
-#else
-	#error unknown cpu architecture!
-#endif
 
 #define _alloca						alloca
 #define _alloca16( x )				((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
