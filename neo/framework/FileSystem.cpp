@@ -34,11 +34,12 @@ If you have questions concerning this license or the applicable additional terms
 	#include <unistd.h>
 #endif
 
-#if ID_ENABLE_CURL
+#include "sys/platform.h"
+
+#ifdef ID_ENABLE_CURL
 	#include <curl/curl.h>
 #endif
 
-#include "sys/platform.h"
 #include "idlib/hashing/MD4.h"
 #include "framework/Licensee.h"
 #include "framework/Unzip.h"
@@ -3642,7 +3643,7 @@ int BackgroundDownloadThread( void *pexit ) {
 			#endif
 			bgl->completed = true;
 		} else {
-#if ID_ENABLE_CURL
+#ifdef ID_ENABLE_CURL
 			// DLTYPE_URL
 			// use a local buffer for curl error since the size define is local
 			char error_buf[ CURL_ERROR_SIZE ];

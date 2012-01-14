@@ -3,4 +3,6 @@
 
 #cmakedefine HAVE_JPEG_MEM_SRC
 
+#cmakedefine ID_ENABLE_CURL
+
 #endif
