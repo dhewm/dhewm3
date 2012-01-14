@@ -69,7 +69,7 @@ idCVar idSoundSystemLocal::s_reverbFeedback( "s_reverbFeedback", "0.333", CVAR_S
 idCVar idSoundSystemLocal::s_enviroSuitVolumeScale( "s_enviroSuitVolumeScale", "0.9", CVAR_SOUND | CVAR_FLOAT, "" );
 idCVar idSoundSystemLocal::s_skipHelltimeFX( "s_skipHelltimeFX", "0", CVAR_SOUND | CVAR_BOOL, "" );
 
-#if ID_OPENAL
+#if !defined(ID_DEDICATED)
 idCVar idSoundSystemLocal::s_libOpenAL( "s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "Deprecated, kept for compability" );
 idCVar idSoundSystemLocal::s_useOpenAL( "s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "Deprecated, kept for compability" );
 idCVar idSoundSystemLocal::s_useEAXReverb( "s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EFX reverb" );
@@ -1339,7 +1339,7 @@ idSoundSystemLocal::IsEFXAvailable
 ===============
 */
 int idSoundSystemLocal::IsEFXAvailable( void ) {
-#if !ID_OPENAL
+#if defined(ID_DEDICATED)
 	return -1;
 #else
 	return EFXAvailable;

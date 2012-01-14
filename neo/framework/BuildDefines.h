@@ -96,14 +96,6 @@ If you have questions concerning this license or the applicable additional terms
 #	endif
 #endif
 
-#ifndef ID_OPENAL
-#	if !defined( ID_DEDICATED )
-#		define ID_OPENAL 1
-#	else
-#		define ID_OPENAL 0
-#	endif
-#endif
-
 // async network
 
 /*
