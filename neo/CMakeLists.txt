@@ -634,8 +634,8 @@ set(src_sys_dedicated	sys/linux/dedicated.cpp)
 
 if (APPLE)
 	set(OSX_RESOURCE_FILES
-			"${CMAKE_CURRENT_SOURCE_DIR}/sys/osx/Doom3.icns"
-			"${CMAKE_CURRENT_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
+			"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
+			"${CMAKE_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
 	)
 
 	set_source_files_properties(${OSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -695,7 +695,7 @@ else()
 	)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
@@ -754,7 +754,7 @@ if (GAME)
 	add_library(game${gamesuffix} SHARED ${src_game})
 	set_target_properties(game${gamesuffix} PROPERTIES PREFIX "")
 	set_target_properties(game${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
-	set_target_properties(game${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/game")
+	set_target_properties(game${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
 	set_target_properties(game${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(game${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(game${gamesuffix} idlib)
@@ -764,7 +764,7 @@ if (D3XP)
 	add_library(d3xp${gamesuffix} SHARED ${src_d3xp})
 	set_target_properties(d3xp${gamesuffix} PROPERTIES PREFIX "")
 	set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
-	set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/d3xp")
+	set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
 	set_target_properties(d3xp${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(d3xp${gamesuffix} idlib)
