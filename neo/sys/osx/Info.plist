@@ -5,17 +5,17 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>doom3</string>
+	<string>dhewm3</string>
 	<key>CFBundleIconFile</key>
 	<string>Doom3.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.idsoftware.doom3</string>
+	<string>org.dhewg.dhewm3</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
-	<string>DOM3</string>
+	<string>DHM3</string>
 	<key>CFBundleVersion</key>
 	<string>3000</string>
 	<key>NSMainNibFile</key>

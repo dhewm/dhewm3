@@ -1,4 +1,4 @@
-project(doom3)
+project(dhewm3)
 cmake_minimum_required(VERSION 2.6)
 
 # TODO
@@ -68,17 +68,17 @@ if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
-# precompiled libraries from the doom3-libs repo
-if (DOOM3LIBS)
+# precompiled libraries from the dhewm3-libs repo
+if (DHEWM3LIBS)
 	if (CMAKE_CROSSCOMPILING)
-		set(CMAKE_FIND_ROOT_PATH ${DOOM3LIBS})
+		set(CMAKE_FIND_ROOT_PATH ${DHEWM3LIBS})
 	else()
-		set(ENV{CMAKE_PREFIX_PATH} ${DOOM3LIBS})
+		set(ENV{CMAKE_PREFIX_PATH} ${DHEWM3LIBS})
 	endif()
 
 	# these are too stupid, give them a hint
-	set(ENV{OPENALDIR} ${DOOM3LIBS})
-	set(ENV{SDLDIR} ${DOOM3LIBS})
+	set(ENV{OPENALDIR} ${DHEWM3LIBS})
+	set(ENV{SDLDIR} ${DHEWM3LIBS})
 endif()
 
 # libs
@@ -706,17 +706,17 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MING
 endif()
 
 if (CORE)
-	add_executable(doom3 WIN32 MACOSX_BUNDLE
+	add_executable(dhewm3 WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_sys_base}
 		${src_sys_core}
 	)
 
-	set_target_properties(doom3 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
-	set_target_properties(doom3 PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(doom3 PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
+	set_target_properties(dhewm3 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
+	set_target_properties(dhewm3 PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(dhewm3 PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 
-	target_link_libraries(doom3
+	target_link_libraries(dhewm3
 		idlib
 		${OPENGL_gl_LIBRARY}
 		${OPENAL_LIBRARY}
@@ -731,7 +731,7 @@ if (CORE)
 endif()
 
 if (DEDICATED)
-	add_executable(doom3ded WIN32 MACOSX_BUNDLE
+	add_executable(dhewm3ded WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_stub_openal}
 		${src_stub_gl}
@@ -740,9 +740,9 @@ if (DEDICATED)
 		${src_sys_dedicated}
 	)
 
-	set_target_properties(doom3ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
-	set_target_properties(doom3ded PROPERTIES LINK_FLAGS "${ldflags}")
-	target_link_libraries(doom3ded
+	set_target_properties(dhewm3ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
+	set_target_properties(dhewm3ded PROPERTIES LINK_FLAGS "${ldflags}")
+	target_link_libraries(dhewm3ded
 		idlib
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}

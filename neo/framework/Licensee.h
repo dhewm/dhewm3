@@ -34,9 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#define GAME_NAME						"DOOM 3"		// appears on window titles and errors
+#define GAME_NAME						"dhewm 3"		// appears on window titles and errors
 
-#define ENGINE_VERSION					"DOOM 1.3.1"	// printed in console
+#define ENGINE_VERSION					"dhewm 1.3.1"	// printed in console
 
 // paths
 #ifdef ID_DEMO_BUILD
@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // filenames
-#define CONFIG_FILE						"DoomConfig.cfg"
+#define CONFIG_FILE						"dhewm.cfg"
 
 // base folder where the source code lives
 #define SOURCE_CODE_BASE_FOLDER			"neo"
@@ -91,13 +91,13 @@ If you have questions concerning this license or the applicable additional terms
 #define EDITOR_WINDOWTEXT				"DOOMEdit"
 
 // win32 info
-#define WIN32_CONSOLE_CLASS				"DOOM 3 WinConsole"
+#define WIN32_CONSOLE_CLASS				"dhewm 3 WinConsole"
 
 // Linux info
 #ifdef ID_DEMO_BUILD
-	#define LINUX_DEFAULT_PATH			"/usr/local/games/doom3-demo"
+	#define LINUX_DEFAULT_PATH			"/usr/local/games/dhewm3-demo"
 #else
-	#define LINUX_DEFAULT_PATH			"/usr/local/games/doom3"
+	#define LINUX_DEFAULT_PATH			"/usr/local/games/dhewm3"
 #endif
 
 // CD Key file info

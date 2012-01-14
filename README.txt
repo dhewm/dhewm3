@@ -1,10 +1,17 @@
-Doom 3 GPL source release
-=========================
+dhewm 3
+=======
 
 This file contains the following sections:
 
+ABOUT
 GENERAL NOTES
 LICENSE
+
+ABOUT
+=====
+
+dhewm 3 is a Doom 3 GPL source modification.
+
 
 GENERAL NOTES
 =============
@@ -49,7 +56,7 @@ cmake /path/to/repository/neo
 
 Using the provided Windows binaries:
 ------------------------------------
-Get a clone of the latest binaries here: https://github.com/dhewg/doom3-libs
+Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
 
 There are two subfolder:
 - 32bit binaries are located in "i686-w64-mingw32"
@@ -57,8 +64,8 @@ There are two subfolder:
 
 Issue the appropriate command from the build folder, for example:
 
-cmake -G "Visual Studio 10" -DDOOM3LIBS=/path/to/doom3-libs/i686-w64-mingw32 /path/to/repository/neo
-cmake -G "Visual Studio 10 Win64" -DDOOM3LIBS=/path/to/doom3-libs/x86_64-w64-mingw32 /path/to/repository/neo
+cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo
+cmake -G "Visual Studio 10 Win64" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo
 
 The binaries are compatible with mingw-w64 and all MSVC versions.
 
@@ -84,7 +91,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 < --- cut --- >
 
 Then point CMake at your Toolchain file:
-cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDOOM3LIBS=/path/to/doom3-libs/i686-w64-mingw32 /path/to/repository/neo
+cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo
 
 Back End Rendering of Stencil Shadows:
 --------------------------------------
