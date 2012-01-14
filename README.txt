@@ -91,7 +91,7 @@ There are two subfolder:
 Issue the appropriate command from the build folder, for example:
 
 cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo
-cmake -G "Visual Studio 10 Win64" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo
+cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo
 
 The binaries are compatible with mingw-w64 and all MSVC versions.
 
