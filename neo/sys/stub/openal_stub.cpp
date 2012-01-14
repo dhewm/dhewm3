@@ -44,12 +44,23 @@ AL_API void AL_APIENTRY alSourceStop( ALuint sid ) { }
 
 AL_API void AL_APIENTRY alGetSourcei( ALuint sid,  ALenum pname, ALint* value ) { }
 
+AL_API void AL_APIENTRY alSource3i( ALuint sid, ALenum param, ALint value1, ALint value2, ALint value3 ) { }
+
+
+AL_API const ALchar* AL_APIENTRY alGetString( ALenum param ) {
+	return "";
+}
+
 AL_API ALint AL_APIENTRY alGetInteger( ALenum param ) { return 0; }
 
 ALC_API void ALC_APIENTRY alcSuspendContext( ALCcontext *alcHandle ) { }
 
 ALC_API ALCdevice * ALC_APIENTRY alcOpenDevice( const ALchar *tokstr ) {
 	return NULL;
+}
+
+ALC_API ALCboolean ALC_APIENTRY alcIsExtensionPresent( ALCdevice *device, const ALCchar *extname ) {
+	return AL_FALSE;
 }
 
 AL_API void AL_APIENTRY alDeleteBuffers( ALsizei n, const ALuint* buffers ) { }
