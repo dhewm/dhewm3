@@ -1,32 +1,23 @@
-dhewm 3
-=======
+# ABOUT
 
-This file contains the following sections:
+_dhewm 3_ is a _Doom 3_ GPL source modification.
 
-ABOUT
-CHANGES
-GENERAL NOTES
-LICENSE
-
-ABOUT
-=====
-
-dhewm 3 is a Doom 3 GPL source modification.
-
-The goal of dhewm 3 is bring DOOM 3 with the help of SDL to all suitable
+The goal of _dhewm 3_ is bring _DOOM 3_ with the help of SDL to all suitable
 plaforms.
-Bugs present in the original DOOM 3 will be fixed (when identified) without
+
+Bugs present in the original _DOOM 3_ will be fixed (when identified) without
 altering the original gameplay.
 
-The project is hosted at: https://github.com/dhewm
-Report bugs here: https://github.com/dhewm/dhewm3/issues
+**The project is hosted at:** https://github.com/dhewm
+
+**Consult the FAQ at:** https://github.com/dhewm/dhewm3/wiki/FAQ
+
+**Report bugs here:** https://github.com/dhewm/dhewm3/issues
 
 
-=======
-CHANGES
-=======
+# CHANGES
 
-Compared to the original DOOM 3, the changes of dhewm 3 worth mentioning are:
+Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are:
 
 - 64bit port
 - SDL for low level OS support, OpenGL and input handling
@@ -36,27 +27,27 @@ Compared to the original DOOM 3, the changes of dhewm 3 worth mentioning are:
 - (Cross-)compilation with mingw-w64
 
 
-GENERAL NOTES
-=============
+# GENERAL NOTES
 
-Game data and patching:
------------------------
+## Game data and patching
 
 This source release does not contain any game data, the game data is still
 covered by the original EULA and must be obeyed as usual.
 
 You must patch the game to the latest version.
 
-Note that Doom 3 and Doom 3: Resurrection of Evil are available from the Steam store at
+Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam store at
+
 http://store.steampowered.com/app/9050/
+
 http://store.steampowered.com/app/9070/
 
-Compiling
----------
+## Compiling
 
 The build system is based on CMake: http://cmake.org/
 
 Required libraries are not part of the tree. These are:
+
 - libjpeg (minimum v6, v8 recommended)
 - libogg
 - libvorbis
@@ -70,71 +61,71 @@ developer files). It is recommended to use the software management tools of
 your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
 
 OSX users need to point cmake at OpenAL Soft (better solutions welcome):
-cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo
+
+`cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
 
 For Windows there are two options:
-1) Use the provided binaries (recommended, see below)
-2) Compile these libraries yourself
+
+- Use the provided binaries (recommended, see below)
+- Compile these libraries yourself
 
 Create a distinct build folder outside of this source repository and issue
 the cmake command there, pointing it at the neo/ folder from this repository:
-cmake /path/to/repository/neo
 
-Using the provided Windows binaries:
-------------------------------------
+`cmake /path/to/repository/neo`
+
+## Using the provided Windows binaries
+
 Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
 
 There are two subfolder:
+
 - 32bit binaries are located in "i686-w64-mingw32"
 - 64bit binaries are located in "x86_64-w64-mingw32"
 
 Issue the appropriate command from the build folder, for example:
 
-cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo
-cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo
+`cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+
+`cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo`
 
 The binaries are compatible with mingw-w64 and all MSVC versions.
 
-Cross compiling:
-----------------
+## Cross compiling
 
 For cross compiling a CMake Toolchain file is required.
+
 For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
 
-< --- cut --- >
-set(CMAKE_SYSTEM_NAME Windows)
-set(CMAKE_SYSTEM_PROCESSOR i686)
-
-set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
-set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
-set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
-
-set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
-
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-< --- cut --- >
+> set(CMAKE_SYSTEM_NAME Windows)
+> set(CMAKE_SYSTEM_PROCESSOR i686)
+> 
+> set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
+> set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
+> set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
+> 
+> set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
+> 
+> set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+> set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+> set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 Then point CMake at your Toolchain file:
-cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo
+`cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
-Back End Rendering of Stencil Shadows:
---------------------------------------
+## Back End Rendering of Stencil Shadows
 
 The Doom 3 GPL source code release does not include functionality enabling rendering
-of stencil shadows via the “depth fail” method, a functionality commonly known as
+of stencil shadows via the Â“depth failÂ” method, a functionality commonly known as
 "Carmack's Reverse".
 
-MayaImport:
----------------------------
+## MayaImport
 
 The code for our Maya export plugin is included, if you are a Maya licensee
 you can obtain the SDK from Autodesk.
 
 
-LICENSE
-=======
+# LICENSE
 
 See COPYING.txt for the GNU GENERAL PUBLIC LICENSE
 
@@ -142,11 +133,12 @@ ADDITIONAL TERMS:  The Doom 3 GPL Source Code is also subject to certain additio
 
 EXCLUDED CODE:  The code described below and contained in the Doom 3 GPL Source Code release is not part of the Program covered by the GPL and is expressly excluded from its terms.  You are solely responsible for obtaining from the copyright holder a license for such code and complying with the applicable license terms.
 
-JPEG library
------------------------------------------------------------------------------
+## JPEG library
+
 neo/renderer/jpeg_memory_src.*
 
 This software is copyright (C) 1991-2011, Thomas G. Lane, Guido Vollbeding.
+
 All Rights Reserved except as specified below.
 
 Permission is hereby granted to use, copy, modify, and distribute this
@@ -176,12 +168,14 @@ We specifically permit and encourage the use of this software as the basis of
 commercial products, provided that all warranty or liability claims are
 assumed by the product vendor.
 
-PropTree
----------------------------------------------------------------------------
+## PropTree
+
 neo/tools/common/PropTree/*
 
 Copyright (C) 1998-2001 Scott Ramsay
+
 sramsay@gonavi.com
+
 http://www.gonavi.com
 
 This material is provided "as is", with absolutely no warranty expressed
@@ -196,16 +190,17 @@ modified is included with the above copyright notice.
 If you use this code, drop me an email.  I'd like to know if you find the code
 useful.
 
-Base64 implementation
----------------------------------------------------------------------------
-lines	file(s)
-234		neo/idlib/Base64.cpp
+## Base64 implementation
+
+neo/idlib/Base64.cpp
 
 Copyright (c) 1996 Lars Wirzenius.  All rights reserved.
 
 June 14 2003: TTimo <ttimo@idsoftware.com>
-	modified + endian bug fixes
-	http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=197039
+
+modified + endian bug fixes
+
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=197039
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -231,11 +226,12 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 
-IO on .zip files using portions of zlib
----------------------------------------------------------------------------
-lines	file(s)
-4471	src/framework/Unzip.cpp
+## IO on .zip files using portions of zlib
+
+src/framework/Unzip.cpp
+
 Copyright (C) 1998 Gilles Vollant
+
 zlib is Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
@@ -254,10 +250,10 @@ zlib is Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 
-MD4 Message-Digest Algorithm
------------------------------------------------------------------------------
-lines   file(s)
-260		neo/idlib/hashing/MD4.cpp
+## MD4 Message-Digest Algorithm
+
+neo/idlib/hashing/MD4.cpp
+
 Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
 
@@ -279,92 +275,86 @@ without express or implied warranty of any kind.
 These notices must be retained in any copies of any part of this
 documentation and/or software.
 
-MD5 Message-Digest Algorithm
------------------------------------------------------------------------------
-lines	file(s)
-273		neo/idlib/hashing/MD5.cpp
+## MD5 Message-Digest Algorithm
+
+neo/idlib/hashing/MD5.cpp
+
 This code implements the MD5 message-digest algorithm.
 The algorithm is due to Ron Rivest.  This code was
 written by Colin Plumb in 1993, no copyright is claimed.
 This code is in the public domain; do with it what you wish.
 
-CRC32 Checksum
------------------------------------------------------------------------------
-lines	file(s)
-168		neo/idlib/hashing/CRC32.cpp
+## CRC32 Checksum
+
+neo/idlib/hashing/CRC32.cpp
+
 Copyright (C) 1995-1998 Mark Adler
 
-OpenGL headers
----------------------------------------------------------------------------
-lines	file(s)
-613		neo/renderer/wglext.h
+## OpenGL headers
 
-/*
-** License Applicability. Except to the extent portions of this file are
-** made subject to an alternative license as permitted in the SGI Free
-** Software License B, Version 1.1 (the "License"), the contents of this
-** file are subject only to the provisions of the License. You may not use
-** this file except in compliance with the License. You may obtain a copy
-** of the License at Silicon Graphics, Inc., attn: Legal Services, 1600
-** Amphitheatre Parkway, Mountain View, CA 94043-1351, or at:
-**
-** http://oss.sgi.com/projects/FreeB
-**
-** Note that, as provided in the License, the Software is distributed on an
-** "AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS
-** DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND
-** CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
-** PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-**
-** Original Code. The Original Code is: OpenGL Sample Implementation,
-** Version 1.2.1, released January 26, 2000, developed by Silicon Graphics,
-** Inc. The Original Code is Copyright (c) 1991-2002 Silicon Graphics, Inc.
-** Copyright in any portions created by third parties is as indicated
-** elsewhere herein. All Rights Reserved.
-**
-** Additional Notice Provisions: This software was created using the
-** OpenGL(R) version 1.2.1 Sample Implementation published by SGI, but has
-** not been independently verified as being compliant with the OpenGL(R)
-** version 1.2.1 Specification.
-*/
+neo/renderer/wglext.h
 
-Brandelf utility
----------------------------------------------------------------------------
-lines	file(s)
-225		neo/sys/linux/setup/brandelf.c
+License Applicability. Except to the extent portions of this file are
+made subject to an alternative license as permitted in the SGI Free
+Software License B, Version 1.1 (the "License"), the contents of this
+file are subject only to the provisions of the License. You may not use
+this file except in compliance with the License. You may obtain a copy
+of the License at Silicon Graphics, Inc., attn: Legal Services, 1600
+Amphitheatre Parkway, Mountain View, CA 94043-1351, or at:
 
-/*-
- * Copyright (c) 1996 Søren Schmidt
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer
- *    in this position and unchanged.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software withough specific prior written permission
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $FreeBSD: src/usr.bin/brandelf/brandelf.c,v 1.16 2000/07/02 03:34:08 imp Exp $
- */
+http://oss.sgi.com/projects/FreeB
 
-makeself - Make self-extractable archives on Unix
----------------------------------------------------------------------------
+Note that, as provided in the License, the Software is distributed on an
+"AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS
+DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND
+CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
+PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+Original Code. The Original Code is: OpenGL Sample Implementation,
+Version 1.2.1, released January 26, 2000, developed by Silicon Graphics,
+Inc. The Original Code is Copyright (c) 1991-2002 Silicon Graphics, Inc.
+Copyright in any portions created by third parties is as indicated
+elsewhere herein. All Rights Reserved.
+
+Additional Notice Provisions: This software was created using the
+OpenGL(R) version 1.2.1 Sample Implementation published by SGI, but has
+not been independently verified as being compliant with the OpenGL(R)
+version 1.2.1 Specification.
+
+## Brandelf utility
+
+neo/sys/linux/setup/brandelf.c
+
+Copyright (c) 1996 SÃ¸ren Schmidt
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer
+   in this position and unchanged.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the author may not be used to endorse or promote products
+   derived from this software withough specific prior written permission
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+$FreeBSD: src/usr.bin/brandelf/brandelf.c,v 1.16 2000/07/02 03:34:08 imp Exp $
+
+## makeself - Make self-extractable archives on Unix
+
 neo/sys/linux/setup/makeself/*, neo/sys/linux/setup/makeself/README
-Copyright (c) Stéphane Peter
+Copyright (c) StÃ©phane Peter
 Licensing: GPL v2
