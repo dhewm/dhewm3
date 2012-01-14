@@ -1,0 +1,6 @@
+#ifndef __DOOM3_CONFIG_H__
+#define __DOOM3_CONFIG_H__
+
+#cmakedefine HAVE_JPEG_MEM_SRC
+
+#endif

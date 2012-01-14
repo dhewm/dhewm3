@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __PLATFORM__
 #define __PLATFORM__
 
+#include "config.h"
 #include "framework/BuildDefines.h"
 
 /*

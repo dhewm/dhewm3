@@ -88,10 +88,7 @@ include_directories(${JPEG_INCLUDE_DIR})
 
 set(CMAKE_REQUIRED_INCLUDES ${JPEG_INCLUDE_DIR})
 set(CMAKE_REQUIRED_LIBRARIES ${JPEG_LIBRARY})
-CHECK_FUNCTION_EXISTS("jpeg_mem_src" jpeg_has_mem_src)
-if (jpeg_has_mem_src)
-	add_definitions(-DHAVE_JPEG_MEM_SRC)
-endif ()
+CHECK_FUNCTION_EXISTS("jpeg_mem_src" HAVE_JPEG_MEM_SRC)
 
 find_package(OGG REQUIRED)
 include_directories(${OGG_INCLUDE_DIR})
@@ -230,6 +227,11 @@ if (WIN32)
 		wsock32
 	)
 endif()
+
+configure_file(
+    "${CMAKE_SOURCE_DIR}/config.h.in"
+    "${CMAKE_BINARY_DIR}/config.h"
+)
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}.${cpu}")
 
@@ -695,6 +697,7 @@ else()
 	)
 endif()
 
+include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
