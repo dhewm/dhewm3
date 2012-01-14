@@ -61,13 +61,16 @@ Required libraries are not part of the tree. These are:
 - libogg
 - libvorbis
 - libvorbisfile (may be part of libvorbis)
-- OpenAL (OpenAL Soft recommended, Creative's and Apple's versions are made of fail)
+- OpenAL (OpenAL Soft required, Creative's and Apple's versions are made of fail)
 - SDL v1.2
 - libcurl (optional, required for server downloads)
 
 For UNIX like system these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
 your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
+
+OSX users need to point cmake at OpenAL Soft (better solutions welcome):
+cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo
 
 For Windows there are two options:
 1) Use the provided binaries (recommended, see below)
