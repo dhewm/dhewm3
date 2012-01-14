@@ -4,6 +4,7 @@ dhewm 3
 This file contains the following sections:
 
 ABOUT
+CHANGES
 GENERAL NOTES
 LICENSE
 
@@ -19,6 +20,20 @@ altering the original gameplay.
 
 The project is hosted at: https://github.com/dhewm
 Report bugs here: https://github.com/dhewm/dhewm3/issues
+
+
+=======
+CHANGES
+=======
+
+Compared to the original DOOM 3, the changes of dhewm 3 worth mentioning are:
+
+- 64bit port
+- SDL for low level OS support, OpenGL and input handling
+- OpenAL for audio output, all OS specific audio backends are gone
+- OpenAL EFX for EAX reverb effects (read: EAX on all platforms)
+- A portable build system based on CMake
+- (Cross-)compilation with mingw-w64
 
 
 GENERAL NOTES
