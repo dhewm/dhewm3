@@ -60,10 +60,6 @@ For UNIX like system these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
 your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
 
-OSX users need to point cmake at OpenAL Soft (better solutions welcome):
-
-`cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
-
 For Windows there are two options:
 
 - Use the provided binaries (recommended, see below)
@@ -73,6 +69,10 @@ Create a distinct build folder outside of this source repository and issue
 the cmake command there, pointing it at the neo/ folder from this repository:
 
 `cmake /path/to/repository/neo`
+
+OSX users need to point cmake at OpenAL Soft (better solutions welcome):
+
+`cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
 
 ## Using the provided Windows binaries
 
