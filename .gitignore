@@ -2,4 +2,3 @@ build
 *~
 .*.swp
 *.pyc
-neo/site.conf
