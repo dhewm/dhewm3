@@ -7633,11 +7633,9 @@ bool idPlayer::CanGive( const char *statname, const char *value ) {
 			return false;
 		}
 		return true;
-	} else {
-		return inventory.CanGive( this, spawnArgs, statname, value, &idealWeapon );
 	}
 
-	return false;
+	return inventory.CanGive( this, spawnArgs, statname, value, &idealWeapon );
 }
 
 /*
@@ -9817,13 +9815,13 @@ bool idPlayer::ClientReceiveEvent( int event, int time, const idBitMsg &msg ) {
 				// happens if the event and the spectate change are written on the server during the same frame (fraglimit)
 				return true;
 			}
-			return idActor::ClientReceiveEvent( event, time, msg );
+			break;
 		}
-		default: {
-			return idActor::ClientReceiveEvent( event, time, msg );
-		}
+		default:
+			break;
 	}
-	return false;
+
+	return idActor::ClientReceiveEvent( event, time, msg );
 }
 
 /*

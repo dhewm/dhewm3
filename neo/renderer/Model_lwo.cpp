@@ -734,7 +734,6 @@ static float incoming( lwKey *key0, lwKey *key1 )
 		 if ( key1->next )
 			in *= ( key1->time - key0->time ) / ( key1->next->time - key0->time );
 		 break;
-		 return in;
 
 	  case ID_BEZ2:
 		 in = key1->param[ 1 ] * ( key1->time - key0->time );

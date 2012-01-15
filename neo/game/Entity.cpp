@@ -863,20 +863,19 @@ bool idEntity::DoDormantTests( void ) {
 			return false;
 		}
 		return true;
-	} else {
-		// the monster area is topologically connected to a player, but if
-		// the monster hasn't been woken up before, do the more precise PVS check
-		if ( !fl.hasAwakened ) {
-			if ( !gameLocal.InPlayerPVS( this ) ) {
-				return true;		// stay dormant
-			}
-		}
-
-		// wake up
-		dormantStart = 0;
-		fl.hasAwakened = true;		// only go dormant when area closed off now, not just out of PVS
-		return false;
 	}
+
+	// the monster area is topologically connected to a player, but if
+	// the monster hasn't been woken up before, do the more precise PVS check
+	if ( !fl.hasAwakened ) {
+		if ( !gameLocal.InPlayerPVS( this ) ) {
+			return true;		// stay dormant
+		}
+	}
+
+	// wake up
+	dormantStart = 0;
+	fl.hasAwakened = true;		// only go dormant when area closed off now, not just out of PVS
 
 	return false;
 }
@@ -4854,10 +4853,10 @@ bool idEntity::ClientReceiveEvent( int event, int time, const idBitMsg &msg ) {
 			StopSound( channel, false );
 			return true;
 		}
-		default: {
-			return false;
-		}
+		default:
+			break;
 	}
+
 	return false;
 }
 
@@ -5297,11 +5296,11 @@ bool idAnimatedEntity::ClientReceiveEvent( int event, int time, const idBitMsg &
 			AddLocalDamageEffect( jointNum, localOrigin, localNormal, localDir, damageDef, collisionMaterial );
 			return true;
 		}
-		default: {
-			return idEntity::ClientReceiveEvent( event, time, msg );
-		}
+		default:
+			break;
 	}
-	return false;
+
+	return idEntity::ClientReceiveEvent( event, time, msg );
 }
 
 /*

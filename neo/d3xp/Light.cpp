@@ -1157,9 +1157,9 @@ bool idLight::ClientReceiveEvent( int event, int time, const idBitMsg &msg ) {
 			BecomeBroken( NULL );
 			return true;
 		}
-		default: {
-			return idEntity::ClientReceiveEvent( event, time, msg );
-		}
+		default:
+			break;
 	}
-	return false;
+
+	return idEntity::ClientReceiveEvent( event, time, msg );
 }

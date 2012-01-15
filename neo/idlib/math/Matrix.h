@@ -2649,9 +2649,10 @@ ID_INLINE bool idMatX::InverseFastSelf( void ) {
 		case 6:
 			return reinterpret_cast<idMat6 *>(mat)->InverseFastSelf();
 		default:
-			return InverseSelfGeneric();
+			break;
 	}
-	return false;
+
+	return InverseSelfGeneric();
 }
 
 ID_INLINE idVecX idMatX::Multiply( const idVecX &vec ) const {

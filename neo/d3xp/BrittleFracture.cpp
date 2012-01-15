@@ -1374,9 +1374,9 @@ bool idBrittleFracture::ClientReceiveEvent( int event, int time, const idBitMsg 
 			Shatter( point, dir, time );
 			return true;
 		}
-		default: {
-			return idEntity::ClientReceiveEvent( event, time, msg );
-		}
+		default:
+			break;
 	}
-	return false;
+
+	return idEntity::ClientReceiveEvent( event, time, msg );
 }

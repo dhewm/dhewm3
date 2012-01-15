@@ -1383,11 +1383,11 @@ bool idProjectile::ClientReceiveEvent( int event, int time, const idBitMsg &msg 
 			DefaultDamageEffect( this, spawnArgs, collision, velocity );
 			return true;
 		}
-		default: {
-			return idEntity::ClientReceiveEvent( event, time, msg );
-		}
+		default:
+			break;
 	}
-	return false;
+
+	return idEntity::ClientReceiveEvent( event, time, msg );
 }
 
 /*
