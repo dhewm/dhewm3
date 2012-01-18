@@ -112,6 +112,7 @@ static byte mapkey(SDLKey key) {
 		return K_MENU;
 
 	case SDLK_LALT:
+	case SDLK_RALT:
 		return K_ALT;
 	case SDLK_RCTRL:
 	case SDLK_LCTRL:
