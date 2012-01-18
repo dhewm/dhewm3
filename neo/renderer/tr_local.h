@@ -801,8 +801,6 @@ public:
 	int						guiRecursionLevel;		// to prevent infinite overruns
 	class idGuiModel *		guiModel;
 	class idGuiModel *		demoGuiModel;
-
-	unsigned short			gammaTable[256];	// brightness / gamma modify this
 };
 
 extern backEndState_t		backEnd;
