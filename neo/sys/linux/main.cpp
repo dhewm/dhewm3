@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/linux/local.h"
 
+#include <locale.h>
+
 static idStr	basepath;
 static idStr	savepath;
 
@@ -285,7 +287,15 @@ main
 ===============
 */
 int main(int argc, char **argv) {
+	setlocale(LC_ALL, "C");
 	Posix_EarlyInit( );
+
+	// some ladspa-plugins (that may be indirectly loaded by doom3 if they're
+	// used by alsa) call setlocale(LC_ALL, ""); This sets LC_ALL to $LANG or
+	// $LC_ALL which usually is not "C" and will fuck up scanf, strtod
+	// etc when using a locale that uses ',' as a float radix.
+	// so set $LC_ALL to "C".
+	setenv("LC_ALL", "C", 1);
 
 	if ( argc > 1 ) {
 		common->Init( argc-1, &argv[1] );
@@ -298,4 +308,5 @@ int main(int argc, char **argv) {
 	while (1) {
 		common->Frame();
 	}
+	return 0;
 }
