@@ -4285,7 +4285,7 @@ void CXYWnd::Paste()
 
 		int		nLen = g_Clipboard.GetLength();
 		char	*pBuffer = new char[nLen + 1];
-		memset(pBuffer, 0, sizeof(pBuffer));
+		memset(pBuffer, 0, sizeof(*pBuffer) * (nLen + 1));
 		g_Clipboard.Read(pBuffer, nLen);
 		pBuffer[nLen] = '\0';
 		Map_ImportBuffer(pBuffer, !(GetAsyncKeyState(VK_SHIFT) & 0x8000));

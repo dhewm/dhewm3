@@ -1565,10 +1565,6 @@ bool idCameraPosition::parseToken( const idStr &key, idParser *src ) {
 		name = token;
 		return true;
 	}
-	else if ( !key.Icmp( "time" ) ) {
-		time = src->ParseInt();
-		return true;
-	}
 	else {
 		src->Error( "unknown camera position key: %s", key.c_str() );
 		return false;
