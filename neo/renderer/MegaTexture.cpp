@@ -540,7 +540,7 @@ void	idMegaTexture::GenerateMegaMipMaps( megaTextureHeader_t *header, idFile *ou
 
 						if ( tx > width || ty > height ) {
 							// off edge, zero fill
-							memset( newBlock, 0, sizeof( tileSize ) );
+							memset( newBlock, 0, tileSize );
 						} else {
 							tileNum = tileOffset + ty * width + tx;
 							inFile->Seek( tileNum * tileSize, FS_SEEK_SET );
