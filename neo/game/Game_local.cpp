@@ -1626,7 +1626,6 @@ void idGameLocal::GetShakeSounds( const idDict *dict ) {
 	const char *soundShaderName;
 	idStr soundName;
 
-	soundShaderName = dict->GetString( "s_shader" );
 	if ( dict->GetString( "s_shader", "", &soundShaderName )
 		 && dict->GetFloat( "s_shakes" ) != 0.0f )
 	{
