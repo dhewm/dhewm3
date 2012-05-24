@@ -263,6 +263,26 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	return (GLExtension_t)SDL_GL_GetProcAddress(name);
 }
 
+static GLenum GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX = 0x9048;
+static GLenum TEXTURE_FREE_MEMORY_ATI                    = 0x87FC;
+
+static int GLimp_GetVideoRam() {
+	GLint meminfo[4] = {0, 0, 0, 0};
+	// nvidia (only uses one of the GLints)
+	qglGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, meminfo);
+	if (meminfo[0] == 0) {
+		// ATI (uses all 4 GLints)
+		qglGetIntegerv(TEXTURE_FREE_MEMORY_ATI, meminfo);
+		// TODO: this actually returns the *free* memory, not the *total* memory.
+		// there's also GLX_AMD_gpu_association and WGL_AMD_gpu_association that
+		// should return the expected value, but is more painful to use and not OS-independent
+	}
+
+	qglGetError();
+
+	return meminfo[0]/1024; // from KB to MB
+}
+
 /*
 ================
 Sys_GetVideoRam
@@ -276,7 +296,10 @@ int Sys_GetVideoRam() {
 
 	common->Printf("guessing video ram (use +set sys_videoRam to force)\n");
 
-	Uint32 vram = SDL_GetVideoInfo()->video_mem;
+	int vram = GLimp_GetVideoRam();
+
+	if(!vram)
+		vram = SDL_GetVideoInfo()->video_mem/1024; // we want MB
 
 	if (!vram)
 		vram = 64;
