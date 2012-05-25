@@ -1,0 +1,83 @@
+# Sikkmod 1.2
+
+string(REPLACE "game/" "sikkmod/" src_sikkmod "${src_game}")
+set(src_sikkmod
+	${src_sikkmod}
+	sikkmod/Grab.cpp
+	sikkmod/physics/Force_Grab.cpp
+)
+
+add_library(sikkmod SHARED ${src_sikkmod})
+set_target_properties(sikkmod PROPERTIES PREFIX "")
+set_target_properties(sikkmod PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+set_target_properties(sikkmod PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/sikkmod -I${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(sikkmod PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(sikkmod PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(sikkmod PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(sikkmod PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../sikkmod")
+target_link_libraries(sikkmod idlib ${ZLIB_LIBRARY})
+
+# Sikkmod 1.1
+
+string(REPLACE "game/" "sikkmod_v11/" src_sikkmod_v11 "${src_game}")
+set(src_sikkmod_v11
+	${src_sikkmod_v11}
+	sikkmod_v11/Grab.cpp
+	sikkmod_v11/physics/Force_Grab.cpp
+)
+
+add_library(sikkmod_v11 SHARED ${src_sikkmod_v11})
+set_target_properties(sikkmod_v11 PROPERTIES PREFIX "")
+set_target_properties(sikkmod_v11 PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+set_target_properties(sikkmod_v11 PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/sikkmod_v11 -I${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(sikkmod_v11 PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(sikkmod_v11 PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(sikkmod_v11 PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(sikkmod_v11 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../sikkmod_v11")
+target_link_libraries(sikkmod_v11 idlib ${ZLIB_LIBRARY})
+
+# Sikkmod 1.1 for RoE
+
+string(REPLACE "d3xp/" "sikkmodd3xp/" src_sikkmodd3xp "${src_d3xp}")
+set(src_sikkmodd3xp
+	${src_sikkmodd3xp}
+	sikkmodd3xp/Grab.cpp
+)
+
+add_library(sikkmodd3xp SHARED ${src_sikkmodd3xp})
+set_target_properties(sikkmodd3xp PROPERTIES PREFIX "")
+set_target_properties(sikkmodd3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
+set_target_properties(sikkmodd3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/sikkmodd3xp -I${CMAKE_CURRENT_SOURCE_DIR} -Wno-overloaded-virtual")
+set_target_properties(sikkmodd3xp PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(sikkmodd3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(sikkmodd3xp PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(sikkmodd3xp PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../sikkmodd3xp")
+target_link_libraries(sikkmodd3xp idlib ${ZLIB_LIBRARY})
+
+# Project Synergy
+
+string(REPLACE "game/" "synergy/" src_synergy "${src_game}")
+
+add_library(synergy SHARED ${src_synergy})
+set_target_properties(synergy PROPERTIES PREFIX "")
+set_target_properties(synergy PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+set_target_properties(synergy PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/synergy -I${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(synergy PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(synergy PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(synergy PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(synergy PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../synergy")
+target_link_libraries(synergy idlib ${ZLIB_LIBRARY})
+
+# Classic Doom
+
+string(REPLACE "game/" "classicdoom/" src_classicdoom "${src_game}")
+
+add_library(classicdoom SHARED ${src_classicdoom})
+set_target_properties(classicdoom PROPERTIES PREFIX "")
+set_target_properties(classicdoom PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+set_target_properties(classicdoom PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/classicdoom -I${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(classicdoom PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(classicdoom PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(classicdoom PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(classicdoom PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../classicdoom")
+target_link_libraries(classicdoom idlib ${ZLIB_LIBRARY})

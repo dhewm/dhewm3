@@ -42,9 +42,7 @@ http://store.steampowered.com/app/9050/
 
 http://store.steampowered.com/app/9070/
 
-## Compiling
-
-The build system is based on CMake: http://cmake.org/
+## Dependencies
 
 Required libraries are not part of the tree. These are:
 
@@ -65,14 +63,35 @@ For Windows there are two options:
 - Use the provided binaries (recommended, see below)
 - Compile these libraries yourself
 
+## Compiling
+
+The build system is based on CMake: http://cmake.org/
+
 Create a distinct build folder outside of this source repository and issue
 the cmake command there, pointing it at the neo/ folder from this repository:
 
-`cmake /path/to/repository/neo`
+`$ cmake /path/to/repository/neo`
 
 OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
-`cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
+`$ cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
+
+For UNIX like systems, run make after that (possibly with multiple jobs):
+
+`make -j4`
+
+## Options
+
+- `D3XP`: build game library for Resurrection of Evil expansion
+- `MODS`: build game libraries for additional mods (see `neo/mods/readme.txt`)
+- `DEDICATED`: build dedicated server
+- `X86`: cross compile for x86 on an x86\_64 machine
+- `ONATIVE`: optimize for the host CPU
+
+These options are disabled by default, but can be turned on via cmake
+arguments. For example:
+
+`cmake -DD3XP=1 -DONATIVE=1 /path/to/repository/neo`
 
 ## Using the provided Windows binaries
 
@@ -112,6 +131,8 @@ For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
 
 Then point CMake at your Toolchain file:
 `cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+
+# MISC NOTES
 
 ## Back End Rendering of Stencil Shadows
 
