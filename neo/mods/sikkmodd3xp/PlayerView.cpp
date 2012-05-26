@@ -540,7 +540,7 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 // <---sikk
 
 	// hack the shake in at the very last moment, so it can't cause any consistency problems
-	renderView_t	hackedView = *view;
+	hackedView = *view;
 	hackedView.viewaxis = hackedView.viewaxis * ShakeAxis();
 
 #ifdef _D3XP
