@@ -34,7 +34,12 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 This source release does not contain any game data, the game data is still
 covered by the original EULA and must be obeyed as usual.
 
-You must patch the game to the latest version.
+You need the original PK4 files that come under `base/`, as well as the ones
+containted in the latest patch. See below for installation details.
+
+If you have the _Resurrection of Evil_ expansion, the PK4 files under `d3xp/`
+can be used to play it. The *D3XP* option must also be enabled (see below for
+configuration details).
 
 Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam store at
 
@@ -82,7 +87,7 @@ For UNIX like systems, run make after that (possibly with multiple jobs):
 
 ## Options
 
-- `D3XP`: build game library for Resurrection of Evil expansion
+- `D3XP`: build game library for the _Resurrection of Evil_ expansion
 - `MODS`: build game libraries for additional mods (see `neo/mods/readme.txt`)
 - `DEDICATED`: build dedicated server
 - `X86`: cross compile for x86 on an x86\_64 machine
@@ -92,6 +97,14 @@ These options are disabled by default, but can be turned on via cmake
 arguments. For example:
 
 `cmake -DD3XP=1 -DONATIVE=1 /path/to/repository/neo`
+
+## Installing
+
+The executable will try to load data (and game library) from the current directory.
+Just copy `/path/to/doom3/installation/base/*.pk4` to the existing `base/`
+subdirectory under the build directory.
+
+TODO: document system-wide installation when available
 
 ## Using the provided Windows binaries
 
