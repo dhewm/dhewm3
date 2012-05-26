@@ -269,18 +269,6 @@ Helper functions for Sys_GetVideoRam()
 =================
 */
 
-static int GLimp_GetVideoRam_NV() {
-	// using nvidia extension
-	const GLenum GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX = 0x9048;
-	GLint total_mem = 0;
-	qglGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &total_mem);
-	qglGetError();
-
-	return total_mem/1024; // from KB to MB
-}
-
-
-
 static int GLimp_GetVideoRam_AMD() {
 	// using AMDs glx/wgl extension. They're identical except for the wgl/glX prefix
 	const GLint QGL_GPU_RAM_AMD = 0x21A3; // value is used for both wgl and glx
@@ -320,6 +308,29 @@ static int GLimp_GetVideoRam_AMD() {
 	return (int)totalMemMB;
 }
 
+static int GLimp_GetVideoRam() {
+	const GLenum GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX = 0x9048;
+	const GLenum GL_TOTAL_PHYSICAL_MEMORY_ATI               = 0x87FE;
+	GLint total_mem[4] = {0};
+
+	// using nvidia extension
+	qglGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, total_mem);
+	if(total_mem[0] == 0) {
+		// try undocumented AMD/ATI extension that is broken in some catalyst versions
+		// but should at least work on all operating systems
+		qglGetIntegerv(GL_TOTAL_PHYSICAL_MEMORY_ATI, total_mem);
+	}
+
+	int ret = total_mem[0]/1024; // from KB to MB
+	if(ret < 32) {
+		// maybe GL_TOTAL_PHYSICAL_MEMORY_ATI was broken in the driver, try glx/wgl method
+		ret = GLimp_GetVideoRam_AMD();
+	}
+
+	qglGetError(); // clear gl error flag
+	return ret;
+}
+
 /*
 ================
 Sys_GetVideoRam
@@ -333,10 +344,7 @@ int Sys_GetVideoRam() {
 
 	common->Printf("guessing video ram (use +set sys_videoRam to force)\n");
 
-	int vram = GLimp_GetVideoRam_NV();
-
-	if(!vram)
-		vram = GLimp_GetVideoRam_AMD();
+	int vram = GLimp_GetVideoRam();
 
 	if(!vram)
 		vram = SDL_GetVideoInfo()->video_mem/1024; // we want MB
