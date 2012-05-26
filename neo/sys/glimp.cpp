@@ -263,24 +263,61 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	return (GLExtension_t)SDL_GL_GetProcAddress(name);
 }
 
-static GLenum GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX = 0x9048;
-static GLenum TEXTURE_FREE_MEMORY_ATI                    = 0x87FC;
+/*
+=================
+Helper functions for Sys_GetVideoRam()
+=================
+*/
 
-static int GLimp_GetVideoRam() {
-	GLint meminfo[4] = {0, 0, 0, 0};
-	// nvidia (only uses one of the GLints)
-	qglGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, meminfo);
-	if (meminfo[0] == 0) {
-		// ATI (uses all 4 GLints)
-		qglGetIntegerv(TEXTURE_FREE_MEMORY_ATI, meminfo);
-		// TODO: this actually returns the *free* memory, not the *total* memory.
-		// there's also GLX_AMD_gpu_association and WGL_AMD_gpu_association that
-		// should return the expected value, but is more painful to use and not OS-independent
-	}
-
+static int GLimp_GetVideoRam_NV() {
+	// using nvidia extension
+	const GLenum GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX = 0x9048;
+	GLint total_mem = 0;
+	qglGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &total_mem);
 	qglGetError();
 
-	return meminfo[0]/1024; // from KB to MB
+	return total_mem/1024; // from KB to MB
+}
+
+
+
+static int GLimp_GetVideoRam_AMD() {
+	// using AMDs glx/wgl extension. They're identical except for the wgl/glX prefix
+	const GLint QGL_GPU_RAM_AMD = 0x21A3; // value is used for both wgl and glx
+	GLuint ( APIENTRY * qglGetGPUIDsAMD  )( GLuint maxCount, GLuint *ids ) = NULL;
+	GLint  ( APIENTRY * qglGetGPUInfoAMD )( GLuint id, GLint property, GLenum dataType, GLuint size, void *data ) = NULL;
+
+#ifdef _WIN32
+	const char* GetGPUIDsAMD  = "wglGetGPUIDsAMD";
+	const char* GetGPUInfoAMD = "wglGetGPUInfoAMD";
+#else
+	const char* GetGPUIDsAMD  = "glXGetGPUIDsAMD";
+	const char* GetGPUInfoAMD = "glXGetGPUInfoAMD";
+#endif
+	// TODO: what about platforms without wgl/glx? this won't break anything there, it just won't work..
+	// I didn't find an equivalent extension for CGL (OSX)
+
+	qglGetGPUIDsAMD  = (GLuint (APIENTRY *)(GLuint, GLuint *)) GLimp_ExtensionPointer( GetGPUIDsAMD );
+	qglGetGPUInfoAMD = (GLint  (APIENTRY *)(GLuint, GLint, GLenum, GLuint, void *)) GLimp_ExtensionPointer( GetGPUInfoAMD );
+
+	if( qglGetGPUIDsAMD == NULL || qglGetGPUInfoAMD == NULL) {
+		// extension not found => not AMDs binary driver, no AMD card, no wgl/glx, ...
+		return 0;
+	}
+
+	GLuint noOfGPUs = qglGetGPUIDsAMD(0, NULL);
+	if(noOfGPUs == 0) {
+		return 0;
+	}
+	GLuint *gpuIDs = new GLuint[noOfGPUs];
+	qglGetGPUIDsAMD(noOfGPUs, gpuIDs);
+	GLuint totalMemMB = 0;
+
+	qglGetGPUInfoAMD(gpuIDs[0], // FIXME: always GPU 0 ?
+	                 QGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof( GLuint ), &totalMemMB );
+
+	delete[] gpuIDs;
+	return (int)totalMemMB;
 }
 
 /*
@@ -296,7 +333,10 @@ int Sys_GetVideoRam() {
 
 	common->Printf("guessing video ram (use +set sys_videoRam to force)\n");
 
-	int vram = GLimp_GetVideoRam();
+	int vram = GLimp_GetVideoRam_NV();
+
+	if(!vram)
+		vram = GLimp_GetVideoRam_AMD();
 
 	if(!vram)
 		vram = SDL_GetVideoInfo()->video_mem/1024; // we want MB
