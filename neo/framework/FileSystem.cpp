@@ -3826,8 +3826,10 @@ void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ], 
 
 #if ID_FAKE_PURE
 	if ( 1 ) {
-#else
+#elif _DEBUG
 	if ( !serverPaks.Num() ) {
+#else
+    if ( 0 ) {
 #endif
 		// from executable directory first - this is handy for developement
 		dllPath = Sys_EXEPath( );
