@@ -39,11 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ENGINE_VERSION					"dhewm 1.3.1"	// printed in console
 
 // paths
-#ifdef ID_DEMO_BUILD
-	#define BASE_GAMEDIR					"demo"
-#else
-	#define	BASE_GAMEDIR					"base"
-#endif
+#define	BASE_GAMEDIR					"base"
 
 // filenames
 #define CONFIG_FILE						"dhewm.cfg"
@@ -94,11 +90,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WIN32_CONSOLE_CLASS				"dhewm 3 WinConsole"
 
 // Linux info
-#ifdef ID_DEMO_BUILD
-	#define LINUX_DEFAULT_PATH			"/usr/local/games/dhewm3-demo"
-#else
-	#define LINUX_DEFAULT_PATH			"/usr/local/games/dhewm3"
-#endif
+#define LINUX_DEFAULT_PATH			"/usr/local/games/dhewm3"
 
 // CD Key file info
 // goes into BASE_GAMEDIR whatever the fs_game is set to

@@ -51,11 +51,7 @@ static idStr	savepath;
  ==============
  */
 const char *Sys_DefaultSavePath(void) {
-#if defined( ID_DEMO_BUILD )
-	sprintf( savepath, "%s/.dhewm3-demo", getenv( "HOME" ) );
-#else
 	sprintf( savepath, "%s/.dhewm3", getenv( "HOME" ) );
-#endif
 	return savepath.c_str();
 }
 /*

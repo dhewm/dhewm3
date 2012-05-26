@@ -196,19 +196,12 @@ idTarget_EndLevel::Event_Activate
 void idTarget_EndLevel::Event_Activate( idEntity *activator ) {
 	idStr nextMap;
 
-#ifdef ID_DEMO_BUILD
-	if ( spawnArgs.GetBool( "endOfGame" ) ) {
-		cvarSystem->SetCVarBool( "g_nightmare", true );
-		gameLocal.sessionCommand = "endofDemo";
-		return;
-	}
-#else
 	if ( spawnArgs.GetBool( "endOfGame" ) ) {
 		cvarSystem->SetCVarBool( "g_nightmare", true );
 		gameLocal.sessionCommand = "disconnect";
 		return;
 	}
-#endif
+
 	if ( !spawnArgs.GetString( "nextMap", "", nextMap ) ) {
 		gameLocal.Printf( "idTarget_SessionCommand::Event_Activate: no nextMap key\n" );
 		return;

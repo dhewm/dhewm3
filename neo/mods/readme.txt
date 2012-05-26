@@ -17,7 +17,7 @@ Then you have to put it where the game library (game*.so) is, or vice-versa.
   Build subdirectory: skikkmod_v11 (copy as doom3evolution)
   Website: http://www.moddb.com/mods/doom-3-evolution
 
-- Doom 3 HD
+- Doom 3 HD Mod
   Build subdirectory: sikkmod (copy as doom3hd), sikkmodd3xp (copy as doom3roehd)
   Website: http://www.moddb.com/mods/cverdzislav
   Notes: run as
@@ -55,6 +55,21 @@ image_downSample set to "1" in your ~/.dhewm3/moddir/dhewm.cfg. If that's the
 case, try setting to "0".
 
 This can be caused by video RAM autodetection problems. Another alternative is
-to delete your ~/.dhewm3/base/dhewm3.cfg and run (just once):
-$ ./dhewm3 +set sys_videoram 512
-Then when creating new configurations, this won't happen again.
+to delete your ~/.dhewm3/base/dhewm.cfg and run (just once):
+$ dhewm3 +set sys_videoram 512
+Then when creating new configurations, this won't happen again. For example:
+$ dhewm3 +set fs_game sikkmod
+(assumming ~/.dhewm3/sikkmod/dhewm.cfg does not yet exist)
+
+Other non-native mods
+
+In case the source code is available, it can be easily adapted to work with
+dhewm3. Otherwise you'll have to use the same Doom 3 version as the available
+game library. Fortunately you have two choices:
+
+- For a Linux 32-bit mod, build dhewm3 with the X86 option turned on.
+  If you don't have Linux, but an OS with binary compatibility such as
+  FreeBSD, you can still run it (but building is not immediate).
+  
+- For a Windows 32-bit mod, you can cross-compile it (see main readme) and run
+  it with Wine. Be sure to build a 32-bit version.

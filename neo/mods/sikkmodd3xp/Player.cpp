@@ -458,15 +458,11 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 	// weapons are stored as a number for persistant data, but as strings in the entityDef
 	weapons	= dict.GetInt( "weapon_bits", "0" );
 
-#ifdef ID_DEMO_BUILD
-		Give( owner, dict, "weapon", dict.GetString( "weapon" ), NULL, false );
-#else
 	if ( g_skill.GetInteger() >= 3 ) {
 		Give( owner, dict, "weapon", dict.GetString( "weapon_nightmare" ), NULL, false );
 	} else {
 		Give( owner, dict, "weapon", dict.GetString( "weapon" ), NULL, false );
 	}
-#endif
 
 	num = dict.GetInt( "levelTriggers" );
 	for ( i = 0; i < num; i++ ) {
@@ -2030,12 +2026,10 @@ void idPlayer::Spawn( void ) {
 #endif
 // sikk - Commented to allow this to be set by the user
 //			g_armorProtection.SetFloat( ( g_skill.GetInteger() < 2 ) ? 0.4f : 0.2f );
-#ifndef ID_DEMO_BUILD
 			if ( g_skill.GetInteger() == 3 ) {
 				healthTake = true;
 				nextHealthTake = gameLocal.time + g_healthTakeTime.GetInteger() * 1000;
 			}
-#endif
 		}
 	}
 
@@ -4322,7 +4316,6 @@ void idPlayer::UpdatePowerUps( void ) {
 		nextHealthPulse = gameLocal.time + HEALTHPULSE_TIME;
 		healthPulse = true;
 	}
-#ifndef ID_DEMO_BUILD
 	if ( !gameLocal.inCinematic && influenceActive == 0 && g_skill.GetInteger() == 3 && gameLocal.time > nextHealthTake && !AI_DEAD && health > g_healthTakeLimit.GetInteger() ) {
 		assert( !gameLocal.isClient );	// healthPool never be set on client
 
@@ -4339,7 +4332,6 @@ void idPlayer::UpdatePowerUps( void ) {
 		nextHealthTake = gameLocal.time + g_healthTakeTime.GetInteger() * 1000;
 		healthTake = true;
 	}
-#endif
 
 // sikk---> Health Management System (Health Regen)
 	if ( g_healthManagementType.GetInteger() == 2 && 
