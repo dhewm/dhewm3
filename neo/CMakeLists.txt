@@ -119,7 +119,6 @@ endif()
 # compiler specific flags
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-pipe)
-	add_definitions(-Wall)
 
 	if (NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 		add_definitions(-march=native)
@@ -127,14 +126,14 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_definitions(-march=pentium3)
 	endif()
 
-    set(CMAKE_C_FLAGS_PRERELEASE "-g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-    set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-    set(CMAKE_C_FLAGS_MINSIZEREL "-DNDEBUG -Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_DEBUG "-g -D_DEBUG -O1")
-    
-    set(CMAKE_C_FLAGS_PROFILE "-DNDEBUG -pg -O1 -fno-omit-frame-pointer")
+	set(CMAKE_C_FLAGS_PRERELEASE "-Wall -g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_MINSIZEREL "-DNDEBUG -Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_DEBUG "-Wall -g -D_DEBUG -O1")
+
+	set(CMAKE_C_FLAGS_PROFILE "-DNDEBUG -pg -O1 -fno-omit-frame-pointer")
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
-    set(LINK_FLAGS_PROFILE "-pg")
+
 
 	add_definitions(-fno-strict-aliasing)
 
@@ -148,6 +147,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-Wno-sign-compare)
 	add_definitions(-Wno-switch)
 	add_definitions(-Wno-format-security)
+	add_definitions(-Wno-enum-compare)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 	if (cxx_has_Woverload_virtual)
@@ -208,7 +208,7 @@ elseif (MSVC)
 	add_definitions(/wd4996) # 'function': was declared deprecated
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
-    set(CMAKE_C_FLAGS_PRERELEASE "/Ox /Oy /Zi /MD")
+	set(CMAKE_C_FLAGS_PRERELEASE "/Ox /Oy /Zi /MD")
 	set(CMAKE_C_FLAGS_MINSIZEREL "/Ox /Oy /Os /MD")
 else()
 	message(FATAL_ERROR "Unsupported compiler")
@@ -232,8 +232,8 @@ if (WIN32)
 endif()
 
 configure_file(
-    "${CMAKE_SOURCE_DIR}/config.h.in"
-    "${CMAKE_BINARY_DIR}/config.h"
+	"${CMAKE_SOURCE_DIR}/config.h.in"
+	"${CMAKE_BINARY_DIR}/config.h"
 )
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
@@ -793,5 +793,5 @@ if (D3XP)
 endif()
 
 if (MODS)
-    add_subdirectory(mods)
+	add_subdirectory(mods)
 endif()
