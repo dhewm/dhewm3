@@ -106,20 +106,21 @@ set(src_ruiner
 	ruiner/Grabber.cpp
 	ruiner/physics/Force_Grab.cpp
 	ruiner/PlayerCursor.cpp
+	ruiner/sourcehook/sourcehook.cpp
 	ruiner/tracer.cpp
 	ruiner/TrailGenerator.cpp
 )
 
-#add_library(ruiner SHARED ${src_ruiner})
-#set_target_properties(ruiner PROPERTIES PREFIX "")
-# TRAIL_FX_CHAIN;TEST_TRAIL;_DENTONMOD
-#set_target_properties(ruiner PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_PORTALSKY")
-#set_target_properties(ruiner PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/ruiner -I${CMAKE_CURRENT_SOURCE_DIR}")
-#set_target_properties(ruiner PROPERTIES LINK_FLAGS "${ldflags}")
-#set_target_properties(ruiner PROPERTIES INSTALL_NAME_DIR "@executable_path")
-#set_target_properties(ruiner PROPERTIES OUTPUT_NAME "game${gamesuffix}")
-#set_target_properties(ruiner PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../ruiner")
-#target_link_libraries(ruiner idlib ${ZLIB_LIBRARY})
-#if (UNIX)
-#   install(TARGETS ruiner LIBRARY DESTINATION share/dhewm3/ruiner)
-#endif()
+add_library(ruiner SHARED ${src_ruiner})
+set_target_properties(ruiner PROPERTIES PREFIX "")
+ 
+set_target_properties(ruiner PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_PORTALSKY;TRAIL_FX_CHAIN;TEST_TRAIL;_DENTONMOD")
+set_target_properties(ruiner PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/ruiner -I${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(ruiner PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(ruiner PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(ruiner PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(ruiner PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../ruiner")
+target_link_libraries(ruiner idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS ruiner LIBRARY DESTINATION share/dhewm3/ruiner)
+endif()

@@ -38,7 +38,7 @@ You need the original PK4 files that come under `base/`, as well as the ones
 containted in the latest patch. See below for installation details.
 
 If you have the _Resurrection of Evil_ expansion, the PK4 files under `d3xp/`
-can be used to play it. The *D3XP* option must also be enabled (see below for
+can be used to play it. The `D3XP` option must also be enabled (see below for
 configuration details).
 
 Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam store at
@@ -81,16 +81,17 @@ OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
 `$ cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
 
-For UNIX like systems, run make after that (possibly with multiple jobs):
-
+For UNIX like systems, run make (possibly with multiple jobs) after that. Like
 `$ make -j4`
 
 ## Options
 
 In CMake use this syntax to set variables:
+
 `$ cmake -DVAR1=V1 -DVAR2=V2 ... /path/to/repository/neo`
 
 For example:
+
 `$ cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/usr -DD3XP=1 -DONATIVE=1 /path/to/repository/neo`
 
 ### Build type
@@ -121,15 +122,17 @@ The following are disabled by default.
 
 ## Installing
 
-Under UNIX there is an "install" target, so just run:
+Under UNIX there is an "install" target, so just run
 `$ make install`
 
 Then copy your `base/*.pk4` files to `${CMAKE_INSTALL_PREFIX}/share/dhewm3/base`,
 and optionally the `d3xp/*.pk4` files to `${CMAKE_INSTALL_PREFIX}/share/dhewm3/d3xp`.
 
-The executable will also look for data in the executable directory and current
-directory before trying the system installation path, so it can also be used
-for user installations.
+The program will also look for data in the executable directory and current
+directory after trying the system installation path, so it can also be used
+for user installations. For other cases you can use:
+
+`$ dhewm3 +set fs_basepath /path/to/doom3`
 
 ## Using the provided Windows binaries
 

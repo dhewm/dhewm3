@@ -1,0 +1,46 @@
+--- sources/base_src/game/Game_local.h	2007-01-16 20:37:47.000000000 -0300
++++ Game_local.h	2012-05-26 16:11:44.921865587 -0300
+@@ -687,6 +706,9 @@
+ #include "physics/Force.h"
+ #include "physics/Force_Constant.h"
+ #include "physics/Force_Drag.h"
++//rev grab
++#include "physics/Force_Grab.h"
++//rev grab
+ #include "physics/Force_Field.h"
+ #include "physics/Force_Spring.h"
+ #include "physics/Physics.h"
+@@ -701,14 +723,25 @@
+ #include "physics/Physics_AF.h"
+ 
+ #include "SmokeParticles.h"
++#include "TrailGenerator.h" //ivan
++
++////Thirdperson cross hair start REVILITY
++#include "PlayerCursor.h"
++////Thirdperson cross hair end REVILITY
+ 
+ #include "Entity.h"
+ #include "GameEdit.h"
++//rev grab
++#include "Grabber.h"
++//rev grab
+ #include "AF.h"
+ #include "IK.h"
+ #include "AFEntity.h"
+ #include "Misc.h"
+ #include "Actor.h"
++#ifdef _DENTONMOD
++#include "tracer.h"
++#endif
+ #include "Projectile.h"
+ #include "Weapon.h"
+ #include "Light.h"
+@@ -728,6 +761,7 @@
+ #include "BrittleFracture.h"
+ 
+ #include "ai/AI.h"
++#include "ai/AI_bot.h" //ivan
+ #include "anim/Anim_Testmodel.h"
+ 
+ #include "script/Script_Compiler.h"

@@ -32,6 +32,10 @@ Then you have to put it where the game library (game*.so) is, or vice-versa.
   Build subdirectory: synergy
   Website: http://www.moddb.com/mods/project-synergy
 
+- Ruiner
+  Build subdirectory: ruiner
+  Website: http://www.moddb.com/mods/ruiner
+
 - Sikkmod 1.1 for Resurrection of Evil
   Build subdirectory: sikkmodd3xp
   Website: http://www.moddb.com/mods/sikkmod
