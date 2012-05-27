@@ -16,6 +16,9 @@ set_target_properties(sikkmod PROPERTIES INSTALL_NAME_DIR "@executable_path")
 set_target_properties(sikkmod PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 set_target_properties(sikkmod PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../sikkmod")
 target_link_libraries(sikkmod idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS sikkmod LIBRARY DESTINATION share/dhewm3/sikkmod)
+endif()
 
 # Sikkmod 1.1
 
@@ -35,6 +38,9 @@ set_target_properties(sikkmod_v11 PROPERTIES INSTALL_NAME_DIR "@executable_path"
 set_target_properties(sikkmod_v11 PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 set_target_properties(sikkmod_v11 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../sikkmod_v11")
 target_link_libraries(sikkmod_v11 idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS sikkmod_v11 LIBRARY DESTINATION share/dhewm3/sikkmod_v11)
+endif()
 
 # Sikkmod 1.1 for RoE
 
@@ -53,6 +59,9 @@ set_target_properties(sikkmodd3xp PROPERTIES INSTALL_NAME_DIR "@executable_path"
 set_target_properties(sikkmodd3xp PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 set_target_properties(sikkmodd3xp PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../sikkmodd3xp")
 target_link_libraries(sikkmodd3xp idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS sikkmodd3xp LIBRARY DESTINATION share/dhewm3/sikkmodd3xp)
+endif()
 
 # Project Synergy
 
@@ -67,6 +76,9 @@ set_target_properties(synergy PROPERTIES INSTALL_NAME_DIR "@executable_path")
 set_target_properties(synergy PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 set_target_properties(synergy PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../synergy")
 target_link_libraries(synergy idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS synergy LIBRARY DESTINATION share/dhewm3/synergy)
+endif()
 
 # Classic Doom
 
@@ -81,3 +93,33 @@ set_target_properties(classicdoom PROPERTIES INSTALL_NAME_DIR "@executable_path"
 set_target_properties(classicdoom PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 set_target_properties(classicdoom PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../classicdoom")
 target_link_libraries(classicdoom idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS classicdoom LIBRARY DESTINATION share/dhewm3/classicdoom)
+endif()
+
+# Ruiner
+
+string(REPLACE "game/" "ruiner/" src_ruiner "${src_game}")
+set(src_ruiner
+	${src_ruiner}
+	ruiner/ai/AI_bot.cpp
+	ruiner/Grabber.cpp
+	ruiner/physics/Force_Grab.cpp
+	ruiner/PlayerCursor.cpp
+	ruiner/tracer.cpp
+	ruiner/TrailGenerator.cpp
+)
+
+#add_library(ruiner SHARED ${src_ruiner})
+#set_target_properties(ruiner PROPERTIES PREFIX "")
+# TRAIL_FX_CHAIN;TEST_TRAIL;_DENTONMOD
+#set_target_properties(ruiner PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_PORTALSKY")
+#set_target_properties(ruiner PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/ruiner -I${CMAKE_CURRENT_SOURCE_DIR}")
+#set_target_properties(ruiner PROPERTIES LINK_FLAGS "${ldflags}")
+#set_target_properties(ruiner PROPERTIES INSTALL_NAME_DIR "@executable_path")
+#set_target_properties(ruiner PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+#set_target_properties(ruiner PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../ruiner")
+#target_link_libraries(ruiner idlib ${ZLIB_LIBRARY})
+#if (UNIX)
+#   install(TARGETS ruiner LIBRARY DESTINATION share/dhewm3/ruiner)
+#endif()

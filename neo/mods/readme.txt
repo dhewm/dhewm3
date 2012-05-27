@@ -20,9 +20,13 @@ Then you have to put it where the game library (game*.so) is, or vice-versa.
 - Doom 3 HD Mod
   Build subdirectory: sikkmod (copy as doom3hd), sikkmodd3xp (copy as doom3roehd)
   Website: http://www.moddb.com/mods/cverdzislav
-  Notes: run as
-    "dhewm3 +set fs_game doom3hd" for Doom 3, and as
-    "dhewm3 +set fs_game_base d3xp +set fs_game doom3roehd" for RoE
+  Installing:
+    (destination folder << source folder1 + folder2 + ...)
+    doom3hd << d3hdm + d3hdmmtr
+    doom3roehd << d3xphdm + d3hdmtr
+  Running:
+    Doom 3: dhewm3 +set fs_game doom3hd
+    RoE: dhewm3 +set fs_game_base d3xp +set fs_game doom3roehd
 
 - Project Synergy
   Build subdirectory: synergy
@@ -31,7 +35,7 @@ Then you have to put it where the game library (game*.so) is, or vice-versa.
 - Sikkmod 1.1 for Resurrection of Evil
   Build subdirectory: sikkmodd3xp
   Website: http://www.moddb.com/mods/sikkmod
-  Notes: run as "dhewm3 +set fs_game_base d3xp +set fs_game sikkmodxp"
+  Run as: dhewm3 +set fs_game_base d3xp +set fs_game sikkmodxp
 
 - Sikkmod 1.2
   Build subdirectory: skikkmod

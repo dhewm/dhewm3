@@ -83,9 +83,31 @@ OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
 For UNIX like systems, run make after that (possibly with multiple jobs):
 
-`make -j4`
+`$ make -j4`
 
 ## Options
+
+In CMake use this syntax to set variables:
+`$ cmake -DVAR1=V1 -DVAR2=V2 ... /path/to/repository/neo`
+
+For example:
+`$ cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/usr -DD3XP=1 -DONATIVE=1 /path/to/repository/neo`
+
+### Build type
+
+The following values are valid for the `CMAKE_BUILD_TYPE` variable:
+
+- `relwithdebinfo`: as `release`, plus debugging symbols (default value)
+- `debug`: includes debugging symbols and basic optimizations
+- `debugall`: includes debugging symbols, and defines \_DEBUG (which produces different code sometimes)
+- `release`: includes more optimizations
+- `minsizerel`: includes optimizations while reducing executable size
+
+TODO: finish and document `profile`
+
+### Common
+
+The following are disabled by default.
 
 - `D3XP`: build game library for the _Resurrection of Evil_ expansion
 - `MODS`: build game libraries for additional mods (see `neo/mods/readme.txt`)
@@ -93,18 +115,21 @@ For UNIX like systems, run make after that (possibly with multiple jobs):
 - `X86`: cross compile for x86 on an x86\_64 machine
 - `ONATIVE`: optimize for the host CPU
 
-These options are disabled by default, but can be turned on via cmake
-arguments. For example:
+### Installation (UNIX)
 
-`cmake -DD3XP=1 -DONATIVE=1 /path/to/repository/neo`
+- `CMAKE_INSTALL_PREFIX`: installation prefix, defaults to `/usr/local`
 
 ## Installing
 
-The executable will try to load data (and game library) from the current directory.
-Just copy `/path/to/doom3/installation/base/*.pk4` to the existing `base/`
-subdirectory under the build directory.
+Under UNIX there is an "install" target, so just run:
+`$ make install`
 
-TODO: document system-wide installation when available
+Then copy your `base/*.pk4` files to `${CMAKE_INSTALL_PREFIX}/share/dhewm3/base`,
+and optionally the `d3xp/*.pk4` files to `${CMAKE_INSTALL_PREFIX}/share/dhewm3/d3xp`.
+
+The executable will also look for data in the executable directory and current
+directory before trying the system installation path, so it can also be used
+for user installations.
 
 ## Using the provided Windows binaries
 
@@ -113,13 +138,13 @@ Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
 There are two subfolder:
 
 - 32bit binaries are located in "i686-w64-mingw32"
-- 64bit binaries are located in "x86_64-w64-mingw32"
+- 64bit binaries are located in "x86\_64-w64-mingw32"
 
 Issue the appropriate command from the build folder, for example:
 
-`cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+`$ cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
-`cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo`
+`$ cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo`
 
 The binaries are compatible with mingw-w64 and all MSVC versions.
 
@@ -143,7 +168,7 @@ For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
 > set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 Then point CMake at your Toolchain file:
-`cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+`$ cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
 # MISC NOTES
 

@@ -196,6 +196,8 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		if (os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
 		endif()
+
+		add_definitions(-DLINUX_DEFAULT_PATH="${CMAKE_INSTALL_PREFIX}/share/dhewm3")
 	endif()
 elseif (MSVC)
 	add_definitions(/W4)
@@ -730,6 +732,9 @@ if (CORE)
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
+	if (UNIX)
+		install(TARGETS dhewm3 RUNTIME DESTINATION bin)
+	endif()
 endif()
 
 if (DEDICATED)
@@ -753,6 +758,9 @@ if (DEDICATED)
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
+	if (UNIX)
+		install(TARGETS dhewm3ded RUNTIME DESTINATION bin)
+	endif()
 endif()
 
 if (GAME)
@@ -765,6 +773,9 @@ if (GAME)
 	set_target_properties(game PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 	set_target_properties(game PROPERTIES LIBRARY_OUTPUT_DIRECTORY "base")
 	target_link_libraries(game idlib)
+	if (UNIX)
+		install(TARGETS game LIBRARY DESTINATION share/dhewm3/base)
+	endif()
 endif()
 
 if (D3XP)
@@ -777,6 +788,9 @@ if (D3XP)
 	set_target_properties(d3xp PROPERTIES OUTPUT_NAME "game${gamesuffix}")
 	set_target_properties(d3xp PROPERTIES LIBRARY_OUTPUT_DIRECTORY "d3xp")
 	target_link_libraries(d3xp idlib)
+	if (UNIX)
+		install(TARGETS game LIBRARY DESTINATION share/dhewm3/d3xp)
+	endif()
 endif()
 
 if (MODS)
