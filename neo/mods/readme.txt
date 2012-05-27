@@ -28,6 +28,11 @@ Then you have to put it where the game library (game*.so) is, or vice-versa.
     Doom 3: dhewm3 +set fs_game doom3hd
     RoE: dhewm3 +set fs_game_base d3xp +set fs_game doom3roehd
 
+- HardQore2
+  Build subdirectory: hardqore2
+  Website: http://www.moddb.com/mods/hardqore-2
+  Notes: requires "release" build, as some assertions fail
+
 - Project Synergy
   Build subdirectory: synergy
   Website: http://www.moddb.com/mods/project-synergy
@@ -35,6 +40,7 @@ Then you have to put it where the game library (game*.so) is, or vice-versa.
 - Ruiner
   Build subdirectory: ruiner
   Website: http://www.moddb.com/mods/ruiner
+  Notes: requires "release" build, as some assertions fail
 
 - Sikkmod 1.1 for Resurrection of Evil
   Build subdirectory: sikkmodd3xp
@@ -80,4 +86,5 @@ game library. Fortunately you have two choices:
   FreeBSD, you can still run it (but building is not immediate).
   
 - For a Windows 32-bit mod, you can cross-compile it (see main readme) and run
-  it with Wine. Be sure to build a 32-bit version.
+  it with Wine. Alternatively you can download a binary. In any case, make
+  sure it's for 32-bit.

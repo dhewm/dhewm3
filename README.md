@@ -98,13 +98,11 @@ For example:
 
 The following values are valid for the `CMAKE_BUILD_TYPE` variable:
 
-- `relwithdebinfo`: as `release`, plus debugging symbols (default value)
-- `debug`: includes debugging symbols and basic optimizations
-- `debugall`: includes debugging symbols, and defines \_DEBUG (which produces different code sometimes)
-- `release`: includes more optimizations
-- `minsizerel`: includes optimizations while reducing executable size
-
-TODO: finish and document `profile`
+- `prerelease`: with optimizations, debugging symbols and consistency checks (default value)
+- `release`: with optimizations, lacks consistency checks (via assertions)
+- `minsizerel`: as before, but avoiding optimizations than increase binary size
+- `debug`: for development purposes (includes debugging symbols and additional code)
+- `profile`: generates profiling information for use with `gprof` in UNIX like systems
 
 ### Common
 

@@ -65,7 +65,7 @@ endif()
 
 # build type
 if (NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+	set(CMAKE_BUILD_TYPE "prerelease")
 endif()
 
 # precompiled libraries from the dhewm3-libs repo
@@ -127,15 +127,14 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_definitions(-march=pentium3)
 	endif()
 
+    set(CMAKE_C_FLAGS_PRERELEASE "-g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+    set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+    set(CMAKE_C_FLAGS_MINSIZEREL "-DNDEBUG -Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
 	set(CMAKE_C_FLAGS_DEBUG "-g -D_DEBUG -O1")
-	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
-	set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-
-	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
+    
+    set(CMAKE_C_FLAGS_PROFILE "-DNDEBUG -pg -O1 -fno-omit-frame-pointer")
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
+    set(LINK_FLAGS_PROFILE "-pg")
 
 	add_definitions(-fno-strict-aliasing)
 
@@ -209,7 +208,7 @@ elseif (MSVC)
 	add_definitions(/wd4996) # 'function': was declared deprecated
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi /MD")
+    set(CMAKE_C_FLAGS_PRERELEASE "/Ox /Oy /Zi /MD")
 	set(CMAKE_C_FLAGS_MINSIZEREL "/Ox /Oy /Os /MD")
 else()
 	message(FATAL_ERROR "Unsupported compiler")
@@ -217,7 +216,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
+set(CMAKE_CXX_FLAGS_PRERELEASE ${CMAKE_C_FLAGS_PRERELEASE})
 set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
 
 # mingw and msvc

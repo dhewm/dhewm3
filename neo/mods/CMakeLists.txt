@@ -53,7 +53,7 @@ set(src_sikkmodd3xp
 add_library(sikkmodd3xp SHARED ${src_sikkmodd3xp})
 set_target_properties(sikkmodd3xp PROPERTIES PREFIX "")
 set_target_properties(sikkmodd3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
-set_target_properties(sikkmodd3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/sikkmodd3xp -I${CMAKE_CURRENT_SOURCE_DIR} -Wno-overloaded-virtual")
+set_target_properties(sikkmodd3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/sikkmodd3xp -I${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(sikkmodd3xp PROPERTIES LINK_FLAGS "${ldflags}")
 set_target_properties(sikkmodd3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 set_target_properties(sikkmodd3xp PROPERTIES OUTPUT_NAME "game${gamesuffix}")
@@ -123,4 +123,29 @@ set_target_properties(ruiner PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../ruiner")
 target_link_libraries(ruiner idlib ${ZLIB_LIBRARY})
 if (UNIX)
 	install(TARGETS ruiner LIBRARY DESTINATION share/dhewm3/ruiner)
+endif()
+
+# HardQore
+
+string(REPLACE "game/" "hardqore2/" src_hardqore2 "${src_game}")
+set(src_hardqore2
+	${src_hardqore2}
+	hardqore2/ai/AI_bot.cpp
+    hardqore2/Liquid.cpp
+    hardqore2/physics/Physics_Liquid.cpp
+	hardqore2/tracer.cpp
+)
+
+add_library(hardqore2 SHARED ${src_hardqore2})
+set_target_properties(hardqore2 PROPERTIES PREFIX "")
+ 
+set_target_properties(hardqore2 PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_WATER_PHYSICS;_PORTALSKY;_DENTONMOD")
+set_target_properties(hardqore2 PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/hardqore2 -I${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(hardqore2 PROPERTIES LINK_FLAGS "${ldflags}")
+set_target_properties(hardqore2 PROPERTIES INSTALL_NAME_DIR "@executable_path")
+set_target_properties(hardqore2 PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+set_target_properties(hardqore2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "../hardqore2")
+target_link_libraries(hardqore2 idlib ${ZLIB_LIBRARY})
+if (UNIX)
+	install(TARGETS hardqore2 LIBRARY DESTINATION share/dhewm3/hardqore2)
 endif()
