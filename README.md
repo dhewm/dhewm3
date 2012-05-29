@@ -109,7 +109,7 @@ The following values are valid for the `CMAKE_BUILD_TYPE` variable:
 The following are disabled by default.
 
 - `D3XP`: build game library for the _Resurrection of Evil_ expansion
-- `MODS`: build game libraries for additional mods (see [this](dhewm3/neo/mods/README.md))
+- `MODS`: build game libraries for additional mods (see [this](dhewm3/blob/master/neo/mods/README.md))
 - `DEDICATED`: build dedicated server
 - `X86`: cross compile for x86 on an x86\_64 machine
 - `ONATIVE`: optimize for the host CPU
@@ -173,4 +173,4 @@ for user installations. For other cases you can use:
 
 # LEGAL
 
-For license information see [this](dhewm3/LEGAL.md).
+For license information see [this](dhewm3/blob/master/LEGAL.md).
