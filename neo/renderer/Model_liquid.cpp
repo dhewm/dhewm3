@@ -399,8 +399,6 @@ void idRenderModelLiquid::InitFromFile( const char *fileName ) {
 		} else if ( !token.Icmp( "shader" ) ) {
 			parser.ReadToken( &token );
 			shader = declManager->FindMaterial( token );
-		} else if ( !token.Icmp( "seed" ) ) {
-			seed = parser.ParseInt();
 		} else if ( !token.Icmp( "update_rate" ) ) {
 			rate = parser.ParseFloat();
 			if ( ( rate <= 0.0f ) || ( rate > 60.0f ) ) {
