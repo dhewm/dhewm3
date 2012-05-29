@@ -131,6 +131,10 @@ Issue the appropriate command from the build folder, for example:
 
 The binaries are compatible with mingw-w64 and all MSVC versions.
 
+Note that you'll need the *DLL* libraries in the `bin` subdirectory
+to run the program. They can be copied to the executable directory
+for convenience.
+
 ### Cross compiling
 
 For cross compiling a CMake Toolchain file is required.

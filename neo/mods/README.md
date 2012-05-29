@@ -106,10 +106,12 @@ In case the source code is available, it can be easily adapted to work with
 dhewm3. Otherwise you'll have to use the same Doom 3 version as the available
 game library. Fortunately you have two choices:
 
-- For a Linux 32-bit mod, build dhewm3 with the X86 option turned on.
-  If you don't have Linux, but an OS with binary compatibility such as
-  FreeBSD, you can still run it (but building is not immediate).
+- For a Linux 32-bit mod, get the latest official Linux patch (which includes
+  binaries) and use 32-bit compatibility. You'll also need appropiate
+  libraries installed.
+  
+- For a Windows 32-bit mod, get the latest official patch for Windows (which
+  includes binaries) and run it with Wine. You won't need additional libraries.
 
-- For a Windows 32-bit mod, you can cross-compile it (see main readme) and run
-  it with Wine. Alternatively you can download a binary. In any case, make
-  sure it's for 32-bit.
+*Note*: apparently the cross-compiled binaries for Windows are incompatible
+with the original SDK, that's why the official build is required for these.
