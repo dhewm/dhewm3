@@ -30,8 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 #include "sys/posix/posix_public.h"
 
-#include "sys/linux/local.h"
-
 /*
 ================
 Sys_GetVideoRam
