@@ -97,18 +97,20 @@ For cross compiling a CMake Toolchain file is required.
 
 For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
 
-> set(CMAKE_SYSTEM_NAME Windows)
-> set(CMAKE_SYSTEM_PROCESSOR i686)
-> 
-> set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
-> set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
-> set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
-> 
-> set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
-> 
-> set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-> set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-> set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+<pre>
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_SYSTEM_PROCESSOR i686)
+
+set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
+set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
+set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
+
+set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+</pre>
 
 Then point CMake at your Toolchain file:
 `cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
