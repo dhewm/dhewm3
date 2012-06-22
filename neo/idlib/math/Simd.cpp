@@ -147,7 +147,7 @@ void idSIMD::Shutdown( void ) {
 
 idSIMDProcessor *p_simd;
 idSIMDProcessor *p_generic;
-long baseClocks = 0;
+int baseClocks = 0;
 
 #ifdef _MSC_VER
 
@@ -155,7 +155,7 @@ long baseClocks = 0;
 
 #pragma warning(disable : 4731)     // frame pointer register 'ebx' modified by inline assembly code
 
-long saved_ebx = 0;
+int saved_ebx = 0;
 
 #define StartRecordTime( start )			\
 	__asm mov saved_ebx, ebx				\
