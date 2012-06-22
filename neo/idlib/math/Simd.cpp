@@ -147,7 +147,7 @@ void idSIMD::Shutdown( void ) {
 
 idSIMDProcessor *p_simd;
 idSIMDProcessor *p_generic;
-long baseClocks = 0;
+int baseClocks = 0;
 
 #ifdef _MSC_VER
 
