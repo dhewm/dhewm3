@@ -3425,7 +3425,6 @@ bool idGameLocal::InhibitEntitySpawn( idDict &spawnArgs ) {
 
 
 	const char *name;
-#ifndef ID_DEMO_BUILD
 	if ( g_skill.GetInteger() == 3 ) {
 		name = spawnArgs.GetString( "classname" );
 		// _D3XP :: remove moveable medkit packs also
@@ -3435,7 +3434,6 @@ bool idGameLocal::InhibitEntitySpawn( idDict &spawnArgs ) {
 			result = true;
 		}
 	}
-#endif
 
 	if ( gameLocal.isMultiplayer ) {
 		name = spawnArgs.GetString( "classname" );

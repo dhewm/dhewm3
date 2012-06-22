@@ -51,11 +51,7 @@ static idStr	savepath;
  ==============
  */
 const char *Sys_DefaultSavePath(void) {
-#if defined( ID_DEMO_BUILD )
-	sprintf( savepath, "%s/.doom3-demo", getenv( "HOME" ) );
-#else
-	sprintf( savepath, "%s/.doom3", getenv( "HOME" ) );
-#endif
+	sprintf( savepath, "%s/.dhewm3", getenv( "HOME" ) );
 	return savepath.c_str();
 }
 /*
@@ -83,15 +79,24 @@ const char *Sys_EXEPath( void ) {
 Sys_DefaultBasePath
 
 Get the default base path
+- system installation path
 - binary image path
 - current directory
-- hardcoded
 Try to be intelligent: if there is no BASE_GAMEDIR, try the next path
 ================
 */
 const char *Sys_DefaultBasePath(void) {
 	struct stat st;
 	idStr testbase;
+
+	basepath = LINUX_DEFAULT_PATH;
+	testbase = basepath; testbase += "/"; testbase += BASE_GAMEDIR;
+	if ( stat( testbase.c_str(), &st ) != -1 && S_ISDIR( st.st_mode ) ) {
+		return basepath.c_str();
+	} else {
+		common->Printf("no '%s' directory in system path %s, skipping\n", BASE_GAMEDIR, basepath.c_str());
+	}
+
 	basepath = Sys_EXEPath();
 	if ( basepath.Length() ) {
 		basepath.StripFilename();
@@ -102,6 +107,7 @@ const char *Sys_DefaultBasePath(void) {
 			common->Printf( "no '%s' directory in exe path %s, skipping\n", BASE_GAMEDIR, basepath.c_str() );
 		}
 	}
+
 	if ( basepath != Posix_Cwd() ) {
 		basepath = Posix_Cwd();
 		testbase = basepath; testbase += "/"; testbase += BASE_GAMEDIR;
@@ -111,7 +117,8 @@ const char *Sys_DefaultBasePath(void) {
 			common->Printf("no '%s' directory in cwd path %s, skipping\n", BASE_GAMEDIR, basepath.c_str());
 		}
 	}
-	common->Printf( "WARNING: using hardcoded default base path\n" );
+
+	common->Printf( "WARNING: no appropiate base path found\n" );
 	return LINUX_DEFAULT_PATH;
 }
 

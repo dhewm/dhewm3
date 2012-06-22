@@ -14,7 +14,6 @@ cmake_minimum_required(VERSION 2.6)
 # SDK				-D_D3SDK
 
 # don't add these as options, but document them?
-# TARGET_DEMO		there are no demo pk4s compatible to this 1.3.1 codebase
 # IDNET_HOST		-DIDNET_HOST=\\"%s\\"' % IDNET_HOST
 # DEBUG_MEMORY		-DID_DEBUG_MEMORY', '-DID_REDIRECT_NEWDELETE
 # LIBC_MALLOC		-DUSE_LIBC_MALLOC=0
@@ -29,6 +28,7 @@ include(CheckFunctionExists)
 option(CORE			"Build the core" ON)
 option(GAME			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" OFF)
+option(MODS			"Build game code for additional mods" OFF)
 option(DEDICATED	"Build the dedicated server" OFF)
 option(X86			"Cross compile for x86 (only applicable on x86_64)" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
@@ -65,7 +65,7 @@ endif()
 
 # build type
 if (NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+	set(CMAKE_BUILD_TYPE "prerelease")
 endif()
 
 # precompiled libraries from the dhewm3-libs repo
@@ -119,7 +119,6 @@ endif()
 # compiler specific flags
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-pipe)
-	add_definitions(-Wall)
 
 	if (NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 		add_definitions(-march=native)
@@ -127,15 +126,14 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_definitions(-march=pentium3)
 	endif()
 
-	set(CMAKE_C_FLAGS_DEBUG "-g -D_DEBUG -O1")
-	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
-	set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_PRERELEASE "-Wall -g -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_MINSIZEREL "-DNDEBUG -Os -ffast-math -fno-unsafe-math-optimizations -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_DEBUG "-Wall -g -D_DEBUG -O1")
 
-	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
+	set(CMAKE_C_FLAGS_PROFILE "-DNDEBUG -pg -O1 -fno-omit-frame-pointer")
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
+
 
 	add_definitions(-fno-strict-aliasing)
 
@@ -149,6 +147,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-Wno-sign-compare)
 	add_definitions(-Wno-switch)
 	add_definitions(-Wno-format-security)
+	add_definitions(-Wno-enum-compare)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 	if (cxx_has_Woverload_virtual)
@@ -196,6 +195,8 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		if (os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
 		endif()
+
+		add_definitions(-DLINUX_DEFAULT_PATH="${CMAKE_INSTALL_PREFIX}/share/dhewm3")
 	endif()
 elseif (MSVC)
 	add_definitions(/W4)
@@ -207,7 +208,7 @@ elseif (MSVC)
 	add_definitions(/wd4996) # 'function': was declared deprecated
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi /MD")
+	set(CMAKE_C_FLAGS_PRERELEASE "/Ox /Oy /Zi /MD")
 	set(CMAKE_C_FLAGS_MINSIZEREL "/Ox /Oy /Os /MD")
 else()
 	message(FATAL_ERROR "Unsupported compiler")
@@ -215,7 +216,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
+set(CMAKE_CXX_FLAGS_PRERELEASE ${CMAKE_C_FLAGS_PRERELEASE})
 set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
 
 # mingw and msvc
@@ -231,8 +232,8 @@ if (WIN32)
 endif()
 
 configure_file(
-    "${CMAKE_SOURCE_DIR}/config.h.in"
-    "${CMAKE_BINARY_DIR}/config.h"
+	"${CMAKE_SOURCE_DIR}/config.h.in"
+	"${CMAKE_BINARY_DIR}/config.h"
 )
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
@@ -730,6 +731,9 @@ if (CORE)
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
+	if (UNIX)
+		install(TARGETS dhewm3 RUNTIME DESTINATION bin)
+	endif()
 endif()
 
 if (DEDICATED)
@@ -753,24 +757,41 @@ if (DEDICATED)
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
+	if (UNIX)
+		install(TARGETS dhewm3ded RUNTIME DESTINATION bin)
+	endif()
 endif()
 
 if (GAME)
-	add_library(game${gamesuffix} SHARED ${src_game})
-	set_target_properties(game${gamesuffix} PROPERTIES PREFIX "")
-	set_target_properties(game${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
-	set_target_properties(game${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
-	set_target_properties(game${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(game${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(game${gamesuffix} idlib)
+	add_library(game SHARED ${src_game})
+	set_target_properties(game PROPERTIES PREFIX "")
+	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+	set_target_properties(game PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
+	set_target_properties(game PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(game PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	set_target_properties(game PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+	set_target_properties(game PROPERTIES LIBRARY_OUTPUT_DIRECTORY "base")
+	target_link_libraries(game idlib)
+	if (UNIX)
+		install(TARGETS game LIBRARY DESTINATION share/dhewm3/base)
+	endif()
 endif()
 
 if (D3XP)
-	add_library(d3xp${gamesuffix} SHARED ${src_d3xp})
-	set_target_properties(d3xp${gamesuffix} PROPERTIES PREFIX "")
-	set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
-	set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
-	set_target_properties(d3xp${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(d3xp${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(d3xp${gamesuffix} idlib)
+	add_library(d3xp SHARED ${src_d3xp})
+	set_target_properties(d3xp PROPERTIES PREFIX "")
+	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
+	set_target_properties(d3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
+	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	set_target_properties(d3xp PROPERTIES OUTPUT_NAME "game${gamesuffix}")
+	set_target_properties(d3xp PROPERTIES LIBRARY_OUTPUT_DIRECTORY "d3xp")
+	target_link_libraries(d3xp idlib)
+	if (UNIX)
+		install(TARGETS game LIBRARY DESTINATION share/dhewm3/d3xp)
+	endif()
+endif()
+
+if (MODS)
+	add_subdirectory(mods)
 endif()

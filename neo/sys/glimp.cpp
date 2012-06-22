@@ -264,6 +264,74 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 }
 
 /*
+=================
+Helper functions for Sys_GetVideoRam()
+=================
+*/
+
+static int GLimp_GetVideoRam_AMD() {
+	// using AMDs glx/wgl extension. They're identical except for the wgl/glX prefix
+	const GLint QGL_GPU_RAM_AMD = 0x21A3; // value is used for both wgl and glx
+	GLuint ( APIENTRY * qglGetGPUIDsAMD  )( GLuint maxCount, GLuint *ids ) = NULL;
+	GLint  ( APIENTRY * qglGetGPUInfoAMD )( GLuint id, GLint property, GLenum dataType, GLuint size, void *data ) = NULL;
+
+#ifdef _WIN32
+	const char* GetGPUIDsAMD  = "wglGetGPUIDsAMD";
+	const char* GetGPUInfoAMD = "wglGetGPUInfoAMD";
+#else
+	const char* GetGPUIDsAMD  = "glXGetGPUIDsAMD";
+	const char* GetGPUInfoAMD = "glXGetGPUInfoAMD";
+#endif
+	// TODO: what about platforms without wgl/glx? this won't break anything there, it just won't work..
+	// I didn't find an equivalent extension for CGL (OSX)
+
+	qglGetGPUIDsAMD  = (GLuint (APIENTRY *)(GLuint, GLuint *)) GLimp_ExtensionPointer( GetGPUIDsAMD );
+	qglGetGPUInfoAMD = (GLint  (APIENTRY *)(GLuint, GLint, GLenum, GLuint, void *)) GLimp_ExtensionPointer( GetGPUInfoAMD );
+
+	if( qglGetGPUIDsAMD == NULL || qglGetGPUInfoAMD == NULL) {
+		// extension not found => not AMDs binary driver, no AMD card, no wgl/glx, ...
+		return 0;
+	}
+
+	GLuint noOfGPUs = qglGetGPUIDsAMD(0, NULL);
+	if(noOfGPUs == 0) {
+		return 0;
+	}
+	GLuint *gpuIDs = new GLuint[noOfGPUs];
+	qglGetGPUIDsAMD(noOfGPUs, gpuIDs);
+	GLuint totalMemMB = 0;
+
+	qglGetGPUInfoAMD(gpuIDs[0], // FIXME: always GPU 0 ?
+	                 QGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof( GLuint ), &totalMemMB );
+
+	delete[] gpuIDs;
+	return (int)totalMemMB;
+}
+
+static int GLimp_GetVideoRam() {
+	const GLenum GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX = 0x9048;
+	const GLenum GL_TOTAL_PHYSICAL_MEMORY_ATI               = 0x87FE;
+	GLint total_mem[4] = {0};
+
+	// using nvidia extension
+	qglGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, total_mem);
+	if(total_mem[0] == 0) {
+		// try undocumented AMD/ATI extension that is broken in some catalyst versions
+		// but should at least work on all operating systems
+		qglGetIntegerv(GL_TOTAL_PHYSICAL_MEMORY_ATI, total_mem);
+	}
+
+	int ret = total_mem[0]/1024; // from KB to MB
+	if(ret < 32) {
+		// maybe GL_TOTAL_PHYSICAL_MEMORY_ATI was broken in the driver, try glx/wgl method
+		ret = GLimp_GetVideoRam_AMD();
+	}
+
+	qglGetError(); // clear gl error flag
+	return ret;
+}
+
+/*
 ================
 Sys_GetVideoRam
 ================
@@ -276,7 +344,10 @@ int Sys_GetVideoRam() {
 
 	common->Printf("guessing video ram (use +set sys_videoRam to force)\n");
 
-	Uint32 vram = SDL_GetVideoInfo()->video_mem;
+	int vram = GLimp_GetVideoRam();
+
+	if(!vram)
+		vram = SDL_GetVideoInfo()->video_mem/1024; // we want MB
 
 	if (!vram)
 		vram = 64;
