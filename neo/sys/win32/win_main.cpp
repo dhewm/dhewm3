@@ -45,6 +45,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <conio.h>
 #include <shellapi.h>
 
+// for GetHomeDir
+#include <shlobj.h>
+
 #ifndef __MRC__
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -239,11 +242,98 @@ const char *Sys_DefaultBasePath( void ) {
 
 /*
 ==============
+Returns "My Documents"/$savedir directory (or equivalent - "CSIDL_PERSONAL").
+To be used with Sys_DefaultSavePath(), so savegames, screenshots etc will be
+saved to the users files instead of systemwide.
+
+Taken (with kind permission) from Yamagi Quake II's Sys_GetHomeDir()
+
+Returns NULL on error
+==============
+ */
+static const char * GetHomeDir(const char *savedir)
+{
+	char *cur;
+	char *old;
+	char profile[MAX_OSPATH];
+	int len;
+	static char gdir[MAX_OSPATH];
+	WCHAR sprofile[MAX_OSPATH];
+	WCHAR uprofile[MAX_OSPATH];
+
+	/* The following lines implement a horrible
+	   hack to connect the UTF-16 WinAPI to the
+	   ASCII doom3 strings. While this should work in
+	   most cases, it'll fail if the "Windows to
+	   DOS filename translation" is switched off.
+	   In that case the function will return NULL
+	   and no homedir is used. */
+
+	/* Get the path to "My Documents" directory */
+	SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, 0, uprofile);
+
+	/* Create a UTF-16 DOS path */
+	len = GetShortPathNameW(uprofile, sprofile, sizeof(sprofile));
+
+	if (len == 0)
+	{
+		return NULL;
+	}
+
+	/* Since the DOS path contains no UTF-16 characters, just convert it to ASCII */
+	WideCharToMultiByte(CP_ACP, 0, sprofile, -1, profile, sizeof(profile), NULL, NULL);
+
+	if (len == 0)
+	{
+		return NULL;
+	}
+
+	// Check if path is too long; +3 because two more slashes and \0
+	if ((len + strlen(savedir) + 3) >= MAX_OSPATH)
+	{
+		return NULL;
+	}
+
+	/* Replace backslashes by slashes */
+	cur = old = profile;
+
+	if (strstr(cur, "\\") != NULL)
+	{
+		while (cur != NULL)
+		{
+			if ((cur - old) > 1)
+			{
+				*cur = '/';
+
+			}
+
+			old = cur;
+			cur = strchr(old + 1, '\\');
+		}
+	}
+
+	sprintf(gdir, "%s/%s/", profile, savedir);
+
+	return gdir;
+}
+
+/*
+==============
 Sys_DefaultSavePath
 ==============
 */
 const char *Sys_DefaultSavePath( void ) {
-	return cvarSystem->GetCVarString( "fs_basepath" );
+	const char *savedir;
+#if defined( ID_DEMO_BUILD )
+	savedir = "Doom3 Demo";
+#else
+	savedir = "Doom3";
+#endif
+	const char *ret = GetHomeDir(savedir);
+	if(ret == NULL) {
+		Sys_Error("ERROR: Couldn't get dir to save path (should be something like: My Documents/%s)!", savedir);
+	}
+	return ret;
 }
 
 /*
