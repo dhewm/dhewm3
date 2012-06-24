@@ -326,6 +326,8 @@ const char *Sys_DefaultSavePath( void ) {
 	const char *savedir;
 #if defined( ID_DEMO_BUILD )
 	savedir = "Doom3 Demo";
+#elif defined( USE_CUSTOM_SAVE_DIR )
+	savedir = CUSTOM_SAVE_DIR;
 #else
 	savedir = "Doom3";
 #endif

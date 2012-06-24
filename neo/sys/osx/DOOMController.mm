@@ -68,11 +68,15 @@ Sys_DefaultSavePath
 */
 const char *Sys_DefaultSavePath(void) {
 	static char savepath[ MAXPATHLEN ];
+	const char *savedir;
 #if defined( ID_DEMO_BUILD )
-	sprintf( savepath, "%s/Library/Application Support/Doom 3 Demo", [NSHomeDirectory() cString] );
+	savedir = "Doom 3 Demo";
+#elif defined( USE_CUSTOM_SAVE_DIR )
+	savedir = CUSTOM_SAVE_DIR;
 #else
-	sprintf( savepath, "%s/Library/Application Support/Doom 3", [NSHomeDirectory() cString] );
+	savedir = "Doom 3";
 #endif
+	sprintf( savepath, "%s/Library/Application Support/%s", [NSHomeDirectory() cString], savedir );
 	return savepath;
 }
 

@@ -855,7 +855,7 @@ const char *idFileSystemLocal::OSPathToRelativePath( const char *OSPath ) {
 
 	// skip a drive letter?
 
-	// search for anything with "base" in it
+	// search for anything with "base" (BASE_GAMEDIR) in it
 	// Ase files from max may have the form of:
 	// "//Purgatory/purgatory/doom/base/models/mapobjects/bitch/hologirl.tga"
 	// which won't match any of our drive letter based search paths
@@ -867,7 +867,7 @@ const char *idFileSystemLocal::OSPathToRelativePath( const char *OSPath ) {
 	if ( ( strstr( tempStr, "//" ) || strstr( tempStr, "w:" ) ) && strstr( tempStr, "/doom/base/") ) {
 		// will cause a warning but will load the file. ase models have
 		// hard coded doom/base/ in the material names
-		base = strstr( OSPath, "base" );
+		base = strstr( OSPath, BASE_GAMEDIR );
 		ignoreWarning = true;
 	}
 #else
@@ -1734,7 +1734,7 @@ idModList *idFileSystemLocal::ListMods( void ) {
 
 		dirs.Remove( "." );
 		dirs.Remove( ".." );
-		dirs.Remove( "base" );
+		dirs.Remove( BASE_GAMEDIR );
 		dirs.Remove( "pb" );
 
 		// see if there are any pk4 files in each directory

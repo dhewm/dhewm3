@@ -51,11 +51,15 @@ static idStr	savepath;
  ==============
  */
 const char *Sys_DefaultSavePath(void) {
+	const char *savedir;
 #if defined( ID_DEMO_BUILD )
-	sprintf( savepath, "%s/.doom3-demo", getenv( "HOME" ) );
+	savedir = "doom3-demo";
+#elif defined( USE_CUSTOM_SAVE_DIR )
+	savedir = CUSTOM_SAVE_DIR;
 #else
-	sprintf( savepath, "%s/.doom3", getenv( "HOME" ) );
+	savedir = "doom3";
 #endif
+	sprintf( savepath, "%s/.%s", getenv( "HOME" ), savedir );
 	return savepath.c_str();
 }
 /*
