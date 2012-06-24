@@ -44,6 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <io.h>
 #include <conio.h>
 #include <shellapi.h>
+#include <shlobj.h>
 
 #ifndef __MRC__
 #include <sys/types.h>
@@ -228,6 +229,64 @@ const char *Sys_Cwd( void ) {
 	return cwd;
 }
 
+/*
+==============
+Returns "My Documents"/My Games/$savedir directory (or equivalent - "CSIDL_PERSONAL").
+To be used with Sys_DefaultSavePath(), so savegames, screenshots etc will be
+saved to the users files instead of systemwide.
+
+Based on (with kind permission) Yamagi Quake II's Sys_GetHomeDir()
+
+Returns the number of characters written to dst
+==============
+ */
+static int GetHomeDir(char *dst, size_t size, const char *savedir)
+{
+	int len;
+	char profile[MAX_OSPATH];
+	WCHAR sprofile[MAX_OSPATH];
+	WCHAR uprofile[MAX_OSPATH];
+	BOOL default_char = FALSE;
+
+	/* Get the path to "My Documents" directory */
+	SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, 0, uprofile);
+
+	// test if we can convert lossless
+	len = WideCharToMultiByte(CP_ACP, 0, uprofile, -1, profile, sizeof(profile), NULL, &default_char);
+
+	if (default_char) {
+		/* The following lines implement a horrible
+		   hack to connect the UTF-16 WinAPI to the
+		   ASCII doom3 strings. While this should work in
+		   most cases, it'll fail if the "Windows to
+		   DOS filename translation" is switched off.
+		   In that case the function will return NULL
+		   and no homedir is used. */
+		len = GetShortPathNameW(uprofile, sprofile, sizeof(sprofile));
+
+		if (len == 0)
+			return 0;
+
+		/* Since the DOS path contains no UTF-16 characters, convert it to the system's default code page */
+		len = WideCharToMultiByte(CP_ACP, 0, sprofile, len, profile, sizeof(profile) - 1, NULL, NULL);
+	}
+
+	if (len == 0)
+		return 0;
+
+	profile[len] = 0;
+	len = idStr::snPrintf(dst, size, "%s/My Games/%s", profile, savedir);
+	if (len >= size)
+		return 0;
+
+	/* Replace backslashes by slashes */
+	for (int i = 0; i < len; ++i)
+		if (dst[i] == '\\')
+			dst[i] = '/';
+
+	return len;
+}
+
 bool Sys_GetPath(sysPath_t type, idStr &path) {
 	char buf[MAX_OSPATH];
 
@@ -237,7 +296,12 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		return true;
 
 	case PATH_SAVE:
-		path = cvarSystem->GetCVarString("fs_basepath");
+		if (GetHomeDir(buf, sizeof(buf), "dhewm3") < 1) {
+			Sys_Error("ERROR: Couldn't get dir to home path");
+			return false;
+		}
+
+		path = buf;
 		return true;
 
 	case PATH_EXE:
