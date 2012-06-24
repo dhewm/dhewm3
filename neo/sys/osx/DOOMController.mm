@@ -254,7 +254,7 @@ returns in megabytes
 ================
 */
 int Sys_GetSystemRam( void ) {
-	long ramSize;
+	SInt32 ramSize;
 
 	if ( Gestalt( gestaltPhysicalRAMSize, &ramSize ) == noErr ) {
 		return ramSize / (1024*1024);
@@ -265,7 +265,7 @@ int Sys_GetSystemRam( void ) {
 
 bool OSX_GetCPUIdentification( int& cpuId, bool& oldArchitecture )
 {
-	long cpu;
+	SInt32 cpu;
 	Gestalt(gestaltNativeCPUtype, &cpu);
 
 	cpuId = cpu;
