@@ -52,7 +52,7 @@ If you have questions concerning this license or the applicable additional terms
  * where savegames, configs, screenshots, .. will be put:
  * $HOME/.$CUSTOM_SAVE_DIR on linux (e.g. /home/horst/.dhewm3)
  * $NSHomeDirectory/Library/Application Support/$CUSTOM_SAVE_DIR on OSX
- * $CSIDL_PERSONAL/$CUSTOM_SAVE_DIR on windows (e.g. My Documents/dhewm3)
+ * $CSIDL_PERSONAL/My Games/$CUSTOM_SAVE_DIR on windows (e.g. My Documents/My Games/dhewm3)
  *
  * If this is not set doom3's defaults (that vary on different platforms, e.g.
  * "Doom 3", "doom3") are used.

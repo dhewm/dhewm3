@@ -242,7 +242,7 @@ const char *Sys_DefaultBasePath( void ) {
 
 /*
 ==============
-Returns "My Documents"/$savedir directory (or equivalent - "CSIDL_PERSONAL").
+Returns "My Documents"/My Games/$savedir directory (or equivalent - "CSIDL_PERSONAL").
 To be used with Sys_DefaultSavePath(), so savegames, screenshots etc will be
 saved to the users files instead of systemwide.
 
@@ -312,7 +312,7 @@ static const char * GetHomeDir(const char *savedir)
 		}
 	}
 
-	sprintf(gdir, "%s/%s/", profile, savedir);
+	sprintf(gdir, "%s/My Games/%s/", profile, savedir);
 
 	return gdir;
 }
