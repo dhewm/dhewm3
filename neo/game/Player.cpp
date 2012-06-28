@@ -8165,7 +8165,7 @@ void idPlayer::WritePlayerStateToSnapshot( idBitMsgDelta &msg ) const {
 	int i;
 
 	msg.WriteByte( bobCycle );
-	msg.WriteLong( stepUpTime );
+	msg.WriteInt( stepUpTime );
 	msg.WriteFloat( stepUpDelta );
 	msg.WriteShort( inventory.weapons );
 	msg.WriteByte( inventory.armor );

@@ -183,7 +183,7 @@ void idGameLocal::ServerSendDeclRemapToClient( int clientNum, declType_t type, i
 	outMsg.BeginWriting();
 	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_REMAP_DECL );
 	outMsg.WriteByte( type );
-	outMsg.WriteLong( index );
+	outMsg.WriteInt( index );
 	outMsg.WriteString( decl->GetName() );
 	networkSystem->ServerSendReliableMessage( clientNum, outMsg );
 }
@@ -333,7 +333,7 @@ void idGameLocal::ServerClientBegin( int clientNum ) {
 	outMsg.BeginWriting();
 	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_SPAWN_PLAYER );
 	outMsg.WriteByte( clientNum );
-	outMsg.WriteLong( spawnIds[ clientNum ] );
+	outMsg.WriteInt( spawnIds[ clientNum ] );
 	networkSystem->ServerSendReliableMessage( -1, outMsg );
 }
 
@@ -396,7 +396,7 @@ void idGameLocal::ServerWriteInitialReliableMessages( int clientNum ) {
 		outMsg.BeginWriting( );
 		outMsg.WriteByte( GAME_RELIABLE_MESSAGE_SPAWN_PLAYER );
 		outMsg.WriteByte( i );
-		outMsg.WriteLong( spawnIds[ i ] );
+		outMsg.WriteInt( spawnIds[ i ] );
 		networkSystem->ServerSendReliableMessage( clientNum, outMsg );
 	}
 
@@ -407,7 +407,7 @@ void idGameLocal::ServerWriteInitialReliableMessages( int clientNum ) {
 		outMsg.WriteByte( GAME_RELIABLE_MESSAGE_EVENT );
 		outMsg.WriteBits( event->spawnId, 32 );
 		outMsg.WriteByte( event->event );
-		outMsg.WriteLong( event->time );
+		outMsg.WriteInt( event->time );
 		outMsg.WriteBits( event->paramsSize, idMath::BitsForInteger( MAX_EVENT_PARAM_SIZE ) );
 		if ( event->paramsSize ) {
 			outMsg.WriteData( event->paramsBuf, event->paramsSize );
@@ -421,7 +421,7 @@ void idGameLocal::ServerWriteInitialReliableMessages( int clientNum ) {
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.BeginWriting();
 	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_PORTALSTATES );
-	outMsg.WriteLong( numPortals );
+	outMsg.WriteInt( numPortals );
 	for ( i = 0; i < numPortals; i++ ) {
 		outMsg.WriteBits( gameRenderWorld->GetPortalState( (qhandle_t) (i+1) ) , NUM_RENDER_PORTAL_BITS );
 	}
@@ -592,7 +592,7 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 #if ASYNC_WRITE_TAGS
 	idRandom tagRandom;
 	tagRandom.SetSeed( random.RandomInt() );
-	msg.WriteLong( tagRandom.GetSeed() );
+	msg.WriteInt( tagRandom.GetSeed() );
 #endif
 
 	// create the snapshot
@@ -643,7 +643,7 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 			snapshot->firstEntityState = newBase;
 
 #if ASYNC_WRITE_TAGS
-			msg.WriteLong( tagRandom.RandomInt() );
+			msg.WriteInt( tagRandom.RandomInt() );
 #endif
 		}
 	}
@@ -654,9 +654,9 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 #if ASYNC_WRITE_PVS
 	for ( i = 0; i < idEntity::MAX_PVS_AREAS; i++ ) {
 		if ( i < numSourceAreas ) {
-			msg.WriteLong( sourceAreas[ i ] );
+			msg.WriteInt( sourceAreas[ i ] );
 		} else {
-			msg.WriteLong( 0 );
+			msg.WriteInt( 0 );
 		}
 	}
 	gameLocal.pvs.WritePVS( pvsHandle, msg );

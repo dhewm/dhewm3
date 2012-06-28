@@ -9701,10 +9701,10 @@ void idPlayer::WritePlayerStateToSnapshot( idBitMsgDelta &msg ) const {
 	int i;
 
 	msg.WriteByte( bobCycle );
-	msg.WriteLong( stepUpTime );
+	msg.WriteInt( stepUpTime );
 	msg.WriteFloat( stepUpDelta );
 #ifdef _D3XP
-	msg.WriteLong( inventory.weapons );
+	msg.WriteInt( inventory.weapons );
 #else
 	msg.WriteShort( inventory.weapons );
 #endif

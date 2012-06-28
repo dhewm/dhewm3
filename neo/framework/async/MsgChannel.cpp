@@ -86,7 +86,7 @@ bool idMsgQueue::Add( const byte *data, const int size ) {
 	}
 	int sequence = last;
 	WriteShort( size );
-	WriteLong( sequence );
+	WriteInt( sequence );
 	WriteData( data, size );
 	last++;
 	return true;
@@ -193,10 +193,10 @@ int idMsgQueue::ReadShort( void ) {
 
 /*
 ===============
-idMsgQueue::WriteLong
+idMsgQueue::WriteInt
 ===============
 */
-void idMsgQueue::WriteLong( int l ) {
+void idMsgQueue::WriteInt( int l ) {
 	WriteByte( ( l >>  0 ) & 255 );
 	WriteByte( ( l >>  8 ) & 255 );
 	WriteByte( ( l >> 16 ) & 255 );
@@ -338,7 +338,7 @@ void idMsgChannel::WriteMessageData( idBitMsg &out, const idBitMsg &msg ) {
 	tmp.Init( tmpBuf, sizeof( tmpBuf ) );
 
 	// write acknowledgement of last received reliable message
-	tmp.WriteLong( reliableReceive.GetLast() );
+	tmp.WriteInt( reliableReceive.GetLast() );
 
 	// write reliable messages
 	reliableSend.CopyToBuffer( tmp.GetData() + tmp.GetSize() );
@@ -428,7 +428,7 @@ void idMsgChannel::SendNextFragment( idPort &port, const int time ) {
 	// write the packet
 	msg.Init( msgBuf, sizeof( msgBuf ) );
 	msg.WriteShort( id );
-	msg.WriteLong( outgoingSequence | FRAGMENT_BIT );
+	msg.WriteInt( outgoingSequence | FRAGMENT_BIT );
 
 	fragLength = FRAGMENT_SIZE;
 	if ( unsentFragmentStart + fragLength > unsentMsg.GetSize() ) {
@@ -507,7 +507,7 @@ int idMsgChannel::SendMessage( idPort &port, const int time, const idBitMsg &msg
 
 	// write the header
 	unsentMsg.WriteShort( id );
-	unsentMsg.WriteLong( outgoingSequence );
+	unsentMsg.WriteInt( outgoingSequence );
 
 	// write out the message data
 	WriteMessageData( unsentMsg, msg );

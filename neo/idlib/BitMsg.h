@@ -84,7 +84,7 @@ public:
 	void			WriteByte( int c );
 	void			WriteShort( int c );
 	void			WriteUShort( int c );
-	void			WriteLong( int c );
+	void			WriteInt( int c );
 	void			WriteFloat( float f );
 	void			WriteFloat( float f, int exponentBits, int mantissaBits );
 	void			WriteAngle8( float f );
@@ -296,7 +296,7 @@ ID_INLINE void idBitMsg::WriteUShort( int c ) {
 	WriteBits( c, 16 );
 }
 
-ID_INLINE void idBitMsg::WriteLong( int c ) {
+ID_INLINE void idBitMsg::WriteInt( int c ) {
 	WriteBits( c, 32 );
 }
 
@@ -454,7 +454,7 @@ public:
 	void			WriteByte( int c );
 	void			WriteShort( int c );
 	void			WriteUShort( int c );
-	void			WriteLong( int c );
+	void			WriteInt( int c );
 	void			WriteFloat( float f );
 	void			WriteFloat( float f, int exponentBits, int mantissaBits );
 	void			WriteAngle8( float f );
@@ -555,7 +555,7 @@ ID_INLINE void idBitMsgDelta::WriteUShort( int c ) {
 	WriteBits( c, 16 );
 }
 
-ID_INLINE void idBitMsgDelta::WriteLong( int c ) {
+ID_INLINE void idBitMsgDelta::WriteInt( int c ) {
 	WriteBits( c, 32 );
 }
 

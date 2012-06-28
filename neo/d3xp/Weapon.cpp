@@ -3154,7 +3154,7 @@ void idWeapon::Event_SetSkin( const char *skinname ) {
 		byte		msgBuf[MAX_EVENT_PARAM_SIZE];
 
 		msg.Init( msgBuf, sizeof( msgBuf ) );
-		msg.WriteLong( ( skinDecl != NULL ) ? gameLocal.ServerRemapDecl( -1, DECL_SKIN, skinDecl->Index() ) : -1 );
+		msg.WriteInt( ( skinDecl != NULL ) ? gameLocal.ServerRemapDecl( -1, DECL_SKIN, skinDecl->Index() ) : -1 );
 		ServerSendEvent( EVENT_CHANGESKIN, &msg, false, -1 );
 	}
 }

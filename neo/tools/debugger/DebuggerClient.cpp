@@ -515,8 +515,8 @@ void rvDebuggerClient::SendAddBreakpoint ( rvDebuggerBreakpoint& bp, bool onceOn
 	MSG_Init( &msg, buffer, sizeof( buffer ) );
 	MSG_WriteShort ( &msg, (int)DBMSG_ADDBREAKPOINT );
 	MSG_WriteBits ( &msg, onceOnly?1:0, 1 );
-	MSG_WriteLong ( &msg, (unsigned long) bp.GetLineNumber ( ) );
-	MSG_WriteLong ( &msg, bp.GetID ( ) );
+	MSG_WriteInt ( &msg, (unsigned long) bp.GetLineNumber ( ) );
+	MSG_WriteInt ( &msg, bp.GetID ( ) );
 	MSG_WriteString ( &msg, bp.GetFilename() );
 
 	SendPacket ( msg.data, msg.cursize );
@@ -541,7 +541,7 @@ void rvDebuggerClient::SendRemoveBreakpoint ( rvDebuggerBreakpoint& bp )
 
 	MSG_Init( &msg, buffer, sizeof( buffer ) );
 	MSG_WriteShort ( &msg, (int)DBMSG_REMOVEBREAKPOINT );
-	MSG_WriteLong ( &msg, bp.GetID() );
+	MSG_WriteInt ( &msg, bp.GetID() );
 
 	SendPacket ( msg.data, msg.cursize );
 }

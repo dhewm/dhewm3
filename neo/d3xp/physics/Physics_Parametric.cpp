@@ -1031,8 +1031,8 @@ idPhysics_Parametric::WriteToSnapshot
 ================
 */
 void idPhysics_Parametric::WriteToSnapshot( idBitMsgDelta &msg ) const {
-	msg.WriteLong( current.time );
-	msg.WriteLong( current.atRest );
+	msg.WriteInt( current.time );
+	msg.WriteInt( current.atRest );
 	msg.WriteFloat( current.origin[0] );
 	msg.WriteFloat( current.origin[1] );
 	msg.WriteFloat( current.origin[2] );

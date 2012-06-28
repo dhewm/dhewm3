@@ -724,8 +724,8 @@ idEntityFx::WriteToSnapshot
 void idEntityFx::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	GetPhysics()->WriteToSnapshot( msg );
 	WriteBindToSnapshot( msg );
-	msg.WriteLong( ( fxEffect != NULL ) ? gameLocal.ServerRemapDecl( -1, DECL_FX, fxEffect->Index() ) : -1 );
-	msg.WriteLong( started );
+	msg.WriteInt( ( fxEffect != NULL ) ? gameLocal.ServerRemapDecl( -1, DECL_FX, fxEffect->Index() ) : -1 );
+	msg.WriteInt( started );
 }
 
 /*

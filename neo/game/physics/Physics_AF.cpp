@@ -7924,7 +7924,7 @@ void idPhysics_AF::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	int i;
 	idCQuat quat;
 
-	msg.WriteLong( current.atRest );
+	msg.WriteInt( current.atRest );
 	msg.WriteFloat( current.noMoveTime );
 	msg.WriteFloat( current.activateTime );
 	msg.WriteDeltaFloat( 0.0f, current.pushVelocity[0], AF_VELOCITY_EXPONENT_BITS, AF_VELOCITY_MANTISSA_BITS );

@@ -993,7 +993,7 @@ void idExplodingBarrel::Killed( idEntity *inflictor, idEntity *attacker, int dam
 			byte		msgBuf[MAX_EVENT_PARAM_SIZE];
 
 			msg.Init( msgBuf, sizeof( msgBuf ) );
-			msg.WriteLong( gameLocal.time );
+			msg.WriteInt( gameLocal.time );
 			ServerSendEvent( EVENT_EXPLODE, &msg, false, -1 );
 		}
 	}

@@ -1057,7 +1057,7 @@ void idMultiplayerGame::NewState( gameState_t news, idPlayer *player ) {
 
 			outMsg.Init( msgBuf, sizeof( msgBuf ) );
 			outMsg.WriteByte( GAME_RELIABLE_MESSAGE_WARMUPTIME );
-			outMsg.WriteLong( warmupEndTime );
+			outMsg.WriteInt( warmupEndTime );
 			networkSystem->ServerSendReliableMessage( -1, outMsg );
 
 			break;
@@ -2183,7 +2183,7 @@ void idMultiplayerGame::PlayGlobalSound( int to, snd_evt_t evt, const char *shad
 				return;
 			}
 			outMsg.WriteByte( GAME_RELIABLE_MESSAGE_SOUND_INDEX );
-			outMsg.WriteLong( gameLocal.ServerRemapDecl( to, DECL_SOUND, shaderDecl->Index() ) );
+			outMsg.WriteInt( gameLocal.ServerRemapDecl( to, DECL_SOUND, shaderDecl->Index() ) );
 		} else {
 			outMsg.WriteByte( GAME_RELIABLE_MESSAGE_SOUND_EVENT );
 			outMsg.WriteByte( evt );
@@ -3284,7 +3284,7 @@ void idMultiplayerGame::VoiceChat( const idCmdArgs &args, bool team ) {
 
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_VCHAT );
-	outMsg.WriteLong( index );
+	outMsg.WriteInt( index );
 	outMsg.WriteBits( team ? 1 : 0, 1 );
 	networkSystem->ClientSendReliableMessage( outMsg );
 }
@@ -3349,7 +3349,7 @@ void idMultiplayerGame::ServerWriteInitialReliableMessages( int clientNum ) {
 	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_STARTSTATE );
 	// send the game state and start time
 	outMsg.WriteByte( gameState );
-	outMsg.WriteLong( matchStartedTime );
+	outMsg.WriteInt( matchStartedTime );
 	outMsg.WriteShort( startFragLimit );
 	// send the powerup states and the spectate states
 	for( i = 0; i < gameLocal.numClients; i++ ) {
@@ -3373,7 +3373,7 @@ void idMultiplayerGame::ServerWriteInitialReliableMessages( int clientNum ) {
 	if ( gameState == COUNTDOWN ) {
 		outMsg.BeginWriting();
 		outMsg.WriteByte( GAME_RELIABLE_MESSAGE_WARMUPTIME );
-		outMsg.WriteLong( warmupEndTime );
+		outMsg.WriteInt( warmupEndTime );
 		networkSystem->ServerSendReliableMessage( clientNum, outMsg );
 	}
 }

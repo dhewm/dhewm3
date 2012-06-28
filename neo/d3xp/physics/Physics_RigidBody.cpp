@@ -1466,7 +1466,7 @@ void idPhysics_RigidBody::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	quat = current.i.orientation.ToCQuat();
 	localQuat = current.localAxis.ToCQuat();
 
-	msg.WriteLong( current.atRest );
+	msg.WriteInt( current.atRest );
 	msg.WriteFloat( current.i.position[0] );
 	msg.WriteFloat( current.i.position[1] );
 	msg.WriteFloat( current.i.position[2] );

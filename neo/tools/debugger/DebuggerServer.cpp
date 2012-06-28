@@ -334,7 +334,7 @@ void rvDebuggerServer::MSG_WriteCallstackFunc ( msg_t* msg, const prstack_t* sta
 	{
 		MSG_WriteString ( msg, "<UNKNOWN>" );
 		MSG_WriteString ( msg, "<UNKNOWN>" );
-		MSG_WriteLong ( msg, 0 );
+		MSG_WriteInt ( msg, 0 );
 		return;
 	}
 	else
@@ -351,12 +351,12 @@ void rvDebuggerServer::MSG_WriteCallstackFunc ( msg_t* msg, const prstack_t* sta
 		OSPathToRelativePath(mBreakProgram->GetFilename( st->file ), qpath);
 		qpath.BackSlashesToSlashes ( );
 		MSG_WriteString ( msg, qpath );
-		MSG_WriteLong ( msg, st->linenumber );
+		MSG_WriteInt ( msg, st->linenumber );
 	}
 	else
 	{
 		MSG_WriteString ( msg, "<UNKNOWN>" );
-		MSG_WriteLong ( msg, 0 );
+		MSG_WriteInt ( msg, 0 );
 	}
 }
 
@@ -421,7 +421,7 @@ void rvDebuggerServer::HandleInspectThreads ( msg_t* in_msg )
 		idThread* thread = idThread::GetThreads()[i];
 
 		MSG_WriteString ( &msg, thread->GetThreadName ( ) );
-		MSG_WriteLong ( &msg, thread->GetThreadNum ( ) );
+		MSG_WriteInt ( &msg, thread->GetThreadNum ( ) );
 
 		MSG_WriteBits ( &msg, (int)(thread == mBreakInterpreter->GetThread ( )), 1 );
 		MSG_WriteBits ( &msg, (int)thread->IsDoneProcessing(), 1 );
@@ -619,7 +619,7 @@ void rvDebuggerServer::Break ( idInterpreter* interpreter, idProgram* program, i
 	// Inform the debugger of the breakpoint hit
 	MSG_Init( &msg, buffer, sizeof( buffer ) );
 	MSG_WriteShort ( &msg, (int)DBMSG_BREAK );
-	MSG_WriteLong ( &msg, st->linenumber );
+	MSG_WriteInt ( &msg, st->linenumber );
 	MSG_WriteString ( &msg, qpath );
 	SendPacket ( msg.data, msg.cursize );
 
