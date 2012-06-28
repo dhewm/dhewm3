@@ -435,7 +435,7 @@ short	LittleShort( short l ) {
 	return SDL_SwapLE16(l);
 }
 
-int		BigLong( int l ) {
+int		BigInt( int l ) {
 	return SDL_SwapBE32(l);
 }
 
