@@ -573,7 +573,7 @@ idDict::WriteToFileHandle
 ================
 */
 void idDict::WriteToFileHandle( idFile *f ) const {
-	int c = LittleLong( args.Num() );
+	int c = LittleInt( args.Num() );
 	f->Write( &c, sizeof( c ) );
 	for ( int i = 0; i < args.Num(); i++ ) {	// don't loop on the swapped count use the original
 		WriteString( args[i].GetKey().c_str(), f );
@@ -615,7 +615,7 @@ void idDict::ReadFromFileHandle( idFile *f ) {
 	Clear();
 
 	f->Read( &c, sizeof( c ) );
-	c = LittleLong( c );
+	c = LittleInt( c );
 	for ( int i = 0; i < c; i++ ) {
 		key = ReadString( f );
 		val = ReadString( f );

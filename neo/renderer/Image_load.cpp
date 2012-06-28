@@ -1400,9 +1400,9 @@ bool idImage::CheckPrecompressedImage( bool fullLoad ) {
 
 	fileSystem->CloseFile( f );
 
-	unsigned int magic = LittleLong( *(unsigned int *)data );
+	unsigned int magic = LittleInt( *(unsigned int *)data );
 	ddsFileHeader_t	*_header = (ddsFileHeader_t *)(data + 4);
-	int ddspf_dwFlags = LittleLong( _header->ddspf.dwFlags );
+	int ddspf_dwFlags = LittleInt( _header->ddspf.dwFlags );
 
 	if ( magic != DDS_MAKEFOURCC('D', 'D', 'S', ' ')) {
 		common->Printf( "CheckPrecompressedImage( %s ): magic != 'DDS '\n", imgName.c_str() );
@@ -1438,24 +1438,24 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 	ddsFileHeader_t	*header = (ddsFileHeader_t *)(data + 4);
 
 	// ( not byte swapping dwReserved1 dwReserved2 )
-	header->dwSize = LittleLong( header->dwSize );
-	header->dwFlags = LittleLong( header->dwFlags );
-	header->dwHeight = LittleLong( header->dwHeight );
-	header->dwWidth = LittleLong( header->dwWidth );
-	header->dwPitchOrLinearSize = LittleLong( header->dwPitchOrLinearSize );
-	header->dwDepth = LittleLong( header->dwDepth );
-	header->dwMipMapCount = LittleLong( header->dwMipMapCount );
-	header->dwCaps1 = LittleLong( header->dwCaps1 );
-	header->dwCaps2 = LittleLong( header->dwCaps2 );
+	header->dwSize = LittleInt( header->dwSize );
+	header->dwFlags = LittleInt( header->dwFlags );
+	header->dwHeight = LittleInt( header->dwHeight );
+	header->dwWidth = LittleInt( header->dwWidth );
+	header->dwPitchOrLinearSize = LittleInt( header->dwPitchOrLinearSize );
+	header->dwDepth = LittleInt( header->dwDepth );
+	header->dwMipMapCount = LittleInt( header->dwMipMapCount );
+	header->dwCaps1 = LittleInt( header->dwCaps1 );
+	header->dwCaps2 = LittleInt( header->dwCaps2 );
 
-	header->ddspf.dwSize = LittleLong( header->ddspf.dwSize );
-	header->ddspf.dwFlags = LittleLong( header->ddspf.dwFlags );
-	header->ddspf.dwFourCC = LittleLong( header->ddspf.dwFourCC );
-	header->ddspf.dwRGBBitCount = LittleLong( header->ddspf.dwRGBBitCount );
-	header->ddspf.dwRBitMask = LittleLong( header->ddspf.dwRBitMask );
-	header->ddspf.dwGBitMask = LittleLong( header->ddspf.dwGBitMask );
-	header->ddspf.dwBBitMask = LittleLong( header->ddspf.dwBBitMask );
-	header->ddspf.dwABitMask = LittleLong( header->ddspf.dwABitMask );
+	header->ddspf.dwSize = LittleInt( header->ddspf.dwSize );
+	header->ddspf.dwFlags = LittleInt( header->ddspf.dwFlags );
+	header->ddspf.dwFourCC = LittleInt( header->ddspf.dwFourCC );
+	header->ddspf.dwRGBBitCount = LittleInt( header->ddspf.dwRGBBitCount );
+	header->ddspf.dwRBitMask = LittleInt( header->ddspf.dwRBitMask );
+	header->ddspf.dwGBitMask = LittleInt( header->ddspf.dwGBitMask );
+	header->ddspf.dwBBitMask = LittleInt( header->ddspf.dwBBitMask );
+	header->ddspf.dwABitMask = LittleInt( header->ddspf.dwABitMask );
 
 	// generate the texture number
 	qglGenTextures( 1, &texnum );

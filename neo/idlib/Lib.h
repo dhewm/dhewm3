@@ -107,7 +107,7 @@ void	UnpackColor( const dword color, idVec4 &unpackedColor );
 short	BigShort( short l );
 short	LittleShort( short l );
 int		BigLong( int l );
-int		LittleLong( int l );
+int		LittleInt( int l );
 float	BigFloat( float l );
 float	LittleFloat( float l );
 void	BigRevBytes( void *bp, int elsize, int elcount );

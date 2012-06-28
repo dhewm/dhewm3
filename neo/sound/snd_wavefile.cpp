@@ -152,9 +152,9 @@ int idWaveFile::ReadMMIO( void ) {
 
 	mhmmio->Read( &mckRiff, 12 );
 	assert( !isOgg );
-	mckRiff.ckid = LittleLong( mckRiff.ckid );
-	mckRiff.cksize = LittleLong( mckRiff.cksize );
-	mckRiff.fccType = LittleLong( mckRiff.fccType );
+	mckRiff.ckid = LittleInt( mckRiff.ckid );
+	mckRiff.cksize = LittleInt( mckRiff.cksize );
+	mckRiff.fccType = LittleInt( mckRiff.fccType );
 	mckRiff.dwDataOffset = 12;
 
 	// Check to make sure this is a valid wave file
@@ -169,8 +169,8 @@ int idWaveFile::ReadMMIO( void ) {
 			return -1;
 		}
 		assert( !isOgg );
-		ckIn.ckid = LittleLong( ckIn.ckid );
-		ckIn.cksize = LittleLong( ckIn.cksize );
+		ckIn.ckid = LittleInt( ckIn.ckid );
+		ckIn.cksize = LittleInt( ckIn.cksize );
 		ckIn.dwDataOffset += ckIn.cksize-8;
 	} while (ckIn.ckid != mmioFOURCC('f', 'm', 't', ' '));
 
@@ -187,8 +187,8 @@ int idWaveFile::ReadMMIO( void ) {
 	assert( !isOgg );
 	pcmWaveFormat.wf.wFormatTag = LittleShort( pcmWaveFormat.wf.wFormatTag );
 	pcmWaveFormat.wf.nChannels = LittleShort( pcmWaveFormat.wf.nChannels );
-	pcmWaveFormat.wf.nSamplesPerSec = LittleLong( pcmWaveFormat.wf.nSamplesPerSec );
-	pcmWaveFormat.wf.nAvgBytesPerSec = LittleLong( pcmWaveFormat.wf.nAvgBytesPerSec );
+	pcmWaveFormat.wf.nSamplesPerSec = LittleInt( pcmWaveFormat.wf.nSamplesPerSec );
+	pcmWaveFormat.wf.nAvgBytesPerSec = LittleInt( pcmWaveFormat.wf.nAvgBytesPerSec );
 	pcmWaveFormat.wf.nBlockAlign = LittleShort( pcmWaveFormat.wf.nBlockAlign );
 	pcmWaveFormat.wBitsPerSample = LittleShort( pcmWaveFormat.wBitsPerSample );
 
@@ -250,7 +250,7 @@ int idWaveFile::ResetFile( void ) {
 
 		mhmmio->Read( &mck.cksize, 4 );
 		assert( !isOgg );
-		mck.cksize = LittleLong( mck.cksize );
+		mck.cksize = LittleInt( mck.cksize );
 		mseekBase = mhmmio->Tell();
 	}
 

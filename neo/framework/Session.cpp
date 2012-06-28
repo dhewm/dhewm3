@@ -2755,7 +2755,7 @@ void idSessionLocal::RunGameTic() {
 		} else {
 			cmd = logCmd.cmd;
 			cmd.ByteSwap();
-			logCmd.consistencyHash = LittleLong( logCmd.consistencyHash );
+			logCmd.consistencyHash = LittleInt( logCmd.consistencyHash );
 		}
 	}
 

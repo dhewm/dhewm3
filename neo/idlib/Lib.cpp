@@ -439,7 +439,7 @@ int		BigLong( int l ) {
 	return SDL_SwapBE32(l);
 }
 
-int		LittleLong( int l ) {
+int		LittleInt( int l ) {
 	return SDL_SwapLE32(l);
 }
 

@@ -2918,7 +2918,7 @@ void idMayaExport::ConvertToMD3( void ) {
 
 	pinmodel = (md3Header_t *)buffer;
 
-	version = LittleLong (pinmodel->version);
+	version = LittleInt (pinmodel->version);
 	if (version != MD3_VERSION) {
 		common->Printf( "R_LoadMD3: %s has wrong version (%i should be %i)\n",
 				 mod_name, version, MD3_VERSION);
@@ -2926,11 +2926,11 @@ void idMayaExport::ConvertToMD3( void ) {
 	}
 
 	mod->type = MOD_MESH;
-	size = LittleLong(pinmodel->ofsEnd);
+	size = LittleInt(pinmodel->ofsEnd);
 	mod->dataSize += size;
 	mod->md3[lod] = ri.Hunk_Alloc( size );
 
-	memcpy (mod->md3[lod], buffer, LittleLong(pinmodel->ofsEnd) );
+	memcpy (mod->md3[lod], buffer, LittleInt(pinmodel->ofsEnd) );
 
 	LL(mod->md3[lod]->ident);
 	LL(mod->md3[lod]->version);
