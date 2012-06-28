@@ -126,7 +126,7 @@ public:
 	int				ReadDeltaChar( int oldValue ) const;
 	int				ReadDeltaByte( int oldValue ) const;
 	int				ReadDeltaShort( int oldValue ) const;
-	int				ReadDeltaLong( int oldValue ) const;
+	int				ReadDeltaInt( int oldValue ) const;
 	float			ReadDeltaFloat( float oldValue ) const;
 	float			ReadDeltaFloat( float oldValue, int exponentBits, int mantissaBits ) const;
 	int				ReadDeltaByteCounter( int oldValue ) const;
@@ -415,7 +415,7 @@ ID_INLINE int idBitMsg::ReadDeltaShort( int oldValue ) const {
 	return (short)ReadDelta( oldValue, -16 );
 }
 
-ID_INLINE int idBitMsg::ReadDeltaLong( int oldValue ) const {
+ID_INLINE int idBitMsg::ReadDeltaInt( int oldValue ) const {
 	return ReadDelta( oldValue, 32 );
 }
 
@@ -492,7 +492,7 @@ public:
 	int				ReadDeltaChar( int oldValue ) const;
 	int				ReadDeltaByte( int oldValue ) const;
 	int				ReadDeltaShort( int oldValue ) const;
-	int				ReadDeltaLong( int oldValue ) const;
+	int				ReadDeltaInt( int oldValue ) const;
 	float			ReadDeltaFloat( float oldValue ) const;
 	float			ReadDeltaFloat( float oldValue, int exponentBits, int mantissaBits ) const;
 	int				ReadDeltaByteCounter( int oldValue ) const;
@@ -661,7 +661,7 @@ ID_INLINE int idBitMsgDelta::ReadDeltaShort( int oldValue ) const {
 	return (short)ReadDelta( oldValue, -16 );
 }
 
-ID_INLINE int idBitMsgDelta::ReadDeltaLong( int oldValue ) const {
+ID_INLINE int idBitMsgDelta::ReadDeltaInt( int oldValue ) const {
 	return ReadDelta( oldValue, 32 );
 }
 
