@@ -536,10 +536,10 @@ int idBitMsg::ReadDeltaShortCounter( int oldValue ) const {
 
 /*
 ================
-idBitMsg::ReadDeltaLongCounter
+idBitMsg::ReadDeltaIntCounter
 ================
 */
-int idBitMsg::ReadDeltaLongCounter( int oldValue ) const {
+int idBitMsg::ReadDeltaIntCounter( int oldValue ) const {
 	int i, newValue;
 
 	i = ReadBits( 5 );
@@ -1041,21 +1041,21 @@ int idBitMsgDelta::ReadDeltaShortCounter( int oldValue ) const {
 
 /*
 ================
-idBitMsgDelta::ReadDeltaLongCounter
+idBitMsgDelta::ReadDeltaIntCounter
 ================
 */
-int idBitMsgDelta::ReadDeltaLongCounter( int oldValue ) const {
+int idBitMsgDelta::ReadDeltaIntCounter( int oldValue ) const {
 	int value;
 
 	if ( !base ) {
-		value = readDelta->ReadDeltaLongCounter( oldValue );
+		value = readDelta->ReadDeltaIntCounter( oldValue );
 		changed = true;
 	} else {
 		int baseValue = base->ReadBits( 32 );
 		if ( !readDelta || readDelta->ReadBits( 1 ) == 0 ) {
 			value = baseValue;
 		} else {
-			value = readDelta->ReadDeltaLongCounter( oldValue );
+			value = readDelta->ReadDeltaIntCounter( oldValue );
 			changed = true;
 		}
 	}

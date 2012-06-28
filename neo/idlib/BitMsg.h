@@ -131,7 +131,7 @@ public:
 	float			ReadDeltaFloat( float oldValue, int exponentBits, int mantissaBits ) const;
 	int				ReadDeltaByteCounter( int oldValue ) const;
 	int				ReadDeltaShortCounter( int oldValue ) const;
-	int				ReadDeltaLongCounter( int oldValue ) const;
+	int				ReadDeltaIntCounter( int oldValue ) const;
 	bool			ReadDeltaDict( idDict &dict, const idDict *base ) const;
 
 	static int		DirToBits( const idVec3 &dir, int numBits );
@@ -497,7 +497,7 @@ public:
 	float			ReadDeltaFloat( float oldValue, int exponentBits, int mantissaBits ) const;
 	int				ReadDeltaByteCounter( int oldValue ) const;
 	int				ReadDeltaShortCounter( int oldValue ) const;
-	int				ReadDeltaLongCounter( int oldValue ) const;
+	int				ReadDeltaIntCounter( int oldValue ) const;
 
 private:
 	const idBitMsg *base;			// base

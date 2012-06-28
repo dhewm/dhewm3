@@ -226,7 +226,7 @@ void idAsyncNetwork::ReadUserCmdDelta( const idBitMsg &msg, usercmd_t &cmd, cons
 	memset( &cmd, 0, sizeof( cmd ) );
 
 	if ( base ) {
-		cmd.gameTime = msg.ReadDeltaLongCounter( base->gameTime );
+		cmd.gameTime = msg.ReadDeltaIntCounter( base->gameTime );
 		cmd.buttons = msg.ReadDeltaByte( base->buttons );
 		cmd.mx = msg.ReadDeltaShort( base->mx );
 		cmd.my = msg.ReadDeltaShort( base->my );
