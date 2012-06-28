@@ -39,10 +39,31 @@ If you have questions concerning this license or the applicable additional terms
 #define ENGINE_VERSION					"dhewm 1.3.1"	// printed in console
 
 // paths
-#ifdef ID_DEMO_BUILD
-	#define BASE_GAMEDIR					"demo"
-#else
-	#define	BASE_GAMEDIR					"base"
+#ifndef BASE_GAMEDIR
+	// BASE_GAMEDIR can be set as compiler option, else this is used
+	#ifdef ID_DEMO_BUILD
+		#define BASE_GAMEDIR			"demo"
+	#else
+		#define	BASE_GAMEDIR			"base"
+	#endif
+#endif
+
+/*
+ * where savegames, configs, screenshots, .. will be put:
+ * $HOME/.$CUSTOM_SAVE_DIR on linux (e.g. /home/horst/.dhewm3)
+ * $NSHomeDirectory/Library/Application Support/$CUSTOM_SAVE_DIR on OSX
+ * $CSIDL_PERSONAL/My Games/$CUSTOM_SAVE_DIR on windows (e.g. My Documents/My Games/dhewm3)
+ *
+ * If this is not set doom3's defaults (that vary on different platforms, e.g.
+ * "Doom 3", "doom3") are used.
+ *
+ * Note: Linux users prefer paths without spaces, so avoid spaces in
+ * your custom game dir :-)
+ */
+#ifdef USE_CUSTOM_SAVE_DIR
+	#ifndef CUSTOM_SAVE_DIR
+		#define CUSTOM_SAVE_DIR			"dhewm3"
+	#endif
 #endif
 
 // filenames
