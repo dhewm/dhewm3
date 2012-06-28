@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <unistd.h>
 #endif
 
-#include <SDL_endian.h>
+#include <SDL.h>
 
 #include "sys/platform.h"
 #include "idlib/math/Vector.h"
