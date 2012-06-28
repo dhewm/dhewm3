@@ -2012,7 +2012,7 @@ void idPhysics_Player::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	msg.WriteDeltaFloat( 0.0f, current.stepUp );
 	msg.WriteBits( current.movementType, PLAYER_MOVEMENT_TYPE_BITS );
 	msg.WriteBits( current.movementFlags, PLAYER_MOVEMENT_FLAGS_BITS );
-	msg.WriteDeltaLong( 0, current.movementTime );
+	msg.WriteDeltaInt( 0, current.movementTime );
 }
 
 /*

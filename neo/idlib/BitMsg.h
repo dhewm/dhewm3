@@ -97,7 +97,7 @@ public:
 	void			WriteDeltaChar( int oldValue, int newValue );
 	void			WriteDeltaByte( int oldValue, int newValue );
 	void			WriteDeltaShort( int oldValue, int newValue );
-	void			WriteDeltaLong( int oldValue, int newValue );
+	void			WriteDeltaInt( int oldValue, int newValue );
 	void			WriteDeltaFloat( float oldValue, float newValue );
 	void			WriteDeltaFloat( float oldValue, float newValue, int exponentBits, int mantissaBits );
 	void			WriteDeltaByteCounter( int oldValue, int newValue );
@@ -333,7 +333,7 @@ ID_INLINE void idBitMsg::WriteDeltaShort( int oldValue, int newValue ) {
 	WriteDelta( oldValue, newValue, -16 );
 }
 
-ID_INLINE void idBitMsg::WriteDeltaLong( int oldValue, int newValue ) {
+ID_INLINE void idBitMsg::WriteDeltaInt( int oldValue, int newValue ) {
 	WriteDelta( oldValue, newValue, 32 );
 }
 
@@ -467,7 +467,7 @@ public:
 	void			WriteDeltaChar( int oldValue, int newValue );
 	void			WriteDeltaByte( int oldValue, int newValue );
 	void			WriteDeltaShort( int oldValue, int newValue );
-	void			WriteDeltaLong( int oldValue, int newValue );
+	void			WriteDeltaInt( int oldValue, int newValue );
 	void			WriteDeltaFloat( float oldValue, float newValue );
 	void			WriteDeltaFloat( float oldValue, float newValue, int exponentBits, int mantissaBits );
 	void			WriteDeltaByteCounter( int oldValue, int newValue );
@@ -592,7 +592,7 @@ ID_INLINE void idBitMsgDelta::WriteDeltaShort( int oldValue, int newValue ) {
 	WriteDelta( oldValue, newValue, -16 );
 }
 
-ID_INLINE void idBitMsgDelta::WriteDeltaLong( int oldValue, int newValue ) {
+ID_INLINE void idBitMsgDelta::WriteDeltaInt( int oldValue, int newValue ) {
 	WriteDelta( oldValue, newValue, 32 );
 }
 

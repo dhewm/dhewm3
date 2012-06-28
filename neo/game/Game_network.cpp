@@ -662,7 +662,7 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 	gameLocal.pvs.WritePVS( pvsHandle, msg );
 #endif
 	for ( i = 0; i < ENTITY_PVS_SIZE; i++ ) {
-		msg.WriteDeltaLong( clientPVS[clientNum][i], snapshot->pvs[i] );
+		msg.WriteDeltaInt( clientPVS[clientNum][i], snapshot->pvs[i] );
 	}
 
 	// free the PVS
