@@ -1106,8 +1106,8 @@ void idPhysics_Parametric::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 	idVec3 linearStartValue, linearSpeed, linearBaseSpeed, startPos, endPos;
 	idAngles angularStartValue, angularSpeed, angularBaseSpeed, startAng, endAng;
 
-	current.time = msg.ReadLong();
-	current.atRest = msg.ReadLong();
+	current.time = msg.ReadInt();
+	current.atRest = msg.ReadInt();
 	current.origin[0] = msg.ReadFloat();
 	current.origin[1] = msg.ReadFloat();
 	current.origin[2] = msg.ReadFloat();

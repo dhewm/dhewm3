@@ -113,7 +113,7 @@ public:
 	int				ReadByte( void ) const;
 	int				ReadShort( void ) const;
 	int				ReadUShort( void ) const;
-	int				ReadLong( void ) const;
+	int				ReadInt( void ) const;
 	float			ReadFloat( void ) const;
 	float			ReadFloat( int exponentBits, int mantissaBits ) const;
 	float			ReadAngle8( void ) const;
@@ -376,7 +376,7 @@ ID_INLINE int idBitMsg::ReadUShort( void ) const {
 	return (unsigned short)ReadBits( 16 );
 }
 
-ID_INLINE int idBitMsg::ReadLong( void ) const {
+ID_INLINE int idBitMsg::ReadInt( void ) const {
 	return ReadBits( 32 );
 }
 
@@ -479,7 +479,7 @@ public:
 	int				ReadByte( void ) const;
 	int				ReadShort( void ) const;
 	int				ReadUShort( void ) const;
-	int				ReadLong( void ) const;
+	int				ReadInt( void ) const;
 	float			ReadFloat( void ) const;
 	float			ReadFloat( int exponentBits, int mantissaBits ) const;
 	float			ReadAngle8( void ) const;
@@ -622,7 +622,7 @@ ID_INLINE int idBitMsgDelta::ReadUShort( void ) const {
 	return (unsigned short)ReadBits( 16 );
 }
 
-ID_INLINE int idBitMsgDelta::ReadLong( void ) const {
+ID_INLINE int idBitMsgDelta::ReadInt( void ) const {
 	return ReadBits( 32 );
 }
 

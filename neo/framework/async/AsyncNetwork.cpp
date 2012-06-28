@@ -239,7 +239,7 @@ void idAsyncNetwork::ReadUserCmdDelta( const idBitMsg &msg, usercmd_t &cmd, cons
 		return;
 	}
 
-	cmd.gameTime = msg.ReadLong();
+	cmd.gameTime = msg.ReadInt();
 	cmd.buttons = msg.ReadByte();
 	cmd.mx = msg.ReadShort();
 	cmd.my = msg.ReadShort();

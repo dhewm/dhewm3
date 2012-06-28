@@ -806,7 +806,7 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 			break;
 		}
 		case GAME_RELIABLE_MESSAGE_VCHAT: {
-			int index = msg.ReadLong();
+			int index = msg.ReadInt();
 			bool team = msg.ReadBits( 1 ) != 0;
 			mpGame.ProcessVoiceChat( clientNum, team, index );
 			break;
@@ -844,7 +844,7 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 
 			event->spawnId = msg.ReadBits( 32 );
 			event->event = msg.ReadByte();
-			event->time = msg.ReadLong();
+			event->time = msg.ReadInt();
 
 			event->paramsSize = msg.ReadBits( idMath::BitsForInteger( MAX_EVENT_PARAM_SIZE ) );
 			if ( event->paramsSize ) {
@@ -1011,7 +1011,7 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int sequence, const int gam
 
 #if ASYNC_WRITE_TAGS
 	idRandom tagRandom;
-	tagRandom.SetSeed( msg.ReadLong() );
+	tagRandom.SetSeed( msg.ReadInt() );
 #endif
 
 	// read all entities from the snapshot
@@ -1089,7 +1089,7 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int sequence, const int gam
 		ent->snapshotBits = msg.GetNumBitsRead() - numBitsRead;
 
 #if ASYNC_WRITE_TAGS
-		if ( msg.ReadLong() != tagRandom.RandomInt() ) {
+		if ( msg.ReadInt() != tagRandom.RandomInt() ) {
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "writeGameState" );
 			if ( entityDefNumber >= 0 && entityDefNumber < declManager->GetNumDecls( DECL_ENTITYDEF ) ) {
 				classname = declManager->DeclByIndex( DECL_ENTITYDEF, entityDefNumber, false )->GetName();
@@ -1128,7 +1128,7 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int sequence, const int gam
 		sourceAreas[ i++ ] = 0;
 	}
 	for ( i = 0; i < idEntity::MAX_PVS_AREAS; i++ ) {
-		serverPVS[ i ] = msg.ReadLong();
+		serverPVS[ i ] = msg.ReadInt();
 	}
 	if ( memcmp( sourceAreas, serverPVS, idEntity::MAX_PVS_AREAS * sizeof( int ) ) ) {
 		common->Warning( "client PVS areas != server PVS areas, sequence 0x%x", sequence );
@@ -1315,7 +1315,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			char name[MAX_STRING_CHARS];
 
 			type = msg.ReadByte();
-			index = msg.ReadLong();
+			index = msg.ReadInt();
 			msg.ReadString( name, sizeof( name ) );
 
 			const idDecl *decl = declManager->FindType( (declType_t)type, name, false );
@@ -1329,7 +1329,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 		}
 		case GAME_RELIABLE_MESSAGE_SPAWN_PLAYER: {
 			int client = msg.ReadByte();
-			int spawnId = msg.ReadLong();
+			int spawnId = msg.ReadInt();
 			if ( !entities[ client ] ) {
 				SpawnPlayer( client );
 				entities[ client ]->FreeModelDef();
@@ -1363,7 +1363,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			break;
 		}
 		case GAME_RELIABLE_MESSAGE_SOUND_INDEX: {
-			int index = gameLocal.ClientRemapDecl( DECL_SOUND, msg.ReadLong() );
+			int index = gameLocal.ClientRemapDecl( DECL_SOUND, msg.ReadInt() );
 			if ( index >= 0 && index < declManager->GetNumDecls( DECL_SOUND ) ) {
 				const idSoundShader *shader = declManager->SoundByIndex( index );
 				mpGame.PlayGlobalSound( -1, SND_COUNT, shader->GetName() );
@@ -1387,7 +1387,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 
 			event->spawnId = msg.ReadBits( 32 );
 			event->event = msg.ReadByte();
-			event->time = msg.ReadLong();
+			event->time = msg.ReadInt();
 
 			event->paramsSize = msg.ReadBits( idMath::BitsForInteger( MAX_EVENT_PARAM_SIZE ) );
 			if ( event->paramsSize ) {
@@ -1434,7 +1434,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			break;
 		}
 		case GAME_RELIABLE_MESSAGE_PORTALSTATES: {
-			int numPortals = msg.ReadLong();
+			int numPortals = msg.ReadInt();
 			assert( numPortals == gameRenderWorld->NumPortals() );
 			for ( int i = 0; i < numPortals; i++ ) {
 				gameRenderWorld->SetPortalState( (qhandle_t) (i+1), msg.ReadBits( NUM_RENDER_PORTAL_BITS ) );
@@ -1442,7 +1442,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			break;
 		}
 		case GAME_RELIABLE_MESSAGE_PORTAL: {
-			qhandle_t portal = msg.ReadLong();
+			qhandle_t portal = msg.ReadInt();
 			int blockingBits = msg.ReadBits( NUM_RENDER_PORTAL_BITS );
 			assert( portal > 0 && portal <= gameRenderWorld->NumPortals() );
 			gameRenderWorld->SetPortalState( portal, blockingBits );

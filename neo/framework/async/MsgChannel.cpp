@@ -104,7 +104,7 @@ bool idMsgQueue::Get( byte *data, int &size ) {
 	}
 	int sequence id_attribute((unused));
 	size = ReadShort();
-	sequence = ReadLong();
+	sequence = ReadInt();
 	ReadData( data, size );
 	assert( sequence == first );
 	first++;
@@ -205,10 +205,10 @@ void idMsgQueue::WriteInt( int l ) {
 
 /*
 ===============
-idMsgQueue::ReadLong
+idMsgQueue::ReadInt
 ===============
 */
-int idMsgQueue::ReadLong( void ) {
+int idMsgQueue::ReadInt( void ) {
 	return ReadByte() | ( ReadByte() << 8 ) | ( ReadByte() << 16 ) | ( ReadByte() << 24 );
 }
 
@@ -378,7 +378,7 @@ bool idMsgChannel::ReadMessageData( idBitMsg &out, const idBitMsg &msg ) {
 	out.BeginReading();
 
 	// read acknowledgement of sent reliable messages
-	reliableAcknowledge = out.ReadLong();
+	reliableAcknowledge = out.ReadInt();
 
 	// remove acknowledged reliable messages
 	while( reliableSend.GetFirst() <= reliableAcknowledge ) {
@@ -394,7 +394,7 @@ bool idMsgChannel::ReadMessageData( idBitMsg &out, const idBitMsg &msg ) {
 			common->Printf( "%s: bad reliable message\n", Sys_NetAdrToString( remoteAddress ) );
 			return false;
 		}
-		reliableSequence = out.ReadLong();
+		reliableSequence = out.ReadInt();
 		if ( reliableSequence == reliableReceive.GetLast() + 1 ) {
 			reliableReceive.Add( out.GetData() + out.GetReadCount(), reliableMessageSize );
 		}
@@ -554,7 +554,7 @@ bool idMsgChannel::Process( const netadr_t from, int time, idBitMsg &msg, int &s
 	UpdateIncomingRate( time, msg.GetSize() );
 
 	// get sequence numbers
-	sequence = msg.ReadLong();
+	sequence = msg.ReadInt();
 
 	// check for fragment information
 	if ( sequence & FRAGMENT_BIT ) {

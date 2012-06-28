@@ -1504,7 +1504,7 @@ idPhysics_RigidBody::ReadFromSnapshot
 void idPhysics_RigidBody::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 	idCQuat quat, localQuat;
 
-	current.atRest = msg.ReadLong();
+	current.atRest = msg.ReadInt();
 	current.i.position[0] = msg.ReadFloat();
 	current.i.position[1] = msg.ReadFloat();
 	current.i.position[2] = msg.ReadFloat();

@@ -194,7 +194,7 @@ void rvDebuggerClient::HandleBreak ( msg_t* msg )
 	mBreak = true;
 
 	// Line number
-	mBreakLineNumber = MSG_ReadLong ( msg );
+	mBreakLineNumber = MSG_ReadInt ( msg );
 
 	// Filename
 	MSG_ReadString ( msg, filename, MAX_PATH );
@@ -263,7 +263,7 @@ void rvDebuggerClient::HandleInspectCallstack ( msg_t* msg )
 		entry->mFilename = temp;
 
 		// Line Number
-		entry->mLineNumber = MSG_ReadLong ( msg );
+		entry->mLineNumber = MSG_ReadInt ( msg );
 
 		// Add to list
 		mCallstack.Append ( entry );
@@ -296,7 +296,7 @@ void rvDebuggerClient::HandleInspectThreads ( msg_t* msg )
 		entry->mName = temp;
 
 		// Thread ID
-		entry->mID = MSG_ReadLong ( msg );
+		entry->mID = MSG_ReadInt ( msg );
 
 		// Thread state
 		entry->mCurrent = MSG_ReadBits ( msg, 1 ) ? true : false;

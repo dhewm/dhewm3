@@ -3388,7 +3388,7 @@ void idMultiplayerGame::ClientReadStartState( const idBitMsg &msg ) {
 
 	// read the state in preparation for reading snapshot updates
 	gameState = (idMultiplayerGame::gameState_t)msg.ReadByte();
-	matchStartedTime = msg.ReadLong( );
+	matchStartedTime = msg.ReadInt( );
 	startFragLimit = msg.ReadShort( );
 	while ( ( client = msg.ReadShort() ) != MAX_CLIENTS ) {
 		assert( gameLocal.entities[ client ] && gameLocal.entities[ client ]->IsType( idPlayer::Type ) );
@@ -3409,5 +3409,5 @@ idMultiplayerGame::ClientReadWarmupTime
 ================
 */
 void idMultiplayerGame::ClientReadWarmupTime( const idBitMsg &msg ) {
-	warmupEndTime = msg.ReadLong();
+	warmupEndTime = msg.ReadInt();
 }

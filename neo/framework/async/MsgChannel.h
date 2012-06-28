@@ -82,7 +82,7 @@ private:
 	void			WriteShort( int s );
 	int				ReadShort( void );
 	void			WriteInt( int l );
-	int				ReadLong( void );
+	int				ReadInt( void );
 	void			WriteData( const byte *data, const int size );
 	void			ReadData( byte *data, const int size );
 };

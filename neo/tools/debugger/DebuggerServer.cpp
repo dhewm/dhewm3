@@ -268,8 +268,8 @@ void rvDebuggerServer::HandleAddBreakpoint ( msg_t* msg )
 
 	// Read the breakpoint info
 	onceOnly   = MSG_ReadBits ( msg, 1 ) ? true : false;
-	lineNumber = MSG_ReadLong ( msg );
-	id		   = MSG_ReadLong ( msg );
+	lineNumber = MSG_ReadInt ( msg );
+	id		   = MSG_ReadInt ( msg );
 
 	MSG_ReadString ( msg, filename, MAX_PATH );
 
@@ -295,7 +295,7 @@ void rvDebuggerServer::HandleRemoveBreakpoint ( msg_t* msg )
 	int id;
 
 	// ID that we are to remove
-	id = MSG_ReadLong ( msg );
+	id = MSG_ReadInt ( msg );
 
 	// Since breakpoints are used by both threads we need to
 	// protect them with a crit section

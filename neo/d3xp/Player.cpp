@@ -9727,10 +9727,10 @@ void idPlayer::ReadPlayerStateFromSnapshot( const idBitMsgDelta &msg ) {
 	int i, ammo;
 
 	bobCycle = msg.ReadByte();
-	stepUpTime = msg.ReadLong();
+	stepUpTime = msg.ReadInt();
 	stepUpDelta = msg.ReadFloat();
 #ifdef _D3XP
-	inventory.weapons = msg.ReadLong();
+	inventory.weapons = msg.ReadInt();
 #else
 	inventory.weapons = msg.ReadShort();
 #endif
