@@ -192,7 +192,7 @@ idAsyncNetwork::WriteUserCmdDelta
 */
 void idAsyncNetwork::WriteUserCmdDelta( idBitMsg &msg, const usercmd_t &cmd, const usercmd_t *base ) {
 	if ( base ) {
-		msg.WriteDeltaLongCounter( base->gameTime, cmd.gameTime );
+		msg.WriteDeltaIntCounter( base->gameTime, cmd.gameTime );
 		msg.WriteDeltaByte( base->buttons, cmd.buttons );
 		msg.WriteDeltaShort( base->mx, cmd.mx );
 		msg.WriteDeltaShort( base->my, cmd.my );

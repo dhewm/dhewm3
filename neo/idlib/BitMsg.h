@@ -102,7 +102,7 @@ public:
 	void			WriteDeltaFloat( float oldValue, float newValue, int exponentBits, int mantissaBits );
 	void			WriteDeltaByteCounter( int oldValue, int newValue );
 	void			WriteDeltaShortCounter( int oldValue, int newValue );
-	void			WriteDeltaLongCounter( int oldValue, int newValue );
+	void			WriteDeltaIntCounter( int oldValue, int newValue );
 	bool			WriteDeltaDict( const idDict &dict, const idDict *base );
 
 	void			BeginReading( void ) const;				// begin reading.
@@ -472,7 +472,7 @@ public:
 	void			WriteDeltaFloat( float oldValue, float newValue, int exponentBits, int mantissaBits );
 	void			WriteDeltaByteCounter( int oldValue, int newValue );
 	void			WriteDeltaShortCounter( int oldValue, int newValue );
-	void			WriteDeltaLongCounter( int oldValue, int newValue );
+	void			WriteDeltaIntCounter( int oldValue, int newValue );
 
 	int				ReadBits( int numBits ) const;
 	int				ReadChar( void ) const;
