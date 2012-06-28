@@ -374,7 +374,7 @@ pvsStack_t *idPVS::FloodPassagePVS_r( pvsPortal_t *source, const pvsPortal_t *po
 		// use the portal PVS if it has been calculated
 		if ( p->done ) {
 			portalVis = reinterpret_cast<int *>(p->vis);
-			for ( j = 0; j < portalVisLongs; j++ ) {
+			for ( j = 0; j < portalVisInts; j++ ) {
 				// get new PVS which is decreased by going through this passage
 				m = *prevMightSee++ & *passageVis++ & *portalVis++;
 				// check if anything might be visible through this passage that wasn't yet visible
@@ -385,7 +385,7 @@ pvsStack_t *idPVS::FloodPassagePVS_r( pvsPortal_t *source, const pvsPortal_t *po
 		}
 		else {
 			// the p->mightSee is implicitely stored in the passageVis
-			for ( j = 0; j < portalVisLongs; j++ ) {
+			for ( j = 0; j < portalVisInts; j++ ) {
 				// get new PVS which is decreased by going through this passage
 				m = *prevMightSee++ & *passageVis++;
 				// check if anything might be visible through this passage that wasn't yet visible
@@ -758,7 +758,7 @@ int idPVS::AreaPVSFromPortalPVS( void ) const {
 		for ( j = 1; j < area->numPortals; j++ ) {
 			p1 = reinterpret_cast<int *>(area->portals[0]->vis);
 			p2 = reinterpret_cast<int *>(area->portals[j]->vis);
-			for ( k = 0; k < portalVisLongs; k++ ) {
+			for ( k = 0; k < portalVisInts; k++ ) {
 				*p1++ |= *p2++;
 			}
 		}
@@ -808,7 +808,7 @@ void idPVS::Init( void ) {
 	areaQueue = new int[numAreas];
 
 	areaVisBytes = ( ((numAreas+31)&~31) >> 3);
-	areaVisLongs = areaVisBytes/sizeof(int);
+	areaVisInts = areaVisBytes/sizeof(int);
 
 	areaPVS = new byte[numAreas * areaVisBytes];
 	memset( areaPVS, 0xFF, numAreas * areaVisBytes );
@@ -816,7 +816,7 @@ void idPVS::Init( void ) {
 	numPortals = GetPortalCount();
 
 	portalVisBytes = ( ((numPortals+31)&~31) >> 3);
-	portalVisLongs = portalVisBytes/sizeof(int);
+	portalVisInts = portalVisBytes/sizeof(int);
 
 	for ( int i = 0; i < MAX_CURRENT_PVS; i++ ) {
 		currentPVS[i].handle.i = -1;
@@ -1037,7 +1037,7 @@ pvsHandle_t idPVS::SetupCurrentPVS( const int *sourceAreas, const int numSourceA
 
 			vis = reinterpret_cast<int *>(areaPVS + sourceAreas[i] * areaVisBytes);
 			pvs = reinterpret_cast<int *>(currentPVS[handle.i].pvs);
-			for ( j = 0; j < areaVisLongs; j++ ) {
+			for ( j = 0; j < areaVisInts; j++ ) {
 				*pvs++ |= *vis++;
 			}
 		}
@@ -1089,7 +1089,7 @@ pvsHandle_t idPVS::MergeCurrentPVS( pvsHandle_t pvs1, pvsHandle_t pvs2 ) const {
 	pvs1Ptr = reinterpret_cast<int *>(currentPVS[pvs1.i].pvs);
 	pvs2Ptr = reinterpret_cast<int *>(currentPVS[pvs2.i].pvs);
 
-	for ( i = 0; i < areaVisLongs; i++ ) {
+	for ( i = 0; i < areaVisInts; i++ ) {
 		*ptr++ = *pvs1Ptr++ | *pvs2Ptr++;
 	}
 
