@@ -68,11 +68,7 @@ Sys_DefaultSavePath
 */
 const char *Sys_DefaultSavePath(void) {
 	static char savepath[ MAXPATHLEN ];
-#if defined( ID_DEMO_BUILD )
-	sprintf( savepath, "%s/Library/Application Support/Doom 3 Demo", [NSHomeDirectory() cString] );
-#else
 	sprintf( savepath, "%s/Library/Application Support/Doom 3", [NSHomeDirectory() cString] );
-#endif
 	return savepath;
 }
 

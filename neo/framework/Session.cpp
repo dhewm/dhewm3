@@ -756,24 +756,6 @@ static void Session_Disconnect_f( const idCmdArgs &args ) {
 }
 
 #ifndef	ID_DEDICATED
-#ifdef ID_DEMO_BUILD
-/*
-================
-Session_EndOfDemo_f
-================
-*/
-static void Session_EndOfDemo_f( const idCmdArgs &args ) {
-	sessLocal.Stop();
-	sessLocal.StartMenu();
-	if ( soundSystem ) {
-		soundSystem->SetMute( false );
-	}
-	if ( sessLocal.guiActive ) {
-		sessLocal.guiActive->HandleNamedEvent( "endOfDemo" );
-	}
-}
-#endif
-
 /*
 ================
 Session_ExitCmdDemo_f
@@ -2828,8 +2810,6 @@ void idSessionLocal::RunGameTic() {
 			SetGUI(guiRestartMenu, NULL);
 		} else if ( !idStr::Icmp( args.Argv(0), "disconnect" ) ) {
 			cmdSystem->BufferCommandText( CMD_EXEC_INSERT, "stoprecording ; disconnect" );
-		} else if ( !idStr::Icmp( args.Argv(0), "endOfDemo" ) ) {
-			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "endOfDemo" );
 		}
 	}
 }
@@ -2871,10 +2851,6 @@ void idSessionLocal::Init() {
 
 	cmdSystem->AddCommand( "disconnect", Session_Disconnect_f, CMD_FL_SYSTEM, "disconnects from a game" );
 
-#ifdef ID_DEMO_BUILD
-	cmdSystem->AddCommand( "endOfDemo", Session_EndOfDemo_f, CMD_FL_SYSTEM, "ends the demo version of the game" );
-#endif
-
 	cmdSystem->AddCommand( "demoShot", Session_DemoShot_f, CMD_FL_SYSTEM, "writes a screenshot for a demo" );
 	cmdSystem->AddCommand( "testGUI", Session_TestGUI_f, CMD_FL_SYSTEM, "tests a gui" );
 
@@ -2901,11 +2877,7 @@ void idSessionLocal::Init() {
 	menuSoundWorld = soundSystem->AllocSoundWorld( rw );
 
 	// we have a single instance of the main menu
-#ifndef ID_DEMO_BUILD
 	guiMainMenu = uiManager->FindGui( "guis/mainmenu.gui", true, false, true );
-#else
-	guiMainMenu = uiManager->FindGui( "guis/demo_mainmenu.gui", true, false, true );
-#endif
 	guiMainMenu_MapList = uiManager->AllocListGUI();
 	guiMainMenu_MapList->Config( guiMainMenu, "mapList" );
 	idAsyncNetwork::client.serverList.GUIConfig( guiMainMenu, "serverList" );

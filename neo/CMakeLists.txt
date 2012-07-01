@@ -14,7 +14,6 @@ cmake_minimum_required(VERSION 2.6)
 # SDK				-D_D3SDK
 
 # don't add these as options, but document them?
-# TARGET_DEMO		there are no demo pk4s compatible to this 1.3.1 codebase
 # IDNET_HOST		-DIDNET_HOST=\\"%s\\"' % IDNET_HOST
 # DEBUG_MEMORY		-DID_DEBUG_MEMORY', '-DID_REDIRECT_NEWDELETE
 # LIBC_MALLOC		-DUSE_LIBC_MALLOC=0
