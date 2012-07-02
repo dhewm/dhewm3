@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SYS_PUBLIC__
 #define __SYS_PUBLIC__
 
+class idStr;
+
 typedef enum {
 	CPUID_NONE							= 0x00000,
 	CPUID_UNSUPPORTED					= 0x00001,	// unsupported (386/486)
@@ -113,6 +115,12 @@ struct sysMemoryStats_t {
 	int totalVirtual;
 	int availVirtual;
 	int availExtendedVirtual;
+};
+
+enum sysPath_t {
+	PATH_BASE,
+	PATH_SAVE,
+	PATH_EXE
 };
 
 template<class type> class idList;		// for Sys_ListFiles
@@ -229,9 +237,8 @@ void			Sys_Mkdir( const char *path );
 ID_TIME_T			Sys_FileTimeStamp( FILE *fp );
 // NOTE: do we need to guarantee the same output on all platforms?
 const char *	Sys_TimeStampToStr( ID_TIME_T timeStamp );
-const char *	Sys_DefaultBasePath( void );
-const char *	Sys_DefaultSavePath( void );
-const char *	Sys_EXEPath( void );
+
+bool			Sys_GetPath(sysPath_t type, idStr &path);
 
 // use fs_debug to verbose Sys_ListFiles
 // returns -1 if directory was not found (the list is cleared)

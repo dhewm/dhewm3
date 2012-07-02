@@ -50,43 +50,32 @@ FPU_EXCEPTION_DIVIDE_BY_ZERO |			\
 /* FPU_EXCEPTION_INEXACT_RESULT | */		\
 0
 
-/*
-==============
-Sys_EXEPath
-==============
-*/
-const char *Sys_EXEPath( void ) {
-	static char exepath[ MAXPATHLEN ];
-	strncpy( exepath, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
-	return exepath;
-}
+bool Sys_GetPath(sysPath_t type, idStr &path) {
+	char buf[MAXPATHLEN];
+	char *snap;
 
-/*
-==========
-Sys_DefaultSavePath
-==========
-*/
-const char *Sys_DefaultSavePath(void) {
-	static char savepath[ MAXPATHLEN ];
-	sprintf( savepath, "%s/Library/Application Support/Doom 3", [NSHomeDirectory() cString] );
-	return savepath;
-}
+	switch(type) {
+	case PATH_BASE:
+		strncpy(buf, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
+		snap = strrchr(buf, '/');
+		if (snap)
+			*snap = '\0';
 
-/*
-==========
-Sys_DefaultBasePath
-==========
-*/
-const char *Sys_DefaultBasePath(void) {
-	static char basepath[ MAXPATHLEN ];
+		path = buf;
+		return true;
 
-	strncpy( basepath, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
-	char *snap = strrchr( basepath, '/' );
-	if ( snap ) {
-		*snap = '\0';
+	case PATH_SAVE:
+		sprintf(buf, "%s/Library/Application Support/Doom 3", [NSHomeDirectory() cString]);
+		path = buf;
+		return true;
+
+	case PATH_EXE:
+		strncpy(buf, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN);
+		path = buf;
+		return true;
 	}
 
-	return basepath;
+	return false;
 }
 
 /*

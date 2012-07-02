@@ -2813,12 +2813,12 @@ void idFileSystemLocal::Init( void ) {
 	common->StartupVariable( "fs_restrict", false );
 	common->StartupVariable( "fs_searchAddons", false );
 
-	if ( fs_basepath.GetString()[0] == '\0' ) {
-		fs_basepath.SetString( Sys_DefaultBasePath() );
-	}
-	if ( fs_savepath.GetString()[0] == '\0' ) {
-		fs_savepath.SetString( Sys_DefaultSavePath() );
-	}
+	idStr path;
+	if (fs_basepath.GetString()[0] == '\0' && Sys_GetPath(PATH_BASE, path))
+		fs_basepath.SetString(path);
+
+	if (fs_savepath.GetString()[0] == '\0' && Sys_GetPath(PATH_SAVE, path))
+		fs_savepath.SetString(path);
 
 	if ( fs_devpath.GetString()[0] == '\0' ) {
 #ifdef WIN32
@@ -3824,10 +3824,9 @@ void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ], 
 #if ID_FAKE_PURE
 	if ( 1 ) {
 #else
-	if ( !serverPaks.Num() ) {
+	if (!serverPaks.Num() && Sys_GetPath(PATH_EXE, dllPath)) {
 #endif
 		// from executable directory first - this is handy for developement
-		dllPath = Sys_EXEPath( );
 		dllPath.StripFilename( );
 		dllPath.AppendPath( dllName );
 		dllFile = OpenExplicitFileRead( dllPath );

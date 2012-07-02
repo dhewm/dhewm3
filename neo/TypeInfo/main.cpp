@@ -119,16 +119,21 @@ const char *Sys_Cwd( void ) {
 	return cwd;
 }
 
-const char *Sys_DefaultBasePath( void ) {
-	return Sys_Cwd();
-}
+bool Sys_GetPath(sysPath_t type, idStr &path) {
+	switch(type) {
+	case PATH_BASE:
+		path = Sys_Cwd();
+		return true;
 
-const char *Sys_DefaultSavePath( void ) {
-	return cvarSystem->GetCVarString( "fs_basepath" );
-}
+	case PATH_SAVE:
+		path = cvarSystem->GetCVarString("fs_basepath");
+		return true;
 
-const char *Sys_EXEPath( void ) {
-	return "";
+	case PATH_EXE:
+		return false;
+	}
+
+	return false;
 }
 
 int Sys_ListFiles( const char *directory, const char *extension, idStrList &list ) {
@@ -172,8 +177,10 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 
 #else
 
-const char *	Sys_DefaultBasePath( void ) { return ""; }
-const char *	Sys_DefaultSavePath( void ) { return ""; }
+bool Sys_GetPath(sysPath_t, idStr &) {
+	return false;
+}
+
 int				Sys_ListFiles( const char *directory, const char *extension, idStrList &list ) { return 0; }
 
 #endif

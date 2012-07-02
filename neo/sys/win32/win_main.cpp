@@ -228,33 +228,25 @@ const char *Sys_Cwd( void ) {
 	return cwd;
 }
 
-/*
-==============
-Sys_DefaultBasePath
-==============
-*/
-const char *Sys_DefaultBasePath( void ) {
-	return Sys_Cwd();
-}
+bool Sys_GetPath(sysPath_t type, idStr &path) {
+	char buf[MAX_OSPATH];
 
-/*
-==============
-Sys_DefaultSavePath
-==============
-*/
-const char *Sys_DefaultSavePath( void ) {
-	return cvarSystem->GetCVarString( "fs_basepath" );
-}
+	switch(type) {
+	case PATH_BASE:
+		path = Sys_Cwd();
+		return true;
 
-/*
-==============
-Sys_EXEPath
-==============
-*/
-const char *Sys_EXEPath( void ) {
-	static char exe[ MAX_OSPATH ];
-	GetModuleFileName( NULL, exe, sizeof( exe ) - 1 );
-	return exe;
+	case PATH_SAVE:
+		path = cvarSystem->GetCVarString("fs_basepath");
+		return true;
+
+	case PATH_EXE:
+		GetModuleFileName(NULL, buf, sizeof(buf) - 1);
+		path = buf;
+		return true;
+	}
+
+	return false;
 }
 
 /*
