@@ -978,7 +978,7 @@ idCommonLocal::WriteFlaggedCVarsToFile
 void idCommonLocal::WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd ) {
 	idFile *f;
 
-	f = fileSystem->OpenFileWrite( filename );
+	f = fileSystem->OpenFileWrite( filename, "fs_configpath" );
 	if ( !f ) {
 		Printf( "Couldn't write %s.\n", filename );
 		return;
@@ -1002,7 +1002,7 @@ void idCommonLocal::WriteConfigToFile( const char *filename ) {
 	idBase64 out;
 #endif
 
-	f = fileSystem->OpenFileWrite( filename );
+	f = fileSystem->OpenFileWrite( filename, "fs_configpath" );
 	if ( !f ) {
 		Printf ("Couldn't write %s.\n", filename );
 		return;
@@ -2920,12 +2920,12 @@ void idCommonLocal::InitGame( void ) {
 	// force r_fullscreen 0 if running a tool
 	CheckToolMode();
 
-	idFile *file = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( CONFIG_SPEC, "fs_savepath" ) );
+	idFile *file = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( CONFIG_SPEC, "fs_configpath" ) );
 	bool sysDetect = ( file == NULL );
 	if ( file ) {
 		fileSystem->CloseFile( file );
 	} else {
-		file = fileSystem->OpenFileWrite( CONFIG_SPEC );
+		file = fileSystem->OpenFileWrite( CONFIG_SPEC, "fs_configpath" );
 		fileSystem->CloseFile( file );
 	}
 

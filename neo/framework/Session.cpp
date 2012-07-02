@@ -201,7 +201,7 @@ static void Sess_WritePrecache_f( const idCmdArgs &args ) {
 	}
 	idStr	str = args.Argv(1);
 	str.DefaultFileExtension( ".cfg" );
-	idFile *f = fileSystem->OpenFileWrite( str );
+	idFile *f = fileSystem->OpenFileWrite( str, "fs_configpath" );
 	declManager->WritePrecacheCommands( f );
 	renderModelManager->WritePrecacheCommands( f );
 	uiManager->WritePrecacheCommands( f );
@@ -2960,7 +2960,7 @@ void idSessionLocal::ReadCDKey( void ) {
 	cdkey_state = CDKEY_UNKNOWN;
 
 	filename = "../" BASE_GAMEDIR "/" CDKEY_FILE;
-	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_savepath" ) );
+	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_configpath" ) );
 	if ( !f ) {
 		common->Printf( "Couldn't read %s.\n", filename.c_str() );
 		cdkey[ 0 ] = '\0';
@@ -2974,7 +2974,7 @@ void idSessionLocal::ReadCDKey( void ) {
 	xpkey_state = CDKEY_UNKNOWN;
 
 	filename = "../" BASE_GAMEDIR "/" XPKEY_FILE;
-	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_savepath" ) );
+	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_configpath" ) );
 	if ( !f ) {
 		common->Printf( "Couldn't read %s.\n", filename.c_str() );
 		xpkey[ 0 ] = '\0';
@@ -2998,10 +2998,10 @@ void idSessionLocal::WriteCDKey( void ) {
 
 	filename = "../" BASE_GAMEDIR "/" CDKEY_FILE;
 	// OpenFileWrite advertises creating directories to the path if needed, but that won't work with a '..' in the path
-	// occasionally on windows, but mostly on Linux and OSX, the fs_savepath/base may not exist in full
-	OSPath = fileSystem->BuildOSPath( cvarSystem->GetCVarString( "fs_savepath" ), BASE_GAMEDIR, CDKEY_FILE );
+	// occasionally on windows, but mostly on Linux and OSX, the fs_configpath/base may not exist in full
+	OSPath = fileSystem->BuildOSPath( cvarSystem->GetCVarString( "fs_configpath" ), BASE_GAMEDIR, CDKEY_FILE );
 	fileSystem->CreateOSPath( OSPath );
-	f = fileSystem->OpenFileWrite( filename );
+	f = fileSystem->OpenFileWrite( filename, "fs_configpath" );
 	if ( !f ) {
 		common->Printf( "Couldn't write %s.\n", filename.c_str() );
 		return;
@@ -3010,7 +3010,7 @@ void idSessionLocal::WriteCDKey( void ) {
 	fileSystem->CloseFile( f );
 
 	filename = "../" BASE_GAMEDIR "/" XPKEY_FILE;
-	f = fileSystem->OpenFileWrite( filename );
+	f = fileSystem->OpenFileWrite( filename, "fs_configpath" );
 	if ( !f ) {
 		common->Printf( "Couldn't write %s.\n", filename.c_str() );
 		return;

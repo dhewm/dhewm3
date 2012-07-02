@@ -64,6 +64,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		path = buf;
 		return true;
 
+	case PATH_CONFIG:
 	case PATH_SAVE:
 		sprintf(buf, "%s/Library/Application Support/dhewm3", [NSHomeDirectory() cString]);
 		path = buf;

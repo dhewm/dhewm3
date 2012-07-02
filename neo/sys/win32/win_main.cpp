@@ -295,6 +295,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		path = Sys_Cwd();
 		return true;
 
+	case PATH_CONFIG:
 	case PATH_SAVE:
 		if (GetHomeDir(buf, sizeof(buf), "dhewm3") < 1) {
 			Sys_Error("ERROR: Couldn't get dir to home path");

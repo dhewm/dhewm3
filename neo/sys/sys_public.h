@@ -119,6 +119,7 @@ struct sysMemoryStats_t {
 
 enum sysPath_t {
 	PATH_BASE,
+	PATH_CONFIG,
 	PATH_SAVE,
 	PATH_EXE
 };

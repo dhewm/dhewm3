@@ -418,6 +418,7 @@ private:
 	static idCVar			fs_restrict;
 	static idCVar			fs_copyfiles;
 	static idCVar			fs_basepath;
+	static idCVar			fs_configpath;
 	static idCVar			fs_savepath;
 	static idCVar			fs_cdpath;
 	static idCVar			fs_devpath;
@@ -485,6 +486,7 @@ idCVar	idFileSystemLocal::fs_restrict( "fs_restrict", "", CVAR_SYSTEM | CVAR_INI
 idCVar	idFileSystemLocal::fs_debug( "fs_debug", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
 idCVar	idFileSystemLocal::fs_copyfiles( "fs_copyfiles", "0", CVAR_SYSTEM | CVAR_INIT | CVAR_INTEGER, "", 0, 4, idCmdSystem::ArgCompletion_Integer<0,3> );
 idCVar	idFileSystemLocal::fs_basepath( "fs_basepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
+idCVar	idFileSystemLocal::fs_configpath( "fs_configpath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	idFileSystemLocal::fs_savepath( "fs_savepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	idFileSystemLocal::fs_cdpath( "fs_cdpath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	idFileSystemLocal::fs_devpath( "fs_devpath", "", CVAR_SYSTEM | CVAR_INIT, "" );
@@ -2176,6 +2178,11 @@ void idFileSystemLocal::SetupGameDirectories( const char *gameName ) {
 	if ( fs_savepath.GetString()[0] ) {
 		AddGameDirectory( fs_savepath.GetString(), gameName );
 	}
+
+	// setup configpath
+	if ( fs_configpath.GetString()[0] ) {
+		AddGameDirectory( fs_configpath.GetString(), gameName );
+	}
 }
 
 /*
@@ -2804,6 +2811,7 @@ void idFileSystemLocal::Init( void ) {
 	// line variable sets don't happen until after the filesystem
 	// has already been initialized
 	common->StartupVariable( "fs_basepath", false );
+	common->StartupVariable( "fs_configpath", false );
 	common->StartupVariable( "fs_savepath", false );
 	common->StartupVariable( "fs_cdpath", false );
 	common->StartupVariable( "fs_devpath", false );
@@ -2819,6 +2827,9 @@ void idFileSystemLocal::Init( void ) {
 
 	if (fs_savepath.GetString()[0] == '\0' && Sys_GetPath(PATH_SAVE, path))
 		fs_savepath.SetString(path);
+
+	if (fs_configpath.GetString()[0] == '\0' && Sys_GetPath(PATH_CONFIG, path))
+		fs_configpath.SetString(path);
 
 	if ( fs_devpath.GetString()[0] == '\0' ) {
 #ifdef WIN32
@@ -3980,7 +3991,7 @@ bool idFileSystemLocal::HasD3XP( void ) {
 	for ( i = 0; i < dirs.Num(); i++ ) {
 		if ( dirs[i].Icmp( "d3xp" ) == 0 ) {
 
-			gamepath = BuildOSPath( fs_savepath.GetString(), dirs[ i ], "default.cfg" );
+			gamepath = BuildOSPath( fs_configpath.GetString(), dirs[ i ], "default.cfg" );
 			idFile* cfg = OpenExplicitFileRead(gamepath);
 			if(cfg) {
 				CloseFile(cfg);

@@ -79,6 +79,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		path = LINUX_DEFAULT_PATH;
 		return true;
 
+	case PATH_CONFIG:
 	case PATH_SAVE:
 		idStr::snPrintf(buf, sizeof(buf), "%s/.doom3", getenv("HOME"));
 		path = buf;
