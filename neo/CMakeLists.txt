@@ -631,7 +631,6 @@ set(src_core
 
 set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
-set(src_stub_sys		sys/stub/sys_stub.cpp)
 set(src_stub_util		sys/stub/util_stub.cpp)
 
 set(src_sys_dedicated	sys/linux/dedicated.cpp)
