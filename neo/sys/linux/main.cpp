@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <locale.h>
 
+static char path_argv[MAX_OSPATH];
+
 bool Sys_GetPath(sysPath_t type, idStr &path) {
 	const char *s;
 	char buf[MAX_OSPATH];
@@ -102,13 +104,17 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 	case PATH_EXE:
 		idStr::snPrintf(buf, sizeof(buf), "/proc/%d/exe", getpid());
 		len = readlink(buf, buf2, sizeof(buf2));
-		if (len == -1) {
-			Sys_Printf("couldn't stat exe path link %s\n", buf);
-			return false;
+		if (len != -1) {
+			path = buf2;
+			return true;
 		}
 
-		path = buf2;
-		return true;
+		if (path_argv[0] != 0) {
+			path = path_argv;
+			return true;
+		}
+
+		return false;
 	}
 
 	return false;
@@ -282,7 +288,17 @@ main
 ===============
 */
 int main(int argc, char **argv) {
+	// fallback path to the binary for systems without /proc
+	// while not 100% reliable, its good enough
+	if (argc > 0) {
+		if (!realpath(argv[0], path_argv))
+			path_argv[0] = 0;
+	} else {
+		path_argv[0] = 0;
+	}
+
 	setlocale(LC_ALL, "C");
+
 	Posix_EarlyInit( );
 
 	// some ladspa-plugins (that may be indirectly loaded by doom3 if they're
