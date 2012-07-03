@@ -40,9 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <errno.h>
 #include <sys/select.h>
 #include <net/if.h>
-#if MACOS_X
 #include <ifaddrs.h>
-#endif
 
 #include "sys/platform.h"
 #include "framework/Common.h"
@@ -275,10 +273,6 @@ NET_InitNetworking
 */
 void Sys_InitNetworking(void)
 {
-	// haven't been able to clearly pinpoint which standards or RFCs define SIOCGIFCONF, SIOCGIFADDR, SIOCGIFNETMASK ioctls
-	// it seems fairly widespread, in Linux kernel ioctl, and in BSD .. so let's assume it's always available on our targets
-
-#if MACOS_X
 	unsigned int ip, mask;
 	struct ifaddrs *ifap, *ifp;
 
@@ -302,85 +296,28 @@ void Sys_InitNetworking(void)
 		if ( !ifp->ifa_netmask )
 			continue;
 
+		common->Printf( "found interface %s - ", ifp->ifa_name);
+
 		ip = ntohl( *( unsigned int *)&ifp->ifa_addr->sa_data[2] );
 		mask = ntohl( *( unsigned int *)&ifp->ifa_netmask->sa_data[2] );
 
 		if ( ip == INADDR_LOOPBACK ) {
 			common->Printf( "loopback\n" );
 		} else {
-			common->Printf( "IP: %d.%d.%d.%d\n",
-							(unsigned char)ifp->ifa_addr->sa_data[2],
-							(unsigned char)ifp->ifa_addr->sa_data[3],
-							(unsigned char)ifp->ifa_addr->sa_data[4],
-							(unsigned char)ifp->ifa_addr->sa_data[5] );
-			common->Printf( "NetMask: %d.%d.%d.%d\n",
-							(unsigned char)ifp->ifa_netmask->sa_data[2],
-							(unsigned char)ifp->ifa_netmask->sa_data[3],
-							(unsigned char)ifp->ifa_netmask->sa_data[4],
-							(unsigned char)ifp->ifa_netmask->sa_data[5] );
+			common->Printf( "%u.%u.%u.%u/%u.%u.%u.%u\n",
+							(ip >> 24) & 0xff, (ip >> 16) & 0xff,
+							(ip >> 8) & 0xff, ip & 0xff,
+							(mask >> 24) & 0xff, (mask >> 16) & 0xff,
+							(mask >> 8) & 0xff, mask & 0xff );
 		}
+
 		netint[ num_interfaces ].ip = ip;
 		netint[ num_interfaces ].mask = mask;
 		num_interfaces++;
-	}
-#else
-	int		s;
-	char	buf[ MAX_INTERFACES*sizeof( ifreq ) ];
-	ifconf	ifc;
-	ifreq	*ifr;
-	int		ifindex;
-	unsigned int ip, mask;
 
-	num_interfaces = 0;
-
-	s = socket( AF_INET, SOCK_DGRAM, 0 );
-	ifc.ifc_len = MAX_INTERFACES*sizeof( ifreq );
-	ifc.ifc_buf = buf;
-	if ( ioctl( s, SIOCGIFCONF, &ifc ) < 0 ) {
-		common->FatalError( "InitNetworking: SIOCGIFCONF error - %s\n", strerror( errno ) );
-		return;
+		if (num_interfaces >= MAX_INTERFACES)
+			break;
 	}
-	ifindex = 0;
-	while ( ifindex < ifc.ifc_len ) {
-		common->Printf( "found interface %s - ", ifc.ifc_buf + ifindex );
-		// find the type - ignore interfaces for which we can find we can't get IP and mask ( not configured )
-		ifr = (ifreq*)( ifc.ifc_buf + ifindex );
-		if ( ioctl( s, SIOCGIFADDR, ifr ) < 0 ) {
-			common->Printf( "SIOCGIFADDR failed: %s\n", strerror( errno ) );
-		} else {
-			if ( ifr->ifr_addr.sa_family != AF_INET ) {
-				common->Printf( "not AF_INET\n" );
-			} else {
-				ip = ntohl( *( unsigned int *)&ifr->ifr_addr.sa_data[2] );
-				if ( ip == INADDR_LOOPBACK ) {
-					common->Printf( "loopback\n" );
-				} else {
-					common->Printf( "%d.%d.%d.%d",
-									(unsigned char)ifr->ifr_addr.sa_data[2],
-									(unsigned char)ifr->ifr_addr.sa_data[3],
-									(unsigned char)ifr->ifr_addr.sa_data[4],
-									(unsigned char)ifr->ifr_addr.sa_data[5] );
-				}
-				if ( ioctl( s, SIOCGIFNETMASK, ifr ) < 0 ) {
-					common->Printf( " SIOCGIFNETMASK failed: %s\n", strerror( errno ) );
-				} else {
-					mask = ntohl( *( unsigned int *)&ifr->ifr_addr.sa_data[2] );
-					if ( ip != INADDR_LOOPBACK ) {
-						common->Printf( "/%d.%d.%d.%d\n",
-										(unsigned char)ifr->ifr_addr.sa_data[2],
-										(unsigned char)ifr->ifr_addr.sa_data[3],
-										(unsigned char)ifr->ifr_addr.sa_data[4],
-										(unsigned char)ifr->ifr_addr.sa_data[5] );
-					}
-					netint[ num_interfaces ].ip = ip;
-					netint[ num_interfaces ].mask = mask;
-					num_interfaces++;
-				}
-			}
-		}
-		ifindex += sizeof( ifreq );
-	}
-#endif
 }
 
 /*
