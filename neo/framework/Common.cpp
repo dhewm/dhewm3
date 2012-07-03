@@ -2589,24 +2589,53 @@ idCommonLocal::LoadGameDLL
 */
 void idCommonLocal::LoadGameDLL( void ) {
 #ifdef __DOOM_DLL__
-	char			dllPath[ MAX_OSPATH ];
+	char			dll[MAX_OSPATH];
+	idStr			s;
 
 	gameImport_t	gameImport;
 	gameExport_t	gameExport;
 	GetGameAPI_t	GetGameAPI;
 
-	fileSystem->FindDLL( "game", dllPath, true );
+	gameDLL = 0;
+	sys->DLL_GetFileName("game", dll, sizeof(dll));
 
-	if ( !dllPath[ 0 ] ) {
-		common->FatalError( "couldn't find game dynamic library" );
-		return;
+	// try next to the binary first (build tree)
+	if (Sys_GetPath(PATH_EXE, s)) {
+		s.StripFilename();
+		s.AppendPath(dll);
+		gameDLL = sys->DLL_Load(s);
 	}
-	common->DPrintf( "Loading game DLL: '%s'\n", dllPath );
-	gameDLL = sys->DLL_Load( dllPath );
+
+#if defined(_WIN32)
+	// then the lib/ dir relative to the binary on windows
+	if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
+		s.StripFilename();
+		s.AppendPath("lib");
+		s.AppendPath(dll);
+		gameDLL = sys->DLL_Load(s);
+	}
+#elif defined(MACOS_X)
+	// then the binary dir in the bundle on osx
+	if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
+		s.StripFilename();
+		s.AppendPath(dll);
+		gameDLL = sys->DLL_Load(s);
+	}
+#else
+	// then the install folder on *nix
+	if (!gameDLL) {
+		s = BUILD_LIBDIR;
+		s.AppendPath(dll);
+		gameDLL = sys->DLL_Load(s);
+	}
+#endif
+
 	if ( !gameDLL ) {
 		common->FatalError( "couldn't load game dynamic library" );
 		return;
 	}
+
+	common->Printf("loaded game library '%s'.\n", s.c_str());
 
 	GetGameAPI = (GetGameAPI_t) Sys_DLL_GetProcAddress( gameDLL, "GetGameAPI" );
 	if ( !GetGameAPI ) {
