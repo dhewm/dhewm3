@@ -2621,12 +2621,6 @@ fsPureReply_t idFileSystemLocal::SetPureServerChecksums( const int pureChecksums
 	int				i, j, imissing;
 	bool			success = true;
 	bool			canPrepend = true;
-	char			dllName[MAX_OSPATH];
-	int				dllHash;
-	fileInPack_t *	pakFile;
-
-	sys->DLL_GetFileName( "game", dllName, MAX_OSPATH );
-	dllHash = HashFileName( dllName );
 
 	imissing = 0;
 	missingChecksums[ 0 ] = 0;
@@ -2703,48 +2697,6 @@ fsPureReply_t idFileSystemLocal::SetPureServerChecksums( const int pureChecksums
 			common->Printf( "pak %s checksumed 0x%x is an extra reference at the end of local pure list\n", serverPaks[ j ]->pakFilename.c_str(), serverPaks[ j ]->checksum );
 		}
 		j++;
-	}
-
-	// DLL checksuming
-	if ( !_gamePakChecksum ) {
-		// server doesn't have knowledge of code we can use ( OS issue )
-		return PURE_NODLL;
-	}
-	assert( gameDLLChecksum );
-#if ID_FAKE_PURE
-	gamePakChecksum = _gamePakChecksum;
-#endif
-	if ( _gamePakChecksum != gamePakChecksum ) {
-		// current DLL is wrong, search for a pak with the approriate checksum
-		// ( search all paks, the pure list is not relevant here )
-		pack = GetPackForChecksum( _gamePakChecksum );
-		if ( !pack ) {
-			if ( fs_debug.GetBool() ) {
-				common->Printf( "missing the game code pak ( 0x%x )\n", _gamePakChecksum );
-			}
-			// if there are other paks missing they have also been marked above
-			*missingGamePakChecksum = _gamePakChecksum;
-			return PURE_MISSING;
-		}
-		// if assets paks are missing, don't try any of the DLL restart / NODLL
-		if ( imissing ) {
-			return PURE_MISSING;
-		}
-		// we have a matching pak
-		if ( fs_debug.GetBool() ) {
-			common->Printf( "server's game code pak candidate is '%s' ( 0x%x )\n", pack->pakFilename.c_str(), pack->checksum );
-		}
-		// make sure there is a valid DLL for us
-		if ( pack->hashTable[ dllHash ] ) {
-			for ( pakFile = pack->hashTable[ dllHash ]; pakFile; pakFile = pakFile->next ) {
-				if ( !FilenameCompare( pakFile->name, dllName ) ) {
-					gamePakChecksum = _gamePakChecksum;		// this will be used to extract the DLL in pure mode FindDLL
-					return PURE_RESTART;
-				}
-			}
-		}
-		common->Warning( "media is misconfigured. server claims pak '%s' ( 0x%x ) has media for us, but '%s' is not found\n", pack->pakFilename.c_str(), pack->checksum, dllName );
-		return PURE_NODLL;
 	}
 
 	// we reply to missing after DLL check so it can be part of the list

@@ -72,7 +72,6 @@ typedef enum {
 	PURE_OK,		// we are good to connect as-is
 	PURE_RESTART,	// restart required
 	PURE_MISSING,	// pak files missing on the client
-	PURE_NODLL		// no DLL could be extracted
 } fsPureReply_t;
 
 typedef enum {

@@ -917,7 +917,6 @@ void idAsyncClient::ProcessReliableMessagePure( const idBitMsg &msg ) {
 		outMsg.WriteInt( inChecksums[ i++ ] );
 	}
 	outMsg.WriteInt( 0 );
-	outMsg.WriteInt( gamePakChecksum );
 
 	if ( !channel.SendReliableMessage( outMsg ) ) {
 		common->Error( "client->server reliable messages overflow\n" );
@@ -1383,7 +1382,7 @@ idAsyncClient::ValidatePureServerChecksums
 bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBitMsg &msg ) {
 	int			i, numChecksums, numMissingChecksums;
 	int			inChecksums[ MAX_PURE_PAKS ];
-	int			inGamePakChecksum;
+	int			inGamePakChecksum = 0;
 	int			missingChecksums[ MAX_PURE_PAKS ];
 	int			missingGamePakChecksum;
 	idBitMsg	dlmsg;
@@ -1402,7 +1401,6 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 		}
 	} while ( i );
 	inChecksums[ numChecksums ] = 0;
-	inGamePakChecksum = msg.ReadInt();
 
 	fsPureReply_t reply = fileSystem->SetPureServerChecksums( inChecksums, inGamePakChecksum, missingChecksums, &missingGamePakChecksum );
 	switch ( reply ) {
@@ -1431,9 +1429,6 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 				if ( numMissingChecksums > 0 ) {
 					message += va( common->GetLanguageDict()->GetString( "#str_06751" ), numMissingChecksums, checksums.c_str() );
 				}
-				if ( missingGamePakChecksum ) {
-					message += va( common->GetLanguageDict()->GetString( "#str_06750" ), missingGamePakChecksum );
-				}
 
 				common->Printf( message );
 				cmdSystem->BufferCommandText( CMD_EXEC_NOW, "disconnect" );
@@ -1445,10 +1440,7 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 					return false;
 				}
 				// ask the server to send back download info
-				common->DPrintf( "missing %d paks: %s\n", numMissingChecksums + ( missingGamePakChecksum ? 1 : 0 ), checksums.c_str() );
-				if ( missingGamePakChecksum ) {
-					common->DPrintf( "game code pak: 0x%x\n", missingGamePakChecksum );
-				}
+				common->DPrintf( "missing %d paks: %s\n", numMissingChecksums, checksums.c_str() );
 				// store the requested downloads
 				GetDownloadRequest( missingChecksums, numMissingChecksums, missingGamePakChecksum );
 				// build the download request message
@@ -1461,7 +1453,6 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 				// used to make sure the server replies to the same download request
 				dlmsg.WriteInt( dlRequest );
 				// special case the code pak - if we have a 0 checksum then we don't need to download it
-				dlmsg.WriteInt( missingGamePakChecksum );
 				// 0-terminated list of missing paks
 				i = 0;
 				while ( missingChecksums[ i ] ) {
@@ -1473,10 +1464,6 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 
 			return false;
 		}
-		case PURE_NODLL:
-			common->Printf( common->GetLanguageDict()->GetString( "#str_07211" ), Sys_NetAdrToString( from ) );
-			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "disconnect" );
-			return false;
 		default:
 			break;
 	}
@@ -1516,7 +1503,7 @@ void idAsyncClient::ProcessPureMessage( const netadr_t from, const idBitMsg &msg
 		outMsg.WriteInt( inChecksums[ i++ ] );
 	}
 	outMsg.WriteInt( 0 );
-	outMsg.WriteInt( gamePakChecksum );
+
 	clientPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 }
 
@@ -2321,15 +2308,14 @@ idAsyncClient::GetDownloadRequest
 */
 int idAsyncClient::GetDownloadRequest( const int checksums[ MAX_PURE_PAKS ], int count, int gamePakChecksum ) {
 	assert( !checksums[ count ] ); // 0-terminated
-	if ( memcmp( dlChecksums + 1, checksums, sizeof( int ) * count ) || gamePakChecksum != dlChecksums[ 0 ] ) {
+	if ( memcmp( dlChecksums, checksums, sizeof( int ) * count ) ) {
 		idRandom newreq;
 
-		dlChecksums[ 0 ] = gamePakChecksum;
-		memcpy( dlChecksums + 1, checksums, sizeof( int ) * MAX_PURE_PAKS );
+		memcpy( dlChecksums, checksums, sizeof( int ) * MAX_PURE_PAKS );
 
 		newreq.SetSeed( Sys_Milliseconds() );
 		dlRequest = newreq.RandomInt();
-		dlCount = count + ( gamePakChecksum ? 1 : 0 );
+		dlCount = count;
 		return dlRequest;
 	}
 	// this is the same dlRequest, we haven't heard from the server. keep the same id

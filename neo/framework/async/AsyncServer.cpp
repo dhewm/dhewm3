@@ -337,16 +337,6 @@ void idAsyncServer::ExecuteMapChange( void ) {
 		}
 	}
 
-	// setup the game pak checksums
-	// since this is not dependant on si_pure we catch anything bad before loading map
-	if ( sessLocal.mapSpawnData.serverInfo.GetInt( "si_pure" ) ) {
-		if ( !fileSystem->UpdateGamePakChecksums( ) ) {
-			session->MessageBox( MSG_OK, common->GetLanguageDict()->GetString ( "#str_04337" ), common->GetLanguageDict()->GetString ( "#str_04338" ), true );
-			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "disconnect\n" );
-			return;
-		}
-	}
-
 	// load map
 	sessLocal.ExecuteMapChange();
 
@@ -1583,9 +1573,6 @@ bool idAsyncServer::SendPureServerMessage( const netadr_t to, int OS ) {
 	}
 	outMsg.WriteInt( 0 );
 
-	// write the pak checksum for game code
-	outMsg.WriteInt( gamePakChecksum );
-
 	serverPort.SendPacket( to, outMsg.GetData(), outMsg.GetSize() );
 	return true;
 }
@@ -1621,7 +1608,6 @@ bool idAsyncServer::SendReliablePureToClient( int clientNum ) {
 		msg.WriteInt( serverChecksums[ i++ ] );
 	}
 	msg.WriteInt( 0 );
-	msg.WriteInt( gamePakChecksum );
 
 	SendReliableMessage( clientNum, msg );
 
@@ -1885,7 +1871,6 @@ idAsyncServer::VerifyChecksumMessage
 bool idAsyncServer::VerifyChecksumMessage( int clientNum, const netadr_t *from, const idBitMsg &msg, idStr &reply, int OS ) {
 	int		i, numChecksums;
 	int		checksums[ MAX_PURE_PAKS ];
-	int		gamePakChecksum;
 	int		serverChecksums[ MAX_PURE_PAKS ];
 	int		serverGamePakChecksum;
 
@@ -1903,18 +1888,9 @@ bool idAsyncServer::VerifyChecksumMessage( int clientNum, const netadr_t *from, 
 	} while ( i );
 	numChecksums--;
 
-	// code pak checksum
-	gamePakChecksum = msg.ReadInt( );
-
 	fileSystem->GetPureServerChecksums( serverChecksums, OS, &serverGamePakChecksum );
 	assert( serverChecksums[ 0 ] );
 
-	// compare the lists
-	if ( serverGamePakChecksum != gamePakChecksum ) {
-		common->Printf( "client %s: invalid game code pak ( 0x%x )\n", from ? Sys_NetAdrToString( *from ) : va( "%d", clientNum ), gamePakChecksum );
-		sprintf( reply, "#str_07145" );
-		return false;
-	}
 	for ( i = 0; serverChecksums[ i ] != 0; i++ ) {
 		if ( checksums[ i ] != serverChecksums[ i ] ) {
 			common->DPrintf( "client %s: pak missing ( 0x%x )\n", from ? Sys_NetAdrToString( *from ) : va( "%d", clientNum ), serverChecksums[ i ] );
@@ -2673,7 +2649,6 @@ idAsyncServer::ProcessDownloadRequestMessage
 */
 void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const idBitMsg &msg ) {
 	int			challenge, clientId, iclient, numPaks, i;
-	int			dlGamePak;
 	int			dlPakChecksum;
 	int			dlSize[ MAX_PURE_PAKS ];	// sizes
 	idStrList	pakNames;					// relative path
@@ -2699,18 +2674,6 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 		return;
 	}
 
-	// the first token of the pak names list passed to the game will be empty if no game pak is requested
-	dlGamePak = msg.ReadInt();
-	if ( dlGamePak ) {
-		if ( !( dlSize[ 0 ] = fileSystem->ValidateDownloadPakForChecksum( dlGamePak, pakbuf, true ) ) ) {
-			common->Warning( "client requested unknown game pak 0x%x", dlGamePak );
-			pakbuf[ 0 ] = '\0';
-			voidSlots++;
-		}
-	} else {
-		pakbuf[ 0 ] = '\0';
-		voidSlots++;
-	}
 	pakNames.Append( pakbuf );
 	numPaks = 1;
 
