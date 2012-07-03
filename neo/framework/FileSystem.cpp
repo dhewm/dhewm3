@@ -263,12 +263,6 @@ typedef struct fileInPack_s {
 } fileInPack_t;
 
 typedef enum {
-	BINARY_UNKNOWN = 0,
-	BINARY_YES,
-	BINARY_NO
-} binaryStatus_t;
-
-typedef enum {
 	PURE_UNKNOWN = 0,	// need to run the pak through GetPackStatus
 	PURE_NEUTRAL,	// neutral regarding pureness. gets in the pure list if referenced
 	PURE_ALWAYS,	// always referenced - for pak* named files, unless NEVER
@@ -287,7 +281,6 @@ typedef struct {
 	int					numfiles;
 	int					length;
 	bool				referenced;
-	binaryStatus_t		binary;
 	bool				addon;						// this is an addon pack - addon_search tells if it's 'active'
 	bool				addon_search;				// is in the search list
 	addonInfo_t			*addon_info;
@@ -312,7 +305,6 @@ typedef struct searchpath_s {
 #define FSFLAG_SEARCH_DIRS		( 1 << 0 )
 #define FSFLAG_SEARCH_PAKS		( 1 << 1 )
 #define FSFLAG_PURE_NOREF		( 1 << 2 )
-#define FSFLAG_BINARY_ONLY		( 1 << 3 )
 #define FSFLAG_SEARCH_ADDONS	( 1 << 4 )
 
 // 3 search path (fs_savepath fs_basepath fs_cdpath)
@@ -1312,7 +1304,6 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 	pack->numfiles = gi.number_entry;
 	pack->buildBuffer = buildBuffer;
 	pack->referenced = false;
-	pack->binary = BINARY_UNKNOWN;
 	pack->addon = false;
 	pack->addon_search = false;
 	pack->addon_info = NULL;
@@ -1967,7 +1958,6 @@ idFileSystemLocal::Path_f
 */
 void idFileSystemLocal::Path_f( const idCmdArgs &args ) {
 	searchpath_t *sp;
-	int i;
 	idStr status;
 
 	common->Printf( "Current search path:\n" );
@@ -3106,26 +3096,6 @@ idFile *idFileSystemLocal::OpenFileReadFlags( const char *relativePath, int sear
 
 			// look through all the pak file elements
 			pak = search->pack;
-
-			if ( searchFlags & FSFLAG_BINARY_ONLY ) {
-				// make sure this pak is tagged as a binary file
-				if ( pak->binary == BINARY_UNKNOWN ) {
-					int				confHash;
-					fileInPack_t	*pakFile;
-					confHash = HashFileName( BINARY_CONFIG );
-					pak->binary = BINARY_NO;
-					for ( pakFile = search->pack->hashTable[confHash]; pakFile; pakFile = pakFile->next ) {
-						if ( !FilenameCompare( pakFile->name, BINARY_CONFIG ) ) {
-							pak->binary = BINARY_YES;
-							break;
-						}
-					}
-				}
-				if ( pak->binary == BINARY_NO ) {
-					continue; // not a binary pak, skip
-				}
-			}
-
 			for ( pakFile = pak->hashTable[hash]; pakFile; pakFile = pakFile->next ) {
 				// case and separator insensitive comparisons
 				if ( !FilenameCompare( pakFile->name, relativePath ) ) {
