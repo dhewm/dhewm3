@@ -55,31 +55,22 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 	switch(type) {
 	case PATH_BASE:
-		if (Sys_GetPath(PATH_EXE, path)) {
-			path.StripFilename();
-			idStr::snPrintf(buf, sizeof(buf), "%s/" BASE_GAMEDIR, path.c_str());
-			if (stat(buf, &st) != -1 && S_ISDIR(st.st_mode)) {
-				path = buf;
-				return true;
-			} else {
-				common->Printf("no '%s' directory in exe path %s, skipping\n", BASE_GAMEDIR, path.c_str());
-			}
+		if (stat(BUILD_DATADIR, &st) != -1 && S_ISDIR(st.st_mode)) {
+			path = BUILD_DATADIR;
+			return true;
 		}
 
-		s = Posix_Cwd();
-		if (path != s) {
-			idStr::snPrintf(buf, sizeof(buf), "%s/" BASE_GAMEDIR, s);
-			if (stat(buf, &st) != -1 && S_ISDIR(st.st_mode)) {
-				path = buf;
-				return true;
-			} else {
-				common->Printf("no '%s' directory in cwd path %s, skipping\n", BASE_GAMEDIR, s);
-			}
+		common->Printf("WARNING: base path '" BUILD_DATADIR "' does not exits\n");
+
+		// fallback to vanilla doom3 install
+		if (stat(LINUX_DEFAULT_PATH, &st) != -1 && S_ISDIR(st.st_mode)) {
+			common->Printf("WARNING: using hardcoded default base path\n");
+
+			path = LINUX_DEFAULT_PATH;
+			return true;
 		}
 
-		common->Printf("WARNING: using hardcoded default base path\n");
-		path = LINUX_DEFAULT_PATH;
-		return true;
+		return false;
 
 	case PATH_CONFIG:
 		s = getenv("XDG_CONFIG_HOME");

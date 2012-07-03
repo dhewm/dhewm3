@@ -90,7 +90,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WIN32_CONSOLE_CLASS				"dhewm 3 WinConsole"
 
 // Linux info
-#define LINUX_DEFAULT_PATH				"/usr/local/games/dhewm3"
+#define LINUX_DEFAULT_PATH				"/usr/local/games/doom3"
 
 // CD Key file info
 // goes into BASE_GAMEDIR whatever the fs_game is set to
