@@ -90,7 +90,6 @@ typedef struct challenge_s {
 	authReplyMsg_t		authReplyMsg;	// default auth messages
 	idStr				authReplyPrint;	// custom msg
 	char				guid[12];		// guid
-	int					OS;
 } challenge_t;
 
 typedef enum {
@@ -102,7 +101,6 @@ typedef enum {
 } serverClientState_t;
 
 typedef struct serverClient_s {
-	int					OS;
 	int					clientId;
 	serverClientState_t	clientState;
 	int					clientPrediction;
@@ -246,12 +244,12 @@ private:
 	bool				ConnectionlessMessage( const netadr_t from, const idBitMsg &msg );
 	bool				ProcessMessage( const netadr_t from, idBitMsg &msg );
 	void				ProcessAuthMessage( const idBitMsg &msg );
-	bool				SendPureServerMessage( const netadr_t to, int OS );										// returns false if no pure paks on the list
+	bool				SendPureServerMessage( const netadr_t to );										// returns false if no pure paks on the list
 	void				ProcessPureMessage( const netadr_t from, const idBitMsg &msg );
 	int					ValidateChallenge( const netadr_t from, int challenge, int clientId );	// returns -1 if validate failed
 	bool				SendReliablePureToClient( int clientNum );
 	void				ProcessReliablePure( int clientNum, const idBitMsg &msg );
-	bool				VerifyChecksumMessage( int clientNum, const netadr_t *from, const idBitMsg &msg, idStr &reply, int OS ); // if from is NULL, clientNum is used for error messages
+	bool				VerifyChecksumMessage( int clientNum, const netadr_t *from, const idBitMsg &msg, idStr &reply ); // if from is NULL, clientNum is used for error messages
 	void				SendReliableMessage( int clientNum, const idBitMsg &msg );				// checks for overflow and disconnects the faulty client
 	int					UpdateTime( int clamp );
 	void				SendEnterGameToClient( int clientNum );

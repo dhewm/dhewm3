@@ -320,7 +320,6 @@ typedef struct searchpath_s {
 #define MAX_CACHED_DIRS 6
 
 // how many OSes to handle game paks for ( we don't have to know them precisely )
-#define MAX_GAME_OS	6
 #define BINARY_CONFIG "binary.conf"
 #define ADDON_CONFIG "addon.conf"
 
@@ -363,7 +362,6 @@ public:
 	virtual void			GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ] );
 	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ] );
 	virtual	void			ClearPureChecksums( void );
-	virtual int				GetOSMask( void );
 	virtual int				ReadFile( const char *relativePath, void **buffer, ID_TIME_T *timestamp );
 	virtual void			FreeFile( void *buffer );
 	virtual int				WriteFile( const char *relativePath, const void *buffer, int size, const char *basePath = "fs_savepath" );
@@ -435,8 +433,6 @@ private:
 	bool					loadedFileFromDir;		// set to true once a file was loaded from a directory - can't switch to pure anymore
 	idList<int>				restartChecksums;		// used during a restart to set things in right order
 	idList<int>				addonChecksums;			// list of checksums that should go to the search list directly ( for restarts )
-
-	int						gamePakForOS[ MAX_GAME_OS ];
 
 	idDEntry				dir_cache[ MAX_CACHED_DIRS ]; // fifo
 	int						dir_cache_index;
@@ -1999,15 +1995,7 @@ void idFileSystemLocal::Path_f( const idCmdArgs &args ) {
 			common->Printf( "%s/%s\n", sp->dir->path.c_str(), sp->dir->gamedir.c_str() );
 		}
 	}
-	common->Printf( "game DLL: 0x%x in pak: 0x%x\n", fileSystemLocal.gameDLLChecksum, fileSystemLocal.gamePakChecksum );
-#if ID_FAKE_PURE
-	common->Printf( "Note: ID_FAKE_PURE is enabled\n" );
-#endif
-	for( i = 0; i < MAX_GAME_OS; i++ ) {
-		if ( fileSystemLocal.gamePakForOS[ i ] ) {
-			common->Printf( "OS %d - pak 0x%x\n", i, fileSystemLocal.gamePakForOS[ i ] );
-		}
-	}
+
 	// show addon packs that are *not* in the search lists
 	common->Printf( "Addon pk4s:\n" );
 	for ( sp = fileSystemLocal.addonPaks; sp; sp = sp->next ) {
@@ -2017,24 +2005,6 @@ void idFileSystemLocal::Path_f( const idCmdArgs &args ) {
 			common->Printf( "%s (%i files)\n", sp->pack->pakFilename.c_str(), sp->pack->numfiles );
 		}
 	}
-}
-
-/*
-============
-idFileSystemLocal::GetOSMask
-============
-*/
-int idFileSystemLocal::GetOSMask( void ) {
-	int i, ret = 0;
-	for( i = 0; i < MAX_GAME_OS; i++ ) {
-		if ( fileSystemLocal.gamePakForOS[ i ] ) {
-			ret |= ( 1 << i );
-		}
-	}
-	if ( !ret ) {
-		return -1;
-	}
-	return ret;
 }
 
 /*
@@ -3697,11 +3667,7 @@ void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ] )
 
 	sys->DLL_GetFileName( name, dllName, MAX_OSPATH );
 
-#if ID_FAKE_PURE
-	if ( 1 ) {
-#else
 	if (!serverPaks.Num() && Sys_GetPath(PATH_EXE, dllPath)) {
-#endif
 		// from executable directory first - this is handy for developement
 		dllPath.StripFilename( );
 		dllPath.AppendPath( dllName );

@@ -58,7 +58,6 @@ typedef struct {
 	char		nickname[ MAX_NICKLEN ][ MAX_ASYNC_CLIENTS ];
 	short		pings[ MAX_ASYNC_CLIENTS ];
 	int			rate[ MAX_ASYNC_CLIENTS ];
-	int			OSMask;
 	int			challenge;
 } networkServer_t;
 

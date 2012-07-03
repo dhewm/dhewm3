@@ -510,20 +510,6 @@ bool idServerScan::IsFiltered( const networkServer_t server ) {
 	int i;
 	const idKeyValue *keyval;
 
-	// OS support filter
-#if 0
-	// filter out pure servers that won't provide checksumed game code for client OS
-	keyval = server.serverInfo.FindKey( "si_pure" );
-	if ( keyval && !idStr::Cmp( keyval->GetValue(), "1" ) ) {
-		if ( ( server.OSMask & ( 1 << BUILD_OS_ID ) ) == 0 ) {
-			return true;
-		}
-	}
-#else
-	if ( ( server.OSMask & ( 1 << BUILD_OS_ID ) ) == 0 ) {
-		return true;
-	}
-#endif
 	// password filter
 	keyval = server.serverInfo.FindKey( "si_usePass" );
 	if ( keyval && gui_filter_password.GetInteger() == 1 ) {

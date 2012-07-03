@@ -1197,7 +1197,6 @@ void idAsyncClient::ProcessInfoResponseMessage( const netadr_t from, const idBit
 		}
 		serverInfo.clients++;
 	}
-	serverInfo.OSMask = msg.ReadInt();
 	index = serverList.InfoResponse( serverInfo );
 
 	common->Printf( "%d: server %s - protocol %d.%d - %s\n", index, Sys_NetAdrToString( serverInfo.adr ), protocol >> 16, protocol & 0xffff, serverInfo.serverInfo.GetString( "si_name" ) );
@@ -1656,12 +1655,6 @@ void idAsyncClient::SetupConnection( void ) {
 		msg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
 		msg.WriteString( "connect" );
 		msg.WriteInt( ASYNC_PROTOCOL_VERSION );
-#if ID_FAKE_PURE
-		// fake win32 OS - might need to adapt depending on the case
-		msg.WriteShort( 0 );
-#else
-		msg.WriteShort( BUILD_OS_ID );
-#endif
 		msg.WriteInt( clientDataChecksum );
 		msg.WriteInt( serverChallenge );
 		msg.WriteShort( clientId );
@@ -1908,7 +1901,6 @@ void idAsyncClient::SendVersionCheck( bool fromMenu ) {
 	msg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
 	msg.WriteString( "versionCheck" );
 	msg.WriteInt( ASYNC_PROTOCOL_VERSION );
-	msg.WriteShort( BUILD_OS_ID );
 	msg.WriteString( cvarSystem->GetCVarString( "si_version" ) );
 	msg.WriteString( cvarSystem->GetCVarString( "com_guid" ) );
 	clientPort.SendPacket( idAsyncNetwork::GetMasterAddress(), msg.GetData(), msg.GetSize() );

@@ -1547,7 +1547,7 @@ void idAsyncServer::ProcessChallengeMessage( const netadr_t from, const idBitMsg
 idAsyncServer::SendPureServerMessage
 ==================
 */
-bool idAsyncServer::SendPureServerMessage( const netadr_t to, int OS ) {
+bool idAsyncServer::SendPureServerMessage( const netadr_t to ) {
 	idBitMsg	outMsg;
 	byte		msgBuf[ MAX_MESSAGE_SIZE ];
 	int			serverChecksums[ MAX_PURE_PAKS ];
@@ -1660,10 +1660,9 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	byte		msgBuf[ MAX_MESSAGE_SIZE ];
 	char		guid[ 12 ];
 	char		password[ 17 ];
-	int			i, ichallenge, islot, OS, numClients;
+	int			i, ichallenge, islot, numClients;
 
 	protocol = msg.ReadInt();
-	OS = msg.ReadShort();
 
 	// check the protocol version
 	if ( protocol != ASYNC_PROTOCOL_VERSION ) {
@@ -1686,13 +1685,12 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	if ( ( ichallenge = ValidateChallenge( from, challenge, clientId ) ) == -1 ) {
 		return;
 	}
-	challenges[ ichallenge ].OS = OS;
 
 	msg.ReadString( guid, sizeof( guid ) );
 
 	switch ( challenges[ ichallenge ].authState ) {
 		case CDK_PUREWAIT:
-			SendPureServerMessage( from, OS );
+			SendPureServerMessage( from );
 			return;
 		case CDK_ONLYLAN:
 			common->DPrintf( "%s: not a lan client\n", Sys_NetAdrToString( from ) );
@@ -1779,7 +1777,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 
 	// enter pure checks if necessary
 	if ( sessLocal.mapSpawnData.serverInfo.GetInt( "si_pure" ) && challenges[ ichallenge ].authState != CDK_PUREOK ) {
-		if ( SendPureServerMessage( from, OS ) ) {
+		if ( SendPureServerMessage( from ) ) {
 			challenges[ ichallenge ].authState = CDK_PUREWAIT;
 			return;
 		}
@@ -1825,7 +1823,6 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 		if ( clientNum < MAX_ASYNC_CLIENTS ) {
 			// initialize
 			clients[ clientNum ].channel.Init( from, serverId );
-			clients[ clientNum ].OS = OS;
 			strncpy( clients[ clientNum ].guid, guid, 12 );
 			clients[ clientNum ].guid[11] = 0;
 			break;
@@ -1866,7 +1863,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 idAsyncServer::VerifyChecksumMessage
 ==================
 */
-bool idAsyncServer::VerifyChecksumMessage( int clientNum, const netadr_t *from, const idBitMsg &msg, idStr &reply, int OS ) {
+bool idAsyncServer::VerifyChecksumMessage( int clientNum, const netadr_t *from, const idBitMsg &msg, idStr &reply ) {
 	int		i, numChecksums;
 	int		checksums[ MAX_PURE_PAKS ];
 	int		serverChecksums[ MAX_PURE_PAKS ];
@@ -1924,7 +1921,7 @@ void idAsyncServer::ProcessPureMessage( const netadr_t from, const idBitMsg &msg
 		return;
 	}
 
-	if ( !VerifyChecksumMessage( iclient, &from, msg, reply, challenges[ iclient ].OS ) ) {
+	if ( !VerifyChecksumMessage( iclient, &from, msg, reply ) ) {
 		PrintOOB( from, SERVER_PRINT_MISC, reply );
 		return;
 	}
@@ -1961,7 +1958,7 @@ void idAsyncServer::ProcessReliablePure( int clientNum, const idBitMsg &msg ) {
 		return;
 	}
 
-	if ( !VerifyChecksumMessage( clientNum, NULL, msg, reply, clients[ clientNum ].OS ) ) {
+	if ( !VerifyChecksumMessage( clientNum, NULL, msg, reply ) ) {
 		DropClient( clientNum, reply );
 		return;
 	}
@@ -2065,7 +2062,6 @@ void idAsyncServer::ProcessGetInfoMessage( const netadr_t from, const idBitMsg &
 		outMsg.WriteString( sessLocal.mapSpawnData.userInfo[i].GetString( "ui_name", "Player" ) );
 	}
 	outMsg.WriteByte( MAX_ASYNC_CLIENTS );
-	outMsg.WriteInt( fileSystem->GetOSMask() );
 
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 }
@@ -2079,12 +2075,11 @@ see (client) "getInfo" -> (server) "infoResponse" -> (client)ProcessGetInfoMessa
 void idAsyncServer::PrintLocalServerInfo( void ) {
 	int i;
 
-	common->Printf( "server '%s' IP = %s\nprotocol %d.%d OS mask 0x%x\n",
+	common->Printf( "server '%s' IP = %s\nprotocol %d.%d\n",
 					sessLocal.mapSpawnData.serverInfo.GetString( "si_name" ),
 					Sys_NetAdrToString( serverPort.GetAdr() ),
 					ASYNC_PROTOCOL_MAJOR,
-					ASYNC_PROTOCOL_MINOR,
-					fileSystem->GetOSMask() );
+					ASYNC_PROTOCOL_MINOR );
 	sessLocal.mapSpawnData.serverInfo.Print();
 	for ( i = 0; i < MAX_ASYNC_CLIENTS; i++ ) {
 		serverClient_t &client = clients[i];

@@ -210,8 +210,6 @@ public:
 	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ] ) = 0;
 							// equivalent to calling SetPureServerChecksums with an empty list
 	virtual	void			ClearPureChecksums( void ) = 0;
-							// get a mask of supported OSes. if not pure, returns -1
-	virtual int				GetOSMask( void ) = 0;
 							// Reads a complete file.
 							// Returns the length of the file, or -1 on failure.
 							// A null buffer will just return the file length without loading.

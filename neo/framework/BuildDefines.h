@@ -60,11 +60,6 @@ If you have questions concerning this license or the applicable additional terms
 	#define ID_ALLOW_CHEATS 0
 #endif
 
-// fake a pure client. useful to connect an all-debug client to a server
-#ifndef ID_FAKE_PURE
-	#define ID_FAKE_PURE 0
-#endif
-
 // verify checksums in clientinfo traffic
 // NOTE: this makes the network protocol incompatible
 #ifndef ID_CLIENTINFO_TAGS
