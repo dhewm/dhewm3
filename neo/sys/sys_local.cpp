@@ -99,11 +99,11 @@ void idSysLocal::DLL_Unload( uintptr_t dllHandle ) {
 
 void idSysLocal::DLL_GetFileName( const char *baseName, char *dllName, int maxLength ) {
 #ifdef _WIN32
-	idStr::snPrintf( dllName, maxLength, "%s" BUILD_CPU ".dll", baseName );
+	idStr::snPrintf( dllName, maxLength, "%s.dll", baseName );
 #elif defined( __unix__ )
-	idStr::snPrintf( dllName, maxLength, "%s" BUILD_CPU ".so", baseName );
+	idStr::snPrintf( dllName, maxLength, "%s.so", baseName );
 #elif defined( MACOS_X )
-	idStr::snPrintf( dllName, maxLength, "%s" ".dylib", baseName );
+	idStr::snPrintf( dllName, maxLength, "%s.dylib", baseName );
 #else
 #error OS define is required
 #endif
