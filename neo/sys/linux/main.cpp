@@ -80,8 +80,22 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		return true;
 
 	case PATH_CONFIG:
+		s = getenv("XDG_CONFIG_HOME");
+		if (s)
+			idStr::snPrintf(buf, sizeof(buf), "%s/dhewm3", s);
+		else
+			idStr::snPrintf(buf, sizeof(buf), "%s/.config/dhewm3", getenv("HOME"));
+
+		path = buf;
+		return true;
+
 	case PATH_SAVE:
-		idStr::snPrintf(buf, sizeof(buf), "%s/.doom3", getenv("HOME"));
+		s = getenv("XDG_DATA_HOME");
+		if (s)
+			idStr::snPrintf(buf, sizeof(buf), "%s/dhewm3", s);
+		else
+			idStr::snPrintf(buf, sizeof(buf), "%s/.local/share/dhewm3", getenv("HOME"));
+
 		path = buf;
 		return true;
 
