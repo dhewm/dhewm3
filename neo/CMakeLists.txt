@@ -6,8 +6,6 @@ cmake_minimum_required(VERSION 2.6)
 # osx: place game .dylib's in the bundle (next to the binary)
 # osx: -weak_framework ?
 
-# how to name the game .so's?
-
 # maybe add these as options:
 # BUILD_GAMEPAK
 # TARGET_MONO
@@ -27,7 +25,7 @@ include(CheckCXXCompilerFlag)
 include(CheckFunctionExists)
 
 option(CORE			"Build the core" ON)
-option(GAME			"Build the base game code" ON)
+option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" OFF)
 option(DEDICATED	"Build the dedicated server" OFF)
 option(X86			"Cross compile for x86 (only applicable on x86_64)" OFF)
@@ -765,14 +763,14 @@ if (DEDICATED)
 	)
 endif()
 
-if (GAME)
-	add_library(game SHARED ${src_game})
-	set_target_properties(game PROPERTIES PREFIX "")
-	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
-	set_target_properties(game PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
-	set_target_properties(game PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(game PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(game idlib)
+if (BASE)
+	add_library(base SHARED ${src_game})
+	set_target_properties(base PROPERTIES PREFIX "")
+	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+	set_target_properties(base PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
+	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(base idlib)
 endif()
 
 if (D3XP)

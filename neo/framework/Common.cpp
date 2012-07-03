@@ -2589,6 +2589,7 @@ idCommonLocal::LoadGameDLL
 */
 void idCommonLocal::LoadGameDLL( void ) {
 #ifdef __DOOM_DLL__
+	const char		*fs_game;
 	char			dll[MAX_OSPATH];
 	idStr			s;
 
@@ -2596,8 +2597,12 @@ void idCommonLocal::LoadGameDLL( void ) {
 	gameExport_t	gameExport;
 	GetGameAPI_t	GetGameAPI;
 
+	fs_game = cvarSystem->GetCVarString("fs_game");
+	if (!fs_game || !fs_game[0])
+		fs_game = BASE_GAMEDIR;
+
 	gameDLL = 0;
-	sys->DLL_GetFileName("game", dll, sizeof(dll));
+	sys->DLL_GetFileName(fs_game, dll, sizeof(dll));
 
 	// try next to the binary first (build tree)
 	if (Sys_GetPath(PATH_EXE, s)) {
