@@ -1551,10 +1551,9 @@ bool idAsyncServer::SendPureServerMessage( const netadr_t to, int OS ) {
 	idBitMsg	outMsg;
 	byte		msgBuf[ MAX_MESSAGE_SIZE ];
 	int			serverChecksums[ MAX_PURE_PAKS ];
-	int			gamePakChecksum;
 	int			i;
 
-	fileSystem->GetPureServerChecksums( serverChecksums, OS, &gamePakChecksum );
+	fileSystem->GetPureServerChecksums( serverChecksums );
 	if ( !serverChecksums[ 0 ] ) {
 		// happens if you run fully expanded assets with si_pure 1
 		common->Warning( "pure server has no pak files referenced" );
@@ -1587,9 +1586,8 @@ bool idAsyncServer::SendReliablePureToClient( int clientNum ) {
 	byte		msgBuf[ MAX_MESSAGE_SIZE ];
 	int			serverChecksums[ MAX_PURE_PAKS ];
 	int			i;
-	int			gamePakChecksum;
 
-	fileSystem->GetPureServerChecksums( serverChecksums, clients[ clientNum ].OS, &gamePakChecksum );
+	fileSystem->GetPureServerChecksums( serverChecksums );
 	if ( !serverChecksums[ 0 ] ) {
 		// happens if you run fully expanded assets with si_pure 1
 		common->Warning( "pure server has no pak files referenced" );
@@ -1872,7 +1870,6 @@ bool idAsyncServer::VerifyChecksumMessage( int clientNum, const netadr_t *from, 
 	int		i, numChecksums;
 	int		checksums[ MAX_PURE_PAKS ];
 	int		serverChecksums[ MAX_PURE_PAKS ];
-	int		serverGamePakChecksum;
 
 	// pak checksums, in a 0-terminated list
 	numChecksums = 0;
@@ -1888,7 +1885,7 @@ bool idAsyncServer::VerifyChecksumMessage( int clientNum, const netadr_t *from, 
 	} while ( i );
 	numChecksums--;
 
-	fileSystem->GetPureServerChecksums( serverChecksums, OS, &serverGamePakChecksum );
+	fileSystem->GetPureServerChecksums( serverChecksums );
 	assert( serverChecksums[ 0 ] );
 
 	for ( i = 0; serverChecksums[ i ] != 0; i++ ) {
@@ -2680,7 +2677,7 @@ void idAsyncServer::ProcessDownloadRequestMessage( const netadr_t from, const id
 	// read the checksums, build path names and pass that to the game code
 	dlPakChecksum = msg.ReadInt();
 	while ( dlPakChecksum ) {
-		if ( !( dlSize[ numPaks ] = fileSystem->ValidateDownloadPakForChecksum( dlPakChecksum, pakbuf, false ) ) ) {
+		if ( !( dlSize[ numPaks ] = fileSystem->ValidateDownloadPakForChecksum( dlPakChecksum, pakbuf ) ) ) {
 			// we pass an empty token to the game so our list doesn't get offset
 			common->Warning( "client requested an unknown pak 0x%x", dlPakChecksum );
 			pakbuf[ 0 ] = '\0';

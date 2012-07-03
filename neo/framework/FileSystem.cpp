@@ -359,9 +359,9 @@ public:
 	virtual void			CreateOSPath( const char *OSPath );
 	virtual bool			FileIsInPAK( const char *relativePath );
 	virtual void			UpdatePureServerChecksums( void );
-	virtual fsPureReply_t	SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum, int missingChecksums[ MAX_PURE_PAKS ], int *missingGamePakChecksum );
-	virtual void			GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ], int OS, int *gamePakChecksum );
-	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum );
+	virtual fsPureReply_t	SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int missingChecksums[ MAX_PURE_PAKS ] );
+	virtual void			GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ] );
+	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ] );
 	virtual	void			ClearPureChecksums( void );
 	virtual int				GetOSMask( void );
 	virtual int				ReadFile( const char *relativePath, void **buffer, ID_TIME_T *timestamp );
@@ -385,7 +385,7 @@ public:
 	virtual bool			HasD3XP( void );
 	virtual bool			RunningD3XP( void );
 	virtual void			CopyFile( const char *fromOSPath, const char *toOSPath );
-	virtual int				ValidateDownloadPakForChecksum( int checksum, char path[ MAX_STRING_CHARS ], bool isBinary );
+	virtual int				ValidateDownloadPakForChecksum( int checksum, char path[ MAX_STRING_CHARS ] );
 	virtual idFile *		MakeTemporaryFile( void );
 	virtual int				AddZipFile( const char *path );
 	virtual findFile_t		FindFile( const char *path, bool scheduleAddons );
@@ -435,9 +435,6 @@ private:
 	bool					loadedFileFromDir;		// set to true once a file was loaded from a directory - can't switch to pure anymore
 	idList<int>				restartChecksums;		// used during a restart to set things in right order
 	idList<int>				addonChecksums;			// list of checksums that should go to the search list directly ( for restarts )
-	int						restartGamePakChecksum;
-	int						gameDLLChecksum;		// the checksum of the last loaded game DLL
-	int						gamePakChecksum;		// the checksum of the pak holding the loaded game DLL
 
 	int						gamePakForOS[ MAX_GAME_OS ];
 
@@ -515,7 +512,6 @@ idFileSystemLocal::idFileSystemLocal( void ) {
 	dir_cache_count = 0;
 	d3xp = 0;
 	loadedFileFromDir = false;
-	restartGamePakChecksum = 0;
 	memset( &backgroundThread, 0, sizeof( backgroundThread ) );
 	backgroundThread_exit = false;
 	addonPaks = NULL;
@@ -2390,9 +2386,6 @@ void idFileSystemLocal::Startup( void ) {
 			}
 			common->FatalError( "Failed to restart with pure mode restrictions for server connect" );
 		}
-		// also the game pak checksum
-		// we could check if the game pak is actually present, but we would not be restarting if there wasn't one @ first pure check
-		gamePakChecksum = restartGamePakChecksum;
 	}
 
 	// add our commands
@@ -2477,12 +2470,11 @@ pack_t* idFileSystemLocal::GetPackForChecksum( int checksum, bool searchAddons )
 idFileSystemLocal::ValidateDownloadPakForChecksum
 ===============
 */
-int idFileSystemLocal::ValidateDownloadPakForChecksum( int checksum, char path[ MAX_STRING_CHARS ], bool isBinary ) {
+int idFileSystemLocal::ValidateDownloadPakForChecksum( int checksum, char path[ MAX_STRING_CHARS ] ) {
 	int			i;
 	idStrList	testList;
 	idStr		name;
 	idStr		relativePath;
-	bool		pakBinary;
 	pack_t		*pak = GetPackForChecksum( checksum );
 
 	if ( !pak ) {
@@ -2495,14 +2487,6 @@ int idFileSystemLocal::ValidateDownloadPakForChecksum( int checksum, char path[ 
 	name.StripPath();
 	if ( strstr( name.c_str(), "pak" ) == name.c_str() ) {
 		common->DPrintf( "%s is not a donwloadable pak\n", pak->pakFilename.c_str() );
-		return 0;
-	}
-	// check the binary
-	// a pure server sets the binary flag when starting the game
-	assert( pak->binary != BINARY_UNKNOWN );
-	pakBinary = ( pak->binary == BINARY_YES ) ? true : false;
-	if ( isBinary != pakBinary ) {
-		common->DPrintf( "%s binary flag mismatch\n", pak->pakFilename.c_str() );
 		return 0;
 	}
 
@@ -2550,7 +2534,7 @@ DLL:
   the checksum of the pak containing the DLL is maintained seperately, the server can send different replies by OS
 =====================
 */
-fsPureReply_t idFileSystemLocal::SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int _gamePakChecksum, int missingChecksums[ MAX_PURE_PAKS ], int *missingGamePakChecksum ) {
+fsPureReply_t idFileSystemLocal::SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int missingChecksums[ MAX_PURE_PAKS ] ) {
 	pack_t			*pack;
 	int				i, j, imissing;
 	bool			success = true;
@@ -2558,8 +2542,6 @@ fsPureReply_t idFileSystemLocal::SetPureServerChecksums( const int pureChecksums
 
 	imissing = 0;
 	missingChecksums[ 0 ] = 0;
-	assert( missingGamePakChecksum );
-	*missingGamePakChecksum = 0;
 
 	if ( pureChecksums[ 0 ] == 0 ) {
 		ClearPureChecksums();
@@ -2653,20 +2635,13 @@ fsPureReply_t idFileSystemLocal::SetPureServerChecksums( const int pureChecksums
 idFileSystemLocal::GetPureServerChecksums
 =====================
 */
-void idFileSystemLocal::GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ], int OS, int *_gamePakChecksum ) {
+void idFileSystemLocal::GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ] ) {
 	int i;
 
 	for ( i = 0; i < serverPaks.Num(); i++ ) {
 		checksums[ i ] = serverPaks[ i ]->checksum;
 	}
 	checksums[ i ] = 0;
-	if ( _gamePakChecksum ) {
-		if ( OS >= 0 ) {
-			*_gamePakChecksum = gamePakForOS[ OS ];
-		} else {
-			*_gamePakChecksum = gamePakChecksum;
-		}
-	}
 }
 
 /*
@@ -2674,7 +2649,7 @@ void idFileSystemLocal::GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ], 
 idFileSystemLocal::SetRestartChecksums
 =====================
 */
-void idFileSystemLocal::SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum ) {
+void idFileSystemLocal::SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ] ) {
 	int		i;
 	pack_t	*pack;
 
@@ -2692,7 +2667,6 @@ void idFileSystemLocal::SetRestartChecksums( const int pureChecksums[ MAX_PURE_P
 		restartChecksums.Append( pureChecksums[ i ] );
 		i++;
 	}
-	restartGamePakChecksum = gamePakChecksum;
 }
 
 /*
@@ -2794,8 +2768,6 @@ void idFileSystemLocal::Shutdown( bool reloading ) {
 		addonChecksums.Clear();
 	}
 	loadedFileFromDir = false;
-	gameDLLChecksum = 0;
-	gamePakChecksum = 0;
 
 	ClearDirCache();
 

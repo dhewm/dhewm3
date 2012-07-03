@@ -218,7 +218,7 @@ private:
 	void				ReadLocalizedServerString( const idBitMsg &msg, char* out, int maxLen );
 	bool				CheckTimeout( void );
 	void				ProcessDownloadInfoMessage( const netadr_t from, const idBitMsg &msg );
-	int					GetDownloadRequest( const int checksums[ MAX_PURE_PAKS ], int count, int gamePakChecksum );
+	int					GetDownloadRequest( const int checksums[ MAX_PURE_PAKS ], int count );
 };
 
 #endif /* !__ASYNCCLIENT_H__ */

@@ -7,7 +7,6 @@ cmake_minimum_required(VERSION 2.6)
 # osx: -weak_framework ?
 
 # maybe add these as options:
-# BUILD_GAMEPAK
 # TARGET_MONO
 # SETUP
 # SDK				-D_D3SDK

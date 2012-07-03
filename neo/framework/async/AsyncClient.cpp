@@ -881,7 +881,6 @@ void idAsyncClient::ProcessReliableMessagePure( const idBitMsg &msg ) {
 	byte		msgBuf[ MAX_MESSAGE_SIZE ];
 	int			inChecksums[ MAX_PURE_PAKS ];
 	int			i;
-	int			gamePakChecksum;
 	int			serverGameInitId;
 
 	session->SetGUI( NULL, NULL );
@@ -906,7 +905,7 @@ void idAsyncClient::ProcessReliableMessagePure( const idBitMsg &msg ) {
 	sessLocal.ExecuteMapChange( true );
 
 	// upon receiving our pure list, the server will send us SCS_INGAME and we'll start getting snapshots
-	fileSystem->GetPureServerChecksums( inChecksums, -1, &gamePakChecksum );
+	fileSystem->GetPureServerChecksums( inChecksums );
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteByte( CLIENT_RELIABLE_MESSAGE_PURE );
 
@@ -1382,9 +1381,7 @@ idAsyncClient::ValidatePureServerChecksums
 bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBitMsg &msg ) {
 	int			i, numChecksums, numMissingChecksums;
 	int			inChecksums[ MAX_PURE_PAKS ];
-	int			inGamePakChecksum = 0;
 	int			missingChecksums[ MAX_PURE_PAKS ];
-	int			missingGamePakChecksum;
 	idBitMsg	dlmsg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -1402,14 +1399,14 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 	} while ( i );
 	inChecksums[ numChecksums ] = 0;
 
-	fsPureReply_t reply = fileSystem->SetPureServerChecksums( inChecksums, inGamePakChecksum, missingChecksums, &missingGamePakChecksum );
+	fsPureReply_t reply = fileSystem->SetPureServerChecksums( inChecksums, missingChecksums );
 	switch ( reply ) {
 		case PURE_RESTART:
 			// need to restart the filesystem with a different pure configuration
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "disconnect" );
 			// restart with the right FS configuration and get back to the server
 			clientState = CS_PURERESTART;
-			fileSystem->SetRestartChecksums( inChecksums, inGamePakChecksum );
+			fileSystem->SetRestartChecksums( inChecksums );
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "reloadEngine" );
 			return false;
 		case PURE_MISSING: {
@@ -1442,7 +1439,7 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 				// ask the server to send back download info
 				common->DPrintf( "missing %d paks: %s\n", numMissingChecksums, checksums.c_str() );
 				// store the requested downloads
-				GetDownloadRequest( missingChecksums, numMissingChecksums, missingGamePakChecksum );
+				GetDownloadRequest( missingChecksums, numMissingChecksums );
 				// build the download request message
 				// NOTE: in a specific function?
 				dlmsg.Init( msgBuf, sizeof( msgBuf ) );
@@ -1481,7 +1478,6 @@ void idAsyncClient::ProcessPureMessage( const netadr_t from, const idBitMsg &msg
 	byte		msgBuf[ MAX_MESSAGE_SIZE ];
 	int			i;
 	int			inChecksums[ MAX_PURE_PAKS ];
-	int			gamePakChecksum;
 
 	if ( clientState != CS_CONNECTING ) {
 		common->Printf( "clientState != CS_CONNECTING, pure msg ignored\n" );
@@ -1492,7 +1488,7 @@ void idAsyncClient::ProcessPureMessage( const netadr_t from, const idBitMsg &msg
 		return;
 	}
 
-	fileSystem->GetPureServerChecksums( inChecksums, -1, &gamePakChecksum );
+	fileSystem->GetPureServerChecksums( inChecksums );
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
 	outMsg.WriteString( "pureClient" );
@@ -2306,7 +2302,7 @@ void idAsyncClient::ProcessDownloadInfoMessage( const netadr_t from, const idBit
 idAsyncClient::GetDownloadRequest
 ===============
 */
-int idAsyncClient::GetDownloadRequest( const int checksums[ MAX_PURE_PAKS ], int count, int gamePakChecksum ) {
+int idAsyncClient::GetDownloadRequest( const int checksums[ MAX_PURE_PAKS ], int count ) {
 	assert( !checksums[ count ] ); // 0-terminated
 	if ( memcmp( dlChecksums, checksums, sizeof( int ) * count ) ) {
 		idRandom newreq;

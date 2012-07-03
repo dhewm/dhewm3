@@ -201,13 +201,13 @@ public:
 							// the function tries to configure pure mode from the paks already referenced and this new list
 							// it returns wether the switch was successfull, and sets the missing checksums
 							// the process is verbosive when fs_debug 1
-	virtual fsPureReply_t	SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum, int missingChecksums[ MAX_PURE_PAKS ], int *missingGamePakChecksum ) = 0;
+	virtual fsPureReply_t	SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int missingChecksums[ MAX_PURE_PAKS ] ) = 0;
 							// fills a 0-terminated list of pak checksums for a client
 							// if OS is -1, give the current game pak checksum. if >= 0, lookup the game pak table (server only)
-	virtual void			GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ], int OS, int *gamePakChecksum ) = 0;
+	virtual void			GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ] ) = 0;
 							// before doing a restart, force the pure list and the search order
 							// if the given checksum list can't be completely processed and set, will error out
-	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum ) = 0;
+	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ] ) = 0;
 							// equivalent to calling SetPureServerChecksums with an empty list
 	virtual	void			ClearPureChecksums( void ) = 0;
 							// get a mask of supported OSes. if not pure, returns -1
@@ -265,7 +265,7 @@ public:
 	virtual void			CopyFile( const char *fromOSPath, const char *toOSPath ) = 0;
 
 							// lookup a relative path, return the size or 0 if not found
-	virtual int				ValidateDownloadPakForChecksum( int checksum, char path[ MAX_STRING_CHARS ], bool isGamePak ) = 0;
+	virtual int				ValidateDownloadPakForChecksum( int checksum, char path[ MAX_STRING_CHARS ] ) = 0;
 
 	virtual idFile *		MakeTemporaryFile( void ) = 0;
 
