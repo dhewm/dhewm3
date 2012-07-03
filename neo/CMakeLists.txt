@@ -223,6 +223,23 @@ if (WIN32)
 	)
 endif()
 
+if (APPLE)
+	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
+	SET(libdir		"${CMAKE_INSTALL_PREFIX}")
+	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
+	SET(datadir		"${datarootdir}")
+elseif (WIN32)
+	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
+	SET(libdir		"${CMAKE_INSTALL_PREFIX}/lib")
+	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
+	SET(datadir		"${datarootdir}")
+else()
+	SET(bindir		"${CMAKE_INSTALL_PREFIX}/bin")
+	SET(libdir		"${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/dhewm3")
+	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}/share")
+	SET(datadir		"${datarootdir}/dhewm3")
+endif()
+
 configure_file(
     "${CMAKE_SOURCE_DIR}/config.h.in"
     "${CMAKE_BINARY_DIR}/config.h"
