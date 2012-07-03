@@ -265,11 +265,7 @@ TODO: OSX - use the native API instead? NSModule
 =================
 */
 uintptr_t Sys_DLL_Load( const char *path ) {
-	void *handle = dlopen( path, RTLD_NOW );
-	if ( !handle ) {
-		Sys_Printf( "dlopen '%s' failed: %s\n", path, dlerror() );
-	}
-	return (uintptr_t)handle;
+	return (uintptr_t)dlopen( path, RTLD_NOW );
 }
 
 /*
