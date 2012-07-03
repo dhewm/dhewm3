@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # TODO
 
+# osx: place game .dylib's in the bundle (next to the binary)
 # osx: -weak_framework ?
 
 # how to name the game .so's?
