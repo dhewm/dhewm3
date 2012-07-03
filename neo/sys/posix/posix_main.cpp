@@ -41,13 +41,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/platform.h"
 #include "idlib/containers/StrList.h"
+#include "framework/FileSystem.h"
 #include "framework/KeyInput.h"
 #include "framework/EditField.h"
 #include "sys/sys_local.h"
 
 #include "sys/posix/posix_public.h"
 
-#define					MAX_OSPATH 256
 #define					COMMAND_HISTORY 64
 
 static int				input_hide = 0;

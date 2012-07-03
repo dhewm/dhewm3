@@ -46,8 +46,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/wglext.h"		// windows OpenGL extensions
 #include "sys/sys_public.h"
 
-#define	MAX_OSPATH			256
-
 #define	WINDOW_STYLE	(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE | WS_THICKFRAME)
 
 void	Sys_CreateConsole( void );
