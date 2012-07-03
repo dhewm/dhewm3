@@ -359,7 +359,6 @@ public:
 	virtual void			CreateOSPath( const char *OSPath );
 	virtual bool			FileIsInPAK( const char *relativePath );
 	virtual void			UpdatePureServerChecksums( void );
-	virtual bool			UpdateGamePakChecksums( void );
 	virtual fsPureReply_t	SetPureServerChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum, int missingChecksums[ MAX_PURE_PAKS ], int *missingGamePakChecksum );
 	virtual void			GetPureServerChecksums( int checksums[ MAX_PURE_PAKS ], int OS, int *gamePakChecksum );
 	virtual void			SetRestartChecksums( const int pureChecksums[ MAX_PURE_PAKS ], int gamePakChecksum );
@@ -2445,71 +2444,6 @@ void idFileSystemLocal::UpdatePureServerChecksums( void ) {
 		}
 		common->Printf( "set pure list - %d paks ( %s)\n", serverPaks.Num(), checks.c_str() );
 	}
-}
-
-/*
-=====================
-idFileSystemLocal::UpdateGamePakChecksums
-=====================
-*/
-bool idFileSystemLocal::UpdateGamePakChecksums( void ) {
-	searchpath_t	*search;
-	fileInPack_t	*pakFile;
-	int				confHash;
-	idFile			*confFile;
-	char			*buf;
-	idLexer			*lexConf;
-	idToken			token;
-	int				id;
-
-	confHash = HashFileName( BINARY_CONFIG );
-
-	memset( gamePakForOS, 0, sizeof( gamePakForOS ) );
-	for ( search = searchPaths; search; search = search->next ) {
-		if ( !search->pack ) {
-			continue;
-		}
-		search->pack->binary = BINARY_NO;
-		for ( pakFile = search->pack->hashTable[confHash]; pakFile; pakFile = pakFile->next ) {
-			if ( !FilenameCompare( pakFile->name, BINARY_CONFIG ) ) {
-				search->pack->binary = BINARY_YES;
-				confFile = ReadFileFromZip( search->pack, pakFile, BINARY_CONFIG );
-				buf = new char[ confFile->Length() + 1 ];
-				confFile->Read( (void *)buf, confFile->Length() );
-				buf[ confFile->Length() ] = '\0';
-				lexConf = new idLexer( buf, confFile->Length(), confFile->GetFullPath() );
-				while ( lexConf->ReadToken( &token ) ) {
-					if ( token.IsNumeric() ) {
-						id = atoi( token );
-						if ( id < MAX_GAME_OS && !gamePakForOS[ id ] ) {
-							if ( fs_debug.GetBool() ) {
-								common->Printf( "Adding game pak checksum for OS %d: %s 0x%x\n", id, confFile->GetFullPath(), search->pack->checksum );
-							}
-							gamePakForOS[ id ] = search->pack->checksum;
-						}
-					}
-				}
-				CloseFile( confFile );
-				delete lexConf;
-				delete[] buf;
-			}
-		}
-	}
-
-	// some sanity checks on the game code references
-	// make sure that at least the local OS got a pure reference
-	if ( !gamePakForOS[ BUILD_OS_ID ] ) {
-		common->Warning( "No game code pak reference found for the local OS" );
-		return false;
-	}
-
-	if ( !cvarSystem->GetCVarBool( "net_serverAllowServerMod" ) &&
-		gamePakChecksum != gamePakForOS[ BUILD_OS_ID ] ) {
-		common->Warning( "The current game code doesn't match pak files (net_serverAllowServerMod is off)" );
-		return false;
-	}
-
-	return true;
 }
 
 /*

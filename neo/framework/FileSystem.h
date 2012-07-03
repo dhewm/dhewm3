@@ -194,8 +194,6 @@ public:
 							// Returns a space separated string containing the checksums of all referenced pak files.
 							// will call SetPureServerChecksums internally to restrict itself
 	virtual void			UpdatePureServerChecksums( void ) = 0;
-							// setup the mapping of OS -> game pak checksum
-	virtual bool			UpdateGamePakChecksums( void ) = 0;
 							// 0-terminated list of pak checksums
 							// if pureChecksums[ 0 ] == 0, all data sources will be allowed
 							// otherwise, only pak files that match one of the checksums will be checked for files
