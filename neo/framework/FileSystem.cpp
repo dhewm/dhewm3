@@ -1353,6 +1353,18 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 		unzGoToNextFile(uf);
 	}
 
+	// ignore all binary paks
+	confHash = HashFileName(BINARY_CONFIG);
+	for (pakFile = pack->hashTable[confHash]; pakFile; pakFile = pakFile->next) {
+		if (!FilenameCompare(pakFile->name, BINARY_CONFIG)) {
+			unzClose(uf);
+			delete[] buildBuffer;
+			delete pack;
+
+			return NULL;
+		}
+	}
+
 	// check if this is an addon pak
 	pack->addon = false;
 	confHash = HashFileName( ADDON_CONFIG );
