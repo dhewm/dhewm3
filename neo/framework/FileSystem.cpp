@@ -380,7 +380,7 @@ public:
 	virtual void			ResetReadCount( void ) { readCount = 0; }
 	virtual void			AddToReadCount( int c ) { readCount += c; }
 	virtual int				GetReadCount( void ) { return readCount; }
-	virtual void			FindDLL( const char *basename, char dllPath[ MAX_OSPATH ], bool updateChecksum );
+	virtual void			FindDLL( const char *basename, char dllPath[ MAX_OSPATH ] );
 	virtual void			ClearDirCache( void );
 	virtual bool			HasD3XP( void );
 	virtual bool			RunningD3XP( void );
@@ -3718,17 +3718,12 @@ int idFileSystemLocal::GetFileChecksum( idFile *file ) {
 idFileSystemLocal::FindDLL
 =================
 */
-void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ], bool updateChecksum ) {
+void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ] ) {
 	idFile			*dllFile = NULL;
 	char			dllName[MAX_OSPATH];
 	idStr			dllPath;
-	int				dllHash;
-	pack_t			*inPak;
-	pack_t			*pak;
-	fileInPack_t	*pakFile;
 
 	sys->DLL_GetFileName( name, dllName, MAX_OSPATH );
-	dllHash = HashFileName( dllName );
 
 #if ID_FAKE_PURE
 	if ( 1 ) {
@@ -3740,74 +3735,10 @@ void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ], 
 		dllPath.AppendPath( dllName );
 		dllFile = OpenExplicitFileRead( dllPath );
 	}
-	if ( !dllFile ) {
-		if ( !serverPaks.Num() ) {
-			// not running in pure mode, try to extract from a pak file first
-			dllFile = OpenFileReadFlags( dllName, FSFLAG_SEARCH_PAKS | FSFLAG_PURE_NOREF | FSFLAG_BINARY_ONLY, &inPak );
-			if ( dllFile ) {
-				common->Printf( "found DLL in pak file: %s\n", dllFile->GetFullPath() );
-				dllPath = RelativePathToOSPath( dllName, "fs_savepath" );
-				CopyFile( dllFile, dllPath );
-				CloseFile( dllFile );
-				dllFile = OpenFileReadFlags( dllName, FSFLAG_SEARCH_DIRS );
-				if ( !dllFile ) {
-					common->Error( "DLL extraction to fs_savepath failed\n" );
-				} else if ( updateChecksum ) {
-					gameDLLChecksum = GetFileChecksum( dllFile );
-					gamePakChecksum = inPak->checksum;
-					updateChecksum = false;	// don't try again below
-				}
-			} else {
-				// didn't find a source in a pak file, try in the directory
-				dllFile = OpenFileReadFlags( dllName, FSFLAG_SEARCH_DIRS );
-				if ( dllFile ) {
-					if ( updateChecksum ) {
-						gameDLLChecksum = GetFileChecksum( dllFile );
-						// see if we can mark a pak file
-						pak = FindPakForFileChecksum( dllName, gameDLLChecksum, false );
-						pak ? gamePakChecksum = pak->checksum : gamePakChecksum = 0;
-						updateChecksum = false;
-					}
-				}
-			}
-		} else {
-			// we are in pure mode. this path to be reached only for game DLL situations
-			// with a code pak checksum given by server
-			assert( gamePakChecksum );
-			assert( updateChecksum );
-			pak = GetPackForChecksum( gamePakChecksum );
-			if ( !pak ) {
-				// not supposed to happen, bug in pure code?
-				common->Warning( "FindDLL in pure mode: game pak not found ( 0x%x )\n", gamePakChecksum );
-			} else {
-				// extract and copy
-				for ( pakFile = pak->hashTable[dllHash]; pakFile; pakFile = pakFile->next ) {
-					if ( !FilenameCompare( pakFile->name, dllName ) ) {
-						dllFile = ReadFileFromZip( pak, pakFile, dllName );
-						common->Printf( "found DLL in game pak file: %s\n", pak->pakFilename.c_str() );
-						dllPath = RelativePathToOSPath( dllName, "fs_savepath" );
-						CopyFile( dllFile, dllPath );
-						CloseFile( dllFile );
-						dllFile = OpenFileReadFlags( dllName, FSFLAG_SEARCH_DIRS );
-						if ( !dllFile ) {
-							common->Error( "DLL extraction to fs_savepath failed\n" );
-						} else {
-							gameDLLChecksum = GetFileChecksum( dllFile );
-							updateChecksum = false;	// don't try again below
-						}
-					}
-				}
-			}
-		}
-	}
-	if ( updateChecksum ) {
-		if ( dllFile ) {
-			gameDLLChecksum = GetFileChecksum( dllFile );
-		} else {
-			gameDLLChecksum = 0;
-		}
-		gamePakChecksum = 0;
-	}
+
+	if ( !dllFile && !serverPaks.Num() )
+		dllFile = OpenFileReadFlags( dllName, FSFLAG_SEARCH_DIRS );
+
 	if ( dllFile ) {
 		dllPath = dllFile->GetFullPath( );
 		CloseFile( dllFile );

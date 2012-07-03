@@ -250,7 +250,7 @@ public:
 							// adds to the read count
 	virtual void			AddToReadCount( int c ) = 0;
 							// look for a dynamic module
-	virtual void			FindDLL( const char *basename, char dllPath[ MAX_OSPATH ], bool updateChecksum ) = 0;
+	virtual void			FindDLL( const char *basename, char dllPath[ MAX_OSPATH ] ) = 0;
 							// case sensitive filesystems use an internal directory cache
 							// the cache is cleared when calling OpenFileWrite and RemoveFile
 							// in some cases you may need to use this directly
