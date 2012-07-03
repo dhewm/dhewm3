@@ -230,7 +230,7 @@ bool Sys_IsLANAddress( const netadr_t adr ) {
 	}
 
 	for ( i = 0; i < num_interfaces; i++ ) {
-		ip = ntohl( adr.ip[0] );
+		ip = ntohl( *( unsigned int *)&adr.ip );
 		if( ( netint[i].ip & netint[i].mask ) == ( ip & netint[i].mask ) ) {
 			return true;
 		}
