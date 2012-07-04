@@ -48,6 +48,7 @@ The build system is based on CMake: http://cmake.org/
 
 Required libraries are not part of the tree. These are:
 
+- zlib
 - libjpeg (minimum v6, v8 recommended)
 - libogg
 - libvorbis
