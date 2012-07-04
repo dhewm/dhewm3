@@ -39,8 +39,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/win32/win_local.h"
 #endif
 
-idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
-
 /*
 ===================
 GLimp_Init
@@ -261,25 +259,4 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 #endif
 
 	return (GLExtension_t)SDL_GL_GetProcAddress(name);
-}
-
-/*
-================
-Sys_GetVideoRam
-================
-*/
-int Sys_GetVideoRam() {
-	assert(SDL_WasInit(SDL_INIT_VIDEO));
-
-	if (sys_videoRam.GetInteger())
-		return sys_videoRam.GetInteger();
-
-	common->Printf("guessing video ram (use +set sys_videoRam to force)\n");
-
-	Uint32 vram = SDL_GetVideoInfo()->video_mem;
-
-	if (!vram)
-		vram = 64;
-
-	return vram;
 }

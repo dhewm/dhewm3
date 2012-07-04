@@ -97,7 +97,6 @@ idCVar com_timestampPrints( "com_timestampPrints", "0", CVAR_SYSTEM, "print time
 idCVar com_timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "scales the time", 0.1f, 10.0f );
 idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when making a build" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
-idCVar com_videoRam( "com_videoRam", "64", CVAR_INTEGER | CVAR_SYSTEM | CVAR_NOCHEAT | CVAR_ARCHIVE, "holds the last amount of detected video ram" );
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
@@ -1455,29 +1454,8 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
 	}
 
-	if ( Sys_GetVideoRam() < 128 ) {
-		cvarSystem->SetCVarBool( "image_ignoreHighQuality", true, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSize", 1, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeLimit", 256, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeSpecular", 1, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeSpecularLimit", 64, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeBump", 1, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeBumpLimit", 256, CVAR_ARCHIVE );
-	}
-
-	if ( Sys_GetSystemRam() < 512 ) {
-		cvarSystem->SetCVarBool( "image_ignoreHighQuality", true, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "s_maxSoundsPerShader", 1, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSize", 1, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeLimit", 256, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeSpecular", 1, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_downSizeSpecularLimit", 64, CVAR_ARCHIVE );
-		cvarSystem->SetCVarBool( "com_purgeAll", true, CVAR_ARCHIVE );
-		cvarSystem->SetCVarBool( "r_forceLoadImages", true, CVAR_ARCHIVE );
-	} else {
-		cvarSystem->SetCVarBool( "com_purgeAll", false, CVAR_ARCHIVE );
-		cvarSystem->SetCVarBool( "r_forceLoadImages", false, CVAR_ARCHIVE );
-	}
+	cvarSystem->SetCVarBool( "com_purgeAll", false, CVAR_ARCHIVE );
+	cvarSystem->SetCVarBool( "r_forceLoadImages", false, CVAR_ARCHIVE );
 
 	bool oldCard = false;
 	bool nv10or20 = false;
@@ -1504,7 +1482,7 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 	OSX_GetVideoCard( vendorId, deviceId );
 	OSX_GetCPUIdentification( cpuId, oldArch );
 	bool isFX5200 = vendorId == 0x10DE && ( deviceId & 0x0FF0 ) == 0x0320;
-	if ( ( oldArch || ( isFX5200 && Sys_GetVideoRam() < 128 ) ) && com_machineSpec.GetInteger() == 0 ) {
+	if ( oldArch && ( com_machineSpec.GetInteger() == 0 ) ) {
 		cvarSystem->SetCVarBool( "r_shadows", false, CVAR_ARCHIVE );
 	} else {
 		cvarSystem->SetCVarBool( "r_shadows", true, CVAR_ARCHIVE );
@@ -2724,32 +2702,27 @@ idCommonLocal::SetMachineSpec
 =================
 */
 void idCommonLocal::SetMachineSpec( void ) {
-	int vidRam = Sys_GetVideoRam();
 	int sysRam = Sys_GetSystemRam();
 	bool oldCard = false;
 	bool nv10or20 = false;
 
 	renderSystem->GetCardCaps( oldCard, nv10or20 );
 
-	if (oldCard)
-		Printf( "Detected\n\t%i MB of System memory\n\t%i MB of Video memory on a less than optimal video architecture\n\n", sysRam, vidRam );
-	else
-		Printf( "Detected\n\t%i MB of System memory\n\t%i MB of Video memory on an optimal video architecture\n\n", sysRam, vidRam );
+	Printf( "Detected\n\t%i MB of System memory\n\n", sysRam );
 
-	if ( vidRam >= 512 && sysRam >= 1024 && !oldCard ) {
+	if ( sysRam >= 1024 && !oldCard ) {
 		Printf( "This system qualifies for Ultra quality!\n" );
 		com_machineSpec.SetInteger( 3 );
-	} else if ( vidRam >= 256 && sysRam >= 512 && !oldCard ) {
+	} else if ( sysRam >= 512 && !oldCard ) {
 		Printf( "This system qualifies for High quality!\n" );
 		com_machineSpec.SetInteger( 2 );
-	} else if ( vidRam >= 128 && sysRam >= 384 ) {
+	} else if ( sysRam >= 384 ) {
 		Printf( "This system qualifies for Medium quality.\n" );
 		com_machineSpec.SetInteger( 1 );
 	} else {
 		Printf( "This system qualifies for Low quality.\n" );
 		com_machineSpec.SetInteger( 0 );
 	}
-	com_videoRam.SetInteger( vidRam );
 }
 
 static unsigned int AsyncTimer(unsigned int interval, void *) {

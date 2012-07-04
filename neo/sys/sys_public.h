@@ -179,9 +179,6 @@ void			Sys_FPU_SetDAZ( bool enable );
 // returns amount of system ram
 int				Sys_GetSystemRam( void );
 
-// returns amount of video ram
-int				Sys_GetVideoRam( void );
-
 // returns amount of drive space in path
 int				Sys_GetDriveFreeSpace( const char *path );
 
