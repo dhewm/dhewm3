@@ -76,6 +76,9 @@ if (DHEWM3LIBS)
 endif()
 
 # libs
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
 find_package(JPEG REQUIRED)
 include_directories(${JPEG_INCLUDE_DIR})
 
@@ -734,6 +737,7 @@ if (CORE)
 		${VORBIS_LIBRARIES}
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
+		${ZLIB_LIBRARY}
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
@@ -765,6 +769,7 @@ if (DEDICATED)
 		${VORBIS_LIBRARIES}
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
+		${ZLIB_LIBRARY}
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
