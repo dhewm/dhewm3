@@ -526,7 +526,6 @@ void Sys_Init( void ) {
 	}
 
 	common->Printf( "%d MB System Memory\n", Sys_GetSystemRam() );
-	common->Printf( "%d MB Video Memory\n", Sys_GetVideoRam() );
 }
 
 /*

@@ -1351,7 +1351,7 @@ bool idImage::CheckPrecompressedImage( bool fullLoad ) {
 	}
 
 	// god i love last minute hacks :-)
-	if ( com_machineSpec.GetInteger() >= 1 && com_videoRam.GetInteger() >= 128 && imgName.Icmpn( "lights/", 7 ) == 0 ) {
+	if ( com_machineSpec.GetInteger() >= 1 && imgName.Icmpn( "lights/", 7 ) == 0 ) {
 		return false;
 	}
 

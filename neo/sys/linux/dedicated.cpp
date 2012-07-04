@@ -29,13 +29,3 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/platform.h"
 #include "renderer/tr_local.h"
 #include "sys/posix/posix_public.h"
-
-/*
-================
-Sys_GetVideoRam
-returns in megabytes
-================
-*/
-int Sys_GetVideoRam( void ) {
-	return 64;
-}
