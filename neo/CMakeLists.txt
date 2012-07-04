@@ -737,6 +737,14 @@ if (CORE)
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
+
+	if (NOT APPLE AND NOT WIN32)
+		install(TARGETS dhewm3
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif ()
 endif()
 
 if (DEDICATED)
@@ -760,6 +768,14 @@ if (DEDICATED)
 		${SDL_LIBRARY}
 		${sys_libs}
 	)
+
+	if (NOT APPLE AND NOT WIN32)
+		install(TARGETS dhewm3ded
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif ()
 endif()
 
 if (BASE)
@@ -770,6 +786,14 @@ if (BASE)
 	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(base idlib)
+
+	if (NOT APPLE AND NOT WIN32)
+		install(TARGETS base
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif ()
 endif()
 
 if (D3XP)
@@ -780,4 +804,12 @@ if (D3XP)
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(d3xp idlib)
+
+	if (NOT APPLE AND NOT WIN32)
+		install(TARGETS d3xp
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif ()
 endif()
