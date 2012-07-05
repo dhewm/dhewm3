@@ -122,14 +122,6 @@ void Sys_Shutdown( void ) {
 
 /*
 ===============
-Sys_FPU_EnableExceptions
-===============
-*/
-void Sys_FPU_EnableExceptions( int exceptions ) {
-}
-
-/*
-===============
 Sys_FPE_handler
 ===============
 */

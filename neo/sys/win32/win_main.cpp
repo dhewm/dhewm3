@@ -621,14 +621,6 @@ void Win_Frame( void ) {
 
 int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, int inse, int opof, int opse );
 
-#define TEST_FPU_EXCEPTIONS	/*	FPU_EXCEPTION_INVALID_OPERATION |		*/	\
-							/*	FPU_EXCEPTION_DENORMALIZED_OPERAND |	*/	\
-							/*	FPU_EXCEPTION_DIVIDE_BY_ZERO |			*/	\
-							/*	FPU_EXCEPTION_NUMERIC_OVERFLOW |		*/	\
-							/*	FPU_EXCEPTION_NUMERIC_UNDERFLOW |		*/	\
-							/*	FPU_EXCEPTION_INEXACT_RESULT |			*/	\
-								0
-
 /*
 ==================
 WinMain
@@ -652,17 +644,11 @@ int main(int argc, char *argv[]) {
 	_CrtSetDbgFlag( 0 );
 #endif
 
-//	Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
-
 	if ( argc > 1 ) {
 		common->Init( argc-1, &argv[1] );
 	} else {
 		common->Init( 0, NULL );
 	}
-
-#if TEST_FPU_EXCEPTIONS != 0
-	common->Printf( Sys_FPU_GetState() );
-#endif
 
 	// hide or show the early console as necessary
 	if ( win32.win_viewlog.GetInteger() || com_skipRenderer.GetBool() || idAsyncNetwork::serverDedicated.GetInteger() ) {
@@ -690,9 +676,6 @@ int main(int argc, char *argv[]) {
 	while( 1 ) {
 
 		Win_Frame();
-
-		// set exceptions, even if some crappy syscall changes them!
-		Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
 
 #ifdef ID_ALLOW_TOOLS
 		if ( com_editors ) {

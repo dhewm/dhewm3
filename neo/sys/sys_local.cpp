@@ -121,10 +121,6 @@ sysEvent_t idSysLocal::GenerateMouseMoveEvent( int deltax, int deltay ) {
 	return ev;
 }
 
-void idSysLocal::FPU_EnableExceptions( int exceptions ) {
-	Sys_FPU_EnableExceptions( exceptions );
-}
-
 /*
 =================
 Sys_TimeStampToStr

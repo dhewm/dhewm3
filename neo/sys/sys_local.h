@@ -53,8 +53,6 @@ public:
 	virtual void			FPU_SetFTZ( bool enable );
 	virtual void			FPU_SetDAZ( bool enable );
 
-	virtual void			FPU_EnableExceptions( int exceptions );
-
 	virtual bool			LockMemory( void *ptr, int bytes );
 	virtual bool			UnlockMemory( void *ptr, int bytes );
 

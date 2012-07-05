@@ -44,15 +44,6 @@ typedef enum {
 } cpuid_t;
 
 typedef enum {
-	FPU_EXCEPTION_INVALID_OPERATION		= 1,
-	FPU_EXCEPTION_DENORMALIZED_OPERAND	= 2,
-	FPU_EXCEPTION_DIVIDE_BY_ZERO		= 4,
-	FPU_EXCEPTION_NUMERIC_OVERFLOW		= 8,
-	FPU_EXCEPTION_NUMERIC_UNDERFLOW		= 16,
-	FPU_EXCEPTION_INEXACT_RESULT		= 32
-} fpuExceptions_t;
-
-typedef enum {
 	AXIS_SIDE,
 	AXIS_FORWARD,
 	AXIS_UP,
@@ -147,9 +138,6 @@ bool			Sys_FPU_StackIsEmpty( void );
 
 // returns the FPU state as a string
 const char *	Sys_FPU_GetState( void );
-
-// enables the given FPU exceptions
-void			Sys_FPU_EnableExceptions( int exceptions );
 
 // sets the FPU precision
 void			Sys_FPU_SetPrecision();
@@ -384,8 +372,6 @@ public:
 	virtual bool			FPU_StackIsEmpty( void ) = 0;
 	virtual void			FPU_SetFTZ( bool enable ) = 0;
 	virtual void			FPU_SetDAZ( bool enable ) = 0;
-
-	virtual void			FPU_EnableExceptions( int exceptions ) = 0;
 
 	virtual bool			LockMemory( void *ptr, int bytes ) = 0;
 	virtual bool			UnlockMemory( void *ptr, int bytes ) = 0;

@@ -251,25 +251,3 @@ const char *Sys_FPU_GetState( void ) {
 	return "";
 #endif
 }
-
-/*
-===============
-Sys_FPU_EnableExceptions
-===============
-*/
-void Sys_FPU_EnableExceptions( int exceptions ) {
-#ifdef _MSC_VER
-	__asm {
-		mov			eax, statePtr
-		mov			ecx, exceptions
-		and			cx, 63
-		not			cx
-		fnstcw		word ptr [eax]
-		mov			bx, word ptr [eax]
-		or			bx, 63
-		and			bx, cx
-		mov			word ptr [eax], bx
-		fldcw		word ptr [eax]
-	}
-#endif
-}

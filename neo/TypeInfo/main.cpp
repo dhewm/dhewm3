@@ -224,8 +224,6 @@ sysEvent_t		idSysLocal::GenerateMouseMoveEvent( int deltax, int deltay ) { sysEv
 void			idSysLocal::OpenURL( const char *url, bool quit ) { }
 void			idSysLocal::StartProcess( const char *exeName, bool quit ) { }
 
-void			idSysLocal::FPU_EnableExceptions( int exceptions ) { }
-
 idSysLocal		sysLocal;
 idSys *			sys = &sysLocal;
 
