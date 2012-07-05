@@ -53,12 +53,6 @@ typedef enum {
 } fpuExceptions_t;
 
 typedef enum {
-	FPU_PRECISION_SINGLE				= 0,
-	FPU_PRECISION_DOUBLE				= 1,
-	FPU_PRECISION_DOUBLE_EXTENDED		= 2
-} fpuPrecision_t;
-
-typedef enum {
 	AXIS_SIDE,
 	AXIS_FORWARD,
 	AXIS_UP,
@@ -158,7 +152,7 @@ const char *	Sys_FPU_GetState( void );
 void			Sys_FPU_EnableExceptions( int exceptions );
 
 // sets the FPU precision
-void			Sys_FPU_SetPrecision( int precision );
+void			Sys_FPU_SetPrecision();
 
 // sets Flush-To-Zero mode
 void			Sys_FPU_SetFTZ( bool enable );

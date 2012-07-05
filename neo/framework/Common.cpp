@@ -2805,6 +2805,9 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		// override cvars from command line
 		StartupVariable( NULL, false );
 
+		// set fpu double extended precision
+		Sys_FPU_SetPrecision();
+
 		// initialize processor specific SIMD implementation
 		InitSIMD();
 

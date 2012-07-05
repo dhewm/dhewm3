@@ -323,9 +323,6 @@ const char *Sys_FPU_GetState( void ) {
 	return "";
 }
 
-void Sys_FPU_SetPrecision( int precision ) {
-}
-
 /*
 ================
 Sys_LockMemory

@@ -273,27 +273,3 @@ void Sys_FPU_EnableExceptions( int exceptions ) {
 	}
 #endif
 }
-
-/*
-===============
-Sys_FPU_SetPrecision
-===============
-*/
-void Sys_FPU_SetPrecision( int precision ) {
-#ifdef _MSC_VER
-	short precisionBitTable[4] = { 0, 1, 3, 0 };
-	short precisionBits = precisionBitTable[precision & 3] << 8;
-	short precisionMask = ~( ( 1 << 9 ) | ( 1 << 8 ) );
-
-	__asm {
-		mov			eax, statePtr
-		mov			cx, precisionBits
-		fnstcw		word ptr [eax]
-		mov			bx, word ptr [eax]
-		and			bx, precisionMask
-		or			bx, cx
-		mov			word ptr [eax], bx
-		fldcw		word ptr [eax]
-	}
-#endif
-}

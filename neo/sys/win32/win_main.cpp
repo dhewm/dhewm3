@@ -653,7 +653,6 @@ int main(int argc, char *argv[]) {
 #endif
 
 //	Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
-	Sys_FPU_SetPrecision( FPU_PRECISION_DOUBLE_EXTENDED );
 
 	if ( argc > 1 ) {
 		common->Init( argc-1, &argv[1] );

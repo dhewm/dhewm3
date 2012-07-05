@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <float.h>
+
 #include <SDL_cpuinfo.h>
 
 // MSVC header intrin.h uses strcmp and errors out when not set
@@ -220,4 +222,15 @@ int Sys_GetProcessorId( void ) {
 		flags |= CPUID_ALTIVEC;
 
 	return flags;
+}
+
+/*
+===============
+Sys_FPU_SetPrecision
+===============
+*/
+void Sys_FPU_SetPrecision() {
+#if defined(_MSC_VER) && defined(_M_IX86)
+	_controlfp(_PC_64, _MCW_PC);
+#endif
 }
