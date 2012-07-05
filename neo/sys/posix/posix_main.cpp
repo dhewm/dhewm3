@@ -319,10 +319,6 @@ bool Sys_FPU_StackIsEmpty( void ) {
 	return true;
 }
 
-const char *Sys_FPU_GetState( void ) {
-	return "";
-}
-
 /*
 ================
 Sys_LockMemory

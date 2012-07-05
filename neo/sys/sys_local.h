@@ -48,7 +48,6 @@ public:
 
 	virtual unsigned int	GetMilliseconds( void );
 	virtual int				GetProcessorId( void );
-	virtual const char *	FPU_GetState( void );
 	virtual bool			FPU_StackIsEmpty( void );
 	virtual void			FPU_SetFTZ( bool enable );
 	virtual void			FPU_SetDAZ( bool enable );

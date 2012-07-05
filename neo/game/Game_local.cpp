@@ -2392,7 +2392,6 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	float	ratio_y;
 
 	if ( !sys->FPU_StackIsEmpty() ) {
-		Printf( sys->FPU_GetState() );
 		Error( "idGameLocal::CalcFov: FPU stack not empty" );
 	}
 
@@ -2404,7 +2403,6 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	// FIXME: somehow, this is happening occasionally
 	assert( fov_y > 0 );
 	if ( fov_y <= 0 ) {
-		Printf( sys->FPU_GetState() );
 		Error( "idGameLocal::CalcFov: bad result" );
 	}
 
@@ -2441,7 +2439,6 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	// FIXME: somehow, this is happening occasionally
 	assert( ( fov_x > 0 ) && ( fov_y > 0 ) );
 	if ( ( fov_y <= 0 ) || ( fov_x <= 0 ) ) {
-		Printf( sys->FPU_GetState() );
 		Error( "idGameLocal::CalcFov: bad result" );
 	}
 }
