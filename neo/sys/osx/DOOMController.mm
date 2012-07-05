@@ -80,47 +80,6 @@ void Sys_Shutdown( void ) {
 }
 
 /*
-===============
-Sys_FPE_handler
-===============
-*/
-void Sys_FPE_handler( int signum, siginfo_t *info, void *context ) {
-#if defined(__ppc__)
-	int ret;
-	ppc_float_state_t *fs;
-	ppc_thread_state_t *ss;
-
-	fs = &( (struct ucontext *)context )->uc_mcontext->fs;
-	ss = &( (struct ucontext *)context )->uc_mcontext->ss;
-
-	Sys_Printf( "FPE at 0x%x:\n", info->si_addr );
-
-	ret = fetestexcept( FE_ALL_EXCEPT );
-	if ( ret & FE_INEXACT ) {
-		Sys_Printf( "FE_INEXACT " );
-	}
-	if ( ret & FE_DIVBYZERO ) {
-		Sys_Printf( "FE_DIVBYZERO " );
-	}
-	if ( ret & FE_UNDERFLOW ) {
-		Sys_Printf( "FE_UNDERFLOW " );
-	}
-	if ( ret & FE_OVERFLOW ) {
-		Sys_Printf( "FE_OVERFLOW " );
-	}
-	if ( ret & FE_INVALID ) {
-		Sys_Printf( "FE_INVALID " );
-	}
-	Sys_Printf( "\n" );
-	// clear the exception flags
-	feclearexcept( FE_ALL_EXCEPT );
-	// re-arm
-	fs->fpscr &= exception_mask;
-	ss->srr0 += 4;
-#endif
-}
-
-/*
 ================
 Sys_GetSystemRam
 returns in megabytes

@@ -121,16 +121,6 @@ void Sys_Shutdown( void ) {
 }
 
 /*
-===============
-Sys_FPE_handler
-===============
-*/
-void Sys_FPE_handler( int signum, siginfo_t *info, void *context ) {
-	assert( signum == SIGFPE );
-	Sys_Printf( "FPE\n" );
-}
-
-/*
 ================
 Sys_GetSystemRam
 returns in megabytes
