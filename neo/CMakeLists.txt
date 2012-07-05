@@ -50,6 +50,10 @@ if (cpu STREQUAL "x86_64" AND X86)
 	set(cpu "x86")
 endif()
 
+if (MSVC AND CMAKE_CL_64)
+	set(cpu "amd64")
+endif()
+
 # target os
 if (APPLE)
 	set(os "macosx")
