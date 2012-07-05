@@ -60,11 +60,11 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 			return true;
 		}
 
-		common->Printf("WARNING: base path '" BUILD_DATADIR "' does not exits\n");
+		common->Warning("base path '" BUILD_DATADIR "' does not exits");
 
 		// fallback to vanilla doom3 install
 		if (stat(LINUX_DEFAULT_PATH, &st) != -1 && S_ISDIR(st.st_mode)) {
-			common->Printf("WARNING: using hardcoded default base path\n");
+			common->Warning("using hardcoded default base path");
 
 			path = LINUX_DEFAULT_PATH;
 			return true;
