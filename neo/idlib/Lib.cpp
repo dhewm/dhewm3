@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #if defined( MACOS_X )
 #include <signal.h>
 #include <sys/types.h>
+#endif
+
+#ifndef _MSC_VER
 #include <unistd.h>
 #endif
 
@@ -513,7 +516,6 @@ void AssertFailed( const char *file, int line, const char *expression ) {
 	__debugbreak();
 #elif defined( __GNUC__ )
 	__builtin_trap();
-#else
-#error dont know how to crash :P
 #endif
+	_exit(1);
 }
