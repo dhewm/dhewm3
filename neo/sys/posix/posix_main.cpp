@@ -73,7 +73,7 @@ idCVar com_pid( "com_pid", "0", CVAR_INTEGER | CVAR_INIT | CVAR_SYSTEM, "process
 // exit - quit - error --------------------------------------------------------
 
 static int set_exit = 0;
-static char exit_spawn[ 1024 ];
+static char exit_spawn[ 1024 ] = { 0 };
 
 /*
 ================
@@ -240,10 +240,14 @@ const char *Posix_Cwd( void ) {
 /*
 =================
 Sys_Init
-Posix_EarlyInit/Posix_LateInit is better
 =================
 */
-void Sys_Init( void ) { }
+void Sys_Init( void ) {
+	Posix_InitConsoleInput();
+	com_pid.SetInteger( getpid() );
+	common->Printf( "pid: %d\n", com_pid.GetInteger() );
+	common->Printf( "%d MB System Memory\n", Sys_GetSystemRam() );
+}
 
 /*
 =================
@@ -349,27 +353,6 @@ return in MegaBytes
 int Sys_GetDriveFreeSpace( const char *path ) {
 	common->DPrintf( "TODO: Sys_GetDriveFreeSpace\n" );
 	return 1000 * 1024;
-}
-
-/*
-===============
-Posix_EarlyInit
-===============
-*/
-void Posix_EarlyInit( void ) {
-	exit_spawn[0] = '\0';
-}
-
-/*
-===============
-Posix_LateInit
-===============
-*/
-void Posix_LateInit( void ) {
-	Posix_InitConsoleInput();
-	com_pid.SetInteger( getpid() );
-	common->Printf( "pid: %d\n", com_pid.GetInteger() );
-	common->Printf( "%d MB System Memory\n", Sys_GetSystemRam() );
 }
 
 /*

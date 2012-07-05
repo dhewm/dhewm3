@@ -180,14 +180,10 @@ int main( int argc, char *argv[] ) {
 	if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]])
 		Sys_Error("Could not access application resources");
 
-	Posix_EarlyInit();
-
 	if (argc > 1)
 		common->Init(argc - 1, &argv[1]);
 	else
 		common->Init(0, NULL);
-
-	Posix_LateInit();
 
 	[NSApp activateIgnoringOtherApps:YES];
 

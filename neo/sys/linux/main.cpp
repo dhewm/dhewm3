@@ -272,8 +272,6 @@ int main(int argc, char **argv) {
 
 	setlocale(LC_ALL, "C");
 
-	Posix_EarlyInit( );
-
 	// some ladspa-plugins (that may be indirectly loaded by doom3 if they're
 	// used by alsa) call setlocale(LC_ALL, ""); This sets LC_ALL to $LANG or
 	// $LC_ALL which usually is not "C" and will fuck up scanf, strtod
@@ -286,8 +284,6 @@ int main(int argc, char **argv) {
 	} else {
 		common->Init( 0, NULL );
 	}
-
-	Posix_LateInit( );
 
 	while (1) {
 		common->Frame();
