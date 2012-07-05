@@ -297,27 +297,3 @@ void Sys_FPU_SetPrecision( int precision ) {
 	}
 #endif
 }
-
-/*
-================
-Sys_FPU_SetRounding
-================
-*/
-void Sys_FPU_SetRounding( int rounding ) {
-#ifdef _MSC_VER
-	short roundingBitTable[4] = { 0, 1, 2, 3 };
-	short roundingBits = roundingBitTable[rounding & 3] << 10;
-	short roundingMask = ~( ( 1 << 11 ) | ( 1 << 10 ) );
-
-	__asm {
-		mov			eax, statePtr
-		mov			cx, roundingBits
-		fnstcw		word ptr [eax]
-		mov			bx, word ptr [eax]
-		and			bx, roundingMask
-		or			bx, cx
-		mov			word ptr [eax], bx
-		fldcw		word ptr [eax]
-	}
-#endif
-}

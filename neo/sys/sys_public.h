@@ -59,13 +59,6 @@ typedef enum {
 } fpuPrecision_t;
 
 typedef enum {
-	FPU_ROUNDING_TO_NEAREST				= 0,
-	FPU_ROUNDING_DOWN					= 1,
-	FPU_ROUNDING_UP						= 2,
-	FPU_ROUNDING_TO_ZERO				= 3
-} fpuRounding_t;
-
-typedef enum {
 	AXIS_SIDE,
 	AXIS_FORWARD,
 	AXIS_UP,
@@ -166,9 +159,6 @@ void			Sys_FPU_EnableExceptions( int exceptions );
 
 // sets the FPU precision
 void			Sys_FPU_SetPrecision( int precision );
-
-// sets the FPU rounding mode
-void			Sys_FPU_SetRounding( int rounding );
 
 // sets Flush-To-Zero mode
 void			Sys_FPU_SetFTZ( bool enable );
