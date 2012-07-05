@@ -59,7 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 
 static const ID_TIME_T	FILE_NOT_FOUND_TIMESTAMP	= 0xFFFFFFFF;
 static const int		MAX_PURE_PAKS				= 128;
-static const int		MAX_OSPATH					= PATH_MAX;
+static const int		MAX_OSPATH					= FILENAME_MAX;
 
 // modes for OpenFileByMode. used as bit mask internally
 typedef enum {
