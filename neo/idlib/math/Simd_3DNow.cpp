@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 //===============================================================
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && defined(_M_IX86)
 
 /*
 ============

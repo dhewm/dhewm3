@@ -50,7 +50,7 @@ public:
 	virtual	void VPCALL MinMax( idVec3 &min,		idVec3 &max,			const idDrawVert *src,	const int *indexes,		const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idPlane *src,		const int count );
 
-#elif defined(_WIN32)
+#elif defined(_MSC_VER) && defined(_M_IX86)
 	virtual const char * VPCALL GetName( void ) const;
 
 	virtual void VPCALL Add( float *dst,			const float constant,	const float *src,		const int count );

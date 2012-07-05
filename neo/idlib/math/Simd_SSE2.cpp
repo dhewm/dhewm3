@@ -239,7 +239,7 @@ void VPCALL idSIMD_SSE2::CmpLT( byte *dst, const byte bitNum, const float *src0,
 	}
 }
 
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && defined(_M_IX86)
 
 #include <xmmintrin.h>
 
