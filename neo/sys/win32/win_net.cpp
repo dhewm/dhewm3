@@ -314,7 +314,6 @@ NET_OpenSocks
 */
 void NET_OpenSocks( int port ) {
 	struct sockaddr_in	address;
-	int					err;
 	struct hostent		*h;
 	int					len;
 	bool			rfc1929;
@@ -325,14 +324,12 @@ void NET_OpenSocks( int port ) {
 	common->Printf( "Opening connection to SOCKS server.\n" );
 
 	if ( ( socks_socket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == INVALID_SOCKET ) {
-		err = WSAGetLastError();
 		common->Printf( "WARNING: NET_OpenSocks: socket: %s\n", NET_ErrorString() );
 		return;
 	}
 
 	h = gethostbyname( net_socksServer.GetString() );
 	if ( h == NULL ) {
-		err = WSAGetLastError();
 		common->Printf( "WARNING: NET_OpenSocks: gethostbyname: %s\n", NET_ErrorString() );
 		return;
 	}
@@ -345,7 +342,6 @@ void NET_OpenSocks( int port ) {
 	address.sin_port = htons( (short)net_socksPort.GetInteger() );
 
 	if ( connect( socks_socket, (struct sockaddr *)&address, sizeof( address ) ) == SOCKET_ERROR ) {
-		err = WSAGetLastError();
 		common->Printf( "NET_OpenSocks: connect: %s\n", NET_ErrorString() );
 		return;
 	}
@@ -373,7 +369,6 @@ void NET_OpenSocks( int port ) {
 		buf[2] = 2;		// method #2 - method id #02: username/password
 	}
 	if ( send( socks_socket, (const char *)buf, len, 0 ) == SOCKET_ERROR ) {
-		err = WSAGetLastError();
 		common->Printf( "NET_OpenSocks: send: %s\n", NET_ErrorString() );
 		return;
 	}
@@ -381,7 +376,6 @@ void NET_OpenSocks( int port ) {
 	// get the response
 	len = recv( socks_socket, (char *)buf, 64, 0 );
 	if ( len == SOCKET_ERROR ) {
-		err = WSAGetLastError();
 		common->Printf( "NET_OpenSocks: recv: %s\n", NET_ErrorString() );
 		return;
 	}
@@ -420,7 +414,6 @@ void NET_OpenSocks( int port ) {
 
 		// send it
 		if ( send( socks_socket, (const char *)buf, 3 + ulen + plen, 0 ) == SOCKET_ERROR ) {
-			err = WSAGetLastError();
 			common->Printf( "NET_OpenSocks: send: %s\n", NET_ErrorString() );
 			return;
 		}
@@ -428,7 +421,6 @@ void NET_OpenSocks( int port ) {
 		// get the response
 		len = recv( socks_socket, (char *)buf, 64, 0 );
 		if ( len == SOCKET_ERROR ) {
-			err = WSAGetLastError();
 			common->Printf( "NET_OpenSocks: recv: %s\n", NET_ErrorString() );
 			return;
 		}
@@ -450,7 +442,6 @@ void NET_OpenSocks( int port ) {
 	*(int *)&buf[4] = INADDR_ANY;
 	*(short *)&buf[8] = htons( (short)port );		// port
 	if ( send( socks_socket, (const char *)buf, 10, 0 ) == SOCKET_ERROR ) {
-		err = WSAGetLastError();
 		common->Printf( "NET_OpenSocks: send: %s\n", NET_ErrorString() );
 		return;
 	}
@@ -458,7 +449,6 @@ void NET_OpenSocks( int port ) {
 	// get the response
 	len = recv( socks_socket, (char *)buf, 64, 0 );
 	if( len == SOCKET_ERROR ) {
-		err = WSAGetLastError();
 		common->Printf( "NET_OpenSocks: recv: %s\n", NET_ErrorString() );
 		return;
 	}
@@ -657,7 +647,7 @@ void Sys_InitNetworking( void ) {
 
 	pAdapterInfo = (IP_ADAPTER_INFO *)malloc( sizeof( IP_ADAPTER_INFO ) );
 	if( !pAdapterInfo ) {
-		common->FatalError( "Sys_InitNetworking: Couldn't malloc( %d )", sizeof( IP_ADAPTER_INFO ) );
+		common->FatalError( "Sys_InitNetworking: Couldn't malloc( %u )", (unsigned int)sizeof( IP_ADAPTER_INFO ) );
 	}
 	ulOutBufLen = sizeof( IP_ADAPTER_INFO );
 
@@ -892,8 +882,6 @@ InitForPort
 ==================
 */
 bool idPort::InitForPort( int portNumber ) {
-	int len = sizeof( struct sockaddr_in );
-
 	netSocket = NET_IPSocket( net_ip.GetString(), portNumber, &bound_to );
 	if ( netSocket <= 0 ) {
 		netSocket = 0;
