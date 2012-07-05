@@ -369,6 +369,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 	case PATH_EXE:
 		GetModuleFileName(NULL, buf, sizeof(buf) - 1);
 		path = buf;
+		path.BackSlashesToSlashes();
 		return true;
 	}
 
