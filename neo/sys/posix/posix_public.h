@@ -40,9 +40,6 @@ void		Posix_EarlyInit( );
 // called after common has been initialized
 void		Posix_LateInit( );
 
-void		Posix_InitSigs( );
-void		Posix_ClearSigs( );
-
 void		Posix_Exit( int ret );
 void		Posix_SetExit(int ret); // override the exit code
 void		Posix_SetExitSpawn( const char *exeName ); // set the process to be spawned when we quit

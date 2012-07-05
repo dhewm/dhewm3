@@ -663,7 +663,6 @@ if (APPLE)
 		sys/events.cpp
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
-		sys/posix/posix_signal.cpp
 		sys/posix/posix_main.cpp
 	)
 
@@ -700,7 +699,6 @@ else()
 		sys/events.cpp
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
-		sys/posix/posix_signal.cpp
 		sys/posix/posix_main.cpp
 		sys/linux/main.cpp
 	)

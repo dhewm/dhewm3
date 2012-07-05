@@ -87,8 +87,6 @@ void Posix_Exit(int ret) {
 			Sys_Printf( "tcsetattr failed: %s\n", strerror( errno ) );
 		}
 	}
-	// at this point, too late to catch signals
-	Posix_ClearSigs();
 
 	// process spawning. it's best when it happens after everything has shut down
 	if ( exit_spawn[0] ) {
@@ -360,7 +358,6 @@ Posix_EarlyInit
 */
 void Posix_EarlyInit( void ) {
 	exit_spawn[0] = '\0';
-	Posix_InitSigs();
 }
 
 /*
