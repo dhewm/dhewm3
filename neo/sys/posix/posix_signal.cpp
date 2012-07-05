@@ -64,8 +64,6 @@ const char *signames[] = {
 	//	"SIGTTOUT"
 };
 
-static char fatalError[ 1024 ];
-
 /*
 ================
 Posix_ClearSigs
@@ -107,10 +105,6 @@ static void sig_handler( int signum, siginfo_t *info, void *context ) {
 	// NOTE: see sigaction man page, could verbose the whole siginfo_t and print human readable si_code
 	Sys_Printf( "signal caught: %s\nsi_code %d\n", strsignal( signum ), info->si_code );
 
-	if ( fatalError[ 0 ] ) {
-		Sys_Printf( "Was in fatal error shutdown: %s\n", fatalError );
-	}
-
 	Sys_Printf( "Trying to exit gracefully..\n" );
 
 	Posix_SetExit( signum );
@@ -126,8 +120,6 @@ Posix_InitSigs
 void Posix_InitSigs( ) {
 	struct sigaction action;
 	int i;
-
-	fatalError[0] = '\0';
 
 	/* Set up the structure */
 	action.sa_sigaction = sig_handler;
@@ -146,13 +138,4 @@ void Posix_InitSigs( ) {
 	// then SIGTTIN or SIGTOU could be emitted, if not caught, turns into a SIGSTP
 	signal( SIGTTIN, SIG_IGN );
 	signal( SIGTTOU, SIG_IGN );
-}
-
-/*
-==================
-Sys_SetFatalError
-==================
-*/
-void Sys_SetFatalError( const char *error ) {
-	strncpy( fatalError, error, sizeof( fatalError ) );
 }

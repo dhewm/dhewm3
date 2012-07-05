@@ -721,7 +721,7 @@ void idCommonLocal::FatalError( const char *fmt, ... ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "vid_restart partial windowed\n" );
 	}
 
-	Sys_SetFatalError( errorMessage );
+	Sys_Printf( "shutting down: %s\n", errorMessage );
 
 	Shutdown();
 

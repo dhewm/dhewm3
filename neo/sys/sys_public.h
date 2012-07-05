@@ -197,9 +197,6 @@ bool			Sys_GetPath(sysPath_t type, idStr &path);
 // returns -1 if directory was not found (the list is cleared)
 int				Sys_ListFiles( const char *directory, const char *extension, idList<class idStr> &list );
 
-// know early if we are performing a fatal error shutdown so the error message doesn't get lost
-void			Sys_SetFatalError( const char *error );
-
 /*
 ==============================================================
 

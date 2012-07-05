@@ -784,11 +784,3 @@ void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 	}
 }
-
-/*
-==================
-Sys_SetFatalError
-==================
-*/
-void Sys_SetFatalError( const char *error ) {
-}
