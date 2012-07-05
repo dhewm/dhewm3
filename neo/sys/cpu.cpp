@@ -47,7 +47,7 @@ If you have questions concerning this license or the applicable additional terms
 		#define NO_CPUID
 	#endif
 #elif defined(_MSC_VER)
-	#if !defined(_M_IX86) && !defined(_M_X64)
+	#if !defined(_M_IX86)
 		#define NO_CPUID
 	#endif
 #else
@@ -56,11 +56,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef NO_CPUID
 void Sys_FPU_SetDAZ(bool enable) {
-	common->Error("ERROR: Sys_FPU_SetDAZ not supported on this architecture\n");
 }
 
 void Sys_FPU_SetFTZ(bool enable) {
-	common->Error("ERROR: Sys_FPU_SetFTZ not supported on this architecture\n");
 }
 #else
 
