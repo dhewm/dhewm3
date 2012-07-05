@@ -619,8 +619,6 @@ void Win_Frame( void ) {
 	}
 }
 
-int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, int inse, int opof, int opse );
-
 /*
 ==================
 WinMain

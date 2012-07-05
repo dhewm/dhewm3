@@ -679,7 +679,6 @@ elseif (WIN32)
 		sys/glimp.cpp
 		sys/events.cpp
 		sys/sys_local.cpp
-		sys/win32/win_cpu.cpp
 		sys/win32/win_input.cpp
 		sys/win32/win_main.cpp
 		sys/win32/win_net.cpp
