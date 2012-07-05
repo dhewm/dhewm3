@@ -644,8 +644,6 @@ set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
 set(src_stub_util		sys/stub/util_stub.cpp)
 
-set(src_sys_dedicated	sys/linux/dedicated.cpp)
-
 if (APPLE)
 	set(OSX_RESOURCE_FILES
 			"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
@@ -757,7 +755,6 @@ if (DEDICATED)
 		${src_stub_gl}
 		${src_stub_util}
 		${src_sys_base}
-		${src_sys_dedicated}
 	)
 
 	set_target_properties(dhewm3ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
