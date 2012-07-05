@@ -84,17 +84,6 @@ struct sysEvent_t {
 	void *			evPtr;				// this must be manually freed if not NULL
 };
 
-struct sysMemoryStats_t {
-	int memoryLoad;
-	int totalPhysical;
-	int availPhysical;
-	int totalPageFile;
-	int availPageFile;
-	int totalVirtual;
-	int availVirtual;
-	int availExtendedVirtual;
-};
-
 enum sysPath_t {
 	PATH_BASE,
 	PATH_CONFIG,
