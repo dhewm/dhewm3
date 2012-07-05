@@ -61,10 +61,6 @@ int idSysLocal::GetProcessorId( void ) {
 	return Sys_GetProcessorId();
 }
 
-bool idSysLocal::FPU_StackIsEmpty( void ) {
-	return Sys_FPU_StackIsEmpty();
-}
-
 void idSysLocal::FPU_SetFTZ( bool enable ) {
 	Sys_FPU_SetFTZ( enable );
 }

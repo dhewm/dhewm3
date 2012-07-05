@@ -2391,10 +2391,6 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	float	ratio_x;
 	float	ratio_y;
 
-	if ( !sys->FPU_StackIsEmpty() ) {
-		Error( "idGameLocal::CalcFov: FPU stack not empty" );
-	}
-
 	// first, calculate the vertical fov based on a 640x480 view
 	x = 640.0f / tan( base_fov / 360.0f * idMath::PI );
 	y = atan2( 480.0f, x );

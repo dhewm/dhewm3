@@ -528,14 +528,6 @@ void idEvent::ServiceEvents( void ) {
 		assert( event->object );
 		event->object->ProcessEventArgPtr( ev, args );
 
-#if 0
-		// event functions may never leave return values on the FPU stack
-		// enable this code to check if any event call left values on the FPU stack
-		if ( !sys->FPU_StackIsEmpty() ) {
-			gameLocal.Error( "idEvent::ServiceEvents %d: %s left a value on the FPU stack\n", num, ev->GetName() );
-		}
-#endif
-
 		// return the event to the free list
 		event->Free();
 

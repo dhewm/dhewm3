@@ -205,7 +205,6 @@ void			idSysLocal::DebugVPrintf( const char *fmt, va_list arg ) {}
 double			idSysLocal::GetClockTicks( void ) { return 0.0; }
 double			idSysLocal::ClockTicksPerSecond( void ) { return 1.0; }
 int				idSysLocal::GetProcessorId( void ) { return 0; }
-bool			idSysLocal::FPU_StackIsEmpty( void ) { return true; }
 void			idSysLocal::FPU_SetFTZ( bool enable ) {}
 void			idSysLocal::FPU_SetDAZ( bool enable ) {}
 

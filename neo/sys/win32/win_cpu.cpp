@@ -118,26 +118,3 @@ int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, 
 	return 0;
 #endif
 }
-
-/*
-===============
-Sys_FPU_StackIsEmpty
-===============
-*/
-bool Sys_FPU_StackIsEmpty( void ) {
-#ifdef _MSC_VER
-	__asm {
-		mov			eax, statePtr
-		fnstenv		[eax]
-		mov			eax, [eax+8]
-		xor			eax, 0xFFFFFFFF
-		and			eax, 0x0000FFFF
-		jz			empty
-	}
-	return false;
-empty:
-	return true;
-#else
-	return true;
-#endif
-}

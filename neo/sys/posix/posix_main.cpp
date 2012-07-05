@@ -315,10 +315,6 @@ void Sys_SetClipboardData( const char *string ) {
 	Sys_Printf( "TODO: Sys_SetClipboardData\n" );
 }
 
-bool Sys_FPU_StackIsEmpty( void ) {
-	return true;
-}
-
 /*
 ================
 Sys_LockMemory
