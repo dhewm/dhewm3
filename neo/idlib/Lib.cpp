@@ -510,7 +510,7 @@ int		IntForSixtets( byte *in ) {
 void AssertFailed( const char *file, int line, const char *expression ) {
 	idLib::sys->DebugPrintf( "\n\nASSERTION FAILED!\n%s(%d): '%s'\n", file, line, expression );
 #ifdef _MSC_VER
-	__asm int 0x03
+	__debugbreak();
 #elif defined( __GNUC__ )
 	__builtin_trap();
 #else
