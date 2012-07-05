@@ -258,7 +258,6 @@ static int WPath2A(char *dst, size_t size, const WCHAR *src) {
 		return 0;
 
 	dst[len] = 0;
-
 	/* Replace backslashes by slashes */
 	for (int i = 0; i < len; ++i)
 		if (dst[i] == '\\')
@@ -301,13 +300,61 @@ static int GetHomeDir(char *dst, size_t size)
 	return len;
 }
 
+static int GetRegistryPath(char *dst, size_t size, const WCHAR *subkey, const WCHAR *name) {
+	WCHAR w[MAX_OSPATH];
+	DWORD len = sizeof(w);
+	HKEY res;
+	DWORD sam = KEY_QUERY_VALUE
+#ifdef _WIN64
+		| KEY_WOW64_32KEY
+#endif
+		;
+	DWORD type;
+
+	if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subkey, 0, sam, &res) != ERROR_SUCCESS)
+		return 0;
+
+	if (RegQueryValueExW(res, name, NULL, &type, (LPBYTE)w, &len) != ERROR_SUCCESS) {
+		RegCloseKey(res);
+		return 0;
+	}
+
+	RegCloseKey(res);
+
+	if (type != REG_SZ)
+		return 0;
+
+	return WPath2A(dst, size, w);
+}
+
 bool Sys_GetPath(sysPath_t type, idStr &path) {
 	char buf[MAX_OSPATH];
+	struct _stat st;
+	idStr s;
 
 	switch(type) {
 	case PATH_BASE:
-		path = Sys_Cwd();
-		return true;
+		// try <path to exe>/base first
+		if (Sys_GetPath(PATH_EXE, path)) {
+			path.StripFilename();
+
+			s = path;
+			s.AppendPath(BASE_GAMEDIR);
+			if (_stat(s.c_str(), &st) != -1 && st.st_mode & _S_IFDIR)
+				return true;
+
+			common->Warning("base path '%s' does not exits", s.c_str());
+		}
+
+		// fallback to vanilla doom3 install
+		if (GetRegistryPath(buf, sizeof(buf), L"SOFTWARE\\id\\Doom 3", L"InstallPath") > 0) {
+			path = buf;
+			return true;
+		}
+
+		common->Warning("vanilla doom3 path not found");
+
+		return false;
 
 	case PATH_CONFIG:
 	case PATH_SAVE:
