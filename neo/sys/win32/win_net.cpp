@@ -36,25 +36,13 @@ If you have questions concerning this license or the applicable additional terms
 
 static WSADATA	winsockdata;
 static bool	winsockInitialized = false;
-static bool usingSocks = false;
 
 idCVar net_ip( "net_ip", "localhost", CVAR_SYSTEM, "local IP address" );
 idCVar net_port( "net_port", "0", CVAR_SYSTEM | CVAR_INTEGER, "local IP port number" );
 idCVar net_forceLatency( "net_forceLatency", "0", CVAR_SYSTEM | CVAR_INTEGER, "milliseconds latency" );
 idCVar net_forceDrop( "net_forceDrop", "0", CVAR_SYSTEM | CVAR_INTEGER, "percentage packet loss" );
 
-idCVar net_socksEnabled( "net_socksEnabled", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "" );
-idCVar net_socksServer( "net_socksServer", "", CVAR_SYSTEM | CVAR_ARCHIVE, "" );
-idCVar net_socksPort( "net_socksPort", "1080", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "" );
-idCVar net_socksUsername( "net_socksUsername", "", CVAR_SYSTEM | CVAR_ARCHIVE, "" );
-idCVar net_socksPassword( "net_socksPassword", "", CVAR_SYSTEM | CVAR_ARCHIVE, "" );
-
-
-static struct sockaddr	socksRelayAddr;
-
 static SOCKET	ip_socket;
-static SOCKET	socks_socket;
-static char		socksBuf[4096];
 
 typedef struct {
 	unsigned long ip;
@@ -308,172 +296,6 @@ int NET_IPSocket( const char *net_interface, int port, netadr_t *bound_to ) {
 }
 
 /*
-====================
-NET_OpenSocks
-====================
-*/
-void NET_OpenSocks( int port ) {
-	struct sockaddr_in	address;
-	struct hostent		*h;
-	int					len;
-	bool			rfc1929;
-	unsigned char		buf[64];
-
-	usingSocks = false;
-
-	common->Printf( "Opening connection to SOCKS server.\n" );
-
-	if ( ( socks_socket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == INVALID_SOCKET ) {
-		common->Printf( "WARNING: NET_OpenSocks: socket: %s\n", NET_ErrorString() );
-		return;
-	}
-
-	h = gethostbyname( net_socksServer.GetString() );
-	if ( h == NULL ) {
-		common->Printf( "WARNING: NET_OpenSocks: gethostbyname: %s\n", NET_ErrorString() );
-		return;
-	}
-	if ( h->h_addrtype != AF_INET ) {
-		common->Printf( "WARNING: NET_OpenSocks: gethostbyname: address type was not AF_INET\n" );
-		return;
-	}
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = *(int *)h->h_addr_list[0];
-	address.sin_port = htons( (short)net_socksPort.GetInteger() );
-
-	if ( connect( socks_socket, (struct sockaddr *)&address, sizeof( address ) ) == SOCKET_ERROR ) {
-		common->Printf( "NET_OpenSocks: connect: %s\n", NET_ErrorString() );
-		return;
-	}
-
-	// send socks authentication handshake
-	if ( *net_socksUsername.GetString() || *net_socksPassword.GetString() ) {
-		rfc1929 = true;
-	}
-	else {
-		rfc1929 = false;
-	}
-
-	buf[0] = 5;		// SOCKS version
-	// method count
-	if ( rfc1929 ) {
-		buf[1] = 2;
-		len = 4;
-	}
-	else {
-		buf[1] = 1;
-		len = 3;
-	}
-	buf[2] = 0;		// method #1 - method id #00: no authentication
-	if ( rfc1929 ) {
-		buf[2] = 2;		// method #2 - method id #02: username/password
-	}
-	if ( send( socks_socket, (const char *)buf, len, 0 ) == SOCKET_ERROR ) {
-		common->Printf( "NET_OpenSocks: send: %s\n", NET_ErrorString() );
-		return;
-	}
-
-	// get the response
-	len = recv( socks_socket, (char *)buf, 64, 0 );
-	if ( len == SOCKET_ERROR ) {
-		common->Printf( "NET_OpenSocks: recv: %s\n", NET_ErrorString() );
-		return;
-	}
-	if ( len != 2 || buf[0] != 5 ) {
-		common->Printf( "NET_OpenSocks: bad response\n" );
-		return;
-	}
-	switch( buf[1] ) {
-	case 0:	// no authentication
-		break;
-	case 2: // username/password authentication
-		break;
-	default:
-		common->Printf( "NET_OpenSocks: request denied\n" );
-		return;
-	}
-
-	// do username/password authentication if needed
-	if ( buf[1] == 2 ) {
-		int		ulen;
-		int		plen;
-
-		// build the request
-		ulen = strlen( net_socksUsername.GetString() );
-		plen = strlen( net_socksPassword.GetString() );
-
-		buf[0] = 1;		// username/password authentication version
-		buf[1] = ulen;
-		if ( ulen ) {
-			memcpy( &buf[2], net_socksUsername.GetString(), ulen );
-		}
-		buf[2 + ulen] = plen;
-		if ( plen ) {
-			memcpy( &buf[3 + ulen], net_socksPassword.GetString(), plen );
-		}
-
-		// send it
-		if ( send( socks_socket, (const char *)buf, 3 + ulen + plen, 0 ) == SOCKET_ERROR ) {
-			common->Printf( "NET_OpenSocks: send: %s\n", NET_ErrorString() );
-			return;
-		}
-
-		// get the response
-		len = recv( socks_socket, (char *)buf, 64, 0 );
-		if ( len == SOCKET_ERROR ) {
-			common->Printf( "NET_OpenSocks: recv: %s\n", NET_ErrorString() );
-			return;
-		}
-		if ( len != 2 || buf[0] != 1 ) {
-			common->Printf( "NET_OpenSocks: bad response\n" );
-			return;
-		}
-		if ( buf[1] != 0 ) {
-			common->Printf( "NET_OpenSocks: authentication failed\n" );
-			return;
-		}
-	}
-
-	// send the UDP associate request
-	buf[0] = 5;		// SOCKS version
-	buf[1] = 3;		// command: UDP associate
-	buf[2] = 0;		// reserved
-	buf[3] = 1;		// address type: IPV4
-	*(int *)&buf[4] = INADDR_ANY;
-	*(short *)&buf[8] = htons( (short)port );		// port
-	if ( send( socks_socket, (const char *)buf, 10, 0 ) == SOCKET_ERROR ) {
-		common->Printf( "NET_OpenSocks: send: %s\n", NET_ErrorString() );
-		return;
-	}
-
-	// get the response
-	len = recv( socks_socket, (char *)buf, 64, 0 );
-	if( len == SOCKET_ERROR ) {
-		common->Printf( "NET_OpenSocks: recv: %s\n", NET_ErrorString() );
-		return;
-	}
-	if( len < 2 || buf[0] != 5 ) {
-		common->Printf( "NET_OpenSocks: bad response\n" );
-		return;
-	}
-	// check completion code
-	if( buf[1] != 0 ) {
-		common->Printf( "NET_OpenSocks: request denied: %i\n", buf[1] );
-		return;
-	}
-	if( buf[3] != 1 ) {
-		common->Printf( "NET_OpenSocks: relay address is not IPV4: %i\n", buf[3] );
-		return;
-	}
-	((struct sockaddr_in *)&socksRelayAddr)->sin_family = AF_INET;
-	((struct sockaddr_in *)&socksRelayAddr)->sin_addr.s_addr = *(int *)&buf[4];
-	((struct sockaddr_in *)&socksRelayAddr)->sin_port = *(short *)&buf[8];
-	memset( ((struct sockaddr_in *)&socksRelayAddr)->sin_zero, 0, 8 );
-
-	usingSocks = true;
-}
-
-/*
 ==================
 Net_WaitForUDPPacket
 ==================
@@ -545,20 +367,7 @@ bool Net_GetUDPPacket( int netSocket, netadr_t &net_from, char *data, int &size,
 		memset( ((struct sockaddr_in *)&from)->sin_zero, 0, 8 );
 	}
 
-	if ( usingSocks && netSocket == ip_socket && memcmp( &from, &socksRelayAddr, fromlen ) == 0 ) {
-		if ( ret < 10 || data[0] != 0 || data[1] != 0 || data[2] != 0 || data[3] != 1 ) {
-			return false;
-		}
-		net_from.type = NA_IP;
-		net_from.ip[0] = data[4];
-		net_from.ip[1] = data[5];
-		net_from.ip[2] = data[6];
-		net_from.ip[3] = data[7];
-		net_from.port = *(short *)&data[8];
-		memmove( data, &data[10], ret - 10 );
-	} else {
-		Net_SockadrToNetadr( &from, &net_from );
-	}
+	Net_SockadrToNetadr( &from, &net_from );
 
 	if( ret == maxSize ) {
 		char	buf[1024];
@@ -586,19 +395,7 @@ void Net_SendUDPPacket( int netSocket, int length, const void *data, const netad
 	}
 
 	Net_NetadrToSockadr( &to, &addr );
-
-	if( usingSocks && to.type == NA_IP ) {
-		socksBuf[0] = 0;	// reserved
-		socksBuf[1] = 0;
-		socksBuf[2] = 0;	// fragment (not fragmented)
-		socksBuf[3] = 1;	// address type: IPV4
-		*(int *)&socksBuf[4] = ((struct sockaddr_in *)&addr)->sin_addr.s_addr;
-		*(short *)&socksBuf[8] = ((struct sockaddr_in *)&addr)->sin_port;
-		memcpy( &socksBuf[10], data, length );
-		ret = sendto( netSocket, socksBuf, length+10, 0, &socksRelayAddr, sizeof(socksRelayAddr) );
-	} else {
-		ret = sendto( netSocket, (const char *)data, length, 0, &addr, sizeof(addr) );
-	}
+	ret = sendto( netSocket, (const char *)data, length, 0, &addr, sizeof(addr) );
 	if( ret == SOCKET_ERROR ) {
 		int err = WSAGetLastError();
 
@@ -888,12 +685,6 @@ bool idPort::InitForPort( int portNumber ) {
 		memset( &bound_to, 0, sizeof( bound_to ) );
 		return false;
 	}
-
-#if 0
-	if ( net_socksEnabled.GetBool() ) {
-		NET_OpenSocks( portNumber );
-	}
-#endif
 
 	udpPorts[ bound_to.port ] = new idUDPLag;
 
