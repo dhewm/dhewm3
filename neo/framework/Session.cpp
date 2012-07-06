@@ -2961,6 +2961,11 @@ void idSessionLocal::ReadCDKey( void ) {
 
 	filename = "../" BASE_GAMEDIR "/" CDKEY_FILE;
 	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_configpath" ) );
+
+	// try the install path, which is where the cd installer and steam put it
+	if ( !f )
+		f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_basepath" ) );
+
 	if ( !f ) {
 		common->Printf( "Couldn't read %s.\n", filename.c_str() );
 		cdkey[ 0 ] = '\0';
@@ -2975,6 +2980,11 @@ void idSessionLocal::ReadCDKey( void ) {
 
 	filename = "../" BASE_GAMEDIR "/" XPKEY_FILE;
 	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_configpath" ) );
+
+	// try the install path, which is where the cd installer and steam put it
+	if ( !f )
+		f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_basepath" ) );
+
 	if ( !f ) {
 		common->Printf( "Couldn't read %s.\n", filename.c_str() );
 		xpkey[ 0 ] = '\0';
