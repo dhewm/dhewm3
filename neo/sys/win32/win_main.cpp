@@ -346,10 +346,19 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 			common->Warning("base path '%s' does not exits", s.c_str());
 		}
 
-		// fallback to vanilla doom3 install
+		// fallback to vanilla doom3 cd install
 		if (GetRegistryPath(buf, sizeof(buf), L"SOFTWARE\\id\\Doom 3", L"InstallPath") > 0) {
 			path = buf;
 			return true;
+		}
+
+		// fallback to steam doom3 install
+		if (GetRegistryPath(buf, sizeof(buf), L"SOFTWARE\\Valve\\Steam", L"InstallPath") > 0) {
+			path = buf;
+			path.AppendPath("steamapps\\common\\doom 3");
+
+			if (_stat(path.c_str(), &st) != -1 && st.st_mode & _S_IFDIR)
+				return true;
 		}
 
 		common->Warning("vanilla doom3 path not found");
