@@ -116,6 +116,7 @@ if (CURL_FOUND)
 else()
 	message(STATUS "libcurl not found, server downloads won't be available")
 	set(ID_ENABLE_CURL OFF)
+	set(CURL_LIBRARY "")
 endif()
 
 # compiler specific flags
