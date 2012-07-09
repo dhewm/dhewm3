@@ -22,6 +22,7 @@ set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 
 include(CheckCXXCompilerFlag)
 include(CheckFunctionExists)
+include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 
 option(CORE			"Build the core" ON)
 option(BASE			"Build the base game code" ON)
@@ -229,22 +230,30 @@ if (WIN32)
 	)
 endif()
 
-if (APPLE)
-	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
-	SET(libdir		"${CMAKE_INSTALL_PREFIX}")
-	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
-	SET(datadir		"${datarootdir}")
-elseif (WIN32)
-	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
-	SET(libdir		"${CMAKE_INSTALL_PREFIX}/lib")
-	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
-	SET(datadir		"${datarootdir}")
-else()
-	SET(bindir		"${CMAKE_INSTALL_PREFIX}/bin")
-	SET(libdir		"${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/dhewm3")
-	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}/share")
-	SET(datadir		"${datarootdir}/dhewm3")
+# fallback for cmake versions without GNUInstallDirs
+if(GNUINSTALLDIRS MATCHES "NOTFOUND")
+	set(CMAKE_INSTALL_BINDIR		"bin"
+		CACHE PATH "user executables (bin)")
+	set(CMAKE_INSTALL_LIBDIR		"lib${LIB_SUFFIX}"
+		CACHE PATH "object code libraries (lib${LIB_SUFFIX})")
+	set(CMAKE_INSTALL_DATAROOTDIR	"share"
+		CACHE PATH "read-only architecture-independent data root (share)")
+	set(CMAKE_INSTALL_DATADIR		"${CMAKE_INSTALL_DATAROOTDIR}"
+		CACHE PATH "read-only architecture-independent data (DATAROOTDIR)")
+
+	mark_as_advanced(CMAKE_INSTALL_BINDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_DATAROOTDIR CMAKE_INSTALL_DATADIR)
+	foreach(dir BINDIR LIBDIR DATAROOTDIR DATADIR)
+	  if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_${dir}})
+		set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
+	  else()
+		set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_${dir}}")
+	  endif()
+	endforeach()
 endif()
+
+set(bindir		"${CMAKE_INSTALL_FULL_BINDIR}")
+set(libdir		"${CMAKE_INSTALL_FULL_LIBDIR}/dhewm3")
+set(datadir		"${CMAKE_INSTALL_FULL_DATADIR}/dhewm3")
 
 configure_file(
     "${CMAKE_SOURCE_DIR}/config.h.in"
@@ -252,6 +261,13 @@ configure_file(
 )
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
+
+if (NOT APPLE AND NOT WIN32)
+	message(STATUS "The install target will use the following directories:")
+	message(STATUS "  Binary directory:  ${bindir}")
+	message(STATUS "  Library directory: ${libdir}")
+	message(STATUS "  Data directory:    ${datadir}")
+endif()
 
 set(src_renderer
 	renderer/jpeg_memory_src.cpp
