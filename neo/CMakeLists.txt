@@ -30,41 +30,41 @@ option(D3XP			"Build the d3xp game code" ON)
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
 
-if (NOT CMAKE_SYSTEM_PROCESSOR)
+if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
 endif()
 
-if (NOT CMAKE_SYSTEM_NAME)
+if(NOT CMAKE_SYSTEM_NAME)
 	message(FATAL_ERROR "No target OS set")
 endif()
 
 # target cpu
 set(cpu ${CMAKE_SYSTEM_PROCESSOR})
-if (cpu STREQUAL "powerpc")
+if(cpu STREQUAL "powerpc")
 	set(cpu "ppc")
-elseif (cpu MATCHES "i.86")
+elseif(cpu MATCHES "i.86")
 	set(cpu "x86")
 endif()
 
-if (MSVC AND CMAKE_CL_64)
+if(MSVC AND CMAKE_CL_64)
 	set(cpu "amd64")
 endif()
 
 # target os
-if (APPLE)
+if(APPLE)
 	set(os "macosx")
 else()
 	string(TOLOWER "${CMAKE_SYSTEM_NAME}" os)
 endif()
 
 # build type
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
 # precompiled libraries from the dhewm3-libs repo
-if (DHEWM3LIBS)
-	if (CMAKE_CROSSCOMPILING)
+if(DHEWM3LIBS)
+	if(CMAKE_CROSSCOMPILING)
 		set(CMAKE_FIND_ROOT_PATH ${DHEWM3LIBS})
 	else()
 		set(ENV{CMAKE_PREFIX_PATH} ${DHEWM3LIBS})
@@ -105,7 +105,7 @@ find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 
 find_package(CURL QUIET)
-if (CURL_FOUND)
+if(CURL_FOUND)
 	set(ID_ENABLE_CURL ON)
 	include_directories(${CURL_INCLUDE_DIR})
 else()
@@ -115,13 +115,13 @@ else()
 endif()
 
 # compiler specific flags
-if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-pipe)
 	add_definitions(-Wall)
 
-	if (NOT CMAKE_CROSSCOMPILING AND ONATIVE)
+	if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 		add_definitions(-march=native)
-	elseif (NOT APPLE AND cpu STREQUAL "x86")
+	elseif(NOT APPLE AND cpu STREQUAL "x86")
 		add_definitions(-march=pentium3)
 	endif()
 
@@ -138,7 +138,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-fno-strict-aliasing)
 
 	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
-	if (NOT cxx_has_fvisibility)
+	if(NOT cxx_has_fvisibility)
 		message(FATAL_ERROR "Compiler does not support -fvisibility")
 	endif()
 	add_definitions(-fvisibility=hidden)
@@ -149,28 +149,28 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-Wno-format-security)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
-	if (cxx_has_Woverload_virtual)
+	if(cxx_has_Woverload_virtual)
 		add_definitions(-Woverloaded-virtual)
 	endif()
 
-	if (APPLE)
+	if(APPLE)
 		add_definitions(-DMACOS_X=1)
 
-		if (cpu STREQUAL "x86_64")
+		if(cpu STREQUAL "x86_64")
 			add_definitions(-arch x86_64 -mmacosx-version-min=10.6)
 			set(ldflags "${ldflags} -arch x86_64 -mmacosx-version-min=10.6")
-		elseif (cpu STREQUAL "x86")
+		elseif(cpu STREQUAL "x86")
 			CHECK_CXX_COMPILER_FLAG("-arch i386" cxx_has_arch_i386)
-			if (cxx_has_arch_i386)
+			if(cxx_has_arch_i386)
 				add_definitions(-arch i386)
 				set(ldflags "${ldflags} -arch i386")
 			endif()
 
 			add_definitions(-mmacosx-version-min=10.4)
 			set(ldflags "${ldflags} -mmacosx-version-min=10.4")
-		elseif (cpu STREQUAL "ppc")
+		elseif(cpu STREQUAL "ppc")
 			CHECK_CXX_COMPILER_FLAG("-arch ppc" cxx_has_arch_ppc)
-			if (cxx_has_arch_ppc)
+			if(cxx_has_arch_ppc)
 				add_definitions(-arch ppc)
 				set(ldflags "${ldflags} -arch ppc")
 			endif()
@@ -183,11 +183,11 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 
 		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework IOKit")
 	else()
-		if (os STREQUAL "linux")
+		if(os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
 		endif()
 	endif()
-elseif (MSVC)
+elseif(MSVC)
 	add_definitions(/W4)
 	add_definitions(/wd4100) # unreferenced formal parameter
 	add_definitions(/wd4127) # conditional expression is constant
@@ -210,7 +210,7 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
 set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
 
 # mingw and msvc
-if (WIN32)
+if(WIN32)
 	add_definitions(-DWINVER=0x0501)
 	add_definitions(-D_WIN32_WINNT=0x0501)
 
@@ -253,7 +253,7 @@ configure_file(
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
 
-if (NOT APPLE AND NOT WIN32)
+if(NOT APPLE AND NOT WIN32)
 	message(STATUS "The install target will use the following directories:")
 	message(STATUS "  Binary directory:  ${bindir}")
 	message(STATUS "  Library directory: ${libdir}")
@@ -656,7 +656,7 @@ set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
 set(src_stub_util		sys/stub/util_stub.cpp)
 
-if (APPLE)
+if(APPLE)
 	set(OSX_RESOURCE_FILES
 			"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
 			"${CMAKE_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
@@ -681,7 +681,7 @@ if (APPLE)
 		sys/osx/SDLMain.m
 		${OSX_RESOURCE_FILES}
 	)
-elseif (WIN32)
+elseif(WIN32)
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
@@ -720,11 +720,11 @@ include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
-if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
 	set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
-if (CORE)
+if(CORE)
 	add_executable(dhewm3 WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_sys_base}
@@ -749,16 +749,16 @@ if (CORE)
 		${sys_libs}
 	)
 
-	if (NOT APPLE AND NOT WIN32)
+	if(NOT APPLE AND NOT WIN32)
 		install(TARGETS dhewm3
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
-	endif ()
+	endif()
 endif()
 
-if (DEDICATED)
+if(DEDICATED)
 	add_executable(dhewm3ded WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_stub_openal}
@@ -780,16 +780,16 @@ if (DEDICATED)
 		${sys_libs}
 	)
 
-	if (NOT APPLE AND NOT WIN32)
+	if(NOT APPLE AND NOT WIN32)
 		install(TARGETS dhewm3ded
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
-	endif ()
+	endif()
 endif()
 
-if (BASE)
+if(BASE)
 	add_library(base SHARED ${src_game})
 	set_target_properties(base PROPERTIES PREFIX "")
 	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
@@ -798,16 +798,16 @@ if (BASE)
 	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(base idlib)
 
-	if (NOT APPLE AND NOT WIN32)
+	if(NOT APPLE AND NOT WIN32)
 		install(TARGETS base
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
-	endif ()
+	endif()
 endif()
 
-if (D3XP)
+if(D3XP)
 	add_library(d3xp SHARED ${src_d3xp})
 	set_target_properties(d3xp PROPERTIES PREFIX "")
 	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
@@ -816,11 +816,11 @@ if (D3XP)
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(d3xp idlib)
 
-	if (NOT APPLE AND NOT WIN32)
+	if(NOT APPLE AND NOT WIN32)
 		install(TARGETS d3xp
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
-	endif ()
+	endif()
 endif()
