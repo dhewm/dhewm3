@@ -234,11 +234,11 @@ if(GNUINSTALLDIRS MATCHES "NOTFOUND")
 
 	mark_as_advanced(CMAKE_INSTALL_BINDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_DATAROOTDIR CMAKE_INSTALL_DATADIR)
 	foreach(dir BINDIR LIBDIR DATAROOTDIR DATADIR)
-	  if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_${dir}})
-		set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
-	  else()
-		set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_${dir}}")
-	  endif()
+		if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_${dir}})
+			set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
+		else()
+			set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_${dir}}")
+		endif()
 	endforeach()
 endif()
 
@@ -247,8 +247,8 @@ set(libdir		"${CMAKE_INSTALL_FULL_LIBDIR}/dhewm3")
 set(datadir		"${CMAKE_INSTALL_FULL_DATADIR}/dhewm3")
 
 configure_file(
-    "${CMAKE_SOURCE_DIR}/config.h.in"
-    "${CMAKE_BINARY_DIR}/config.h"
+	"${CMAKE_SOURCE_DIR}/config.h.in"
+	"${CMAKE_BINARY_DIR}/config.h"
 )
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
