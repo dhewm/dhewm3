@@ -284,13 +284,13 @@ void Sys_InitNetworking(void)
 	}
 
 	for( ifp = ifap; ifp; ifp = ifp->ifa_next ) {
+		if ( !ifp->ifa_addr )
+			continue;
+
 		if ( ifp->ifa_addr->sa_family != AF_INET )
 			continue;
 
 		if ( !( ifp->ifa_flags & IFF_UP ) )
-			continue;
-
-		if ( !ifp->ifa_addr )
 			continue;
 
 		if ( !ifp->ifa_netmask )
