@@ -729,8 +729,6 @@ static void ASE_KeyGEOMOBJECT( const char *token )
 	else if ( !strcmp( token, "*MESH" ) )
 	{
 		ase.currentMesh = &ase.currentObject->mesh;
-		memset( ase.currentMesh, 0, sizeof( aseMesh_t ) );
-
 		ASE_ParseBracedBlock( ASE_KeyMESH );
 	}
 	// according to spec these are obsolete
