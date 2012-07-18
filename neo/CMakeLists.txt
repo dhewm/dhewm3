@@ -98,9 +98,6 @@ include_directories(${VORBISFILE_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIR})
-
 find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 
@@ -181,7 +178,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			message(FATAL_ERROR "Unsupported CPU architecture for OSX")
 		endif()
 
-		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework IOKit")
+		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework IOKit")
 	else()
 		if(os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
@@ -729,7 +726,6 @@ if(CORE)
 
 	target_link_libraries(dhewm3
 		idlib
-		${OPENGL_gl_LIBRARY}
 		${OPENAL_LIBRARY}
 		${OGG_LIBRARIES}
 		${VORBISFILE_LIBRARIES}

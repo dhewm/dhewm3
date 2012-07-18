@@ -221,6 +221,10 @@ idCVar r_materialOverride( "r_materialOverride", "", CVAR_RENDERER, "overrides a
 
 idCVar r_debugRenderToTexture( "r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "" );
 
+// define qgl functions
+#define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
+#include "renderer/qgl_proc.h"
+
 void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 void ( APIENTRY * qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
@@ -557,6 +561,14 @@ void R_InitOpenGL( void ) {
 		r_displayRefresh.SetInteger( 0 );
 		r_multiSamples.SetInteger( 0 );
 	}
+
+// load qgl function pointers
+#define QGLPROC(name, rettype, args) \
+	q##name = (rettype(APIENTRYP)args)GLimp_ExtensionPointer(#name); \
+	if (!q##name) \
+		common->FatalError("Unable to initialize OpenGL (%s)", #name);
+
+#include "renderer/qgl_proc.h"
 
 	// input and sound systems need to be tied to the new window
 	Sys_InitInput();
