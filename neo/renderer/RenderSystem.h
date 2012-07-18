@@ -88,7 +88,6 @@ typedef struct glconfig_s {
 
 	bool				allowNV30Path;
 	bool				allowNV20Path;
-	bool				allowNV10Path;
 	bool				allowARB2Path;
 
 	bool				isInitialized;

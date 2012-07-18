@@ -49,7 +49,7 @@ If you have questions concerning this license or the applicable additional terms
 
 glconfig_t	glConfig;
 
-const char *r_rendererArgs[] = { "best", "arb", "arb2", "nv10", "nv20", NULL };
+const char *r_rendererArgs[] = { "best", "arb", "arb2", "nv20", NULL };
 
 idCVar r_inhibitFragmentProgram( "r_inhibitFragmentProgram", "0", CVAR_RENDERER | CVAR_BOOL, "ignore the fragment program extension" );
 idCVar r_useLightPortalFlow( "r_useLightPortalFlow", "1", CVAR_RENDERER | CVAR_BOOL, "use a more precise area reference determination" );
@@ -638,7 +638,6 @@ void R_InitOpenGL( void ) {
 
 	// parse our vertex and fragment programs, possibly disably support for
 	// one of the paths if there was an error
-	R_NV10_Init();
 	R_NV20_Init();
 	R_ARB2_Init();
 
@@ -1748,12 +1747,6 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	const char *active[2] = { "", " (ACTIVE)" };
 	common->Printf( "ARB path ENABLED%s\n", active[tr.backEndRenderer == BE_ARB] );
 
-	if ( glConfig.allowNV10Path ) {
-		common->Printf( "NV10 path ENABLED%s\n", active[tr.backEndRenderer == BE_NV10] );
-	} else {
-		common->Printf( "NV10 path disabled\n" );
-	}
-
 	if ( glConfig.allowNV20Path ) {
 		common->Printf( "NV20 path ENABLED%s\n", active[tr.backEndRenderer == BE_NV20] );
 	} else {
@@ -2222,6 +2215,6 @@ idRenderSystemLocal::GetCardCaps
 ========================
 */
 void idRenderSystemLocal::GetCardCaps( bool &oldCard, bool &nv10or20 ) {
-	nv10or20 = ( tr.backEndRenderer == BE_NV10 || tr.backEndRenderer == BE_NV20 );
-	oldCard = ( tr.backEndRenderer == BE_ARB || tr.backEndRenderer == BE_NV10 || tr.backEndRenderer == BE_NV20 );
+	nv10or20 = tr.backEndRenderer == BE_NV20;
+	oldCard = ( tr.backEndRenderer == BE_ARB || tr.backEndRenderer == BE_NV20 );
 }

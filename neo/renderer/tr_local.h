@@ -673,7 +673,6 @@ const int MAX_GUI_SURFACES	= 1024;		// default size of the drawSurfs list for gu
 
 typedef enum {
 	BE_ARB,
-	BE_NV10,
 	BE_NV20,
 	BE_ARB2,
 	BE_BAD
@@ -834,7 +833,7 @@ extern idCVar r_flareSize;				// scale the flare deforms from the material def
 extern idCVar r_gamma;					// changes gamma tables
 extern idCVar r_brightness;				// changes gamma tables
 
-extern idCVar r_renderer;				// arb, nv10, nv20, gl2, etc
+extern idCVar r_renderer;				// arb, nv20, gl2, etc
 
 extern idCVar r_checkBounds;			// compare all surface bounds with precalculated ones
 
@@ -1277,9 +1276,6 @@ DRAW_*
 */
 
 void	RB_ARB_DrawInteractions( void );
-
-void	R_NV10_Init( void );
-void	RB_NV10_DrawInteractions( void );
 
 void	R_NV20_Init( void );
 void	RB_NV20_DrawInteractions( void );
