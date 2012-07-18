@@ -654,7 +654,6 @@ set(src_core
 
 set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
-set(src_stub_util		sys/stub/util_stub.cpp)
 
 if(APPLE)
 	set(OSX_RESOURCE_FILES
@@ -697,7 +696,6 @@ elseif(WIN32)
 	)
 
 	set(src_sys_core
-		${src_stub_util}
 	)
 else()
 	set(src_sys_base
@@ -711,7 +709,6 @@ else()
 	)
 
 	set(src_sys_core
-		${src_stub_util}
 		sys/glimp.cpp
 	)
 endif()
@@ -763,7 +760,6 @@ if(DEDICATED)
 		${src_core}
 		${src_stub_openal}
 		${src_stub_gl}
-		${src_stub_util}
 		${src_sys_base}
 	)
 
