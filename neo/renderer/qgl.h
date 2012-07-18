@@ -84,29 +84,8 @@ extern void ( APIENTRY *qglTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, G
 // shared texture palette
 extern	void ( APIENTRY *qglColorTableEXT)( int, int, int, int, int, const void * );
 
-// ATI_fragment_shader
-extern	PFNGLGENFRAGMENTSHADERSATIPROC	qglGenFragmentShadersATI;
-extern	PFNGLBINDFRAGMENTSHADERATIPROC	qglBindFragmentShaderATI;
-extern	PFNGLDELETEFRAGMENTSHADERATIPROC qglDeleteFragmentShaderATI;
-extern	PFNGLBEGINFRAGMENTSHADERATIPROC qglBeginFragmentShaderATI;
-extern	PFNGLENDFRAGMENTSHADERATIPROC	qglEndFragmentShaderATI;
-extern	PFNGLPASSTEXCOORDATIPROC		qglPassTexCoordATI;
-extern	PFNGLSAMPLEMAPATIPROC			qglSampleMapATI;
-extern	PFNGLCOLORFRAGMENTOP1ATIPROC	qglColorFragmentOp1ATI;
-extern	PFNGLCOLORFRAGMENTOP2ATIPROC	qglColorFragmentOp2ATI;
-extern	PFNGLCOLORFRAGMENTOP3ATIPROC	qglColorFragmentOp3ATI;
-extern	PFNGLALPHAFRAGMENTOP1ATIPROC	qglAlphaFragmentOp1ATI;
-extern	PFNGLALPHAFRAGMENTOP2ATIPROC	qglAlphaFragmentOp2ATI;
-extern	PFNGLALPHAFRAGMENTOP3ATIPROC	qglAlphaFragmentOp3ATI;
-extern	PFNGLSETFRAGMENTSHADERCONSTANTATIPROC	qglSetFragmentShaderConstantATI;
-
 // EXT_stencil_two_side
 extern	PFNGLACTIVESTENCILFACEEXTPROC	qglActiveStencilFaceEXT;
-
-
-// ATI_separate_stencil
-extern	PFNGLSTENCILOPSEPARATEATIPROC		qglStencilOpSeparateATI;
-extern	PFNGLSTENCILFUNCSEPARATEATIPROC		qglStencilFuncSeparateATI;
 
 // ARB_texture_compression
 extern	PFNGLCOMPRESSEDTEXIMAGE2DARBPROC	qglCompressedTexImage2DARB;

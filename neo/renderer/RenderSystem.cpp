@@ -561,10 +561,6 @@ void idRenderSystemLocal::SetBackEndRenderer() {
 		if ( glConfig.allowNV20Path ) {
 			backEndRenderer = BE_NV20;
 		}
-	} else if ( idStr::Icmp( r_renderer.GetString(), "r200" ) == 0 ) {
-		if ( glConfig.allowR200Path ) {
-			backEndRenderer = BE_R200;
-		}
 	}
 
 	// fallback
@@ -572,8 +568,6 @@ void idRenderSystemLocal::SetBackEndRenderer() {
 		// choose the best
 		if ( glConfig.allowARB2Path ) {
 			backEndRenderer = BE_ARB2;
-		} else if ( glConfig.allowR200Path ) {
-			backEndRenderer = BE_R200;
 		} else if ( glConfig.allowNV20Path ) {
 			backEndRenderer = BE_NV20;
 		} else if ( glConfig.allowNV10Path ) {
@@ -596,10 +590,6 @@ void idRenderSystemLocal::SetBackEndRenderer() {
 		break;
 	case BE_NV20:
 		common->Printf( "using NV20 renderSystem\n" );
-		backEndRendererHasVertexPrograms = true;
-		break;
-	case BE_R200:
-		common->Printf( "using R200 renderSystem\n" );
 		backEndRendererHasVertexPrograms = true;
 		break;
 	case BE_ARB2:

@@ -80,12 +80,6 @@ typedef struct glconfig_s {
 	bool				textureNonPowerOfTwoAvailable;
 	bool				depthBoundsTestAvailable;
 
-	// ati r200 extensions
-	bool				atiFragmentShaderAvailable;
-
-	// ati r300
-	bool				atiTwoSidedStencilAvailable;
-
 	int					vidWidth, vidHeight;	// passed to R_BeginFrame
 
 	int					displayFrequency;
@@ -95,7 +89,6 @@ typedef struct glconfig_s {
 	bool				allowNV30Path;
 	bool				allowNV20Path;
 	bool				allowNV10Path;
-	bool				allowR200Path;
 	bool				allowARB2Path;
 
 	bool				isInitialized;
