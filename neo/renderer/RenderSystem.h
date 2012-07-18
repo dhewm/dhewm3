@@ -87,7 +87,6 @@ typedef struct glconfig_s {
 	bool				isFullscreen;
 
 	bool				allowNV30Path;
-	bool				allowNV20Path;
 	bool				allowARB2Path;
 
 	bool				isInitialized;
