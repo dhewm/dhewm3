@@ -123,7 +123,7 @@ ResizeWindow
 ===============
 */
 static void ResizeWindow( int width, int height ) {
-#ifdef WIN32
+#if 0 // FIXME
 	int	winWidth, winHeight;
 	if ( glConfig.isFullscreen ) {
 		winWidth = width;
@@ -154,7 +154,7 @@ RestoreWindow
 ===============
 */
 static void RestoreWindow( void ) {
-#ifdef WIN32
+#if 0 // FIXME
 	int	winWidth, winHeight;
 	if ( glConfig.isFullscreen ) {
 		winWidth = oldWidth;

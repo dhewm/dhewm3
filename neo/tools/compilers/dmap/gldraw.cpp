@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/platform.h"
 #include "tools/compilers/dmap/dmap.h"
 
-#ifdef WIN32
+#if 0 // FIXME
 #include "sys/win32/win_local.h"
 
 #include <GL/gl.h>
