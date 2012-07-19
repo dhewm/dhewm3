@@ -285,8 +285,7 @@ initialize the sound system
 ===============
 */
 void idSoundSystemLocal::Init() {
-
-	common->Printf( "----- Initializing Sound System ------\n" );
+	common->Printf( "----- Initializing OpenAL -----\n" );
 
 	isInitialized = false;
 	muted = false;
@@ -357,16 +356,13 @@ void idSoundSystemLocal::Init() {
 		openalDevice = alcOpenDevice( NULL );
 	}
 
-	common->Printf( "OpenAL: using '%s'\n", alcGetString( openalDevice, ALC_DEVICE_SPECIFIER ) );
-
 	openalContext = alcCreateContext( openalDevice, NULL );
 	alcMakeContextCurrent( openalContext );
 
 	// log openal info
-	common->Printf( "AL_VERSION: %s\n", alGetString(AL_VERSION));
-	common->Printf( "AL_VENDOR: %s\n", alGetString(AL_VENDOR));
-	common->Printf( "AL_RENDERER: %s\n", alGetString(AL_RENDERER));
-	common->Printf( "AL_EXTENSIONS: %s\n", alGetString(AL_EXTENSIONS));
+	common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR));
+	common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER));
+	common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION));
 
 	// try to obtain EFX extensions
 	if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
@@ -435,7 +431,6 @@ void idSoundSystemLocal::Init() {
 	}
 
 	common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
-	common->Printf( "ALC_EXTENSIONS: %s\n", alcGetString(openalDevice, ALC_EXTENSIONS));
 
 	// adjust source count to allow for at least eight stereo sounds to play
 	openalSourceCount -= 8;
@@ -448,9 +443,6 @@ void idSoundSystemLocal::Init() {
 	cmdSystem->AddCommand( "reloadSounds", SoundReloadSounds_f, CMD_FL_SOUND|CMD_FL_CHEAT, "reloads all sounds" );
 	cmdSystem->AddCommand( "testSound", TestSound_f, CMD_FL_SOUND | CMD_FL_CHEAT, "tests a sound", idCmdSystem::ArgCompletion_SoundName );
 	cmdSystem->AddCommand( "s_restart", SoundSystemRestart_f, CMD_FL_SOUND, "restarts the sound system" );
-
-	common->Printf( "sound system initialized.\n" );
-	common->Printf( "--------------------------------------\n" );
 }
 
 /*
