@@ -256,14 +256,24 @@ static void PushConsoleEvent(const char *s) {
 	SDL_PushEvent(&event);
 }
 
-static void GrabInput(bool grab, bool hide_cursor, bool set_state) {
+const int GRAB_ENABLE		= (1 << 0);
+const int GRAB_REENABLE		= (1 << 1);
+const int GRAB_HIDECURSOR	= (1 << 2);
+const int GRAB_SETSTATE		= (1 << 3);
+
+static void GrabInput(int flags) {
 #if defined(ID_DEDICATED)
 	return;
 #else
-	if (set_state)
+	bool grab = flags & GRAB_ENABLE;
+
+	if (grab && (flags & GRAB_REENABLE))
+		grab = false;
+
+	if (flags & GRAB_SETSTATE)
 		grabbed = grab;
 
-	if (hide_cursor)
+	if (flags & GRAB_HIDECURSOR)
 		SDL_ShowCursor(SDL_DISABLE);
 	else
 		SDL_ShowCursor(SDL_ENABLE);
@@ -365,7 +375,14 @@ Sys_GrabMouseCursor
 ===============
 */
 void Sys_GrabMouseCursor(bool grabIt) {
-	GrabInput(grabIt, grabIt, true);
+	int flags;
+
+	if (grabIt)
+		flags = GRAB_ENABLE | GRAB_HIDECURSOR | GRAB_SETSTATE;
+	else
+		flags = GRAB_SETSTATE;
+
+	GrabInput(flags);
 }
 
 /*
@@ -393,7 +410,15 @@ sysEvent_t Sys_GetEvent() {
 	if (SDL_PollEvent(&ev)) {
 		switch (ev.type) {
 		case SDL_ACTIVEEVENT:
-			GrabInput(grabbed && ev.active.gain == 1, ev.active.gain == 1, false);
+			{
+				int flags = 0;
+
+				if (ev.active.gain)
+					flags = GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR;
+
+				GrabInput(flags);
+			}
+
 			return res_none;
 
 		case SDL_VIDEOEXPOSE:
