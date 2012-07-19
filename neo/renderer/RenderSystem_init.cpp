@@ -618,7 +618,7 @@ void R_InitOpenGL( void ) {
 	glimpParms_t	parms;
 	int				i;
 
-	common->Printf( "----- R_InitOpenGL -----\n" );
+	common->Printf( "----- Initializing OpenGL -----\n" );
 
 	if ( glConfig.isInitialized ) {
 		common->FatalError( "R_InitOpenGL called while active" );
@@ -679,6 +679,10 @@ void R_InitOpenGL( void ) {
 	}
 
 	glConfig.isInitialized = true;
+
+	common->Printf("OpenGL vendor: %s\n", glConfig.vendor_string );
+	common->Printf("OpenGL renderer: %s\n", glConfig.renderer_string );
+	common->Printf("OpenGL version: %s\n", glConfig.version_string );
 
 	// recheck all the extensions (FIXME: this might be dangerous)
 	R_CheckPortableExtensions();
@@ -1820,10 +1824,6 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 		common->Printf( "ARB2 path disabled\n" );
 	}
 
-	//=============================
-
-	common->Printf( "-------\n" );
-
 	if ( r_finish.GetBool() ) {
 		common->Printf( "Forcing glFinish\n" );
 	} else {
@@ -2099,9 +2099,6 @@ idRenderSystemLocal::Init
 ===============
 */
 void idRenderSystemLocal::Init( void ) {
-
-	common->Printf( "------- Initializing renderSystem --------\n" );
-
 	// clear all our internal state
 	viewCount = 1;		// so cleared structures never match viewCount
 	// we used to memset tr, but now that it is a class, we can't, so
@@ -2142,9 +2139,6 @@ void idRenderSystemLocal::Init( void ) {
 	// determine which back end we will use
 	// ??? this is invalid here as there is not enough information to set it up correctly
 	SetBackEndRenderer();
-
-	common->Printf( "renderSystem initialized.\n" );
-	common->Printf( "--------------------------------------\n" );
 }
 
 /*
