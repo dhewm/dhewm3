@@ -2765,7 +2765,14 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		idCVar::RegisterStaticVars();
 
 		// print engine version
-		Printf( "%s\n", version.string );
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SDL_version sdlv;
+		SDL_GetVersion(&sdlv);
+#else
+		SDL_version sdlv = *SDL_Linked_Version();
+#endif
+		Printf( "%s using SDL v%u.%u.%u\n",
+				version.string, sdlv.major, sdlv.minor, sdlv.patch );
 
 		// initialize key input/binding, done early so bind command exists
 		idKeyInput::Init();
