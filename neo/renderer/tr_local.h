@@ -1097,6 +1097,12 @@ void		GLimp_DeactivateContext( void );
 // being immediate returns, which lets us guage how much time is
 // being spent inside OpenGL.
 
+const int GRAB_ENABLE		= (1 << 0);
+const int GRAB_REENABLE		= (1 << 1);
+const int GRAB_HIDECURSOR	= (1 << 2);
+const int GRAB_SETSTATE		= (1 << 3);
+
+void GLimp_GrabInput(int flags);
 /*
 ====================================================================
 

@@ -34,6 +34,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
+
+static bool grabbed = false;
+
 /*
 ===================
 GLimp_Init
@@ -226,4 +230,31 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	assert(SDL_WasInit(SDL_INIT_VIDEO));
 
 	return (GLExtension_t)SDL_GL_GetProcAddress(name);
+}
+
+void GLimp_GrabInput(int flags) {
+#if defined(ID_DEDICATED)
+	return;
+#else
+	bool grab = flags & GRAB_ENABLE;
+
+	if (grab && (flags & GRAB_REENABLE))
+		grab = false;
+
+	if (flags & GRAB_SETSTATE)
+		grabbed = grab;
+
+	if (flags & GRAB_HIDECURSOR)
+		SDL_ShowCursor(SDL_DISABLE);
+	else
+		SDL_ShowCursor(SDL_ENABLE);
+
+	if (in_nograb.GetBool())
+		grab = false;
+
+	if (grab)
+		SDL_WM_GrabInput(SDL_GRAB_ON);
+	else
+		SDL_WM_GrabInput(SDL_GRAB_OFF);
+#endif
 }

@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Common.h"
 #include "framework/KeyInput.h"
 #include "renderer/RenderSystem.h"
+#include "renderer/tr_local.h"
 
 #include "sys/sys_public.h"
 
@@ -41,7 +42,6 @@ const char *kbdNames[] = {
 	"english", "french", "german", "italian", "spanish", "turkish", NULL
 };
 
-idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
 idCVar in_kbd("in_kbd", "english", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
 
 struct kbd_poll_t {
@@ -72,7 +72,6 @@ struct mouse_poll_t {
 
 static idList<kbd_poll_t> kbd_polls;
 static idList<mouse_poll_t> mouse_polls;
-static bool grabbed = false;
 
 static byte mapkey(SDLKey key) {
 	switch (key) {
@@ -256,38 +255,6 @@ static void PushConsoleEvent(const char *s) {
 	SDL_PushEvent(&event);
 }
 
-const int GRAB_ENABLE		= (1 << 0);
-const int GRAB_REENABLE		= (1 << 1);
-const int GRAB_HIDECURSOR	= (1 << 2);
-const int GRAB_SETSTATE		= (1 << 3);
-
-static void GrabInput(int flags) {
-#if defined(ID_DEDICATED)
-	return;
-#else
-	bool grab = flags & GRAB_ENABLE;
-
-	if (grab && (flags & GRAB_REENABLE))
-		grab = false;
-
-	if (flags & GRAB_SETSTATE)
-		grabbed = grab;
-
-	if (flags & GRAB_HIDECURSOR)
-		SDL_ShowCursor(SDL_DISABLE);
-	else
-		SDL_ShowCursor(SDL_ENABLE);
-
-	if (in_nograb.GetBool())
-		grab = false;
-
-	if (grab)
-		SDL_WM_GrabInput(SDL_GRAB_ON);
-	else
-		SDL_WM_GrabInput(SDL_GRAB_OFF);
-#endif
-}
-
 /*
 =================
 Sys_InitInput
@@ -382,7 +349,7 @@ void Sys_GrabMouseCursor(bool grabIt) {
 	else
 		flags = GRAB_SETSTATE;
 
-	GrabInput(flags);
+	GLimp_GrabInput(flags);
 }
 
 /*
@@ -416,7 +383,7 @@ sysEvent_t Sys_GetEvent() {
 				if (ev.active.gain)
 					flags = GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR;
 
-				GrabInput(flags);
+				GLimp_GrabInput(flags);
 			}
 
 			return res_none;
