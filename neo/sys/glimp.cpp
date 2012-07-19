@@ -161,14 +161,7 @@ bool GLimp_Init(glimpParms_t parms) {
 		return false;
 	}
 
-	glConfig.wgl_extensions_string = "";
-
 #ifdef _WIN32
-	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)GLimp_ExtensionPointer("wglGetExtensionsStringARB");
-
-	if (wglGetExtensionsStringARB)
-		glConfig.wgl_extensions_string = (const char *)wglGetExtensionsStringARB(wglGetCurrentDC());
-
 	// the editors still rely on these vars
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);

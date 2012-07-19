@@ -865,7 +865,7 @@ void RB_DrawView( const void *data ) {
 		return;
 	}
 
-	// skip render context sets the wgl context to NULL,
+	// skip render context sets the gl context to NULL,
 	// which should factor out the API cost, under the assumption
 	// that all gl calls just return if the context isn't valid
 	if ( r_skipRenderContext.GetBool() && backEnd.viewDef->viewEntitys ) {
