@@ -29,6 +29,7 @@ option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
+option(SDL2			"Use SDL2 instead of SDL1.2" OFF)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
@@ -73,6 +74,7 @@ if(DHEWM3LIBS)
 	# these are too stupid, give them a hint
 	set(ENV{OPENALDIR} ${DHEWM3LIBS})
 	set(ENV{SDLDIR} ${DHEWM3LIBS})
+	set(ENV{SDL2DIR} ${DHEWM3LIBS})
 endif()
 
 # libs
@@ -98,12 +100,23 @@ include_directories(${VORBISFILE_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
-if(APPLE OR WIN32)
+if (SDL2)
+	# skip SDL2main
+	if(APPLE OR WIN32)
+		set(SDL2_BUILDING_LIBRARY TRUE)
+	endif()
+	find_package(SDL2 REQUIRED)
+	include_directories(${SDL2_INCLUDE_DIR})
+	set(SDLx_LIBRARY ${SDL2_LIBRARY})
+else()
 	# skip SDLmain
-	set(SDL_BUILDING_LIBRARY TRUE)
+	if(APPLE OR WIN32)
+		set(SDL_BUILDING_LIBRARY TRUE)
+	endif()
+	find_package(SDL REQUIRED)
+	include_directories(${SDL_INCLUDE_DIR})
+	set(SDLx_LIBRARY ${SDL_LIBRARY})
 endif()
-find_package(SDL REQUIRED)
-include_directories(${SDL_INCLUDE_DIR})
 
 find_package(CURL QUIET)
 if(CURL_FOUND)
@@ -737,7 +750,7 @@ if(CORE)
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
 		${ZLIB_LIBRARY}
-		${SDL_LIBRARY}
+		${SDLx_LIBRARY}
 		${sys_libs}
 	)
 
@@ -767,7 +780,7 @@ if(DEDICATED)
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
 		${ZLIB_LIBRARY}
-		${SDL_LIBRARY}
+		${SDLx_LIBRARY}
 		${sys_libs}
 	)
 
