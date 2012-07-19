@@ -240,7 +240,7 @@ idCommonLocal::idCommonLocal( void ) {
 	config_compressor = NULL;
 #endif
 
-	async_timer = NULL;
+	async_timer = 0;
 }
 
 /*
@@ -2849,7 +2849,7 @@ idCommonLocal::Shutdown
 void idCommonLocal::Shutdown( void ) {
 	if (async_timer) {
 		SDL_RemoveTimer(async_timer);
-		async_timer = NULL;
+		async_timer = 0;
 	}
 
 	idAsyncNetwork::server.Kill();
