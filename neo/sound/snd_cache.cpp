@@ -211,7 +211,6 @@ void idSoundCache::EndLevelLoad() {
 
 	common->Printf( "%5ik referenced\n", useCount / 1024 );
 	common->Printf( "%5ik purged\n", purgeCount / 1024 );
-	common->Printf( "----------------------------------------\n" );
 }
 
 /*

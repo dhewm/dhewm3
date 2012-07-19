@@ -1603,7 +1603,7 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 
 	int start = Sys_Milliseconds();
 
-	common->Printf( "--------- Map Initialization ---------\n" );
+	common->Printf( "----- Map Initialization -----\n" );
 	common->Printf( "Map: %s\n", mapString.c_str() );
 
 	// let the renderSystem load all the geometry
@@ -1660,8 +1660,6 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 			game->RunFrame( mapSpawnData.mapSpawnUsercmd );
 		}
 	}
-
-	common->Printf ("-----------------------------------\n");
 
 	int	msec = Sys_Milliseconds() - start;
 	common->Printf( "%6d msec to load %s\n", msec, mapString.c_str() );
@@ -2824,7 +2822,7 @@ so commands, cvars, files, etc are all available
 */
 void idSessionLocal::Init() {
 
-	common->Printf( "-------- Initializing Session --------\n" );
+	common->Printf( "----- Initializing Session -----\n" );
 
 	cmdSystem->AddCommand( "writePrecache", Sess_WritePrecache_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "writes precache commands" );
 
@@ -2896,9 +2894,6 @@ void idSessionLocal::Init() {
 	guiHandle = NULL;
 
 	ReadCDKey();
-
-	common->Printf( "session initialized\n" );
-	common->Printf( "--------------------------------------\n" );
 }
 
 /*

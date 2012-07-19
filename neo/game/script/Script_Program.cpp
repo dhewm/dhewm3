@@ -1778,7 +1778,7 @@ void idProgram::CompileStats( void ) {
 	int funcMem;
 	int	i;
 
-	gameLocal.Printf( "---------- Compile stats ----------\n" );
+	gameLocal.Printf( "----- Compile stats -----\n" );
 	gameLocal.DPrintf( "Files loaded:\n" );
 
 	stringspace = 0;
@@ -1807,7 +1807,7 @@ void idProgram::CompileStats( void ) {
 	memused += functions.MemoryUsed();	// name and filename of functions are shared, so no need to include them
 	memused += sizeof( variables );
 
-	gameLocal.Printf( "\nMemory usage:\n" );
+	gameLocal.Printf( "Memory usage:\n" );
 	gameLocal.Printf( "     Strings: %d, %d bytes\n", fileList.Num(), stringspace );
 	gameLocal.Printf( "  Statements: %d, %zd bytes\n", statements.Num(), statements.MemoryUsed() );
 	gameLocal.Printf( "   Functions: %d, %d bytes\n", functions.Num(), funcMem );
@@ -1815,7 +1815,7 @@ void idProgram::CompileStats( void ) {
 	gameLocal.Printf( "    Mem used: %d bytes\n", memused );
 	gameLocal.Printf( " Static data: %zd bytes\n", sizeof( idProgram ) );
 	gameLocal.Printf( "   Allocated: %d bytes\n", memallocated );
-	gameLocal.Printf( " Thread size: %zd bytes\n\n", sizeof( idThread ) );
+	gameLocal.Printf( " Thread size: %zd bytes\n", sizeof( idThread ) );
 }
 
 /*

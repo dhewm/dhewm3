@@ -514,7 +514,7 @@ void idCommonLocal::PrintWarnings( void ) {
 
 	warningList.Sort();
 
-	Printf( "------------- Warnings ---------------\n" );
+	Printf( "----- Warnings -----\n" );
 	Printf( "during %s...\n", warningCaption.c_str() );
 
 	for ( i = 0; i < warningList.Num(); i++ ) {
@@ -555,7 +555,7 @@ void idCommonLocal::DumpWarnings( void ) {
 	warningFile = fileSystem->OpenFileWrite( "warnings.txt", "fs_savepath" );
 	if ( warningFile ) {
 
-		warningFile->Printf( "------------- Warnings ---------------\n\n" );
+		warningFile->Printf( "----- Warnings -----\n\n" );
 		warningFile->Printf( "during %s...\n", warningCaption.c_str() );
 		warningList.Sort();
 		for ( i = 0; i < warningList.Num(); i++ ) {
@@ -568,7 +568,7 @@ void idCommonLocal::DumpWarnings( void ) {
 			warningFile->Printf( "\n%d warnings.\n", warningList.Num() );
 		}
 
-		warningFile->Printf( "\n\n-------------- Errors ---------------\n\n" );
+		warningFile->Printf( "\n\n----- Errors -----\n\n" );
 		errorList.Sort();
 		for ( i = 0; i < errorList.Num(); i++ ) {
 			errorList[i].RemoveColors();
@@ -2824,8 +2824,6 @@ void idCommonLocal::Init( int argc, char **argv ) {
 			// if the user didn't give any commands, run default action
 			session->StartMenu( true );
 		}
-
-		Printf( "--- Common Initialization Complete ---\n" );
 
 		// print all warnings queued during initialization
 		PrintWarnings();

@@ -2197,7 +2197,7 @@ void idFileSystemLocal::Startup( void ) {
 	pack_t			*pak;
 	int				addon_index;
 
-	common->Printf( "------ Initializing File System ------\n" );
+	common->Printf( "----- Initializing File System -----\n" );
 
 	if ( restartChecksums.Num() ) {
 		common->Printf( "restarting in pure mode with %d pak files\n", restartChecksums.Num() );
@@ -2357,9 +2357,6 @@ void idFileSystemLocal::Startup( void ) {
 
 	// print the current search paths
 	Path_f( idCmdArgs() );
-
-	common->Printf( "file system initialized.\n" );
-	common->Printf( "--------------------------------------\n" );
 }
 
 /*

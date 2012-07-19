@@ -545,7 +545,7 @@ int idModelExport::ExportModels( const char *pathname, const char *extension ) {
 		return 0;
 	}
 
-	gameLocal.Printf( "--------- Exporting models --------\n" );
+	gameLocal.Printf( "----- Exporting models -----\n" );
 	if ( !g_exportMask.GetString()[ 0 ] ) {
 		gameLocal.Printf( "  Export mask: '%s'\n", g_exportMask.GetString() );
 	}
@@ -559,7 +559,6 @@ int idModelExport::ExportModels( const char *pathname, const char *extension ) {
 	fileSystem->FreeFileList( files );
 
 	gameLocal.Printf( "...%d models exported.\n", count );
-	gameLocal.Printf( "-----------------------------------\n" );
 
 	return count;
 }

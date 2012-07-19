@@ -326,7 +326,7 @@ void idGameLocal::Init( void ) {
 
 #endif
 
-	Printf( "--------- Initializing Game ----------\n" );
+	Printf( "----- Initializing Game -----\n" );
 	Printf( "gamename: %s\n", GAME_VERSION );
 	Printf( "gamedate: %s\n", __DATE__ );
 
@@ -406,8 +406,6 @@ void idGameLocal::Init( void ) {
 	gamestate = GAMESTATE_NOMAP;
 
 	Printf( "...%d aas types\n", aasList.Num() );
-	Printf( "game initialized.\n" );
-	Printf( "--------------------------------------\n" );
 }
 
 /*
@@ -423,7 +421,7 @@ void idGameLocal::Shutdown( void ) {
 		return;
 	}
 
-	Printf( "------------ Game Shutdown -----------\n" );
+	Printf( "----- Game Shutdown -----\n" );
 
 	mpGame.Shutdown();
 
@@ -467,8 +465,6 @@ void idGameLocal::Shutdown( void ) {
 
 	// shut down the animation manager
 	animationLib.Shutdown();
-
-	Printf( "--------------------------------------\n" );
 
 #ifdef GAME_DLL
 
@@ -1060,7 +1056,7 @@ idGameLocal::LocalMapRestart
 void idGameLocal::LocalMapRestart( ) {
 	int i, latchSpawnCount;
 
-	Printf( "----------- Game Map Restart ------------\n" );
+	Printf( "----- Game Map Restart -----\n" );
 
 	gamestate = GAMESTATE_SHUTDOWN;
 
@@ -1115,8 +1111,6 @@ void idGameLocal::LocalMapRestart( ) {
 	}
 
 	gamestate = GAMESTATE_ACTIVE;
-
-	Printf( "--------------------------------------\n" );
 }
 
 /*
@@ -1315,7 +1309,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 		MapShutdown();
 	}
 
-	Printf( "----------- Game Map Init ------------\n" );
+	Printf( "----- Game Map Init -----\n" );
 
 	gamestate = GAMESTATE_STARTUP;
 
@@ -1336,8 +1330,6 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	animationLib.FlushUnusedAnims();
 
 	gamestate = GAMESTATE_ACTIVE;
-
-	Printf( "--------------------------------------\n" );
 }
 
 /*
@@ -1355,7 +1347,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 		MapShutdown();
 	}
 
-	Printf( "------- Game Map Init SaveGame -------\n" );
+	Printf( "----- Game Map Init SaveGame -----\n" );
 
 	gamestate = GAMESTATE_STARTUP;
 
@@ -1589,8 +1581,6 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	gamestate = GAMESTATE_ACTIVE;
 
-	Printf( "--------------------------------------\n" );
-
 	return true;
 }
 
@@ -1640,7 +1630,7 @@ idGameLocal::MapShutdown
 ============
 */
 void idGameLocal::MapShutdown( void ) {
-	Printf( "--------- Game Map Shutdown ----------\n" );
+	Printf( "----- Game Map Shutdown -----\n" );
 
 	gamestate = GAMESTATE_SHUTDOWN;
 
@@ -1678,8 +1668,6 @@ void idGameLocal::MapShutdown( void ) {
 	gameSoundWorld = NULL;
 
 	gamestate = GAMESTATE_NOMAP;
-
-	Printf( "--------------------------------------\n" );
 }
 
 /*

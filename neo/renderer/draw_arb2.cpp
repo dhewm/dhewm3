@@ -496,7 +496,6 @@ void R_ReloadARBPrograms_f( const idCmdArgs &args ) {
 	for ( i = 0 ; progs[i].name[0] ; i++ ) {
 		R_LoadARBProgram( i );
 	}
-	common->Printf( "-------------------------------\n" );
 }
 
 /*
@@ -508,7 +507,7 @@ R_ARB2_Init
 void R_ARB2_Init( void ) {
 	glConfig.allowARB2Path = false;
 
-	common->Printf( "---------- R_ARB2_Init ----------\n" );
+	common->Printf( "ARB2 renderer: " );
 
 	if ( !glConfig.ARBVertexProgramAvailable || !glConfig.ARBFragmentProgramAvailable ) {
 		common->Printf( "Not available.\n" );
@@ -516,8 +515,6 @@ void R_ARB2_Init( void ) {
 	}
 
 	common->Printf( "Available.\n" );
-
-	common->Printf( "---------------------------------\n" );
 
 	glConfig.allowARB2Path = true;
 }

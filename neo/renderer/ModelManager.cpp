@@ -567,7 +567,6 @@ void idRenderModelManagerLocal::EndLevelLoad() {
 	if ( loadCount ) {
 		common->Printf( "%5i new models loaded in %5.1f seconds\n", loadCount, (end-start) * 0.001 );
 	}
-	common->Printf( "---------------------------------------------------\n" );
 }
 
 /*

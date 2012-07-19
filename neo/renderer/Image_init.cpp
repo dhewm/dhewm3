@@ -2099,7 +2099,6 @@ void idImageManager::EndLevelLoad() {
 	common->Printf( "%5i kept from previous\n", keepCount );
 	common->Printf( "%5i new loaded\n", loadCount );
 	common->Printf( "all images loaded in %5.1f seconds\n", (end-start) * 0.001 );
-	common->Printf( "----------------------------------------\n" );
 }
 
 /*
