@@ -38,6 +38,26 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_public.h"
 
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
+#define SDL_Keycode SDLKey
+#define SDLK_APPLICATION SDLK_COMPOSE
+#define SDLK_SCROLLLOCK SDLK_SCROLLOCK
+#define SDLK_LGUI SDLK_LSUPER
+#define SDLK_RGUI SDLK_RSUPER
+#define SDLK_KP_0 SDLK_KP0
+#define SDLK_KP_1 SDLK_KP1
+#define SDLK_KP_2 SDLK_KP2
+#define SDLK_KP_3 SDLK_KP3
+#define SDLK_KP_4 SDLK_KP4
+#define SDLK_KP_5 SDLK_KP5
+#define SDLK_KP_6 SDLK_KP6
+#define SDLK_KP_7 SDLK_KP7
+#define SDLK_KP_8 SDLK_KP8
+#define SDLK_KP_9 SDLK_KP9
+#define SDLK_NUMLOCKCLEAR SDLK_NUMLOCK
+#define SDLK_PRINTSCREEN SDLK_PRINT
+#endif
+
 const char *kbdNames[] = {
 	"english", "french", "german", "italian", "spanish", "turkish", NULL
 };
@@ -73,7 +93,7 @@ struct mouse_poll_t {
 static idList<kbd_poll_t> kbd_polls;
 static idList<mouse_poll_t> mouse_polls;
 
-static byte mapkey(SDLKey key) {
+static byte mapkey(SDL_Keycode key) {
 	switch (key) {
 	case SDLK_BACKSPACE:
 		return K_BACKSPACE;
@@ -85,11 +105,11 @@ static byte mapkey(SDLKey key) {
 		return key & 0xff;
 
 	switch (key) {
-	case SDLK_COMPOSE:
+	case SDLK_APPLICATION:
 		return K_COMMAND;
 	case SDLK_CAPSLOCK:
 		return K_CAPSLOCK;
-	case SDLK_SCROLLOCK:
+	case SDLK_SCROLLLOCK:
 		return K_SCROLL;
 	case SDLK_POWER:
 		return K_POWER;
@@ -103,9 +123,9 @@ static byte mapkey(SDLKey key) {
 	case SDLK_RIGHT:
 		return K_RIGHTARROW;
 
-	case SDLK_LSUPER:
+	case SDLK_LGUI:
 		return K_LWIN;
-	case SDLK_RSUPER:
+	case SDLK_RGUI:
 		return K_RWIN;
 	case SDLK_MENU:
 		return K_MENU;
@@ -164,27 +184,27 @@ static byte mapkey(SDLKey key) {
 	case SDLK_F15:
 		return K_F15;
 
-	case SDLK_KP7:
+	case SDLK_KP_7:
 		return K_KP_HOME;
-	case SDLK_KP8:
+	case SDLK_KP_8:
 		return K_KP_UPARROW;
-	case SDLK_KP9:
+	case SDLK_KP_9:
 		return K_KP_PGUP;
-	case SDLK_KP4:
+	case SDLK_KP_4:
 		return K_KP_LEFTARROW;
-	case SDLK_KP5:
+	case SDLK_KP_5:
 		return K_KP_5;
-	case SDLK_KP6:
+	case SDLK_KP_6:
 		return K_KP_RIGHTARROW;
-	case SDLK_KP1:
+	case SDLK_KP_1:
 		return K_KP_END;
-	case SDLK_KP2:
+	case SDLK_KP_2:
 		return K_KP_DOWNARROW;
-	case SDLK_KP3:
+	case SDLK_KP_3:
 		return K_KP_PGDN;
 	case SDLK_KP_ENTER:
 		return K_KP_ENTER;
-	case SDLK_KP0:
+	case SDLK_KP_0:
 		return K_KP_INS;
 	case SDLK_KP_PERIOD:
 		return K_KP_DEL;
@@ -196,7 +216,7 @@ static byte mapkey(SDLKey key) {
 	// K_ACUTE_ACCENT;
 	case SDLK_KP_PLUS:
 		return K_KP_PLUS;
-	case SDLK_NUMLOCK:
+	case SDLK_NUMLOCKCLEAR:
 		return K_KP_NUMLOCK;
 	case SDLK_KP_MULTIPLY:
 		return K_KP_STAR;
@@ -228,7 +248,7 @@ static byte mapkey(SDLKey key) {
 	// K_AUX15;
 	// K_AUX16;
 
-	case SDLK_PRINT:
+	case SDLK_PRINTSCREEN:
 		return K_PRINT_SCR;
 	case SDLK_MODE:
 		return K_RIGHT_ALT;
@@ -264,8 +284,10 @@ void Sys_InitInput() {
 	kbd_polls.SetGranularity(64);
 	mouse_polls.SetGranularity(64);
 
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+#endif
 
 	in_kbd.SetModified();
 }
@@ -363,6 +385,26 @@ sysEvent_t Sys_GetEvent() {
 	byte key;
 
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	static char *s = NULL;
+	static size_t s_pos = 0;
+
+	if (s) {
+		res.evType = SE_CHAR;
+		res.evValue = s[s_pos];
+
+		s_pos++;
+		if (!s[s_pos]) {
+			free(s);
+			s = NULL;
+			s_pos = 0;
+		}
+
+		return res;
+	}
+#endif
+
 	static byte c = 0;
 
 	if (c) {
@@ -376,6 +418,19 @@ sysEvent_t Sys_GetEvent() {
 
 	if (SDL_PollEvent(&ev)) {
 		switch (ev.type) {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		case SDL_WINDOWEVENT:
+			switch (ev.window.event) {
+				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					GLimp_GrabInput(GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR);
+					break;
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					GLimp_GrabInput(0);
+					break;
+			}
+
+			return res_none;
+#else
 		case SDL_ACTIVEEVENT:
 			{
 				int flags = 0;
@@ -390,6 +445,7 @@ sysEvent_t Sys_GetEvent() {
 
 		case SDL_VIDEOEXPOSE:
 			return res_none;
+#endif
 
 		case SDL_KEYDOWN:
 			if (ev.key.keysym.sym == SDLK_RETURN && (ev.key.keysym.mod & KMOD_ALT) > 0) {
@@ -423,10 +479,27 @@ sysEvent_t Sys_GetEvent() {
 
 			kbd_polls.Append(kbd_poll_t(key, ev.key.state == SDL_PRESSED));
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+			if (key == K_BACKSPACE && ev.key.state == SDL_PRESSED)
+				c = key;
+#else
 			if (ev.key.state == SDL_PRESSED && (ev.key.keysym.unicode & 0xff00) == 0)
 				c = ev.key.keysym.unicode & 0xff;
+#endif
 
 			return res;
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		case SDL_TEXTINPUT:
+			if (ev.text.text && *ev.text.text) {
+				if (!ev.text.text[1])
+					c = *ev.text.text;
+				else
+					s = strdup(ev.text.text);
+			}
+
+			return res_none;
+#endif
 
 		case SDL_MOUSEMOTION:
 			res.evType = SE_MOUSE;
@@ -437,6 +510,23 @@ sysEvent_t Sys_GetEvent() {
 			mouse_polls.Append(mouse_poll_t(M_DELTAY, ev.motion.yrel));
 
 			return res;
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		case SDL_MOUSEWHEEL:
+			res.evType = SE_KEY;
+
+			if (ev.wheel.y > 0) {
+				res.evValue = K_MWHEELUP;
+				mouse_polls.Append(mouse_poll_t(M_DELTAZ, 1));
+			} else {
+				res.evValue = K_MWHEELDOWN;
+				mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
+			}
+
+			res.evValue2 = 1;
+
+			return res;
+#endif
 
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
@@ -455,6 +545,8 @@ sysEvent_t Sys_GetEvent() {
 				res.evValue = K_MOUSE2;
 				mouse_polls.Append(mouse_poll_t(M_ACTION2, ev.button.state == SDL_PRESSED ? 1 : 0));
 				break;
+
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
 			case SDL_BUTTON_WHEELUP:
 				res.evValue = K_MWHEELUP;
 				if (ev.button.state == SDL_PRESSED)
@@ -465,6 +557,7 @@ sysEvent_t Sys_GetEvent() {
 				if (ev.button.state == SDL_PRESSED)
 					mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 				break;
+#endif
 			}
 
 			res.evValue2 = ev.button.state == SDL_PRESSED ? 1 : 0;
