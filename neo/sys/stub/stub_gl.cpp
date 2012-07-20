@@ -387,3 +387,4 @@ void GLimp_Shutdown() {};
 void GLimp_SwapBuffers() {};
 void GLimp_ActivateContext() {};
 void GLimp_DeactivateContext() {};
+void GLimp_GrabInput(int flags) {};
