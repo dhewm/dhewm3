@@ -304,12 +304,14 @@ int console_main(int argc, char *argv[])
 	atexit(cleanup_output);
 	atexit(cleanup);
 
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
 	/* Sam:
 	   We still need to pass in the application handle so that
 	   DirectInput will initialize properly when SDL_RegisterApp()
 	   is called later in the video initialization.
 	 */
 	SDL_SetModuleHandle(GetModuleHandle(NULL));
+#endif
 
 	/* Run the application main() code */
 	status = SDL_main(argc, argv);
