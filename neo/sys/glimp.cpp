@@ -33,9 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Licensee.h"
 
 #include "renderer/tr_local.h"
-#if defined(_WIN32)
-#include "sys/win32/win_local.h"
-#endif
 
 /*
 ===================
@@ -160,20 +157,6 @@ bool GLimp_Init(glimpParms_t parms) {
 		common->Warning("No usable GL mode found: %s", SDL_GetError());
 		return false;
 	}
-
-#ifdef _WIN32
-	// the editors still rely on these vars
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-
-	if (SDL_GetWMInfo(&info)) {
-		win32.hDC = wglGetCurrentDC();
-		win32.hGLRC = info.hglrc;
-	}
-
-	win32.pixelformat = GetPixelFormat(win32.hDC);
-	DescribePixelFormat(win32.hDC, win32.pixelformat, sizeof(win32.pfd), &win32.pfd);
-#endif
 
 	return true;
 }
