@@ -172,7 +172,7 @@ void OSX_GetVideoCard( int& outVendorId, int& outDeviceId )
 main
 ===============
 */
-int main( int argc, char *argv[] ) {
+int SDL_main( int argc, char *argv[] ) {
 	NSAutoreleasePool *pool;
 
 	pool = [[NSAutoreleasePool alloc] init];
