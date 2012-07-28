@@ -308,8 +308,7 @@ void GLimp_GrabInput(int flags) {
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
-	if (SDL_SetRelativeMouseMode(flags & GRAB_HIDECURSOR ? SDL_TRUE : SDL_FALSE))
-		common->Warning("Failed to set relative mouse movement mode");
+	SDL_SetRelativeMouseMode(flags & GRAB_HIDECURSOR ? SDL_TRUE : SDL_FALSE);
 	SDL_SetWindowGrab(window, grab ? SDL_TRUE : SDL_FALSE);
 #else
 	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
