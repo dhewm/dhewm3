@@ -126,7 +126,7 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, channelcolorbits);
-		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, channelcolorbits);
+		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, tdepthbits);
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, tstencilbits);
