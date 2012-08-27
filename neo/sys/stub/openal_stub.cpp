@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sound/snd_local.h"
 
+extern "C" {
+
 AL_API ALenum AL_APIENTRY alGetError() {
 	return AL_NO_ERROR;
 }
@@ -91,18 +93,6 @@ ALC_API const ALCchar * ALC_APIENTRY alcGetString( ALCdevice *deviceHandle, ALCe
 	return NULL;
 }
 
-AL_API void AL_APIENTRY alBufferData( ALuint   buffer,
-									ALenum   format,
-									ALvoid*    data,
-									ALsizei  size,
-									ALsizei  freq ) { }
-
-AL_API void AL_APIENTRY alDeleteBuffers( ALsizei n, ALuint* buffers ) { }
-
-AL_API ALboolean AL_APIENTRY alIsExtensionPresent( ALubyte* fname ) {
-	return AL_FALSE;
-}
-
 AL_API void AL_APIENTRY alDeleteSources( ALsizei n, const ALuint* sources ) { }
 
 AL_API ALenum AL_APIENTRY alGetEnumValue( const ALchar* ename ) {
@@ -115,10 +105,6 @@ AL_API void* AL_APIENTRY alGetProcAddress( const ALchar* fname ) {
 
 ALC_API ALCcontext * ALC_APIENTRY alcCreateContext( ALCdevice *dev,
 												  const ALCint* attrlist ) {
-	return NULL;
-}
-
-ALC_API ALCdevice * ALC_APIENTRY alcOpenDevice( ALubyte *tokstr ) {
 	return NULL;
 }
 
@@ -146,3 +132,5 @@ AL_API void AL_APIENTRY alSourcef( ALuint sid, ALenum param, ALfloat value ) { }
 AL_API void AL_APIENTRY alSourceUnqueueBuffers( ALuint sid, ALsizei numEntries, ALuint *bids ) { }
 
 AL_API void AL_APIENTRY alSourcePlay( ALuint sid ) { }
+
+} // extern "C"
