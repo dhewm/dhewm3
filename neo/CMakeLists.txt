@@ -693,7 +693,6 @@ elseif(WIN32)
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
-		sys/glimp.cpp
 		sys/events.cpp
 		sys/sys_local.cpp
 		sys/win32/win_input.cpp
@@ -705,6 +704,7 @@ elseif(WIN32)
 	)
 
 	set(src_sys_core
+		sys/glimp.cpp
 	)
 else()
 	set(src_sys_base

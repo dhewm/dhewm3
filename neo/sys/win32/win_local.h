@@ -40,8 +40,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <mmreg.h>
 #include <objbase.h>
 
-#include <GL/gl.h>
-
 #include "framework/CVarSystem.h"
 #include "sys/sys_public.h"
 
