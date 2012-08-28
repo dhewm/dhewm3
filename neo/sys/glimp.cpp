@@ -287,9 +287,6 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 }
 
 void GLimp_GrabInput(int flags) {
-#if defined(ID_DEDICATED)
-	return;
-#else
 	bool grab = flags & GRAB_ENABLE;
 
 	if (grab && (flags & GRAB_REENABLE))
@@ -313,6 +310,5 @@ void GLimp_GrabInput(int flags) {
 #else
 	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
 	SDL_WM_GrabInput(grab ? SDL_GRAB_ON : SDL_GRAB_OFF);
-#endif
 #endif
 }
