@@ -44,7 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <SDL_opengl.h>
 
-#ifdef defined( ID_DEDICATED ) && defined( _WIN32 )
+#if defined( ID_DEDICATED ) && defined( _WIN32 )
 // restore WINGDIAPI
 	#ifdef WINGDIAPI
 		#pragma pop_macro("WINGDIAPI")
