@@ -636,6 +636,10 @@ WinMain
 int main(int argc, char *argv[]) {
 	const HCURSOR hcurSave = ::SetCursor( LoadCursor( 0, IDC_WAIT ) );
 
+#ifdef ID_DEDICATED
+	MSG msg;
+#endif
+
 	Sys_SetPhysicalWorkMemory( 192 << 20, 1024 << 20 );
 
 	win32.hInstance = GetModuleHandle(NULL);
@@ -681,6 +685,17 @@ int main(int argc, char *argv[]) {
 
 	// main game loop
 	while( 1 ) {
+#if ID_DEDICATED
+		// Since this is a Dedicated Server, process all Windowing Messages
+		// Now.
+		while(PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)){
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// Give the OS a little time to recuperate.
+		Sleep(10);
+#endif
 
 		Win_Frame();
 
