@@ -108,7 +108,11 @@ static LRESULT CALLBACK ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			}
 		break;
 		case WM_CLOSE:
+#ifdef ID_DEDICATED
+			if ( cvarSystem->IsInitialized() ) {
+#else
 			if ( cvarSystem->IsInitialized() && com_skipRenderer.GetBool() ) {
+#endif
 				cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
 			} else if ( s_wcd.quitOnClose ) {
 				PostQuitMessage( 0 );
@@ -143,11 +147,15 @@ static LRESULT CALLBACK ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 				SendMessage( s_wcd.hwndBuffer, EM_SETSEL, 0, -1 );
 				SendMessage( s_wcd.hwndBuffer, WM_COPY, 0, 0 );
 			} else if ( wParam == QUIT_ID ) {
+#ifdef ID_DEDICATED
+				cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
+#else
 				if ( s_wcd.quitOnClose ) {
 					PostQuitMessage( 0 );
 				} else {
 					cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
 				}
+#endif
 			} else if ( wParam == CLEAR_ID ) {
 				SendMessage( s_wcd.hwndBuffer, EM_SETSEL, 0, -1 );
 				SendMessage( s_wcd.hwndBuffer, EM_REPLACESEL, FALSE, ( LPARAM ) "" );
