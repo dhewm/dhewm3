@@ -196,6 +196,8 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		endif()
 
 		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework IOKit")
+	elseif(WIN32)
+		set(ldflags "${ldflags} -static-libgcc -static-libstdc++")
 	else()
 		if(os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
