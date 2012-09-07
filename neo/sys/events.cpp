@@ -422,6 +422,15 @@ sysEvent_t Sys_GetEvent() {
 		case SDL_WINDOWEVENT:
 			switch (ev.window.event) {
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					// unset modifier, in case alt-tab was used to leave window and ALT is still set
+					// as that can cause fullscreen-toggling when pressing enter...
+					SDL_Keymod currentmod = SDL_GetModState();
+					int newmod = KMOD_NONE;
+					if (currentmod & KMOD_CAPS) // preserve capslock
+						newmod |= KMOD_CAPS;
+
+					SDL_SetModState((SDL_Keymod)newmod);
+
 					GLimp_GrabInput(GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
@@ -435,8 +444,18 @@ sysEvent_t Sys_GetEvent() {
 			{
 				int flags = 0;
 
-				if (ev.active.gain)
+				if (ev.active.gain) {
 					flags = GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR;
+
+					// unset modifier, in case alt-tab was used to leave window and ALT is still set
+					// as that can cause fullscreen-toggling when pressing enter...
+					SDLMod currentmod = SDL_GetModState();
+					int newmod = KMOD_NONE;
+					if (currentmod & KMOD_CAPS) // preserve capslock
+						newmod |= KMOD_CAPS;
+
+					SDL_SetModState((SDLMod)newmod);
+				}
 
 				GLimp_GrabInput(flags);
 			}
