@@ -28,6 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/platform.h"
 #include "physics/Physics.h"
+#include "gamesys/SaveGame.h"
 
 #include "physics/Force_Spring.h"
 
@@ -44,6 +45,9 @@ idForce_Spring::idForce_Spring( void ) {
 	Kcompress		= 100.0f;
 	damping			= 0.0f;
 	restLength		= 0.0f;
+	maxLength		= 0.0f; // added by ivan for FraggingFree
+	pullEntity1		= false; // added by ivan for FraggingFree
+
 	physics1		= NULL;
 	id1				= 0;
 	p1				= vec3_zero;
@@ -60,16 +64,72 @@ idForce_Spring::~idForce_Spring
 idForce_Spring::~idForce_Spring( void ) {
 }
 
+//ivan start
+/*
+================
+idForce_Spring::Save
+================
+*/
+void idForce_Spring::Save( idSaveGame *savefile ) const {
+	savefile->WriteFloat( Kstretch );
+	savefile->WriteFloat( Kcompress );
+	savefile->WriteFloat( damping );
+	savefile->WriteFloat( restLength );
+	savefile->WriteFloat( maxLength );
+	savefile->WriteBool( pullEntity1 );
+
+	/*
+	//Not saved:
+	savefile->WriteInt( id1 );
+	savefile->WriteInt( id2 );
+	savefile->WriteVec3( p1 );
+	savefile->WriteVec3( p2 );
+
+	physics1
+	physics2
+	*/
+}
+
+/*
+================
+idForce_Spring::Restore
+================
+*/
+void idForce_Spring::Restore( idRestoreGame *savefile ) {
+	savefile->ReadFloat( Kstretch );
+	savefile->ReadFloat( Kcompress );
+	savefile->ReadFloat( damping );
+	savefile->ReadFloat( restLength );
+	savefile->ReadFloat( maxLength );
+	savefile->ReadBool( pullEntity1 );
+
+	/*
+	// Owner needs to call SetPosition before Evaluate!!
+	//Not saved:
+
+	savefile->ReadInt( id1 );
+	savefile->ReadInt( id2 );
+	savefile->ReadVec3( p1 );
+	savefile->ReadVec3( p2 );
+
+	physics1
+	physics2
+	*/
+}
+//ivan end
+
 /*
 ================
 idForce_Spring::InitSpring
 ================
 */
-void idForce_Spring::InitSpring( float Kstretch, float Kcompress, float damping, float restLength ) {
+void idForce_Spring::InitSpring( float Kstretch, float Kcompress, float damping, float restLength, float maxLength, bool pullEntity1 ) {
 	this->Kstretch = Kstretch;
 	this->Kcompress = Kcompress;
 	this->damping = damping;
 	this->restLength = restLength;
+	this->maxLength = maxLength;
+	this->pullEntity1 = pullEntity1;
 }
 
 /*
@@ -125,11 +185,15 @@ void idForce_Spring::Evaluate( int time ) {
 	dampingForce = ( damping * ( ((velocity2 - velocity1) * force) / (force * force) ) ) * force;
 	length = force.Normalize();
 
+	if ( length > maxLength ) { //ff1.3
+		length = maxLength;
+	}
+
 	// if the spring is stretched
 	if ( length > restLength ) {
 		if ( Kstretch > 0.0f ) {
 			force = ( Square( length - restLength ) * Kstretch ) * force - dampingForce;
-			if ( physics1 ) {
+			if ( pullEntity1 && physics1 ) {
 				physics1->AddForce( id1, pos1, force );
 			}
 			if ( physics2 ) {
@@ -140,7 +204,7 @@ void idForce_Spring::Evaluate( int time ) {
 	else {
 		if ( Kcompress > 0.0f ) {
 			force = ( Square( length - restLength ) * Kcompress ) * force - dampingForce;
-			if ( physics1 ) {
+			if ( pullEntity1 && physics1 ) {
 				physics1->AddForce( id1, pos1, -force );
 			}
 			if ( physics2 ) {
