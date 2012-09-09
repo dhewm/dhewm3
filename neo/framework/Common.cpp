@@ -186,6 +186,7 @@ private:
 	void						DumpWarnings( void );
 	void						SingleAsyncTic( void );
 	void						LoadGameDLL( void );
+	void						LoadGameDLLbyName( const char *dll, idStr& s );
 	void						UnloadGameDLL( void );
 	void						PrintLoadingMessage( const char *msg );
 	void						FilterLangList( idStrList* list, idStr lang );
@@ -2543,6 +2544,49 @@ void idCommonLocal::Async( void ) {
 
 /*
 =================
+idCommonLocal::LoadGameDLLbyName
+
+Helper for LoadGameDLL() to make it less painfull to try different dll names.
+=================
+*/
+void idCommonLocal::LoadGameDLLbyName( const char *dll, idStr& s ) {
+	s.CapLength(0);
+	// try next to the binary first (build tree)
+	if (Sys_GetPath(PATH_EXE, s)) {
+		// "s = " seems superfluous, but works around g++ 4.7 bug else StripFilename()
+		// (and possibly even CapLength()) seems to be "optimized" away and the string contains garbage
+		s = s.StripFilename();
+		s.AppendPath(dll);
+		gameDLL = sys->DLL_Load(s);
+	}
+
+	#if defined(_WIN32)
+		// then the lib/ dir relative to the binary on windows
+		if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
+			s.StripFilename();
+			s.AppendPath("lib");
+			s.AppendPath(dll);
+			gameDLL = sys->DLL_Load(s);
+		}
+	#elif defined(MACOS_X)
+		// then the binary dir in the bundle on osx
+		if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
+			s.StripFilename();
+			s.AppendPath(dll);
+			gameDLL = sys->DLL_Load(s);
+		}
+	#else
+		// then the install folder on *nix
+		if (!gameDLL) {
+			s = BUILD_LIBDIR;
+			s.AppendPath(dll);
+			gameDLL = sys->DLL_Load(s);
+		}
+	#endif
+}
+
+/*
+=================
 idCommonLocal::LoadGameDLL
 =================
 */
@@ -2561,38 +2605,16 @@ void idCommonLocal::LoadGameDLL( void ) {
 		fs_game = BASE_GAMEDIR;
 
 	gameDLL = 0;
+
 	sys->DLL_GetFileName(fs_game, dll, sizeof(dll));
+	LoadGameDLLbyName(dll, s);
 
-	// try next to the binary first (build tree)
-	if (Sys_GetPath(PATH_EXE, s)) {
-		s.StripFilename();
-		s.AppendPath(dll);
-		gameDLL = sys->DLL_Load(s);
-	}
-
-#if defined(_WIN32)
-	// then the lib/ dir relative to the binary on windows
-	if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
-		s.StripFilename();
-		s.AppendPath("lib");
-		s.AppendPath(dll);
-		gameDLL = sys->DLL_Load(s);
-	}
-#elif defined(MACOS_X)
-	// then the binary dir in the bundle on osx
-	if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
-		s.StripFilename();
-		s.AppendPath(dll);
-		gameDLL = sys->DLL_Load(s);
-	}
-#else
-	// then the install folder on *nix
+	// there was no gamelib for this mod, use default one from base game
 	if (!gameDLL) {
-		s = BUILD_LIBDIR;
-		s.AppendPath(dll);
-		gameDLL = sys->DLL_Load(s);
+		common->Warning( "couldn't load mod-specific %s, defaulting to base game's library!", dll );
+		sys->DLL_GetFileName(BASE_GAMEDIR, dll, sizeof(dll));
+		LoadGameDLLbyName(dll, s);
 	}
-#endif
 
 	if ( !gameDLL ) {
 		common->FatalError( "couldn't load game dynamic library" );
