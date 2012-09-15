@@ -62,6 +62,17 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 		common->Warning("base path '" BUILD_DATADIR "' does not exits");
 
+		// try next to the executable..
+		if (Sys_GetPath(PATH_EXE, path)) {
+			path = path.StripFilename();
+			if (stat(path.c_str(), &st) != -1 && S_ISDIR(st.st_mode)) {
+				common->Warning("using path of executable: %s", path.c_str());
+				return true;
+			} else {
+				path.Clear();
+			}
+		}
+
 		// fallback to vanilla doom3 install
 		if (stat(LINUX_DEFAULT_PATH, &st) != -1 && S_ISDIR(st.st_mode)) {
 			common->Warning("using hardcoded default base path");
