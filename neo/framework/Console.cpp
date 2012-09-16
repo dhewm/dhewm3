@@ -631,10 +631,17 @@ void idConsoleLocal::KeyDownEvent( int key ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, consoleField.GetBuffer() );	// valid command
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "\n" );
 
-		// copy line to history buffer
-		historyEditLines[nextHistoryLine % COMMAND_HISTORY] = consoleField;
-		nextHistoryLine++;
+		// copy line to history buffer, if it isn't the same as the last command
+		if ( idStr::Cmp( consoleField.GetBuffer(),
+		                 historyEditLines[(nextHistoryLine + COMMAND_HISTORY - 1) % COMMAND_HISTORY].GetBuffer()) != 0 )
+		{
+			historyEditLines[nextHistoryLine % COMMAND_HISTORY] = consoleField;
+			nextHistoryLine++;
+		}
+
 		historyLine = nextHistoryLine;
+		// clear the next line from old garbage, else the oldest history entry turns up when pressing DOWN
+		historyEditLines[nextHistoryLine % COMMAND_HISTORY].Clear();
 
 		consoleField.Clear();
 		consoleField.SetWidthInChars( LINE_WIDTH );
