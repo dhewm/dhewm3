@@ -2853,6 +2853,9 @@ void idCommonLocal::Init( int argc, char **argv ) {
 
 		ClearCommandLine();
 
+		// load the persistent console history
+		console->LoadHistory();
+
 		com_fullyInitialized = true;
 	}
 
@@ -2880,6 +2883,9 @@ void idCommonLocal::Shutdown( void ) {
 
 	idAsyncNetwork::server.Kill();
 	idAsyncNetwork::client.Shutdown();
+
+	// save persistent console history
+	console->SaveHistory();
 
 	// game specific shut down
 	ShutdownGame( false );

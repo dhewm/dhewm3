@@ -67,6 +67,9 @@ public:
 
 	virtual void	Draw( bool forceFullScreen ) = 0;
 	virtual void	Print( const char *text ) = 0;
+
+	virtual void	SaveHistory() = 0;
+	virtual void	LoadHistory() = 0;
 };
 
 extern idConsole *	console;	// statically initialized to an idConsoleLocal
