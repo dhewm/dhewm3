@@ -467,7 +467,7 @@ static int unzlocal_GetCurrentFileInfoInternal (unzFile file,
 {
 	unz_s* s;
 	unz_file_info file_info;
-	unz_file_info_internal file_info_internal;
+	unz_file_info_internal file_info_internal = {0};
 	int err=UNZ_OK;
 	uLong uMagic;
 	long lSeek=0;
@@ -774,7 +774,7 @@ static int unzlocal_CheckCurrentFileCoherencyHeader (unz_s* s, uInt* piSizeVar,
 													uInt *psize_local_extrafield)
 {
 	uLong uMagic,uData,uFlags = 0;
-	uLong size_filename;
+	uLong size_filename = 0;
 	uLong size_extra_field;
 	int err=UNZ_OK;
 

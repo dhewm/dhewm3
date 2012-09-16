@@ -503,6 +503,10 @@ ID_INLINE idStr::operator const char *( void ) const {
 	return c_str();
 }
 
+#pragma GCC diagnostic push
+// shut up GCC's stupid "warning: assuming signed overflow does not occur when assuming that
+// (X - c) > X is always false [-Wstrict-overflow]"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 ID_INLINE char idStr::operator[]( int index ) const {
 	assert( ( index >= 0 ) && ( index <= len ) );
 	return data[ index ];
@@ -512,6 +516,7 @@ ID_INLINE char &idStr::operator[]( int index ) {
 	assert( ( index >= 0 ) && ( index <= len ) );
 	return data[ index ];
 }
+#pragma GCC diagnostic pop
 
 ID_INLINE void idStr::operator=( const idStr &text ) {
 	int l;
@@ -912,12 +917,17 @@ ID_INLINE idStr idStr::Left( int len ) const {
 	return Mid( 0, len );
 }
 
+#pragma GCC diagnostic push
+// shut up GCC's stupid "warning: assuming signed overflow does not occur when assuming that
+// (X - c) > X is always false [-Wstrict-overflow]"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 ID_INLINE idStr idStr::Right( int len ) const {
 	if ( len >= Length() ) {
 		return *this;
 	}
 	return Mid( Length() - len, len );
 }
+#pragma GCC diagnostic pop
 
 ID_INLINE void idStr::Strip( const char c ) {
 	StripLeading( c );

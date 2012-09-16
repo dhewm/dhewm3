@@ -376,9 +376,15 @@ ID_INLINE void idList<type>::Resize( int newsize ) {
 
 	temp	= list;
 	size	= newsize;
+
+#pragma GCC diagnostic push
+// shut up GCC's stupid "warning: assuming signed overflow does not occur when assuming that
+// (X - c) > X is always false [-Wstrict-overflow]"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 	if ( size < num ) {
 		num = size;
 	}
+#pragma GCC diagnostic pop
 
 	// copy the old list into our new one
 	list = new type[ size ];
@@ -549,6 +555,10 @@ ID_INLINE idList<type> &idList<type>::operator=( const idList<type> &other ) {
 	return *this;
 }
 
+#pragma GCC diagnostic push
+// shut up GCC's stupid "warning: assuming signed overflow does not occur when assuming that
+// (X - c) > X is always false [-Wstrict-overflow]"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 /*
 ================
 idList<type>::operator[] const
@@ -580,6 +590,7 @@ ID_INLINE type &idList<type>::operator[]( int index ) {
 
 	return list[ index ];
 }
+#pragma GCC diagnostic pop
 
 /*
 ================
