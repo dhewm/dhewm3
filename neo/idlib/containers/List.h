@@ -356,6 +356,10 @@ Allocates memory for the amount of elements requested while keeping the contents
 Contents are copied using their = operator so that data is correnctly instantiated.
 ================
 */
+#pragma GCC diagnostic push
+// shut up GCC's stupid "warning: assuming signed overflow does not occur when assuming that
+// (X - c) > X is always false [-Wstrict-overflow]"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 template< class type >
 ID_INLINE void idList<type>::Resize( int newsize ) {
 	type	*temp;
@@ -377,14 +381,9 @@ ID_INLINE void idList<type>::Resize( int newsize ) {
 	temp	= list;
 	size	= newsize;
 
-#pragma GCC diagnostic push
-// shut up GCC's stupid "warning: assuming signed overflow does not occur when assuming that
-// (X - c) > X is always false [-Wstrict-overflow]"
-#pragma GCC diagnostic ignored "-Wstrict-overflow"
 	if ( size < num ) {
 		num = size;
 	}
-#pragma GCC diagnostic pop
 
 	// copy the old list into our new one
 	list = new type[ size ];
@@ -397,6 +396,7 @@ ID_INLINE void idList<type>::Resize( int newsize ) {
 		delete[] temp;
 	}
 }
+#pragma GCC diagnostic pop
 
 /*
 ================
