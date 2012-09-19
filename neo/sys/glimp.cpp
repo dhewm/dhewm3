@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 
 idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
+idCVar r_waylandcompat("r_waylandcompat", "0", CVAR_SYSTEM | CVAR_NOCHEAT | CVAR_ARCHIVE, "wayland compatible framebuffer");
 
 static bool grabbed = false;
 
@@ -126,10 +127,14 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, channelcolorbits);
-		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, tdepthbits);
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, tstencilbits);
+
+		if (r_waylandcompat.GetBool())
+			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+		else
+			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, channelcolorbits);
 
 		SDL_GL_SetAttribute(SDL_GL_STEREO, parms.stereo ? 1 : 0);
 
