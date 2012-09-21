@@ -419,6 +419,11 @@ void idSessionLocal::Shutdown() {
 		EndAVICapture();
 	}
 
+	if(timeDemo == TD_YES) {
+		// else the game freezes when showing the timedemo results
+		timeDemo = TD_YES_THEN_QUIT;
+	}
+
 	Stop();
 
 	if ( rw ) {
