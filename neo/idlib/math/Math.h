@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_MATH_H__
 #define __MATH_MATH_H__
 
+#include "sys/platform.h"
+
 #ifdef MACOS_X
 // for FLT_MIN
 #include <float.h>
