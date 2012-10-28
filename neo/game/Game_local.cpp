@@ -2392,6 +2392,11 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 
 	switch( r_aspectRatio.GetInteger() ) {
 	default :
+	case -1 :
+		// auto mode => use aspect ratio from resolution, assuming screen's pixels are squares
+		ratio_x = renderSystem->GetScreenWidth();
+		ratio_y = renderSystem->GetScreenHeight();
+		break;
 	case 0 :
 		// 4:3
 		fov_x = base_fov;
