@@ -1664,7 +1664,7 @@ void idAsyncClient::SetupConnection( void ) {
 		// do not make the protocol depend on PB
 		msg.WriteShort( 0 );
 		clientPort.SendPacket( serverAddress, msg.GetData(), msg.GetSize() );
-
+#ifdef ID_ENFORCE_KEY_CLIENT
 		if ( idAsyncNetwork::LANServer.GetBool() ) {
 			common->Printf( "net_LANServer is set, connecting in LAN mode\n" );
 		} else {
@@ -1686,6 +1686,12 @@ void idAsyncClient::SetupConnection( void ) {
 			}
 			clientPort.SendPacket( idAsyncNetwork::GetMasterAddress(), msg.GetData(), msg.GetSize() );
 		}
+#else
+		if (! Sys_IsLANAddress( serverAddress ) ) {
+			common->Printf( "Build Does not have CD Key Enforcement enabled. The Server ( %s ) is not within the lan addresses. Attemting to connect.\n", Sys_NetAdrToString( serverAddress ) );
+		}
+		common->Printf( "Not Testing key.\n" );
+#endif
 	} else {
 		return;
 	}

@@ -1520,6 +1520,7 @@ void idAsyncServer::ProcessChallengeMessage( const netadr_t from, const idBitMsg
 
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 
+#if ID_ENFORCE_KEY_CLIENT
 	if ( Sys_IsLANAddress( from ) ) {
 		// no CD Key check for LAN clients
 		challenges[i].authState = CDK_OK;
@@ -1540,6 +1541,12 @@ void idAsyncServer::ProcessChallengeMessage( const netadr_t from, const idBitMsg
 			serverPort.SendPacket( idAsyncNetwork::GetMasterAddress(), outMsg.GetData(), outMsg.GetSize() );
 		}
 	}
+#else
+	if (! Sys_IsLANAddress( from ) ) {
+		common->Printf( "Build Does not have CD Key Enforcement enabled. Client %s is not a LAN address, but will be accepted\n", Sys_NetAdrToString( from ) );
+	}
+	challenges[i].authState = CDK_OK;
+#endif
 }
 
 /*

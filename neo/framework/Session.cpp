@@ -3248,7 +3248,7 @@ idSessionLocal::CDKeysAuthReply
 ===============
 */
 void idSessionLocal::CDKeysAuthReply( bool valid, const char *auth_msg ) {
-	assert( authEmitTimeout > 0 );
+	//assert( authEmitTimeout > 0 );
 	if ( authWaitBox ) {
 		// close the wait box
 		StopBox();
