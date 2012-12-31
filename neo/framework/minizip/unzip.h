@@ -432,32 +432,19 @@ extern int ZEXPORT unzSetOffset (unzFile file, uLong pos);
 
 // ####################################################################
 
-// the following functions were added for doom3 by id Software
+// the following function was added for doom3 by id Software
 
 extern unzFile unzReOpen( const char* path, unzFile file );
 
 /*
-  Open a Zip file. path contain the full pathname (by example,
+  Re-Open a Zip file, i.e. clone an existing one and give it a new file descriptor.
+  path contain the full pathname (by example,
      on a Windows NT computer "c:\\zlib\\zlib111.zip" or on an Unix computer
 	 "zlib/zlib111.zip".
 	 If the zipfile cannot be opened (file don't exist or in not valid), the
 	   return value is NULL.
      Else, the return value is a unzFile Handle, usable with other function
 	   of this unzip package.
-*/
-
-extern int unzGetCurrentFileInfoPosition( unzFile file, ZPOS64_T* pos );
-
-/*
-  Get the position of the info of the current file in the zip.
-  return UNZ_OK if there is no problem
-*/
-
-extern int unzSetCurrentFileInfoPosition( unzFile file, ZPOS64_T pos );
-
-/*
-  Set the position of the info of the current file in the zip.
-  return UNZ_OK if there is no problem
 */
 
 #ifdef __cplusplus

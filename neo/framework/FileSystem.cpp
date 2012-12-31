@@ -1329,7 +1329,7 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 		buildBuffer[i].name.ToLower();
 		buildBuffer[i].name.BackSlashesToSlashes();
 		// store the file position in the zip
-		unzGetCurrentFileInfoPosition( uf, &buildBuffer[i].pos );
+		buildBuffer[i].pos = unzGetOffset64( uf );
 		// add the file to the hash
 		buildBuffer[i].next = pack->hashTable[hash];
 		pack->hashTable[hash] = &buildBuffer[i];
@@ -2894,7 +2894,7 @@ idFile_InZip * idFileSystemLocal::ReadFileFromZip( pack_t *pak, fileInPack_t *pa
 	// pakFile->Pos is position of that file within the zip
 
 	// set position in pk4 file to the file (in the zip/pk4) we want a handle on
-	unzSetCurrentFileInfoPosition( pak->handle, pakFile->pos );
+	unzSetOffset64( pak->handle, pakFile->pos );
 
 	// clone handle and assign a new internal filestream to zip file to it
 	unzFile uf = unzReOpen( pak->pakFilename, pak->handle );

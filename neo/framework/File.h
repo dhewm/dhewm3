@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/math/Vector.h"
 #include "idlib/BitMsg.h"
 
+#include "framework/Unzip.h"
+
 /*
 ==============================================================
 
@@ -238,7 +240,7 @@ public:
 private:
 	idStr					name;			// name of the file in the pak
 	idStr					fullPath;		// full file path including pak file name
-	int						zipFilePos;		// zip file info position in pak
+	ZPOS64_T				zipFilePos;		// zip file info position in pak
 	int						fileSize;		// size of the file
 	void *					z;				// unzip info
 };

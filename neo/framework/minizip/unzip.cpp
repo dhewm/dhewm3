@@ -65,13 +65,9 @@
 
         ####################################################################################
 
-The following functions were added by id Software (originally in framework/Unzip.cpp) for doom3
-and adjusted by Daniel Gibson for MiniZip 1.1 by Daniel Gibson
+unzReOpen() was added by id Software (originally in framework/Unzip.cpp) for doom3
+and adjusted for MiniZip 1.1 by Daniel Gibson
 The file was renamed from unzip.c to unzip.cpp so we can use C++ functions from doom3
-
- * unzReOpen()
- * unzGetCurrentFileInfoPosition()
- * unzSetCurrentFileInfoPosition()
 
  Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
  Copyright (C) 2012 Daniel Gibson
@@ -1759,6 +1755,9 @@ extern int ZEXPORT unzReadCurrentFile  (unzFile file, voidp buf, unsigned len)
                 uReadThis = (uInt)pfile_in_zip_read_info->rest_read_compressed;
             if (uReadThis == 0)
                 return UNZ_EOF;
+            // TODO: the following line was added by id Software to the original src - seems to work without it,
+            // but if problems occur look here..
+            // if(s->cur_file_info.compressed_size == pfile_in_zip_read_info->rest_read_compressed)
             if (ZSEEK64(pfile_in_zip_read_info->z_filefunc,
                       pfile_in_zip_read_info->filestream,
                       pfile_in_zip_read_info->pos_in_zipfile +
@@ -2158,7 +2157,7 @@ extern int ZEXPORT unzSetOffset (unzFile file, uLong pos)
 
 
 // ####################################################################
-// the following functions were added for doom3 by id Software and
+// the following function was added for doom3 by id Software and
 // adjusted for MiniZip 1.1 by Daniel Gibson
 
 
@@ -2193,28 +2192,4 @@ extern unzFile unzReOpen (const char* path, unzFile file)
 	unzOpenCurrentFile( s );
 
 	return (unzFile)s;
-}
-
-/*
-  Get the position of the info of the current file in the zip.
-  return UNZ_OK if there is no problem
-*/
-extern int unzGetCurrentFileInfoPosition (unzFile file, ZPOS64_T *pos )
-{
-	ZPOS64_T p = unzGetOffset64(file);
-	if(p==0)
-		return UNZ_PARAMERROR;
-
-	*pos = p;
-
-	return UNZ_OK;
-}
-
-/*
-  Set the position of the info of the current file in the zip.
-  return UNZ_OK if there is no problem
-*/
-extern int unzSetCurrentFileInfoPosition (unzFile file, ZPOS64_T pos )
-{
-	return unzSetOffset64(file, pos);
 }
