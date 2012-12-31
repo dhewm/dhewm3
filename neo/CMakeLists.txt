@@ -352,7 +352,6 @@ set(src_framework
 	framework/File.cpp
 	framework/FileSystem.cpp
 	framework/KeyInput.cpp
-	framework/Unzip.cpp
 	framework/UsercmdGen.cpp
 	framework/Session_menu.cpp
 	framework/Session.cpp
@@ -362,6 +361,8 @@ set(src_framework
 	framework/async/MsgChannel.cpp
 	framework/async/NetworkSystem.cpp
 	framework/async/ServerScan.cpp
+	framework/minizip/ioapi.c
+	framework/minizip/unzip.cpp
 )
 
 set(src_cm
