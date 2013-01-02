@@ -30,6 +30,7 @@ option(D3XP			"Build the d3xp game code" ON)
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
 option(SDL2			"Use SDL2 instead of SDL1.2" OFF)
+option(ZFAIL			"Use Carmack's reverse" OFF)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
@@ -738,6 +739,9 @@ if(CORE)
 		${src_sys_base}
 		${src_sys_core}
 	)
+	if(ZFAIL)
+		add_definitions( -DDEFY_PATENTS )
+	endif()
 
 	set_target_properties(dhewm3 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
 	set_target_properties(dhewm3 PROPERTIES LINK_FLAGS "${ldflags}")
