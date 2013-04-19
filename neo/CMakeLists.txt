@@ -212,6 +212,8 @@ elseif(MSVC)
 	add_definitions(/wd4267) # possible loss of data
 	add_definitions(/wd4714) # 'function' marked as __forceinline not inlined
 	add_definitions(/wd4996) # 'function': was declared deprecated
+	add_definitions(/wd4068) # unknown pragma
+	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi /MD")

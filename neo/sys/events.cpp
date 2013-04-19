@@ -424,15 +424,17 @@ sysEvent_t Sys_GetEvent() {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_WINDOWEVENT:
 			switch (ev.window.event) {
-				case SDL_WINDOWEVENT_FOCUS_GAINED:
-					// unset modifier, in case alt-tab was used to leave window and ALT is still set
-					// as that can cause fullscreen-toggling when pressing enter...
-					SDL_Keymod currentmod = SDL_GetModState();
-					int newmod = KMOD_NONE;
-					if (currentmod & KMOD_CAPS) // preserve capslock
-						newmod |= KMOD_CAPS;
+				case SDL_WINDOWEVENT_FOCUS_GAINED: {
+						// unset modifier, in case alt-tab was used to leave window and ALT is still set
+						// as that can cause fullscreen-toggling when pressing enter...
+						SDL_Keymod currentmod = SDL_GetModState();
+					
+						int newmod = KMOD_NONE;
+						if (currentmod & KMOD_CAPS) // preserve capslock
+							newmod |= KMOD_CAPS;
 
-					SDL_SetModState((SDL_Keymod)newmod);
+						SDL_SetModState((SDL_Keymod)newmod);
+					} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
 
 					GLimp_GrabInput(GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR);
 					break;
