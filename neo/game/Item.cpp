@@ -712,6 +712,44 @@ void idObjective::Event_CamShot( ) {
 			renderView_t fullView = *view;
 			fullView.width = SCREEN_WIDTH;
 			fullView.height = SCREEN_HEIGHT;
+
+            //neuro start
+			// HACK : always draw sky-portal view if there is one in the map, this isn't real-time
+			if ( gameLocal.portalSkyEnt.GetEntity() && g_enablePortalSky.GetBool() ) {
+				renderView_t	portalView = fullView;
+				portalView.vieworg = gameLocal.portalSkyEnt.GetEntity()->GetPhysics()->GetOrigin();
+
+				// setup global fixup projection vars
+				if ( 1 ) {
+					int vidWidth, vidHeight;
+					idVec2 shiftScale;
+
+					renderSystem->GetGLSettings( vidWidth, vidHeight );
+
+					float pot;
+					int temp;
+
+					int	 w = vidWidth;
+					for (temp = 1 ; temp < w ; temp<<=1) {
+					}
+					pot = (float)temp;
+					shiftScale.x = (float)w / pot;
+
+					int	 h = vidHeight;
+					for (temp = 1 ; temp < h ; temp<<=1) {
+					}
+					pot = (float)temp;
+					shiftScale.y = (float)h / pot;
+
+					fullView.shaderParms[4] = shiftScale.x;
+					fullView.shaderParms[5] = shiftScale.y;
+				}
+
+				gameRenderWorld->RenderScene( &portalView );
+				renderSystem->CaptureRenderToImage( "_currentRender" );
+			}
+			//neuro end
+
 			// draw a view to a texture
 			renderSystem->CropRenderSize( 256, 256, true );
 			gameRenderWorld->RenderScene( &fullView );

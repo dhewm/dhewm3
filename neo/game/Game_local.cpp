@@ -252,6 +252,13 @@ void idGameLocal::Clear( void ) {
 	savedEventQueue.Init();
 
 	memset( lagometer, 0, sizeof( lagometer ) );
+
+    //neuro start
+	portalSkyEnt			= NULL;
+	portalSkyActive			= false;
+	playerOldEyePos.Zero();			 // 7318
+	globalPortalSky			= false; // 7318
+	//neuro end
 }
 
 /*
@@ -535,6 +542,17 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteInt( realClientTime );
 	savegame.WriteBool( isNewFrame );
 	savegame.WriteFloat( clientSmoothing );
+
+    //neuro start
+	portalSkyEnt.Save( &savegame );
+	savegame.WriteBool( portalSkyActive );
+	savegame.WriteBool( globalPortalSky );		// 7318
+	savegame.WriteInt( currentPortalSkyType );	// 7318
+	savegame.WriteVec3( playerOldEyePos );		// 7318
+	savegame.WriteVec3( portalSkyGlobalOrigin );	// 7318
+	savegame.WriteVec3( portalSkyOrigin );		// 7318
+
+	//neuro end
 
 	savegame.WriteBool( mapCycleLoaded );
 	savegame.WriteInt( spawnCount );
@@ -905,6 +923,13 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	framenum		= 0;
 	sessionCommand = "";
 	nextGibTime		= 0;
+
+    //neuro start
+	portalSkyEnt			= NULL;
+	portalSkyActive			= false;
+	playerOldEyePos.Zero();			// 7318
+	globalPortalSky			= false;// 7318
+	//neuro end
 
 	vacuumAreaNum = -1;		// if an info_vacuum is spawned, it will set this
 
@@ -1352,6 +1377,16 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadInt( realClientTime );
 	savegame.ReadBool( isNewFrame );
 	savegame.ReadFloat( clientSmoothing );
+
+    //neuro start
+	portalSkyEnt.Restore( &savegame );
+	savegame.ReadBool( portalSkyActive );
+	savegame.ReadBool( globalPortalSky );		// 7318
+	savegame.ReadInt( currentPortalSkyType );	// 7318
+	savegame.ReadVec3( playerOldEyePos );		// 7318
+	savegame.ReadVec3( portalSkyGlobalOrigin );	// 7318
+	savegame.ReadVec3( portalSkyOrigin );		// 7318
+	//neuro end
 
 	savegame.ReadBool( mapCycleLoaded );
 	savegame.ReadInt( spawnCount );
@@ -1999,6 +2034,25 @@ void idGameLocal::SetupPlayerPVS( void ) {
 			pvs.FreeCurrentPVS( otherPVS );
 			playerConnectedAreas = newPVS;
 		}
+
+        //neuro start
+		// if portalSky is preset, then merge into pvs so we get rotating brushes, etc
+		if ( portalSkyEnt.GetEntity() ) {
+			idEntity *skyEnt = portalSkyEnt.GetEntity();
+
+			otherPVS = pvs.SetupCurrentPVS( skyEnt->GetPVSAreas(), skyEnt->GetNumPVSAreas() );
+			newPVS = pvs.MergeCurrentPVS( playerPVS, otherPVS );
+			pvs.FreeCurrentPVS( playerPVS );
+			pvs.FreeCurrentPVS( otherPVS );
+			playerPVS = newPVS;
+
+			otherPVS = pvs.SetupCurrentPVS( skyEnt->GetPVSAreas(), skyEnt->GetNumPVSAreas() );
+			newPVS = pvs.MergeCurrentPVS( playerConnectedAreas, otherPVS );
+			pvs.FreeCurrentPVS( playerConnectedAreas );
+			pvs.FreeCurrentPVS( otherPVS );
+			playerConnectedAreas = newPVS;
+		}
+		//neuro end
 	}
 }
 
@@ -4267,6 +4321,69 @@ idGameLocal::ThrottleUserInfo
 void idGameLocal::ThrottleUserInfo( void ) {
 	mpGame.ThrottleUserInfo();
 }
+
+//neuro start
+/*
+=================
+idGameLocal::SetPortalSkyEnt
+=================
+*/
+void idGameLocal::SetPortalSkyEnt( idEntity *ent ) {
+	portalSkyEnt = ent;
+}
+
+/*
+=================
+idGameLocal::IsPortalSkyAcive
+=================
+*/
+bool idGameLocal::IsPortalSkyAcive() {
+	return portalSkyActive;
+}
+
+/*
+=================
+idGameLocal::CheckGlobalPortalSky			--> 7318
+=================
+*/
+bool idGameLocal::CheckGlobalPortalSky() {
+	return globalPortalSky;
+}
+
+/*
+=================
+idGameLocal::SetGlobalPortalSky			--> 7318
+=================
+*/
+void idGameLocal::SetGlobalPortalSky( const char *name ) {
+
+	if ( CheckGlobalPortalSky() ) {
+		Error( "more than one global portalSky:\ndelete them until you have just one.\nportalSky '%s' causes it.", name );
+	}
+	else {
+		globalPortalSky = true;
+	}
+}
+
+/*
+=================
+idGameLocal::SetCurrentPortalSkyType		--> 7318
+=================
+*/
+void idGameLocal::SetCurrentPortalSkyType( int type ) {
+	currentPortalSkyType = type;
+}
+
+/*
+=================
+idGameLocal::GetCurrentPortalSkyType		--> 7318
+=================
+*/
+int idGameLocal::GetCurrentPortalSkyType() {
+	return currentPortalSkyType;
+}
+
+//neuro end
 
 /*
 ===========
