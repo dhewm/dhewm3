@@ -1339,7 +1339,7 @@ int idFile_InZip::Seek( long offset, fsOrigin_t origin ) {
 		}
 		case FS_SEEK_SET: {
 			// set the file position in the zip file (also sets the current file info)
-			unzSetCurrentFileInfoPosition( z, zipFilePos );
+			unzSetOffset64(z, zipFilePos);
 			unzOpenCurrentFile( z );
 			if ( offset <= 0 ) {
 				return 0;
