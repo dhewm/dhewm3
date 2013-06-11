@@ -258,7 +258,7 @@ static idInitExclusions	initExclusions;
 
 typedef struct fileInPack_s {
 	idStr				name;						// name of the file
-	unsigned long		pos;						// file info position in zip
+	ZPOS64_T			pos;						// file info position in zip
 	struct fileInPack_s * next;						// next file in the hash
 } fileInPack_t;
 
@@ -539,6 +539,8 @@ int idFileSystemLocal::HashFileName( const char *fname ) const {
 idFileSystemLocal::FilenameCompare
 
 Ignore case and separator char distinctions
+
+RETURNS false WHEN EQUAL THIS IS SO STUPID IT HURTS!
 ===========
 */
 bool idFileSystemLocal::FilenameCompare( const char *s1, const char *s2 ) const {
@@ -1264,9 +1266,9 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 	pack_t *		pack;
 	unzFile			uf;
 	int				err;
-	unz_global_info gi;
+	unz_global_info64 gi;
 	char			filename_inzip[MAX_ZIPPED_FILE_NAME];
-	unz_file_info	file_info;
+	unz_file_info64	file_info;
 	int				i;
 	int				hash;
 	int				fs_numHeaderLongs;
@@ -1287,7 +1289,7 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 	fs_numHeaderLongs = 0;
 
 	uf = unzOpen( zipfile );
-	err = unzGetGlobalInfo( uf, &gi );
+	err = unzGetGlobalInfo64( uf, &gi );
 
 	if ( err != UNZ_OK ) {
 		return NULL;
@@ -1315,7 +1317,7 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 	unzGoToFirstFile(uf);
 	fs_headerLongs = (int *)Mem_ClearedAlloc( gi.number_entry * sizeof(int) );
 	for ( i = 0; i < (int)gi.number_entry; i++ ) {
-		err = unzGetCurrentFileInfo( uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0 );
+		err = unzGetCurrentFileInfo64( uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0 );
 		if ( err != UNZ_OK ) {
 			break;
 		}
@@ -1327,7 +1329,7 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 		buildBuffer[i].name.ToLower();
 		buildBuffer[i].name.BackSlashesToSlashes();
 		// store the file position in the zip
-		unzGetCurrentFileInfoPosition( uf, &buildBuffer[i].pos );
+		buildBuffer[i].pos = unzGetOffset64( uf );
 		// add the file to the hash
 		buildBuffer[i].next = pack->hashTable[hash];
 		pack->hashTable[hash] = &buildBuffer[i];
@@ -2888,30 +2890,34 @@ idFileSystemLocal::ReadFileFromZip
 ===========
 */
 idFile_InZip * idFileSystemLocal::ReadFileFromZip( pack_t *pak, fileInPack_t *pakFile, const char *relativePath ) {
-	unz_s *			zfi;
-	FILE *			fp;
-	idFile_InZip *file = new idFile_InZip();
+	// relativePath == pakFile->name according to FilenameCompare()
+	// pakFile->Pos is position of that file within the zip
 
-	// open a new file on the pakfile
-	file->z = unzReOpen( pak->pakFilename, pak->handle );
-	if ( file->z == NULL ) {
+	// set position in pk4 file to the file (in the zip/pk4) we want a handle on
+	unzSetOffset64( pak->handle, pakFile->pos );
+
+	// clone handle and assign a new internal filestream to zip file to it
+	unzFile uf = unzReOpen( pak->pakFilename, pak->handle );
+	if ( uf == NULL ) {
 		common->FatalError( "Couldn't reopen %s", pak->pakFilename.c_str() );
 	}
+
+	// the following stuff is needed to get the uncompress filesize (for file->fileSize)
+	char	filename_inzip[MAX_ZIPPED_FILE_NAME];
+	unz_file_info64	file_info;
+	int err = unzGetCurrentFileInfo64( uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0 );
+	if ( err != UNZ_OK ) {
+		common->FatalError( "Couldn't get file info for %s in %s, pos %llu", relativePath, pak->pakFilename.c_str(), pakFile->pos );
+	}
+
+	// create idFile_InZip and set fields accordingly
+	idFile_InZip *file = new idFile_InZip();
+	file->z = uf;
 	file->name = relativePath;
 	file->fullPath = pak->pakFilename + "/" + relativePath;
-	zfi = (unz_s *)file->z;
-	// in case the file was new
-	fp = zfi->file;
-	// set the file position in the zip file (also sets the current file info)
-	unzSetCurrentFileInfoPosition( pak->handle, pakFile->pos );
-	// copy the file info into the unzip structure
-	memcpy( zfi, pak->handle, sizeof(unz_s) );
-	// we copy this back into the structure
-	zfi->file = fp;
-	// open the file in the zip
-	unzOpenCurrentFile( file->z );
 	file->zipFilePos = pakFile->pos;
-	file->fileSize = zfi->cur_file_info.uncompressed_size;
+	file->fileSize = file_info.uncompressed_size;
+
 	return file;
 }
 

@@ -231,9 +231,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ## IO on .zip files using minizip
 
-src/framework/Unzip.cpp
+src/framework/minizip/*
 
-Copyright (C) 1998 Gilles Vollant
+Copyright (C) 1998-2010 Gilles Vollant (minizip) ( http://www.winimage.com/zLibDll/minizip.html )
+
+Modifications of Unzip for Zip64
+Copyright (C) 2007-2008 Even Rouault
+
+Modifications for Zip64 support
+Copyright (C) 2009-2010 Mathias Svensson ( http://result42.com )
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
