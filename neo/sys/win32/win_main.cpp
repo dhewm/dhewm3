@@ -343,7 +343,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 			if (_stat(s.c_str(), &st) != -1 && st.st_mode & _S_IFDIR)
 				return true;
 
-			common->Warning("base path '%s' does not exits", s.c_str());
+			common->Warning("base path '%s' does not exist", s.c_str());
 		}
 
 		// fallback to vanilla doom3 cd install
