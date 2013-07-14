@@ -60,7 +60,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 			return true;
 		}
 
-		common->Warning("base path '" BUILD_DATADIR "' does not exits");
+		common->Warning("base path '" BUILD_DATADIR "' does not exist");
 
 		// try next to the executable..
 		if (Sys_GetPath(PATH_EXE, path)) {
