@@ -481,10 +481,9 @@ sysEvent_t Sys_GetEvent() {
 			// fall through
 		case SDL_KEYUP:
 			key = mapkey(ev.key.keysym.sym);
-
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
 			if (!key) {
 				unsigned char c;
-
 				// check if its an unmapped console key
 				if (ev.key.keysym.unicode == (c = Sys_GetConsoleKey(false))) {
 					key = c;
@@ -496,6 +495,20 @@ sysEvent_t Sys_GetEvent() {
 					return res_none;
 				}
 			}
+#else
+			if(!key) {
+				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) {
+					key = Sys_GetConsoleKey(true);
+				} else {
+					if (ev.type == SDL_KEYDOWN) {
+						common->Warning("unmapped SDL key %d", ev.key.keysym.sym);
+					return res_none;
+					}
+
+				}
+			}
+
+#endif
 
 			res.evType = SE_KEY;
 			res.evValue = key;
