@@ -2076,7 +2076,7 @@ bool idSessionLocal::LoadGame( const char *saveName ) {
 	savegameFile->ReadString( gamename );
 
 	// if this isn't a savegame for the correct game, abort loadgame
-	if ( gamename != GAME_NAME ) {
+	if ( ! (gamename == GAME_NAME || gamename == "DOOM 3") ) {
 		common->Warning( "Attempted to load an invalid savegame: %s", in.c_str() );
 
 		loadingSaveGame = false;
