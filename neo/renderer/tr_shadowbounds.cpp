@@ -38,9 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 typedef idList<int> vectorInt;
-//int vectorInt::max_size = 0;
 typedef idList<idVec4> vectorVec4;
-//int vectorVec4::max_size = 0;
 
 struct poly
 {
@@ -50,7 +48,6 @@ struct poly
 };
 
 typedef idList<poly> vectorPoly;
-//int vectorPoly::max_size = 0;
 
 struct edge
 {
@@ -59,7 +56,6 @@ struct edge
 };
 
 typedef idList<edge> vectorEdge;
-//int vectorEdge::max_size = 0;
 
 vectorInt four_ints(int a, int b, int c, int d)
 {
@@ -356,7 +352,6 @@ polyhedron make_sv(const polyhedron & oc, idVec4 light)
 }
 
 typedef idList<idVec4> MySegments;
-//int MySegments::max_size = 0;
 
 void polyhedron_edges(polyhedron & a, MySegments & e)
 {
