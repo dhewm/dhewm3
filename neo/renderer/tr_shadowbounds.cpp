@@ -222,6 +222,7 @@ polyhedron PolyhedronFromBounds( const idBounds & b )
 //       |  /    \  |
 //       | /      \ |
 //       0----------1
+//
 
 	static polyhedron p;
 
