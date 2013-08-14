@@ -2505,7 +2505,7 @@ idWeapon::GetAmmoNameForNum
 ================
 */
 const char *idWeapon::GetAmmoNameForNum( ammo_t ammonum ) {
-	int i;
+	int i, j;
 	int num;
 	const idDict *ammoDict;
 	const idKeyValue *kv;
@@ -2539,8 +2539,8 @@ const char *idWeapon::GetAmmoNameForNum( ammo_t ammonum ) {
 			ammoDict = gameLocal.FindEntityDefDict( va("ammo_types_%s", gamedir.c_str()), false );
 			if ( ammoDict ) {
 				num = ammoDict->GetNumKeyVals();
-				for( i = 0; i < num; i++ ) {
-					kv = ammoDict->GetKeyVal( i );
+				for( j = 0; j < num; j++ ) {
+					kv = ammoDict->GetKeyVal( j );
 					if ( kv->GetValue() == text ) {
 						return kv->GetKey();
 					}
