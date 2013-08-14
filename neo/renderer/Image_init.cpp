@@ -70,6 +70,8 @@ idCVar idImageManager::image_downSizeSpecularLimit( "image_downSizeSpecularLimit
 idCVar idImageManager::image_downSizeBumpLimit( "image_downSizeBumpLimit", "128", CVAR_RENDERER | CVAR_ARCHIVE, "controls normal map downsample limit" );
 idCVar idImageManager::image_ignoreHighQuality( "image_ignoreHighQuality", "0", CVAR_RENDERER | CVAR_ARCHIVE, "ignore high quality setting on materials" );
 idCVar idImageManager::image_downSizeLimit( "image_downSizeLimit", "256", CVAR_RENDERER | CVAR_ARCHIVE, "controls diffuse map downsample limit" );
+idCVar r_phongExponent( "r_phongExponent", "3", CVAR_RENDERER | CVAR_ARCHIVE, "controls falloff of specular texture" ); 
+idCVar r_phongSpecular( "r_phongSpecular", "0.7", CVAR_RENDERER | CVAR_ARCHIVE, "controls brightness of specular texture" ); 
 // do this with a pointer, in case we want to make the actual manager
 // a private virtual subclass
 idImageManager	imageManager;
@@ -155,26 +157,32 @@ Creates a ramp that matches our fudged specular calculation
 */
 static void R_SpecularTableImage( idImage *image ) {
 	int		x;
-	byte	data[256][4];
+	byte	data[1024][4];
 
-	for (x=0 ; x<256 ; x++) {
-		float f = x/255.f;
-#if 0
-		f = pow(f, 16);
-#else
-		// this is the behavior of the hacked up fragment programs that
-		// can't really do a power function
-		f = (f-0.75)*4;
-		if ( f < 0 ) {
+	for (x=0 ; x<1024 ; ++x)
+	{
+
+		float f = x/512.f;
+
+		f = ( ( pow( 10, f * r_phongExponent.GetFloat() ) -1 ) / 100 ) / pow( 10, r_phongExponent.GetFloat() );
+
+		if( f > 1 )
+		{
+			f = 1;
+		}
+
+		if( f < 0 )
+		{
 			f = 0;
 		}
-		f = f * f;
-#endif
-		int		b = (int)(f * 255);
 
-		data[x][0] =
-		data[x][1] =
-		data[x][2] =
+		f *= r_phongSpecular.GetFloat();
+
+		byte b = (byte)(f * 255);
+
+		data[x][0] = b;
+		data[x][1] = b;
+		data[x][2] = b;
 		data[x][3] = b;
 	}
 
