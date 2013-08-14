@@ -1016,9 +1016,10 @@ void idConsoleLocal::DrawInput() {
 
 	renderSystem->SetColor( idStr::ColorForIndex( C_COLOR_CYAN ) );
 
-	renderSystem->DrawSmallChar( 1 * SMALLCHAR_WIDTH, y, ']', localConsole.charSetShader );
+	renderSystem->DrawSmallChar( 1 * SMALLCHAR_WIDTH, y, '$', localConsole.charSetShader );
+	renderSystem->DrawSmallChar( 1 * SMALLCHAR_WIDTH, y, ' ', localConsole.charSetShader );
 
-	consoleField.Draw(2 * SMALLCHAR_WIDTH, y, SCREEN_WIDTH - 3 * SMALLCHAR_WIDTH, true, charSetShader );
+	consoleField.Draw(3 * SMALLCHAR_WIDTH, y, SCREEN_WIDTH - 4 * SMALLCHAR_WIDTH, true, charSetShader );
 }
 
 
