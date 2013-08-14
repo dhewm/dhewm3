@@ -25,6 +25,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
 #include "sys/platform.h"
 #include "renderer/RenderWorld_local.h"
 
@@ -32,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // Compute conservative shadow bounds as the intersection
 // of the object's bounds' shadow volume and the light's bounds.
-// 
+//
 // --cass
 
 
@@ -95,10 +96,10 @@ idVec4 compute_homogeneous_plane(idVec4 a, idVec4 b, idVec4 c)
 
 	idVec3 vb = homogeneous_difference(a, b);
 	idVec3 vc = homogeneous_difference(a, c);
-	
+
 	idVec3 n = vb.Cross(vc);
 	n.Normalize();
-	
+
 	v.x = n.x;
 	v.y = n.y;
 	v.z = n.z;
@@ -187,7 +188,7 @@ struct polyhedron
 							fprintf(stderr,"why am I here?\n");
 						}
 					}
-					if( found ) 
+					if( found )
 						break;
 				}
 			}
@@ -216,16 +217,15 @@ struct polyhedron
 polyhedron PolyhedronFromBounds( const idBounds & b )
 {
 
-//	   3----------2
-//	   |\		/|
-//	   | \	  / |
-//	   |   7--6   |
-//	   |   |  |   |
-//	   |   4--5   |
-//	   |  /	\  |
-//	   | /	  \ |
-//	   0----------1
-//
+//       3----------2
+//       |\        /|
+//       | \      / |
+//       |   7--6   |
+//       |   |  |   |
+//       |   4--5   |
+//       |  /    \  |
+//       | /      \ |
+//       0----------1
 
 	static polyhedron p;
 
@@ -398,7 +398,7 @@ void clip_segments(const polyhedron & ph, MySegments & is, MySegments & os)
 				code |= 1;
 
 
-			switch ( code ) 
+			switch ( code )
 			{
 			case 3:
 				discard = true;
@@ -469,7 +469,7 @@ void world_to_hclip( const viewDef_t *viewDef, const idVec4 &global, idVec4 &cli
 	idVec4	view;
 
 	for ( i = 0 ; i < 4 ; i ++ ) {
-		view[i] = 
+		view[i] =
 			global[0] * viewDef->worldSpace.modelViewMatrix[ i + 0 * 4 ] +
 			global[1] * viewDef->worldSpace.modelViewMatrix[ i + 1 * 4 ] +
 			global[2] * viewDef->worldSpace.modelViewMatrix[ i + 2 * 4 ] +
@@ -478,7 +478,7 @@ void world_to_hclip( const viewDef_t *viewDef, const idVec4 &global, idVec4 &cli
 
 
 	for ( i = 0 ; i < 4 ; i ++ ) {
-		clip[i] = 
+		clip[i] =
 			view[0] * viewDef->projectionMatrix[ i + 0 * 4 ] +
 			view[1] * viewDef->projectionMatrix[ i + 1 * 4 ] +
 			view[2] * viewDef->projectionMatrix[ i + 2 * 4 ] +
@@ -538,7 +538,7 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 	// clip them by the shadow volume
 	clip_segments(sv, in_segs, out_segs);
 
-	// debug // 
+	// debug //
 	if ( r_useInteractionScissors.GetInteger() == -2 ) {
 		draw_segments( viewDef, out_segs, colorGreen );
 	}
