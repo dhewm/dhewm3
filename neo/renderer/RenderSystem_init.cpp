@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#include <SDL.h>
+
 // Vista OpenGL wrapper check
 #ifdef _WIN32
 #include "sys/win32/win_local.h"
@@ -534,7 +536,7 @@ void R_InitOpenGL( void ) {
 	r_vidModes.Clear();
 
 	// add some initial videomodes
-
+/*
 	// 4:3
 	R_AddVideoMode( 320,	240 );
 	R_AddVideoMode( 400,	300 );
@@ -564,6 +566,16 @@ void R_InitOpenGL( void ) {
 	R_AddVideoMode( 2560,	1600 );
 	R_AddVideoMode( 3840,	2400 );
 	R_AddVideoMode( 7680,	4800 );
+*/
+
+	SDL_Rect** modes;
+
+	modes = SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_HWSURFACE);
+
+	for (int i = 0; modes[i]; ++i )
+	{
+		R_AddVideoMode( modes[i]->w, modes[i]->h );
+	}
 
 	if ( glConfig.isInitialized ) {
 		common->FatalError( "R_InitOpenGL called while active" );
