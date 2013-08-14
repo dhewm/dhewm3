@@ -690,14 +690,14 @@ idScreenRect idInteraction::CalcInteractionScissorRectangle( const idFrustum &vi
 	idScreenRect	portalRect;
 	idScreenRect	scissorRect;
 
-	if ( r_useInteractionScissors.GetInteger() == 0 ) {
+/*	if ( r_useInteractionScissors.GetInteger() == 0 ) {
 		return lightDef->viewLight->scissorRect;
 	}
 
-	if ( r_useInteractionScissors.GetInteger() < 0 ) {
+	if ( r_useInteractionScissors.GetInteger() < 0 ) {*/
 		// this is the code from Cass at nvidia, it is more precise, but slower
 		return R_CalcIntersectionScissor( lightDef, entityDef, tr.viewDef );
-	}
+//	}
 
 	// the following is Mr.E's code
 
