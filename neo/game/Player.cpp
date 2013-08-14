@@ -6633,7 +6633,7 @@ void idPlayer::CalcDamagePoints( idEntity *inflictor, idEntity *attacker, const 
 	// check for completely getting out of the damage
 	if ( !damageDef->GetBool( "noGod" ) ) {
 		// check for godmode
-		if ( godmode || ( cvarSystem->GetCVarBool( "ch_god" ) ) ) {
+		if ( godmode ) {
 			damage = 0;
 		}
 	}

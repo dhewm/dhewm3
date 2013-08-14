@@ -59,9 +59,6 @@ struct gameVersion_s {
 	char	string[256];
 } gameVersion;
 
-// cjayho: add cheat cvars. cheaters are people too
-idCVar ch_god(						"ch_god",					"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL | CVAR_CHEAT, "set game to permanent god mode" );
-
 idCVar g_version(					"g_version",				gameVersion.string,	CVAR_GAME | CVAR_ROM, "game version" );
 
 // noset vars
