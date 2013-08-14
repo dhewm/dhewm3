@@ -37,59 +37,17 @@ If you have questions concerning this license or the applicable additional terms
 // --cass
 
 
-template <class T, int N>
-struct MyArray
-{
-	MyArray() : s(0) {}
-
-	MyArray( const MyArray<T,N> & cpy ) : s(cpy.s)
-	{
-		for(int i=0; i < s; i++)
-			v[i] = cpy.v[i];
-	}
-
-	void push_back(const T & i) {
-		v[s] = i;
-		s++;
-		//if(s > max_size)
-		//	max_size = int(s);
-	}
-
-	T & operator[](int i) {
-		return v[i];
-	}
-
-	const T & operator[](int i) const {
-		return v[i];
-	}
-
-	unsigned int size() const {
-		return s;
-	}
-
-	void empty() {
-		s = 0;
-	}
-
-	T v[N];
-	int s;
-//	static int max_size;
-};
-
-typedef MyArray<int, 4> MyArrayInt;
-//int MyArrayInt::max_size = 0;
-typedef MyArray<idVec4, 16> MyArrayVec4;
-//int MyArrayVec4::max_size = 0;
+typedef idList<int> vectorInt;
+typedef idList<idVec4> vectorVec4;
 
 struct poly
 {
-	MyArrayInt vi;
-	MyArrayInt ni;
+	vectorInt vi;
+	vectorInt ni;
 	idVec4 plane;
 };
 
-typedef MyArray<poly, 9> MyArrayPoly;
-//int MyArrayPoly::max_size = 0;
+typedef idList<poly> vectorPoly;
 
 struct edge
 {
@@ -97,16 +55,15 @@ struct edge
 	int pi[2];
 };
 
-typedef MyArray<edge, 15> MyArrayEdge;
-//int MyArrayEdge::max_size = 0;
+typedef idList<edge> vectorEdge;
 
-MyArrayInt four_ints(int a, int b, int c, int d)
+vectorInt four_ints(int a, int b, int c, int d)
 {
-	MyArrayInt vi;
-	vi.push_back(a);
-	vi.push_back(b);
-	vi.push_back(c);
-	vi.push_back(d);
+	vectorInt vi;
+	vi.Append(a);
+	vi.Append(b);
+	vi.Append(c);
+	vi.Append(d);
 	return vi;
 }
 
@@ -150,9 +107,9 @@ idVec4 compute_homogeneous_plane(idVec4 a, idVec4 b, idVec4 c)
 
 struct polyhedron
 {
-	MyArrayVec4 v;
-	MyArrayPoly  p;
-	MyArrayEdge  e;
+	vectorVec4 v;
+	vectorPoly  p;
+	vectorEdge  e;
 
 	void add_quad( int va, int vb, int vc, int vd )
 	{
@@ -160,33 +117,33 @@ struct polyhedron
 		pg.vi = four_ints(va, vb, vc, vd);
 		pg.ni = four_ints(-1, -1, -1, -1);
 		pg.plane = compute_homogeneous_plane(v[va], v[vb], v[vc]);
-		p.push_back(pg);
+		p.Append(pg);
 	}
 
 	void discard_neighbor_info()
 	{
-		for(unsigned int i = 0; i < p.size(); i++ )
+		for(int i = 0; i < p.Num(); i++ )
 		{
-			MyArrayInt & ni = p[i].ni;
-			for(unsigned int j = 0; j < ni.size(); j++)
+			vectorInt & ni = p[i].ni;
+			for(int j = 0; j < ni.Num(); j++)
 				ni[j] = -1;
 		}
 	}
 
 	void compute_neighbors()
 	{
-		e.empty();
+		e.Clear();
 
 		discard_neighbor_info();
 
 		bool found;
-		int P = p.size();
+		int P = p.Num();
 		// for each polygon
 		for(int i = 0; i < P-1; i++ )
 		{
-			const MyArrayInt & vi = p[i].vi;
-			MyArrayInt & ni = p[i].ni;
-			int Si = vi.size();
+			const vectorInt & vi = p[i].vi;
+			vectorInt & ni = p[i].ni;
+			int Si = vi.Num();
 
 			// for each edge of that polygon
 			for(int ii=0; ii < Si; ii++)
@@ -201,9 +158,9 @@ struct polyhedron
 				// check all remaining polygons
 				for(int j = i+1; j < P; j++ )
 				{
-					const MyArrayInt & vj = p[j].vi;
-					MyArrayInt & nj = p[j].ni;
-					int Sj = vj.size();
+					const vectorInt & vj = p[j].vi;
+					vectorInt & nj = p[j].ni;
+					int Sj = vj.Num();
 
 					for( int jj = 0; jj < Sj; jj++ )
 					{
@@ -216,7 +173,7 @@ struct polyhedron
 							ed.vi[1] = vi[ii1];
 							ed.pi[0] = i;
 							ed.pi[1] = j;
-							e.push_back(ed);
+							e.Append(ed);
 							ni[ii] = j;
 							nj[jj] = i;
 							found = true;
@@ -237,7 +194,7 @@ struct polyhedron
 	void recompute_planes()
 	{
 		// for each polygon
-		for(unsigned int i = 0; i < p.size(); i++ )
+		for(int i = 0; i < p.Num(); i++ )
 		{
 			p[i].plane = compute_homogeneous_plane(v[p[i].vi[0]], v[p[i].vi[1]], v[p[i].vi[2]]);
 		}
@@ -245,7 +202,7 @@ struct polyhedron
 
 	void transform(const idMat4 & m)
 	{
-		for(unsigned int i=0; i < v.size(); i++ )
+		for(int i=0; i < v.Num(); i++ )
 			v[i] = m * v[i];
 		recompute_planes();
 	}
@@ -269,16 +226,16 @@ polyhedron PolyhedronFromBounds( const idBounds & b )
 
 	static polyhedron p;
 
-	if( p.e.size() == 0 ) {
+	if( p.e.Num() == 0 ) {
 
-		p.v.push_back(idVec4( -1, -1,  1, 1));
-		p.v.push_back(idVec4(  1, -1,  1, 1));
-		p.v.push_back(idVec4(  1,  1,  1, 1));
-		p.v.push_back(idVec4( -1,  1,  1, 1));
-		p.v.push_back(idVec4( -1, -1, -1, 1));
-		p.v.push_back(idVec4(  1, -1, -1, 1));
-		p.v.push_back(idVec4(  1,  1, -1, 1));
-		p.v.push_back(idVec4( -1,  1, -1, 1));
+		p.v.Append(idVec4( -1, -1,  1, 1));
+		p.v.Append(idVec4(  1, -1,  1, 1));
+		p.v.Append(idVec4(  1,  1,  1, 1));
+		p.v.Append(idVec4( -1,  1,  1, 1));
+		p.v.Append(idVec4( -1, -1, -1, 1));
+		p.v.Append(idVec4(  1, -1, -1, 1));
+		p.v.Append(idVec4(  1,  1, -1, 1));
+		p.v.Append(idVec4( -1,  1, -1, 1));
 
 		p.add_quad( 0, 1, 2, 3 );
 		p.add_quad( 7, 6, 5, 4 );
@@ -289,7 +246,7 @@ polyhedron PolyhedronFromBounds( const idBounds & b )
 
 		p.compute_neighbors();
 		p.recompute_planes();
-		p.v.empty(); // no need to copy this data since it'll be replaced
+		p.v.Clear(); // no need to copy this data since it'll be replaced
 	}
 
 	polyhedron p2(p);
@@ -297,15 +254,15 @@ polyhedron PolyhedronFromBounds( const idBounds & b )
 	const idVec3 & min = b[0];
 	const idVec3 & max = b[1];
 
-	p2.v.empty();
-	p2.v.push_back(idVec4( min.x, min.y, max.z, 1));
-	p2.v.push_back(idVec4( max.x, min.y, max.z, 1));
-	p2.v.push_back(idVec4( max.x, max.y, max.z, 1));
-	p2.v.push_back(idVec4( min.x, max.y, max.z, 1));
-	p2.v.push_back(idVec4( min.x, min.y, min.z, 1));
-	p2.v.push_back(idVec4( max.x, min.y, min.z, 1));
-	p2.v.push_back(idVec4( max.x, max.y, min.z, 1));
-	p2.v.push_back(idVec4( min.x, max.y, min.z, 1));
+	p2.v.Clear();
+	p2.v.Append(idVec4( min.x, min.y, max.z, 1));
+	p2.v.Append(idVec4( max.x, min.y, max.z, 1));
+	p2.v.Append(idVec4( max.x, max.y, max.z, 1));
+	p2.v.Append(idVec4( min.x, max.y, max.z, 1));
+	p2.v.Append(idVec4( min.x, min.y, min.z, 1));
+	p2.v.Append(idVec4( max.x, min.y, min.z, 1));
+	p2.v.Append(idVec4( max.x, max.y, min.z, 1));
+	p2.v.Append(idVec4( min.x, max.y, min.z, 1));
 
 	p2.recompute_planes();
 	return p2;
@@ -322,41 +279,41 @@ polyhedron make_sv(const polyhedron & oc, idVec4 light)
 			index |= 1<<i;
 	}
 
-	if( lut[index].e.size() == 0 )
+	if( lut[index].e.Num() == 0 )
 	{
 		polyhedron & ph = lut[index];
 		ph = oc;
 
-		int V = ph.v.size();
-		for( int j = 0; j < V; j++ )
+		int V = ph.v.Num();
+		for( int j = 0; j < V; j++ ) 
 		{
 			idVec3 proj = homogeneous_difference( light, ph.v[j] );
-			ph.v.push_back( idVec4(proj.x, proj.y, proj.z, 0) );
+			ph.v.Append( idVec4(proj.x, proj.y, proj.z, 0) );
 		}
 
-		ph.p.empty();
+		ph.p.Clear(); 
 
-		for(unsigned int i=0; i < oc.p.size(); i++)
+		for(int i=0; i < oc.p.Num(); i++)
 		{
 			if( (oc.p[i].plane * light) > 0)
 			{
-				ph.p.push_back(oc.p[i]);
+				ph.p.Append(oc.p[i]);
 			}
 		}
 
-		if(ph.p.size() == 0)
+		if(ph.p.Num() == 0)
 			return ph = polyhedron();
 
 		ph.compute_neighbors();
 
-		MyArrayPoly vpg;
-		int I = ph.p.size();
+		vectorPoly vpg;
+		int I = ph.p.Num();
 
 		for(int i=0; i < I; i++)
 		{
-			MyArrayInt & vi = ph.p[i].vi;
-			MyArrayInt & ni = ph.p[i].ni;
-			int S = vi.size();
+			vectorInt & vi = ph.p[i].vi;
+			vectorInt & ni = ph.p[i].ni;
+			int S = vi.Num();
 
 			for(int j = 0; j < S; j++)
 			{
@@ -367,26 +324,26 @@ polyhedron make_sv(const polyhedron & oc, idVec4 light)
 					int b = vi[j];
 					pg.vi = four_ints( a, b, b+V, a+V);
 					pg.ni = four_ints(-1, -1, -1, -1);
-					vpg.push_back(pg);
+					vpg.Append(pg);
 				}
 			}
 		}
-		for(unsigned int i = 0; i < vpg.size(); i++)
-			ph.p.push_back(vpg[i]);
+		for(int i = 0; i < vpg.Num(); i++)
+			ph.p.Append(vpg[i]);
 
 		ph.compute_neighbors();
-		ph.v.empty(); // no need to copy this data since it'll be replaced
+		ph.v.Clear(); // no need to copy this data since it'll be replaced
 	}
 
 	polyhedron ph2 = lut[index];
 
 	// initalize vertices
 	ph2.v = oc.v;
-	int V = ph2.v.size();
-	for( int j = 0; j < V; j++ )
+	int V = ph2.v.Num();
+	for( int j = 0; j < V; j++ ) 
 	{
 		idVec3 proj = homogeneous_difference( light, ph2.v[j] );
-		ph2.v.push_back( idVec4(proj.x, proj.y, proj.z, 0) );
+		ph2.v.Append( idVec4(proj.x, proj.y, proj.z, 0) );
 	}
 
 	// need to compute planes for the shadow volume (sv)
@@ -395,19 +352,18 @@ polyhedron make_sv(const polyhedron & oc, idVec4 light)
 	return ph2;
 }
 
-typedef MyArray<idVec4, 36> MySegments;
-//int MySegments::max_size = 0;
+typedef idList<idVec4> MySegments;
 
 void polyhedron_edges(polyhedron & a, MySegments & e)
 {
-	e.empty();
-	if(a.e.size() == 0 && a.p.size() != 0)
+	e.Clear();
+	if(a.e.Num() == 0 && a.p.Num() != 0)
 		a.compute_neighbors();
 
-	for(unsigned int i = 0; i < a.e.size(); i++)
+	for(int i = 0; i < a.e.Num(); i++)
 	{
-		e.push_back(a.v[a.e[i].vi[0]]);
-		e.push_back(a.v[a.e[i].vi[1]]);
+		e.Append(a.v[a.e[i].vi[0]]);
+		e.Append(a.v[a.e[i].vi[1]]);
 	}
 
 }
@@ -415,9 +371,9 @@ void polyhedron_edges(polyhedron & a, MySegments & e)
 // clip the segments of e by the planes of polyhedron a.
 void clip_segments(const polyhedron & ph, MySegments & is, MySegments & os)
 {
-	const MyArrayPoly & p = ph.p;
+	const vectorPoly & p = ph.p;
 
-	for(unsigned int i = 0; i < is.size(); i+=2 )
+	for(int i = 0; i < is.Num(); i+=2 )
 	{
 		idVec4 a = is[i  ];
 		idVec4 b = is[i+1];
@@ -425,7 +381,7 @@ void clip_segments(const polyhedron & ph, MySegments & is, MySegments & os)
 
 		bool discard = false;
 
-		for(unsigned int j = 0; j < p.size(); j++ )
+		for(int j = 0; j < p.Num(); j++ )
 		{
 			float da = a * p[j].plane;
 			float db = b * p[j].plane;
@@ -468,8 +424,8 @@ void clip_segments(const polyhedron & ph, MySegments & is, MySegments & os)
 
 		if( ! discard )
 		{
-			os.push_back(a);
-			os.push_back(b);
+			os.Append(a);
+			os.Append(b);
 		}
 	}
 
@@ -490,7 +446,7 @@ idVec3 v4to3(const idVec4 & v)
 
 void draw_polyhedron( const viewDef_t *viewDef, const polyhedron & p, idVec4 color )
 {
-	for(unsigned int i = 0; i < p.e.size(); i++)
+	for(int i = 0; i < p.e.Num(); i++)
 	{
 		viewDef->renderWorld->DebugLine( color, v4to3(p.v[p.e[i].vi[0]]), v4to3(p.v[p.e[i].vi[1]]));
 	}
@@ -498,7 +454,7 @@ void draw_polyhedron( const viewDef_t *viewDef, const polyhedron & p, idVec4 col
 
 void draw_segments( const viewDef_t *viewDef, const MySegments & s, idVec4 color )
 {
-	for(unsigned int i = 0; i < s.size(); i+=2)
+	for(int i = 0; i < s.Num(); i+=2)
 	{
 		viewDef->renderWorld->DebugLine( color, v4to3(s[i]), v4to3(s[i+1]));
 	}
@@ -585,7 +541,7 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 
 	idBounds outbounds;
 	outbounds.Clear();
-	for( unsigned int i = 0; i < out_segs.size(); i++ ) {
+	for( int i = 0; i < out_segs.Num(); i++ ) {
 
 		idVec4 v;
 		world_to_hclip( viewDef, out_segs[i], v );
