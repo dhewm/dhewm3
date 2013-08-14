@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#include <SDL.h>
+
 // Vista OpenGL wrapper check
 #ifdef _WIN32
 #include "sys/win32/win_local.h"
@@ -453,23 +455,19 @@ the values from r_customWidth, amd r_customHeight
 will be used instead.
 ====================
 */
-typedef struct vidmode_s {
-	const char *description;
-	int         width, height;
+typedef class vidmode_s {
+	public:
+		int	width, height;
+
+		vidmode_s(){};
+		vidmode_s( int w, int h )
+		{
+			width = w;
+			height = h;
+		}
 } vidmode_t;
 
-vidmode_t r_vidModes[] = {
-	{ "Mode  0: 320x240",		320,	240 },
-	{ "Mode  1: 400x300",		400,	300 },
-	{ "Mode  2: 512x384",		512,	384 },
-	{ "Mode  3: 640x480",		640,	480 },
-	{ "Mode  4: 800x600",		800,	600 },
-	{ "Mode  5: 1024x768",		1024,	768 },
-	{ "Mode  6: 1152x864",		1152,	864 },
-	{ "Mode  7: 1280x1024",		1280,	1024 },
-	{ "Mode  8: 1600x1200",		1600,	1200 },
-};
-static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
+idList<vidmode_t> r_vidModes;
 
 static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	vidmode_t	*vm;
@@ -477,7 +475,7 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	if ( mode < -1 ) {
 		return false;
 	}
-	if ( mode >= s_numVidModes ) {
+	if ( mode >= r_vidModes.Num() ) {
 		return false;
 	}
 
@@ -499,6 +497,18 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	return true;
 }
 
+/*
+==================
+R_AddVideoMode
+
+This function adds videomode to videomodes list
+*/
+
+void R_AddVideoMode( int width, int height )
+{
+	r_vidModes.Append( *( new vidmode_t( width,	height ) ) );
+	common->Printf( "New video mode: \"Mode %d: %dx%d\"\n", r_vidModes.Num()-1, width, height );
+}
 
 /*
 ==================
@@ -522,6 +532,50 @@ void R_InitOpenGL( void ) {
 	int				i;
 
 	common->Printf( "----- Initializing OpenGL -----\n" );
+
+	r_vidModes.Clear();
+
+	// add some initial videomodes
+/*
+	// 4:3
+	R_AddVideoMode( 320,	240 );
+	R_AddVideoMode( 400,	300 );
+	R_AddVideoMode( 512,	384 );
+	R_AddVideoMode( 640,	480 );
+	R_AddVideoMode( 800,	600 );
+	R_AddVideoMode( 1024,	768 );
+	R_AddVideoMode( 1152,	864 );
+	R_AddVideoMode( 1280,	1024 );
+	R_AddVideoMode( 1600,	1200 );
+	R_AddVideoMode( 2048,	1536 );
+	R_AddVideoMode( 3200,	2400 );
+	R_AddVideoMode( 4000,	3000 );
+	R_AddVideoMode( 6400,	3800 );
+
+	// 16:9
+	R_AddVideoMode( 852,	480 );
+	R_AddVideoMode( 1280,	720 );
+	R_AddVideoMode( 1365,	768 );
+	R_AddVideoMode( 1600,	900 );
+	R_AddVideoMode( 1920,	1080 );
+
+	//16:10
+	R_AddVideoMode( 1440,	900 );
+	R_AddVideoMode( 1680,	1050 );
+	R_AddVideoMode( 1920,	1200 );
+	R_AddVideoMode( 2560,	1600 );
+	R_AddVideoMode( 3840,	2400 );
+	R_AddVideoMode( 7680,	4800 );
+*/
+
+	SDL_Rect** modes;
+
+	modes = SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_HWSURFACE);
+
+	for (int i = 0; modes[i]; ++i )
+	{
+		R_AddVideoMode( modes[i]->w, modes[i]->h );
+	}
 
 	if ( glConfig.isInitialized ) {
 		common->FatalError( "R_InitOpenGL called while active" );
@@ -725,8 +779,8 @@ static void R_ListModes_f( const idCmdArgs &args ) {
 	int i;
 
 	common->Printf( "\n" );
-	for ( i = 0; i < s_numVidModes; i++ ) {
-		common->Printf( "%s\n", r_vidModes[i].description );
+	for ( i = 0; i < r_vidModes.Num(); i++ ) {
+		common->Printf( "Mode %d: %dx%d\n", i, r_vidModes[i].width, r_vidModes[i].height );
 	}
 	common->Printf( "\n" );
 }
