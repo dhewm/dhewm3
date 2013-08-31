@@ -24,6 +24,12 @@
 #ifndef _ZLIBIOAPI64_H
 #define _ZLIBIOAPI64_H
 
+// DG: Gentoo renamed zlibs OF to _Z_OF for some reason..
+// as we use OF, just define it as _Z_OF in that case
+#ifdef _Z_OF
+#define OF _Z_OF
+#endif
+
 #if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
 
   // Linux needs this to support file operation on files larger then 4+GB
