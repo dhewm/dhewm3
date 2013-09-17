@@ -24,10 +24,10 @@
 #ifndef _ZLIBIOAPI64_H
 #define _ZLIBIOAPI64_H
 
-// DG: Gentoo renamed zlibs OF to _Z_OF for some reason..
-// as we use OF, just define it as _Z_OF in that case
-#ifdef _Z_OF
-#define OF _Z_OF
+// fixes Gentoo zlib problems, see
+// https://bugs.gentoo.org/show_bug.cgi?id=383179
+#ifndef OF
+#define OF(x) x
 #endif
 
 #if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
