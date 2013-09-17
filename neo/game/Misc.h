@@ -765,4 +765,25 @@ private:
 	idList<idVec3>		lastTargetPos;
 };
 
+//neuro start
+/*
+===============================================================================
+
+idPortalSky
+
+===============================================================================
+*/
+class idPortalSky : public idEntity {
+public:
+	CLASS_PROTOTYPE( idPortalSky );
+
+	idPortalSky();
+	~idPortalSky();
+
+	void				Spawn( void );
+	void				Event_PostSpawn();
+	void				Event_Activate( idEntity *activator );
+};
+//neuro end
+
 #endif /* !__GAME_MISC_H__ */

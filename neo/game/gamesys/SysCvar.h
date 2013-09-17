@@ -254,4 +254,7 @@ extern const char *si_gameTypeArgs[];
 
 extern const char *ui_skinArgs[];
 
+//neuro start
+extern idCVar	g_enablePortalSky;
+//neuro end
 #endif /* !__SYS_CVAR_H__ */

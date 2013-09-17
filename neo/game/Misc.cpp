@@ -3156,3 +3156,93 @@ void idPhantomObjects::Think( void ) {
 		BecomeInactive( TH_THINK );
 	}
 }
+//neuro start
+/*
+===============================================================================
+
+idPortalSky
+
+===============================================================================
+*/
+
+CLASS_DECLARATION( idEntity, idPortalSky )
+	EVENT( EV_PostSpawn,			idPortalSky::Event_PostSpawn )
+	EVENT( EV_Activate,				idPortalSky::Event_Activate )
+END_CLASS
+
+/*
+===============
+idPortalSky::idPortalSky
+===============
+*/
+idPortalSky::idPortalSky( void ) {
+
+}
+
+/*
+===============
+idPortalSky::~idPortalSky
+===============
+*/
+idPortalSky::~idPortalSky( void ) {
+
+}
+
+/*
+===============
+idPortalSky::Spawn
+===============
+*/
+void idPortalSky::Spawn( void ) {
+
+	if ( spawnArgs.GetInt( "type" ) == PORTALSKY_GLOBAL ) {
+		gameLocal.SetGlobalPortalSky( spawnArgs.GetString( "name" ) );
+		gameLocal.portalSkyGlobalOrigin = GetPhysics()->GetOrigin();
+	}
+	
+		
+	if ( !spawnArgs.GetBool( "triggered" ) ) {
+        if ( spawnArgs.GetInt( "type" ) != PORTALSKY_STANDARD ) {
+            gameLocal.portalSkyScale = spawnArgs.GetInt( "scale", "16" );
+        }
+		PostEventMS( &EV_PostSpawn, 1 );
+	}
+
+	
+}
+
+/*
+================
+idPortalSky::Event_PostSpawn
+================
+*/
+void idPortalSky::Event_PostSpawn() {
+
+	gameLocal.SetCurrentPortalSkyType( spawnArgs.GetInt( "type", "0" ) );
+
+	if ( gameLocal.GetCurrentPortalSkyType() != PORTALSKY_GLOBAL ) {
+		gameLocal.portalSkyOrigin = GetPhysics()->GetOrigin();
+		// both standard and local portalSky share the origin, it's in the execution that things change.
+	}
+
+	gameLocal.SetPortalSkyEnt( this );
+}
+
+/*
+================
+idPortalSky::Event_Activate
+================
+*/
+void idPortalSky::Event_Activate( idEntity *activator ) {
+
+	gameLocal.SetCurrentPortalSkyType( spawnArgs.GetInt( "type", "0" ) );
+
+	if ( gameLocal.GetCurrentPortalSkyType() != PORTALSKY_GLOBAL ) {
+		gameLocal.portalSkyOrigin = GetPhysics()->GetOrigin();
+		// both standard and local portalSky share the origin, it's in the execution that things change.
+	}	
+
+	gameLocal.portalSkyScale = spawnArgs.GetInt( "scale", "16" );	
+	gameLocal.SetPortalSkyEnt( this );
+}
+//neuro end

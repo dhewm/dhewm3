@@ -165,6 +165,16 @@ typedef struct {
 
 //============================================================================
 
+//7318 start
+enum {
+	PORTALSKY_STANDARD = 0,			// classic portalsky
+	PORTALSKY_GLOBAL = 1,			// always following portal sky
+	PORTALSKY_LOCAL = 2,			// following portal sky from a spot
+};
+//7318 end
+
+//============================================================================
+
 class idEventQueue {
 public:
 	typedef enum {
@@ -294,6 +304,30 @@ public:
 	idEntityPtr<idEntity>	lastGUIEnt;				// last entity with a GUI, used by Cmd_NextGUI_f
 	int						lastGUI;				// last GUI on the lastGUIEnt
 
+    //neuro start
+        idEntityPtr<idEntity>	                portalSkyEnt;
+	bool					portalSkyActive;
+	//7318 start
+	bool					globalPortalSky;	
+	int					portalSkyScale;		
+	int					currentPortalSkyType;	//0 = classic, 1 = global, 2 = local 
+	idVec3					portalSkyOrigin;	
+	idVec3					portalSkyGlobalOrigin;	
+	idVec3					playerOldEyePos;	
+	//7318 end
+		
+
+	void					SetPortalSkyEnt( idEntity *ent );
+	bool					IsPortalSkyAcive();
+	//7318 start
+	bool					CheckGlobalPortalSky();	
+	void					SetGlobalPortalSky(const char *name);
+	void					SetCurrentPortalSkyType(int type);	// 0 = classic, 1 = global, 2 = local
+	int					GetCurrentPortalSkyType();	//0 = classic, 1 = global, 2 = local
+	//7318 end	
+
+	//neuro end
+
 	// ---------------------- Public idGame Interface -------------------
 
 							idGameLocal();
@@ -386,6 +420,10 @@ public:
 
 	bool					InPlayerPVS( idEntity *ent ) const;
 	bool					InPlayerConnectedArea( idEntity *ent ) const;
+
+    //Ivan_the_B start
+	pvsHandle_t				GetPlayerPVS()			{ return playerPVS; };
+	//Ivan_the_B end
 
 	void					SetCamera( idCamera *cam );
 	idCamera *				GetCamera( void ) const;
