@@ -62,6 +62,16 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 		common->Warning("base path '" BUILD_DATADIR "' does not exist");
 
+		// fallback to vanilla doom3 install
+		if (stat(LINUX_DEFAULT_PATH, &st) != -1 && S_ISDIR(st.st_mode)) {
+			common->Warning("using hardcoded default base path");
+
+			path = LINUX_DEFAULT_PATH;
+			return true;
+		}
+
+		common->Warning("base path '" LINUX_DEFAULT_PATH "' does not exist");
+
 		// try next to the executable..
 		if (Sys_GetPath(PATH_EXE, path)) {
 			path = path.StripFilename();
@@ -71,14 +81,6 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 			} else {
 				path.Clear();
 			}
-		}
-
-		// fallback to vanilla doom3 install
-		if (stat(LINUX_DEFAULT_PATH, &st) != -1 && S_ISDIR(st.st_mode)) {
-			common->Warning("using hardcoded default base path");
-
-			path = LINUX_DEFAULT_PATH;
-			return true;
 		}
 
 		return false;
