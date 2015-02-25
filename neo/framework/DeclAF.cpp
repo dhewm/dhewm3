@@ -893,7 +893,7 @@ bool idDeclAF::ParseBody( idLexer &src ) {
 				src.Error( "custom models not yet implemented" );
 				return false;
 			} else {
-				src.Error( "unkown model type %s", token.c_str() );
+				src.Error( "unknown model type %s", token.c_str() );
 				return false;
 			}
 		} else if ( !token.Icmp( "origin" ) ) {
