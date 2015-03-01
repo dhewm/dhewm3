@@ -48,6 +48,39 @@ static SDL_Surface *window = NULL;
 #define SDL_WINDOW_FULLSCREEN SDL_FULLSCREEN
 #endif
 
+static void SetSDLIcon()
+{
+	Uint32 rmask, gmask, bmask, amask;
+
+	// ok, the following is pretty stupid.. SDL_CreateRGBSurfaceFrom() pretends to use a void* for the data,
+	// but it's really treated as endian-specific Uint32* ...
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	rmask = 0xff000000;
+	gmask = 0x00ff0000;
+	bmask = 0x0000ff00;
+	amask = 0x000000ff;
+#else
+	rmask = 0x000000ff;
+	gmask = 0x0000ff00;
+	bmask = 0x00ff0000;
+	amask = 0xff000000;
+#endif
+
+	#include "doom_icon.h" // contains the struct d3_icon
+
+	SDL_Surface* icon = SDL_CreateRGBSurfaceFrom((void*)d3_icon.pixel_data, d3_icon.width, d3_icon.height,
+			d3_icon.bytes_per_pixel*8, d3_icon.bytes_per_pixel*d3_icon.width,
+			rmask, gmask, bmask, amask);
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_SetWindowIcon(window, icon);
+#else
+	SDL_WM_SetIcon(icon, NULL);
+#endif
+
+	SDL_FreeSurface(icon);
+}
+
 /*
 ===================
 GLimp_Init
@@ -146,7 +179,6 @@ bool GLimp_Init(glimpParms_t parms) {
 									SDL_WINDOWPOS_UNDEFINED,
 									SDL_WINDOWPOS_UNDEFINED,
 									parms.width, parms.height, flags);
-		context = SDL_GL_CreateContext(window);
 
 		if (!window) {
 			common->DPrintf("Couldn't set GL mode %d/%d/%d: %s",
@@ -154,14 +186,20 @@ bool GLimp_Init(glimpParms_t parms) {
 			continue;
 		}
 
+		context = SDL_GL_CreateContext(window);
+
 		if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)
 			common->Warning("SDL_GL_SWAP_CONTROL not supported");
 
 		SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
 
+		SetSDLIcon(); // for SDL2  this must be done after creating the window
+
 		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 #else
 		SDL_WM_SetCaption(GAME_NAME, GAME_NAME);
+
+		SetSDLIcon(); // for SDL1.2  this must be done before creating the window
 
 		if (SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, r_swapInterval.GetInteger()) < 0)
 			common->Warning("SDL_GL_SWAP_CONTROL not supported");
@@ -310,7 +348,7 @@ void GLimp_GrabInput(int flags) {
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
-	SDL_SetRelativeMouseMode(flags & GRAB_HIDECURSOR ? SDL_TRUE : SDL_FALSE);
+	SDL_SetRelativeMouseMode((grab && (flags & GRAB_HIDECURSOR)) ? SDL_TRUE : SDL_FALSE);
 	SDL_SetWindowGrab(window, grab ? SDL_TRUE : SDL_FALSE);
 #else
 	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
