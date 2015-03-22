@@ -28,10 +28,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/platform.h"
 
-#include "renderer/jpeg_memory_src.h"
 #include "renderer/tr_local.h"
 
 #include "renderer/Image.h"
+
+#include <jpeglib.h>
+#include <jerror.h>
 
 /*
 
@@ -824,7 +826,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
   /* Step 2: specify data source (eg, a file) */
 
-  jpeg_memory_src(&cinfo, fbuffer, len);
+  jpeg_mem_src(&cinfo, fbuffer, len);
 
   /* Step 3: read file parameters with jpeg_read_header() */
 

@@ -29,11 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/platform.h"
 
 #include "framework/FileSystem.h"
-#include "renderer/jpeg_memory_src.h"
 #include "renderer/tr_local.h"
 #include "sound/sound.h"
 
 #include "renderer/Cinematic.h"
+
+#include <jpeglib.h>
+#include <jerror.h>
 
 #define CIN_system	1
 #define CIN_loop	2
@@ -1309,7 +1311,7 @@ int JPEGBlit( byte *wStatus, byte *data, int datasize )
 
   /* Step 2: specify data source (eg, a file) */
 
-  jpeg_memory_src(&cinfo, data, datasize);
+  jpeg_mem_src(&cinfo, data, datasize);
 
   /* Step 3: read file parameters with jpeg_read_header() */
 

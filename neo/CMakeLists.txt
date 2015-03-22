@@ -86,7 +86,6 @@ include_directories(${JPEG_INCLUDE_DIR})
 
 set(CMAKE_REQUIRED_INCLUDES ${JPEG_INCLUDE_DIR})
 set(CMAKE_REQUIRED_LIBRARIES ${JPEG_LIBRARY})
-CHECK_FUNCTION_EXISTS("jpeg_mem_src" HAVE_JPEG_MEM_SRC)
 
 find_package(OGG REQUIRED)
 include_directories(${OGG_INCLUDE_DIR})
@@ -279,7 +278,6 @@ if(NOT APPLE AND NOT WIN32)
 endif()
 
 set(src_renderer
-	renderer/jpeg_memory_src.cpp
 	renderer/Cinematic.cpp
 	renderer/GuiModel.cpp
 	renderer/Image_files.cpp
