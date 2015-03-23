@@ -95,6 +95,9 @@ extern	void ( APIENTRY *qglColorTableEXT)( int, int, int, int, int, const void *
 // EXT_stencil_two_side
 extern	PFNGLACTIVESTENCILFACEEXTPROC	qglActiveStencilFaceEXT;
 
+// glStencilOpSeparate
+extern PFNGLSTENCILOPSEPARATEPROC		qglStencilOpSeparate;
+
 // ARB_texture_compression
 extern	PFNGLCOMPRESSEDTEXIMAGE2DARBPROC	qglCompressedTexImage2DARB;
 extern	PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	qglGetCompressedTexImageARB;

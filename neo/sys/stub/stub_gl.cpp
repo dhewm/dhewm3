@@ -297,6 +297,7 @@ void APIENTRY glShadeModel(GLenum mode){};
 void APIENTRY glStencilFunc(GLenum func, GLint ref, GLuint mask){};
 void APIENTRY glStencilMask(GLuint mask){};
 void APIENTRY glStencilOp(GLenum fail, GLenum zfail, GLenum zpass){};
+void APIENTRY glStencilOp(GLenum face, GLenum fail, GLenum zfail, GLenum zpass){};
 void APIENTRY glTexCoord1d(GLdouble s){};
 void APIENTRY glTexCoord1dv(const GLdouble *v){};
 void APIENTRY glTexCoord1f(GLfloat s){};
