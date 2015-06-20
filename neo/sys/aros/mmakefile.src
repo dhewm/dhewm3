@@ -1,0 +1,8 @@
+# Copyright © 2004, The AROS Development Team. All rights reserved.
+# $Id: mmakefile.src 33489 2010-06-07 23:03:12Z mazze $
+
+include $(TOP)/config/make.cfg
+
+DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/ADoom3
+DOOM3_ICONS := ADoom3 "ADoom3 - Resurrection of Evil"
+%build_icons mmake=iconset-Gorilla-contrib-games-doom3game icons="$(DOOM3_ICONS)" dir=$(DOOM3_EXEDIR)

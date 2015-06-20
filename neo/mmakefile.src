@@ -1,0 +1,47 @@
+# Copyright © 2012-2015, Nick "Kalamatee" Andrews.
+# $Id$
+
+-include $(TOP)/config/make.cfg
+
+DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/ADoom3
+DOOM3_GAMEDIR := base
+
+GRAPHITE_CFLAGS := \
+                -ftree-loop-linear -floop-strip-mine -floop-block
+
+USER_CFLAGS := \
+                -ffast-math -fomit-frame-pointer \
+                -Wno-error -fexceptions -static-libstdc++
+
+#MM- aros-doom3-libs : contrib-openal-linklib development-libogg development-libvorbis
+#MM- aros-doom3-libs : contrib-curl contrib-sdl development-SDL_gfx-quick
+
+#MM aros-doom3 : aros-doom3-libs iconset-Gorilla-contrib-icons-extras-games-adoom3 iconset-Gorilla-contrib-games-doom3game
+
+DOOM3_OPTIONS := -DCORE=ON -DDEDICATED=ON -DBASE=ON -DSDL2=OFF\
+        -DCMAKE_INSTALL_BINDIR= \
+        -DCMAKE_INSTALL_LIBDIR= \
+        -DZLIB_LIBRARY=$(AROS_DEVELOPMENT)/lib/libz.a \
+        -DZLIB_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+        -DJPEG_LIBRARY=$(AROS_DEVELOPMENT)/lib/libjpeg.a \
+        -DJPEG_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+        -DOPENAL_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+        -DOPENAL_LIBRARY="$(AROS_DEVELOPMENT)/lib/libopenal.a;$(AROS_DEVELOPMENT)/lib/libpthread.a;" \
+        -DOGG_LIBRARY=$(AROS_DEVELOPMENT)/lib/libogg.a \
+        -DOGG_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+        -DVORBIS_LIBRARY=$(AROS_DEVELOPMENT)/lib/libvorbis.a \
+        -DVORBIS_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+        -DVORBISFILE_LIBRARY=$(AROS_DEVELOPMENT)/lib/libvorbisfile.a \
+        -DVORBISFILE_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+	-DCURL_LIBRARY="$(AROS_DEVELOPMENT)/lib/libcurl.a;$(AROS_DEVELOPMENT)/lib/libiconv.a;$(AROS_DEVELOPMENT)/lib/libz.a;$(AROS_DEVELOPMENT)/lib/libssl.a;$(AROS_DEVELOPMENT)/lib/libcrypto.a;" \
+        -DCURL_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include \
+        -DSDL_LIBRARY=$(AROS_DEVELOPMENT)/lib/libSDL.a \
+        -DSDL_INCLUDE_DIR=$(AROS_DEVELOPMENT)/include/SDL
+
+%build_with_cmake mmake=aros-doom3		\
+    	prefix="$(DOOM3_EXEDIR)"		\
+	extraoptions="$(DOOM3_OPTIONS)"
+
+%build_icons mmake=iconset-Gorilla-contrib-icons-extras-games-adoom3 icons=ADoom3 dir=$(AROS_CONTRIB)/Games
+
+%common

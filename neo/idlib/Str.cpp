@@ -817,7 +817,11 @@ idStr::DefaultPath
 ==================
 */
 idStr &idStr::DefaultPath( const char *basepath ) {
+#if defined(__AROS__)
+	if ( ( ( *this )[ 0 ] == '/' ) || ( ( *this )[ 0 ] == '\\' ) || ( ( *this )[ 0 ] == ':' ) ) {
+#else
 	if ( ( ( *this )[ 0 ] == '/' ) || ( ( *this )[ 0 ] == '\\' ) ) {
+#endif
 		// absolute path location
 		return *this;
 	}
@@ -840,11 +844,19 @@ void idStr::AppendPath( const char *text ) {
 		EnsureAlloced( len + strlen( text ) + 2 );
 
 		if ( pos ) {
+#if defined(__AROS__)
+			if (( data[ pos-1 ] != '/' ) || ( data[ pos-1 ] != ':' )) {
+#else
 			if ( data[ pos-1 ] != '/' ) {
+#endif
 				data[ pos++ ] = '/';
 			}
 		}
+#if defined(__AROS__)
+		if (( text[i] == '/' ) || ( text[i] == ':' )) {
+#else
 		if ( text[i] == '/' ) {
+#endif
 			i++;
 		}
 
@@ -869,7 +881,11 @@ idStr &idStr::StripFilename( void ) {
 	int pos;
 
 	pos = Length() - 1;
+#if defined(__AROS__)
+	while( ( pos > 0 ) && ( ( *this )[ pos ] != '/' ) && ( ( *this )[ pos ] != '\\' ) && ( ( *this )[ pos ] != ':' ) ) {
+#else
 	while( ( pos > 0 ) && ( ( *this )[ pos ] != '/' ) && ( ( *this )[ pos ] != '\\' ) ) {
+#endif
 		pos--;
 	}
 
@@ -890,7 +906,11 @@ idStr &idStr::StripPath( void ) {
 	int pos;
 
 	pos = Length();
+#if defined(__AROS__)
+	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' )  && ( ( *this )[ pos - 1 ] != ':' ) ) {
+#else
 	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) ) {
+#endif
 		pos--;
 	}
 
@@ -910,7 +930,11 @@ void idStr::ExtractFilePath( idStr &dest ) const {
 	// back up until a \ or the start
 	//
 	pos = Length();
+#if defined(__AROS__)
+	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) && ( ( *this )[ pos - 1 ] != ':' ) ) {
+#else
 	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) ) {
+#endif
 		pos--;
 	}
 
@@ -929,7 +953,11 @@ void idStr::ExtractFileName( idStr &dest ) const {
 	// back up until a \ or the start
 	//
 	pos = Length() - 1;
+#if defined(__AROS__)
+	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) && ( ( *this )[ pos - 1 ] != ':' ) ) {
+#else
 	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) ) {
+#endif
 		pos--;
 	}
 
@@ -949,7 +977,11 @@ void idStr::ExtractFileBase( idStr &dest ) const {
 	// back up until a \ or the start
 	//
 	pos = Length() - 1;
+#if defined(__AROS__)
+	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) && ( ( *this )[ pos - 1 ] != ':' ) ) {
+#else
 	while( ( pos > 0 ) && ( ( *this )[ pos - 1 ] != '/' ) && ( ( *this )[ pos - 1 ] != '\\' ) ) {
+#endif
 		pos--;
 	}
 

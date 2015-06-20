@@ -1,0 +1,18 @@
+# $Id$
+
+include $(TOP)/config/make.cfg
+
+#MM- aros-doom3 : aros-doom3-defconfig
+
+#MM aros-doom3-defconfig : aros-doom3-dirs
+
+aros-doom3-defconfig:  $(AROS_CONTRIB)/Games/ADoom3/base/default.cfg
+
+$(AROS_CONTRIB)/Games/ADoom3/base/default.cfg: $(SRCDIR)/$(CURDIR)/default.cfg
+	@$(CP) $< $@
+        
+#MM
+aros-doom3-dirs :
+	%mkdirs_q $(AROS_CONTRIB)/Games/ADoom3/base
+
+%common
