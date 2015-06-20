@@ -59,7 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 const char *kbdNames[] = {
-	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", NULL
+	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", "brazilian", NULL
 };
 
 idCVar in_kbd("in_kbd", "english", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
@@ -343,6 +343,9 @@ unsigned char Sys_GetConsoleKey(bool shifted) {
 			} else if (!lang.Icmp("norwegian")) {
 				keys[0] = 124; // |
 				keys[1] = 167; // §
+			} else if (!lang.Icmp("brazilian")) {
+				keys[0] = '\'';
+				keys[1] = '"';
 			}
 		}
 
