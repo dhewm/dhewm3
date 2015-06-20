@@ -64,12 +64,18 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 #define StrCmpNI		use_idStr_Icmpn
 
+#if defined( stricmp )
+#undef stricmp
+#endif
 #define stricmp			idStr::Icmp		// use_idStr_Icmp
 #define _stricmp		use_idStr_Icmp
 #if defined( strcasecmp )
 #undef strcasecmp
 #endif
 #define strcasecmp		use_idStr_Icmp
+#if defined( strnicmp )
+#undef strnicmp
+#endif
 #define strnicmp		use_idStr_Icmpn
 #define _strnicmp		use_idStr_Icmpn
 #define _memicmp		use_idStr_Icmpn

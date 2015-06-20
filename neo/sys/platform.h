@@ -41,6 +41,34 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // Win32
+#if defined(__AROS__)
+
+#define _alloca						alloca
+#define _alloca16( x )				((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
+
+#ifdef GAME_DLL
+#define ID_GAME_API					__attribute__((visibility ("default")))
+#else
+#define ID_GAME_API
+#endif
+
+#define ALIGN16( x )				x __attribute__ ((aligned (16)))
+#define PACKED						__attribute__((packed))
+
+#define PATHSEPERATOR_STR			"/"
+#define PATHSEPERATOR_CHAR			'/'
+
+#define __cdecl
+#define ASSERT						assert
+
+#define ID_INLINE					inline
+#define ID_STATIC_TEMPLATE
+
+#define assertmem( x, y )
+
+#endif
+
+// Win32
 #if defined(WIN32) || defined(_WIN32)
 
 #define _alloca16( x )				((void *)((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15))
