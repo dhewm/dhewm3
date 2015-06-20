@@ -43,6 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ENGINE_VERSION					"dhewm 3 1.4.1"	// printed in console
 #endif
+#endif
 
 // paths
 #define	BASE_GAMEDIR					"base"
