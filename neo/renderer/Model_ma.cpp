@@ -1030,7 +1030,6 @@ maModel_t *MA_Load( const char *fileName ) {
 		}
 		ma = NULL;
 	}
-
 	fileSystem->FreeFile( buf );
 
 	return ma;
