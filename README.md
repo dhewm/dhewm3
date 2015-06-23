@@ -75,6 +75,14 @@ OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
 `cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
 
+### Mods
+
+See https://github.com/DanielGibson/dhewm3-mods for instructions on how to build
+some mods that provide source und GPL and how to port other mods to _dhewm3_.
+
+Basically, you have to clone aforementioned repository to `dhewm3/neo/mods`
+and run cmake with `-DMODS=ON`
+
 ## Using the provided Windows binaries
 
 Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
