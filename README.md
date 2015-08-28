@@ -3,7 +3,7 @@
 _dhewm 3_ is a _Doom 3_ GPL source modification.
 
 The goal of _dhewm 3_ is bring _DOOM 3_ with the help of SDL to all suitable
-plaforms.
+platforms.
 
 Bugs present in the original _DOOM 3_ will be fixed (when identified) without
 altering the original gameplay.
@@ -57,7 +57,7 @@ Required libraries are not part of the tree. These are:
 - SDL v1.2
 - libcurl (optional, required for server downloads)
 
-For UNIX like system these libraries need to be installed (including the
+For UNIX-like systems these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
 your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
 
@@ -79,7 +79,7 @@ OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
 Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
 
-There are two subfolder:
+There are two subfolders:
 
 - 32bit binaries are located in "i686-w64-mingw32"
 - 64bit binaries are located in "x86_64-w64-mingw32"
