@@ -13,7 +13,7 @@ USER_CFLAGS := \
                 -ffast-math -fomit-frame-pointer \
                 -Wno-error -fexceptions -static-libstdc++
 
-#MM- aros-doom3-libs : contrib-openal-linklib development-libogg development-libvorbis
+#MM- aros-doom3-libs : workbench-libs-jpeg-linklib contrib-openal-linklib development-libogg development-libvorbis
 #MM- aros-doom3-libs : contrib-curl contrib-sdl development-SDL_gfx-quick
 
 #MM aros-doom3 : aros-doom3-libs iconset-Gorilla-contrib-icons-extras-games-adoom3 iconset-Gorilla-contrib-games-doom3game
