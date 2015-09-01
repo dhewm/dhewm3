@@ -893,4 +893,5 @@ int main(int argc, char **argv) {
     while (1) {
             common->Frame();
     }
+    return 0;
 }
