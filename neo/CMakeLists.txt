@@ -29,7 +29,7 @@ option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
-option(SDL2			"Use SDL2 instead of SDL1.2" OFF)
+option(SDL2			"Use SDL2 instead of SDL1.2" ON)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
