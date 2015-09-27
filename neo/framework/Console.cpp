@@ -792,8 +792,15 @@ ProcessEvent
 ==============
 */
 bool	idConsoleLocal::ProcessEvent( const sysEvent_t *event, bool forceAccept ) {
-	bool consoleKey;
-	consoleKey = event->evType == SE_KEY && ( event->evValue == Sys_GetConsoleKey( false ) || event->evValue == Sys_GetConsoleKey( true ) );
+	bool consoleKey = false;
+	if(event->evType == SE_KEY)
+	{
+		if( event->evValue == Sys_GetConsoleKey( false ) || event->evValue == Sys_GetConsoleKey( true )
+		    || (event->evValue == K_ESCAPE && idKeyInput::IsDown( K_SHIFT )) ) // shift+esc should also open console
+		{
+			consoleKey = true;
+		}
+	}
 
 #if ID_CONSOLE_LOCK
 	// If the console's not already down, and we have it turned off, check for ctrl+alt
@@ -821,8 +828,9 @@ bool	idConsoleLocal::ProcessEvent( const sysEvent_t *event, bool forceAccept ) {
 		} else {
 			consoleField.Clear();
 			keyCatching = true;
-			if ( idKeyInput::IsDown( K_SHIFT ) ) {
+			if ( idKeyInput::IsDown( K_SHIFT ) && event->evValue != K_ESCAPE ) {
 				// if the shift key is down, don't open the console as much
+				// except we used shift+esc.
 				SetDisplayFraction( 0.2f );
 			} else {
 				SetDisplayFraction( 0.5f );
