@@ -2387,7 +2387,7 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	// FIXME: somehow, this is happening occasionally
 	assert( fov_y > 0 );
 	if ( fov_y <= 0 ) {
-		Error( "idGameLocal::CalcFov: bad result, fov_y == %f, base_fov == ", fov_y, base_fov );
+		Error( "idGameLocal::CalcFov: bad result, fov_y == %f, base_fov == %f", fov_y, base_fov );
 	}
 
 	switch( r_aspectRatio.GetInteger() ) {
