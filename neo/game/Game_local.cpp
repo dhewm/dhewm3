@@ -2387,7 +2387,7 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	// FIXME: somehow, this is happening occasionally
 	assert( fov_y > 0 );
 	if ( fov_y <= 0 ) {
-		Error( "idGameLocal::CalcFov: bad result" );
+		Error( "idGameLocal::CalcFov: bad result, fov_y == %f, base_fov == ", fov_y, base_fov );
 	}
 
 	switch( r_aspectRatio.GetInteger() ) {
@@ -2396,6 +2396,13 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 		// auto mode => use aspect ratio from resolution, assuming screen's pixels are squares
 		ratio_x = renderSystem->GetScreenWidth();
 		ratio_y = renderSystem->GetScreenHeight();
+		if(ratio_x <= 0.0f || ratio_y <= 0.0f)
+		{
+			// for some reason (maybe this is a dedicated server?) GetScreenWidth()/Height()
+			// returned 0. Assume default 4:3 to avoid assert()/Error() below.
+			fov_x = base_fov;
+			return;
+		}
 		break;
 	case 0 :
 		// 4:3
