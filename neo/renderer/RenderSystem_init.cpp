@@ -449,7 +449,7 @@ R_GetModeInfo
 
 r_mode is normally a small non-negative integer that
 looks resolutions up in a table, but if it is set to -1,
-the values from r_customWidth, amd r_customHeight
+the values from r_customWidth, and r_customHeight
 will be used instead.
 ====================
 */
@@ -468,6 +468,20 @@ vidmode_t r_vidModes[] = {
 	{ "Mode  6: 1152x864",		1152,	864 },
 	{ "Mode  7: 1280x1024",		1280,	1024 },
 	{ "Mode  8: 1600x1200",		1600,	1200 },
+	// DG: from here on: modes I added.
+	{ "Mode  9: 1280x720",		1280,	720 },
+	{ "Mode 10: 1366x768",		1366,	768 },
+	{ "Mode 11: 1440x900",		1440,	900 },
+	{ "Mode 12: 1400x1050",		1400,	1050 },
+	{ "Mode 13: 1600x900",		1600,	900 },
+	{ "Mode 14: 1680x1050",		1680,	1050 },
+	{ "Mode 15: 1920x1080",		1920,	1080 },
+	{ "Mode 16: 1920x1200",		1920,	1200 },
+	{ "Mode 17: 2048x1152",		2048,	1152 },
+	{ "Mode 18: 2560x1600",		2560,	1600 },
+	{ "Mode 19: 3200x2400",		3200,	2400 },
+	{ "Mode 20: 3840x2160",		3840,   2160 },
+	{ "Mode 21: 4096x2304",		4096,   2304 },
 };
 static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
@@ -498,6 +512,40 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 
 	return true;
 }
+
+// DG: the following two functions are part of a horrible hack in ChoiceWindow.cpp
+//     to overwrite the default resolution list in the system options menu
+
+// "r_custom*;640x480;800x600;1024x768;..."
+idStr R_GetVidModeListString()
+{
+	idStr ret = "r_custom*";
+	// for some reason, modes 0-2 are not used. maybe too small for GUI?
+	for(int mode=3; mode<s_numVidModes; ++mode)
+	{
+		int w, h;
+		if(R_GetModeInfo(&w, &h, mode))
+		{
+			idStr modeStr;
+			sprintf(modeStr, ";%dx%d", w, h);
+			ret += modeStr;
+		}
+	}
+	return ret;
+}
+
+// r_mode values for resolutions from R_GetVidModeListString(): "-1;3;4;5;..."
+idStr R_GetVidModeValsString()
+{
+	idStr ret =  "-1"; // for custom resolutions using r_customWidth/r_customHeight
+	for(int mode=3; mode<s_numVidModes; ++mode)
+	{
+		ret += ";";
+		ret += mode;
+	}
+	return ret;
+}
+// DG end
 
 
 /*

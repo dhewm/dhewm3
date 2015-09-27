@@ -352,8 +352,22 @@ void idChoiceWindow::UpdateChoicesAndVals( void ) {
 	}
 }
 
+idStr R_GetVidModeListString();
+idStr R_GetVidModeValsString();
+
 void idChoiceWindow::PostParse() {
 	idWindow::PostParse();
+
+	// DG: HACKHACKFUCKINGUGLYHACK: overwrite resolution list from mainmenu.gui
+	//     to support more resolutions and widescreen and stuff.
+	if( idStr::Cmp(GetName(), "OS2Primary") == 0 && cvarStr == "r_mode"
+	    && idStr::Icmp(GetGui()->GetSourceFile(), "guis/mainmenu.gui") == 0 )
+	{
+		choicesStr.Set( R_GetVidModeListString() );
+		choiceVals.Set( R_GetVidModeValsString() );
+	}
+	// DG end
+
 	UpdateChoicesAndVals();
 
 	InitVars();
