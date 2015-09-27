@@ -363,6 +363,8 @@ Posix_InitConsoleInput
 void Posix_InitConsoleInput( void ) {
 	struct termios tc;
 
+	common->StartupVariable( "in_tty", false );
+
 	if ( in_tty.GetBool() ) {
 		if ( isatty( STDIN_FILENO ) != 1 ) {
 			Sys_Printf( "terminal support disabled: stdin is not a tty\n" );
@@ -415,7 +417,7 @@ void Posix_InitConsoleInput( void ) {
 				Sys_Printf( "WARNING: terminal type '%s' is unknown. terminal support may not work correctly\n", term );
 			}
 		}
-		Sys_Printf( "terminal support enabled ( use +set in_tty 0 to disabled )\n" );
+		Sys_Printf( "terminal support enabled ( use +set in_tty 0 to disable )\n" );
 	} else {
 		Sys_Printf( "terminal support disabled\n" );
 	}
