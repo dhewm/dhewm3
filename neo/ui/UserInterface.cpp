@@ -342,8 +342,23 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 	}
 
 	if ( event->evType == SE_MOUSE ) {
-		cursorX += event->evValue;
-		cursorY += event->evValue2;
+		if ( !desktop || (desktop->GetFlags() & WIN_MENUGUI) ) {
+			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
+			//     so by 640/w, because the GUI pretends that everything is 640x480
+			//     even if the actual resolution is higher => mouse moved too fast
+			float w = renderSystem->GetScreenWidth();
+			float h = renderSystem->GetScreenHeight();
+			if( w <= 0.0f || h <= 0.0f ) {
+				w = 640.0f;
+				h = 480.0f;
+			}
+			cursorX += event->evValue * (640.0f/w);
+			cursorY += event->evValue2 * (480.0f/h);
+		} else {
+			// not a fullscreen GUI but some ingame thing - no scaling needed
+			cursorX += event->evValue;
+			cursorY += event->evValue2;
+		}
 
 		if (cursorX < 0) {
 			cursorX = 0;
