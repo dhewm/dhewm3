@@ -393,17 +393,17 @@ sysEvent_t Sys_GetEvent() {
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	static char *s = NULL;
+	static char s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
 	static size_t s_pos = 0;
 
-	if (s) {
+	if (s[0] != '\0') {
 		res.evType = SE_CHAR;
 		res.evValue = s[s_pos];
 
-		s_pos++;
-		if (!s[s_pos]) {
-			free(s);
-			s = NULL;
+		++s_pos;
+
+		if (!s[s_pos] || s_pos == SDL_TEXTINPUTEVENT_TEXT_SIZE) {
+			memset(s, 0, sizeof(s));
 			s_pos = 0;
 		}
 
@@ -532,10 +532,15 @@ sysEvent_t Sys_GetEvent() {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_TEXTINPUT:
 			if (ev.text.text[0]) {
-				if (!ev.text.text[1])
-					c = *ev.text.text;
-				else
-					s = strdup(ev.text.text);
+				res.evType = SE_CHAR;
+				res.evValue = ev.text.text[0];
+
+				if (ev.text.text[1] != '\0')
+				{
+					memcpy(s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE);
+					s_pos = 1; // pos 0 is returned
+				}
+				return res;
 			}
 
 			return res_none;
