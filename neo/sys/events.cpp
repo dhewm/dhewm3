@@ -422,7 +422,8 @@ sysEvent_t Sys_GetEvent() {
 		return res;
 	}
 
-	if (SDL_PollEvent(&ev)) {
+	// loop until there is an event we care about (will return then) or no more events
+	while(SDL_PollEvent(&ev)) {
 		switch (ev.type) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_WINDOWEVENT:
@@ -446,7 +447,7 @@ sysEvent_t Sys_GetEvent() {
 					break;
 			}
 
-			return res_none;
+			continue; // handle next event
 #else
 		case SDL_ACTIVEEVENT:
 			{
@@ -468,10 +469,10 @@ sysEvent_t Sys_GetEvent() {
 				GLimp_GrabInput(flags);
 			}
 
-			return res_none;
+			continue; // handle next event
 
 		case SDL_VIDEOEXPOSE:
-			return res_none;
+			continue; // handle next event
 #endif
 
 		case SDL_KEYDOWN:
@@ -495,19 +496,18 @@ sysEvent_t Sys_GetEvent() {
 				} else {
 					if (ev.type == SDL_KEYDOWN)
 						common->Warning("unmapped SDL key %d (0x%x)", ev.key.keysym.sym, ev.key.keysym.unicode);
-					return res_none;
+					continue; // handle next event
 				}
 			}
 #else
 			if(!key) {
-				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) {
+				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) { // TODO: always do this check?
 					key = Sys_GetConsoleKey(true);
 				} else {
 					if (ev.type == SDL_KEYDOWN) {
 						common->Warning("unmapped SDL key %d", ev.key.keysym.sym);
-					return res_none;
 					}
-
+					continue; // handle next event
 				}
 			}
 
@@ -543,7 +543,7 @@ sysEvent_t Sys_GetEvent() {
 				return res;
 			}
 
-			return res_none;
+			continue; // handle next event
 #endif
 
 		case SDL_MOUSEMOTION:
@@ -622,11 +622,11 @@ sysEvent_t Sys_GetEvent() {
 				return res;
 			default:
 				common->Warning("unknown user event %u", ev.user.code);
-				return res_none;
+				continue; // handle next event
 			}
 		default:
 			common->Warning("unknown event %u", ev.type);
-			return res_none;
+			continue; // handle next event
 		}
 	}
 
