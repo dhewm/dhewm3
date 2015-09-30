@@ -59,7 +59,7 @@ Required libraries are not part of the tree. These are:
 
 For UNIX-like systems these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
-your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
+your OS (apt-get, portage, rpm, BSD ports, [Homebrew for OS X](http://brew.sh), ...).
 
 For Windows there are two options:
 
