@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(dhewm3)
-cmake_minimum_required(VERSION 2.6)
 
 # TODO
 
@@ -17,11 +17,20 @@ cmake_minimum_required(VERSION 2.6)
 # LIBC_MALLOC		-DUSE_LIBC_MALLOC=0
 # ID_NOLANADDRESS	-DID_NOLANADDRESS
 
+# fallback for cmake versions without add_compile_options
+if(NOT COMMAND add_compile_options)
+	function(add_compile_options)
+		foreach(arg ${ARGN})
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${arg}" PARENT_SCOPE)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${arg}" PARENT_SCOPE)
+		endforeach()
+	endfunction()
+endif()
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
 set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 
 include(CheckCXXCompilerFlag)
-include(CheckFunctionExists)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 
 option(CORE			"Build the core" ON)
@@ -129,13 +138,13 @@ endif()
 
 # compiler specific flags
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	add_definitions(-pipe)
-	add_definitions(-Wall)
+	add_compile_options(-pipe)
+	add_compile_options(-Wall)
 
 	if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
-		add_definitions(-march=native)
+		add_compile_options(-march=native)
 	elseif(NOT APPLE AND cpu STREQUAL "x86")
-		add_definitions(-march=pentium3)
+		add_compile_options(-march=pentium3)
 	endif()
 
 	set(CMAKE_C_FLAGS_DEBUG "-g -D_DEBUG -O1")
@@ -148,47 +157,47 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
 
-	add_definitions(-fno-strict-aliasing)
+	add_compile_options(-fno-strict-aliasing)
 
 	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
 	if(NOT cxx_has_fvisibility)
 		message(FATAL_ERROR "Compiler does not support -fvisibility")
 	endif()
-	add_definitions(-fvisibility=hidden)
+	add_compile_options(-fvisibility=hidden)
 
 	# TODO fix these warnings
-	add_definitions(-Wno-sign-compare)
-	add_definitions(-Wno-switch)
-	add_definitions(-Wno-format-security)
+	add_compile_options(-Wno-sign-compare)
+	add_compile_options(-Wno-switch)
+	add_compile_options(-Wno-format-security)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 	if(cxx_has_Woverload_virtual)
-		add_definitions(-Woverloaded-virtual)
+		add_compile_options(-Woverloaded-virtual)
 	endif()
 
 	if(APPLE)
 		add_definitions(-DMACOS_X=1)
 
 		if(cpu STREQUAL "x86_64")
-			add_definitions(-arch x86_64 -mmacosx-version-min=10.6)
+			add_compile_options(-arch x86_64 -mmacosx-version-min=10.6)
 			set(ldflags "${ldflags} -arch x86_64 -mmacosx-version-min=10.6")
 		elseif(cpu STREQUAL "x86")
 			CHECK_CXX_COMPILER_FLAG("-arch i386" cxx_has_arch_i386)
 			if(cxx_has_arch_i386)
-				add_definitions(-arch i386)
+				add_compile_options(-arch i386)
 				set(ldflags "${ldflags} -arch i386")
 			endif()
 
-			add_definitions(-mmacosx-version-min=10.4)
+			add_compile_options(-mmacosx-version-min=10.4)
 			set(ldflags "${ldflags} -mmacosx-version-min=10.4")
 		elseif(cpu STREQUAL "ppc")
 			CHECK_CXX_COMPILER_FLAG("-arch ppc" cxx_has_arch_ppc)
 			if(cxx_has_arch_ppc)
-				add_definitions(-arch ppc)
+				add_compile_options(-arch ppc)
 				set(ldflags "${ldflags} -arch ppc")
 			endif()
 
-			add_definitions(-mmacosx-version-min=10.4)
+			add_compile_options(-mmacosx-version-min=10.4)
 			set(ldflags "${ldflags} -mmacosx-version-min=10.4")
 		else()
 			message(FATAL_ERROR "Unsupported CPU architecture for OSX")
@@ -197,21 +206,19 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework IOKit")
 	elseif(WIN32)
 		set(ldflags "${ldflags} -static-libgcc -static-libstdc++")
-	else()
-		if(os STREQUAL "linux")
-			set(sys_libs ${sys_libs} dl)
-		endif()
+	elseif(os STREQUAL "linux")
+		set(sys_libs ${sys_libs} dl)
 	endif()
 elseif(MSVC)
-	add_definitions(/W4)
-	add_definitions(/wd4100) # unreferenced formal parameter
-	add_definitions(/wd4127) # conditional expression is constant
-	add_definitions(/wd4244) # possible loss of data
-	add_definitions(/wd4245) # signed/unsigned mismatch
-	add_definitions(/wd4267) # possible loss of data
-	add_definitions(/wd4714) # 'function' marked as __forceinline not inlined
-	add_definitions(/wd4996) # 'function': was declared deprecated
-	add_definitions(/wd4068) # unknown pragma
+	add_compile_options(/W4)
+	add_compile_options(/wd4100) # unreferenced formal parameter
+	add_compile_options(/wd4127) # conditional expression is constant
+	add_compile_options(/wd4244) # possible loss of data
+	add_compile_options(/wd4245) # signed/unsigned mismatch
+	add_compile_options(/wd4267) # possible loss of data
+	add_compile_options(/wd4714) # 'function' marked as __forceinline not inlined
+	add_compile_options(/wd4996) # 'function': was declared deprecated
+	add_compile_options(/wd4068) # unknown pragma
 	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
@@ -235,6 +242,7 @@ if(WIN32)
 		winmm
 		iphlpapi
 		wsock32
+		ole32
 	)
 endif()
 
@@ -670,8 +678,8 @@ set(src_stub_gl			sys/stub/stub_gl.cpp)
 
 if(APPLE)
 	set(OSX_RESOURCE_FILES
-			"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
-			"${CMAKE_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
+		"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
+		"${CMAKE_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
 	)
 
 	set_source_files_properties(${OSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -693,6 +701,10 @@ if(APPLE)
 		${OSX_RESOURCE_FILES}
 	)
 elseif(WIN32)
+	set(WIN32_RESOURCE_FILES
+		"${CMAKE_SOURCE_DIR}/sys/win32/rc/dhewm3.rc"
+	)
+
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
@@ -708,6 +720,7 @@ elseif(WIN32)
 
 	set(src_sys_core
 		sys/glimp.cpp
+		${WIN32_RESOURCE_FILES}
 	)
 else()
 	set(src_sys_base
