@@ -23,6 +23,7 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 - SDL for low level OS support, OpenGL and input handling
 - OpenAL for audio output, all OS specific audio backends are gone
 - OpenAL EFX for EAX reverb effects (read: EAX on all platforms)
+- Better support for widescreen (and arbitrary display resolutions)
 - A portable build system based on CMake
 - (Cross-)compilation with mingw-w64
 
@@ -34,13 +35,21 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 This source release does not contain any game data, the game data is still
 covered by the original EULA and must be obeyed as usual.
 
-You must patch the game to the latest version.
+You must patch the game to the latest version (1.3.1). See the FAQ for details, including
+how to get the game data from Steam on Linux or OSX.
 
 Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam store at
 
 http://store.steampowered.com/app/9050/
 
 http://store.steampowered.com/app/9070/
+
+You can also buy Steam keys at the Humble Store; currently this seems the only way to
+buy a Doom3 Steam key in Germany (Note that Germans still can't buy the RoE Addon there):
+
+https://www.humblebundle.com/store/p/doom3_storefront
+
+https://www.humblebundle.com/store/p/doom3_resofevil_storefront
 
 ## Compiling
 
@@ -119,7 +128,7 @@ Then point CMake at your Toolchain file:
 ## Back End Rendering of Stencil Shadows
 
 The Doom 3 GPL source code release does not include functionality enabling rendering
-of stencil shadows via the depth fail method, a functionality commonly known as
+of stencil shadows via the "depth fail" method, a functionality commonly known as
 "Carmack's Reverse".
 
 ## MayaImport

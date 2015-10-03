@@ -75,7 +75,7 @@ If you have questions concerning this license or the applicable additional terms
 	#define	ID_ALLOW_TOOLS
 #endif
 
-#define ID_ENFORCE_KEY_CLIENT 0
+#define ID_ENFORCE_KEY 0
 
 #ifndef ID_ENFORCE_KEY
 #	if !defined( ID_DEDICATED )

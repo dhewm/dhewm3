@@ -344,7 +344,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 	if ( event->evType == SE_MOUSE ) {
 		if ( !desktop || (desktop->GetFlags() & WIN_MENUGUI) ) {
 			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
-			//     so by 640/w, because the GUI pretends that everything is 640x480
+			//     by 640/w, because the GUI pretends that everything is 640x480
 			//     even if the actual resolution is higher => mouse moved too fast
 			float w = renderSystem->GetScreenWidth();
 			float h = renderSystem->GetScreenHeight();
