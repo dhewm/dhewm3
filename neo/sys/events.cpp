@@ -544,6 +544,10 @@ sysEvent_t Sys_GetEvent() {
 			}
 
 			continue; // handle next event
+
+		case SDL_TEXTEDITING:
+			// on windows we get this event whenever the window gains focus.. just ignore it.
+			continue;
 #endif
 
 		case SDL_MOUSEMOTION:
@@ -625,7 +629,7 @@ sysEvent_t Sys_GetEvent() {
 				continue; // handle next event
 			}
 		default:
-			common->Warning("unknown event %u", ev.type);
+			common->Warning("unknown SDL event 0x%x", ev.type);
 			continue; // handle next event
 		}
 	}
