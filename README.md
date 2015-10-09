@@ -10,6 +10,8 @@ altering the original gameplay.
 
 **The project is hosted at:** https://github.com/dhewm
 
+**Latest Release:** https://github.com/dhewm/dhewm3/releases/latest
+
 **Consult the FAQ at:** https://github.com/dhewm/dhewm3/wiki/FAQ
 
 **Report bugs here:** https://github.com/dhewm/dhewm3/issues
