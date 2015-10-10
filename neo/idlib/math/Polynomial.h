@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "idlib/math/Complex.h"
 #include "idlib/Heap.h"
+#include <malloc.h>
 
 /*
 ===============================================================================
