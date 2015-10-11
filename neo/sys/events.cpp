@@ -628,6 +628,18 @@ sysEvent_t Sys_GetEvent() {
 					mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 				break;
 #endif
+			default:
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+				// handle X1 button and above
+				if( ev.button.button <= 8 ) // doesn't support more than 8 mouse buttons
+				{
+					int buttonIndex = ev.button.button - SDL_BUTTON_LEFT;
+					res.evValue = K_MOUSE1 + buttonIndex;
+					mouse_polls.Append( mouse_poll_t( M_ACTION1 + buttonIndex, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
+				}
+				else
+#endif
+				continue; // handle next event
 			}
 
 			res.evValue2 = ev.button.state == SDL_PRESSED ? 1 : 0;
