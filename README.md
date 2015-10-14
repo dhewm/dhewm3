@@ -1,6 +1,6 @@
 # ABOUT
 
-_dhewm 3_ is a _Doom 3_ GPL source modification.
+_dhewm 3_ is a _Doom 3_ GPL source port, know to work on at least Windows, Linux, Mac OS X and FreeBSD.
 
 The goal of _dhewm 3_ is bring _DOOM 3_ with the help of SDL to all suitable
 platforms.
@@ -10,7 +10,7 @@ altering the original gameplay.
 
 **The project is hosted at:** https://github.com/dhewm
 
-**Latest Release:** https://github.com/dhewm/dhewm3/releases/latest
+**Download latest Release:** https://github.com/dhewm/dhewm3/releases/latest
 
 **Consult the FAQ at:** https://github.com/dhewm/dhewm3/wiki/FAQ
 
@@ -24,7 +24,7 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 - 64bit port
 - SDL for low level OS support, OpenGL and input handling
 - OpenAL for audio output, all OS specific audio backends are gone
-- OpenAL EFX for EAX reverb effects (read: EAX on all platforms)
+- OpenAL EFX for EAX reverb effects (read: EAX-like sound effects on all platforms/hardware)
 - Better support for widescreen (and arbitrary display resolutions)
 - A portable build system based on CMake
 - (Cross-)compilation with mingw-w64
