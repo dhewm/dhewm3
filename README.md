@@ -133,6 +133,11 @@ The Doom 3 GPL source code release does not include functionality enabling rende
 of stencil shadows via the "depth fail" method, a functionality commonly known as
 "Carmack's Reverse".
 
+***Note*** that this **does *not* change the visual appereance** of the game.
+The shadows look the same, they're just created in a slightly different way.
+In theory there might be a small performance impact, but on hardware less than
+ten years old it shouldn't make a difference.
+
 ## MayaImport
 
 The code for our Maya export plugin is included, if you are a Maya licensee
