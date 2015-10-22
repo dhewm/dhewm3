@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#include <SDL.h>
+
 // Vista OpenGL wrapper check
 #ifdef _WIN32
 #include "sys/win32/win_local.h"
@@ -54,7 +56,7 @@ const char *r_rendererArgs[] = { "best", "arb2", NULL };
 idCVar r_inhibitFragmentProgram( "r_inhibitFragmentProgram", "0", CVAR_RENDERER | CVAR_BOOL, "ignore the fragment program extension" );
 idCVar r_useLightPortalFlow( "r_useLightPortalFlow", "1", CVAR_RENDERER | CVAR_BOOL, "use a more precise area reference determination" );
 idCVar r_multiSamples( "r_multiSamples", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "number of antialiasing samples" );
-idCVar r_mode( "r_mode", "5", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
+idCVar r_mode( "r_mode", "0", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
 idCVar r_displayRefresh( "r_displayRefresh", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_NOCHEAT, "optional display refresh rate option for vid mode", 0.0f, 200.0f );
 idCVar r_fullscreen( "r_fullscreen", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0 = windowed, 1 = full screen" );
 idCVar r_customWidth( "r_customWidth", "720", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "custom screen width. set r_mode to -1 to activate" );
@@ -453,37 +455,19 @@ the values from r_customWidth, and r_customHeight
 will be used instead.
 ====================
 */
-typedef struct vidmode_s {
-	const char *description;
-	int         width, height;
+typedef class vidmode_s {
+	public:
+		int	width, height;
+
+		vidmode_s(){};
+		vidmode_s( int w, int h )
+		{
+			width = w;
+			height = h;
+		}
 } vidmode_t;
 
-vidmode_t r_vidModes[] = {
-	{ "Mode  0: 320x240",		320,	240 },
-	{ "Mode  1: 400x300",		400,	300 },
-	{ "Mode  2: 512x384",		512,	384 },
-	{ "Mode  3: 640x480",		640,	480 },
-	{ "Mode  4: 800x600",		800,	600 },
-	{ "Mode  5: 1024x768",		1024,	768 },
-	{ "Mode  6: 1152x864",		1152,	864 },
-	{ "Mode  7: 1280x1024",		1280,	1024 },
-	{ "Mode  8: 1600x1200",		1600,	1200 },
-	// DG: from here on: modes I added.
-	{ "Mode  9: 1280x720",		1280,	720 },
-	{ "Mode 10: 1366x768",		1366,	768 },
-	{ "Mode 11: 1440x900",		1440,	900 },
-	{ "Mode 12: 1400x1050",		1400,	1050 },
-	{ "Mode 13: 1600x900",		1600,	900 },
-	{ "Mode 14: 1680x1050",		1680,	1050 },
-	{ "Mode 15: 1920x1080",		1920,	1080 },
-	{ "Mode 16: 1920x1200",		1920,	1200 },
-	{ "Mode 17: 2048x1152",		2048,	1152 },
-	{ "Mode 18: 2560x1600",		2560,	1600 },
-	{ "Mode 19: 3200x2400",		3200,	2400 },
-	{ "Mode 20: 3840x2160",		3840,   2160 },
-	{ "Mode 21: 4096x2304",		4096,   2304 },
-};
-static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
+idList<vidmode_t> r_vidModes;
 
 static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	vidmode_t	*vm;
@@ -491,7 +475,7 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	if ( mode < -1 ) {
 		return false;
 	}
-	if ( mode >= s_numVidModes ) {
+	if ( mode >= r_vidModes.Num() ) {
 		return false;
 	}
 
@@ -521,7 +505,7 @@ idStr R_GetVidModeListString()
 {
 	idStr ret = "r_custom*";
 	// for some reason, modes 0-2 are not used. maybe too small for GUI?
-	for(int mode=3; mode<s_numVidModes; ++mode)
+	for(int mode=3; mode < r_vidModes.Num(); ++mode)
 	{
 		int w, h;
 		if(R_GetModeInfo(&w, &h, mode))
@@ -538,7 +522,7 @@ idStr R_GetVidModeListString()
 idStr R_GetVidModeValsString()
 {
 	idStr ret =  "-1"; // for custom resolutions using r_customWidth/r_customHeight
-	for(int mode=3; mode<s_numVidModes; ++mode)
+	for(int mode=3; mode < r_vidModes.Num(); ++mode)
 	{
 		ret += ";";
 		ret += mode;
@@ -547,6 +531,19 @@ idStr R_GetVidModeValsString()
 }
 // DG end
 
+
+/*
+==================
+R_AddVideoMode
+
+This function adds videomode to videomodes list
+*/
+
+void R_AddVideoMode( int width, int height )
+{
+	r_vidModes.Append( *( new vidmode_t( width,	height ) ) );
+	common->Printf( "New video mode: \"Mode %d: %dx%d\"\n", r_vidModes.Num()-1, width, height );
+}
 
 /*
 ==================
@@ -570,6 +567,29 @@ void R_InitOpenGL( void ) {
 	int				i;
 
 	common->Printf( "----- Initializing OpenGL -----\n" );
+
+	r_vidModes.Clear();
+
+#if( SDL_MAJOR_VERSION == 2 )
+	// TODO: support multiscreen
+	int displayNum = 0;
+
+	for( int i = 0; i < SDL_GetNumDisplayModes( displayNum ); ++i )
+	{
+		SDL_DisplayMode mode = { SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 };
+		SDL_GetDisplayMode( displayNum, i, &mode );
+		R_AddVideoMode( mode.w, mode.h );
+	}
+#else
+	SDL_Rect** modes;
+
+	modes = SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_HWSURFACE);
+
+	for (int i = 0; modes[i]; ++i )
+	{
+		R_AddVideoMode( modes[i]->w, modes[i]->h );
+	}
+#endif
 
 	if ( glConfig.isInitialized ) {
 		common->FatalError( "R_InitOpenGL called while active" );
@@ -604,7 +624,7 @@ void R_InitOpenGL( void ) {
 
 		// if we failed, set everything back to "safe mode"
 		// and try again
-		r_mode.SetInteger( 3 );
+		r_mode.SetInteger( 0 );
 		r_fullscreen.SetInteger( 1 );
 		r_displayRefresh.SetInteger( 0 );
 		r_multiSamples.SetInteger( 0 );
@@ -773,8 +793,8 @@ static void R_ListModes_f( const idCmdArgs &args ) {
 	int i;
 
 	common->Printf( "\n" );
-	for ( i = 0; i < s_numVidModes; i++ ) {
-		common->Printf( "%s\n", r_vidModes[i].description );
+	for ( i = 0; i < r_vidModes.Num(); i++ ) {
+		common->Printf( "Mode %d: %dx%d\n", i, r_vidModes[i].width, r_vidModes[i].height );
 	}
 	common->Printf( "\n" );
 }
