@@ -84,7 +84,7 @@ the cmake command there, pointing it at the neo/ folder from this repository:
 
 OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
-`cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
+`cmake -DOPENAL_LIBRARY=/usr/local/opt/openal-soft/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/opt/openal-soft/include /path/to/repository/neo`
 
 ## Using the provided Windows binaries
 
