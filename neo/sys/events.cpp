@@ -629,7 +629,8 @@ sysEvent_t Sys_GetEvent() {
 				continue; // handle next event
 			}
 		default:
-			common->Warning("unknown SDL event 0x%x", ev.type);
+			// ok, I don't /really/ care about unknown SDL events. only uncomment this for debugging.
+			// common->Warning("unknown SDL event 0x%x", ev.type);
 			continue; // handle next event
 		}
 	}
