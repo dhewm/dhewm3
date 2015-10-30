@@ -482,8 +482,10 @@ vidmode_t r_vidModes[] = {
 	{ "Mode 19: 3200x2400",		3200,	2400 },
 	{ "Mode 20: 3840x2160",		3840,   2160 },
 	{ "Mode 21: 4096x2304",		4096,   2304 },
+	{ "Mode 22: 2880x1800",		2880,   1800 },
 };
-static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
+// DG: made this an enum so even stupid compilers accept it as array length below
+enum {	s_numVidModes = sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) };
 
 static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	vidmode_t	*vm;
@@ -513,6 +515,45 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	return true;
 }
 
+// DG: I added all this vidModeInfoPtr stuff, so I can have a second list of vidmodes
+//     that are sorted (by width, height), instead of just r_mode index.
+//     That way I can add modes without breaking r_mode, but still display them
+//     sorted in the menu.
+
+struct vidModePtr {
+	vidmode_t* vidMode;
+	int modeIndex;
+};
+
+static vidModePtr sortedVidModes[s_numVidModes];
+
+static int vidModeCmp(const void* vm1, const void* vm2)
+{
+	const vidModePtr* v1 = static_cast<const vidModePtr*>(vm1);
+	const vidModePtr* v2 = static_cast<const vidModePtr*>(vm2);
+
+	// sort primarily by width, secondarily by height
+	int wdiff = v1->vidMode->width - v2->vidMode->width;
+	return (wdiff != 0) ? wdiff : (v1->vidMode->height - v2->vidMode->height);
+}
+
+static void initSortedVidModes()
+{
+	if(sortedVidModes[0].vidMode != NULL)
+	{
+		// already initialized
+		return;
+	}
+
+	for(int i=0; i<s_numVidModes; ++i)
+	{
+		sortedVidModes[i].modeIndex = i;
+		sortedVidModes[i].vidMode = &r_vidModes[i];
+	}
+
+	qsort(sortedVidModes, s_numVidModes, sizeof(vidModePtr), vidModeCmp);
+}
+
 // DG: the following two functions are part of a horrible hack in ChoiceWindow.cpp
 //     to overwrite the default resolution list in the system options menu
 
@@ -520,14 +561,14 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 idStr R_GetVidModeListString()
 {
 	idStr ret = "r_custom*";
-	// for some reason, modes 0-2 are not used. maybe too small for GUI?
-	for(int mode=3; mode<s_numVidModes; ++mode)
+
+	for(int i=0; i<s_numVidModes; ++i)
 	{
-		int w, h;
-		if(R_GetModeInfo(&w, &h, mode))
+		// for some reason, modes 0-2 are not used. maybe too small for GUI?
+		if(sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL)
 		{
 			idStr modeStr;
-			sprintf(modeStr, ";%dx%d", w, h);
+			sprintf(modeStr, ";%dx%d", sortedVidModes[i].vidMode->width, sortedVidModes[i].vidMode->height);
 			ret += modeStr;
 		}
 	}
@@ -538,10 +579,14 @@ idStr R_GetVidModeListString()
 idStr R_GetVidModeValsString()
 {
 	idStr ret =  "-1"; // for custom resolutions using r_customWidth/r_customHeight
-	for(int mode=3; mode<s_numVidModes; ++mode)
+	for(int i=0; i<s_numVidModes; ++i)
 	{
-		ret += ";";
-		ret += mode;
+		// for some reason, modes 0-2 are not used. maybe too small for GUI?
+		if(sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL)
+		{
+			ret += ";";
+			ret += sortedVidModes[i].modeIndex;
+		}
 	}
 	return ret;
 }
@@ -578,6 +623,8 @@ void R_InitOpenGL( void ) {
 	// in case we had an error while doing a tiled rendering
 	tr.viewportOffset[0] = 0;
 	tr.viewportOffset[1] = 0;
+
+	initSortedVidModes();
 
 	//
 	// initialize OS specific portions of the renderSystem
