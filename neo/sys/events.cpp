@@ -484,8 +484,8 @@ sysEvent_t Sys_GetEvent() {
 
 			// fall through
 		case SDL_KEYUP:
-			key = mapkey(ev.key.keysym.sym);
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
+			key = mapkey(ev.key.keysym.sym);
 			if (!key) {
 				unsigned char c;
 				// check if its an unmapped console key
@@ -500,6 +500,27 @@ sysEvent_t Sys_GetEvent() {
 				}
 			}
 #else
+		{
+			// workaround for AZERTY-keyboards, which don't have 1, 2, ..., 9, 0 in first row:
+			// always map those physical keys (scancodes) to those keycodes anyway
+			// see also https://bugzilla.libsdl.org/show_bug.cgi?id=3188
+			SDL_Scancode sc = ev.key.keysym.scancode;
+			if(sc == SDL_SCANCODE_0)
+			{
+				key = '0';
+			}
+			else if(sc >= SDL_SCANCODE_1 && sc <= SDL_SCANCODE_9)
+			{
+				// note that the SDL_SCANCODEs are SDL_SCANCODE_1, _2, ..., _9, SDL_SCANCODE_0
+				// while in ASCII it's '0', '1', ..., '9' => handle 0 and 1-9 separately
+				// (doom3 uses the ASCII values for those keys)
+				key = '1' + (sc - SDL_SCANCODE_1);
+			}
+			else
+			{
+				key = mapkey(ev.key.keysym.sym);
+			}
+
 			if(!key) {
 				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) { // TODO: always do this check?
 					key = Sys_GetConsoleKey(true);
@@ -510,7 +531,7 @@ sysEvent_t Sys_GetEvent() {
 					continue; // handle next event
 				}
 			}
-
+		}
 #endif
 
 			res.evType = SE_KEY;
