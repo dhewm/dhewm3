@@ -631,7 +631,7 @@ sysEvent_t Sys_GetEvent() {
 			default:
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 				// handle X1 button and above
-				if( ev.button.button <= 8 ) // doesn't support more than 8 mouse buttons
+				if( ev.button.button < SDL_BUTTON_LEFT + 8 ) // doesn't support more than 8 mouse buttons
 				{
 					int buttonIndex = ev.button.button - SDL_BUTTON_LEFT;
 					res.evValue = K_MOUSE1 + buttonIndex;
