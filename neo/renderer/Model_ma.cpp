@@ -203,7 +203,7 @@ bool MA_ParseVertex(idParser& parser, maAttribHeader_t* header) {
 
 	//Allocate enough space for all the verts if this is the first attribute for verticies
 	if(!pMesh->vertexes) {
-		pMesh->numVertexes = header->size;
+		pMesh->numVertexes = header->size; // XXX: +1?
 		pMesh->vertexes = (idVec3 *)Mem_Alloc( sizeof( idVec3 ) * pMesh->numVertexes );
 	}
 
@@ -692,7 +692,16 @@ void MA_ParseMesh(idParser& parser) {
 
 	//Now apply the pt transformations
 	for(int i = 0; i < pMesh->numVertTransforms; i++) {
-		pMesh->vertexes[(int)pMesh->vertTransforms[i].w] +=  pMesh->vertTransforms[i].ToVec3();
+		int idx = (int)pMesh->vertTransforms[i].w;
+		if(idx < 0 || idx >= pMesh->numVertexes)
+		{
+			// this happens with d3xp/models/david/hell_h7.ma in the d3xp hell level
+			// TODO: if it happens for other models, too, maybe it's intended and the .ma parsing is broken
+			common->Warning( "Model %s tried to set an out-of-bounds vertex transform (%d, but max vert. index is %d)!",
+							 parser.GetFileName(), idx, pMesh->numVertexes-1 );
+			continue;
+		}
+		pMesh->vertexes[idx] +=  pMesh->vertTransforms[i].ToVec3();
 	}
 
 	MA_VERBOSE((va("MESH %s - parent %s\n", header.name, header.parent)));
