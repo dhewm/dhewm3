@@ -1344,7 +1344,7 @@ pack_t *idFileSystemLocal::LoadZipFile( const char *zipfile ) {
 			unzClose(uf);
 			delete[] buildBuffer;
 			delete pack;
-
+			Mem_Free( fs_headerLongs );
 			return NULL;
 		}
 	}

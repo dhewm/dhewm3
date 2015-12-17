@@ -861,20 +861,20 @@ idPVS::Shutdown
 */
 void idPVS::Shutdown( void ) {
 	if ( connectedAreas ) {
-		delete connectedAreas;
+		delete[] connectedAreas;
 		connectedAreas = NULL;
 	}
 	if ( areaQueue ) {
-		delete areaQueue;
+		delete[] areaQueue;
 		areaQueue = NULL;
 	}
 	if ( areaPVS ) {
-		delete areaPVS;
+		delete[] areaPVS;
 		areaPVS = NULL;
 	}
 	if ( currentPVS ) {
 		for ( int i = 0; i < MAX_CURRENT_PVS; i++ ) {
-			delete currentPVS[i].pvs;
+			delete[] currentPVS[i].pvs;
 			currentPVS[i].pvs = NULL;
 		}
 	}
