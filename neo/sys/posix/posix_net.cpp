@@ -318,6 +318,7 @@ void Sys_InitNetworking(void)
 		if (num_interfaces >= MAX_INTERFACES)
 			break;
 	}
+	freeifaddrs(ifap);
 }
 
 /*

@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#if defined( MACOS_X )
+#if defined( MACOS_X ) || defined(__unix__)
 #include <signal.h>
 #include <sys/types.h>
 #endif
@@ -514,8 +514,14 @@ void AssertFailed( const char *file, int line, const char *expression ) {
 	idLib::sys->DebugPrintf( "\n\nASSERTION FAILED!\n%s(%d): '%s'\n", file, line, expression );
 #ifdef _MSC_VER
 	__debugbreak();
+	_exit(1);
+#elif defined(__unix__)
+	// __builtin_trap() causes an illegal instruction which is kinda ugly.
+	// especially if you'd like to be able to continue after the assertion during debugging
+	raise(SIGTRAP); // this will break into the debugger.
 #elif defined( __GNUC__ )
 	__builtin_trap();
-#endif
 	_exit(1);
+#endif
+
 }

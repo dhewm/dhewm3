@@ -19,6 +19,7 @@ USER_CFLAGS := \
 #MM aros-doom3 : aros-doom3-libs iconset-Gorilla-contrib-icons-extras-games-adoom3 iconset-Gorilla-contrib-games-doom3game
 
 DOOM3_OPTIONS := -DCORE=ON -DDEDICATED=ON -DBASE=ON \
+        -DSDL2=OFF \
         -DCMAKE_INSTALL_BINDIR= \
         -DCMAKE_INSTALL_LIBDIR= \
         -DZLIB_LIBRARY=$(AROS_DEVELOPMENT)/lib/libz.a \

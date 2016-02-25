@@ -54,9 +54,9 @@ const char *r_rendererArgs[] = { "best", "arb2", NULL };
 idCVar r_inhibitFragmentProgram( "r_inhibitFragmentProgram", "0", CVAR_RENDERER | CVAR_BOOL, "ignore the fragment program extension" );
 idCVar r_useLightPortalFlow( "r_useLightPortalFlow", "1", CVAR_RENDERER | CVAR_BOOL, "use a more precise area reference determination" );
 idCVar r_multiSamples( "r_multiSamples", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "number of antialiasing samples" );
-idCVar r_mode( "r_mode", "3", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
+idCVar r_mode( "r_mode", "5", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
 idCVar r_displayRefresh( "r_displayRefresh", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_NOCHEAT, "optional display refresh rate option for vid mode", 0.0f, 200.0f );
-idCVar r_fullscreen( "r_fullscreen", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0 = windowed, 1 = full screen" );
+idCVar r_fullscreen( "r_fullscreen", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0 = windowed, 1 = full screen" );
 idCVar r_customWidth( "r_customWidth", "720", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "custom screen width. set r_mode to -1 to activate" );
 idCVar r_customHeight( "r_customHeight", "486", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "custom screen height. set r_mode to -1 to activate" );
 idCVar r_singleTriangle( "r_singleTriangle", "0", CVAR_RENDERER | CVAR_BOOL, "only draw a single triangle per primitive" );
@@ -84,7 +84,7 @@ idCVar r_znear( "r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane d
 
 idCVar r_ignoreGLErrors( "r_ignoreGLErrors", "1", CVAR_RENDERER | CVAR_BOOL, "ignore GL errors" );
 idCVar r_finish( "r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glFinish() every frame" );
-idCVar r_swapInterval( "r_swapInterval", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "changes the GL swap interval" );
+idCVar r_swapInterval( "r_swapInterval", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "changes the GL swap interval" );
 
 idCVar r_gamma( "r_gamma", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f );
 idCVar r_brightness( "r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 2.0f );
@@ -449,7 +449,7 @@ R_GetModeInfo
 
 r_mode is normally a small non-negative integer that
 looks resolutions up in a table, but if it is set to -1,
-the values from r_customWidth, amd r_customHeight
+the values from r_customWidth, and r_customHeight
 will be used instead.
 ====================
 */
@@ -468,8 +468,24 @@ vidmode_t r_vidModes[] = {
 	{ "Mode  6: 1152x864",		1152,	864 },
 	{ "Mode  7: 1280x1024",		1280,	1024 },
 	{ "Mode  8: 1600x1200",		1600,	1200 },
+	// DG: from here on: modes I added.
+	{ "Mode  9: 1280x720",		1280,	720 },
+	{ "Mode 10: 1366x768",		1366,	768 },
+	{ "Mode 11: 1440x900",		1440,	900 },
+	{ "Mode 12: 1400x1050",		1400,	1050 },
+	{ "Mode 13: 1600x900",		1600,	900 },
+	{ "Mode 14: 1680x1050",		1680,	1050 },
+	{ "Mode 15: 1920x1080",		1920,	1080 },
+	{ "Mode 16: 1920x1200",		1920,	1200 },
+	{ "Mode 17: 2048x1152",		2048,	1152 },
+	{ "Mode 18: 2560x1600",		2560,	1600 },
+	{ "Mode 19: 3200x2400",		3200,	2400 },
+	{ "Mode 20: 3840x2160",		3840,   2160 },
+	{ "Mode 21: 4096x2304",		4096,   2304 },
+	{ "Mode 22: 2880x1800",		2880,   1800 },
 };
-static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
+// DG: made this an enum so even stupid compilers accept it as array length below
+enum {	s_numVidModes = sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) };
 
 static bool R_GetModeInfo( int *width, int *height, int mode ) {
 	vidmode_t	*vm;
@@ -498,6 +514,83 @@ static bool R_GetModeInfo( int *width, int *height, int mode ) {
 
 	return true;
 }
+
+// DG: I added all this vidModeInfoPtr stuff, so I can have a second list of vidmodes
+//     that are sorted (by width, height), instead of just r_mode index.
+//     That way I can add modes without breaking r_mode, but still display them
+//     sorted in the menu.
+
+struct vidModePtr {
+	vidmode_t* vidMode;
+	int modeIndex;
+};
+
+static vidModePtr sortedVidModes[s_numVidModes];
+
+static int vidModeCmp(const void* vm1, const void* vm2)
+{
+	const vidModePtr* v1 = static_cast<const vidModePtr*>(vm1);
+	const vidModePtr* v2 = static_cast<const vidModePtr*>(vm2);
+
+	// sort primarily by width, secondarily by height
+	int wdiff = v1->vidMode->width - v2->vidMode->width;
+	return (wdiff != 0) ? wdiff : (v1->vidMode->height - v2->vidMode->height);
+}
+
+static void initSortedVidModes()
+{
+	if(sortedVidModes[0].vidMode != NULL)
+	{
+		// already initialized
+		return;
+	}
+
+	for(int i=0; i<s_numVidModes; ++i)
+	{
+		sortedVidModes[i].modeIndex = i;
+		sortedVidModes[i].vidMode = &r_vidModes[i];
+	}
+
+	qsort(sortedVidModes, s_numVidModes, sizeof(vidModePtr), vidModeCmp);
+}
+
+// DG: the following two functions are part of a horrible hack in ChoiceWindow.cpp
+//     to overwrite the default resolution list in the system options menu
+
+// "r_custom*;640x480;800x600;1024x768;..."
+idStr R_GetVidModeListString()
+{
+	idStr ret = "r_custom*";
+
+	for(int i=0; i<s_numVidModes; ++i)
+	{
+		// for some reason, modes 0-2 are not used. maybe too small for GUI?
+		if(sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL)
+		{
+			idStr modeStr;
+			sprintf(modeStr, ";%dx%d", sortedVidModes[i].vidMode->width, sortedVidModes[i].vidMode->height);
+			ret += modeStr;
+		}
+	}
+	return ret;
+}
+
+// r_mode values for resolutions from R_GetVidModeListString(): "-1;3;4;5;..."
+idStr R_GetVidModeValsString()
+{
+	idStr ret =  "-1"; // for custom resolutions using r_customWidth/r_customHeight
+	for(int i=0; i<s_numVidModes; ++i)
+	{
+		// for some reason, modes 0-2 are not used. maybe too small for GUI?
+		if(sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL)
+		{
+			ret += ";";
+			ret += sortedVidModes[i].modeIndex;
+		}
+	}
+	return ret;
+}
+// DG end
 
 
 /*
@@ -530,6 +623,8 @@ void R_InitOpenGL( void ) {
 	// in case we had an error while doing a tiled rendering
 	tr.viewportOffset[0] = 0;
 	tr.viewportOffset[1] = 0;
+
+	initSortedVidModes();
 
 	//
 	// initialize OS specific portions of the renderSystem

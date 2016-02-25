@@ -1,6 +1,6 @@
 # ABOUT
 
-_dhewm 3_ is a _Doom 3_ GPL source modification.
+_dhewm 3_ is a _Doom 3_ GPL source port, know to work on at least Windows, Linux, Mac OS X and FreeBSD.
 
 The goal of _dhewm 3_ is bring _DOOM 3_ with the help of SDL to all suitable
 platforms.
@@ -9,6 +9,8 @@ Bugs present in the original _DOOM 3_ will be fixed (when identified) without
 altering the original gameplay.
 
 **The project is hosted at:** https://github.com/dhewm
+
+**Download latest Release:** https://github.com/dhewm/dhewm3/releases/latest
 
 **Consult the FAQ at:** https://github.com/dhewm/dhewm3/wiki/FAQ
 
@@ -22,7 +24,8 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 - 64bit port
 - SDL for low level OS support, OpenGL and input handling
 - OpenAL for audio output, all OS specific audio backends are gone
-- OpenAL EFX for EAX reverb effects (read: EAX on all platforms)
+- OpenAL EFX for EAX reverb effects (read: EAX-like sound effects on all platforms/hardware)
+- Better support for widescreen (and arbitrary display resolutions)
 - A portable build system based on CMake
 - (Cross-)compilation with mingw-w64
 
@@ -34,13 +37,21 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 This source release does not contain any game data, the game data is still
 covered by the original EULA and must be obeyed as usual.
 
-You must patch the game to the latest version.
+You must patch the game to the latest version (1.3.1). See the FAQ for details, including
+how to get the game data from Steam on Linux or OSX.
 
 Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam store at
 
 http://store.steampowered.com/app/9050/
 
 http://store.steampowered.com/app/9070/
+
+You can also buy Steam keys at the Humble Store; currently this seems the only way to
+buy a Doom3 Steam key in Germany (Note that Germans still can't buy the RoE Addon there):
+
+https://www.humblebundle.com/store/p/doom3_storefront
+
+https://www.humblebundle.com/store/p/doom3_resofevil_storefront
 
 ## Compiling
 
@@ -49,17 +60,17 @@ The build system is based on CMake: http://cmake.org/
 Required libraries are not part of the tree. These are:
 
 - zlib
-- libjpeg (minimum v6, v8 recommended)
+- libjpeg (v8)
 - libogg
 - libvorbis
 - libvorbisfile (may be part of libvorbis)
 - OpenAL (OpenAL Soft required, Creative's and Apple's versions are made of fail)
-- SDL v1.2
+- SDL v1.2 or 2.0 (2.0 recommended)
 - libcurl (optional, required for server downloads)
 
 For UNIX-like systems these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
-your OS (apt-get, portage, rpm, BSD ports, MacPorts, ...).
+your OS (apt-get, portage, rpm, BSD ports, [Homebrew for OS X](http://brew.sh), ...).
 
 For Windows there are two options:
 
@@ -73,7 +84,7 @@ the cmake command there, pointing it at the neo/ folder from this repository:
 
 OSX users need to point cmake at OpenAL Soft (better solutions welcome):
 
-`cmake -DOPENAL_LIBRARY=/usr/local/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/include /path/to/repository/neo`
+`cmake -DOPENAL_LIBRARY=/usr/local/opt/openal-soft/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/opt/openal-soft/include /path/to/repository/neo`
 
 ## Using the provided Windows binaries
 
@@ -98,7 +109,7 @@ For cross compiling a CMake Toolchain file is required.
 
 For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
 
-<pre>
+```
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR i686)
 
@@ -111,7 +122,7 @@ set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-</pre>
+```
 
 Then point CMake at your Toolchain file:
 `cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
@@ -119,8 +130,13 @@ Then point CMake at your Toolchain file:
 ## Back End Rendering of Stencil Shadows
 
 The Doom 3 GPL source code release does not include functionality enabling rendering
-of stencil shadows via the depth fail method, a functionality commonly known as
+of stencil shadows via the "depth fail" method, a functionality commonly known as
 "Carmack's Reverse".
+
+***Note*** that this **does *not* change the visual appereance** of the game.
+The shadows look the same, they're just created in a slightly different way.
+In theory there might be a small performance impact, but on hardware less than
+ten years old it shouldn't make a difference.
 
 ## MayaImport
 
@@ -261,37 +277,6 @@ This code is in the public domain; do with it what you wish.
 neo/idlib/hashing/CRC32.cpp
 
 Copyright (C) 1995-1998 Mark Adler
-
-## OpenGL headers
-
-neo/renderer/wglext.h
-
-License Applicability. Except to the extent portions of this file are
-made subject to an alternative license as permitted in the SGI Free
-Software License B, Version 1.1 (the "License"), the contents of this
-file are subject only to the provisions of the License. You may not use
-this file except in compliance with the License. You may obtain a copy
-of the License at Silicon Graphics, Inc., attn: Legal Services, 1600
-Amphitheatre Parkway, Mountain View, CA 94043-1351, or at:
-
-http://oss.sgi.com/projects/FreeB
-
-Note that, as provided in the License, the Software is distributed on an
-"AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS
-DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND
-CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
-PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-
-Original Code. The Original Code is: OpenGL Sample Implementation,
-Version 1.2.1, released January 26, 2000, developed by Silicon Graphics,
-Inc. The Original Code is Copyright (c) 1991-2002 Silicon Graphics, Inc.
-Copyright in any portions created by third parties is as indicated
-elsewhere herein. All Rights Reserved.
-
-Additional Notice Provisions: This software was created using the
-OpenGL(R) version 1.2.1 Sample Implementation published by SGI, but has
-not been independently verified as being compliant with the OpenGL(R)
-version 1.2.1 Specification.
 
 ## Brandelf utility
 

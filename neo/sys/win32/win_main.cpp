@@ -673,7 +673,7 @@ int main(int argc, char *argv[]) {
 	SetThreadAffinityMask( GetCurrentThread(), 1 );
 #endif
 
-	::SetCursor( hcurSave );
+	// ::SetCursor( hcurSave ); // DG: I think SDL handles the cursor fine..
 
 	// Launch the script debugger
 	if ( strstr( GetCommandLine(), "+debugger" ) ) {
@@ -681,7 +681,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	::SetFocus( win32.hWnd );
+	// ::SetFocus( win32.hWnd ); // DG: let SDL handle focus, otherwise input is fucked up! (#100)
 
 	// main game loop
 	while( 1 ) {

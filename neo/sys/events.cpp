@@ -59,7 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 const char *kbdNames[] = {
-	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", NULL
+	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", "brazilian", NULL
 };
 
 idCVar in_kbd("in_kbd", "english", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
@@ -343,6 +343,9 @@ unsigned char Sys_GetConsoleKey(bool shifted) {
 			} else if (!lang.Icmp("norwegian")) {
 				keys[0] = 124; // |
 				keys[1] = 167; // §
+			} else if (!lang.Icmp("brazilian")) {
+				keys[0] = '\'';
+				keys[1] = '"';
 			}
 		}
 
@@ -390,17 +393,17 @@ sysEvent_t Sys_GetEvent() {
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	static char *s = NULL;
+	static char s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
 	static size_t s_pos = 0;
 
-	if (s) {
+	if (s[0] != '\0') {
 		res.evType = SE_CHAR;
 		res.evValue = s[s_pos];
 
-		s_pos++;
-		if (!s[s_pos]) {
-			free(s);
-			s = NULL;
+		++s_pos;
+
+		if (!s[s_pos] || s_pos == SDL_TEXTINPUTEVENT_TEXT_SIZE) {
+			memset(s, 0, sizeof(s));
 			s_pos = 0;
 		}
 
@@ -419,7 +422,8 @@ sysEvent_t Sys_GetEvent() {
 		return res;
 	}
 
-	if (SDL_PollEvent(&ev)) {
+	// loop until there is an event we care about (will return then) or no more events
+	while(SDL_PollEvent(&ev)) {
 		switch (ev.type) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_WINDOWEVENT:
@@ -443,7 +447,7 @@ sysEvent_t Sys_GetEvent() {
 					break;
 			}
 
-			return res_none;
+			continue; // handle next event
 #else
 		case SDL_ACTIVEEVENT:
 			{
@@ -465,10 +469,10 @@ sysEvent_t Sys_GetEvent() {
 				GLimp_GrabInput(flags);
 			}
 
-			return res_none;
+			continue; // handle next event
 
 		case SDL_VIDEOEXPOSE:
-			return res_none;
+			continue; // handle next event
 #endif
 
 		case SDL_KEYDOWN:
@@ -480,8 +484,8 @@ sysEvent_t Sys_GetEvent() {
 
 			// fall through
 		case SDL_KEYUP:
-			key = mapkey(ev.key.keysym.sym);
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
+			key = mapkey(ev.key.keysym.sym);
 			if (!key) {
 				unsigned char c;
 				// check if its an unmapped console key
@@ -492,22 +496,42 @@ sysEvent_t Sys_GetEvent() {
 				} else {
 					if (ev.type == SDL_KEYDOWN)
 						common->Warning("unmapped SDL key %d (0x%x)", ev.key.keysym.sym, ev.key.keysym.unicode);
-					return res_none;
+					continue; // handle next event
 				}
 			}
 #else
+		{
+			// workaround for AZERTY-keyboards, which don't have 1, 2, ..., 9, 0 in first row:
+			// always map those physical keys (scancodes) to those keycodes anyway
+			// see also https://bugzilla.libsdl.org/show_bug.cgi?id=3188
+			SDL_Scancode sc = ev.key.keysym.scancode;
+			if(sc == SDL_SCANCODE_0)
+			{
+				key = '0';
+			}
+			else if(sc >= SDL_SCANCODE_1 && sc <= SDL_SCANCODE_9)
+			{
+				// note that the SDL_SCANCODEs are SDL_SCANCODE_1, _2, ..., _9, SDL_SCANCODE_0
+				// while in ASCII it's '0', '1', ..., '9' => handle 0 and 1-9 separately
+				// (doom3 uses the ASCII values for those keys)
+				key = '1' + (sc - SDL_SCANCODE_1);
+			}
+			else
+			{
+				key = mapkey(ev.key.keysym.sym);
+			}
+
 			if(!key) {
-				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) {
+				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) { // TODO: always do this check?
 					key = Sys_GetConsoleKey(true);
 				} else {
 					if (ev.type == SDL_KEYDOWN) {
 						common->Warning("unmapped SDL key %d", ev.key.keysym.sym);
-					return res_none;
 					}
-
+					continue; // handle next event
 				}
 			}
-
+		}
 #endif
 
 			res.evType = SE_KEY;
@@ -528,14 +552,23 @@ sysEvent_t Sys_GetEvent() {
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_TEXTINPUT:
-			if (ev.text.text && *ev.text.text) {
-				if (!ev.text.text[1])
-					c = *ev.text.text;
-				else
-					s = strdup(ev.text.text);
+			if (ev.text.text[0]) {
+				res.evType = SE_CHAR;
+				res.evValue = ev.text.text[0];
+
+				if (ev.text.text[1] != '\0')
+				{
+					memcpy(s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE);
+					s_pos = 1; // pos 0 is returned
+				}
+				return res;
 			}
 
-			return res_none;
+			continue; // handle next event
+
+		case SDL_TEXTEDITING:
+			// on windows we get this event whenever the window gains focus.. just ignore it.
+			continue;
 #endif
 
 		case SDL_MOUSEMOTION:
@@ -595,6 +628,18 @@ sysEvent_t Sys_GetEvent() {
 					mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 				break;
 #endif
+			default:
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+				// handle X1 button and above
+				if( ev.button.button < SDL_BUTTON_LEFT + 8 ) // doesn't support more than 8 mouse buttons
+				{
+					int buttonIndex = ev.button.button - SDL_BUTTON_LEFT;
+					res.evValue = K_MOUSE1 + buttonIndex;
+					mouse_polls.Append( mouse_poll_t( M_ACTION1 + buttonIndex, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
+				}
+				else
+#endif
+				continue; // handle next event
 			}
 
 			res.evValue2 = ev.button.state == SDL_PRESSED ? 1 : 0;
@@ -614,11 +659,12 @@ sysEvent_t Sys_GetEvent() {
 				return res;
 			default:
 				common->Warning("unknown user event %u", ev.user.code);
-				return res_none;
+				continue; // handle next event
 			}
 		default:
-			common->Warning("unknown event %u", ev.type);
-			return res_none;
+			// ok, I don't /really/ care about unknown SDL events. only uncomment this for debugging.
+			// common->Warning("unknown SDL event 0x%x", ev.type);
+			continue; // handle next event
 		}
 	}
 

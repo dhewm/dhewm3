@@ -854,7 +854,7 @@ void Sys_DoStartProcess( const char *exeName, bool dofork ) {
                     sleep( 1 );	// on some systems I've seen that starting the new process and exiting this one should not be too close
     } else {
             printf( "execl %s\n", exeName );
-            execl( exeName, exeName, 0 );
+            execl( exeName, exeName, NULL );
             printf( "execl failed: %s\n", strerror( errno ) );
     }
     // terminate
