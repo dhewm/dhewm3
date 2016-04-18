@@ -9,9 +9,11 @@ DOOM3_GAMEDIR := base
 GRAPHITE_CFLAGS := \
                 -ftree-loop-linear -floop-strip-mine -floop-block
 
-USER_CFLAGS := \
+USER_CFLAGS := -Wno-error
+USER_CXXFLAGS := \
                 -ffast-math -fomit-frame-pointer \
-                -Wno-error -fexceptions -static-libstdc++
+                -Wno-error -fexceptions
+USER_LDFLAGS := -static-libstdc++
 
 #MM- aros-doom3-libs : workbench-libs-jpeg-linklib contrib-openal-linklib development-libogg development-libvorbis
 #MM- aros-doom3-libs : contrib-curl contrib-sdl development-SDL_gfx-quick
