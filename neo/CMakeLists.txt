@@ -108,6 +108,9 @@ include_directories(${VORBISFILE_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
+
 if (SDL2)
 	# skip SDL2main
 	if(APPLE OR WIN32)
@@ -759,6 +762,7 @@ if(CORE)
 
 	target_link_libraries(dhewm3
 		idlib
+		${OPENGL_LIBRARIES}
 		${OPENAL_LIBRARY}
 		${OGG_LIBRARIES}
 		${VORBISFILE_LIBRARIES}
