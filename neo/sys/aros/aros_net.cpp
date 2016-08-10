@@ -420,8 +420,8 @@ static int IPSocket( const char *net_interface, int port, netadr_t *bound_to = N
 	}
 
 	if ( bound_to ) {
-		unsigned int len = sizeof( address );
-		if ( (unsigned int)(getsockname( newsocket, (struct sockaddr *)&address, (int *)&len )) == -1 ) {
+		socklen_t len = sizeof( address );
+		if ( (unsigned int)(getsockname( newsocket, (struct sockaddr *)&address, &len )) == -1 ) {
 			common->Printf( "ERROR: IPSocket: getsockname: %s\n", strerror( errno ) );
 			CloseSocket( newsocket );
 			return 0;
@@ -472,14 +472,14 @@ idPort::GetPacket
 bool idPort::GetPacket( netadr_t &net_from, void *data, int &size, int maxSize ) {
 	int ret;
 	struct sockaddr_in from;
-	int fromlen;
+	socklen_t fromlen;
 
 	if ( !netSocket ) {
 		return false;
 	}
 
 	fromlen = sizeof( from );
-	ret = recvfrom( netSocket, data, maxSize, 0, (struct sockaddr *) &from, (int *) &fromlen );
+	ret = recvfrom( netSocket, data, maxSize, 0, (struct sockaddr *) &from, &fromlen );
 
 	if ( ret == -1 ) {
 		if (errno == EWOULDBLOCK || errno == ECONNREFUSED) {
@@ -535,9 +535,9 @@ bool idPort::GetPacketBlocking( netadr_t &net_from, void *data, int &size, int m
 		return false;
 	}
 	struct sockaddr_in from;
-	int fromlen;
+	socklen_t fromlen;
 	fromlen = sizeof( from );
-	ret = recvfrom( netSocket, data, maxSize, 0, (struct sockaddr *)&from, (int *)&fromlen );
+	ret = recvfrom( netSocket, data, maxSize, 0, (struct sockaddr *)&from, &fromlen );
 	if ( ret == -1 ) {
 		// there should be no blocking errors once select declares things are good
 		common->DPrintf( "idPort::GetPacketBlocking: %s\n", strerror( errno ) );
