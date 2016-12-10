@@ -108,6 +108,9 @@ include_directories(${VORBISFILE_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
+find_package(X11 REQUIRED)
+include_directories(${X11_INCLUDE_DIR})
+
 if (SDL2)
 	# skip SDL2main
 	if(APPLE OR WIN32)
