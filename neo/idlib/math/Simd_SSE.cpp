@@ -489,7 +489,7 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 	/*
 		jz			startVert1
 	*/
-	if (count != 0) {
+	if (count_l4 != 0) {
 	/*
 		imul		eax, 16
 		add			esi, eax
