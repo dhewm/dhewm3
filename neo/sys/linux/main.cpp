@@ -109,6 +109,11 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		idStr::snPrintf(buf, sizeof(buf), "/proc/%d/exe", getpid());
 		len = readlink(buf, buf2, sizeof(buf2));
 		if (len != -1) {
+			if (len < MAX_OSPATH) {
+				buf2[len] = '\0';
+			} else {
+				buf2[MAX_OSPATH - 1] = '\0';
+			}
 			path = buf2;
 			return true;
 		}
