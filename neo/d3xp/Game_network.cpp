@@ -702,8 +702,16 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 	WriteGameStateToSnapshot( deltaMsg );
 
 	// copy the client PVS string
+	// copies 4 bytes (== one int)?!
 	memcpy( clientInPVS, snapshot->pvs, ( numPVSClients + 7 ) >> 3 );
-	LittleRevBytes( clientInPVS, sizeof( int ), sizeof( clientInPVS ) / sizeof ( int ) );
+	// FIXME: fishy.
+	// byte		clientInPVS[MAX_ASYNC_CLIENTS >> 3];
+	// numPVSClients == MAX_ASYNC_CLIENTS
+	// I think the orig code only "works" because it's a no-op on little endian architectures (like x86)
+	// orig code: LittleRevBytes( clientInPVS, sizeof( int ), sizeof( clientInPVS ) / sizeof ( int ) );
+	// sizeof( clientInPVS ) ?! (== sizeof(size_t))
+	// not sure if the replacement is 100% correct, though
+	LittleRevBytes( clientInPVS, sizeof( int ), (( numPVSClients + 7 ) >> 3) / sizeof ( int ) );
 }
 
 /*
