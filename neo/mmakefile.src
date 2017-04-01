@@ -1,18 +1,19 @@
-# Copyright © 2012-2015, Nick "Kalamatee" Andrews.
+# Copyright © 2012-2017, Nick "Kalamatee" Andrews.
 # $Id$
 
--include $(TOP)/config/make.cfg
+include $(SRCDIR)/config/aros.cfg
 
 DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/ADoom3
 DOOM3_GAMEDIR := base
 
 GRAPHITE_CFLAGS := \
-                -ftree-loop-linear -floop-strip-mine -floop-block
+                -ftree-loop-linear $(CFLAGS_LOOP_STRIP_MINE) $(CFLAGS_LOOP_BLOCK)
 
-USER_CFLAGS := -Wno-error
+NOWARN_FLAGS := $(NOWARN_ERROR) $(NOWARN_MISLEADING_INDENTATION) $(NOWARN_MAYBE_UNINITIALIZED) $(NOWARN_NONNULL_COMPARE) $(NOWARN_ENUM_COMPARE)
+
+USER_CFLAGS := $(NOWARN_FLAGS) 
 USER_CXXFLAGS := \
-                -ffast-math -fomit-frame-pointer \
-                -Wno-error -fexceptions
+                $(CFLAGS_FAST_MATH) -fomit-frame-pointer -fexceptions $(NOWARN_FLAGS)
 USER_LDFLAGS := -static-libstdc++
 
 #MM- aros-doom3-libs : workbench-libs-jpeg-linklib contrib-openal-linklib development-libogg development-libvorbis
