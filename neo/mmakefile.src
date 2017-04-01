@@ -1,9 +1,15 @@
 # Copyright © 2012-2017, Nick "Kalamatee" Andrews.
 # $Id$
 
+#
+#  This is the AROS specific top level mmakefile to build
+#  dhewm3.  It correctly configures/invokes cmake to
+#  build the AROS ARM, i386 and x86_64 ports.
+#
+
 include $(SRCDIR)/config/aros.cfg
 
-DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/ADoom3
+DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/Fps/ADoom3
 DOOM3_GAMEDIR := base
 
 GRAPHITE_CFLAGS := \
@@ -44,7 +50,5 @@ DOOM3_OPTIONS := -DCORE=ON -DDEDICATED=ON -DBASE=ON -DSDL2=OFF \
 %build_with_cmake mmake=aros-doom3		\
     	prefix="$(DOOM3_EXEDIR)"		\
 	extraoptions="$(DOOM3_OPTIONS)"
-
-%build_icons mmake=iconset-Gorilla-contrib-icons-extras-games-adoom3 icons=ADoom3 dir=$(AROS_CONTRIB)/Games
 
 %common
