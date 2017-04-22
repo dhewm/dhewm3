@@ -1,0 +1,54 @@
+# Copyright © 2012-2017, Nick "Kalamatee" Andrews.
+# $Id$
+
+#
+#  This is the AROS specific top level mmakefile to build
+#  dhewm3.  It correctly configures/invokes cmake to
+#  build the AROS ARM, i386 and x86_64 ports.
+#
+
+include $(SRCDIR)/config/aros.cfg
+
+DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/Fps/ADoom3
+DOOM3_GAMEDIR := base
+
+GRAPHITE_CFLAGS := \
+                -ftree-loop-linear $(CFLAGS_LOOP_STRIP_MINE) $(CFLAGS_LOOP_BLOCK)
+
+NOWARN_FLAGS := $(NOWARN_ERROR) $(NOWARN_MISLEADING_INDENTATION) $(NOWARN_MAYBE_UNINITIALIZED) $(NOWARN_NONNULL_COMPARE) $(NOWARN_ENUM_COMPARE)
+
+USER_CFLAGS := $(NOWARN_FLAGS) 
+USER_CXXFLAGS := \
+                $(CFLAGS_FAST_MATH) -fomit-frame-pointer -fexceptions $(NOWARN_FLAGS)
+USER_LDFLAGS := -static-libstdc++
+
+#MM- aros-doom3-libs : workbench-libs-jpeg-linklib contrib-openal-linklib development-libogg development-libvorbis
+#MM- aros-doom3-libs : contrib-curl contrib-sdl development-SDL_gfx-quick
+
+#MM aros-doom3 : aros-doom3-libs iconset-Gorilla-contrib-icons-extras-games-adoom3 iconset-Gorilla-contrib-games-doom3game
+
+DOOM3_OPTIONS := -DCORE=ON -DDEDICATED=ON -DBASE=ON -DSDL2=OFF \
+        -DCMAKE_INSTALL_BINDIR= \
+        -DCMAKE_INSTALL_LIBDIR= \
+        -DZLIB_LIBRARY=$(AROS_DEVELOPER)/lib/libz.a \
+        -DZLIB_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+        -DJPEG_LIBRARY=$(AROS_DEVELOPER)/lib/libjpeg.a \
+        -DJPEG_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+        -DOPENAL_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+        -DOPENAL_LIBRARY="$(AROS_DEVELOPER)/lib/libopenal.a;$(AROS_DEVELOPER)/lib/libpthread.a;" \
+        -DOGG_LIBRARY=$(AROS_DEVELOPER)/lib/libogg.a \
+        -DOGG_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+        -DVORBIS_LIBRARY=$(AROS_DEVELOPER)/lib/libvorbis.a \
+        -DVORBIS_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+        -DVORBISFILE_LIBRARY=$(AROS_DEVELOPER)/lib/libvorbisfile.a \
+        -DVORBISFILE_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+	-DCURL_LIBRARY="$(AROS_DEVELOPER)/lib/libcurl.a;$(AROS_DEVELOPER)/lib/libiconv.a;$(AROS_DEVELOPER)/lib/libz.a;$(AROS_DEVELOPER)/lib/libssl.a;$(AROS_DEVELOPER)/lib/libcrypto.a;" \
+        -DCURL_INCLUDE_DIR=$(AROS_DEVELOPER)/include \
+        -DSDL_LIBRARY=$(AROS_DEVELOPER)/lib/libSDL.a \
+        -DSDL_INCLUDE_DIR=$(AROS_DEVELOPER)/include/SDL
+
+%build_with_cmake mmake=aros-doom3		\
+    	prefix="$(DOOM3_EXEDIR)"		\
+	extraoptions="$(DOOM3_OPTIONS)"
+
+%common

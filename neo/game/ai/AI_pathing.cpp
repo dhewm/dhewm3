@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "ai/AI.h"
 
+#include <stddef.h>
+
 /*
 ===============================================================================
 
@@ -604,12 +606,14 @@ pathNode_t *BuildPathTree( const obstacle_t *obstacles, int numObstacles, const 
 	pathNode_t *root, *node, *child;
 	// gcc 4.0
 	idQueueTemplate<pathNode_t, offsetof( pathNode_t, next ) > pathNodeQueue, treeQueue;
+
 	root = pathNodeAllocator.Alloc();
 	root->Init();
 	root->pos = startPos;
 
 	root->delta = seekPos - root->pos;
 	root->numNodes = 0;
+    
 	pathNodeQueue.Add( root );
 
 	for ( node = pathNodeQueue.Get(); node && pathNodeAllocator.GetAllocCount() < MAX_PATH_NODES; node = pathNodeQueue.Get() ) {

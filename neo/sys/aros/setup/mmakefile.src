@@ -1,0 +1,20 @@
+# $Id$
+
+include $(TOP)/config/make.cfg
+
+#MM- aros-doom3 : aros-doom3-defconfig
+
+#MM aros-doom3-defconfig : aros-doom3-dirs
+
+aros-doom3-defconfig:  $(AROS_CONTRIB)/Games/Fps/ADoom3/base/default.cfg
+
+$(AROS_CONTRIB)/Games/ADoom3/base/default.cfg: $(SRCDIR)/$(CURDIR)/default.cfg
+	@$(CP) $< $@
+
+%build_icons mmake=iconset-Gorilla-contrib-icons-extras-games-adoom3 icons=ADoom3 dir=$(AROS_CONTRIB)/Games/Fps
+
+#MM
+aros-doom3-dirs :
+	%mkdirs_q $(AROS_CONTRIB)/Fps/Games/ADoom3/base
+
+%common

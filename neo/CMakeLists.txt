@@ -30,6 +30,8 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
 set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 
+set(DHEWM3BINARY "dhewm3")
+
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 
@@ -108,8 +110,10 @@ include_directories(${VORBISFILE_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
-find_package(X11 REQUIRED)
-include_directories(${X11_INCLUDE_DIR})
+if(NOT AROS)
+	find_package(X11 REQUIRED)
+	include_directories(${X11_INCLUDE_DIR})
+endif()
 
 if (SDL2)
 	# skip SDL2main
@@ -162,11 +166,13 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 
 	add_compile_options(-fno-strict-aliasing)
 
-	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
-	if(NOT cxx_has_fvisibility)
-		message(FATAL_ERROR "Compiler does not support -fvisibility")
+	if(NOT AROS)
+		CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
+		if(NOT cxx_has_fvisibility)
+			message(FATAL_ERROR "Compiler does not support -fvisibility")
+		endif()
+		add_compile_options(-fvisibility=hidden)
 	endif()
-	add_compile_options(-fvisibility=hidden)
 
 	# TODO fix these warnings
 	add_compile_options(-Wno-sign-compare)
@@ -178,7 +184,10 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_compile_options(-Woverloaded-virtual)
 	endif()
 
-	if(APPLE)
+	if(AROS)
+		set(CMAKE_SHARED_LIBRARY_SUFFIX ".aros-${cpu}")
+		add_definitions(-DIOAPI_NO_64)
+	elseif(APPLE)
 		add_definitions(-DMACOS_X=1)
 
 		if(cpu STREQUAL "x86_64")
@@ -679,7 +688,31 @@ set(src_core
 set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
 
-if(APPLE)
+if(AROS)
+	set(DHEWM3BINARY "ADoom3")
+	set(sys_libs ${sys_libs} dll)
+
+	set(src_arosdll
+		sys/aros/dll/dllstartup.c
+		sys/aros/dll/dll.c
+		sys/aros/dll/dllimport.c
+	)
+
+	set(src_sys_base
+		sys/cpu.cpp
+		sys/threads.cpp
+		sys/events.cpp
+		sys/sys_local.cpp
+		sys/aros/aros_net.cpp
+		sys/aros/aros_signal.cpp
+		sys/aros/aros_main.cpp
+		sys/aros/aros_dos.cpp
+	)
+
+	set(src_sys_core
+		sys/glimp.cpp
+	)
+elseif(APPLE)
 	set(OSX_RESOURCE_FILES
 		"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
 		"${CMAKE_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
@@ -745,27 +778,36 @@ include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
-	set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
+if (AROS)
+	add_library(dll STATIC ${src_arosdll})
+        if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")
+		set(AROS_ARCH "x86")
+        else()
+		set(AROS_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+	endif()
+else()
+	if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
+		set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
+	endif()
 endif()
 
 if(CORE)
-	add_executable(dhewm3 WIN32 MACOSX_BUNDLE
+	add_executable(${DHEWM3BINARY} WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_sys_base}
 		${src_sys_core}
 	)
 
-	set_target_properties(dhewm3 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
-	set_target_properties(dhewm3 PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(dhewm3 PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
+	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
+	set_target_properties(${DHEWM3BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(${DHEWM3BINARY} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 
-	target_link_libraries(dhewm3
+	target_link_libraries(${DHEWM3BINARY}
 		idlib
 		${OPENAL_LIBRARY}
-		${OGG_LIBRARIES}
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}
+		${OGG_LIBRARIES}
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
 		${ZLIB_LIBRARY}
@@ -774,7 +816,7 @@ if(CORE)
 	)
 
 	if(NOT APPLE AND NOT WIN32)
-		install(TARGETS dhewm3
+		install(TARGETS ${DHEWM3BINARY}
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
@@ -783,19 +825,20 @@ if(CORE)
 endif()
 
 if(DEDICATED)
-	add_executable(dhewm3ded WIN32 MACOSX_BUNDLE
+	add_executable(${DHEWM3BINARY}ded WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_stub_openal}
 		${src_stub_gl}
 		${src_sys_base}
 	)
 
-	set_target_properties(dhewm3ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
-	set_target_properties(dhewm3ded PROPERTIES LINK_FLAGS "${ldflags}")
-	target_link_libraries(dhewm3ded
+	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
+	set_target_properties(${DHEWM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")
+	target_link_libraries(${DHEWM3BINARY}ded
 		idlib
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}
+		${OGG_LIBRARIES}
 		${CURL_LIBRARY}
 		${JPEG_LIBRARY}
 		${ZLIB_LIBRARY}
@@ -804,7 +847,7 @@ if(DEDICATED)
 	)
 
 	if(NOT APPLE AND NOT WIN32)
-		install(TARGETS dhewm3ded
+		install(TARGETS ${DHEWM3BINARY}ded
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
@@ -813,13 +856,22 @@ if(DEDICATED)
 endif()
 
 if(BASE)
-	add_library(base SHARED ${src_game})
+	if (AROS)
+		add_executable(base sys/aros/dll/dllglue.c ${src_game})
+		set_target_properties(base PROPERTIES OUTPUT_NAME "base.aros-${AROS_ARCH}")
+	else()
+		add_library(base SHARED ${src_game})
+	endif()
 	set_target_properties(base PROPERTIES PREFIX "")
 	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
 	set_target_properties(base PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
 	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(base idlib)
+	if (AROS)
+		target_link_libraries(base idlib dll)
+	else()
+		target_link_libraries(base idlib)
+	endif()
 
 	if(NOT APPLE AND NOT WIN32)
 		install(TARGETS base
@@ -831,13 +883,22 @@ if(BASE)
 endif()
 
 if(D3XP)
-	add_library(d3xp SHARED ${src_d3xp})
+	if (AROS)
+		add_executable(d3xp sys/aros/dll/dllglue.c ${src_d3xp})
+		set_target_properties(d3xp PROPERTIES OUTPUT_NAME "d3xp.aros-${AROS_ARCH}")
+	else()
+		add_library(d3xp SHARED ${src_d3xp})
+	endif()
 	set_target_properties(d3xp PROPERTIES PREFIX "")
 	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
 	set_target_properties(d3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(d3xp idlib)
+	if (AROS)
+		target_link_libraries(d3xp idlib dll)
+	else()
+		target_link_libraries(d3xp idlib)
+	endif()
 
 	if(NOT APPLE AND NOT WIN32)
 		install(TARGETS d3xp

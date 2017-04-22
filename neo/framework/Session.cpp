@@ -37,6 +37,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "framework/Session_local.h"
 
+#if defined(__AROS__)
+#define CDKEY_FILEPATH CDKEY_FILE
+#define XPKEY_FILEPATH XPKEY_FILE
+#else
+#define CDKEY_FILEPATH "../" BASE_GAMEDIR "/" CDKEY_FILE
+#define XPKEY_FILEPATH "../" BASE_GAMEDIR "/" XPKEY_FILE
+#endif
+
 idCVar	idSessionLocal::com_showAngles( "com_showAngles", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar	idSessionLocal::com_minTics( "com_minTics", "1", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_showTics( "com_showTics", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
@@ -2961,7 +2969,7 @@ void idSessionLocal::ReadCDKey( void ) {
 
 	cdkey_state = CDKEY_UNKNOWN;
 
-	filename = "../" BASE_GAMEDIR "/" CDKEY_FILE;
+	filename = CDKEY_FILEPATH;
 	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_configpath" ) );
 
 	// try the install path, which is where the cd installer and steam put it
@@ -2980,7 +2988,7 @@ void idSessionLocal::ReadCDKey( void ) {
 
 	xpkey_state = CDKEY_UNKNOWN;
 
-	filename = "../" BASE_GAMEDIR "/" XPKEY_FILE;
+	filename = XPKEY_FILEPATH;
 	f = fileSystem->OpenExplicitFileRead( fileSystem->RelativePathToOSPath( filename, "fs_configpath" ) );
 
 	// try the install path, which is where the cd installer and steam put it
@@ -3008,7 +3016,7 @@ void idSessionLocal::WriteCDKey( void ) {
 	idFile *f;
 	const char *OSPath;
 
-	filename = "../" BASE_GAMEDIR "/" CDKEY_FILE;
+	filename = CDKEY_FILEPATH;
 	// OpenFileWrite advertises creating directories to the path if needed, but that won't work with a '..' in the path
 	// occasionally on windows, but mostly on Linux and OSX, the fs_configpath/base may not exist in full
 	OSPath = fileSystem->BuildOSPath( cvarSystem->GetCVarString( "fs_configpath" ), BASE_GAMEDIR, CDKEY_FILE );
@@ -3021,7 +3029,7 @@ void idSessionLocal::WriteCDKey( void ) {
 	f->Printf( "%s%s", cdkey, CDKEY_TEXT );
 	fileSystem->CloseFile( f );
 
-	filename = "../" BASE_GAMEDIR "/" XPKEY_FILE;
+	filename = XPKEY_FILEPATH;
 	f = fileSystem->OpenFileWrite( filename, "fs_configpath" );
 	if ( !f ) {
 		common->Printf( "Couldn't write %s.\n", filename.c_str() );
