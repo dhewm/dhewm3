@@ -46,12 +46,13 @@ http://store.steampowered.com/app/9050/
 
 http://store.steampowered.com/app/9070/
 
-You can also buy Steam keys at the Humble Store; currently this seems the only way to
-buy a Doom3 Steam key in Germany (Note that Germans still can't buy the RoE Addon there):
+You can also buy Steam keys at the Humble Store:
 
 https://www.humblebundle.com/store/p/doom3_storefront
 
 https://www.humblebundle.com/store/p/doom3_resofevil_storefront
+
+Note that neither Steam nor the Humble Store offer the *Ressurection of Evil* addon for German customers (or at least people with German IPs).
 
 ## Compiling
 
