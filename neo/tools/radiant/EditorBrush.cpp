@@ -2673,7 +2673,7 @@ Brush_AddToList
 */
 void Brush_AddToList(brush_t *b, brush_t *list) {
 	if (b->next || b->prev) {
-		Error("Brush_AddToList: allready linked");
+		Error("Brush_AddToList: already linked");
 	}
 
 	if (list == &selected_brushes || list == &active_brushes) {
@@ -2905,7 +2905,7 @@ void Brush_SelectFaceForDragging(brush_t *b, face_t *f, bool shear) {
 	//AddMovePlane(&f->plane);
 
 	if (c == 0) {
-		return;				// allready completely added
+		return;				// already completely added
 	}
 
 	// select all points on this plane in all brushes the selection

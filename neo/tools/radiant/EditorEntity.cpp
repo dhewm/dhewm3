@@ -304,7 +304,7 @@ void Entity_FreeEpairs(entity_t *e) {
  */
 void Entity_AddToList(entity_t *e, entity_t *list) {
 	if (e->next || e->prev) {
-		Error("Entity_AddToList: allready linked");
+		Error("Entity_AddToList: already linked");
 	}
 
 	e->next = list->next;

@@ -47,7 +47,7 @@ bool WINAPI GetToken (bool crossline)
 {
 	char    *token_p;
 
-	if (unget)                         // is a token allready waiting?
+	if (unget)                         // is a token already waiting?
 	{
 		unget = false;
 		return true;

@@ -365,7 +365,7 @@ bool idGuiScript::Parse(idParser *src) {
 	}
 
 	if (handler == NULL) {
-		src->Error("Uknown script call %s", token.c_str());
+		src->Error("Unknown script call %s", token.c_str());
 	}
 	// now read parms til ;
 	// all parms are read as idWinStr's but will be fixed up later
