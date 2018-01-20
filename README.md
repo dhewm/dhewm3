@@ -1,6 +1,6 @@
 # ABOUT
 
-_dhewm 3_ is a _Doom 3_ GPL source port, know to work on at least Windows, Linux, Mac OS X and FreeBSD.
+_dhewm 3_ is a _Doom 3_ GPL source port, known to work on at least Windows, Linux, macOS and FreeBSD.
 
 The goal of _dhewm 3_ is bring _DOOM 3_ with the help of SDL to all suitable
 platforms.
@@ -10,7 +10,7 @@ altering the original gameplay.
 
 **The project is hosted at:** https://github.com/dhewm
 
-**Download latest Release:** https://github.com/dhewm/dhewm3/releases/latest
+**Download the latest release:** https://github.com/dhewm/dhewm3/releases/latest
 
 **Consult the FAQ at:** https://github.com/dhewm/dhewm3/wiki/FAQ
 
@@ -21,13 +21,13 @@ altering the original gameplay.
 
 Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are:
 
-- 64bit port
-- SDL for low level OS support, OpenGL and input handling
-- OpenAL for audio output, all OS specific audio backends are gone
+- 64-bit port
+- SDL for low-level OS support, OpenGL and input handling
+- OpenAL for audio output, all OS-specific audio backends are gone
 - OpenAL EFX for EAX reverb effects (read: EAX-like sound effects on all platforms/hardware)
 - Better support for widescreen (and arbitrary display resolutions)
 - A portable build system based on CMake
-- (Cross-)compilation with mingw-w64
+- (Cross-)compilation with MinGW-w64
 
 
 # GENERAL NOTES
@@ -40,7 +40,7 @@ covered by the original EULA and must be obeyed as usual.
 You must patch the game to the latest version (1.3.1). See the FAQ for details, including
 how to get the game data from Steam on Linux or OSX.
 
-Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam store at
+Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam Store at
 
 http://store.steampowered.com/app/9050/
 
@@ -52,7 +52,8 @@ https://www.humblebundle.com/store/p/doom3_storefront
 
 https://www.humblebundle.com/store/p/doom3_resofevil_storefront
 
-Note that neither Steam nor the Humble Store offer the *Ressurection of Evil* addon for German customers (or at least people with German IPs).
+Note that neither Steam nor the Humble Store offer the *Resurrection of Evil* addon
+for German customers (or at least people with German IP adresses).
 
 ## Compiling
 
@@ -69,11 +70,11 @@ Required libraries are not part of the tree. These are:
 - SDL v1.2 or 2.0 (2.0 recommended)
 - libcurl (optional, required for server downloads)
 
-For UNIX-like systems these libraries need to be installed (including the
+For UNIX-like systems, these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
-your OS (apt-get, portage, rpm, BSD ports, [Homebrew for OS X](http://brew.sh), ...).
+your OS (apt, dnf, portage, BSD ports, [Homebrew for macOS](http://brew.sh), ...).
 
-For Windows there are two options:
+For Windows, there are two options:
 
 - Use the provided binaries (recommended, see below)
 - Compile these libraries yourself
@@ -83,7 +84,7 @@ the cmake command there, pointing it at the neo/ folder from this repository:
 
 `cmake /path/to/repository/neo`
 
-OSX users need to point cmake at OpenAL Soft (better solutions welcome):
+macOS users need to point CMake at OpenAL Soft (better solutions welcome):
 
 `cmake -DOPENAL_LIBRARY=/usr/local/opt/openal-soft/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/opt/openal-soft/include /path/to/repository/neo`
 
@@ -93,8 +94,8 @@ Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
 
 There are two subfolders:
 
-- 32bit binaries are located in "i686-w64-mingw32"
-- 64bit binaries are located in "x86_64-w64-mingw32"
+- 32-bit binaries are located in `i686-w64-mingw32`
+- 64-bit binaries are located in `x86_64-w64-mingw32`
 
 Issue the appropriate command from the build folder, for example:
 
@@ -102,13 +103,13 @@ Issue the appropriate command from the build folder, for example:
 
 `cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo`
 
-The binaries are compatible with mingw-w64 and all MSVC versions.
+The binaries are compatible with MinGW-w64 and all MSVC versions.
 
-## Cross compiling
+## Cross-compiling
 
-For cross compiling a CMake Toolchain file is required.
+For cross-compiling, a CMake Toolchain file is required.
 
-For the mingw-w64 toolchain "i686-w64-mingw32" on Ubuntu precise it looks like:
+For the MinGW-w64 toolchain `i686-w64-mingw32` on Ubuntu 12.04, it looks like:
 
 ```
 set(CMAKE_SYSTEM_NAME Windows)
@@ -125,7 +126,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 ```
 
-Then point CMake at your Toolchain file:
+Then point CMake at your toolchain file:
 `cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
 ## Back End Rendering of Stencil Shadows
