@@ -51,9 +51,9 @@ idCVar	idSessionLocal::com_showTics( "com_showTics", "0", CVAR_SYSTEM | CVAR_BOO
 idCVar	idSessionLocal::com_fixedTic( "com_fixedTic", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 10 );
 idCVar	idSessionLocal::com_showDemo( "com_showDemo", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar	idSessionLocal::com_skipGameDraw( "com_skipGameDraw", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
-idCVar	idSessionLocal::com_aviDemoSamples( "com_aviDemoSamples", "16", CVAR_SYSTEM, "" );
-idCVar	idSessionLocal::com_aviDemoWidth( "com_aviDemoWidth", "256", CVAR_SYSTEM, "" );
-idCVar	idSessionLocal::com_aviDemoHeight( "com_aviDemoHeight", "256", CVAR_SYSTEM, "" );
+idCVar	idSessionLocal::com_aviDemoSamples( "com_aviDemoSamples", "1", CVAR_SYSTEM, "" );
+idCVar	idSessionLocal::com_aviDemoWidth( "com_aviDemoWidth", "800", CVAR_SYSTEM, "" );
+idCVar	idSessionLocal::com_aviDemoHeight( "com_aviDemoHeight", "600", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_aviDemoTics( "com_aviDemoTics", "2", CVAR_SYSTEM | CVAR_INTEGER, "", 1, 60 );
 idCVar	idSessionLocal::com_wipeSeconds( "com_wipeSeconds", "1", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_guid( "com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "" );
@@ -2473,6 +2473,7 @@ void idSessionLocal::Draw() {
 /*
 ===============
 idSessionLocal::UpdateScreen
+PRO: Рендерит каждый тик
 ===============
 */
 void idSessionLocal::UpdateScreen( bool outOfSequence ) {
@@ -2549,17 +2550,36 @@ void idSessionLocal::Frame() {
 			// skipped frames so write them out
 			int c = aviDemoFrameCount - aviTicStart;
 			while ( c-- ) {
-				renderSystem->TakeScreenshot( com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL );
+				renderSystem->TakeScreenshot(
+					com_aviDemoWidth.GetInteger(),
+					com_aviDemoHeight.GetInteger(),
+					name,
+					com_aviDemoSamples.GetInteger(),
+					NULL
+				);
 				name = va("demos/%s/%s_%05i.tga", aviDemoShortName.c_str(), aviDemoShortName.c_str(), ++aviTicStart );
 			}
 		}
 		aviTicStart = aviDemoFrameCount;
 
 		// remove any printed lines at the top before taking the screenshot
-		console->ClearNotifyLines();
+		// console->ClearNotifyLines();
 
+		// common->Printf(
+		// 	"TakeScreenShot(%i, %i, %s, %i)",
+		// 	640,// com_aviDemoWidth.GetInteger(),
+		// 	480,// com_aviDemoHeight.GetInteger(),
+		// 	name,
+		// 	com_aviDemoSamples.GetInteger());
 		// this will call Draw, possibly multiple times if com_aviDemoSamples is > 1
-		renderSystem->TakeScreenshot( com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL );
+
+		renderSystem->TakeScreenshot(
+			com_aviDemoWidth.GetInteger(),
+			com_aviDemoHeight.GetInteger(),
+			name,
+			com_aviDemoSamples.GetInteger(),
+			NULL
+		);
 	}
 
 	// at startup, we may be backwards
