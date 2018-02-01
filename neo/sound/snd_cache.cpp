@@ -364,7 +364,7 @@ void idSoundSample::MakeDefault( void ) {
 	alGetError();
 	alBufferData( openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, nonCacheData, objectMemSize, objectInfo.nSamplesPerSec );
 	if ( alGetError() != AL_NO_ERROR ) {
-		common->Error( "idSoundCache: error loading data into OpenAL hardware buffer" );
+		hardwareBuffer = false;
 	} else {
 		hardwareBuffer = true;
 	}
@@ -494,7 +494,7 @@ void idSoundSample::Load( void ) {
 			alGetError();
 			alBufferData( openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, nonCacheData, objectMemSize, objectInfo.nSamplesPerSec );
 			if ( alGetError() != AL_NO_ERROR ) {
-				common->Error( "idSoundCache: error loading data into OpenAL hardware buffer" );
+				hardwareBuffer = false;
 			} else {
 				hardwareBuffer = true;
 			}
@@ -547,7 +547,7 @@ void idSoundSample::Load( void ) {
 					alGetError();
 					alBufferData( openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, destData, objectSize * sizeof( short ), objectInfo.nSamplesPerSec );
 					if ( alGetError() != AL_NO_ERROR )
-						common->Error( "idSoundCache: error loading data into OpenAL hardware buffer" );
+						hardwareBuffer = false;
 					else {
 						hardwareBuffer = true;
 					}
