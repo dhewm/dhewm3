@@ -1248,7 +1248,7 @@ void idSoundSystemLocal::DoEnviroSuit( float* samples, int numSamples, int numSp
 	float out[10000], *out_p = out + 2;
 	float in[10000], *in_p = in + 2;
 
-	// TODO port to OpenAL
+	// TODO: port to OpenAL
 	assert( false );
 
 	if ( !fxList.Num() ) {
