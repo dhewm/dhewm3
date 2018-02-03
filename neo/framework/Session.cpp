@@ -338,6 +338,7 @@ void idSessionLocal::Clear() {
 	mapSpawned = false;
 	guiActive = NULL;
 	aviCaptureMode = false;
+	soundRecordMode = false;
 	timeDemo = TD_NO;
 	waitingOnBind = false;
 	lastPacifierTime = 0;
@@ -425,6 +426,10 @@ void idSessionLocal::Shutdown() {
 
 	if ( aviCaptureMode ) {
 		EndAVICapture();
+	}
+
+	if ( soundRecordMode ) {
+		EndRecordSound();
 	}
 
 	if(timeDemo == TD_YES) {
@@ -695,6 +700,27 @@ static void Session_TimeDemoQuit_f( const idCmdArgs &args ) {
 
 /*
 ================
+Session_RecordSound_f MARK1:
+================
+*/
+static void Session_RecordSound_f( const idCmdArgs &args ) {
+	if ( args.Argc() != 2 ) {
+		return common->Printf("Session_RecordSound_f: requires 1 arg. Demo's name");
+	}
+	sessLocal.StartRecordingSound( va( "demos/%s", args.Argv(1) ) );
+}
+
+/*
+================
+Session_EndRecordSound_f MARK1:
+================
+*/
+static void Session_EndRecordSound_f( const idCmdArgs &args ) {
+	sessLocal.EndRecordingSound();
+}
+
+/*
+================
 Session_AVIDemo_f
 ================
 */
@@ -828,7 +854,7 @@ idSessionLocal::StopRecordingRenderDemo
 ================
 */
 void idSessionLocal::StopRecordingRenderDemo() {
-	if ( !writeDemo ) {
+	if ( !writeDemo && !soundRecordMode ) {
 		common->Printf( "idSessionLocal::StopRecordingRenderDemo: not recording\n" );
 		return;
 	}
@@ -858,6 +884,7 @@ void idSessionLocal::StopPlayingRenderDemo() {
 	int timeDemoStopTime = Sys_Milliseconds();
 
 	EndAVICapture();
+	EndRecordSound();
 
 	readDemo->Close();
 
@@ -994,6 +1021,39 @@ void idSessionLocal::TimeRenderDemo( const char *demoName, bool twice ) {
 	timeDemo = TD_YES;
 }
 
+/*
+================
+idSessionLocal::StartRecordingSound MARK2:
+================
+*/
+void idSessionLocal::StartRecordingSound( const char *_demoName ) {
+	idStr	demoName = _demoName;	// copy off from va() buffer
+
+	StartPlayingRenderDemo( demoName );
+	if ( !readDemo ) {
+		return;
+	}
+
+	BeginAVICapture( demoName.c_str() ) ;
+	aviCaptureMode = false;
+}
+
+/*
+================
+idSessionLocal::EndRecordSound MARK2:
+================
+*/
+void idSessionLocal::EndRecordSound() {
+	if ( !aviCaptureMode && !soundRecordMode ) {
+		return;
+	}
+
+	sw->AVIClose();
+	common->Printf("Sound file saved!");
+	soundRecordMode = false;
+}
+
+
 
 /*
 ================
@@ -1078,6 +1138,11 @@ Start AVI recording the current game session
 void idSessionLocal::AVIGame( const char *demoName ) {
 	if ( aviCaptureMode ) {
 		EndAVICapture();
+		return;
+	}
+
+	if ( soundRecordMode ) {
+		EndRecordSound();
 		return;
 	}
 
@@ -2764,6 +2829,11 @@ void idSessionLocal::RunGameTic() {
 				EndAVICapture();
 				Shutdown();
 			}
+
+			if( soundRecordMode ) {
+				EndRecordSound();
+				Shutdown();
+			}
 			// we fall out of the demo to normal commands
 			// the impulse and chat character toggles may not be correct, and the view
 			// angle will definitely be wrong
@@ -2880,6 +2950,13 @@ void idSessionLocal::Init() {
 	cmdSystem->AddCommand( "timeDemoQuit", Session_TimeDemoQuit_f, CMD_FL_SYSTEM, "times a demo and quits", idCmdSystem::ArgCompletion_DemoName );
 	cmdSystem->AddCommand( "aviDemo", Session_AVIDemo_f, CMD_FL_SYSTEM, "writes AVIs for a demo", idCmdSystem::ArgCompletion_DemoName );
 	cmdSystem->AddCommand( "compressDemo", Session_CompressDemo_f, CMD_FL_SYSTEM, "compresses a demo file", idCmdSystem::ArgCompletion_DemoName );
+
+	// [idTech4]
+	cmdSystem->AddCommand( "rec", Session_RecordDemo_f, CMD_FL_SYSTEM, "start record" );
+	cmdSystem->AddCommand( "stop", Session_StopRecordingDemo_f, CMD_FL_SYSTEM, "stop record" );
+	cmdSystem->AddCommand( "play", Session_PlayDemo_f, CMD_FL_SYSTEM, "play record", idCmdSystem::ArgCompletion_DemoName );
+	cmdSystem->AddCommand( "render", Session_AVIDemo_f, CMD_FL_SYSTEM, "renders the record" );
+	cmdSystem->AddCommand( "renderSound", Session_RecordSound_f, CMD_FL_SYSTEM, "start sound record" );
 #endif
 
 	cmdSystem->AddCommand( "disconnect", Session_Disconnect_f, CMD_FL_SYSTEM, "disconnects from a game" );
