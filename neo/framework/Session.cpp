@@ -715,8 +715,8 @@ static void Session_RecordSound_f( const idCmdArgs &args ) {
 Session_EndRecordSound_f MARK1:
 ================
 */
-static void Session_EndRecordSound_f( const idCmdArgs &args ) {
-	sessLocal.EndRecordingSound();
+static void Session_EndRecordSound_f() {
+	sessLocal.EndRecordSound();
 }
 
 /*
@@ -856,6 +856,11 @@ idSessionLocal::StopRecordingRenderDemo
 void idSessionLocal::StopRecordingRenderDemo() {
 	if ( !writeDemo && !soundRecordMode ) {
 		common->Printf( "idSessionLocal::StopRecordingRenderDemo: not recording\n" );
+		return;
+	}
+
+	if( soundRecordMode ) {
+		sessLocal.EndRecordSound();
 		return;
 	}
 	sw->StopWritingDemo();
