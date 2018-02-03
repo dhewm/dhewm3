@@ -700,7 +700,7 @@ static void Session_TimeDemoQuit_f( const idCmdArgs &args ) {
 
 /*
 ================
-Session_RecordSound_f MARK1:
+Session_RecordSound_f
 ================
 */
 static void Session_RecordSound_f( const idCmdArgs &args ) {
@@ -712,7 +712,7 @@ static void Session_RecordSound_f( const idCmdArgs &args ) {
 
 /*
 ================
-Session_EndRecordSound_f MARK1:
+Session_EndRecordSound_f
 ================
 */
 static void Session_EndRecordSound_f() {
@@ -1028,7 +1028,7 @@ void idSessionLocal::TimeRenderDemo( const char *demoName, bool twice ) {
 
 /*
 ================
-idSessionLocal::StartRecordingSound MARK2:
+idSessionLocal::StartRecordingSound
 ================
 */
 void idSessionLocal::StartRecordingSound( const char *_demoName ) {
@@ -1045,7 +1045,7 @@ void idSessionLocal::StartRecordingSound( const char *_demoName ) {
 
 /*
 ================
-idSessionLocal::EndRecordSound MARK2:
+idSessionLocal::EndRecordSound
 ================
 */
 void idSessionLocal::EndRecordSound() {
@@ -2633,15 +2633,7 @@ void idSessionLocal::Frame() {
 		aviTicStart = aviDemoFrameCount;
 
 		// remove any printed lines at the top before taking the screenshot
-		// console->ClearNotifyLines();
-
-		// common->Printf(
-		// 	"TakeScreenShot(%i, %i, %s, %i)",
-		// 	640,// com_aviDemoWidth.GetInteger(),
-		// 	480,// com_aviDemoHeight.GetInteger(),
-		// 	name,
-		// 	com_aviDemoSamples.GetInteger());
-		// this will call Draw, possibly multiple times if com_aviDemoSamples is > 1
+		console->ClearNotifyLines();
 
 		renderSystem->TakeScreenshot(
 			com_aviDemoWidth.GetInteger(),
