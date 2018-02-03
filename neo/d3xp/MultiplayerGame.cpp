@@ -1204,7 +1204,7 @@ void idMultiplayerGame::UpdateWinsLosses( idPlayer *winner ) {
 	else if ( IsGametypeFlagBased() ) { /* CTF */
 		int winteam = WinningTeam();
 
-		if ( winteam != -1 )	// TODO : print a message telling it why the hell the game ended with no winning team?
+		if ( winteam != -1 )	// TODO: print a message telling it why the hell the game ended with no winning team?
 		for( int i = 0; i < gameLocal.numClients; i++ ) {
 			idEntity *ent = gameLocal.entities[ i ];
 			if ( !ent || !ent->IsType( idPlayer::Type ) ) {
@@ -1947,7 +1947,7 @@ void idMultiplayerGame::Run() {
 			if ( IsGametypeFlagBased() ) { /* CTF */
 				int team = WinningTeam();
 				if ( team != -1 ) {
-					// TODO : implement pointLimitTimeout
+					// TODO: implement pointLimitTimeout
 					NewState( GAMEREVIEW, NULL );
 					PrintMessageEvent( -1, MSG_POINTLIMIT, team );
 				}
@@ -4223,7 +4223,7 @@ idItemTeam * idMultiplayerGame::GetTeamFlag( int team ) {
 	if ( !IsGametypeFlagBased() || ( team != 0 && team != 1 ) ) /* CTF */
 		return NULL;
 
-	// TODO : just call on map start
+	// TODO: just call on map start
 	FindTeamFlags();
 
 	return teamFlags[team];

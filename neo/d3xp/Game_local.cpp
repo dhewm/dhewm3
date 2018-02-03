@@ -4602,7 +4602,7 @@ idEntity *idGameLocal::SelectInitialSpawnPoint( idPlayer *player ) {
 #ifdef CTF
 		if ( mpGame.IsGametypeFlagBased() ) /* CTF */
 		{
-			// TODO : make as reusable method, same code as below
+			// TODO: make as reusable method, same code as below
 			int team = player->team;
 			assert( team == 0 || team == 1 );
 

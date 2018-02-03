@@ -174,7 +174,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_compile_options(-fvisibility=hidden)
 	endif()
 
-	# TODO fix these warnings
+	# TODO:fix these warnings
 	add_compile_options(-Wno-sign-compare)
 	add_compile_options(-Wno-switch)
 	add_compile_options(-Wno-format-security)

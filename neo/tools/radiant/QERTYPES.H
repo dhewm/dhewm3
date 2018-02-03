@@ -154,7 +154,7 @@ typedef struct qtexture_s
 } qtexture_t;
 
 //++timo texdef and brushprimit_texdef are static
-// TODO : do dynamic ?
+// TODO: do dynamic ?
 typedef struct face_s
 {
 	struct face_s			*next;

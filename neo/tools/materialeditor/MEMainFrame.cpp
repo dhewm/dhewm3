@@ -255,7 +255,7 @@ BOOL MEMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 /**
 * Called by the framework while the window is being created. This methods
 * creates the tool bars and status bars
-* /todo Bmatt Nerve: Need to get the toolbars to work correctly.
+* /TODO:Bmatt Nerve: Need to get the toolbars to work correctly.
 */
 int MEMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -378,7 +378,7 @@ void MEMainFrame::OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult) {
 
 /**
 * Shuts down the material editor.
-* /todo BMatt Nerve: Need to warn the user if a file is modified.
+* /TODO:BMatt Nerve: Need to warn the user if a file is modified.
 */
 void MEMainFrame::OnFileExit() {
 	PostMessage(WM_DESTROY, 0, 0);
