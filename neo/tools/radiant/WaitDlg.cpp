@@ -119,7 +119,7 @@ void CWaitDlg::AllowCancel( bool enable ) {
 
 bool CWaitDlg::CancelPressed( void ) {
 #if _MSC_VER >= 1300
-	MSG *msg = AfxGetCurrentMessage();			// TODO Robert fix me!!
+	MSG *msg = AfxGetCurrentMessage();			// TODO:Robert fix me!!
 #else
 	MSG *msg = &m_msgCur;
 #endif

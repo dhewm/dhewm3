@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Radiant.h"
 #include "TextureBar.h"
 
-//++timo TODO : the whole CTextureBar has to be modified for the new texture code
+//++timo TODO: the whole CTextureBar has to be modified for the new texture code
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

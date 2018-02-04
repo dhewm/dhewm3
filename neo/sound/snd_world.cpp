@@ -562,10 +562,12 @@ void idSoundWorldLocal::MixLoop( int current44kHz, int numSpeakers, float *final
 		}
 	}
 
-	// TODO port to OpenAL
+	// TODO: port to OpenAL
 	if ( false && enviroSuitActive ) {
+
 		soundSystemLocal.DoEnviroSuit( finalMixBuffer, MIXBUFFER_SAMPLES, numSpeakers );
 	}
+	// common->Printf("MixLoop(%d, %d, %f)\n", current44kHz, numSpeakers, &finalMixBuffer);
 }
 
 //==============================================================================
@@ -581,7 +583,7 @@ void idSoundWorldLocal::AVIOpen( const char *path, const char *name ) {
 	aviDemoPath = path;
 	aviDemoName = name;
 
-	lastAVI44kHz = game44kHz - game44kHz % MIXBUFFER_SAMPLES;
+	lastAVI44kHz = game44kHz - (game44kHz % MIXBUFFER_SAMPLES);
 
 	if ( idSoundSystemLocal::s_numberOfSpeakers.GetInteger() == 6 ) {
 		fpa[0] = fileSystem->OpenFileWrite( aviDemoPath + "channel_51_left.raw" );
@@ -636,6 +638,7 @@ void idSoundWorldLocal::AVIUpdate() {
 				outD[j] = idMath::FtoiFast( s );
 			}
 		}
+
 		// write to file
 		fpa[i]->Write( outD, MIXBUFFER_SAMPLES*sizeof(short) );
 	}
@@ -1844,8 +1847,8 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 				chan->triggered = false;
 			}
 		}
-	} else {
-
+	} //else {
+	if (true) {
 		if ( slowmoActive && !chan->disallowSlow ) {
 			idSlowChannel slow = sound->GetSlowChannel( chan );
 

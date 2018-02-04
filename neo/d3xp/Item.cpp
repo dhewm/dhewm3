@@ -801,7 +801,7 @@ void idItemTeam::Think( void ) {
 
 	TouchTriggers();
 
-	// TODO : only update on updatevisuals
+	// TODO: only update on updatevisuals
 	/*idVec3 offset( 0.0f, 0.0f, 20.0f );
 	itemGlow.origin = GetPhysics()->GetOrigin() + offset;
 	if ( itemGlowHandle == -1 ) {

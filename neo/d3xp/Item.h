@@ -228,7 +228,7 @@ public:
 
 public:
 	int                     team;
-	// TODO : turn this into a state :
+	// TODO: turn this into a state :
 	bool					carried;			// is it beeing carried by a player?
 	bool					dropped;			// was it dropped?
 

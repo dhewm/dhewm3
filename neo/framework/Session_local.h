@@ -226,6 +226,7 @@ public:
 	bool				syncNextGameFrame;
 
 
+	bool				soundRecordMode;	//separate sound from aviCapture
 	bool				aviCaptureMode;		// if true, screenshots will be taken and sound captured
 	idStr				aviDemoShortName;	//
 	float				aviDemoFrameCount;
@@ -285,6 +286,8 @@ public:
 	void				SaveCmdDemoToFile(idFile *file);
 	void				LoadCmdDemoFromFile(idFile *file);
 	void				StartRecordingRenderDemo( const char *name );
+	void				StartRecordingSound( const char *name );
+	void				EndRecordSound();
 	void				StopRecordingRenderDemo();
 	void				StartPlayingRenderDemo( idStr name );
 	void				StopPlayingRenderDemo();

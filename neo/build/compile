@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Компилирую и запускаю..."
+
+make -j2
+sudo make install
+idtech4

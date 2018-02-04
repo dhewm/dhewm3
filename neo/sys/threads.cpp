@@ -111,7 +111,7 @@ void Sys_ShutdownThreads() {
 
 		Sys_Printf("WARNING: Thread '%s' still running\n", thread[i]->name);
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		// TODO no equivalent in SDL2
+		// TODO:no equivalent in SDL2
 #else
 		SDL_KillThread(thread[i]->threadHandle);
 #endif

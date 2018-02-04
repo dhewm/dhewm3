@@ -51,9 +51,9 @@ idCVar	idSessionLocal::com_showTics( "com_showTics", "0", CVAR_SYSTEM | CVAR_BOO
 idCVar	idSessionLocal::com_fixedTic( "com_fixedTic", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 10 );
 idCVar	idSessionLocal::com_showDemo( "com_showDemo", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar	idSessionLocal::com_skipGameDraw( "com_skipGameDraw", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
-idCVar	idSessionLocal::com_aviDemoSamples( "com_aviDemoSamples", "16", CVAR_SYSTEM, "" );
-idCVar	idSessionLocal::com_aviDemoWidth( "com_aviDemoWidth", "256", CVAR_SYSTEM, "" );
-idCVar	idSessionLocal::com_aviDemoHeight( "com_aviDemoHeight", "256", CVAR_SYSTEM, "" );
+idCVar	idSessionLocal::com_aviDemoSamples( "com_aviDemoSamples", "1", CVAR_SYSTEM, "" );
+idCVar	idSessionLocal::com_aviDemoWidth( "com_aviDemoWidth", "800", CVAR_SYSTEM, "" );
+idCVar	idSessionLocal::com_aviDemoHeight( "com_aviDemoHeight", "600", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_aviDemoTics( "com_aviDemoTics", "2", CVAR_SYSTEM | CVAR_INTEGER, "", 1, 60 );
 idCVar	idSessionLocal::com_wipeSeconds( "com_wipeSeconds", "1", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_guid( "com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "" );
@@ -338,6 +338,7 @@ void idSessionLocal::Clear() {
 	mapSpawned = false;
 	guiActive = NULL;
 	aviCaptureMode = false;
+	soundRecordMode = false;
 	timeDemo = TD_NO;
 	waitingOnBind = false;
 	lastPacifierTime = 0;
@@ -425,6 +426,10 @@ void idSessionLocal::Shutdown() {
 
 	if ( aviCaptureMode ) {
 		EndAVICapture();
+	}
+
+	if ( soundRecordMode ) {
+		EndRecordSound();
 	}
 
 	if(timeDemo == TD_YES) {
@@ -695,6 +700,27 @@ static void Session_TimeDemoQuit_f( const idCmdArgs &args ) {
 
 /*
 ================
+Session_RecordSound_f
+================
+*/
+static void Session_RecordSound_f( const idCmdArgs &args ) {
+	if ( args.Argc() != 2 ) {
+		return common->Printf("Session_RecordSound_f: requires 1 arg. Demo's name");
+	}
+	sessLocal.StartRecordingSound( va( "demos/%s", args.Argv(1) ) );
+}
+
+/*
+================
+Session_EndRecordSound_f
+================
+*/
+static void Session_EndRecordSound_f() {
+	sessLocal.EndRecordSound();
+}
+
+/*
+================
 Session_AVIDemo_f
 ================
 */
@@ -828,8 +854,13 @@ idSessionLocal::StopRecordingRenderDemo
 ================
 */
 void idSessionLocal::StopRecordingRenderDemo() {
-	if ( !writeDemo ) {
+	if ( !writeDemo && !soundRecordMode ) {
 		common->Printf( "idSessionLocal::StopRecordingRenderDemo: not recording\n" );
+		return;
+	}
+
+	if( soundRecordMode ) {
+		sessLocal.EndRecordSound();
 		return;
 	}
 	sw->StopWritingDemo();
@@ -858,6 +889,7 @@ void idSessionLocal::StopPlayingRenderDemo() {
 	int timeDemoStopTime = Sys_Milliseconds();
 
 	EndAVICapture();
+	EndRecordSound();
 
 	readDemo->Close();
 
@@ -994,6 +1026,39 @@ void idSessionLocal::TimeRenderDemo( const char *demoName, bool twice ) {
 	timeDemo = TD_YES;
 }
 
+/*
+================
+idSessionLocal::StartRecordingSound
+================
+*/
+void idSessionLocal::StartRecordingSound( const char *_demoName ) {
+	idStr	demoName = _demoName;	// copy off from va() buffer
+
+	StartPlayingRenderDemo( demoName );
+	if ( !readDemo ) {
+		return;
+	}
+
+	BeginAVICapture( demoName.c_str() ) ;
+	aviCaptureMode = false;
+}
+
+/*
+================
+idSessionLocal::EndRecordSound
+================
+*/
+void idSessionLocal::EndRecordSound() {
+	if ( !aviCaptureMode && !soundRecordMode ) {
+		return;
+	}
+
+	sw->AVIClose();
+	common->Printf("Sound file saved!");
+	soundRecordMode = false;
+}
+
+
 
 /*
 ================
@@ -1078,6 +1143,11 @@ Start AVI recording the current game session
 void idSessionLocal::AVIGame( const char *demoName ) {
 	if ( aviCaptureMode ) {
 		EndAVICapture();
+		return;
+	}
+
+	if ( soundRecordMode ) {
+		EndRecordSound();
 		return;
 	}
 
@@ -2473,6 +2543,7 @@ void idSessionLocal::Draw() {
 /*
 ===============
 idSessionLocal::UpdateScreen
+PRO: Рендерит каждый тик
 ===============
 */
 void idSessionLocal::UpdateScreen( bool outOfSequence ) {
@@ -2549,7 +2620,13 @@ void idSessionLocal::Frame() {
 			// skipped frames so write them out
 			int c = aviDemoFrameCount - aviTicStart;
 			while ( c-- ) {
-				renderSystem->TakeScreenshot( com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL );
+				renderSystem->TakeScreenshot(
+					com_aviDemoWidth.GetInteger(),
+					com_aviDemoHeight.GetInteger(),
+					name,
+					com_aviDemoSamples.GetInteger(),
+					NULL
+				);
 				name = va("demos/%s/%s_%05i.tga", aviDemoShortName.c_str(), aviDemoShortName.c_str(), ++aviTicStart );
 			}
 		}
@@ -2558,8 +2635,13 @@ void idSessionLocal::Frame() {
 		// remove any printed lines at the top before taking the screenshot
 		console->ClearNotifyLines();
 
-		// this will call Draw, possibly multiple times if com_aviDemoSamples is > 1
-		renderSystem->TakeScreenshot( com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL );
+		renderSystem->TakeScreenshot(
+			com_aviDemoWidth.GetInteger(),
+			com_aviDemoHeight.GetInteger(),
+			name,
+			com_aviDemoSamples.GetInteger(),
+			NULL
+		);
 	}
 
 	// at startup, we may be backwards
@@ -2744,6 +2826,11 @@ void idSessionLocal::RunGameTic() {
 				EndAVICapture();
 				Shutdown();
 			}
+
+			if( soundRecordMode ) {
+				EndRecordSound();
+				Shutdown();
+			}
 			// we fall out of the demo to normal commands
 			// the impulse and chat character toggles may not be correct, and the view
 			// angle will definitely be wrong
@@ -2860,6 +2947,13 @@ void idSessionLocal::Init() {
 	cmdSystem->AddCommand( "timeDemoQuit", Session_TimeDemoQuit_f, CMD_FL_SYSTEM, "times a demo and quits", idCmdSystem::ArgCompletion_DemoName );
 	cmdSystem->AddCommand( "aviDemo", Session_AVIDemo_f, CMD_FL_SYSTEM, "writes AVIs for a demo", idCmdSystem::ArgCompletion_DemoName );
 	cmdSystem->AddCommand( "compressDemo", Session_CompressDemo_f, CMD_FL_SYSTEM, "compresses a demo file", idCmdSystem::ArgCompletion_DemoName );
+
+	// [idTech4]
+	cmdSystem->AddCommand( "rec", Session_RecordDemo_f, CMD_FL_SYSTEM, "start record" );
+	cmdSystem->AddCommand( "stop", Session_StopRecordingDemo_f, CMD_FL_SYSTEM, "stop record" );
+	cmdSystem->AddCommand( "play", Session_PlayDemo_f, CMD_FL_SYSTEM, "play record", idCmdSystem::ArgCompletion_DemoName );
+	cmdSystem->AddCommand( "render", Session_AVIDemo_f, CMD_FL_SYSTEM, "renders the record" );
+	cmdSystem->AddCommand( "renderSound", Session_RecordSound_f, CMD_FL_SYSTEM, "start sound record" );
 #endif
 
 	cmdSystem->AddCommand( "disconnect", Session_Disconnect_f, CMD_FL_SYSTEM, "disconnects from a game" );
