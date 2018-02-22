@@ -497,7 +497,7 @@ void tty_Show() {
 }
 
 void tty_FlushIn() {
-  char key;
+  int key;
   while ( ( key = getchar() ) != EOF ) {
 	  Sys_Printf( "'%d' ", key );
   }
@@ -513,7 +513,7 @@ Return NULL if a complete line is not ready.
 */
 char *Sys_ConsoleInput( void ) {
 	if ( tty_enabled ) {
-		char	key;
+		int	key;
 		bool	hidden = false;
 		while ( ( key = getchar() ) != EOF ) {
 			if ( !hidden ) {
