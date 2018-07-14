@@ -179,6 +179,7 @@ void idSoundChannel::Clear( void ) {
 	diversity = 0.0f;
 	leadinSample = NULL;
 	trigger44kHzTime = 0;
+	stopped = false;
 	for( j = 0; j < 6; j++ ) {
 		lastV[j] = 0.0f;
 	}
@@ -210,6 +211,7 @@ idSoundChannel::Stop
 */
 void idSoundChannel::Stop( void ) {
 	triggerState = false;
+	stopped = true;
 	if ( decoder != NULL ) {
 		idSampleDecoder::Free( decoder );
 		decoder = NULL;
@@ -461,9 +463,8 @@ void idSoundEmitterLocal::CheckForCompletion( int current44kHzTime ) {
 						if ( chan->leadinSample->onDemand ) {
 							chan->leadinSample->PurgeSoundSample();
 						}
-						continue;
 					}
-				} else if ( ( chan->trigger44kHzTime + chan->leadinSample->LengthIn44kHzSamples() < current44kHzTime ) || ( state == AL_STOPPED ) ) {
+				} else if ( ( chan->trigger44kHzTime + chan->leadinSample->LengthIn44kHzSamples() < current44kHzTime ) || ( chan->stopped ) ) {
 					chan->Stop();
 
 					// free hardware resources
@@ -473,7 +474,6 @@ void idSoundEmitterLocal::CheckForCompletion( int current44kHzTime ) {
 					if ( chan->leadinSample->onDemand ) {
 						chan->leadinSample->PurgeSoundSample();
 					}
-					continue;
 				}
 			}
 
@@ -831,6 +831,7 @@ int idSoundEmitterLocal::StartSound( const idSoundShader *shader, const s_channe
 	chan->triggerGame44kHzTime = soundWorld->game44kHz;
 	chan->soundShader = shader;
 	chan->triggerChannel = channel;
+	chan->stopped = false;
 	chan->Start();
 
 	// we need to start updating the def and mixing it in
