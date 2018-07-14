@@ -628,6 +628,49 @@ void Win_Frame( void ) {
 	}
 }
 
+// code that tells windows we're High DPI aware so it doesn't scale our windows
+// taken from Yamagi Quake II
+
+typedef enum D3_PROCESS_DPI_AWARENESS {
+	D3_PROCESS_DPI_UNAWARE = 0,
+	D3_PROCESS_SYSTEM_DPI_AWARE = 1,
+	D3_PROCESS_PER_MONITOR_DPI_AWARE = 2
+} YQ2_PROCESS_DPI_AWARENESS;
+
+static void setHighDPIMode(void)
+{
+	/* For Vista, Win7 and Win8 */
+	BOOL(WINAPI *SetProcessDPIAware)(void) = NULL;
+
+	/* Win8.1 and later */
+	HRESULT(WINAPI *SetProcessDpiAwareness)(D3_PROCESS_DPI_AWARENESS dpiAwareness) = NULL;
+
+
+	HINSTANCE userDLL = LoadLibrary("USER32.DLL");
+
+	if (userDLL)
+	{
+		SetProcessDPIAware = (BOOL(WINAPI *)(void)) GetProcAddress(userDLL, "SetProcessDPIAware");
+	}
+
+
+	HINSTANCE shcoreDLL = LoadLibrary("SHCORE.DLL");
+
+	if (shcoreDLL)
+	{
+		SetProcessDpiAwareness = (HRESULT(WINAPI *)(YQ2_PROCESS_DPI_AWARENESS))
+									GetProcAddress(shcoreDLL, "SetProcessDpiAwareness");
+	}
+
+
+	if (SetProcessDpiAwareness) {
+		SetProcessDpiAwareness(D3_PROCESS_PER_MONITOR_DPI_AWARE);
+	}
+	else if (SetProcessDPIAware) {
+		SetProcessDPIAware();
+	}
+}
+
 /*
 ==================
 WinMain
@@ -638,6 +681,9 @@ int main(int argc, char *argv[]) {
 
 #ifdef ID_DEDICATED
 	MSG msg;
+#else
+	// tell windows we're high dpi aware, otherwise display scaling screws up the game
+	setHighDPIMode();
 #endif
 
 	Sys_SetPhysicalWorkMemory( 192 << 20, 1024 << 20 );
