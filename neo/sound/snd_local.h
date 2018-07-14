@@ -384,6 +384,7 @@ public:
 	ALuint				openalStreamingOffset;
 	ALuint				openalStreamingBuffer[3];
 	ALuint				lastopenalStreamingBuffer[3];
+	bool				stopped;
 
 	bool				disallowSlow;
 
