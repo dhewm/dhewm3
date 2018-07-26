@@ -108,8 +108,8 @@ void roqParam::InitFromFile( const char *fileName )
 			readarg++;
 			continue;
 		}
-// scaleable
-		if (token.Icmp( "scaleable") == 0) {
+// scalable
+		if (token.Icmp( "scalable") == 0) {
 			isScaleable = true;
 			readarg++;
 			continue;

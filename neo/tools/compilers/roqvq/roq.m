@@ -49,7 +49,7 @@ blah
 	return lastFrame;
 }
 
-- (BOOL)scaleable
+- (BOOL)scalable
 {
 	return [paramFileId isScaleable];
 }
@@ -116,7 +116,7 @@ int morestuff;
 	while( morestuff ) {
 		[self loadAndDisplayImage: f1];
 		
-		if (onFrame==1 && ([image hadAlpha]==NO || [paramInputFile noAlpha]==YES) && ![self makingVideo] && ![self scaleable]) {
+		if (onFrame==1 && ([image hadAlpha]==NO || [paramInputFile noAlpha]==YES) && ![self makingVideo] && ![self scalable]) {
 			[encoder sparseEncode: self];
 //			[self writeLossless];
 		} else {
