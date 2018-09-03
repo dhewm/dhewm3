@@ -2738,12 +2738,81 @@ static unsigned int AsyncTimer(unsigned int interval, void *) {
 	return tick - now;
 }
 
+static bool checkForHelp(int argc, char **argv)
+{
+	const char* helpArgs[] = { "--help", "-h", "-help", "-?", "/?" };
+	const int numHelpArgs = sizeof(helpArgs)/sizeof(helpArgs[0]);
+
+	for (int i=0; i<argc; ++i)
+	{
+		const char* arg = argv[i];
+		for (int h=0; h<numHelpArgs; ++h)
+		{
+			if (idStr::Icmp(arg, helpArgs[h]) == 0)
+			{
+				// TODO: use Printf() or sth instead?
+				printf("%s - http://dhewm3.org\n", ENGINE_VERSION);
+				printf("Commandline arguments:\n");
+				printf("-h or --help: Show this help\n");
+				printf("+<command> [command arguments]\n");
+				printf("  executes a command (with optional arguments)\n");
+
+				printf("\nSome interesting commands:\n");
+				printf("+map <map>\n");
+				printf("  directly loads the given level, e.g. +map game/hell1\n");
+				printf("+exec <config>\n");
+				printf("  execute the given config (mainly relevant for dedicated servers)\n");
+				printf("+disconnect\n");
+				printf("  starts the game, goes directly into main menu without showing logo video\n");
+				printf("+connect <host>[:port]\n");
+				printf("  directly connect to multiplayer server at given host/port\n");
+				printf("  e.g. +connect d3.example.com\n");
+				printf("  e.g. +connect d3.example.com:27667\n");
+				printf("  e.g. +connect 192.168.0.42:27666\n");
+				printf("+set <cvarname> <value>\n");
+				printf("  Set the given cvar to the given value, e.g. +set r_fullscreen 0\n");
+				printf("+seta <cvarname> <value>\n");
+				printf("  like +set, but also makes sure the changed cvar is saved (\"archived\") in a cfg\n");
+
+				printf("\nSome interesting cvars:\n");
+				printf("+set fs_basepath <gamedata path>\n");
+				printf("  set path to your Doom3 game data (the directory base/ is in)\n");
+				printf("+set fs_game <modname>\n");
+				printf("  start the given addon/mod, e.g. +set fs_game d3xp\n");
+#ifndef ID_DEDICATED
+				printf("+set r_fullscreen <0 or 1>\n");
+				printf("  start game in windowed (0) or fullscreen (1) mode\n");
+				printf("+set r_mode <modenumber>\n");
+				printf("  start game in resolution belonging to <modenumber>,\n");
+				printf("  use -1 for custom resolutions:\n");
+				printf("+set r_customWidth  <size in pixels>\n");
+				printf("+set r_customHeight <size in pixels>\n");
+				printf("  if r_mode is set to -1, these cvars allow you to specify the\n");
+				printf("  width/height of your custom resolution\n");
+#endif // !ID_DEDICATED
+				printf("\nSee https://modwiki.xnet.fi/CVars_%%28Doom_3%%29 for more cvars\n");
+				printf("See https://modwiki.xnet.fi/Commands_%%28Doom_3%%29 for more commands\n");
+
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 /*
 =================
 idCommonLocal::Init
 =================
 */
 void idCommonLocal::Init( int argc, char **argv ) {
+
+	if(checkForHelp(argc, argv))
+	{
+		// game has been started with --help (or similar), usage message has been shown => quit
+		exit(1);
+	}
+
 #ifdef ID_DEDICATED
 	// we want to use the SDL event queue for dedicated servers. That
 	// requires video to be initialized, so we just use the dummy
