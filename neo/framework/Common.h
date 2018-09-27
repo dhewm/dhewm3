@@ -211,6 +211,67 @@ public:
 
 								// Directly sample a keystate.
 	virtual int					KeyState( int key ) = 0;
+
+	/* Some Mods (like Ruiner and DarkMod when it still was a mod) used "SourceHook"
+	 * to override Doom3 Methods to call their own code before the original method
+	 * was executed.. this is super ugly and probably not super portable either.
+	 *
+	 * So let's offer something that's slightly less ugly: A function pointer based
+	 * interface to provide similar (but known!) hacks.
+	 * For example, Ruiner used SourceHook to intercept idCmdSystem::BufferCommandText()
+	 * and recreate some cooked rendering data in case reloadImages or vid_restart was executed.
+	 * Now, instead of doing ugly hacks with SourceHook, Ruiner can just call
+	 *   common->SetCallback( idCommon::CB_ReloadImages,
+	 *                        (idCommon::FunctionPointer)functionToCall,
+	 *                        (void*)argForFunctionToCall );
+	 *
+	 * (the Mod needs to check if SetCallback() returned true; if it didn't the used version
+	 *  of dhewm3 doesn't support the given CallBackType and the Mod must either error out
+	 *  or handle the case that the callback doesn't work)
+	 *
+	 * Of course this means that for every new SourceHook hack a Mod (that's ported to dhewm3)
+	 * uses, a corresponding entry must be added to enum CallbackType and it must be handled,
+	 * which implies that the Mod will only properly work with the latest dhewm3 git code
+	 * or the next release..
+	 * I guess most mods don't need this hack though, so I think it's feasible.
+	 *
+	 * Note that this allows adding new types of callbacks without breaking the API and ABI
+	 * between dhewm3 and the Game DLLs; the alternative would be something like
+	 * idCommon::RegisterReloadImagesCallback(), and maybe other similar methods later, which
+	 * would break the ABI and API each time and all Mods would have to be adjusted, even if
+	 * they don't even need that functionality (because they never needed SourceHook or similar).
+	 *
+	 * Similar to SetCallback() I've also added GetAdditionalFunction() to get a function pointer
+	 * from dhewm3 that Mods can call (and that's not exported via the normal interface classes).
+	 * Right now GetAdditionalFunction() will always just return false and do nothing, but if
+	 * some Mod needs some specific function in the future, it could be implemented with
+	 * GetAdditionalFunction() - again without breaking the game API and ABI for all the other
+	 * Mods that don't need that function.
+	 */
+
+	typedef void* (*FunctionPointer)(void*); // needs to be cast to/from real type!
+	enum CallbackType {
+		// called on reloadImages and vid_restart commands (before anything "real" happens)
+		// expecting callback to be like void cb(void* userarg, const idCmdArgs& cmdArgs)
+		// where cmdArgs contains the command+arguments that was called
+		CB_ReloadImages = 1,
+	};
+
+	// returns true if setting the callback was successful, else false
+	// When a game DLL is unloaded the callbacks are automatically removed from the Engine
+	// so you usually don't have to worry about that; but you can call this with cb = NULL
+	// and userArg = NULL to remove a callback manually (e.g. if userArg refers to an object you deleted)
+	virtual bool				SetCallback(CallbackType cbt, FunctionPointer cb, void* userArg) = 0;
+
+	enum FunctionType {
+		// None yet..
+	};
+
+	// returns true if that function is available in this version of dhewm3
+	// *out_fnptr will be the function (you'll have to cast it probably)
+	// *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
+	// NOTE: this doesn't do anything yet, but allows to add ugly mod-specific hacks without breaking the Game interface
+	virtual bool				GetAdditionalFunction(FunctionType ft, FunctionPointer* out_fnptr, void** out_userArg) = 0;
 };
 
 extern idCommon *		common;

@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "framework/Common.h"
 
+#include "GameCallbacks_local.h"
+
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
 
@@ -161,6 +163,23 @@ public:
 
 	virtual int					ButtonState( int key );
 	virtual int					KeyState( int key );
+
+	// DG: hack to allow adding callbacks and exporting additional functions without breaking the game ABI
+	//     see Common.h for longer explanation...
+
+	// returns true if setting the callback was successful, else false
+	// When a game DLL is unloaded the callbacks are automatically removed from the Engine
+	// so you usually don't have to worry about that; but you can call this with cb = NULL
+	// and userArg = NULL to remove a callback manually (e.g. if userArg refers to an object you deleted)
+	virtual bool				SetCallback(idCommon::CallbackType cbt, idCommon::FunctionPointer cb, void* userArg);
+
+	// returns true if that function is available in this version of dhewm3
+	// *out_fnptr will be the function (you'll have to cast it probably)
+	// *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
+	// NOTE: this doesn't do anything yet, but allows to add ugly mod-specific hacks without breaking the Game interface
+	virtual bool				GetAdditionalFunction(idCommon::FunctionType ft, idCommon::FunctionPointer* out_fnptr, void** out_userArg);
+
+	// DG end
 
 	void						InitGame( void );
 	void						ShutdownGame( bool reloading );
@@ -2688,6 +2707,8 @@ void idCommonLocal::UnloadGameDLL( void ) {
 	gameEdit = NULL;
 
 #endif
+
+	gameCallbacks.Reset(); // DG: these callbacks are invalid now because DLL has been unloaded
 }
 
 /*
@@ -3175,4 +3196,60 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 
 	// shut down the file system
 	fileSystem->Shutdown( reloading );
+}
+
+// DG: below here are hacks to allow adding callbacks and exporting additional functions to the
+//     Game DLL without breaking the ABI. See Common.h for longer explanation...
+
+
+// returns true if setting the callback was successful, else false
+// When a game DLL is unloaded the callbacks are automatically removed from the Engine
+// so you usually don't have to worry about that; but you can call this with cb = NULL
+// and userArg = NULL to remove a callback manually (e.g. if userArg refers to an object you deleted)
+bool idCommonLocal::SetCallback(idCommon::CallbackType cbt, idCommon::FunctionPointer cb, void* userArg)
+{
+	switch(cbt)
+	{
+		case idCommon::CB_ReloadImages:
+			gameCallbacks.reloadImagesCB = (idGameCallbacks::ReloadImagesCallback)cb;
+			gameCallbacks.reloadImagesUserArg = userArg;
+			return true;
+
+		default:
+			Warning("Called idCommon::SetCallback() with unknown CallbackType %d!\n", cbt);
+			return false;
+	}
+}
+
+// returns true if that function is available in this version of dhewm3
+// *out_fnptr will be the function (you'll have to cast it probably)
+// *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
+bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::FunctionPointer* out_fnptr, void** out_userArg)
+{
+	if(out_userArg != NULL)
+		*out_userArg = NULL;
+
+	if(out_fnptr == NULL)
+	{
+		Warning("Called idCommon::GetAdditionalFunction() with out_fnptr == NULL!\n");
+		return false;
+	}
+	*out_fnptr = NULL;
+
+	// NOTE: this doesn't do anything yet, but allows to later add ugly mod-specific hacks without breaking the Game interface
+
+	return false;
+}
+
+
+idGameCallbacks gameCallbacks;
+
+idGameCallbacks::idGameCallbacks()
+: reloadImagesCB(NULL), reloadImagesUserArg(NULL)
+{}
+
+void idGameCallbacks::Reset()
+{
+	reloadImagesCB = NULL;
+	reloadImagesUserArg = NULL;
 }
