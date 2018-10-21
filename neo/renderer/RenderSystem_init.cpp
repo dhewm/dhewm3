@@ -561,9 +561,9 @@ static void initSortedVidModes()
 //     to overwrite the default resolution list in the system options menu
 
 // "r_custom*;640x480;800x600;1024x768;..."
-idStr R_GetVidModeListString()
+idStr R_GetVidModeListString(bool addCustom)
 {
-	idStr ret = "r_custom*";
+	idStr ret = addCustom ? "r_custom*" : "";
 
 	for(int i=0; i<s_numVidModes; ++i)
 	{
@@ -579,9 +579,9 @@ idStr R_GetVidModeListString()
 }
 
 // r_mode values for resolutions from R_GetVidModeListString(): "-1;3;4;5;..."
-idStr R_GetVidModeValsString()
+idStr R_GetVidModeValsString(bool addCustom)
 {
-	idStr ret =  "-1"; // for custom resolutions using r_customWidth/r_customHeight
+	idStr ret = addCustom ? "-1" : ""; // for custom resolutions using r_customWidth/r_customHeight
 	for(int i=0; i<s_numVidModes; ++i)
 	{
 		// for some reason, modes 0-2 are not used. maybe too small for GUI?

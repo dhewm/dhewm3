@@ -352,19 +352,52 @@ void idChoiceWindow::UpdateChoicesAndVals( void ) {
 	}
 }
 
-idStr R_GetVidModeListString();
-idStr R_GetVidModeValsString();
+idStr R_GetVidModeListString(bool addCustom);
+idStr R_GetVidModeValsString(bool addCustom);
 
 void idChoiceWindow::PostParse() {
 	idWindow::PostParse();
 
-	// DG: HACKHACKFUCKINGUGLYHACK: overwrite resolution list from mainmenu.gui
+	// DG: HACKHACKFUCKINGUGLYHACK: overwrite resolution list
 	//     to support more resolutions and widescreen and stuff.
-	if( idStr::Cmp(GetName(), "OS2Primary") == 0 && cvarStr == "r_mode"
-	    && idStr::Icmp(GetGui()->GetSourceFile(), "guis/mainmenu.gui") == 0 )
+	bool injectResolutions = false;
+	bool injectCustomMode = true;
+
+	/*
+	 * Mods that have their own video settings menu can tell dhewm3 to replace the
+	 * "choices" and "values" entries in their choiceDef with the resolutions supported by
+	 * dhewm3 (and corresponding modes). So if we add new video modes to dhewm3,
+	 * they'll automatically appear in the menu without changing the .gui
+	 * To enable this, the mod authors only need to add an "injectResolutions 1" entry
+	 * to their resolution choiceDef. By default, the first entry will be "r_custom*"
+	 * for r_mode -1, which means "custom resolution, use r_customWidth and r_customHeight".
+	 * If that entry shoud be disabled for the mod, just add another entry:
+	 * "injectCustomResolutionMode 0"
+	 */
+	idWinVar* wv = GetWinVarByName("injectResolutions");
+	if(wv != NULL) {
+		const char* val = wv->c_str();
+		if(val != NULL && *val != '\0' && idStr::Cmp(val, "0") != 0) {
+			injectResolutions = true;
+			wv = GetWinVarByName("injectCustomResolutionMode");
+			if(wv != NULL) {
+				const char* val = wv->c_str();
+				if(val != NULL && *val != '\0' && idStr::Cmp(val, "0") == 0) {
+					injectCustomMode = false;
+				}
+			}
+		}
+	}
+	else if( idStr::Cmp(GetName(), "OS2Primary") == 0 && cvarStr == "r_mode"
+		    && idStr::Icmp(GetGui()->GetSourceFile(), "guis/mainmenu.gui") == 0 )
 	{
-		choicesStr.Set( R_GetVidModeListString() );
-		choiceVals.Set( R_GetVidModeValsString() );
+		// always enable this for base/ and d3xp/ mainmenu.gui (like we did before)
+		injectResolutions = true;
+	}
+
+	if(injectResolutions) {
+		choicesStr.Set( R_GetVidModeListString(injectCustomMode) );
+		choiceVals.Set( R_GetVidModeValsString(injectCustomMode) );
 	}
 	// DG end
 
