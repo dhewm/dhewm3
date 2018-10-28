@@ -135,6 +135,10 @@ void idDeviceContext::Init() {
 	mat.Identity();
 	origin.Zero();
 	initialized = true;
+
+	// DG: this is used for the "make sure menus are rendered as 4:3" hack
+	fixScaleForMenu.Set(1, 1);
+	fixOffsetForMenu.Set(0, 0);
 }
 
 void idDeviceContext::Shutdown() {
@@ -254,8 +258,67 @@ bool idDeviceContext::ClippedCoords(float *x, float *y, float *w, float *h, floa
 	return (*w == 0 || *h == 0) ? true : false;
 }
 
+// DG: this is used for the "make sure menus are rendered as 4:3" hack
+void idDeviceContext::SetMenuScaleFix(bool enable) {
+	if(enable) {
+		float w = renderSystem->GetScreenWidth();
+		float h = renderSystem->GetScreenHeight();
+		float aspectRatio = w/h;
+		static const float virtualAspectRatio = float(VIRTUAL_WIDTH)/float(VIRTUAL_HEIGHT); // 4:3
+		if(aspectRatio > 1.4f) {
+			// widescreen (4:3 is 1.333 3:2 is 1.5, 16:10 is 1.6, 16:9 is 1.7778)
+			// => we need to scale and offset X
+			// All the coordinates here assume 640x480 (VIRTUAL_WIDTH x VIRTUAL_HEIGHT)
+			// screensize, so to fit a 4:3 menu into 640x480 stretched to a widescreen,
+			// we need do decrease the width to something smaller than 640 and center
+			// the result with an offset
+			float scaleX = virtualAspectRatio/aspectRatio;
+			float offsetX = (1.0f-scaleX)*(VIRTUAL_WIDTH*0.5f); // (640 - scale*640)/2
+			fixScaleForMenu.Set(scaleX, 1);
+			fixOffsetForMenu.Set(offsetX, 0);
+		} else if(aspectRatio < 1.24f) {
+			// portrait-mode, "thinner" than 5:4 (which is 1.25)
+			// => we need to scale and offset Y
+			// it's analogue to the other case, but inverted and with height and Y
+			float scaleY = aspectRatio/virtualAspectRatio;
+			float offsetY = (1.0f - scaleY)*(VIRTUAL_HEIGHT*0.5f); // (480 - scale*480)/2
+			fixScaleForMenu.Set(1, scaleY);
+			fixOffsetForMenu.Set(0, offsetY);
+		}
+	} else {
+		fixScaleForMenu.Set(1, 1);
+		fixOffsetForMenu.Set(0, 0);
+	}
+}
 
 void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h) {
+
+	if (x) {
+		*x *= xScale;
+
+		*x *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
+		*x += fixOffsetForMenu.x;
+	}
+	if (y) {
+		*y *= yScale;
+
+		*y *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
+		*y += fixOffsetForMenu.y;
+	}
+	if (w) {
+		*w *= xScale;
+
+		*w *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
+	}
+	if (h) {
+		*h *= yScale;
+
+		*h *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
+	}
+}
+
+// DG: same as AdjustCoords, but ignore fixupMenus because for the cursor that must be handled seperately
+void idDeviceContext::AdjustCursorCoords(float *x, float *y, float *w, float *h) {
 	if (x) {
 		*x *= xScale;
 	}
@@ -637,8 +700,16 @@ void idDeviceContext::DrawCursor(float *x, float *y, float size) {
 	}
 
 	renderSystem->SetColor(colorWhite);
-	AdjustCoords(x, y, &size, &size);
-	DrawStretchPic( *x, *y, size, size, 0, 0, 1, 1, cursorImages[cursor]);
+
+	// DG: I use this instead of plain AdjustCursorCoords and the following lines
+	//     to scale menus and other fullscreen GUIs to 4:3 aspect ratio
+	AdjustCursorCoords(x, y, &size, &size);
+	float sizeW = size * fixScaleForMenu.x;
+	float sizeH = size * fixScaleForMenu.y;
+	float fixedX = *x * fixScaleForMenu.x + fixOffsetForMenu.x;
+	float fixedY = *y * fixScaleForMenu.y + fixOffsetForMenu.y;
+
+	DrawStretchPic(fixedX, fixedY, sizeW, sizeH, 0, 0, 1, 1, cursorImages[cursor]);
 }
 /*
  =======================================================================================================================

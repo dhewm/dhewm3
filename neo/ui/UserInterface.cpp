@@ -37,6 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "ui/UserInterfaceLocal.h"
 
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
+extern idCVar r_scaleMenusTo43; // DG: for the "scale menus to 4:3" hack
 
 idUserInterfaceManagerLocal	uiManagerLocal;
 idUserInterfaceManager *	uiManager = &uiManagerLocal;
@@ -349,11 +350,30 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 			float w = renderSystem->GetScreenWidth();
 			float h = renderSystem->GetScreenHeight();
 			if( w <= 0.0f || h <= 0.0f ) {
-				w = 640.0f;
-				h = 480.0f;
+				w = VIRTUAL_WIDTH;
+				h = VIRTUAL_HEIGHT;
 			}
-			cursorX += event->evValue * (640.0f/w);
-			cursorY += event->evValue2 * (480.0f/h);
+
+			if(r_scaleMenusTo43.GetBool()) {
+				// in case we're scaling menus to 4:3, we need to take that into account
+				// when scaling the mouse events.
+				// no, we can't just call uiManagerLocal.dc.GetFixScaleForMenu() or sth like that,
+				// because when we're here dc.SetMenuScaleFix(true) is not active and it'd just return (1, 1)!
+				float aspectRatio = w/h;
+				static const float virtualAspectRatio = float(VIRTUAL_WIDTH)/float(VIRTUAL_HEIGHT); // 4:3
+				if(aspectRatio > 1.4f) {
+					// widescreen (4:3 is 1.333 3:2 is 1.5, 16:10 is 1.6, 16:9 is 1.7778)
+					// => we need to modify cursorX scaling, by modifying w
+					w *= virtualAspectRatio/aspectRatio;
+				} else if(aspectRatio < 1.24f) {
+					// portrait-mode, "thinner" than 5:4 (which is 1.25)
+					// => we need to scale cursorY via h
+					h *= aspectRatio/virtualAspectRatio;
+				}
+			}
+
+			cursorX += event->evValue * (float(VIRTUAL_WIDTH)/w);
+			cursorY += event->evValue2 * (float(VIRTUAL_HEIGHT)/h);
 		} else {
 			// not a fullscreen GUI but some ingame thing - no scaling needed
 			cursorX += event->evValue;
