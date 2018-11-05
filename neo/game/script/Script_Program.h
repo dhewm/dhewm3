@@ -44,7 +44,7 @@ class idSaveGame;
 class idRestoreGame;
 
 #define MAX_STRING_LEN		128
-#define MAX_GLOBALS			196608			// in bytes
+#define MAX_GLOBALS			296608			// in bytes - DG: increased this for better support of mods that use the vanilla game dll
 #define MAX_STRINGS			1024
 #define MAX_FUNCS			3072
 #define MAX_STATEMENTS		81920			// statement_t - 18 bytes last I checked
