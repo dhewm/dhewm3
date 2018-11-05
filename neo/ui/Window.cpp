@@ -1215,10 +1215,15 @@ void idWindow::Redraw(float x, float y) {
 
 	// DG: allow scaling menus to 4:3
 	bool fixupFor43 = false;
-	if ( (flags & (WIN_MENUGUI | WIN_DESKTOP)) == (WIN_MENUGUI | WIN_DESKTOP)
-	     && r_scaleMenusTo43.GetBool() ) {
-		fixupFor43 = true;
-		dc->SetMenuScaleFix(true);
+	if ( flags & WIN_DESKTOP ) {
+		// only scale desktop windows (will automatically scale its sub-windows)
+		// that EITHER have the scaleto43 flag set OR are fullscreen menus and r_scaleMenusTo43 is 1
+		if( (flags & WIN_SCALETO43) ||
+			((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool()) )
+		{
+			fixupFor43 = true;
+			dc->SetMenuScaleFix(true);
+		}
 	}
 
 	if ( flags & WIN_SHOWTIME ) {
@@ -1946,6 +1951,15 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src) {
 		}
 		return true;
 	}
+	// DG: added this window flag for Windows that should be scaled to 4:3
+	//     (with "empty" bars left/right or above/below)
+	if (idStr::Icmp(_name, "scaleto43") == 0) {
+		if ( src->ParseBool() ) {
+			flags |= WIN_SCALETO43;
+		}
+		return true;
+	}
+	// DG end
 	if (idStr::Icmp(_name, "forceaspectwidth") == 0) {
 		forceAspectWidth = src->ParseFloat();
 		return true;

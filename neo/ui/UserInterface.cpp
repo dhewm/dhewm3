@@ -462,6 +462,19 @@ float idUserInterfaceLocal::GetStateFloat( const char *varName, const char* defa
 void idUserInterfaceLocal::StateChanged( int _time, bool redraw ) {
 	time = _time;
 	if (desktop) {
+		// DG: little hack: allow game DLLs to do
+		//     ui->SetStateBool("scaleto43", true);
+		//     ui->StateChanged(gameLocal.time);
+		//     so we can force cursors.gui (crosshair) to be scaled, for example
+		bool scaleTo43 = false;
+		if(state.GetBool("scaleto43", "0", scaleTo43)) {
+			if(scaleTo43)
+				desktop->SetFlag(WIN_SCALETO43);
+			else
+				desktop->ClearFlag(WIN_SCALETO43);
+		}
+		// DG end
+
 		desktop->StateChanged( redraw );
 	}
 	if ( state.GetBool( "noninteractive" ) ) {
