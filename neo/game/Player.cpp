@@ -1464,6 +1464,13 @@ void idPlayer::Spawn( void ) {
 			cursor = uiManager->FindGui( temp, true, gameLocal.isMultiplayer, gameLocal.isMultiplayer );
 		}
 		if ( cursor ) {
+			// DG: make it scale to 4:3 so crosshair looks properly round
+			//     yes, like so many scaling-related things this is a bit hacky
+			//     and note that this is special cased in StateChanged and you
+			//     can *not* generally set windowDef properties like this.
+			cursor->SetStateBool("scaleto43", true);
+			cursor->StateChanged(gameLocal.time); // DG end
+
 			cursor->Activate( true, gameLocal.time );
 		}
 
