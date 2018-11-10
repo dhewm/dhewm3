@@ -231,6 +231,7 @@ elseif(MSVC)
 	add_compile_options(/wd4714) # 'function' marked as __forceinline not inlined
 	add_compile_options(/wd4996) # 'function': was declared deprecated
 	add_compile_options(/wd4068) # unknown pragma
+	add_compile_options(/wd4458) # declaration of 'variable' hides class member
 	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
