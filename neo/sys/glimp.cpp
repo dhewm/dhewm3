@@ -175,7 +175,7 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, parms.multiSamples);
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		window = SDL_CreateWindow(GAME_NAME,
+		window = SDL_CreateWindow(ENGINE_VERSION,
 									SDL_WINDOWPOS_UNDEFINED,
 									SDL_WINDOWPOS_UNDEFINED,
 									parms.width, parms.height, flags);
@@ -197,7 +197,7 @@ bool GLimp_Init(glimpParms_t parms) {
 
 		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 #else
-		SDL_WM_SetCaption(GAME_NAME, GAME_NAME);
+		SDL_WM_SetCaption(ENGINE_VERSION, ENGINE_VERSION);
 
 		SetSDLIcon(); // for SDL1.2  this must be done before creating the window
 
