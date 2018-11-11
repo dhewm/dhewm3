@@ -1286,6 +1286,7 @@ void idCollisionModelManagerLocal::Rotation180( trace_t *results, const idVec3 &
 	tw.quickExit = false;
 	tw.angle = endAngle - startAngle;
 	assert( tw.angle > -180.0f && tw.angle < 180.0f );
+	tw.angle = idMath::ClampFloat(-180.0f, 180.0f, tw.angle); // DG: enforce it for the rare cases the assert would trigger
 	tw.maxTan = initialTan = idMath::Fabs( tan( ( idMath::PI / 360.0f ) * tw.angle ) );
 	tw.model = idCollisionModelManagerLocal::models[model];
 	tw.start = start - modelOrigin;
