@@ -27,8 +27,19 @@ if(NOT COMMAND add_compile_options)
 	endfunction()
 endif()
 
+option(LINUX_RELEASE_BINS "Set RPATH to \$ORIGIN/libs/ for Linux binary releases" OFF)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
-set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
+
+if(LINUX_RELEASE_BINS)
+	message(STATUS "Setting RPATH to \$ORIGIN/libs/ so you can put dependencies in there")
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+	set(CMAKE_INSTALL_RPATH "$ORIGIN/libs")
+	set(ldflags "${ldflags} -Wl,-z,origin") # not sure this is even needed, but shouldn't hurt
+else()
+	set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
+endif()
 
 set(DHEWM3BINARY "dhewm3")
 
