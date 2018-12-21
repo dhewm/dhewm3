@@ -2821,8 +2821,8 @@ static bool checkForHelp(int argc, char **argv)
 				WriteString("  if r_mode is set to -1, these cvars allow you to specify the\n");
 				WriteString("  width/height of your custom resolution\n");
 #endif // !ID_DEDICATED
-				WriteString("\nSee https://modwiki.xnet.fi/CVars_%%28Doom_3%%29 for more cvars\n");
-				WriteString("See https://modwiki.xnet.fi/Commands_%%28Doom_3%%29 for more commands\n");
+				WriteString("\nSee https://modwiki.dhewm3.org/CVars_%28Doom_3%29 for more cvars\n");
+				WriteString("See https://modwiki.dhewm3.org/Commands_%28Doom_3%29 for more commands\n");
 
 				#undef WriteString
 
