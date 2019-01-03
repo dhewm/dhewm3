@@ -389,7 +389,8 @@ void idChoiceWindow::PostParse() {
 		}
 	}
 	else if( idStr::Cmp(GetName(), "OS2Primary") == 0 && cvarStr == "r_mode"
-		    && idStr::Icmp(GetGui()->GetSourceFile(), "guis/mainmenu.gui") == 0 )
+	         && ( idStr::Icmp(GetGui()->GetSourceFile(), "guis/demo_mainmenu.gui") == 0 ||
+		          idStr::Icmp(GetGui()->GetSourceFile(), "guis/mainmenu.gui") == 0 ) )
 	{
 		// always enable this for base/ and d3xp/ mainmenu.gui (like we did before)
 		injectResolutions = true;
