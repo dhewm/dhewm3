@@ -319,6 +319,8 @@ bool idUserInterfaceLocal::InitFromFile( const char *qpath, bool rebuild, bool c
 		desktop->backColor = idVec4( 0.0f, 0.0f, 0.0f, 1.0f );
 		desktop->SetupFromState();
 		common->Warning( "Couldn't load gui: '%s'", qpath );
+		loading = false;
+		return false;
 	}
 
 	interactive = desktop->Interactive();
