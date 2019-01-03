@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/platform.h"
 #include "framework/DeclEntityDef.h"
 #include "framework/DeclSkin.h"
+#include "framework/Session.h"
 
 #include "gamesys/SysCvar.h"
 #include "ai/AI.h"
@@ -465,7 +466,8 @@ void idWeapon::Restore( idRestoreGame *savefile ) {
 	WEAPON_RELOAD.LinkTo(		scriptObject, "WEAPON_RELOAD" );
 	WEAPON_NETRELOAD.LinkTo(	scriptObject, "WEAPON_NETRELOAD" );
 	WEAPON_NETENDRELOAD.LinkTo(	scriptObject, "WEAPON_NETENDRELOAD" );
-	WEAPON_NETFIRING.LinkTo(	scriptObject, "WEAPON_NETFIRING" );
+	if (!session->demoversion)
+		WEAPON_NETFIRING.LinkTo(	scriptObject, "WEAPON_NETFIRING" );
 	WEAPON_RAISEWEAPON.LinkTo(	scriptObject, "WEAPON_RAISEWEAPON" );
 	WEAPON_LOWERWEAPON.LinkTo(	scriptObject, "WEAPON_LOWERWEAPON" );
 
@@ -693,7 +695,8 @@ void idWeapon::Clear( void ) {
 	WEAPON_RELOAD.Unlink();
 	WEAPON_NETRELOAD.Unlink();
 	WEAPON_NETENDRELOAD.Unlink();
-	WEAPON_NETFIRING.Unlink();
+	if (!session->demoversion)
+	    WEAPON_NETFIRING.Unlink();
 	WEAPON_RAISEWEAPON.Unlink();
 	WEAPON_LOWERWEAPON.Unlink();
 
@@ -1177,7 +1180,8 @@ void idWeapon::GetWeaponDef( const char *objectname, int ammoinclip ) {
 	WEAPON_RELOAD.LinkTo(		scriptObject, "WEAPON_RELOAD" );
 	WEAPON_NETRELOAD.LinkTo(	scriptObject, "WEAPON_NETRELOAD" );
 	WEAPON_NETENDRELOAD.LinkTo(	scriptObject, "WEAPON_NETENDRELOAD" );
-	WEAPON_NETFIRING.LinkTo(	scriptObject, "WEAPON_NETFIRING" );
+	if (!session->demoversion)
+		WEAPON_NETFIRING.LinkTo(	scriptObject, "WEAPON_NETFIRING" );
 	WEAPON_RAISEWEAPON.LinkTo(	scriptObject, "WEAPON_RAISEWEAPON" );
 	WEAPON_LOWERWEAPON.LinkTo(	scriptObject, "WEAPON_LOWERWEAPON" );
 
