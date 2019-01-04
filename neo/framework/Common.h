@@ -243,10 +243,7 @@ public:
 	 *
 	 * Similar to SetCallback() I've also added GetAdditionalFunction() to get a function pointer
 	 * from dhewm3 that Mods can call (and that's not exported via the normal interface classes).
-	 * Right now GetAdditionalFunction() will always just return false and do nothing, but if
-	 * some Mod needs some specific function in the future, it could be implemented with
-	 * GetAdditionalFunction() - again without breaking the game API and ABI for all the other
-	 * Mods that don't need that function.
+	 * Right now it's only used for a Doom3 Demo specific hack only relevant for base.dll (not for Mods)
 	 */
 
 	typedef void* (*FunctionPointer)(void*); // needs to be cast to/from real type!
@@ -264,13 +261,15 @@ public:
 	virtual bool				SetCallback(CallbackType cbt, FunctionPointer cb, void* userArg) = 0;
 
 	enum FunctionType {
-		// None yet..
+		// the function's signature is bool fn(void) - no arguments.
+		// it returns true if we're currently running the doom3 demo
+		// not relevant for mods, only for game/ aka base.dll/base.so/...
+		FT_IsDemo = 1,
 	};
 
 	// returns true if that function is available in this version of dhewm3
 	// *out_fnptr will be the function (you'll have to cast it probably)
 	// *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
-	// NOTE: this doesn't do anything yet, but allows to add ugly mod-specific hacks without breaking the Game interface
 	virtual bool				GetAdditionalFunction(FunctionType ft, FunctionPointer* out_fnptr, void** out_userArg) = 0;
 };
 

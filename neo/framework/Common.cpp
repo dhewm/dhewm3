@@ -52,6 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Common.h"
 
 #include "GameCallbacks_local.h"
+#include "Session_local.h" // DG: For FT_IsDemo/isDemo() hack
 
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
@@ -3238,6 +3239,11 @@ bool idCommonLocal::SetCallback(idCommon::CallbackType cbt, idCommon::FunctionPo
 	}
 }
 
+static bool isDemo(void)
+{
+	return sessLocal.IsDemoVersion();
+}
+
 // returns true if that function is available in this version of dhewm3
 // *out_fnptr will be the function (you'll have to cast it probably)
 // *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
@@ -3251,11 +3257,18 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 		Warning("Called idCommon::GetAdditionalFunction() with out_fnptr == NULL!\n");
 		return false;
 	}
-	*out_fnptr = NULL;
+	switch(ft)
+	{
+		case idCommon::FT_IsDemo:
+			*out_fnptr = (idCommon::FunctionPointer)isDemo;
+			// don't set *out_userArg, this function takes no arguments
+			return true;
 
-	// NOTE: this doesn't do anything yet, but allows to later add ugly mod-specific hacks without breaking the Game interface
-
-	return false;
+		default:
+			*out_fnptr = NULL;
+			Warning("Called idCommon::SetCallback() with unknown FunctionType %d!\n", ft);
+			return false;
+	}
 }
 
 

@@ -165,9 +165,6 @@ public:
 	idDemoFile *	readDemo;
 	idDemoFile *	writeDemo;
 	int				renderdemoVersion;
-
-public:
-	bool			demoversion;
 };
 
 extern	idSession *	session;
