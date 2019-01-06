@@ -283,21 +283,23 @@ Based on (with kind permission) Yamagi Quake II's Sys_GetHomeDir()
 Returns the number of characters written to dst
 ==============
  */
-static int GetHomeDir(char *dst, size_t size)
-{
-	int len;
-	WCHAR profile[MAX_OSPATH];
+extern "C" { // DG: I need this in SDL_win32_main.c
+	int Sys_GetHomeDir(char *dst, size_t size)
+	{
+		int len;
+		WCHAR profile[MAX_OSPATH];
 
-	/* Get the path to "My Documents" directory */
-	SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, 0, profile);
+		/* Get the path to "My Documents" directory */
+		SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, 0, profile);
 
-	len = WPath2A(dst, size, profile);
-	if (len == 0)
-		return 0;
+		len = WPath2A(dst, size, profile);
+		if (len == 0)
+			return 0;
 
-	idStr::Append(dst, size, "/My Games/dhewm3");
+		idStr::Append(dst, size, "/My Games/dhewm3");
 
-	return len;
+		return len;
+	}
 }
 
 static int GetRegistryPath(char *dst, size_t size, const WCHAR *subkey, const WCHAR *name) {
@@ -354,6 +356,8 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 			common->Warning("base path '%s' does not exist", s.c_str());
 		}
 
+		// Note: apparently there is no registry entry for the Doom 3 Demo
+
 		// fallback to vanilla doom3 cd install
 		if (GetRegistryPath(buf, sizeof(buf), L"SOFTWARE\\id\\Doom 3", L"InstallPath") > 0) {
 			path = buf;
@@ -369,13 +373,13 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 				return true;
 		}
 
-		common->Warning("vanilla doom3 path not found");
+		common->Warning("vanilla doom3 path not found either");
 
 		return false;
 
 	case PATH_CONFIG:
 	case PATH_SAVE:
-		if (GetHomeDir(buf, sizeof(buf)) < 1) {
+		if (Sys_GetHomeDir(buf, sizeof(buf)) < 1) {
 			Sys_Error("ERROR: Couldn't get dir to home path");
 			return false;
 		}

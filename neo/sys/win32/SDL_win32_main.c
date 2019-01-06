@@ -10,6 +10,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include <sys/stat.h>
+
 #ifdef _WIN32_WCE
 # define DIR_SEPERATOR TEXT("\\")
 # undef _getcwd
@@ -195,22 +197,50 @@ static void cleanup_output(void) {
 	}
 }
 
+extern int Sys_GetHomeDir(char *dst, size_t size);
+
 /* Redirect the output (stdout and stderr) to a file */
 static void redirect_output(void)
 {
-	DWORD pathlen;
 #ifdef _WIN32_WCE
 	wchar_t path[MAX_PATH];
+#error "adapt homedir code for wchar_t!"
 #else
 	char path[MAX_PATH];
+	struct _stat st;
+
+	// DG: use "My Documents/My Games/dhewm3" to write stdout.txt and stderr.txt
+	//     instead of the binary, which might not be writable
+	Sys_GetHomeDir(path, sizeof(path));
+
+	if (_stat(path, &st) == -1) {
+		// oops, "My Documents/My Games/dhewm3" doesn't exist - does My Games/ at least exist?
+		char myGamesPath[MAX_PATH];
+		memcpy(myGamesPath, path, MAX_PATH);
+		char* lastslash = strrchr(myGamesPath, '/');
+		if (lastslash != NULL) {
+			*lastslash = '\0';
+		}
+		if (_stat(myGamesPath, &st) == -1) {
+			// if My Documents/My Games/ doesn't exist, create it
+			_mkdir(myGamesPath);
+		}
+		
+		_mkdir(path); // create My Documents/My Games/dhewm3/
+	}
+	
+
 #endif
 	FILE *newfp;
 
+#if 0 // DG: don't do this anymore.
+	DWORD pathlen;
 	pathlen = GetModuleFileName(NULL, path, SDL_arraysize(path));
 	while ( pathlen > 0 && path[pathlen] != '\\' ) {
 		--pathlen;
 	}
 	path[pathlen] = '\0';
+#endif
 
 #ifdef _WIN32_WCE
 	wcsncpy( stdoutPath, path, SDL_arraysize(stdoutPath) );
