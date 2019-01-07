@@ -28,8 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #if 0 // TODO: FIX this. - DG: from SteelStorm2
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "../../sys/win32/rc/Common_resource.h"
 #include "../../sys/win32/rc/DeclEditor_resource.h"

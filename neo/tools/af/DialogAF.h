@@ -27,6 +27,8 @@ If you have questions concerning this license or the applicable additional terms
 */
 #pragma once
 
+#include "tools/edit_gui_common.h"
+
 class idDeclAF;
 
 class DialogAFView;

@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 #include "Radiant.h"
@@ -1949,7 +1949,7 @@ void CMainFrame::OnFileSaveCopy() {
 	AddSlash(strPath);
 	strPath += "maps";
 	if (g_PrefsDlg.m_strMaps.GetLength() > 0) {
-		strPath += va("\\%s", g_PrefsDlg.m_strMaps);
+		strPath += va("\\%s", g_PrefsDlg.m_strMaps.GetString());
 	}
 
 	/* Place the terminating null character in the szFile. */
@@ -3021,7 +3021,7 @@ void CMainFrame::OnMiscSetViewPos()
 		}
 		else
 		{
-			ErrorBox(va("\"%s\" wasn't 3 valid floats with spaces",psNewCoords));
+			ErrorBox(va("\"%s\" wasn't 3 valid floats with spaces",psNewCoords.GetString()));
 		}
 	}
 }

@@ -26,10 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
 
-#include "../../game/game.h"
+
 #include "../../sys/win32/win_local.h"
 #include "../../sys/win32/rc/common_resource.h"
 #include "../../sys/win32/rc/PDAEditor_resource.h"

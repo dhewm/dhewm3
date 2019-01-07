@@ -25,8 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "MaterialTreeView.h"
 
@@ -968,9 +968,9 @@ void MaterialTreeView::OnMouseMove(UINT nFlags, CPoint point) {
 		if(item && (TVHT_ONITEM & flags)) {
 			if(item != hoverItem) {
 				hoverItem = item;
-				hoverStartTime = timeGetTime();
+				hoverStartTime = Sys_Milliseconds();
 			} else {
-				DWORD currentTime = timeGetTime();
+				DWORD currentTime = Sys_Milliseconds();
 				if(currentTime - hoverStartTime > HOVER_EXPAND_DELAY) {
 
 					UINT state = tree.GetItemState(hoverItem, TVIS_EXPANDED);

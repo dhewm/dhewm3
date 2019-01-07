@@ -49,8 +49,8 @@ include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 option(CORE			"Build the core" ON)
 option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
-if(MSVC) # TODO: does this work?
-	option(TOOLS		"build the tools game code ( Windows only )" OFF)
+if(MSVC)
+	option(TOOLS		"Build the tools game code (Windows+Visual Studio+SDL2 only)" OFF)
 endif()
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
@@ -155,6 +155,11 @@ endif()
 if(MSVC)
 	# This is required for tools on windows.
 	find_package(MFC)
+	
+	if(TOOLS AND NOT MFC_FOUND)
+		message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
+		message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
+	endif()
 endif()
 
 # compiler specific flags
@@ -239,7 +244,10 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		set(sys_libs ${sys_libs} ${EXECINFO_LIBRARIES})
 	endif()
 elseif(MSVC)
+	add_definitions(/MP) # parallel build (use all cores, or as many as configured in VS)
+	
 	add_compile_options(/W4)
+	add_compile_options(/we4840) # treat as error when passing a class to a vararg-function (probably printf-like)
 	add_compile_options(/wd4100) # unreferenced formal parameter
 	add_compile_options(/wd4127) # conditional expression is constant
 	add_compile_options(/wd4244) # possible loss of data
@@ -748,7 +756,9 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 	set(ALLOWRESOURCES ON)
 	# Common files.
 	file(GLOB src_comafx "tools/comafx/*.cpp")
+	add_globbed_headers(src_comafx "tools/comafx")
 	file(GLOB_RECURSE src_tools_common "tools/common/*.cpp")
+	add_globbed_headers(src_tools_common "tools/common")
 
 	#Compilers.
 	# DG: this is always added, why add it again? file(GLOB src_compiler_renderbump "neo/tools/compilers/renderbump/*.cpp")
@@ -857,9 +867,6 @@ elseif(APPLE)
 		${OSX_RESOURCE_FILES}
 	)
 elseif(WIN32)
-	set(WIN32_RESOURCE_FILES
-		"${CMAKE_SOURCE_DIR}/sys/win32/rc/dhewm3.rc"
-	)
 
 	set(src_sys_base
 		sys/cpu.cpp
@@ -884,11 +891,14 @@ elseif(WIN32)
 
 	set(src_sys_core
 		sys/glimp.cpp
-		${WIN32_RESOURCE_FILES}
 	)
 
 	if(TOOLS)
 		set(src_sys_core ${src_sys_core} "sys/win32/rc/doom.rc")
+	else()
+		# adding both .rc files breaks the build, but I think it only contains the icon
+		# and doom.rc also contains that (+icons for editor etc, AFAIK), so this is fine
+		set(src_sys_core ${src_sys_core} "${CMAKE_SOURCE_DIR}/sys/win32/rc/dhewm3.rc" )
 	endif()
 
 else()
