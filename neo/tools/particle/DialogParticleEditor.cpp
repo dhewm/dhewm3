@@ -1273,7 +1273,16 @@ BOOL CDialogParticleEditor::OnInitDialog() {
 
 void CDialogParticleEditor::OnHScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar ) {
 	CDialog::OnHScroll( nSBCode, nPos, pScrollBar );
-	CSliderCtrl *ctrl = dynamic_cast< CSliderCtrl* >( pScrollBar );
+
+	// DG: from SteelStorm2:
+	// Something funky is going on with the RTTI.  The dynamic_cast even to a CRangeSlider*
+	// was not happening correctly.  Whatever is getting to this callback from the CRangeSlider
+	// must not be one of the basic slider types or even a CRangeSlider.  What is weird is the
+	// objects coming in have the same addresses as the various CRangeSliders on the dlg, so they
+	// should cast correctly.  Turns out it does not matter because once the addresses matche up
+	// this code just uses the dlg member reference so all I need is for the address check to
+	// go through correctly.
+	CRangeSlider* ctrl = (CRangeSlider*)pScrollBar;
 	if ( !ctrl ) {
 		return;
 	}

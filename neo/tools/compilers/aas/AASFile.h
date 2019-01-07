@@ -88,7 +88,7 @@ If you have questions concerning this license or the applicable additional terms
 // bits for different bboxes
 #define AREACONTENTS_BBOX_BIT		24
 
-#define MAX_REACH_PER_AREA			256
+#define MAX_REACH_PER_AREA			256 // FIXME: SteelStorm2 has this increased to 512
 #define MAX_AAS_TREE_DEPTH			128
 
 #define MAX_AAS_BOUNDING_BOXES		4

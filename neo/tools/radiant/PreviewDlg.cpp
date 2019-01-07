@@ -303,7 +303,7 @@ void CPreviewDlg::OnTvnSelchangedTreeMedia(NMHDR *pNMHDR, LRESULT *pResult)
 			}
 			// strip the leading "base/"
 			if (id == MATERIALS) {
-				mediaName.Strip("Materials/");
+				mediaName.Strip("Materials/"); // FIXME: SteelStorm2 has a _v1 suffix here
 			} else if (id == WAVES) {
 				mediaName.Strip( "Wave files/" );
 			} else if (id == PARTICLES) {
@@ -608,7 +608,7 @@ void CPreviewDlg::AddMaterials(bool rootItems) {
 			list.Append(mat->GetName());
 		}
 		list.Sort();
-		AddStrList("Materials", list, MATERIALS);
+		AddStrList("Materials", list, MATERIALS); // FIXME: SteelStorm2 has a _v1 suffix here
 	}
 
 }

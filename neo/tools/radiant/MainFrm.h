@@ -198,6 +198,13 @@ public:
 	afx_msg void OnFileSave();
 	afx_msg void OnFileSaveas();
 	afx_msg void OnFileSaveCopy();
+
+	/* Begin SS2 Changes */
+	afx_msg void OnSetViewTop();
+	afx_msg void OnSetViewSide();
+	afx_msg void OnSetViewFront();
+	/* end SS2 Changes */
+	
 	afx_msg void OnViewShowModels();
 	afx_msg void OnView100();
 	afx_msg void OnViewCenter();

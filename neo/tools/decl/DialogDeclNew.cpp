@@ -200,6 +200,7 @@ void DialogDeclNew::OnBnClickedFile() {
 	}
 
 	switch( type ) {
+		// FIXME: SteelStorm2 has a _v1 suffix for materials, def and fx - why?
 		case DECL_TABLE:		folder = "materials";	ext = "(*.mtr)|*.mtr|(*.*)|*.*||";					break;
 		case DECL_MATERIAL:		folder = "materials";	ext = "(*.mtr)|*.mtr|(*.*)|*.*||";					break;
 		case DECL_SKIN:			folder = "skins";		ext = "(*.skin)|*.skin|(*.*)|*.*||";				break;

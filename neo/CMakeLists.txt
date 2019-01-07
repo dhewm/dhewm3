@@ -49,6 +49,9 @@ include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 option(CORE			"Build the core" ON)
 option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
+if(MSVC) # TODO: does this work?
+	option(TOOLS		"build the tools game code ( Windows only )" OFF)
+endif()
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
 option(SDL2			"Use SDL2 instead of SDL1.2" ON)
@@ -147,6 +150,11 @@ else()
 	message(STATUS "libcurl not found, server downloads won't be available")
 	set(ID_ENABLE_CURL OFF)
 	set(CURL_LIBRARY "")
+endif()
+
+if(MSVC)
+	# This is required for tools on windows.
+	find_package(MFC)
 endif()
 
 # compiler specific flags
@@ -509,12 +517,6 @@ set(src_ui
 
 add_globbed_headers(src_ui "ui")
 
-set(src_tools
-	tools/guied/GEWindowWrapper_stub.cpp
-)
-
-# TODO: add_globbed_headers(src_tools "tools/guied")
-
 set(src_idlib
 	idlib/bv/Bounds.cpp
 	idlib/bv/Frustum.cpp
@@ -734,6 +736,78 @@ set(src_core
 set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
 
+
+set(src_tools
+	tools/guied/GEWindowWrapper_stub.cpp
+)
+
+# TODO: add_globbed_headers(src_tools "tools/guied")
+
+# Begin normal tools code
+if (TOOLS AND MFC_FOUND AND MSVC)
+	set(ALLOWRESOURCES ON)
+	# Common files.
+	file(GLOB src_comafx "tools/comafx/*.cpp")
+	file(GLOB_RECURSE src_tools_common "tools/common/*.cpp")
+
+	#Compilers.
+	# DG: this is always added, why add it again? file(GLOB src_compiler_renderbump "neo/tools/compilers/renderbump/*.cpp")
+	file(GLOB src_compiler_roqvq	  "tools/compilers/roqvq/*.cpp") # FIXME: some of those were added before
+	add_globbed_headers(src_compiler_roqvq "tools/compilers/roqvq")
+	#tools
+	# Articulated Frame editor.
+	file(GLOB src_afeditor "tools/af/*.cpp")
+	add_globbed_headers(src_afeditor "tools/af")
+	# Declaration editor
+	file(GLOB src_decleditor "tools/decl/*.cpp")
+	add_globbed_headers(src_decleditor "tools/decl")
+	# GUI Editor.
+	file(GLOB src_gui_editor "tools/guied/*.cpp")
+	add_globbed_headers(src_gui_editor "tools/guied")
+	# Material editor
+	file(GLOB src_materialeditor "tools/materialeditor/*.cpp")
+	add_globbed_headers(src_materialeditor "tools/materialeditor")
+	# Particle Editor
+	file(GLOB src_particleeditor "tools/particle/*.cpp")
+	add_globbed_headers(src_particleeditor "tools/particle")
+	# PDA editor
+	file(GLOB src_pdaeditor "tools/pda/*.cpp")
+	add_globbed_headers(src_pdaeditor "tools/pda")
+	# Radiant ( Map editor )
+	file(GLOB src_map_editor "tools/radiant/*.cpp")
+	add_globbed_headers(src_map_editor "tools/radiant")
+	# Script editor
+	file(GLOB src_script_editor "tools/script/*.cpp")
+	add_globbed_headers(src_script_editor "tools/script")
+	# sound editor?
+	file(GLOB src_sound_editor "tools/sound/*.cpp")
+	add_globbed_headers(src_sound_editor "tools/sound")
+	
+
+	# The numerous tools in a nice list.
+	list(APPEND src_editor_tools
+		${src_comafx}
+		${src_tools_common}
+		${src_compiler_renderbump}
+		${src_afeditor}
+		${src_decleditor}
+		${src_gui_editor}
+		${src_materialeditor}
+		${src_particleeditor}
+		${src_pdaeditor}
+		${src_map_editor}
+		${src_script_editor}
+		${src_sound_editor}
+		"tools/edit_public.h"
+		"tools/edit_gui_common.h"
+		)
+	SET(CMAKE_MFC_FLAG 2)
+	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;__AFXDLL")
+else()
+	set(src_editor_tools "tools/edit_stub.cpp" "tools/edit_public.h")
+endif()
+
+
 if(AROS)
 	set(DHEWM3BINARY "ADoom3")
 	set(sys_libs ${sys_libs} dll)
@@ -799,7 +873,7 @@ elseif(WIN32)
 		sys/win32/win_syscon.cpp
 		sys/win32/SDL_win32_main.c
 	)
-	
+
 	# adding the few relevant headers in sys/ manually..
 	set(src_sys_base ${src_sys_base}
 		sys/platform.h
@@ -812,6 +886,11 @@ elseif(WIN32)
 		sys/glimp.cpp
 		${WIN32_RESOURCE_FILES}
 	)
+
+	if(TOOLS)
+		set(src_sys_core ${src_sys_core} "sys/win32/rc/doom.rc")
+	endif()
+
 else()
 	set(src_sys_base
 		sys/cpu.cpp
@@ -852,11 +931,12 @@ if(CORE)
 		${src_core}
 		${src_sys_base}
 		${src_sys_core}
+		${src_editor_tools}
 	)
 
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
-	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
+	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;${TOOLS_DEFINES}")
 	set_target_properties(${DHEWM3BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(${DHEWM3BINARY} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 

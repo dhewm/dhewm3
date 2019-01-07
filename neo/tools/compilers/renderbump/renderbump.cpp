@@ -123,7 +123,7 @@ ResizeWindow
 ===============
 */
 static void ResizeWindow( int width, int height ) {
-#if 0 // FIXME
+#if defined(WIN32) && defined(ID_ALLOW_TOOLS)
 	int	winWidth, winHeight;
 	if ( glConfig.isFullscreen ) {
 		winWidth = width;
@@ -144,7 +144,7 @@ static void ResizeWindow( int width, int height ) {
 	}
 	SetWindowPos( win32.hWnd, HWND_TOP, 0, 0, winWidth, winHeight, SWP_SHOWWINDOW );
 
-	qwglMakeCurrent( win32.hDC, win32.hGLRC );
+	// FIXME: ??? qwglMakeCurrent( win32.hDC, win32.hGLRC );
 #endif
 }
 
@@ -154,7 +154,7 @@ RestoreWindow
 ===============
 */
 static void RestoreWindow( void ) {
-#if 0 // FIXME
+#if defined(WIN32) && defined(ID_ALLOW_TOOLS)
 	int	winWidth, winHeight;
 	if ( glConfig.isFullscreen ) {
 		winWidth = oldWidth;
