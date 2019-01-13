@@ -180,6 +180,8 @@ int SDL_main( int argc, char *argv[] ) {
 	if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]])
 		Sys_Error("Could not access application resources");
 
+	Posix_InitSignalHandlers(); // DG: added signal handlers for POSIX platforms
+
 	if (argc > 1)
 		common->Init(argc - 1, &argv[1]);
 	else

@@ -301,6 +301,8 @@ int main(int argc, char **argv) {
 	// so set $LC_ALL to "C".
 	setenv("LC_ALL", "C", 1);
 
+	Posix_InitSignalHandlers();
+
 	if ( argc > 1 ) {
 		common->Init( argc-1, &argv[1] );
 	} else {

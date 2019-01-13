@@ -44,6 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/FileSystem.h"
 #include "framework/KeyInput.h"
 #include "framework/EditField.h"
+#include "framework/Licensee.h"
 #include "sys/sys_local.h"
 
 #include "sys/posix/posix_public.h"
@@ -355,6 +356,105 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 	return 1000 * 1024;
 }
 
+
+// ----------- lots of signal handling stuff ------------
+
+static const int   crashSigs[]     = {  SIGILL,   SIGABRT,   SIGFPE,   SIGSEGV };
+static const char* crashSigNames[] = { "SIGILL", "SIGABRT", "SIGFPE", "SIGSEGV" };
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
+  // TODO: https://github.com/ianlancetaylor/libbacktrace looks interesting and also supports windows apparently
+  #define D3_HAVE_BACKTRACE
+  #include <execinfo.h>
+#endif
+
+static void signalhandlerCrash(int sig)
+{
+	const char* name = "";
+	for(int i=0; i<sizeof(crashSigs)/sizeof(crashSigs[0]); ++i) {
+		if(crashSigs[i] == sig)
+			name = crashSigNames[i];
+	}
+
+	// TODO: should probably use a custom print function around write(STDERR_FILENO, ...)
+	//       because printf() could allocate which is not good if processes state is fscked
+	//       (could use backtrace_symbols_fd() then)
+	printf("Looks like %s crashed with signal %s (%d) - sorry!\n", ENGINE_VERSION, name, sig);
+
+#ifdef D3_HAVE_BACKTRACE
+	// this is partly based on Yamagi Quake II code
+	void* array[128];
+	int size = backtrace(array, sizeof(array)/sizeof(array[0]));
+	char** strings = backtrace_symbols(array, size);
+
+	printf("\nBacktrace:\n");
+
+	for(int i = 0; i < size; i++) {
+		printf("  %s\n", strings[i]);
+	}
+
+	printf("\n");
+
+	free(strings);
+
+#else
+	printf("(No Backtrace on this platform)\n");
+#endif
+
+	fflush(stdout);
+
+	raise(sig); // pass it on to system
+}
+
+static bool disableTTYinput = false;
+
+static void signalhandlerConsoleStuff(int sig)
+{
+	if(sig == SIGTTIN) {
+		// we get this if dhewm3 was started in foreground, then put to sleep with ctrl-z
+		// and afterwards set to background..
+		// as it's in background now, disable console input
+		// (if someone uses fg afterwards that's their problem, this is already obscure enough)
+		if(tty_enabled) {
+			Sys_Printf( "Sent to background, disabling terminal support.\n" );
+			in_tty.SetBool( false );
+			tty_enabled = false;
+
+			tcsetattr(0, TCSADRAIN, &tty_tc);
+
+			// Note: this is only about TTY input, we'll still print to stdout
+			// (which, I think, is normal for processes running in the background)
+		}
+	}
+
+	// apparently we get SIGTTOU from tcsetattr() in Posix_InitConsoleInput()
+	// so we'll handle the disabling console there (it checks for disableTTYinput)
+
+	disableTTYinput = true;
+}
+
+static void installSigHandler(int sig, int flags, void (*handler)(int))
+{
+	struct sigaction sigact = {0};
+	sigact.sa_handler = handler;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = flags;
+	sigaction(sig, &sigact, NULL);
+}
+
+void Posix_InitSignalHandlers( void )
+{
+	for(int i=0; i<sizeof(crashSigs)/sizeof(crashSigs[0]); ++i)
+	{
+		installSigHandler(crashSigs[i], SA_RESTART|SA_RESETHAND, signalhandlerCrash);
+	}
+
+	installSigHandler(SIGTTIN, 0, signalhandlerConsoleStuff);
+	installSigHandler(SIGTTOU, 0, signalhandlerConsoleStuff);
+}
+
+// ----------- signal handling stuff done ------------
+
 /*
 ===============
 Posix_InitConsoleInput
@@ -400,8 +500,16 @@ void Posix_InitConsoleInput( void ) {
 		tc.c_cc[VMIN] = 1;
 		tc.c_cc[VTIME] = 0;
 		if ( tcsetattr( 0, TCSADRAIN, &tc ) == -1 ) {
-			Sys_Printf( "tcsetattr failed: %s\n", strerror( errno ) );
-			Sys_Printf( "terminal support may not work correctly. Use +set in_tty 0 to disable it\n" );
+			if(disableTTYinput) {
+				// got SIGTTOU => running in the background (started with `./dhewm3 &` or similar)
+				// so we shouldn't take any console input
+				Sys_Printf( "Running in background, disabling terminal support.\n" );
+				in_tty.SetBool( false );
+				return;
+			} else {
+				Sys_Printf( "tcsetattr failed: %s (%d)\n", strerror( errno ), errno );
+				Sys_Printf( "terminal support may not work correctly. Use +set in_tty 0 to disable it\n" );
+			}
 		}
 #if 0
 		// make the output non blocking
