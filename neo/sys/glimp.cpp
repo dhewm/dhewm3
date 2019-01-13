@@ -27,7 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include <SDL.h>
-#include <SDL_syswm.h>
 
 #include "sys/platform.h"
 #include "framework/Licensee.h"
