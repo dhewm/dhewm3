@@ -610,6 +610,13 @@ void idRenderSystemLocal::BeginFrame( int windowWidth, int windowHeight ) {
 		windowHeight = tiledViewport[1];
 	}
 
+	// DG: FIXME: WTF?! this is *not* reset in EndFrame() and next time
+	//     idSessionLocal::UpdateScreen() calls this function to render a proper frame,
+	//     passing renderSystem->GetScreenWidth()/Height() WHICH JUST RETURN glConfig.vidWidth/Height
+	//     will render the whole frame in that resolution (in a corner of the window), unless someone
+	//     resets glConfig.vid* manually... this is quite fragile, I wonder how many (more) bugs 
+	//     (esp. in Editor code) will turn up because of this, but right now I don't dare to change
+	//     the behavior either, in case "fixing" it breaks other things
 	glConfig.vidWidth = windowWidth;
 	glConfig.vidHeight = windowHeight;
 

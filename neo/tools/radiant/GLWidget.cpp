@@ -445,6 +445,19 @@ void idGLDrawableMaterial::draw(int x, int y, int w, int h) {
 		}
 
 		renderView_t	refdef;
+		
+		// DG: renderSystem->BeginFrame() changes glConfig.vidWidth and vidHeight to w and h
+		//     that is never reset automatically and for some reason glConfig.vidWith/height is even
+		//     used for renderSystem->GetScreenWidth()/Height() so idSessionLocal::UpdateScreen()
+		//     which calls renderSystem->BeginFrame( renderSystem->GetScreenWidth(), renderSystem->GetScreenHeight() );
+		//     won't reset those values to something sane either, causing the game to be rendered in a tiny rectangle
+		//     at the lower left corner of the screen once we're done picking a material here..
+		//     I don't dare to fix this in renderSystem, as other code might rely on this behavior..
+		//     (OTOH I wouldn't be surprised if other callers of renderSystem->BeginFrame() cause the same issue)
+		//     Anyway, my workaround is to remember glConfig.vidWith/Height and set them to the original
+		//     values once we're done rendering here..
+		int oldWidth  = glConfig.vidWidth;
+		int oldHeight = glConfig.vidHeight;
 		// render it
 		renderSystem->BeginFrame(w, h);
 		memset( &refdef, 0, sizeof( refdef ) );
@@ -469,6 +482,9 @@ void idGLDrawableMaterial::draw(int x, int y, int w, int h) {
 
 		qglMatrixMode( GL_MODELVIEW );
 		qglLoadIdentity();
+		// DG: reset glConfig.vidWidth/Height
+		glConfig.vidWidth = oldWidth;
+		glConfig.vidHeight = oldHeight;
 	}
 
 }

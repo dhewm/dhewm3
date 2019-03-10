@@ -448,7 +448,8 @@ void CPreviewDlg::SetModal() {
 void CPreviewDlg::OnBnClickedButtonReload()
 {
 	BuildTree();
-	g_qeglobals.sw->StopAllSounds();
+	if(g_qeglobals.sw != NULL)
+		g_qeglobals.sw->StopAllSounds();
 }
 
 void CPreviewDlg::OnBnClickedButtonAdd()
