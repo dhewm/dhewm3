@@ -61,6 +61,12 @@ struct Win32Vars_t {
 
 	OSVERSIONINFOEX	osversion;
 
+#ifdef ID_ALLOW_TOOLS
+	HDC				hDC; // handle to device
+	HGLRC			hGLRC; // handle to GL rendering context
+	PIXELFORMATDESCRIPTOR pfd;
+#endif
+
 	static idCVar	win_outputDebugString;
 	static idCVar	win_outputEditString;
 	static idCVar	win_viewlog;

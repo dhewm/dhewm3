@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 #include "../../renderer/model_local.h"	// for idRenderModelPrt
@@ -1762,7 +1762,7 @@ void Select_AllOfType() {
 			CString strName = e->eclass->name;
 			idStr strKey, strVal;
 			bool	bCriteria = g_Inspectors->GetSelectAllCriteria(strKey, strVal);
-			common->Printf("Selecting all %s(s)\n", strName);
+			common->Printf("Selecting all %s(s)\n", strName.GetString());
 			Select_Deselect();
 
 			for (b = active_brushes.next; b != &active_brushes; b = next) {

@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "../../sys/win32/rc/guied_resource.h"
 #include "../../renderer/tr_local.h"
@@ -289,11 +289,11 @@ void rvGEWorkspace::Render ( HDC hdc )
 	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render the workspace below
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
 	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	qglColor3f ( mApplication->GetOptions().GetWorkspaceColor()[0], mApplication->GetOptions().GetWorkspaceColor()[1], mApplication->GetOptions().GetWorkspaceColor()[2] );
 	qglBegin ( GL_QUADS );
@@ -337,11 +337,11 @@ void rvGEWorkspace::Render ( HDC hdc )
 
 	qglViewport(0, 0, mWindowWidth, mWindowHeight );
 	qglScissor(0, 0, mWindowWidth, mWindowHeight );
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
 	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	RenderGrid ( );
 

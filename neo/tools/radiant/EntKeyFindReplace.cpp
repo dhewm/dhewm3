@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 //#include "stdafx.h"
 #include "radiant.h"
@@ -126,7 +126,7 @@ void CEntKeyFindReplace::OnReplace()
 		{
 			// another check, if they're trying to do a replace with a missing replace key, it'll just delete found keys...
 			//
-			if ((!m_strReplaceKey.IsEmpty() && !m_strReplaceValue.IsEmpty()) || GetYesNo(va("Empty REPLACE <key> or <value> fields will just delete all occurence of <key> \"%s\"\n\nProceed?",m_strFindKey)))
+			if ((!m_strReplaceKey.IsEmpty() && !m_strReplaceValue.IsEmpty()) || GetYesNo(va("Empty REPLACE <key> or <value> fields will just delete all occurence of <key> \"%s\"\n\nProceed?",m_strFindKey.GetString())))
 			{
 				if (GetYesNo("Sure?"))
 				{

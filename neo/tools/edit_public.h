@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __EDIT_PUBLIC_H__
 #define __EDIT_PUBLIC_H__
 
+#include "idlib/math/Vector.h"
+#include "idlib/Dict.h"
+
 /*
 ===============================================================================
 

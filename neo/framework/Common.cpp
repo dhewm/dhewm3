@@ -48,6 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/RenderSystem.h"
 #include "tools/compilers/compiler_public.h"
 #include "tools/compilers/aas/AASFileManager.h"
+#include "tools/edit_public.h"
 
 #include "framework/Common.h"
 

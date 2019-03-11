@@ -26,8 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#if 0 // TODO: FIX this. - DG: from SteelStorm2
+
+#include "tools/edit_gui_common.h"
+
 
 #include "../../sys/win32/rc/Common_resource.h"
 #include "../../sys/win32/rc/DeclEditor_resource.h"
@@ -858,3 +860,5 @@ void DialogEntityDefEditor::OnBnClickedDelete() {
 		MessageBox("Cannot delete an inherited value");
 	}
 }
+#endif
+

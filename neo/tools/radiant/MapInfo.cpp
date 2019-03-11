@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 #include "Radiant.h"
@@ -109,7 +109,7 @@ BOOL CMapInfo::OnInitDialog()
   {
 	mapEntity.GetNextAssoc(pos, strKey, reinterpret_cast<void*&>(nValue));
 	CString strList;
-	strList.Format("%s\t%i", strKey, nValue);
+	strList.Format("%s\t%i", strKey.GetString(), nValue);
 	m_lstEntity.AddString(strList);
   }
 

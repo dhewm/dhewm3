@@ -26,10 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
 
-#include "../../sys/win32/common_resource.h"
+
+#include "sys/win32/rc/Common_resource.h"
+// FIXME: SteelStorm2 has this whole file commented out
 
 idCVar rbfg_DefaultWidth( "rbfg_DefaultWidth", "0", 0, "" );
 idCVar rbfg_DefaultHeight( "rbfg_DefaultHeight", "0", 0, "" );
@@ -51,7 +52,9 @@ static bool CheckPow2(int Num)
 	return true;
 }
 
-extern void Com_WriteConfigToFile( const char *filename );
+static void Com_WriteConfigToFile(const char *filename) {
+	common->Warning("Some renderbump code called Com_WriteConfigTiFile(\"%s\") which is not implemented!\n", filename);
+}
 
 static BOOL CALLBACK RBFProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {

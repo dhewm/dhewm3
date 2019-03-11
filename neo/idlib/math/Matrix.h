@@ -34,6 +34,11 @@ If you have questions concerning this license or the applicable additional terms
  #include <malloc.h>
 #endif
 
+#ifdef _MSC_VER // DG: I don't care if matrix code has some unused r variable only used for assertions, shut up VS
+#pragma warning( push )
+#pragma warning( disable : 4189 )
+#endif
+
 /*
 ===============================================================================
 
@@ -2945,5 +2950,9 @@ ID_INLINE const float *idMatX::ToFloatPtr( void ) const {
 ID_INLINE float *idMatX::ToFloatPtr( void ) {
 	return mat;
 }
+
+#ifdef _MSC_VER // DG: re-enable warning 4189
+#pragma warning( pop )
+#endif
 
 #endif /* !__MATH_MATRIX_H__ */

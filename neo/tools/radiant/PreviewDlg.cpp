@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 #include "Radiant.h"
@@ -303,7 +303,7 @@ void CPreviewDlg::OnTvnSelchangedTreeMedia(NMHDR *pNMHDR, LRESULT *pResult)
 			}
 			// strip the leading "base/"
 			if (id == MATERIALS) {
-				mediaName.Strip("Materials/");
+				mediaName.Strip("Materials/"); // FIXME: SteelStorm2 has a _v1 suffix here
 			} else if (id == WAVES) {
 				mediaName.Strip( "Wave files/" );
 			} else if (id == PARTICLES) {
@@ -448,7 +448,8 @@ void CPreviewDlg::SetModal() {
 void CPreviewDlg::OnBnClickedButtonReload()
 {
 	BuildTree();
-	g_qeglobals.sw->StopAllSounds();
+	if(g_qeglobals.sw != NULL)
+		g_qeglobals.sw->StopAllSounds();
 }
 
 void CPreviewDlg::OnBnClickedButtonAdd()
@@ -608,7 +609,7 @@ void CPreviewDlg::AddMaterials(bool rootItems) {
 			list.Append(mat->GetName());
 		}
 		list.Sort();
-		AddStrList("Materials", list, MATERIALS);
+		AddStrList("Materials", list, MATERIALS); // FIXME: SteelStorm2 has a _v1 suffix here
 	}
 
 }

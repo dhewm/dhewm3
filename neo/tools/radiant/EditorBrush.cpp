@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 #include <GL/glu.h>
@@ -44,7 +44,7 @@ bool	g_bShowLightVolumes = false;
 bool	g_bShowLightTextures = false;
 
 void GLCircle(float x, float y, float z, float r);
-
+void GLSphere(float r, int lats, int longs);
 const int POINTS_PER_KNOT = 50;
 
 /*
@@ -3618,9 +3618,9 @@ void DrawProjectedLight(brush_t *b, bool bSelected, bool texture) {
 	qglColor3f(1, 0, 1);
 	for (i = 0; i < tri->numIndexes; i += 3) {
 		qglBegin(GL_LINE_LOOP);
-		glVertex3fv(tri->verts[tri->indexes[i]].xyz.ToFloatPtr());
-		glVertex3fv(tri->verts[tri->indexes[i + 1]].xyz.ToFloatPtr());
-		glVertex3fv(tri->verts[tri->indexes[i + 2]].xyz.ToFloatPtr());
+		qglVertex3fv(tri->verts[tri->indexes[i]].xyz.ToFloatPtr());
+		qglVertex3fv(tri->verts[tri->indexes[i + 1]].xyz.ToFloatPtr());
+		qglVertex3fv(tri->verts[tri->indexes[i + 2]].xyz.ToFloatPtr());
 		qglEnd();
 	}
 
@@ -3734,6 +3734,35 @@ void GLCircle(float x, float y, float z, float r)
 
 /*
 ================
+GLSphere - DG: from SteelStorm2
+================
+*/
+void GLSphere(float r, int lats, int longs) {
+	int i, j;
+	for(i = 0; i <= lats; i++) {
+		float lat0 = idMath::PI  * (-0.5 + (float) (i - 1) / lats);
+		float z0  = idMath::Sin(lat0);
+		float zr0 =  idMath::Cos(lat0);
+		float lat1 = idMath::PI * (-0.5 + (float) i / lats);
+		float z1 = sin(lat1);
+		float zr1 = cos(lat1);
+    
+		qglBegin(GL_QUAD_STRIP);
+		for(j = 0; j <= longs; j++) {
+			float lng = 2 * idMath::PI * (float) (j - 1) / longs;
+			float x = idMath::Cos(lng);
+			float y = idMath::Sin(lng);
+    
+			qglNormal3f(x * zr0, y * zr0, z0);
+			qglVertex3f(x * zr0, y * zr0, z0);
+			qglNormal3f(x * zr1, y * zr1, z1);
+			qglVertex3f(x * zr1, y * zr1, z1);
+			}
+			qglEnd();
+       }
+ }
+/*
+================
 DrawSpeaker
 ================
 */
@@ -3788,10 +3817,9 @@ void DrawSpeaker(brush_t *b, bool bSelected, bool twoD) {
 		qglTranslatef(b->owner->origin.x, b->owner->origin.y, b->owner->origin.z );
 		qglColor3f( 0.4f, 0.4f, 0.4f );
 		qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-		GLUquadricObj* qobj = gluNewQuadric();
-		gluSphere(qobj, min, 8, 8);
+
 		qglColor3f( 0.8f, 0.8f, 0.8f );
-		gluSphere(qobj, max, 8, 8);
+		GLSphere(max, 8, 8);
 		qglEnable(GL_BLEND);
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -3801,14 +3829,13 @@ void DrawSpeaker(brush_t *b, bool bSelected, bool twoD) {
 		} else {
 			qglColor4f( b->owner->eclass->color.x, b->owner->eclass->color.y, b->owner->eclass->color.z, 0.35f );
 		}
-		gluSphere(qobj, min, 8, 8);
+		GLSphere(min, 8, 8);
 		if (bSelected) {
 			qglColor4f( g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].x, g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].y, g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].z, 0.1f );
 		} else {
 			qglColor4f( b->owner->eclass->color.x, b->owner->eclass->color.y, b->owner->eclass->color.z, 0.1f );
 		}
-		gluSphere(qobj, max, 8, 8);
-		gluDeleteQuadric(qobj);
+		GLSphere(max, 8, 8);
 		qglPopMatrix();
 	}
 

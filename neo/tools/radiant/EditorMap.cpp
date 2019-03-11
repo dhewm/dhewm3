@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 
@@ -699,10 +699,13 @@ bool Map_SaveFile(const char *filename, bool use_region, bool autosave) {
 		if ( _unlink(backup) != 0 && errno != 2 ) { // errno 2 means the file doesn't exist, which we don't care about
 			g_pParentWnd->MessageBox( va("Unable to delete %s: %s", backup.c_str(), strerror(errno) ), "File Error" );
 		}
-
-		if ( rename(filename, backup) != 0 ) {
-			g_pParentWnd->MessageBox( va("Unable to rename %s to %s: %s", filename, backup.c_str(), strerror(errno) ), "File Error" );
-		}
+	// DG: from SteelStorm2:
+// Removed this check.  On the first save, it is valid that the map file does not exist because
+// it has not been written to disk yet.
+// KJA
+//		if ( rename(filename, backup) != 0 ) {
+//			g_pParentWnd->MessageBox( va("Unable to rename %s to %s: %s", filename, backup.c_str(), strerror(errno) ), "File Error" );
+//		}
 	}
 
 	common->Printf("Map_SaveFile: %s\n", filename);

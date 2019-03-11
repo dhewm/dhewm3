@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "tools/edit_gui_common.h"
+
 
 #include "qe3.h"
 #include "Radiant.h"
@@ -38,6 +38,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../renderer/tr_local.h"
 #include "../../renderer/model_local.h"	// for idRenderModelMD5
+
+
+// TODO: DG: could merge SteelStorm2 "new 3D view navigation" improvements
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -354,7 +357,10 @@ int CCamWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
 	HFONT hOldFont = (HFONT)SelectObject(hDC, hfont);
 
-	wglMakeCurrent (hDC, win32.hGLRC);
+	//qwglMakeCurrent (hDC, win32.hGLRC);
+	if( qwglMakeCurrent ( hDC, win32.hGLRC ) == FALSE ) {
+		common->Warning("wglMakeCurrent failed: %d", ::GetLastError());
+	}
 
 	if ((g_qeglobals.d_font_list = qglGenLists(256)) == 0) {
 		common->Warning( "couldn't create font dlists" );
@@ -2062,11 +2068,13 @@ void CCamWnd::Cam_Render() {
 		return;					// not valid yet
 	}
 
-	if (!qwglMakeCurrent(dc.m_hDC, win32.hGLRC)) {
+	// DG: from SteelStorm2
+	// Jmarshal23 recommended to disable this to fix lighting render in the Cam window
+	/* if (!qwglMakeCurrent(dc.m_hDC, win32.hGLRC)) {
 		common->Printf("ERROR: wglMakeCurrent failed..\n ");
 		common->Printf("Please restart " EDITOR_WINDOWTEXT " if the camera view is not working\n");
 		return;
-	}
+	} */
 
 	// save the editor state
 	//qglPushAttrib( GL_ALL_ATTRIB_BITS );

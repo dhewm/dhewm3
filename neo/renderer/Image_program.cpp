@@ -403,7 +403,7 @@ static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *he
 	}
 
 	if ( !token.Icmp( "addnormals" ) ) {
-		byte	*pic2;
+		byte	*pic2 = NULL;
 		int		width2, height2;
 
 		MatchAndAppendToken( src, "(" );
@@ -454,7 +454,7 @@ static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *he
 	}
 
 	if ( !token.Icmp( "add" ) ) {
-		byte	*pic2;
+		byte	*pic2 = NULL;
 		int		width2, height2;
 
 		MatchAndAppendToken( src, "(" );
@@ -589,7 +589,7 @@ static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *he
 	// load it as an image
 	R_LoadImage( token.c_str(), pic, width, height, &timestamp, true );
 
-	if ( timestamp == -1 ) {
+	if ( timestamp == FILE_NOT_FOUND_TIMESTAMP ) {
 		return false;
 	}
 
