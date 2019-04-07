@@ -102,6 +102,17 @@ if(DHEWM3LIBS)
 	set(ENV{SDL2DIR} ${DHEWM3LIBS})
 endif()
 
+if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION LESS 8 ))
+	# cmake < 3.8 doesn't support source_group(TREE ...) so replace it with a dummy
+	# (it's only cosmetical anyway, to make source files show up properly in Visual Studio)
+	function(source_group)
+	endfunction()
+	message(STATUS "Using CMake < 3.8, doesn't support source_group(TREE ...), replacing it with a dummy")
+	message(STATUS "  (this is only relevants for IDEs, doesn't matter for just compiling dhewm3)")
+#else()
+#	message(STATUS "Using CMake >= 3.8, supports source_group(TREE ...)")
+endif()
+
 # libs
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
