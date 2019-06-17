@@ -48,6 +48,9 @@ class idFile;
 // are bindable (otherwise they get bound as one of the special keys in this
 // table)
 typedef enum {
+
+	// DG: please don't change any existing constants for keyboard keys below (or recreate the tables in win_input.cpp)!
+
 	K_TAB = 9,
 	K_ENTER = 13,
 	K_ESCAPE = 27,
@@ -118,6 +121,8 @@ typedef enum {
 	K_KP_NUMLOCK,
 	K_KP_STAR,
 	K_KP_EQUALS,
+
+	// DG: please don't change any existing constants above this one (or recreate the tables in win_input.cpp)!
 
 	K_MASCULINE_ORDINATOR = 186,
 	// K_MOUSE enums must be contiguous (no char codes in the middle)
