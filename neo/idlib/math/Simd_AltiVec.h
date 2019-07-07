@@ -110,7 +110,7 @@ If you have questions concerning this license or the applicable additional terms
 //#define DRAWVERT_PADDED
 
 class idSIMD_AltiVec : public idSIMD_Generic {
-#if defined(__GNUC__) && defined(__ALTIVEC__)
+#if defined(MACOS_X) && defined(__GNUC__) && defined(__ALTIVEC__)
 public:
 
 	virtual const char * VPCALL GetName( void ) const;
