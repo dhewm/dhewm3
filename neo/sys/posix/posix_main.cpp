@@ -362,7 +362,7 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 static const int   crashSigs[]     = {  SIGILL,   SIGABRT,   SIGFPE,   SIGSEGV };
 static const char* crashSigNames[] = { "SIGILL", "SIGABRT", "SIGFPE", "SIGSEGV" };
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
+#if ( defined(__linux__) && defined(__GLIBC__) ) || defined(__FreeBSD__) || defined(__APPLE__)
   // TODO: https://github.com/ianlancetaylor/libbacktrace looks interesting and also supports windows apparently
   #define D3_HAVE_BACKTRACE
   #include <execinfo.h>
