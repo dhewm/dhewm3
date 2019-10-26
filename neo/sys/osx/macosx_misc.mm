@@ -76,5 +76,5 @@ const char* OSX_GetLocalizedString( const char* key )
 {
 	NSString *string = [ [ NSBundle mainBundle ] localizedStringForKey:[ NSString stringWithCString: key ]
 													 value:@"No translation" table:nil];
-	return [string cString];
+	return [string UTF8String];
 }
