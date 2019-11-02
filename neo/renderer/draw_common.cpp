@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+extern idCVar r_useCarmacksReverse;
+
 /*
 =====================
 RB_BakeTextureMatrixIntoTexgen
@@ -1140,42 +1142,21 @@ static void RB_T_Shadow( const drawSurf_t *surf ) {
 		return;
 	}
 
-#if 0 // LEITH: the original patent free "preload" code
+	if( !r_useCarmacksReverse.GetBool() ) { // LEITH: the original patent free "preload" code
 
-	// patent-free work around
-	if ( !external ) {
-		// "preload" the stencil buffer with the number of volumes
-		// that get clipped by the near or far clip plane
-		qglStencilOp( GL_KEEP, tr.stencilDecr, tr.stencilDecr );
-		GL_Cull( CT_FRONT_SIDED );
-		RB_DrawShadowElementsWithCounters( tri, numIndexes );
-		qglStencilOp( GL_KEEP, tr.stencilIncr, tr.stencilIncr );
-		GL_Cull( CT_BACK_SIDED );
-		RB_DrawShadowElementsWithCounters( tri, numIndexes );
-	}
+		// patent-free work around
+		if ( !external ) {
+			// "preload" the stencil buffer with the number of volumes
+			// that get clipped by the near or far clip plane
+			qglStencilOp( GL_KEEP, tr.stencilDecr, tr.stencilDecr );
+			GL_Cull( CT_FRONT_SIDED );
+			RB_DrawShadowElementsWithCounters( tri, numIndexes );
+			qglStencilOp( GL_KEEP, tr.stencilIncr, tr.stencilIncr );
+			GL_Cull( CT_BACK_SIDED );
+			RB_DrawShadowElementsWithCounters( tri, numIndexes );
+		}
 
-	// traditional depth-pass stencil shadows
-	qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilIncr );
-	GL_Cull( CT_FRONT_SIDED );
-	RB_DrawShadowElementsWithCounters( tri, numIndexes );
-
-	qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilDecr );
-	GL_Cull( CT_BACK_SIDED );
-	RB_DrawShadowElementsWithCounters( tri, numIndexes );
-
-#else // LEITH: the patented "Carmack's Reverse" code
-
-	// patented depth-fail stencil shadows
-	if ( !external ) {
-		qglStencilOp( GL_KEEP, tr.stencilDecr, GL_KEEP );
-		GL_Cull( CT_FRONT_SIDED );
-		RB_DrawShadowElementsWithCounters( tri, numIndexes );
-		qglStencilOp( GL_KEEP, tr.stencilIncr, GL_KEEP );
-		GL_Cull( CT_BACK_SIDED );
-		RB_DrawShadowElementsWithCounters( tri, numIndexes );
-	}
-	// traditional depth-pass stencil shadows
-	else {
+		// traditional depth-pass stencil shadows
 		qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilIncr );
 		GL_Cull( CT_FRONT_SIDED );
 		RB_DrawShadowElementsWithCounters( tri, numIndexes );
@@ -1183,9 +1164,33 @@ static void RB_T_Shadow( const drawSurf_t *surf ) {
 		qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilDecr );
 		GL_Cull( CT_BACK_SIDED );
 		RB_DrawShadowElementsWithCounters( tri, numIndexes );
+
+	} else { // LEITH: the (formerly patented) "Carmack's Reverse" code
+
+		// DG: that bloody patent on depth-fail stencil shadows has finally expired on 2019-10-13,
+		//     so use them (see https://patents.google.com/patent/US6384822B1/en for expiration status)
+
+		// depth-fail/Z-Fail stencil shadows
+		if ( !external ) {
+			qglStencilOp( GL_KEEP, tr.stencilDecr, GL_KEEP );
+			GL_Cull( CT_FRONT_SIDED );
+			RB_DrawShadowElementsWithCounters( tri, numIndexes );
+			qglStencilOp( GL_KEEP, tr.stencilIncr, GL_KEEP );
+			GL_Cull( CT_BACK_SIDED );
+			RB_DrawShadowElementsWithCounters( tri, numIndexes );
+		}
+		// traditional depth-pass stencil shadows
+		else {
+			qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilIncr );
+			GL_Cull( CT_FRONT_SIDED );
+			RB_DrawShadowElementsWithCounters( tri, numIndexes );
+
+			qglStencilOp( GL_KEEP, GL_KEEP, tr.stencilDecr );
+			GL_Cull( CT_BACK_SIDED );
+			RB_DrawShadowElementsWithCounters( tri, numIndexes );
+		}
 	}
 
-#endif
 }
 
 /*
