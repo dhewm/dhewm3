@@ -95,6 +95,9 @@ extern	void ( APIENTRY *qglColorTableEXT)( int, int, int, int, int, const void *
 // EXT_stencil_two_side
 extern	PFNGLACTIVESTENCILFACEEXTPROC	qglActiveStencilFaceEXT;
 
+// DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
+extern PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
+
 // ARB_texture_compression
 extern	PFNGLCOMPRESSEDTEXIMAGE2DARBPROC	qglCompressedTexImage2DARB;
 extern	PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	qglGetCompressedTexImageARB;
