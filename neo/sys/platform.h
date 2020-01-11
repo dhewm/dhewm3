@@ -136,8 +136,8 @@ If you have questions concerning this license or the applicable additional terms
 // Unix
 #ifdef __unix__
 
-#define _alloca						alloca
-#define _alloca16( x )				((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
+#define _alloca( x )				(({assert( (x)<600000 );}), alloca( (x) ))
+#define _alloca16( x )				(({assert( (x)<600000 );}),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
 
 #ifdef GAME_DLL
 #define ID_GAME_API					__attribute__((visibility ("default")))

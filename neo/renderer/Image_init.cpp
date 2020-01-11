@@ -1197,7 +1197,7 @@ void R_ListImages_f( const idCmdArgs &args ) {
 
 	totalSize = 0;
 
-	sortedImage_t	*sortedArray = (sortedImage_t *)alloca( sizeof( sortedImage_t ) * globalImages->images.Num() );
+	sortedImage_t	*sortedArray = (sortedImage_t *)_alloca( sizeof( sortedImage_t ) * globalImages->images.Num() );
 
 	for ( i = 0 ; i < globalImages->images.Num() ; i++ ) {
 		image = globalImages->images[ i ];
