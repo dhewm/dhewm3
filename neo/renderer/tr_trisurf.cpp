@@ -1378,7 +1378,15 @@ void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
 	faceTangents_t	*ft;
 	idDrawVert		*vert;
 
-	faceTangents = (faceTangents_t *)_alloca16( sizeof(faceTangents[0]) * tri->numIndexes/3 );
+	// DG: windows only has a 1MB stack and it could happen that we try to allocate >1MB here
+	//     (in lost mission mod, game/le_hell map), causing a stack overflow
+	//     to prevent that, use heap allocation if it's >600KB
+	size_t allocaSize = sizeof(faceTangents[0]) * tri->numIndexes/3;
+	if(allocaSize < 600000)
+		faceTangents = (faceTangents_t *)_alloca16( allocaSize );
+	else
+		faceTangents = (faceTangents_t *)Mem_Alloc16( allocaSize );
+
 	R_DeriveFaceTangents( tri, faceTangents );
 
 	// clear the tangents
@@ -1434,6 +1442,9 @@ void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
 	}
 
 	tri->tangentsCalculated = true;
+
+	if(allocaSize >= 600000)
+		Mem_Free16( faceTangents );
 }
 
 static ID_INLINE void VectorNormalizeFast2( const idVec3 &v, idVec3 &out) {
