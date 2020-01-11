@@ -204,7 +204,7 @@ idCurve::RombergIntegral
 ====================
 */
 template< class type >
-ID_INLINE float idCurve<type>::RombergIntegral( const float t0, const float t1, const int order ) const {
+ID_MAYBE_INLINE float idCurve<type>::RombergIntegral(const float t0, const float t1, const int order) const {
 	int i, j, k, m, n;
 	float sum, delta;
 	float *temp[2];
@@ -242,7 +242,7 @@ idCurve::GetLengthBetweenKnots
 ====================
 */
 template< class type >
-ID_INLINE float idCurve<type>::GetLengthBetweenKnots( const int i0, const int i1 ) const {
+ID_MAYBE_INLINE float idCurve<type>::GetLengthBetweenKnots(const int i0, const int i1) const {
 	float length = 0.0f;
 	for ( int i = i0; i < i1; i++ ) {
 		length += RombergIntegral( times[i], times[i+1], 5 );
