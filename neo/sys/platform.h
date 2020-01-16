@@ -99,7 +99,6 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGN16( x )				x __attribute__ ((aligned (16)))
 #define PACKED						__attribute__((packed))
 #define ID_INLINE					inline
-#define ID_MAYBE_INLINE				inline
 #define ID_STATIC_TEMPLATE
 #define assertmem( x, y )
 #endif
@@ -165,6 +164,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
+#ifndef ID_MAYBE_INLINE
+// for MSVC it's __inline, otherwise just inline should work
+#define ID_MAYBE_INLINE inline
+#endif // ID_MAYBE_INLINE
 
 #ifdef __GNUC__
 #define id_attribute(x) __attribute__(x)
