@@ -255,81 +255,82 @@ which will determine the head kick direction
 ==============
 */
 void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict *damageDef ) {
-	//
-	// double vision effect
-	//
-	if ( lastDamageTime > 0.0f && SEC2MS( lastDamageTime ) + IMPULSE_DELAY > gameLocal.slow.time ) {
-		// keep shotgun from obliterating the view
-		return;
-	}
-
-	float	dvTime = damageDef->GetFloat( "dv_time" );
-	if ( dvTime ) {
-		if ( dvFinishTime < gameLocal.fast.time ) {
-			dvFinishTime = gameLocal.fast.time;
+	if ( cvarSystem->GetCVarBool( "g_hitEffect" ) ) {
+		//
+		// double vision effect
+		//
+		if ( lastDamageTime > 0.0f && SEC2MS( lastDamageTime ) + IMPULSE_DELAY > gameLocal.slow.time ) {
+			// keep shotgun from obliterating the view
+			return;
 		}
-		dvFinishTime += g_dvTime.GetFloat() * dvTime;
-		// don't let it add up too much in god mode
-		if ( dvFinishTime > gameLocal.fast.time + 5000 ) {
-			dvFinishTime = gameLocal.fast.time + 5000;
+
+		float	dvTime = damageDef->GetFloat( "dv_time" );
+		if ( dvTime ) {
+			if ( dvFinishTime < gameLocal.fast.time ) {
+				dvFinishTime = gameLocal.fast.time;
+			}
+			dvFinishTime += g_dvTime.GetFloat() * dvTime;
+			// don't let it add up too much in god mode
+			if ( dvFinishTime > gameLocal.fast.time + 5000 ) {
+				dvFinishTime = gameLocal.fast.time + 5000;
+			}
 		}
-	}
 
-	//
-	// head angle kick
-	//
-	float	kickTime = damageDef->GetFloat( "kick_time" );
-	if ( kickTime ) {
-		kickFinishTime = gameLocal.slow.time + g_kickTime.GetFloat() * kickTime;
+		//
+		// head angle kick
+		//
+		float	kickTime = damageDef->GetFloat( "kick_time" );
+		if ( kickTime ) {
+			kickFinishTime = gameLocal.slow.time + g_kickTime.GetFloat() * kickTime;
 
-		// forward / back kick will pitch view
-		kickAngles[0] = localKickDir[0];
+			// forward / back kick will pitch view
+			kickAngles[0] = localKickDir[0];
 
-		// side kick will yaw view
-		kickAngles[1] = localKickDir[1]*0.5f;
+			// side kick will yaw view
+			kickAngles[1] = localKickDir[1] * 0.5f;
 
-		// up / down kick will pitch view
-		kickAngles[0] += localKickDir[2];
+			// up / down kick will pitch view
+			kickAngles[0] += localKickDir[2];
 
-		// roll will come from  side
-		kickAngles[2] = localKickDir[1];
+			// roll will come from  side
+			kickAngles[2] = localKickDir[1];
 
-		float kickAmplitude = damageDef->GetFloat( "kick_amplitude" );
-		if ( kickAmplitude ) {
-			kickAngles *= kickAmplitude;
+			float kickAmplitude = damageDef->GetFloat( "kick_amplitude" );
+			if ( kickAmplitude ) {
+				kickAngles *= kickAmplitude;
+			}
 		}
+
+		//
+		// screen blob
+		//
+		float	blobTime = damageDef->GetFloat( "blob_time" );
+		if ( blobTime ) {
+			screenBlob_t* blob = GetScreenBlob();
+			blob->startFadeTime = gameLocal.slow.time;
+			blob->finishTime = gameLocal.slow.time + blobTime * g_blobTime.GetFloat() * ( ( float )gameLocal.msec / USERCMD_MSEC );
+
+			const char* materialName = damageDef->GetString( "mtr_blob" );
+			blob->material = declManager->FindMaterial( materialName );
+			blob->x = damageDef->GetFloat( "blob_x" );
+			blob->x += ( gameLocal.random.RandomInt() & 63 ) - 32;
+			blob->y = damageDef->GetFloat( "blob_y" );
+			blob->y += ( gameLocal.random.RandomInt() & 63 ) - 32;
+
+			float scale = ( 256 + ( ( gameLocal.random.RandomInt() & 63 ) - 32 ) ) / 256.0f;
+			blob->w = damageDef->GetFloat( "blob_width" ) * g_blobSize.GetFloat() * scale;
+			blob->h = damageDef->GetFloat( "blob_height" ) * g_blobSize.GetFloat() * scale;
+			blob->s1 = 0;
+			blob->t1 = 0;
+			blob->s2 = 1;
+			blob->t2 = 1;
+		}
+
+		//
+		// save lastDamageTime for tunnel vision accentuation
+		//
+		lastDamageTime = MS2SEC( gameLocal.slow.time );
 	}
-
-	//
-	// screen blob
-	//
-	float	blobTime = damageDef->GetFloat( "blob_time" );
-	if ( blobTime ) {
-		screenBlob_t	*blob = GetScreenBlob();
-		blob->startFadeTime = gameLocal.slow.time;
-		blob->finishTime = gameLocal.slow.time + blobTime * g_blobTime.GetFloat() * ((float)gameLocal.msec / USERCMD_MSEC);
-
-		const char *materialName = damageDef->GetString( "mtr_blob" );
-		blob->material = declManager->FindMaterial( materialName );
-		blob->x = damageDef->GetFloat( "blob_x" );
-		blob->x += ( gameLocal.random.RandomInt()&63 ) - 32;
-		blob->y = damageDef->GetFloat( "blob_y" );
-		blob->y += ( gameLocal.random.RandomInt()&63 ) - 32;
-
-		float scale = ( 256 + ( ( gameLocal.random.RandomInt()&63 ) - 32 ) ) / 256.0f;
-		blob->w = damageDef->GetFloat( "blob_width" ) * g_blobSize.GetFloat() * scale;
-		blob->h = damageDef->GetFloat( "blob_height" ) * g_blobSize.GetFloat() * scale;
-		blob->s1 = 0;
-		blob->t1 = 0;
-		blob->s2 = 1;
-		blob->t2 = 1;
-	}
-
-	//
-	// save lastDamageTime for tunnel vision accentuation
-	//
-	lastDamageTime = MS2SEC( gameLocal.slow.time );
-
 }
 
 /*
