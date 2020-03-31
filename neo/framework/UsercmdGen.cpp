@@ -391,6 +391,7 @@ private:
 	static idCVar	in_angleSpeedKey;
 	static idCVar	in_freeLook;
 	static idCVar	in_alwaysRun;
+	static idCVar	in_alwaysRunSP;
 	static idCVar	in_toggleRun;
 	static idCVar	in_toggleCrouch;
 	static idCVar	in_toggleZoom;
@@ -408,6 +409,7 @@ idCVar idUsercmdGenLocal::in_pitchSpeed( "in_pitchspeed", "140", CVAR_SYSTEM | C
 idCVar idUsercmdGenLocal::in_angleSpeedKey( "in_anglespeedkey", "1.5", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_FLOAT, "angle change scale when holding down _speed button" );
 idCVar idUsercmdGenLocal::in_freeLook( "in_freeLook", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "look around with mouse (reverse _mlook button)" );
 idCVar idUsercmdGenLocal::in_alwaysRun( "in_alwaysRun", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP" );
+idCVar idUsercmdGenLocal::in_alwaysRunSP("in_alwaysRunSP", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in SP");
 idCVar idUsercmdGenLocal::in_toggleRun( "in_toggleRun", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "pressing _speed button toggles run on/off - only in MP" );
 idCVar idUsercmdGenLocal::in_toggleCrouch( "in_toggleCrouch", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "pressing _movedown button toggles player crouching/standing" );
 idCVar idUsercmdGenLocal::in_toggleZoom( "in_toggleZoom", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "pressing _zoom button toggles zoom on/off" );
@@ -720,8 +722,17 @@ void idUsercmdGenLocal::CmdButtons( void ) {
 	}
 
 	// check the run button
-	if ( toggled_run.on ^ ( in_alwaysRun.GetBool() && idAsyncNetwork::IsActive() ) ) {
-		cmd.buttons |= BUTTON_RUN;
+	if ( idAsyncNetwork::IsActive() ) {
+		// multiplayer
+		if ( toggled_run.on ^ in_alwaysRun.GetBool() ) {
+			cmd.buttons |= BUTTON_RUN;
+		}
+	}
+	else {
+		// singleplayer
+		if ( ( in_alwaysRunSP.GetBool() && !ButtonState(UB_SPEED) ) || ( !in_alwaysRunSP.GetBool() && ButtonState(UB_SPEED) ) ) {
+			cmd.buttons |= BUTTON_RUN;
+		}
 	}
 
 	// check the zoom button
