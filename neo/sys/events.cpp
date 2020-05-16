@@ -477,7 +477,14 @@ sysEvent_t Sys_GetEvent() {
 
 		case SDL_KEYDOWN:
 			if (ev.key.keysym.sym == SDLK_RETURN && (ev.key.keysym.mod & KMOD_ALT) > 0) {
-				cvarSystem->SetCVarBool("r_fullscreen", !renderSystem->IsFullScreen());
+				static int prevFullScreen;
+				if (renderSystem->IsFullScreen()) {
+					prevFullScreen = cvarSystem->GetCVarInteger("r_fullscreen");
+					cvarSystem->SetCVarInteger("r_fullscreen", 0);
+				} else {
+					cvarSystem->SetCVarInteger("r_fullscreen", prevFullScreen ? prevFullScreen : 1);
+				}
+
 				PushConsoleEvent("vid_restart");
 				return res_none;
 			}

@@ -1054,7 +1054,7 @@ IMPLEMENTATION SPECIFIC FUNCTIONS
 typedef struct {
 	int			width;
 	int			height;
-	bool		fullScreen;
+	int			fullScreen;
 	bool		stereo;
 	int			displayHz;
 	int			multiSamples;

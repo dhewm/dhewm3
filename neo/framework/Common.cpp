@@ -2813,8 +2813,8 @@ static bool checkForHelp(int argc, char **argv)
 				WriteString("+set fs_game <modname>\n");
 				WriteString("  start the given addon/mod, e.g. +set fs_game d3xp\n");
 #ifndef ID_DEDICATED
-				WriteString("+set r_fullscreen <0 or 1>\n");
-				WriteString("  start game in windowed (0) or fullscreen (1) mode\n");
+				WriteString("+set r_fullscreen <0, 1 or 2>\n");
+				WriteString("  start game in windowed (0), fullscreen (1) or fullscreen-desktop (2) mode\n");
 				WriteString("+set r_mode <modenumber>\n");
 				WriteString("  start game in resolution belonging to <modenumber>,\n");
 				WriteString("  use -1 for custom resolutions:\n");

@@ -58,7 +58,7 @@ idCVar r_useLightPortalFlow( "r_useLightPortalFlow", "1", CVAR_RENDERER | CVAR_B
 idCVar r_multiSamples( "r_multiSamples", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "number of antialiasing samples" );
 idCVar r_mode( "r_mode", "5", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
 idCVar r_displayRefresh( "r_displayRefresh", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_NOCHEAT, "optional display refresh rate option for vid mode", 0.0f, 200.0f );
-idCVar r_fullscreen( "r_fullscreen", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0 = windowed, 1 = full screen" );
+idCVar r_fullscreen( "r_fullscreen", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = windowed, 1 = full screen, 2 = full screen desktop" );
 idCVar r_customWidth( "r_customWidth", "720", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "custom screen width. set r_mode to -1 to activate" );
 idCVar r_customHeight( "r_customHeight", "486", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "custom screen height. set r_mode to -1 to activate" );
 idCVar r_singleTriangle( "r_singleTriangle", "0", CVAR_RENDERER | CVAR_BOOL, "only draw a single triangle per primitive" );
@@ -656,7 +656,7 @@ void R_InitOpenGL( void ) {
 
 		parms.width = glConfig.vidWidth;
 		parms.height = glConfig.vidHeight;
-		parms.fullScreen = r_fullscreen.GetBool();
+		parms.fullScreen = r_fullscreen.GetInteger();
 		parms.displayHz = r_displayRefresh.GetInteger();
 		parms.multiSamples = r_multiSamples.GetInteger();
 		parms.stereo = false;
@@ -1798,7 +1798,8 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	const char *fsstrings[] =
 	{
 		"windowed",
-		"fullscreen"
+		"fullscreen",
+		"fullscreen-desktop",
 	};
 
 	common->Printf( "\nGL_VENDOR: %s\n", glConfig.vendor_string );
@@ -1810,7 +1811,13 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	common->Printf( "GL_MAX_TEXTURE_COORDS_ARB: %d\n", glConfig.maxTextureCoords );
 	common->Printf( "GL_MAX_TEXTURE_IMAGE_UNITS_ARB: %d\n", glConfig.maxTextureImageUnits );
 	common->Printf( "\nPIXELFORMAT: color(%d-bits) Z(%d-bit) stencil(%d-bits)\n", glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
-	common->Printf( "MODE: %d, %d x %d %s hz:", r_mode.GetInteger(), glConfig.vidWidth, glConfig.vidHeight, fsstrings[r_fullscreen.GetBool()] );
+	int fullscreen = r_fullscreen.GetInteger();
+	if (fullscreen < 0) {
+		fullscreen = 0;
+	} else if (fullscreen > 2) {
+		fullscreen = 2;
+	}
+	common->Printf( "MODE: %d, %d x %d %s hz:", r_mode.GetInteger(), glConfig.vidWidth, glConfig.vidHeight, fsstrings[fullscreen] );
 
 	if ( glConfig.displayFrequency ) {
 		common->Printf( "%d\n", glConfig.displayFrequency );
@@ -1909,12 +1916,12 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 		glConfig.isInitialized = false;
 
 		// create the new context and vertex cache
-		bool latch = cvarSystem->GetCVarBool( "r_fullscreen" );
+		int latch = cvarSystem->GetCVarInteger( "r_fullscreen" );
 		if ( forceWindow ) {
 			cvarSystem->SetCVarBool( "r_fullscreen", false );
 		}
 		R_InitOpenGL();
-		cvarSystem->SetCVarBool( "r_fullscreen", latch );
+		cvarSystem->SetCVarInteger( "r_fullscreen", latch );
 
 		// regenerate all images
 		globalImages->ReloadAllImages();
@@ -1922,7 +1929,7 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 		glimpParms_t	parms;
 		parms.width = glConfig.vidWidth;
 		parms.height = glConfig.vidHeight;
-		parms.fullScreen = ( forceWindow ) ? false : r_fullscreen.GetBool();
+		parms.fullScreen = ( forceWindow ) ? 0 : r_fullscreen.GetInteger();
 		parms.displayHz = r_displayRefresh.GetInteger();
 		parms.multiSamples = r_multiSamples.GetInteger();
 		parms.stereo = false;

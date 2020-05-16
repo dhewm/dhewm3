@@ -97,8 +97,10 @@ bool GLimp_Init(glimpParms_t parms) {
 
 	Uint32 flags = SDL_WINDOW_OPENGL;
 
-	if (parms.fullScreen)
+	if (parms.fullScreen == 1)
 		flags |= SDL_WINDOW_FULLSCREEN;
+	else if (parms.fullScreen == 2)
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 	int colorbits = 24;
 	int depthbits = 24;
