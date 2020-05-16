@@ -95,7 +95,7 @@ bool GLimp_Init(glimpParms_t parms) {
 
 	assert(SDL_WasInit(SDL_INIT_VIDEO));
 
-	Uint32 flags = SDL_WINDOW_OPENGL;
+	Uint32 flags = SDL_WINDOW_OPENGL|SDL_WINDOW_ALLOW_HIGHDPI;
 
 	if (parms.fullScreen)
 		flags |= SDL_WINDOW_FULLSCREEN;
@@ -195,7 +195,11 @@ bool GLimp_Init(glimpParms_t parms) {
 		if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)
 			common->Warning("SDL_GL_SWAP_CONTROL not supported");
 
-		SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+		// Use SDL_GL_GetDrawableSize so it also works with macOS high-DPI ("Retina") displays.
+		SDL_GL_GetDrawableSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+		// Fallback
+		if (!glConfig.vidWidth || !glConfig.vidHeight)
+			SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
 
 		SetSDLIcon(); // for SDL2  this must be done after creating the window
 
