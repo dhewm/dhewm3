@@ -2069,6 +2069,7 @@ void idAsyncServer::ProcessGetInfoMessage( const netadr_t from, const idBitMsg &
 		outMsg.WriteString( sessLocal.mapSpawnData.userInfo[i].GetString( "ui_name", "Player" ) );
 	}
 	outMsg.WriteByte( MAX_ASYNC_CLIENTS );
+	outMsg.WriteInt( -1 );
 
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 }
