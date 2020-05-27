@@ -2069,6 +2069,10 @@ void idAsyncServer::ProcessGetInfoMessage( const netadr_t from, const idBitMsg &
 		outMsg.WriteString( sessLocal.mapSpawnData.userInfo[i].GetString( "ui_name", "Player" ) );
 	}
 	outMsg.WriteByte( MAX_ASYNC_CLIENTS );
+	// Stradex: Originally Doom3 did outMsg.WriteLong( fileSystem->GetOSMask() ); here
+	//          dhewm3 eliminated GetOSMask() and WriteLong() became WriteInt() as it's supposed to write an int32
+	//          Sending -1 (instead of nothing at all) restores compatibility with id's masterserver.
+	outMsg.WriteInt( -1 );
 
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 }
