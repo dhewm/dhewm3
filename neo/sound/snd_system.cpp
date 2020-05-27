@@ -313,130 +313,153 @@ void idSoundSystemLocal::Init() {
 
 	graph = NULL;
 
-	if ( !s_noSound.GetBool() ) {
-		idSampleDecoder::Init();
-		soundCache = new idSoundCache();
-	}
+	// DG: no point in initializing OpenAL if sound is disabled with s_noSound
+	if ( s_noSound.GetBool() ) {
+		common->Printf( "Sound disabled with s_noSound 1 !\n" );
+		openalDevice = NULL;
+		openalContext = NULL;
+	} else {
+		// set up openal device and context
+		common->Printf( "Setup OpenAL device and context\n" );
 
-	// set up openal device and context
-	common->Printf( "Setup OpenAL device and context\n" );
+		const char *device = s_device.GetString();
+		if (strlen(device) < 1)
+			device = NULL;
+		else if (!idStr::Icmp(device, "default"))
+			device = NULL;
 
-	const char *device = s_device.GetString();
-	if (strlen(device) < 1)
-		device = NULL;
-	else if (!idStr::Icmp(device, "default"))
-		device = NULL;
+		if ( alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") ) {
+			const char *devs = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+			bool found = false;
 
-	if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT")) {
-		const char *devs = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-		bool found = false;
+			while (devs && *devs) {
+				common->Printf("OpenAL: found device '%s'", devs);
 
-		while (devs && *devs) {
-			common->Printf("OpenAL: found device '%s'", devs);
+				if ( device && !idStr::Icmp(devs, device) ) {
+					common->Printf(" (ACTIVE)\n");
+					found = true;
+				} else {
+					common->Printf("\n");
+				}
 
-			if (device && !idStr::Icmp(devs, device)) {
-				common->Printf(" (ACTIVE)\n");
-				found = true;
-			} else {
-				common->Printf("\n");
+				devs += strlen(devs) + 1;
 			}
 
-			devs += strlen(devs) + 1;
+			if ( device && !found ) {
+				common->Printf("OpenAL: device %s not found, using default\n", device);
+				device = NULL;
+			}
 		}
 
-		if (device && !found) {
-			common->Printf("OpenAL: device %s not found, using default\n", device);
-			device = NULL;
+		openalDevice = alcOpenDevice(device);
+		if ( !openalDevice && device ) {
+			common->Printf( "OpenAL: failed to open device '%s' (0x%x), trying default...\n", device, alGetError() );
+			openalDevice = alcOpenDevice( NULL );
 		}
-	}
 
-	openalDevice = alcOpenDevice( device );
-	if (!openalDevice && device) {
-		common->Printf("OpenAL: failed to open device '%s' (0x%x), using default\n", device, alGetError());
-		openalDevice = alcOpenDevice( NULL );
-	}
-
-	openalContext = alcCreateContext( openalDevice, NULL );
-	alcMakeContextCurrent( openalContext );
-
-	// log openal info
-	common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR));
-	common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER));
-	common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION));
-
-	// try to obtain EFX extensions
-	if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
-		common->Printf( "OpenAL: found EFX extension\n" );
-		EFXAvailable = 1;
-
-		alGenEffects = (LPALGENEFFECTS)alGetProcAddress("alGenEffects");
-		alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress("alDeleteEffects");
-		alIsEffect = (LPALISEFFECT)alGetProcAddress("alIsEffect");
-		alEffecti = (LPALEFFECTI)alGetProcAddress("alEffecti");
-		alEffectf = (LPALEFFECTF)alGetProcAddress("alEffectf");
-		alEffectfv = (LPALEFFECTFV)alGetProcAddress("alEffectfv");
-		alGenFilters = (LPALGENFILTERS)alGetProcAddress("alGenFilters");
-		alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress("alDeleteFilters");
-		alIsFilter = (LPALISFILTER)alGetProcAddress("alIsFilter");
-		alFilteri = (LPALFILTERI)alGetProcAddress("alFilteri");
-		alFilterf = (LPALFILTERF)alGetProcAddress("alFilterf");
-		alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
-		alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
-		alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress("alIsAuxiliaryEffectSlot");;
-		alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress("alAuxiliaryEffectSloti");
-	} else {
-		common->Printf( "OpenAL: EFX extension not found\n" );
-		EFXAvailable = 0;
-		idSoundSystemLocal::s_useEAXReverb.SetBool( false );
-
-		alGenEffects = NULL;
-		alDeleteEffects = NULL;
-		alIsEffect = NULL;
-		alEffecti = NULL;
-		alEffectf = NULL;
-		alEffectfv = NULL;
-		alGenFilters = NULL;
-		alDeleteFilters = NULL;
-		alIsFilter = NULL;
-		alFilteri = NULL;
-		alFilterf = NULL;
-		alGenAuxiliaryEffectSlots = NULL;
-		alDeleteAuxiliaryEffectSlots = NULL;
-		alIsAuxiliaryEffectSlot = NULL;
-		alAuxiliaryEffectSloti = NULL;
-	}
-
-	ALuint handle;
-	openalSourceCount = 0;
-
-	while ( openalSourceCount < 256 ) {
-		alGetError();
-		alGenSources( 1, &handle );
-		if ( alGetError() != AL_NO_ERROR ) {
-			break;
+		// DG: handle the possibility that opening the default device or creating context failed
+		if ( openalDevice == NULL ) {
+			common->Printf( "OpenAL: failed to open default device (0x%x), disabling sound\n", alGetError() );
+			openalContext = NULL;
 		} else {
-			// store in source array
-			openalSources[openalSourceCount].handle = handle;
-			openalSources[openalSourceCount].startTime = 0;
-			openalSources[openalSourceCount].chan = NULL;
-			openalSources[openalSourceCount].inUse = false;
-			openalSources[openalSourceCount].looping = false;
-
-			// initialise sources
-			alSourcef( handle, AL_ROLLOFF_FACTOR, 0.0f );
-
-			// found one source
-			openalSourceCount++;
+			openalContext = alcCreateContext( openalDevice, NULL );
+			if ( openalContext == NULL ) {
+				common->Printf( "OpenAL: failed to create context (0x%x), disabling sound\n", alcGetError(openalDevice) );
+				alcCloseDevice( openalDevice );
+				openalDevice = NULL;
+			}
 		}
 	}
 
-	common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
+	// DG: only do these things if opening device and creating context succeeded and sound is enabled
+	//     (if sound is disabled with s_noSound, openalContext is NULL)
+	if ( openalContext != NULL )
+	{
+		idSampleDecoder::Init();
+		soundCache = new idSoundCache();
 
-	// adjust source count to allow for at least eight stereo sounds to play
-	openalSourceCount -= 8;
+		alcMakeContextCurrent( openalContext );
 
-	useEFXReverb = idSoundSystemLocal::s_useEAXReverb.GetBool();
-	efxloaded = false;
+		// log openal info
+		common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR) );
+		common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER) );
+		common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION) );
+
+		// try to obtain EFX extensions
+		if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
+			common->Printf( "OpenAL: found EFX extension\n" );
+			EFXAvailable = 1;
+
+			alGenEffects = (LPALGENEFFECTS)alGetProcAddress("alGenEffects");
+			alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress("alDeleteEffects");
+			alIsEffect = (LPALISEFFECT)alGetProcAddress("alIsEffect");
+			alEffecti = (LPALEFFECTI)alGetProcAddress("alEffecti");
+			alEffectf = (LPALEFFECTF)alGetProcAddress("alEffectf");
+			alEffectfv = (LPALEFFECTFV)alGetProcAddress("alEffectfv");
+			alGenFilters = (LPALGENFILTERS)alGetProcAddress("alGenFilters");
+			alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress("alDeleteFilters");
+			alIsFilter = (LPALISFILTER)alGetProcAddress("alIsFilter");
+			alFilteri = (LPALFILTERI)alGetProcAddress("alFilteri");
+			alFilterf = (LPALFILTERF)alGetProcAddress("alFilterf");
+			alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
+			alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
+			alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress("alIsAuxiliaryEffectSlot");;
+			alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress("alAuxiliaryEffectSloti");
+		} else {
+			common->Printf( "OpenAL: EFX extension not found\n" );
+			EFXAvailable = 0;
+			idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+
+			alGenEffects = NULL;
+			alDeleteEffects = NULL;
+			alIsEffect = NULL;
+			alEffecti = NULL;
+			alEffectf = NULL;
+			alEffectfv = NULL;
+			alGenFilters = NULL;
+			alDeleteFilters = NULL;
+			alIsFilter = NULL;
+			alFilteri = NULL;
+			alFilterf = NULL;
+			alGenAuxiliaryEffectSlots = NULL;
+			alDeleteAuxiliaryEffectSlots = NULL;
+			alIsAuxiliaryEffectSlot = NULL;
+			alAuxiliaryEffectSloti = NULL;
+		}
+
+		ALuint handle;
+		openalSourceCount = 0;
+
+		while ( openalSourceCount < 256 ) {
+			alGetError();
+			alGenSources( 1, &handle );
+			if ( alGetError() != AL_NO_ERROR ) {
+				break;
+			} else {
+				// store in source array
+				openalSources[openalSourceCount].handle = handle;
+				openalSources[openalSourceCount].startTime = 0;
+				openalSources[openalSourceCount].chan = NULL;
+				openalSources[openalSourceCount].inUse = false;
+				openalSources[openalSourceCount].looping = false;
+
+				// initialise sources
+				alSourcef( handle, AL_ROLLOFF_FACTOR, 0.0f );
+
+				// found one source
+				openalSourceCount++;
+			}
+		}
+
+		common->Printf( "OpenAL: found %d hardware voices\n", openalSourceCount );
+
+		// adjust source count to allow for at least eight stereo sounds to play
+		openalSourceCount -= 8;
+
+		useEFXReverb = idSoundSystemLocal::s_useEAXReverb.GetBool();
+		efxloaded = false;
+
+	}
 
 	cmdSystem->AddCommand( "listSounds", ListSounds_f, CMD_FL_SOUND, "lists all sounds" );
 	cmdSystem->AddCommand( "listSoundDecoders", ListSoundDecoders_f, CMD_FL_SOUND, "list active sound decoders" );
@@ -507,7 +530,9 @@ bool idSoundSystemLocal::InitHW() {
 		s_numberOfSpeakers.SetInteger(numSpeakers);
 	}
 
-	if ( s_noSound.GetBool() ) {
+	// DG: if OpenAL context couldn't be created (maybe there were no
+	//      audio devices), keep audio disabled.
+	if ( s_noSound.GetBool() || openalContext == NULL ) {
 		return false;
 	}
 
