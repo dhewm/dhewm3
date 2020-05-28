@@ -2520,11 +2520,17 @@ void idSessionLocal::UpdateScreen( bool outOfSequence ) {
 idSessionLocal::Frame
 ===============
 */
+extern bool CheckOpenALDeviceAndRecoverIfNeeded();
 void idSessionLocal::Frame() {
 
 	if ( com_asyncSound.GetInteger() == 0 ) {
 		soundSystem->AsyncUpdate( Sys_Milliseconds() );
 	}
+
+	// DG: periodically check if sound device is still there and try to reset it if not
+	//     (calling this from idSoundSystem::AsyncUpdate(), which runs in a separate thread
+	//      by default, causes a deadlock when calling idCommon->Warning())
+	CheckOpenALDeviceAndRecoverIfNeeded();
 
 	// Editors that completely take over the game
 	if ( com_editorActive && ( com_editors & ( EDITOR_RADIANT | EDITOR_GUI ) ) ) {

@@ -277,6 +277,17 @@ void SoundSystemRestart_f( const idCmdArgs &args ) {
 	soundSystem->SetMute( false );
 }
 
+// DG: make this function callable from idSessionLocal::Frame() without having to
+// change the public idSoundSystem interface - that would break mod DLL compat,
+// and this is not relevant for gamecode.
+bool CheckOpenALDeviceAndRecoverIfNeeded()
+{
+	if(soundSystemLocal.isInitialized)
+		return soundSystemLocal.CheckDeviceAndRecoverIfNeeded();
+
+	return true;
+}
+
 /*
 ===============
 idSoundSystemLocal::Init
@@ -312,6 +323,11 @@ void idSoundSystemLocal::Init() {
 	finalMixBuffer = (float *) ( ( ( (intptr_t)realAccum ) + 15 ) & ~15 );
 
 	graph = NULL;
+
+	// DG: added these for CheckDeviceAndRecoverIfNeeded()
+	alcResetDeviceSOFT = NULL;
+	resetRetryCount = 0;
+	lastCheckTime = 0;
 
 	// DG: no point in initializing OpenAL if sound is disabled with s_noSound
 	if ( s_noSound.GetBool() ) {
@@ -384,6 +400,14 @@ void idSoundSystemLocal::Init() {
 		common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR) );
 		common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER) );
 		common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION) );
+
+		// DG: extensions needed for CheckDeviceAndRecoverIfNeeded()
+		bool hasAlcExtDisconnect = alcIsExtensionPresent( openalDevice, "ALC_EXT_disconnect" ) != AL_FALSE;
+		bool hasAlcSoftHrtf = alcIsExtensionPresent( openalDevice, "ALC_SOFT_HRTF" ) != AL_FALSE;
+		if ( hasAlcExtDisconnect && hasAlcSoftHrtf ) {
+			common->Printf( "OpenAL: found extensions for resetting disconnected devices\n" );
+			alcResetDeviceSOFT = (LPALCRESETDEVICESOFT)alcGetProcAddress( openalDevice, "alcResetDeviceSOFT" );
+		}
 
 		// try to obtain EFX extensions
 		if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
@@ -568,6 +592,63 @@ bool idSoundSystemLocal::ShutdownHW() {
 	}
 
 	return true;
+}
+
+
+/*
+===============
+idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded
+
+ DG: returns true if openalDevice is still available,
+     otherwise it will try to recover the device and return false while it's gone
+     (display audio sound devices sometimes disappear for a few seconds when switching resolution)
+===============
+*/
+bool idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded()
+{
+	static const int maxRetries = 20;
+
+	if ( alcResetDeviceSOFT == NULL ) {
+		return true; // we can't check or reset, just pretend everything is fine..
+	}
+
+	unsigned int curTime = Sys_Milliseconds();
+	if ( curTime - lastCheckTime >= 1000 ) // check once per second
+	{
+		lastCheckTime = curTime;
+
+		ALCint connected; // ALC_CONNECTED needs ALC_EXT_disconnect (we check for that in Init())
+		alcGetIntegerv( openalDevice, ALC_CONNECTED, 1, &connected );
+		if ( connected ) {
+			resetRetryCount = 0;
+			return true;
+		}
+
+		if ( resetRetryCount == 0 ) {
+			common->Warning( "OpenAL device disconnected! Will try to reconnect.." );
+			resetRetryCount = 1;
+		} else if ( resetRetryCount > maxRetries ) { // give up after 20 seconds
+			if ( resetRetryCount == maxRetries+1 ) {
+				common->Warning( "OpenAL device still disconnected! Giving up!" );
+				++resetRetryCount; // this makes sure the warning is only shown once
+
+				// TODO: can we shut down sound without things blowing up?
+				//       if we can, we could do that if we don't have alcResetDeviceSOFT but ALC_EXT_disconnect
+			}
+			return false;
+		}
+
+		if ( alcResetDeviceSOFT( openalDevice, NULL ) ) {
+			common->Printf( "OpenAL: resetting device succeeded!\n" );
+			resetRetryCount = 0;
+			return true;
+		}
+
+		++resetRetryCount;
+		return false;
+	}
+
+	return resetRetryCount == 0; // if it's 0, state on last check was ok
 }
 
 /*

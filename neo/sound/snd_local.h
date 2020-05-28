@@ -691,6 +691,11 @@ public:
 	ALuint					AllocOpenALSource( idSoundChannel *chan, bool looping, bool stereo );
 	void					FreeOpenALSource( ALuint handle );
 
+	// returns true if openalDevice is still available,
+	// otherwise it will try to recover the device and return false while it's gone
+	// (display audio sound devices sometimes disappear for a few seconds when switching resolution)
+	bool					CheckDeviceAndRecoverIfNeeded();
+
 	idSoundCache *			soundCache;
 
 	idSoundWorldLocal *		currentSoundWorld;	// the one to mix each async tic
@@ -746,6 +751,11 @@ public:
 	static bool				useEFXReverb;
 							// mark available during initialization, or through an explicit test
 	static int				EFXAvailable;
+
+	// DG: for CheckDeviceAndRecoverIfNeeded()
+	LPALCRESETDEVICESOFT	alcResetDeviceSOFT; // needs ALC_SOFT_HRTF extension
+	int						resetRetryCount;
+	unsigned int			lastCheckTime;
 
 	static idCVar			s_noSound;
 	static idCVar			s_device;
