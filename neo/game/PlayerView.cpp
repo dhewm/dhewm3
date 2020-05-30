@@ -224,7 +224,7 @@ which will determine the head kick direction
 ==============
 */
 void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict *damageDef ) {
-	if ( cvarSystem->GetCVarBool( "g_hitEffect" ) ) {
+	if ( g_hitEffect.GetBool() ) {
 		//
 		// double vision effect
 		//
