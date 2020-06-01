@@ -2524,7 +2524,7 @@ extern bool CheckOpenALDeviceAndRecoverIfNeeded();
 void idSessionLocal::Frame() {
 
 	if ( com_asyncSound.GetInteger() == 0 ) {
-		soundSystem->AsyncUpdate( Sys_Milliseconds() );
+		soundSystem->AsyncUpdateWrite( Sys_Milliseconds() );
 	}
 
 	// DG: periodically check if sound device is still there and try to reset it if not

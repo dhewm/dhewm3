@@ -695,7 +695,10 @@ int idSoundSystemLocal::AsyncMix( int soundTime, float *mixBuffer ) {
 /*
 ===================
 idSoundSystemLocal::AsyncUpdate
-called from async sound thread when com_asyncSound == 1 ( Windows )
+called from async sound thread when com_asyncSound == 2
+DG: using this for the "traditional" sound updates that
+    only happen about every 100ms (and lead to delays between 1 and 110ms between
+    starting a sound in gamecode and it being played), for people who like that..
 ===================
 */
 int idSoundSystemLocal::AsyncUpdate( int inTime ) {
@@ -772,9 +775,12 @@ int idSoundSystemLocal::AsyncUpdate( int inTime ) {
 /*
 ===================
 idSoundSystemLocal::AsyncUpdateWrite
-sound output using a write API. all the scheduling based on time
-we mix MIXBUFFER_SAMPLES at a time, but we feed the audio device with smaller chunks (and more often)
-called by the sound thread when com_asyncSound is 3 ( Linux )
+DG: using this now for 60Hz sound updates
+called from async sound thread when com_asyncSound is 3 or 1
+also called from main thread if com_asyncSound == 0
+(those were the default values used in dhewm3 on unix-likes (except mac) or rest)
+with this, once every async tic new sounds are started and existing ones updated,
+instead of once every ~100ms.
 ===================
 */
 int idSoundSystemLocal::AsyncUpdateWrite( int inTime ) {
@@ -783,21 +789,7 @@ int idSoundSystemLocal::AsyncUpdateWrite( int inTime ) {
 		return 0;
 	}
 
-	unsigned int dwCurrentBlock = (unsigned int)( inTime * 44.1f / MIXBUFFER_SAMPLES );
-
-	if ( nextWriteBlock == 0xffffffff ) {
-		nextWriteBlock = dwCurrentBlock;
-	}
-
-	if ( dwCurrentBlock < nextWriteBlock ) {
-		return 0;
-	}
-
-	if ( nextWriteBlock != dwCurrentBlock ) {
-		Sys_Printf( "missed %d sound updates\n", dwCurrentBlock - nextWriteBlock );
-	}
-
-	int sampleTime = dwCurrentBlock * MIXBUFFER_SAMPLES;
+	int sampleTime = inTime * 44.1f;
 	int numSpeakers = s_numberOfSpeakers.GetInteger();
 
 	// enable audio hardware caching
@@ -811,8 +803,6 @@ int idSoundSystemLocal::AsyncUpdateWrite( int inTime ) {
 	// disable audio hardware caching (this updates ALL settings since last alcSuspendContext)
 	alcProcessContext( openalContext );
 
-	// only move to the next block if the write was successful
-	nextWriteBlock = dwCurrentBlock + 1;
 	CurrentSoundTime = sampleTime;
 
 	return Sys_Milliseconds() - inTime;
