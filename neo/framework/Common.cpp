@@ -83,12 +83,8 @@ idCVar com_purgeAll( "com_purgeAll", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_SYSTEM
 idCVar com_memoryMarker( "com_memoryMarker", "-1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_INIT, "used as a marker for memory stats" );
 idCVar com_preciseTic( "com_preciseTic", "1", CVAR_BOOL|CVAR_SYSTEM, "run one game tick every async thread update" );
 idCVar com_asyncInput( "com_asyncInput", "0", CVAR_BOOL|CVAR_SYSTEM, "sample input from the async thread" );
-#define ASYNCSOUND_INFO "0: mix sound inline, 1: memory mapped async mix, 2: callback mixing, 3: write async mix"
-#if defined( __unix__ ) && !defined( MACOS_X )
-idCVar com_asyncSound( "com_asyncSound", "3", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ROM, ASYNCSOUND_INFO );
-#else
-idCVar com_asyncSound( "com_asyncSound", "1", CVAR_INTEGER|CVAR_SYSTEM, ASYNCSOUND_INFO, 0, 1 );
-#endif
+#define ASYNCSOUND_INFO "0: mix sound inline, 1 or 3: async update every 16ms 2: async update about every 100ms (original behavior)"
+idCVar com_asyncSound( "com_asyncSound", "1", CVAR_INTEGER|CVAR_SYSTEM, ASYNCSOUND_INFO, 0, 3 );
 idCVar com_forceGenericSIMD( "com_forceGenericSIMD", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "force generic platform independent SIMD" );
 idCVar com_developer( "developer", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "developer mode" );
 idCVar com_allowConsole( "com_allowConsole", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "allow toggling console with the tilde key" );
@@ -2506,10 +2502,13 @@ void idCommonLocal::SingleAsyncTic( void ) {
 
 	switch ( com_asyncSound.GetInteger() ) {
 		case 1:
-			soundSystem->AsyncUpdate( stat->milliseconds );
-			break;
 		case 3:
+			// DG: these are now used for the new default behavior of "update every async tic (every 16ms)"
 			soundSystem->AsyncUpdateWrite( stat->milliseconds );
+			break;
+		case 2:
+			// DG: use 2 for the old "update only 10x/second" behavior in case anyone likes that..
+			soundSystem->AsyncUpdate( stat->milliseconds );
 			break;
 	}
 
@@ -2754,6 +2753,9 @@ static unsigned int AsyncTimer(unsigned int interval, void *) {
 	// calculate the next interval to get as close to 60fps as possible
 	unsigned int now = SDL_GetTicks();
 	unsigned int tick = com_ticNumber * USERCMD_MSEC;
+	// FIXME: this is pretty broken and basically always returns 1 because now now is much bigger than tic
+	//        (probably com_tickNumber only starts incrementing a second after engine starts?)
+	//        only reason this works is common->Async() checking again before calling SingleAsyncTic()
 
 	if (now >= tick)
 		return 1;

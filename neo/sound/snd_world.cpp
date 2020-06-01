@@ -1857,7 +1857,11 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 				chan->triggered = false;
 			}
 		}
-	} else {
+	}
+#if 1 // DG: I /think/ this was only relevant for the old sound backends?
+	// FIXME: completely remove else branch, but for testing leave it in under com_asyncSound 2
+	//        (which also does the old 92-100ms updates)
+	else if( com_asyncSound.GetInteger() == 2 ) {
 
 		if ( slowmoActive && !chan->disallowSlow ) {
 			idSlowChannel slow = sound->GetSlowChannel( chan );
@@ -1952,6 +1956,7 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 		}
 
 	}
+#endif // 1/0
 
 	soundSystemLocal.soundStats.activeSounds++;
 
