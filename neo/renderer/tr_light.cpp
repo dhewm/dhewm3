@@ -1634,7 +1634,7 @@ void R_RemoveUnecessaryViewLights( void ) {
 			return ((sortLight_t*)a)->screenArea - ((sortLight_t*)b)->screenArea;
 		}
 	};
-	sortLight_t* sortLights = (sortLight_t*)_malloca(sizeof(sortLight_t) * numViewLights);
+	sortLight_t* sortLights = (sortLight_t*)_alloca(sizeof(sortLight_t) * numViewLights);
 	int	numSortLightsFilled = 0;
 	for (viewLight_t* vLight = tr.viewDef->viewLights; vLight != NULL; vLight = vLight->next) {
 		sortLights[numSortLightsFilled].vLight = vLight;
