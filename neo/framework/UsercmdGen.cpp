@@ -572,9 +572,9 @@ void idUsercmdGenLocal::AdjustAngles( void ) {
 	float	speed;
 
 	if ( toggled_run.on ^ ( in_alwaysRun.GetBool() && AlwaysRunAllowed() ) ) { // DG: always run in SP
-		speed = idMath::M_MS2SEC * USERCMD_MSEC * in_angleSpeedKey.GetFloat();
+		speed = idMath::M_MS2SEC * com_gameMSRate * in_angleSpeedKey.GetFloat();
 	} else {
-		speed = idMath::M_MS2SEC * USERCMD_MSEC;
+		speed = idMath::M_MS2SEC * com_gameMSRate;
 	}
 
 	if ( !ButtonState( UB_STRAFE ) ) {

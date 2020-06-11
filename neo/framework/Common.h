@@ -77,6 +77,10 @@ extern idCVar		com_enableDebuggerServer;
 extern idCVar		com_dbgClientAdr;
 extern idCVar		com_dbgServerAdr;
 
+extern idCVar		com_gameHz;
+extern int			com_gameMSRate;
+extern int			com_realGameHz;
+
 extern int			time_gameFrame;			// game logic time
 extern int			time_gameDraw;			// game present time
 extern int			time_frontend;			// renderer frontend time

@@ -109,6 +109,15 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
+
+//Stradex: start
+idCVar com_gameHz("com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, "Frames per second the game runs at", 10, 1024);
+
+int com_gameMSRate = 1000 / 60; //Refreshed later
+int com_realGameHz = 60;
+bool tReloadingEngine = false;
+//Stradex: end
+
 // com_speeds times
 int				time_gameFrame;
 int				time_gameDraw;
@@ -1540,14 +1549,24 @@ void Com_ReloadEngine_f( const idCmdArgs &args ) {
 	}
 
 	common->Printf( "============= ReloadEngine start =============\n" );
+
+	tReloadingEngine = true;
+
 	if ( !menu ) {
 		Sys_ShowConsole( 1, false );
 	}
+
+
+	com_realGameHz = com_gameHz.GetInteger();
+
 	commonLocal.ShutdownGame( true );
 	commonLocal.InitGame();
 	if ( !menu && !idAsyncNetwork::serverDedicated.GetBool() ) {
 		Sys_ShowConsole( 0, false );
 	}
+
+	tReloadingEngine = false;
+
 	common->Printf( "============= ReloadEngine end ===============\n" );
 
 	if ( !cmdSystem->PostReloadEngine() ) {
@@ -2442,7 +2461,7 @@ void idCommonLocal::Frame( void ) {
 		// DG: prepare new ImGui frame - I guess this is a good place, as all new events should be available?
 		D3::ImGuiHooks::NewFrame();
 
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+		com_frameTime = com_ticNumber * com_gameMSRate;
 
 		idAsyncNetwork::RunFrame();
 
@@ -2488,7 +2507,7 @@ idCommonLocal::GUIFrame
 void idCommonLocal::GUIFrame( bool execCmd, bool network ) {
 	Sys_GenerateEvents();
 	eventLoop->RunEventLoop( execCmd );	// and execute any commands
-	com_frameTime = com_ticNumber * USERCMD_MSEC;
+	com_frameTime = com_ticNumber * com_gameMSRate;
 	if ( network ) {
 		idAsyncNetwork::RunFrame();
 	}
@@ -2571,7 +2590,7 @@ idCommonLocal::Async
 void idCommonLocal::Async( void ) {
 	int	msec = Sys_Milliseconds();
 	if ( !lastTicMsec ) {
-		lastTicMsec = msec - USERCMD_MSEC;
+		lastTicMsec = msec - com_gameMSRate;
 	}
 
 	if ( !com_preciseTic.GetBool() ) {
@@ -2580,7 +2599,7 @@ void idCommonLocal::Async( void ) {
 		return;
 	}
 
-	int ticMsec = USERCMD_MSEC;
+	int ticMsec = com_gameMSRate;
 
 	// the number of msec per tic can be varies with the timescale cvar
 	float timescale = com_timescale.GetFloat();
@@ -2593,8 +2612,8 @@ void idCommonLocal::Async( void ) {
 
 	// don't skip too many
 	if ( timescale == 1.0f ) {
-		if ( lastTicMsec + 10 * USERCMD_MSEC < msec ) {
-			lastTicMsec = msec - 10*USERCMD_MSEC;
+		if ( lastTicMsec + 10 * com_gameMSRate < msec ) {
+			lastTicMsec = msec - 10* com_gameMSRate;
 		}
 	}
 
@@ -2796,7 +2815,8 @@ static unsigned int AsyncTimer(unsigned int interval, void *) {
 
 	// calculate the next interval to get as close to 60fps as possible
 	unsigned int now = SDL_GetTicks();
-	unsigned int tick = com_ticNumber * USERCMD_MSEC;
+
+	unsigned int tick = com_ticNumber * com_gameMSRate;
 	// FIXME: this is pretty broken and basically always returns 1 because now now is much bigger than tic
 	//        (probably com_tickNumber only starts incrementing a second after engine starts?)
 	//        only reason this works is common->Async() checking again before calling SingleAsyncTic()
@@ -3037,6 +3057,11 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		// game specific initialization
 		InitGame();
 
+		//stradex: start
+		com_realGameHz = com_gameHz.GetInteger();
+		com_gameMSRate = idMath::FtoiFast(1000.0f / static_cast<float>(com_gameHz.GetInteger()));
+		//stradex: end
+
 		// don't add startup commands if no CD key is present
 #if ID_ENFORCE_KEY
 		if ( !session->CDKeysAreValid( false ) || !AddStartupCommands() ) {
@@ -3069,7 +3094,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		Sys_Error( "Error during initialization" );
 	}
 
-	async_timer = SDL_AddTimer(USERCMD_MSEC, AsyncTimer, NULL);
+	async_timer = SDL_AddTimer(com_gameMSRate, AsyncTimer, NULL);
 
 	if (!async_timer)
 		Sys_Error("Error while starting the async timer: %s", SDL_GetError());
@@ -3202,6 +3227,16 @@ void idCommonLocal::InitGame( void ) {
 
 	// if any archived cvars are modified after this, we will trigger a writing of the config file
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
+
+#ifndef ID_DEDICATED
+	if (tReloadingEngine) {
+		com_gameHz.SetInteger(com_realGameHz);
+		com_gameMSRate = idMath::FtoiFast(1000.0f / static_cast<float>(com_gameHz.GetInteger()));
+		//reset time and tics
+		com_frameNumber = 0;
+		com_ticNumber = 0;
+	}
+#endif
 
 	// init the user command input code
 	usercmdGen->Init();

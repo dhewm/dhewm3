@@ -308,7 +308,7 @@ void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict *damageDef )
 		if ( blobTime ) {
 			screenBlob_t* blob = GetScreenBlob();
 			blob->startFadeTime = gameLocal.slow.time;
-			blob->finishTime = gameLocal.slow.time + blobTime * g_blobTime.GetFloat() * ( ( float )gameLocal.msec / USERCMD_MSEC );
+			blob->finishTime = gameLocal.slow.time + blobTime * g_blobTime.GetFloat() * ( ( float )gameLocal.msec / gameLocal.gameMsec );
 
 			const char* materialName = damageDef->GetString( "mtr_blob" );
 			blob->material = declManager->FindMaterial( materialName );

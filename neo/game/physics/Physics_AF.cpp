@@ -6607,7 +6607,7 @@ idPhysics_AF::idPhysics_AF( void ) {
 
 	memset( &current, 0, sizeof( current ) );
 	current.atRest = -1;
-	current.lastTimeStep = USERCMD_MSEC;
+	current.lastTimeStep = gameLocal.msec;
 	saved = current;
 
 	linearFriction = 0.005f;

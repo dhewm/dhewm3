@@ -295,6 +295,9 @@ void idGameLocal::Init( void ) {
 	const idDict *dict;
 	idAAS *aas;
 
+	msec = 16; //60fps
+	gameFps = 60; //60fps
+
 #ifndef GAME_DLL
 
 	TestGameAPI();
@@ -311,6 +314,10 @@ void idGameLocal::Init( void ) {
 	idSIMD::InitProcessor( "game", com_forceGenericSIMD.GetBool() );
 
 #endif
+
+	//Update MSEC and gameFps
+	gameFps = cvarSystem->GetCVarInteger("com_gameHz");
+	msec = idMath::FtoiFast(1000.0f / static_cast<float>(cvarSystem->GetCVarInteger("com_gameHz")));
 
 	Printf( "----- Initializing Game -----\n" );
 	Printf( "gamename: %s\n", GAME_VERSION );
@@ -1199,6 +1206,8 @@ void idGameLocal::MapPopulate( void ) {
 	// before the physics are run so entities can bind correctly
 	Printf( "==== Processing events ====\n" );
 	idEvent::ServiceEvents();
+
+	SetScriptFPS(static_cast<const float>(this->gameFps));
 }
 
 /*
@@ -1260,6 +1269,8 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	gameRenderWorld = renderWorld;
 	gameSoundWorld = soundWorld;
+
+	SetScriptFPS(static_cast<const float>(this->gameFps));
 
 	idRestoreGame savegame( saveGameFile );
 
@@ -4443,3 +4454,36 @@ idGameLocal::GetMapLoadingGUI
 ===============
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
+
+/*
+===================
+idGameLocal::SetScriptFPS
+===================
+*/
+void idGameLocal::SetScriptFPS(const float tCom_gameHz)
+{
+	idVarDef* fpsDef = program.GetDef(&type_float, "GAME_FPS", &def_namespace);
+	if (fpsDef != NULL) {
+		eval_t fpsValue;
+		fpsValue._float = tCom_gameHz;
+		fpsDef->SetValue(fpsValue, false);
+
+		common->Printf("GAME_FPS: %f\n", tCom_gameHz);
+	}
+	else {
+		common->Printf("Unable to find GAME_FPS def\n");
+	}
+
+	float frameRate = 1.0 / tCom_gameHz;
+	idVarDef* frameRateDef = program.GetDef(&type_float, "GAME_FRAMETIME", &def_namespace);
+	if (frameRateDef != NULL) {
+		eval_t frameRateValue;
+		frameRateValue._float = frameRate;
+		frameRateDef->SetValue(frameRateValue, false);
+
+		common->Printf("GAME_FRAMETIME to: %f\n", frameRate);
+	}
+	else {
+		common->Printf("Unable to find GAME_FRAMETIME def\n");
+	}
+}
