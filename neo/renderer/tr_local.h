@@ -69,6 +69,9 @@ public:
 	void		Union( const idScreenRect &rect );
 	bool		Equals( const idScreenRect &rect ) const;
 	bool		IsEmpty() const;
+
+	//From BFG Edition
+	int			GetArea() const { return (x2 - x1 + 1) * (y2 - y1 + 1); }
 };
 
 idScreenRect R_ScreenRectFromViewFrustumBounds( const idBounds &bounds );

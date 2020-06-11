@@ -74,6 +74,10 @@ extern idCVar		com_showSoundDecoders;
 extern idCVar		com_makingBuild;
 extern idCVar		com_updateLoadSize;
 
+extern idCVar		com_gameHz;
+extern int			com_gameMSRate;
+extern int			com_realGameHz;
+
 extern int			time_gameFrame;			// game logic time
 extern int			time_gameDraw;			// game present time
 extern int			time_frontend;			// renderer frontend time

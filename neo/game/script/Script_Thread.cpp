@@ -1769,7 +1769,7 @@ idThread::Event_GetTicsPerSecond
 ================
 */
 void idThread::Event_GetTicsPerSecond( void ) {
-	idThread::ReturnFloat( USERCMD_HZ );
+	idThread::ReturnFloat( gameLocal.gameFps );
 }
 
 /*

@@ -497,7 +497,7 @@ void idSessionLocal::StartWipe( const char *_wipeMaterial, bool hold ) {
 	wipeMaterial = declManager->FindMaterial( _wipeMaterial, false );
 
 	wipeStartTic = com_ticNumber;
-	wipeStopTic = wipeStartTic + 1000.0f / USERCMD_MSEC * com_wipeSeconds.GetFloat();
+	wipeStopTic = wipeStartTic + 1000.0f / com_gameMSRate * com_wipeSeconds.GetFloat();
 	wipeHold = hold;
 }
 
@@ -538,14 +538,14 @@ void idSessionLocal::ShowLoadingGui() {
 	int stop = Sys_Milliseconds() + 1000;
 	int force = 10;
 	while ( Sys_Milliseconds() < stop || force-- > 0 ) {
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+		com_frameTime = com_ticNumber * com_gameMSRate;
 		session->Frame();
 		session->UpdateScreen( false );
 	}
 #else
-	int stop = com_ticNumber + 1000.0f / USERCMD_MSEC * 1.0f;
+	int stop = com_ticNumber + 1000.0f / com_gameMSRate * 1.0f;
 	while ( com_ticNumber < stop ) {
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+		com_frameTime = com_ticNumber * com_gameMSRate;
 		session->Frame();
 		session->UpdateScreen( false );
 	}
@@ -2545,7 +2545,7 @@ void idSessionLocal::Frame() {
 
 		name = va("demos/%s/%s_%05i.tga", aviDemoShortName.c_str(), aviDemoShortName.c_str(), aviTicStart );
 
-		float ratio = 30.0f / ( 1000.0f / USERCMD_MSEC / com_aviDemoTics.GetInteger() );
+		float ratio = 30.0f / ( 1000.0f / com_gameMSRate / com_aviDemoTics.GetInteger() );
 		aviDemoFrameCount += ratio;
 		if ( aviTicStart + 1 != ( int )aviDemoFrameCount ) {
 			// skipped frames so write them out
@@ -2669,7 +2669,7 @@ void idSessionLocal::Frame() {
 
 	// don't let a long onDemand sound load unsync everything
 	if ( timeHitch ) {
-		int	skip = timeHitch / USERCMD_MSEC;
+		int	skip = timeHitch / com_gameMSRate;
 		lastGameTic += skip;
 		numCmdsToRun -= skip;
 		timeHitch = 0;

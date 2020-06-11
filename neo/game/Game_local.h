@@ -272,7 +272,8 @@ public:
 	int						framenum;
 	int						previousTime;			// time in msec of last frame
 	int						time;					// in msec
-	static const int		msec = USERCMD_MSEC;	// time since last update in milliseconds
+	int						msec;					// time since last update in milliseconds
+	int						gameFps;				//added by Stradex for com_gameHz
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 
@@ -518,6 +519,7 @@ private:
 	void					RunDebugInfo( void );
 
 	void					InitScriptForMap( void );
+	void					SetScriptFPS(const float tCom_gameHz);
 
 	void					InitConsoleCommands( void );
 	void					ShutdownConsoleCommands( void );
