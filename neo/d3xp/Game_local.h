@@ -589,7 +589,6 @@ private:
 	void					RunDebugInfo( void );
 
 	void					InitScriptForMap( void );
-	void					SetScriptFPS(const float tCom_gameHz);
 
 	void					InitConsoleCommands( void );
 	void					ShutdownConsoleCommands( void );
