@@ -249,6 +249,7 @@ define_t *idParser::CopyDefine( define_t *define ) {
 	newdefine->hashnext = NULL;
 	//copy the define tokens
 	newdefine->tokens = NULL;
+
 	for (lasttoken = NULL, token = define->tokens; token; token = token->next) {
 		newtoken = new idToken(token);
 		newtoken->next = NULL;
@@ -800,6 +801,7 @@ int idParser::ExpandDefine( idToken *deftoken, define_t *define, idToken **first
 	if ( define->builtin ) {
 		return idParser::ExpandBuiltinDefine( deftoken, define, firsttoken, lasttoken );
 	}
+
 	// if the define has parameters
 	if ( define->numparms ) {
 		if ( !idParser::ReadDefineParms( define, parms, MAX_DEFINEPARMS ) ) {
@@ -1126,6 +1128,8 @@ int idParser::Directive_define( void ) {
 	if ( !idParser::ReadLine( &token ) ) {
 		return true;
 	}
+
+
 	// if it is a define with parameters
 	if ( token.WhiteSpaceBeforeToken() == 0 && token == "(" ) {
 		// read the define parameters
@@ -1170,10 +1174,32 @@ int idParser::Directive_define( void ) {
 				}
 			}
 		}
+
 		if ( !idParser::ReadLine( &token ) ) {
 			return true;
 		}
 	}
+
+
+	//UGLY HACK Stradex: workaround to have com_gameHz working without having to modify script files and avoiding new pak data
+	if (idStr::Icmp(define->name, "GAME_FPS") == 0) {
+		token = cvarSystem->GetCVarString("com_gameHz");
+	}
+	else if (idStr::Icmp(define->name, "GAME_FRAMETIME") == 0) {
+		float hackGameMsec = 1.0f / static_cast<float>(cvarSystem->GetCVarInteger("com_gameHz"));
+		char sHackMsec[64];
+		sprintf(sHackMsec, "%.3f", hackGameMsec);
+		token = static_cast<const char*>(sHackMsec);
+	}
+	else if (idStr::Icmp(define->name, "CHAINGUN_FIRE_SKIPFRAMES") == 0) {
+		int newSkipFramesVal = (int)idMath::Rint(cvarSystem->GetCVarFloat("com_gameHz")/ 7.0); //FIXME: Would be better to actually read the original value from CHAINGUN_FIRE_SKIPFRAMES instead of using 7.0 directly
+		char sHackSkipFramesVal[64];
+		sprintf(sHackSkipFramesVal, "%d", newSkipFramesVal);
+		token = static_cast<const char*>(sHackSkipFramesVal);
+	}
+	//UGLY HACK ends
+
+
 	// read the defined stuff
 	last = NULL;
 	do
@@ -1188,6 +1214,7 @@ int idParser::Directive_define( void ) {
 		if ( last ) last->next = t;
 		else define->tokens = t;
 		last = t;
+
 	} while( idParser::ReadLine( &token ) );
 
 	if ( last ) {
