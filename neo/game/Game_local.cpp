@@ -4405,6 +4405,7 @@ idGameLocal::SetScriptFPS
 */
 void idGameLocal::SetScriptFPS(const float tCom_gameHz)
 {
+	
 	idVarDef* fpsDef = program.GetDef(&type_float, "GAME_FPS", &def_namespace);
 	if (fpsDef != NULL) {
 		eval_t fpsValue;
