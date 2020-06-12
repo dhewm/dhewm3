@@ -600,7 +600,7 @@ idWindow::RunTimeEvents
 */
 bool idWindow::RunTimeEvents(int time) {
 
-	if ( time - lastTimeRun < com_gameMSRate ) {
+	if ( time - lastTimeRun < idMath::Rint(com_gameMSRate) ) {
 		//common->Printf("Skipping gui time events at %i\n", time);
 		return false;
 	}

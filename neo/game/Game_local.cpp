@@ -317,7 +317,8 @@ void idGameLocal::Init( void ) {
 
 	//Update MSEC and gameFps
 	gameFps = cvarSystem->GetCVarInteger("com_gameHz");
-	msec = idMath::FtoiFast(1000.0f / static_cast<float>(cvarSystem->GetCVarInteger("com_gameHz")));
+	msec = 1000.0f/ cvarSystem->GetCVarFloat("com_gameHz");
+	Printf("msec: %d\n", msec);
 
 	Printf( "----- Initializing Game -----\n" );
 	Printf( "gamename: %s\n", GAME_VERSION );
@@ -2267,7 +2268,7 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		// update the game time
 		framenum++;
 		previousTime = time;
-		time += msec;
+		time = FRAME_TO_MSEC(framenum);
 		realClientTime = time;
 
 #ifdef GAME_DLL
@@ -3602,7 +3603,7 @@ idGameLocal::AlertAI
 void idGameLocal::AlertAI( idEntity *ent ) {
 	if ( ent && ent->IsType( idActor::Type ) ) {
 		// alert them for the next frame
-		lastAIAlertTime = time + msec;
+		lastAIAlertTime = time + (int)idMath::Rint(msec);
 		lastAIAlertEntity = static_cast<idActor *>( ent );
 	}
 }
@@ -4007,7 +4008,7 @@ void idGameLocal::SetCamera( idCamera *cam ) {
 
 	} else {
 		inCinematic = false;
-		cinematicStopTime = time + msec;
+		cinematicStopTime = time + (int)idMath::Rint(msec);
 
 		// restore r_znear
 		cvarSystem->SetCVarFloat( "r_znear", 3.0f );

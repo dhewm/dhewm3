@@ -2378,7 +2378,7 @@ void idAsyncServer::RunFrame( void ) {
 		do {
 
 			// blocking read with game time residual timeout
-			newPacket = serverPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), com_gameMSRate - gameTimeResidual - 1 );
+			newPacket = serverPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), (int)idMath::Rint(com_gameMSRate) - gameTimeResidual - 1 );
 			if ( newPacket ) {
 				msg.Init( msgBuf, sizeof( msgBuf ) );
 				msg.SetSize( size );
@@ -2393,7 +2393,7 @@ void idAsyncServer::RunFrame( void ) {
 
 		} while( newPacket );
 
-	} while( gameTimeResidual < com_gameMSRate );
+	} while( gameTimeResidual < (int)idMath::Rint(com_gameMSRate) );
 
 	// send heart beat to master servers
 	MasterHeartbeat();
@@ -2434,7 +2434,7 @@ void idAsyncServer::RunFrame( void ) {
 	}
 
 	// advance the server game
-	while( gameTimeResidual >= com_gameMSRate ) {
+	while( gameTimeResidual >= (int)idMath::Rint(com_gameMSRate) ) {
 
 		// sample input for the local client
 		LocalClientInput();
@@ -2449,8 +2449,8 @@ void idAsyncServer::RunFrame( void ) {
 
 		// update time
 		gameFrame++;
-		gameTime += com_gameMSRate;
-		gameTimeResidual -= com_gameMSRate;
+		gameTime = FRAME_TO_MSEC(gameFrame);
+		gameTimeResidual -= (int)idMath::Rint(com_gameMSRate);
 	}
 
 	// duplicate usercmds so there is always at least one available to send with snapshots

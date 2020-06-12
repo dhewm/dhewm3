@@ -1789,7 +1789,7 @@ void idAsyncClient::RunFrame( void ) {
 		do {
 
 			// blocking read with game time residual timeout
-			newPacket = clientPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), com_gameMSRate - ( gameTimeResidual + clientPredictTime ) - 1 );
+			newPacket = clientPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), (int)idMath::Rint(com_gameMSRate) - ( gameTimeResidual + clientPredictTime ) - 1 );
 			if ( newPacket ) {
 				msg.Init( msgBuf, sizeof( msgBuf ) );
 				msg.SetSize( size );
@@ -1802,14 +1802,14 @@ void idAsyncClient::RunFrame( void ) {
 
 		} while( newPacket );
 
-	} while( gameTimeResidual + clientPredictTime < com_gameMSRate );
+	} while( gameTimeResidual + clientPredictTime < (int)idMath::Rint(com_gameMSRate) );
 
 	// update server list
 	serverList.RunFrame();
 
 	if ( clientState == CS_DISCONNECTED ) {
 		usercmdGen->GetDirectUsercmd();
-		gameTimeResidual = com_gameMSRate - 1;
+		gameTimeResidual = (int)idMath::Rint(com_gameMSRate) - 1;
 		clientPredictTime = 0;
 		return;
 	}
@@ -1817,7 +1817,7 @@ void idAsyncClient::RunFrame( void ) {
 	if ( clientState == CS_PURERESTART ) {
 		clientState = CS_DISCONNECTED;
 		Reconnect();
-		gameTimeResidual = com_gameMSRate - 1;
+		gameTimeResidual = (int)idMath::Rint(com_gameMSRate) - 1;
 		clientPredictTime = 0;
 		return;
 	}
@@ -1827,7 +1827,7 @@ void idAsyncClient::RunFrame( void ) {
 		// also need to read mouse for the connecting guis
 		usercmdGen->GetDirectUsercmd();
 		SetupConnection();
-		gameTimeResidual = com_gameMSRate - 1;
+		gameTimeResidual = (int)idMath::Rint(com_gameMSRate) - 1;
 		clientPredictTime = 0;
 		return;
 	}
@@ -1851,20 +1851,20 @@ void idAsyncClient::RunFrame( void ) {
 		cvarSystem->ClearModifiedFlags( CVAR_USERINFO );
 	}
 
-	if ( gameTimeResidual + clientPredictTime >= com_gameMSRate ) {
+	if ( gameTimeResidual + clientPredictTime >= (int)idMath::Rint(com_gameMSRate)) {
 		lastFrameDelta = 0;
 	}
 
 	// generate user commands for the predicted time
-	while ( gameTimeResidual + clientPredictTime >= com_gameMSRate ) {
+	while ( gameTimeResidual + clientPredictTime >= (int)idMath::Rint(com_gameMSRate)) {
 
 		// send the user commands of this client to the server
 		SendUsercmdsToServer();
 
 		// update time
 		gameFrame++;
-		gameTime += com_gameMSRate;
-		gameTimeResidual -= com_gameMSRate;
+		gameTime = FRAME_TO_MSEC(gameFrame);
+		gameTimeResidual -= (int)idMath::Rint(com_gameMSRate);
 
 		// run from the snapshot up to the local game frame
 		while ( snapshotGameFrame < gameFrame ) {
@@ -1875,7 +1875,7 @@ void idAsyncClient::RunFrame( void ) {
 			DuplicateUsercmds( snapshotGameFrame, snapshotGameTime );
 
 			// indicate the last prediction frame before a render
-			bool lastPredictFrame = ( snapshotGameFrame + 1 >= gameFrame && gameTimeResidual + clientPredictTime < com_gameMSRate );
+			bool lastPredictFrame = ( snapshotGameFrame + 1 >= gameFrame && gameTimeResidual + clientPredictTime < (int)idMath::Rint(com_gameMSRate) );
 
 			// run client prediction
 			gameReturn_t ret = game->ClientPrediction( clientNum, userCmds[ snapshotGameFrame & ( MAX_USERCMD_BACKUP - 1 ) ], lastPredictFrame );
@@ -1883,7 +1883,7 @@ void idAsyncClient::RunFrame( void ) {
 			idAsyncNetwork::ExecuteSessionCommand( ret.sessionCommand );
 
 			snapshotGameFrame++;
-			snapshotGameTime += com_gameMSRate;
+			snapshotGameTime = FRAME_TO_MSEC(snapshotGameFrame);
 		}
 	}
 }

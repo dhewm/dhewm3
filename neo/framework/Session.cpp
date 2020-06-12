@@ -541,7 +541,7 @@ void idSessionLocal::ShowLoadingGui() {
 	int stop = Sys_Milliseconds() + 1000;
 	int force = 10;
 	while ( Sys_Milliseconds() < stop || force-- > 0 ) {
-		com_frameTime = com_ticNumber * com_gameMSRate;
+		com_frameTime = FRAME_TO_MSEC(com_ticNumber);
 		session->Frame();
 		session->UpdateScreen( false );
 	}
@@ -2790,7 +2790,7 @@ void idSessionLocal::Frame() {
 
 	// don't let a long onDemand sound load unsync everything
 	if ( timeHitch ) {
-		int	skip = timeHitch / com_gameMSRate;
+		int	skip = timeHitch / (int)idMath::Rint(com_gameMSRate);
 		lastGameTic += skip;
 		numCmdsToRun -= skip;
 		timeHitch = 0;

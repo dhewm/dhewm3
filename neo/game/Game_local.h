@@ -272,7 +272,7 @@ public:
 	int						framenum;
 	int						previousTime;			// time in msec of last frame
 	int						time;					// in msec
-	int						msec;					// time since last update in milliseconds
+	float					msec;					// time since last update in milliseconds
 	int						gameFps;				//added by Stradex for com_gameHz
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
