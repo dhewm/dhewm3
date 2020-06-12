@@ -669,7 +669,7 @@ bool idThread::Execute( void ) {
 		if ( waitingUntil > lastExecuteTime ) {
 			PostEventMS( &EV_Thread_Execute, waitingUntil - lastExecuteTime );
 		} else if ( interpreter.MultiFrameEventInProgress() ) {
-			PostEventMS( &EV_Thread_Execute, gameLocal.msec );
+			PostEventMS( &EV_Thread_Execute, (int)idMath::Rint(gameLocal.msec) );
 		}
 	}
 
@@ -910,7 +910,7 @@ void idThread::WaitFrame( void ) {
 	// manual control threads don't set waitingUntil so that they can be run again
 	// that frame if necessary.
 	if ( !manualControl ) {
-		waitingUntil = gameLocal.time + gameLocal.msec;
+		waitingUntil = gameLocal.time + (int)idMath::Rint(gameLocal.msec);
 	}
 }
 

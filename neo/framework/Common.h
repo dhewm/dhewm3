@@ -75,7 +75,7 @@ extern idCVar		com_makingBuild;
 extern idCVar		com_updateLoadSize;
 
 extern idCVar		com_gameHz;
-extern int			com_gameMSRate;
+extern float		com_gameMSRate;
 extern int			com_realGameHz;
 
 extern int			time_gameFrame;			// game logic time
@@ -275,8 +275,32 @@ public:
 	// *out_fnptr will be the function (you'll have to cast it probably)
 	// *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
 	virtual bool				GetAdditionalFunction(FunctionType ft, FunctionPointer* out_fnptr, void** out_userArg) = 0;
+
+	virtual float				Get_com_gameMSRate(void) = 0;
 };
 
 extern idCommon *		common;
+
+// Returns the msec the frame starts on
+ID_INLINE int FRAME_TO_MSEC(int frame)
+{
+	return (int)idMath::Rint(static_cast<float>(frame) * common->Get_com_gameMSRate());
+}
+// Rounds DOWN to the nearest frame
+ID_INLINE int MSEC_TO_FRAME_FLOOR(int msec)
+{
+	return (int)idMath::Floor(static_cast<float>(msec) / common->Get_com_gameMSRate());
+}
+// Rounds UP to the nearest frame
+ID_INLINE int MSEC_TO_FRAME_CEIL(int msec)
+{
+	return (int)idMath::Ceil(static_cast<float>(msec) / common->Get_com_gameMSRate());
+}
+// Aligns msec so it starts on a frame bondary
+ID_INLINE int MSEC_ALIGN_TO_FRAME(int msec)
+{
+	return FRAME_TO_MSEC(MSEC_TO_FRAME_CEIL(msec));
+}
+
 
 #endif /* !__COMMON_H__ */

@@ -108,7 +108,7 @@ idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SY
 //Stradex: start
 idCVar com_gameHz("com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, "Frames per second the game runs at", 10, 1024);
 
-int com_gameMSRate = 1000 / 60; //Refreshed later
+float com_gameMSRate = 1000.0f / 60.0f; //Refreshed later (changed to float to improve precision)
 int com_realGameHz = 60;
 bool tReloadingEngine = false;
 //Stradex: end
@@ -189,6 +189,8 @@ public:
 	// *out_userArg will be an argument you have to pass to the function, if appropriate (else NULL)
 	// NOTE: this doesn't do anything yet, but allows to add ugly mod-specific hacks without breaking the Game interface
 	virtual bool				GetAdditionalFunction(idCommon::FunctionType ft, idCommon::FunctionPointer* out_fnptr, void** out_userArg);
+
+	virtual float				Get_com_gameMSRate(void);
 
 	// DG end
 
@@ -2423,7 +2425,7 @@ void idCommonLocal::Frame( void ) {
 
 		eventLoop->RunEventLoop();
 
-		com_frameTime = com_ticNumber * com_gameMSRate;
+		com_frameTime = FRAME_TO_MSEC(com_ticNumber);
 
 		idAsyncNetwork::RunFrame();
 
@@ -2469,7 +2471,7 @@ idCommonLocal::GUIFrame
 void idCommonLocal::GUIFrame( bool execCmd, bool network ) {
 	Sys_GenerateEvents();
 	eventLoop->RunEventLoop( execCmd );	// and execute any commands
-	com_frameTime = com_ticNumber * com_gameMSRate;
+	com_frameTime = FRAME_TO_MSEC(com_ticNumber);
 	if ( network ) {
 		idAsyncNetwork::RunFrame();
 	}
@@ -2507,7 +2509,7 @@ typedef struct {
 static const int MAX_ASYNC_STATS = 1024;
 asyncStats_t	com_asyncStats[MAX_ASYNC_STATS];		// indexed by com_ticNumber
 int prevAsyncMsec;
-int	lastTicMsec;
+float	lastTicMsec; //float for better precision with framerate
 
 void idCommonLocal::SingleAsyncTic( void ) {
 	// main thread code can prevent this from happening while modifying
@@ -2547,7 +2549,7 @@ idCommonLocal::Async
 =================
 */
 void idCommonLocal::Async( void ) {
-	int	msec = Sys_Milliseconds();
+	float	msec = static_cast<float>(Sys_Milliseconds());
 	if ( !lastTicMsec ) {
 		lastTicMsec = msec - com_gameMSRate;
 	}
@@ -2558,21 +2560,21 @@ void idCommonLocal::Async( void ) {
 		return;
 	}
 
-	int ticMsec = com_gameMSRate;
+	float ticMsec = com_gameMSRate;
 
 	// the number of msec per tic can be varies with the timescale cvar
 	float timescale = com_timescale.GetFloat();
 	if ( timescale != 1.0f ) {
 		ticMsec /= timescale;
-		if ( ticMsec < 1 ) {
-			ticMsec = 1;
+		if ( ticMsec < 1.0 ) {
+			ticMsec = 1.0;
 		}
 	}
 
 	// don't skip too many
 	if ( timescale == 1.0f ) {
-		if ( lastTicMsec + 10 * com_gameMSRate < msec ) {
-			lastTicMsec = msec - 10* com_gameMSRate;
+		if ( lastTicMsec + 10.0 * com_gameMSRate < msec ) {
+			lastTicMsec = msec - 10.0* com_gameMSRate;
 		}
 	}
 
@@ -2772,7 +2774,7 @@ static unsigned int AsyncTimer(unsigned int interval, void *) {
 
 	// calculate the next interval to get as close to 60fps as possible
 	unsigned int now = SDL_GetTicks();
-	unsigned int tick = com_ticNumber * com_gameMSRate;
+	unsigned int tick = FRAME_TO_MSEC(com_ticNumber);
 
 	if (now >= tick)
 		return 1;
@@ -2961,7 +2963,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 
 		//stradex: start
 		com_realGameHz = com_gameHz.GetInteger();
-		com_gameMSRate = idMath::FtoiFast(1000.0f / static_cast<float>(com_gameHz.GetInteger()));
+		com_gameMSRate = 1000.0f / static_cast<float>(com_gameHz.GetInteger());
 		//stradex: end
 
 		// don't add startup commands if no CD key is present
@@ -2996,7 +2998,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		Sys_Error( "Error during initialization" );
 	}
 
-	async_timer = SDL_AddTimer(com_gameMSRate, AsyncTimer, NULL);
+	async_timer = SDL_AddTimer((int)idMath::Floor(com_gameMSRate), AsyncTimer, NULL);
 
 	if (!async_timer)
 		Sys_Error("Error while starting the async timer: %s", SDL_GetError());
@@ -3133,7 +3135,7 @@ void idCommonLocal::InitGame( void ) {
 #ifndef ID_DEDICATED
 	if (tReloadingEngine) {
 		com_gameHz.SetInteger(com_realGameHz);
-		com_gameMSRate = idMath::FtoiFast(1000.0f / static_cast<float>(com_gameHz.GetInteger()));
+		com_gameMSRate = 1000.0f / static_cast<float>(com_gameHz.GetInteger());
 		//reset time and tics
 		com_frameNumber = 0;
 		com_ticNumber = 0;
@@ -3305,6 +3307,11 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 			return false;
 	}
 }
+
+float idCommonLocal::Get_com_gameMSRate() {
+	return com_gameMSRate;
+}
+
 
 
 idGameCallbacks gameCallbacks;

@@ -2809,7 +2809,7 @@ void idMover_Binary::Use_BinaryMover( idEntity *activator ) {
 	if ( moverState == MOVER_POS1 ) {
 		// FIXME: start moving USERCMD_MSEC later, because if this was player
 		// triggered, gameLocal.time hasn't been advanced yet
-		MatchActivateTeam( MOVER_1TO2, gameLocal.time + gameLocal.msec );
+		MatchActivateTeam( MOVER_1TO2, gameLocal.time + (int)idMath::Rint(gameLocal.msec) );
 
 		SetGuiStates( guiBinaryMoverStates[MOVER_1TO2] );
 		// open areaportal
