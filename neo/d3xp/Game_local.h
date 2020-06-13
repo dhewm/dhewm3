@@ -486,7 +486,7 @@ public:
 	// added the following to assist licensees with merge issues
 	int						GetFrameNum() const { return framenum; };
 	int						GetTime() const { return time; };
-	float					GetMSec() const { return msec; };
+	int						GetMSec() const { return (int)idMath::Rint(msec); };
 
 	int						GetNextClientNum( int current ) const;
 	idPlayer *				GetClientByNum( int current ) const;
