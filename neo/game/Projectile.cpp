@@ -863,7 +863,7 @@ void idProjectile::Explode( const trace_t &collision, idEntity *ignore ) {
 		renderLight.shaderParms[SHADERPARM_TIMEOFFSET] = -MS2SEC( gameLocal.time );
 		light_fadetime = spawnArgs.GetFloat( "explode_light_fadetime", "0.5" );
 		lightStartTime = gameLocal.time;
-		lightEndTime = gameLocal.time + SEC2MS( light_fadetime );
+		lightEndTime = MSEC_ALIGN_TO_FRAME(gameLocal.time + SEC2MS( light_fadetime ));
 		BecomeActive( TH_THINK );
 	}
 

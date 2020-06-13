@@ -75,6 +75,6 @@ idPhysics::SnapTimeToPhysicsFrame
 */
 int idPhysics::SnapTimeToPhysicsFrame( int t ) {
 	int s;
-	s = t + gameLocal.gameMsec - 1;
-	return ( s - s % gameLocal.gameMsec );
+	s = t + (int)idMath::Rint(gameLocal.gameMsec) - 1;
+	return ( s - s % (int)idMath::Rint(gameLocal.gameMsec) );
 }
