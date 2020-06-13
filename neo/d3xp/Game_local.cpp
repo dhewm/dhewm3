@@ -248,6 +248,7 @@ void idGameLocal::Clear( void ) {
 	framenum = 0;
 	previousTime = 0;
 	time = 0;
+	preciseTime = 0.0f;
 	vacuumAreaNum = 0;
 	mapFileName.Clear();
 	mapFile = NULL;
@@ -309,7 +310,7 @@ void idGameLocal::Init( void ) {
 	const idDict *dict;
 	idAAS *aas;
 
-	msec = 16; //60fps
+	msec = 16.0; //60fps
 	gameMsec = msec;
 	gameFps = 60; //60fps
 
@@ -332,7 +333,7 @@ void idGameLocal::Init( void ) {
 
 	//Update MSEC and gameFps
 	gameFps = cvarSystem->GetCVarInteger("com_gameHz");
-	msec = idMath::FtoiFast(1000.0f / static_cast<float>(cvarSystem->GetCVarInteger("com_gameHz")));
+	msec = 1000.0f / cvarSystem->GetCVarFloat("com_gameHz");
 	gameMsec = msec;
 
 	Printf( "----- Initializing Game -----\n" );
@@ -608,7 +609,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteInt( time );
 
 #ifdef _D3XP
-	savegame.WriteInt( msec );
+	savegame.WriteFloat( msec );
 #endif
 
 	savegame.WriteInt( vacuumAreaNum );
@@ -1487,7 +1488,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadInt( time );
 
 #ifdef _D3XP
-	savegame.ReadInt( msec );
+	savegame.ReadFloat( msec );
 #endif
 
 	savegame.ReadInt( vacuumAreaNum );
@@ -2440,7 +2441,8 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		// update the game time
 		framenum++;
 		previousTime = time;
-		time += msec;
+		preciseTime += msec;
+		time = (int)idMath::Rint(preciseTime);
 		realClientTime = time;
 
 #ifdef _D3XP
@@ -3821,7 +3823,7 @@ idGameLocal::AlertAI
 void idGameLocal::AlertAI( idEntity *ent ) {
 	if ( ent && ent->IsType( idActor::Type ) ) {
 		// alert them for the next frame
-		lastAIAlertTime = time + msec;
+		lastAIAlertTime = time + (int)idMath::Rint(msec);
 		lastAIAlertEntity = static_cast<idActor *>( ent );
 	}
 }
@@ -4234,7 +4236,7 @@ void idGameLocal::SetCamera( idCamera *cam ) {
 
 	} else {
 		inCinematic = false;
-		cinematicStopTime = time + msec;
+		cinematicStopTime = time + idMath::Rint(msec);
 
 		// restore r_znear
 		cvarSystem->SetCVarFloat( "r_znear", 3.0f );
@@ -4830,7 +4832,7 @@ void idGameLocal::ComputeSlowMsec() {
 
 		// stop the state
 		slowmoState = SLOWMO_STATE_OFF;
-		slowmoMsec = (float)gameMsec;
+		slowmoMsec = gameMsec;
 	}
 
 	// check the player state
@@ -4851,7 +4853,7 @@ void idGameLocal::ComputeSlowMsec() {
 		slowmoMsec = msec;
 		if ( gameSoundWorld ) {
 			gameSoundWorld->SetSlowmo( true );
-			gameSoundWorld->SetSlowmoSpeed( slowmoMsec / (float)gameMsec );
+			gameSoundWorld->SetSlowmoSpeed( slowmoMsec / gameMsec );
 		}
 	}
 	else if ( !powerupOn && slowmoState == SLOWMO_STATE_ON ) {
@@ -4865,10 +4867,10 @@ void idGameLocal::ComputeSlowMsec() {
 
 	// do any necessary ramping
 	if ( slowmoState == SLOWMO_STATE_RAMPUP ) {
-		delta = idMath::Rint(4.0 * 60.0 / (float)gameFps) - slowmoMsec;
+		delta = 4.0 * 60.0 / (float)gameFps - slowmoMsec;
 
 		if ( fabs( delta ) < g_slowmoStepRate.GetFloat() ) {
-			slowmoMsec = idMath::Rint(4.0 * 60.0 / (float)gameFps);
+			slowmoMsec = 4.0 * 60.0 / (float)gameFps;
 			slowmoState = SLOWMO_STATE_ON;
 		}
 		else {
@@ -4876,14 +4878,14 @@ void idGameLocal::ComputeSlowMsec() {
 		}
 
 		if ( gameSoundWorld ) {
-			gameSoundWorld->SetSlowmoSpeed( slowmoMsec / (float)gameMsec );
+			gameSoundWorld->SetSlowmoSpeed( slowmoMsec / gameMsec );
 		}
 	}
 	else if ( slowmoState == SLOWMO_STATE_RAMPDOWN ) {
-		delta = idMath::Rint(16.0 * 60.0 / (float)gameFps) - slowmoMsec;
+		delta = 16.0 * 60.0 / gameFps - slowmoMsec;
 
 		if ( fabs( delta ) < g_slowmoStepRate.GetFloat() ) {
-			slowmoMsec = idMath::Rint(16.0*60.0/(float)gameFps);
+			slowmoMsec = 16.0*60.0/(float)gameFps;
 			slowmoState = SLOWMO_STATE_OFF;
 			if ( gameSoundWorld ) {
 				gameSoundWorld->SetSlowmo( false );
@@ -4894,7 +4896,7 @@ void idGameLocal::ComputeSlowMsec() {
 		}
 
 		if ( gameSoundWorld ) {
-			gameSoundWorld->SetSlowmoSpeed( slowmoMsec / (float)gameMsec );
+			gameSoundWorld->SetSlowmoSpeed( slowmoMsec / gameMsec );
 		}
 	}
 }
