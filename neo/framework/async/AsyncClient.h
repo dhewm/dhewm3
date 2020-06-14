@@ -156,7 +156,7 @@ private:
 	int					gameInitId;					// game initialization identification
 	int					gameFrame;					// local game frame
 	int					gameTime;					// local game time
-	int					gameTimeResidual;			// left over time from previous frame
+	float				gameTimeResidual;			// left over time from previous frame
 
 	usercmd_t			userCmds[MAX_USERCMD_BACKUP][MAX_ASYNC_CLIENTS];
 
