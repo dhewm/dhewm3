@@ -211,6 +211,7 @@ void idGameLocal::Clear( void ) {
 	framenum = 0;
 	previousTime = 0;
 	time = 0;
+	preciseTime = 0.0f;
 	vacuumAreaNum = 0;
 	mapFileName.Clear();
 	mapFile = NULL;
@@ -302,6 +303,7 @@ void idGameLocal::Init( void ) {
 	//Update MSEC and gameFps
 	gameFps = cvarSystem->GetCVarInteger("com_gameHz");
 	msec = 1000.0f/ cvarSystem->GetCVarFloat("com_gameHz");
+	msec *= 0.96f*0.96f; //HACK to emulate OG D3 msec error, in order to have exactly the same game logic speed
 	Printf("msec: %d\n", msec);
 
 	Printf( "----- Initializing Game -----\n" );
@@ -543,6 +545,8 @@ void idGameLocal::SaveGame( idFile *f ) {
 
 	savegame.WriteBool( isMultiplayer );
 	savegame.WriteInt( gameType );
+
+	savegame.WriteFloat( preciseTime );
 
 	savegame.WriteInt( framenum );
 	savegame.WriteInt( previousTime );
@@ -928,6 +932,7 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 
 	previousTime	= 0;
 	time			= 0;
+	preciseTime		= 0.0f;
 	framenum		= 0;
 	sessionCommand = "";
 	nextGibTime		= 0;
@@ -1360,6 +1365,8 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	savegame.ReadBool( isMultiplayer );
 	savegame.ReadInt( (int &)gameType );
+
+	savegame.ReadFloat( preciseTime );
 
 	savegame.ReadInt( framenum );
 	savegame.ReadInt( previousTime );
@@ -2211,7 +2218,9 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		// update the game time
 		framenum++;
 		previousTime = time;
-		time = FRAME_TO_MSEC(framenum);
+		preciseTime += msec;
+		time = (int)idMath::Rint(preciseTime);
+		//time = FRAME_TO_MSEC(framenum);
 		realClientTime = time;
 
 #ifdef GAME_DLL

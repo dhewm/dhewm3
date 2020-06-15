@@ -274,6 +274,7 @@ public:
 	int						time;					// in msec
 	float					msec;					// time since last update in milliseconds
 	int						gameFps;				//added by Stradex for com_gameHz
+	float					preciseTime;			// added by Stradex for cm_gameHz fidelity
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 
