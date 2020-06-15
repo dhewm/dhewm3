@@ -3062,6 +3062,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		//stradex: start
 		com_realGameHz = com_gameHz.GetInteger();
 		com_gameMSRate = 1000.0f / static_cast<float>(com_gameHz.GetInteger());
+		//com_gameMSRate *= 0.96f; //HACK: force OG D3 msec error to ensure the games feels exactly the same in terms of speed.
 		//stradex: end
 
 		// don't add startup commands if no CD key is present
@@ -3234,6 +3235,7 @@ void idCommonLocal::InitGame( void ) {
 	if (tReloadingEngine) {
 		com_gameHz.SetInteger(com_realGameHz);
 		com_gameMSRate = 1000.0f / static_cast<float>(com_gameHz.GetInteger());
+		//com_gameMSRate *= 0.96f; //HACK: force OG D3 msec error to ensure the games feels exactly the same in terms of speed.
 		//reset time and tics
 		com_frameNumber = 0;
 		com_ticNumber = 0;
