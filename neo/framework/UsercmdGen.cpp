@@ -532,9 +532,9 @@ void idUsercmdGenLocal::AdjustAngles( void ) {
 	float	speed;
 
 	if ( toggled_run.on ^ ( in_alwaysRun.GetBool() && idAsyncNetwork::IsActive() ) ) {
-		speed = idMath::M_MS2SEC * USERCMD_MSEC * in_angleSpeedKey.GetFloat();
+		speed = idMath::M_MS2SEC * com_gameMSRate * in_angleSpeedKey.GetFloat();
 	} else {
-		speed = idMath::M_MS2SEC * USERCMD_MSEC;
+		speed = idMath::M_MS2SEC * com_gameMSRate;
 	}
 
 	if ( !ButtonState( UB_STRAFE ) ) {
@@ -681,9 +681,9 @@ void idUsercmdGenLocal::JoystickMove( void ) {
 	float	anglespeed;
 
 	if ( toggled_run.on ^ ( in_alwaysRun.GetBool() && idAsyncNetwork::IsActive() ) ) {
-		anglespeed = idMath::M_MS2SEC * USERCMD_MSEC * in_angleSpeedKey.GetFloat();
+		anglespeed = idMath::M_MS2SEC * com_gameMSRate * in_angleSpeedKey.GetFloat();
 	} else {
-		anglespeed = idMath::M_MS2SEC * USERCMD_MSEC;
+		anglespeed = idMath::M_MS2SEC * com_gameMSRate;
 	}
 
 	if ( !ButtonState( UB_STRAFE ) ) {

@@ -225,14 +225,14 @@ private:
 struct timeState_t {
 	int					time;
 	int					previousTime;
-	int					msec;
+	float				msec;
 	int					framenum;
 	int					realClientTime;
 
-	void				Set( int t, int pt, int ms, int f, int rct )		{ time = t; previousTime = pt; msec = ms; framenum = f; realClientTime = rct; };
-	void				Get( int& t, int& pt, int& ms, int& f, int& rct )	{ t = time; pt = previousTime; ms = msec; f = framenum; rct = realClientTime; };
-	void				Save( idSaveGame *savefile ) const	{ savefile->WriteInt( time ); savefile->WriteInt( previousTime ); savefile->WriteInt( msec ); savefile->WriteInt( framenum ); savefile->WriteInt( realClientTime ); }
-	void				Restore( idRestoreGame *savefile )	{ savefile->ReadInt( time ); savefile->ReadInt( previousTime ); savefile->ReadInt( msec ); savefile->ReadInt( framenum ); savefile->ReadInt( realClientTime ); }
+	void				Set( int t, int pt, float ms, int f, int rct )		{ time = t; previousTime = pt; msec = ms; framenum = f; realClientTime = rct; };
+	void				Get( int& t, int& pt, float& ms, int& f, int& rct )	{ t = time; pt = previousTime; ms = msec; f = framenum; rct = realClientTime; };
+	void				Save( idSaveGame *savefile ) const	{ savefile->WriteInt( time ); savefile->WriteInt( previousTime ); savefile->WriteFloat( msec ); savefile->WriteInt( framenum ); savefile->WriteInt( realClientTime ); }
+	void				Restore( idRestoreGame *savefile )	{ savefile->ReadInt( time ); savefile->ReadInt( previousTime ); savefile->ReadFloat( msec ); savefile->ReadInt( framenum ); savefile->ReadInt( realClientTime ); }
 	void				Increment()											{ framenum++; previousTime = time; time += msec; realClientTime = time; };
 };
 
@@ -298,7 +298,10 @@ public:
 	int						framenum;
 	int						previousTime;			// time in msec of last frame
 	int						time;					// in msec
-	int						msec;					// time since last update in milliseconds
+	float					msec;					// time since last update in milliseconds
+	float					preciseTime;			// added by Stradex for cm_gameHz fidelity
+	int						gameFps;				//added by Stradex for com_gameHz
+	float					gameMsec;				//added by Stradex for com_gameHz (ROE)
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 
@@ -483,7 +486,7 @@ public:
 	// added the following to assist licensees with merge issues
 	int						GetFrameNum() const { return framenum; };
 	int						GetTime() const { return time; };
-	int						GetMSec() const { return msec; };
+	int						GetMSec() const { return (int)idMath::Rint(msec); };
 
 	int						GetNextClientNum( int current ) const;
 	idPlayer *				GetClientByNum( int current ) const;

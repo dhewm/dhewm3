@@ -858,7 +858,8 @@ void idProjectile::Explode( const trace_t &collision, idEntity *ignore ) {
 		renderLight.shaderParms[SHADERPARM_TIMEOFFSET] = -MS2SEC( gameLocal.time );
 		light_fadetime = spawnArgs.GetFloat( "explode_light_fadetime", "0.5" );
 		lightStartTime = gameLocal.time;
-		lightEndTime = gameLocal.time + SEC2MS( light_fadetime );
+		//lightEndTime = MSEC_ALIGN_TO_FRAME(gameLocal.time + SEC2MS( light_fadetime ));
+		lightEndTime = gameLocal.time + SEC2MS(light_fadetime);
 		BecomeActive( TH_THINK );
 	}
 
@@ -1430,7 +1431,7 @@ void idGuidedProjectile::Launch( const idVec3 &start, const idVec3 &dir, const i
 	angles = vel.ToAngles();
 	speed = vel.Length();
 	rndScale = spawnArgs.GetAngles( "random", "15 15 0" );
-	turn_max = spawnArgs.GetFloat( "turn_max", "180" ) / ( float )USERCMD_HZ;
+	turn_max = spawnArgs.GetFloat( "turn_max", "180" ) / ( float )gameLocal.gameFps;
 	clamp_dist = spawnArgs.GetFloat( "clamp_dist", "256" );
 	burstMode = spawnArgs.GetBool( "burstMode" );
 	unGuided = false;

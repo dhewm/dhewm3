@@ -1515,6 +1515,7 @@ void idAsyncServer::ProcessChallengeMessage( const netadr_t from, const idBitMsg
 	outMsg.WriteString( "challengeResponse" );
 	outMsg.WriteInt( challenges[i].challenge );
 	outMsg.WriteShort( serverId );
+	outMsg.WriteShort(static_cast<short int>(cvarSystem->GetCVarInteger("com_gameHz"))); //added by Stradex to force client sync gamehz
 	outMsg.WriteString( cvarSystem->GetCVarString( "fs_game_base" ) );
 	outMsg.WriteString( cvarSystem->GetCVarString( "fs_game" ) );
 
@@ -2377,7 +2378,7 @@ void idAsyncServer::RunFrame( void ) {
 		do {
 
 			// blocking read with game time residual timeout
-			newPacket = serverPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), USERCMD_MSEC - gameTimeResidual - 1 );
+			newPacket = serverPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), (int)idMath::Rint(com_gameMSRate) - gameTimeResidual - 1 );
 			if ( newPacket ) {
 				msg.Init( msgBuf, sizeof( msgBuf ) );
 				msg.SetSize( size );
@@ -2392,7 +2393,7 @@ void idAsyncServer::RunFrame( void ) {
 
 		} while( newPacket );
 
-	} while( gameTimeResidual < USERCMD_MSEC );
+	} while( gameTimeResidual < (int)idMath::Rint(com_gameMSRate) );
 
 	// send heart beat to master servers
 	MasterHeartbeat();
@@ -2433,7 +2434,7 @@ void idAsyncServer::RunFrame( void ) {
 	}
 
 	// advance the server game
-	while( gameTimeResidual >= USERCMD_MSEC ) {
+	while( gameTimeResidual >= (int)idMath::Rint(com_gameMSRate) ) {
 
 		// sample input for the local client
 		LocalClientInput();
@@ -2448,8 +2449,8 @@ void idAsyncServer::RunFrame( void ) {
 
 		// update time
 		gameFrame++;
-		gameTime += USERCMD_MSEC;
-		gameTimeResidual -= USERCMD_MSEC;
+		gameTime = FRAME_TO_MSEC(gameFrame);
+		gameTimeResidual -= (int)idMath::Rint(com_gameMSRate);
 	}
 
 	// duplicate usercmds so there is always at least one available to send with snapshots

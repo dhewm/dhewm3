@@ -75,6 +75,7 @@ idPhysics::SnapTimeToPhysicsFrame
 */
 int idPhysics::SnapTimeToPhysicsFrame( int t ) {
 	int s;
-	s = t + USERCMD_MSEC - 1;
-	return ( s - s % USERCMD_MSEC );
+	s = t + gameLocal.GetMSec() - 1;
+	return (s - s % gameLocal.GetMSec());
+	//return MSEC_ALIGN_TO_FRAME(t);
 }

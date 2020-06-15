@@ -236,7 +236,7 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 			if ( nowCount >= stage->totalParticles ) {
 				nowCount = stage->totalParticles-1;
 			}
-			prevCount = floor( ((float)( deltaMsec - gameLocal.msec /*_D3XP - FIX - was USERCMD_MSEC*/ ) / finalParticleTime) * stage->totalParticles );
+			prevCount = floor( ((float)( deltaMsec - (int)idMath::Rint(gameLocal.msec) /*_D3XP - FIX - was gameLocal.msec*/ ) / finalParticleTime) * stage->totalParticles );
 			if ( prevCount < -1 ) {
 				prevCount = -1;
 			}

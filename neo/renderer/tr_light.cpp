@@ -1573,10 +1573,12 @@ R_RemoveUnecessaryViewLights
 =====================
 */
 void R_RemoveUnecessaryViewLights( void ) {
-	viewLight_t		*vLight;
+	viewLight_t* vLight;
+	int numViewLights = 0;
 
 	// go through each visible light
 	for ( vLight = tr.viewDef->viewLights ; vLight ; vLight = vLight->next ) {
+		numViewLights++;
 		// if the light didn't have any lit surfaces visible, there is no need to
 		// draw any of the shadows.  We still keep the vLight for debugging
 		// draws
@@ -1620,5 +1622,32 @@ void R_RemoveUnecessaryViewLights( void ) {
 
 			vLight->scissorRect.Intersect( surfRect );
 		}
+	}
+
+
+	// BFG optimization: sort the viewLights list so the largest lights come first, which will reduce
+	// the chance of GPU pipeline bubbles
+	struct sortLight_t {
+		viewLight_t* vLight;
+		int				screenArea;
+		static int sort(const void* a, const void* b) {
+			return ((sortLight_t*)a)->screenArea - ((sortLight_t*)b)->screenArea;
+		}
+	};
+	sortLight_t* sortLights = (sortLight_t*)_alloca(sizeof(sortLight_t) * numViewLights);
+	int	numSortLightsFilled = 0;
+	for (viewLight_t* vLight = tr.viewDef->viewLights; vLight != NULL; vLight = vLight->next) {
+		sortLights[numSortLightsFilled].vLight = vLight;
+		sortLights[numSortLightsFilled].screenArea = vLight->scissorRect.GetArea();
+		numSortLightsFilled++;
+	}
+
+	qsort(sortLights, numSortLightsFilled, sizeof(sortLights[0]), sortLight_t::sort);
+
+	// rebuild the linked list in order
+	tr.viewDef->viewLights = NULL;
+	for (int i = 0; i < numSortLightsFilled; i++) {
+		sortLights[i].vLight->next = tr.viewDef->viewLights;
+		tr.viewDef->viewLights = sortLights[i].vLight;
 	}
 }
