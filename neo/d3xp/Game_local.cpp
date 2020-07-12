@@ -47,6 +47,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Misc.h"
 #include "Trigger.h"
 
+#include "framework/Licensee.h" // DG: for ID__DATE__
+
 #include "Game_local.h"
 
 const int NUM_RENDER_PORTAL_BITS	= idMath::BitsForInteger( PS_BLOCK_ALL );
@@ -328,7 +330,7 @@ void idGameLocal::Init( void ) {
 
 	Printf( "----- Initializing Game -----\n" );
 	Printf( "gamename: %s\n", GAME_VERSION );
-	Printf( "gamedate: %s\n", __DATE__ );
+	Printf( "gamedate: %s\n", ID__DATE__ );
 
 	// register game specific decl types
 	declManager->RegisterDeclType( "model",				DECL_MODELDEF,		idDeclAllocator<idDeclModelDef> );

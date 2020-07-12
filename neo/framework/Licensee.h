@@ -43,6 +43,17 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ENGINE_VERSION					"dhewm3 1.5.1pre"	// printed in console
 
+#ifdef ID_REPRODUCIBLE_BUILD
+	// for reproducible builds we hardcode values that would otherwise come from __DATE__ and __TIME__
+	// NOTE: remember to update esp. the date for (pre-) releases and RCs and the like
+	#define ID__DATE__  "Jul 12 2020"
+	#define ID__TIME__  "13:37:42"
+
+#else // not reproducible build, use __DATE__ and __TIME__ macros
+	#define ID__DATE__  __DATE__
+	#define ID__TIME__  __TIME__
+#endif
+
 // paths
 #define	BASE_GAMEDIR					"base"
 

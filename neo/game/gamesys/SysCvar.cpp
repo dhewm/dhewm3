@@ -55,7 +55,7 @@ const char *ui_skinArgs[]			= { "skins/characters/player/marine_mp", "skins/char
 const char *ui_teamArgs[]			= { "Red", "Blue", NULL };
 
 struct gameVersion_s {
-	gameVersion_s( void ) { sprintf( string, "%s.%d%s %s-%s %s %s", ENGINE_VERSION, BUILD_NUMBER, BUILD_DEBUG, BUILD_OS, BUILD_CPU, __DATE__, __TIME__ ); }
+	gameVersion_s( void ) { sprintf( string, "%s.%d%s %s-%s %s %s", ENGINE_VERSION, BUILD_NUMBER, BUILD_DEBUG, BUILD_OS, BUILD_CPU, ID__DATE__, ID__TIME__ ); }
 	char	string[256];
 } gameVersion;
 
@@ -63,7 +63,7 @@ idCVar g_version(					"g_version",				gameVersion.string,	CVAR_GAME | CVAR_ROM, 
 
 // noset vars
 idCVar gamename(					"gamename",					GAME_VERSION,	CVAR_GAME | CVAR_SERVERINFO | CVAR_ROM, "" );
-idCVar gamedate(					"gamedate",					__DATE__,		CVAR_GAME | CVAR_ROM, "" );
+idCVar gamedate(					"gamedate",					ID__DATE__,		CVAR_GAME | CVAR_ROM, "" );
 
 // server info
 idCVar si_name(						"si_name",					"dhewm server",	CVAR_GAME | CVAR_SERVERINFO | CVAR_ARCHIVE, "name of the server" );

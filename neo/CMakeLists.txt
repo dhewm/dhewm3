@@ -50,11 +50,12 @@ option(CORE			"Build the core" ON)
 option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
 if(MSVC)
-	option(TOOLS		"Build the tools game code (Windows+Visual Studio+SDL2 only)" OFF)
+	option(TOOLS		"Build the tools game code (32bit Windows+Visual Studio+SDL2 only)" OFF)
 endif()
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
 option(SDL2			"Use SDL2 instead of SDL1.2" ON)
+option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
@@ -152,6 +153,12 @@ else()
 	include_directories(${SDL_INCLUDE_DIR})
 	set(SDLx_LIBRARY ${SDL_LIBRARY})
 endif()
+
+if(REPRODUCIBLE_BUILD)
+	# don't use __DATE__ and __TIME__ macros so builds are reproducible
+	add_definitions(-DID_REPRODUCIBLE_BUILD)
+endif()
+
 
 find_package(CURL QUIET)
 if(CURL_FOUND)
