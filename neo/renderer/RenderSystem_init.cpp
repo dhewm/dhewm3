@@ -402,7 +402,7 @@ static void R_CheckPortableExtensions( void ) {
 	} else {
 		// TODO: there was an extension by ATI providing glStencilOpSeparateATI - do we care?
 		common->Printf( "... don't have GL2.0+ glStencilOpSeparate()\n" );
-		qglStencilOpSeparate = nullptr;
+		qglStencilOpSeparate = NULL;
 	}
 
 	// ARB_vertex_buffer_object

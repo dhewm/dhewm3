@@ -1144,7 +1144,7 @@ static void RB_T_Shadow( const drawSurf_t *surf ) {
 
 	// DG: that bloody patent on depth-fail stencil shadows has finally expired on 2019-10-13,
 	//     so use them (see https://patents.google.com/patent/US6384822B1/en for expiration status)
-	bool useStencilOpSeperate = r_useStencilOpSeparate.GetBool() && qglStencilOpSeparate != nullptr;
+	bool useStencilOpSeperate = r_useStencilOpSeparate.GetBool() && qglStencilOpSeparate != NULL;
 	if( !r_useCarmacksReverse.GetBool() ) {
 		if( useStencilOpSeperate ) {
 			// not using z-fail, but using qglStencilOpSeparate()
