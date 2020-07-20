@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/Heap.h"
 #include "framework/Common.h"
 #include "framework/KeyInput.h"
+#include "framework/Session.h"
 #include "renderer/RenderSystem.h"
 #include "renderer/tr_local.h"
 
@@ -440,7 +441,13 @@ sysEvent_t Sys_GetEvent() {
 						SDL_SetModState((SDL_Keymod)newmod);
 					} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
 
-					GLimp_GrabInput(GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR);
+					
+					common->ActivateTool( false );
+					GLimp_GrabInput(GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR); // FIXME: not sure this is still needed after the ActivateTool()-call
+
+					// start playing the game sound world again (when coming from editor)
+					session->SetPlayingSoundWorld();
+
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					GLimp_GrabInput(0);
