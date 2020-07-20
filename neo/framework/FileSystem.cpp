@@ -798,7 +798,7 @@ const char *idFileSystemLocal::BuildOSPath( const char *base, const char *game, 
 
 		if ( testPath.HasUpper() ) {
 
-			common->DPrintf( "Non-portable: path contains uppercase characters: %s", testPath.c_str() );
+			common->DPrintf( "Non-portable: path contains uppercase characters: %s\n", testPath.c_str() );
 
 			// attempt a fixup on the fly
 			if ( fs_caseSensitiveOS.GetBool() ) {
@@ -1709,6 +1709,10 @@ idModList *idFileSystemLocal::ListMods( void ) {
 	search[3] = fs_cdpath.GetString();
 
 	for ( isearch = 0; isearch < 4; isearch++ ) {
+		// skip empty cdpath or such, so we don't search C:\ or / -_-
+		if ( search[ isearch ][ 0 ] == '\0' ) {
+			continue;
+		}
 
 		dirs.Clear();
 		pk4s.Clear();
