@@ -610,13 +610,11 @@ void idRenderSystemLocal::BeginFrame( int windowWidth, int windowHeight ) {
 		windowHeight = tiledViewport[1];
 	}
 
-	// DG: FIXME: WTF?! this is *not* reset in EndFrame() and next time
-	//     idSessionLocal::UpdateScreen() calls this function to render a proper frame,
-	//     passing renderSystem->GetScreenWidth()/Height() WHICH JUST RETURN glConfig.vidWidth/Height
-	//     will render the whole frame in that resolution (in a corner of the window), unless someone
-	//     resets glConfig.vid* manually... this is quite fragile, I wonder how many (more) bugs 
-	//     (esp. in Editor code) will turn up because of this, but right now I don't dare to change
-	//     the behavior either, in case "fixing" it breaks other things
+	// DG: save the original size, so editors don't mess up the game viewport
+	//     with their tiny (texture-preview etc) viewports.
+	origWidth = glConfig.vidWidth;
+	origHeight = glConfig.vidHeight;
+
 	glConfig.vidWidth = windowWidth;
 	glConfig.vidHeight = windowHeight;
 
@@ -730,6 +728,12 @@ void idRenderSystemLocal::EndFrame( int *frontEndMsec, int *backEndMsec ) {
 		}
 	}
 
+	// DG: restore the original size that was set before BeginFrame() overwrote it
+	//     with its function-arguments, so editors don't mess up our viewport.
+	//     (unsure why/how this at least *kinda* worked in original Doom3,
+	//      maybe glConfig.vidWidth/Height was reset if the window gained focus or sth)
+	glConfig.vidWidth = origWidth;
+	glConfig.vidHeight = origHeight;
 }
 
 /*

@@ -796,6 +796,11 @@ public:
 	int						guiRecursionLevel;		// to prevent infinite overruns
 	class idGuiModel *		guiModel;
 	class idGuiModel *		demoGuiModel;
+
+	// DG: remember the original glConfig.vidWidth/Height values that get overwritten in BeginFrame()
+	//     so they can be reset in EndFrame() (Editors tend to mess up the viewport by using BeginFrame())
+	int						origWidth;
+	int						origHeight;
 };
 
 extern backEndState_t		backEnd;

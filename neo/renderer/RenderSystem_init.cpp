@@ -2143,6 +2143,8 @@ void idRenderSystemLocal::Init( void ) {
 	identitySpace.modelMatrix[0*4+0] = 1.0f;
 	identitySpace.modelMatrix[1*4+1] = 1.0f;
 	identitySpace.modelMatrix[2*4+2] = 1.0f;
+
+	origWidth = origHeight = 0; // DG: for resetting width/height in EndFrame()
 }
 
 /*
