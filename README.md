@@ -143,7 +143,7 @@ of stencil shadows via the "depth fail" method, a functionality commonly known a
 It has been restored in dhewm3 1.5.1 after Creative Labs' [patent](https://patents.google.com/patent/US6384822B1/en)
 finally expired.
 
-Note that this did not change the visual appereance of the game, and didn't seem to
+Note that this did not change the visual appearance of the game, and didn't seem to
 make a noticeable performance difference (on halfway-recent hardware) either.
 
 ## MayaImport
