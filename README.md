@@ -137,14 +137,14 @@ Then point CMake at your toolchain file:
 
 ## Back End Rendering of Stencil Shadows
 
-The Doom 3 GPL source code release does not include functionality enabling rendering
+The Doom 3 GPL source code release **did** not include functionality enabling rendering
 of stencil shadows via the "depth fail" method, a functionality commonly known as
-"Carmack's Reverse".
+"Carmack's Reverse".  
+It has been restored in dhewm3 1.5.1 after Creative Labs' [patent](https://patents.google.com/patent/US6384822B1/en)
+finally expired.
 
-***Note*** that this **does *not* change the visual appereance** of the game.
-The shadows look the same, they're just created in a slightly different way.
-In theory there might be a small performance impact, but on hardware less than
-ten years old it shouldn't make a difference.
+Note that this did not change the visual appereance of the game, and didn't seem to
+make a noticeable performance difference (on halfway-recent hardware) either.
 
 ## MayaImport
 
