@@ -1238,7 +1238,14 @@ void idSessionLocal::MoveToNewMap( const char *mapName ) {
 
 	if ( !mapSpawnData.serverInfo.GetBool("devmap") ) {
 		// Autosave at the beginning of the level
-		SaveGame( GetAutoSaveName( mapName ), true );
+
+		// DG: set an explicit savename to avoid problems with autosave names
+		//     (they were translated which caused problems like all alpha labs parts
+		//      getting the same filename in spanish, probably because the strings contained
+		//      dots and everything behind them was cut off as "file extension".. see #305)
+		idStr saveFileName = "Autosave_";
+		saveFileName += mapName;
+		SaveGame( GetAutoSaveName( mapName ), true, saveFileName );
 	}
 
 	SetGUI( NULL, NULL );
@@ -1898,13 +1905,15 @@ void idSessionLocal::ScrubSaveGameFileName( idStr &saveFileName ) const {
 idSessionLocal::SaveGame
 ===============
 */
-bool idSessionLocal::SaveGame( const char *saveName, bool autosave ) {
+bool idSessionLocal::SaveGame( const char *saveName, bool autosave, const char* saveFileName ) {
 #ifdef	ID_DEDICATED
 	common->Printf( "Dedicated servers cannot save games.\n" );
 	return false;
 #else
 	int i;
-	idStr gameFile, previewFile, descriptionFile, mapName;
+	idStr previewFile, descriptionFile, mapName;
+	// DG: support setting an explicit savename to avoid problems with autosave names
+	idStr gameFile = (saveFileName != NULL) ? saveFileName : saveName;
 
 	if ( !mapSpawned ) {
 		common->Printf( "Not playing a game.\n" );
@@ -1935,7 +1944,6 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave ) {
 	}
 
 	// setup up filenames and paths
-	gameFile = saveName;
 	ScrubSaveGameFileName( gameFile );
 
 	gameFile = "savegames/" + gameFile;

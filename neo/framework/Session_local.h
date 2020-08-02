@@ -163,7 +163,8 @@ public:
 	idStr				GetAutoSaveName( const char *mapName ) const;
 
 	bool				LoadGame(const char *saveName);
-	bool				SaveGame(const char *saveName, bool autosave = false);
+	// DG: added saveFileName so we can set a sensible filename for autosaves (see comment in MoveToNewMap())
+	bool				SaveGame(const char *saveName, bool autosave = false, const char* saveFileName = NULL);
 
 	const char			*GetAuthMsg( void );
 
