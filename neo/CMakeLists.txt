@@ -262,7 +262,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		set(sys_libs ${sys_libs} ${EXECINFO_LIBRARIES})
 	endif()
 elseif(MSVC)
-	add_definitions(/MP) # parallel build (use all cores, or as many as configured in VS)
+	add_compile_options(/MP) # parallel build (use all cores, or as many as configured in VS)
 	
 	add_compile_options(/W4)
 	add_compile_options(/we4840) # treat as error when passing a class to a vararg-function (probably printf-like)
@@ -961,6 +961,11 @@ if(CORE)
 		${src_sys_core}
 		${src_editor_tools}
 	)
+	
+	if(MSVC AND CMAKE_MAJOR_VERSION GREATER 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION GREATER_EQUAL 6 ))
+		# CMake >= 3.6 supports setting the default project started for debugging (instead of trying to launch ALL_BUILD ...)
+		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DHEWM3BINARY})
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
