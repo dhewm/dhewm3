@@ -2144,33 +2144,46 @@ void idCompiler::ParseFunctionDef( idTypeDef *returnType, const char *name ) {
 		}
 	}
 
+	// DG: make sure parmSize gets calculated when parsing prototype (not just when parsing
+	//     implementation) so calling this function/method before implementation has been parsed
+	//     works without getting Assertions in IdInterpreter::Execute() and ::LeaveFunction()
+	//     ("st->c->value.argSize == func->parmTotal", "localstackUsed == localstackBase", see #303)
+
+	// calculate stack space used by parms
+	numParms = type->NumParameters();
+	if( numParms != func->parmSize.Num() ) { // DG: make sure not to do this twice
+
+		// if it hasn't been parsed yet, parmSize.Num() should be 0..
+		assert( func->parmSize.Num() == 0 && "function had different number of arguments before?!" );
+
+		func->parmSize.SetNum( numParms );
+		for( i = 0; i < numParms; i++ ) {
+			parmType = type->GetParmType( i );
+			if ( parmType->Inherits( &type_object ) ) {
+				func->parmSize[ i ] = type_object.Size();
+			} else {
+				func->parmSize[ i ] = parmType->Size();
+			}
+			func->parmTotal += func->parmSize[ i ];
+		}
+
+		// define the parms
+		for( i = 0; i < numParms; i++ ) {
+			if ( gameLocal.program.GetDef( type->GetParmType( i ), type->GetParmName( i ), def ) ) {
+				Error( "'%s' defined more than once in function parameters", type->GetParmName( i ) );
+			}
+			gameLocal.program.AllocDef( type->GetParmType( i ), type->GetParmName( i ), def, false );
+		}
+	}
+
+	// DG: moved this down here so parmSize also gets calculated when parsing prototype
 	// check if this is a prototype or declaration
 	if ( !CheckToken( "{" ) ) {
 		// it's just a prototype, so get the ; and move on
 		ExpectToken( ";" );
 		return;
 	}
-
-	// calculate stack space used by parms
-	numParms = type->NumParameters();
-	func->parmSize.SetNum( numParms );
-	for( i = 0; i < numParms; i++ ) {
-		parmType = type->GetParmType( i );
-		if ( parmType->Inherits( &type_object ) ) {
-			func->parmSize[ i ] = type_object.Size();
-		} else {
-			func->parmSize[ i ] = parmType->Size();
-		}
-		func->parmTotal += func->parmSize[ i ];
-	}
-
-	// define the parms
-	for( i = 0; i < numParms; i++ ) {
-		if ( gameLocal.program.GetDef( type->GetParmType( i ), type->GetParmName( i ), def ) ) {
-			Error( "'%s' defined more than once in function parameters", type->GetParmName( i ) );
-		}
-		gameLocal.program.AllocDef( type->GetParmType( i ), type->GetParmName( i ), def, false );
-	}
+	// DG end
 
 	oldscope = scope;
 	scope = def;
