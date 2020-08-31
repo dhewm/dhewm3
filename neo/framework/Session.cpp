@@ -2606,6 +2606,7 @@ void idSessionLocal::Frame() {
 		minTic = latchedTicNumber;
 	}
 
+	/*
 	while( 1 ) {
 		latchedTicNumber = com_ticNumber;
 		if ( latchedTicNumber >= minTic ) {
@@ -2613,6 +2614,9 @@ void idSessionLocal::Frame() {
 		}
 		Sys_WaitForEvent( TRIGGER_EVENT_ONE );
 	}
+	*/
+
+	latchedTicNumber = com_ticNumber;
 
 	if ( authEmitTimeout ) {
 		// waiting for a game auth
