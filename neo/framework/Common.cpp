@@ -2386,7 +2386,6 @@ idCommonLocal::Frame
 */
 void idCommonLocal::Frame( void ) {
 	try {
-
 		// pump all the events
 		Sys_GenerateEvents();
 

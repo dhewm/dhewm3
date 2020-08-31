@@ -54,15 +54,6 @@ void Sys_Sleep(int msec) {
 }
 
 /*
-================
-Sys_Milliseconds
-================
-*/
-unsigned int Sys_Milliseconds() {
-	return SDL_GetTicks();
-}
-
-/*
 ==================
 Sys_InitThreads
 ==================

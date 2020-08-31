@@ -101,3 +101,38 @@ Sys_SetPhysicalWorkMemory
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
 	::SetProcessWorkingSetSize( GetCurrentProcess(), minBytes, maxBytes );
 }
+
+/*
+================
+Sys_Microseconds
+================
+*/
+unsigned long long Sys_Microseconds() {
+	static LARGE_INTEGER freq = { 0 };
+	static LARGE_INTEGER base = { 0 };
+
+	if (!freq.QuadPart)
+	{
+		QueryPerformanceFrequency(&freq);
+	}
+
+	if (!base.QuadPart)
+	{
+		QueryPerformanceCounter(&base);
+		base.QuadPart -= 1001;
+	}
+
+	LARGE_INTEGER cur;
+	QueryPerformanceCounter(&cur);
+
+	return (cur.QuadPart - base.QuadPart) * 1000000 / freq.QuadPart;
+}
+
+/*
+================
+Sys_Milliseconds
+================
+*/
+unsigned int Sys_Milliseconds() {
+	return (int)(Sys_Microseconds()/1000ll);
+}
