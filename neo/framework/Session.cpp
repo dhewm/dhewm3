@@ -2606,17 +2606,17 @@ void idSessionLocal::Frame() {
 		minTic = latchedTicNumber;
 	}
 
-	/*
-	while( 1 ) {
+	if ( cvarSystem->GetCVarBool( "com_asyncClient" ) == true ) {
 		latchedTicNumber = com_ticNumber;
-		if ( latchedTicNumber >= minTic ) {
-			break;
+	} else {
+		while( 1 ) {
+			latchedTicNumber = com_ticNumber;
+			if ( latchedTicNumber >= minTic ) {
+				break;
+			}
+			Sys_WaitForEvent( TRIGGER_EVENT_ONE );
 		}
-		Sys_WaitForEvent( TRIGGER_EVENT_ONE );
 	}
-	*/
-
-	latchedTicNumber = com_ticNumber;
 
 	if ( authEmitTimeout ) {
 		// waiting for a game auth

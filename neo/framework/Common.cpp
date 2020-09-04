@@ -97,6 +97,7 @@ idCVar com_timestampPrints( "com_timestampPrints", "0", CVAR_SYSTEM, "print time
 idCVar com_timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "scales the time", 0.1f, 10.0f );
 idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when making a build" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
+idCVar com_asyncClient ( "com_asyncClient", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_ARCHIVE, "run client and renderer asynchronous" );
 idCVar com_renderFPS( "com_renderFPS", "300", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "frames per second to render" );
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
@@ -2409,22 +2410,25 @@ void idCommonLocal::Frame( void ) {
 
 	static int clientdelta = 1000000;
 	static int renderdelta = 1000000;
-	clientdelta += frametime;
-	renderdelta += frametime;
 
 	bool clientframe = true;
 	bool renderframe = true;
 
-	if ( clientdelta < ( 1000000 / 60 ) ) {
-		clientframe = false;
-	} else {
-		clientdelta = 0;
-	}
+	if ( cvarSystem->GetCVarBool( "com_asyncClient" ) == true ) {
+		clientdelta += frametime;
+		renderdelta += frametime;
 
-	if ( renderdelta < ( 1000000 / cvarSystem->GetCVarInteger( "com_renderFPS" ) ) ) {
-		renderframe = false;
-	} else {
-		renderdelta = 0;
+		if ( clientdelta < ( 1000000 / 60 ) ) {
+			clientframe = false;
+		} else {
+			clientdelta = 0;
+		}
+
+		if ( renderdelta < ( 1000000 / cvarSystem->GetCVarInteger( "com_renderFPS" ) ) ) {
+			renderframe = false;
+		} else {
+			renderdelta = 0;
+		}
 	}
 
 	// Early return if no work has to be done.
