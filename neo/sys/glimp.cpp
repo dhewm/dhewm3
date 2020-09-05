@@ -179,9 +179,30 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, parms.multiSamples);
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+		int displayIndex = 0;
+
+		// try to put the window on the display the mousecursor currently is on
+		{
+			int x, y;
+			SDL_GetGlobalMouseState(&x, &y);
+
+			int numDisplays = SDL_GetNumVideoDisplays();
+			for (i=0; i<numDisplays; ++i) {
+				SDL_Rect rect;
+				if (SDL_GetDisplayBounds(i, &rect) == 0) {
+					if (   x >= rect.x && x < rect.x + rect.w
+						&& y >= rect.y && y < rect.y + rect.h )
+					{
+						displayIndex = i;
+						break;
+					}
+				}
+			}
+		}
+
 		window = SDL_CreateWindow(ENGINE_VERSION,
-									SDL_WINDOWPOS_UNDEFINED,
-									SDL_WINDOWPOS_UNDEFINED,
+									SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
+									SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
 									parms.width, parms.height, flags);
 
 		if (!window) {
