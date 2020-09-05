@@ -17164,6 +17164,10 @@ void idSIMD_SSE::UpSamplePCMTo44kHz( float *dest, const short *src, const int nu
 	}
 }
 
+
+// DG: at least in the 22KHz Stereo OGG case with numSamples % 4 != 0 this is broken (writes 4 floats too much which can destroy the stack, see #303),
+//     so let's just not use it anymore its MSVC+32bit only anyway and I doubt it gets noticable speedups, so I don't feel like trying to understand and fix it..
+#if 0
 /*
 ============
 SSE_UpSample11kHzMonoOGGTo44kHz
@@ -17474,6 +17478,7 @@ void idSIMD_SSE::UpSampleOGGTo44kHz( float *dest, const float * const *ogg, cons
 		assert( 0 );
 	}
 }
+#endif
 
 /*
 ============
