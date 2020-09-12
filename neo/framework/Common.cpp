@@ -99,6 +99,7 @@ idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
 idCVar com_asyncClient ( "com_asyncClient", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_ARCHIVE, "run client and renderer asynchronous" );
 idCVar com_renderFPS( "com_renderFPS", "300", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "frames per second to render" );
+idCVar com_clientFPS( "com_clientFPS", "60", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "times per second the game is called" );
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
@@ -2418,7 +2419,7 @@ void idCommonLocal::Frame( void ) {
 		clientdelta += frametime;
 		renderdelta += frametime;
 
-		if ( clientdelta < ( 1000000 / 60 ) ) {
+		if ( clientdelta < ( 1000000 / cvarSystem->GetCVarInteger( "com_clientFPS" ) ) ) {
 			clientframe = false;
 		} else {
 			clientdelta = 0;

@@ -75,6 +75,7 @@ extern idCVar		com_makingBuild;
 extern idCVar		com_updateLoadSize;
 extern idCVar		com_asyncClient;
 extern idCVar		com_renderFPS;
+extern idCVar		com_clientFPS;
 
 extern int			time_gameFrame;			// game logic time
 extern int			time_gameDraw;			// game present time
