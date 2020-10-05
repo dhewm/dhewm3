@@ -1569,7 +1569,7 @@ idImage	*idImageManager::ImageFromFile( const char *_name, textureFilter_t filte
 			if ( image_preload.GetBool() && !insideLevelLoad ) {
 				image->referencedOutsideLevelLoad = true;
 				image->ActuallyLoadImage( true, false );	// check for precompressed, load is from front end
-				declManager->MediaPrint( "%ix%i %s (reload for mixed referneces)\n", image->uploadWidth, image->uploadHeight, image->imgName.c_str() );
+				declManager->MediaPrint( "%ix%i %s (reload for mixed references)\n", image->uploadWidth, image->uploadHeight, image->imgName.c_str() );
 			}
 			return image;
 		}
