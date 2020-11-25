@@ -199,8 +199,13 @@ bool idEFXFile::ReadEffect( idLexer &src, idSoundEffect *effect ) {
 			// <+KittyCat> the "environment" token should be ignored (efx has nothing equatable to it)
 			src.ParseInt();
 		} else if ( token == "environment size" ) {
+			//
+			// The formula for density according to Creative's EFX-Util.lib:
+			//    density = clamp(pow(size, 3) / 16, 0, 1)
+			//
 			float size = src.ParseFloat();
-			efxf(AL_EAXREVERB_DENSITY, (size < 2.0f) ? (size - 1.0f) : 1.0f);
+			size = idMath::ClampFloat(0.0f, 1.0f, (size * size * size) / 16.0f);
+			efxf(AL_EAXREVERB_DENSITY, size);
 		} else if ( token == "environment diffusion" ) {
 			efxf(AL_EAXREVERB_DIFFUSION, src.ParseFloat());
 		} else if ( token == "room" ) {
