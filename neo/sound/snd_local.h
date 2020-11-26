@@ -593,7 +593,8 @@ public:
 	idStr					listenerAreaName;
 	ALuint					listenerEffect;
 	ALuint					listenerSlot;
-	ALuint					listenerFilter;
+	bool					listenerAreFiltersInitialized;
+	ALuint					listenerFilters[2]; // 0 - direct; 1 - send.
 
 	int						gameMsec;
 	int						game44kHz;
