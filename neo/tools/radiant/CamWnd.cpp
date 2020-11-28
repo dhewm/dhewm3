@@ -360,6 +360,9 @@ int CCamWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	//qwglMakeCurrent (hDC, win32.hGLRC);
 	if( qwglMakeCurrent ( hDC, win32.hGLRC ) == FALSE ) {
 		common->Warning("wglMakeCurrent failed: %d", ::GetLastError());
+		if ( r_multiSamples.GetInteger() > 0 ) {
+			common->Warning("\n!!! Remember to set r_multiSamples 0 when using the editor !!!\n");
+		}
 	}
 
 	if ((g_qeglobals.d_font_list = qglGenLists(256)) == 0) {

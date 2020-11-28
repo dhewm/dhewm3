@@ -211,6 +211,70 @@ bool GLimp_Init(glimpParms_t parms) {
 			continue;
 		}
 
+		/* Check if we're really in the requested display mode. There is
+		   (or was) an SDL bug were SDL switched into the wrong mode
+		   without giving an error code. See the bug report for details:
+		   https://bugzilla.libsdl.org/show_bug.cgi?id=4700 */
+		if ((flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) == SDL_WINDOW_FULLSCREEN)
+		{
+			SDL_DisplayMode real_mode;
+			if (SDL_GetWindowDisplayMode(window, &real_mode) != 0)
+			{
+				SDL_DestroyWindow(window);
+				window = NULL;
+				common->Warning("Can't get display mode: %s\n", SDL_GetError());
+				return false; // trying other color depth etc is unlikely to help with this issue
+			}
+			if ((real_mode.w != parms.width) || (real_mode.h != parms.height))
+			{
+				common->Warning("Current display mode isn't requested display mode\n");
+				common->Warning("Likely SDL bug #4700, trying to work around it\n");
+
+				/* Mkay, try to hack around that. */
+				SDL_DisplayMode wanted_mode = {};
+
+				wanted_mode.w = parms.width;
+				wanted_mode.h = parms.height;
+
+				if (SDL_SetWindowDisplayMode(window, &wanted_mode) != 0)
+				{
+					SDL_DestroyWindow(window);
+					window = NULL;
+
+					common->Warning("Can't force resolution to %ix%i: %s\n", parms.width, parms.height, SDL_GetError());
+
+					return false; // trying other color depth etc is unlikely to help with this issue
+				}
+
+				/* The SDL doku says, that SDL_SetWindowSize() shouldn't be
+				   used on fullscreen windows. But at least in my test with
+				   SDL 2.0.9 the subsequent SDL_GetWindowDisplayMode() fails
+				   if I don't call it. */
+				SDL_SetWindowSize(window, wanted_mode.w, wanted_mode.h);
+
+				if (SDL_GetWindowDisplayMode(window, &real_mode) != 0)
+				{
+					SDL_DestroyWindow(window);
+					window = NULL;
+
+					common->Warning("Can't get display mode: %s\n", SDL_GetError());
+
+					return false; // trying other color depth etc is unlikely to help with this issue
+				}
+
+				if ((real_mode.w != parms.width) || (real_mode.h != parms.height))
+				{
+					SDL_DestroyWindow(window);
+					window = NULL;
+
+					common->Warning("Still in wrong display mode: %ix%i instead of %ix%i\n",
+					                real_mode.w, real_mode.h, parms.width, parms.height);
+
+					return false; // trying other color depth etc is unlikely to help with this issue
+				}
+			}
+		}
+
 		context = SDL_GL_CreateContext(window);
 
 		if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)

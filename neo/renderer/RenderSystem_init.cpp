@@ -673,7 +673,7 @@ void R_InitOpenGL( void ) {
 		// if we failed, set everything back to "safe mode"
 		// and try again
 		r_mode.SetInteger( 3 );
-		r_fullscreen.SetInteger( 1 );
+		r_fullscreen.SetInteger( 0 );
 		r_displayRefresh.SetInteger( 0 );
 		r_multiSamples.SetInteger( 0 );
 	}
