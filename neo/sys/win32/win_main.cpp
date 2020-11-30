@@ -600,6 +600,9 @@ uintptr_t Sys_DLL_Load( const char *dllName ) {
 			Sys_DLL_Unload( (uintptr_t)libHandle );
 			return 0;
 		}
+	} else {
+		DWORD e = GetLastError();
+		// TODO
 	}
 	return (uintptr_t)libHandle;
 }

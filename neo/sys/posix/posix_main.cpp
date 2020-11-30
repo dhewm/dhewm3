@@ -268,7 +268,28 @@ TODO: OSX - use the native API instead? NSModule
 =================
 */
 uintptr_t Sys_DLL_Load( const char *path ) {
-	return (uintptr_t)dlopen( path, RTLD_NOW );
+	void* ret = dlopen( path, RTLD_NOW );
+	if (ret == NULL) {
+		// dlopen() failed - this might be ok (we tried one possible path and the next will work)
+		// or it might be worth warning about (the lib existed but still couldn't be loaded,
+		// maybe a missing symbol or permission problems)
+		// unfortunately we only get a string from dlerror(), not some distinctive error code..
+		// so use try to open() the file to get a better idea what went wrong
+
+		int fd = open(path, O_RDONLY);
+		if (fd < 0) { // couldn't open file for reading either
+			int e = errno;
+			if(e != ENOENT) {
+				// it didn't fail because the file doesn't exist - log it, might be interesting (=> likely permission problem)
+				common->Warning("Failed to load lib '%s'! Reason: %s ( %s )\n", path, dlerror(), strerror(e));
+			}
+		} else {
+			// file could be opened, so it exists => log just dlerror()
+			close(fd);
+			common->Warning("Failed to load lib '%s' even though it exists and is readable! Reason: %s\n", path, dlerror());
+		}
+	}
+	return (uintptr_t)ret;
 }
 
 /*
