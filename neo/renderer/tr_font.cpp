@@ -246,31 +246,16 @@ int readInt( void ) {
 	return i;
 }
 
-typedef union {
-	byte	fred[4];
-	float	ffred;
-} poor;
-
 /*
 ============
 readFloat
 ============
 */
 float readFloat( void ) {
-	poor	me;
-#ifdef __ppc__
-	me.fred[0] = fdFile[fdOffset+3];
-	me.fred[1] = fdFile[fdOffset+2];
-	me.fred[2] = fdFile[fdOffset+1];
-	me.fred[3] = fdFile[fdOffset+0];
-#else
-	me.fred[0] = fdFile[fdOffset+0];
-	me.fred[1] = fdFile[fdOffset+1];
-	me.fred[2] = fdFile[fdOffset+2];
-	me.fred[3] = fdFile[fdOffset+3];
-#endif
-	fdOffset += 4;
-	return me.ffred;
+	float f;
+	memcpy(&f, &fdFile[fdOffset], sizeof(float));
+	fdOffset += sizeof(float);
+	return LittleFloat(f);
 }
 
 /*
@@ -312,6 +297,7 @@ bool idRenderSystemLocal::RegisterFont( const char *fontName, fontInfoEx_t &font
 		}
 	}
 */
+	assert(sizeof(float) == 4 && "if this is false, readFloat() won't work");
 
 	memset( &font, 0, sizeof( font ) );
 
