@@ -814,6 +814,7 @@ extern glconfig_t			glConfig;		// outside of TR since it shouldn't be cleared du
 extern idCVar r_mode;					// video mode number
 extern idCVar r_displayRefresh;			// optional display refresh rate option for vid mode
 extern idCVar r_fullscreen;				// 0 = windowed, 1 = full screen
+extern idCVar r_fullscreenDesktop;		// 0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode
 extern idCVar r_multiSamples;			// number of antialiasing samples
 
 extern idCVar r_ignore;					// used for random debugging without defining new vars
