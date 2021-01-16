@@ -144,6 +144,7 @@ if (SDL2)
 	find_package(SDL2 REQUIRED)
 	include_directories(${SDL2_INCLUDE_DIRS})
 	set(SDLx_LIBRARY ${SDL2_LIBRARIES})
+	link_directories(${SDL2_LIBDIR})
 else()
 	# skip SDLmain
 	if(APPLE OR WIN32)

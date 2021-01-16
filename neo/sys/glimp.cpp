@@ -235,7 +235,7 @@ bool GLimp_Init(glimpParms_t parms) {
 			if ((real_mode.w != parms.width) || (real_mode.h != parms.height))
 			{
 				common->Warning("Current display mode isn't requested display mode\n");
-				common->Warning("Likely SDL bug #4700, trying to work around it\n");
+				common->Warning("Likely SDL bug #4700, trying to work around it..\n");
 
 				/* Mkay, try to hack around that. */
 				SDL_DisplayMode wanted_mode = {};
@@ -279,6 +279,7 @@ bool GLimp_Init(glimpParms_t parms) {
 
 					return false; // trying other color depth etc is unlikely to help with this issue
 				}
+				common->Warning("Now we have the requested resolution (%d x %d)\n", parms.width, parms.height);
 			}
 		}
 
