@@ -8,3 +8,7 @@
 
 /dhewm*
 /*-releases/
+/neo/.vs*
+/neo/out*
+/neo/build*
+

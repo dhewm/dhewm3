@@ -602,7 +602,31 @@ uintptr_t Sys_DLL_Load( const char *dllName ) {
 		}
 	} else {
 		DWORD e = GetLastError();
-		// TODO
+		LPVOID msgBuf = nullptr;
+
+		FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			e,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&msgBuf,
+			0, NULL);
+
+		idStr errorStr = va( "[%i (0x%X)]\t%s", e, e, msgBuf );
+
+		// common, skipped.
+		if ( e == 0x7E ) // [126 (0x7E)] The specified module could not be found.
+			errorStr = "";
+		// probably going to be common. Lets try to be less cryptic.
+		else if ( e == 0xC1 ) // [193 (0xC1)] is not a valid Win32 application.
+			errorStr = va( "[%i (0x%X)]\t%s", e, e, "probably the DLL is of the wrong architecture, like x64 instead of x86" );
+
+		if ( errorStr.Length() )
+			common->Warning( "LoadLibrary(%s) Failed ! %s", dllName, errorStr.c_str() );
+
+		::LocalFree( msgBuf );
 	}
 	return (uintptr_t)libHandle;
 }
