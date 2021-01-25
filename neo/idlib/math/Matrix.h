@@ -1230,7 +1230,11 @@ ID_INLINE idMat5::idMat5( void ) {
 }
 
 ID_INLINE idMat5::idMat5( const float src[ 5 ][ 5 ] ) {
-	memcpy( mat, src, 5 * 5 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1]; mat[0].z = src[0][2]; mat[0].s = src[0][3]; mat[0].t = src[0][4];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1]; mat[1].z = src[1][2]; mat[1].s = src[1][3]; mat[1].t = src[1][4];
+	mat[2].x = src[2][0]; mat[2].y = src[2][1]; mat[2].z = src[2][2]; mat[2].s = src[2][3]; mat[2].t = src[2][4];
+	mat[3].x = src[3][0]; mat[3].y = src[3][1]; mat[3].z = src[3][2]; mat[3].s = src[3][3]; mat[3].t = src[3][4];
+	mat[4].x = src[4][0]; mat[4].y = src[4][1]; mat[4].z = src[4][2]; mat[4].s = src[4][3]; mat[4].t = src[4][4];
 }
 
 ID_INLINE idMat5::idMat5( const idVec5 &v0, const idVec5 &v1, const idVec5 &v2, const idVec5 &v3, const idVec5 &v4 ) {
