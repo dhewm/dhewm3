@@ -1555,7 +1555,12 @@ ID_INLINE idMat6::idMat6( const idVec6 &v0, const idVec6 &v1, const idVec6 &v2, 
 }
 
 ID_INLINE idMat6::idMat6( const float src[ 6 ][ 6 ] ) {
-	memcpy( mat, src, 6 * 6 * sizeof( float ) );
+	memcpy( mat[0].ToFloatPtr(), src[0], 6 * sizeof( float ) );
+	memcpy( mat[1].ToFloatPtr(), src[1], 6 * sizeof( float ) );
+	memcpy( mat[2].ToFloatPtr(), src[2], 6 * sizeof( float ) );
+	memcpy( mat[3].ToFloatPtr(), src[3], 6 * sizeof( float ) );
+	memcpy( mat[4].ToFloatPtr(), src[4], 6 * sizeof( float ) );
+	memcpy( mat[5].ToFloatPtr(), src[5], 6 * sizeof( float ) );
 }
 
 ID_INLINE const idVec6 &idMat6::operator[]( int index ) const {
