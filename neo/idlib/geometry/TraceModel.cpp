@@ -1409,7 +1409,10 @@ void idTraceModel::VolumeIntegrals( struct volumeIntegrals_s &integrals ) const 
 	int i, a, b, c;
 	float nx, ny, nz;
 
-	memset( &integrals, 0, sizeof(volumeIntegrals_t) );
+	integrals.T0 = 0.0f;
+	integrals.T1.Zero();
+	integrals.T2.Zero();
+	integrals.TP.Zero();
 	for ( i = 0; i < numPolys; i++ ) {
 		poly = &polys[i];
 
