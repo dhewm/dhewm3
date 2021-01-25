@@ -1723,7 +1723,9 @@ ID_INLINE bool idMat6::operator!=( const idMat6 &a ) const {
 }
 
 ID_INLINE void idMat6::Zero( void ) {
-	memset( mat, 0, sizeof( idMat6 ) );
+	for (int i = 0; i < 6; i++) {
+		mat[i].Zero();
+	}
 }
 
 ID_INLINE void idMat6::Identity( void ) {
