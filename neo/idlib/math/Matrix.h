@@ -439,7 +439,9 @@ ID_INLINE idMat3::idMat3( const float xx, const float xy, const float xz, const 
 }
 
 ID_INLINE idMat3::idMat3( const float src[ 3 ][ 3 ] ) {
-	memcpy( mat, src, 3 * 3 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1]; mat[0].z = src[0][2];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1]; mat[1].z = src[1][2];
+	mat[2].x = src[2][0]; mat[2].y = src[2][1]; mat[2].z = src[2][2];
 }
 
 ID_INLINE const idVec3 &idMat3::operator[]( int index ) const {
