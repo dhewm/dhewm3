@@ -598,7 +598,9 @@ ID_INLINE bool idMat3::operator!=( const idMat3 &a ) const {
 }
 
 ID_INLINE void idMat3::Zero( void ) {
-	memset( mat, 0, sizeof( idMat3 ) );
+	mat[0].x = 0.0f; mat[0].y = 0.0f; mat[0].z = 0.0f;
+	mat[1].x = 0.0f; mat[1].y = 0.0f; mat[1].z = 0.0f;
+	mat[2].x = 0.0f; mat[2].y = 0.0f; mat[2].z = 0.0f;
 }
 
 ID_INLINE void idMat3::Identity( void ) {
