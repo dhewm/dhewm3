@@ -134,7 +134,8 @@ ID_INLINE idMat2::idMat2( const float xx, const float xy, const float yx, const 
 }
 
 ID_INLINE idMat2::idMat2( const float src[ 2 ][ 2 ] ) {
-	memcpy( mat, src, 2 * 2 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1];
 }
 
 ID_INLINE const idVec2 &idMat2::operator[]( int index ) const {
