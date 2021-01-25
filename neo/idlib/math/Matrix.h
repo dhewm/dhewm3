@@ -1397,7 +1397,11 @@ ID_INLINE bool idMat5::operator!=( const idMat5 &a ) const {
 }
 
 ID_INLINE void idMat5::Zero( void ) {
-	memset( mat, 0, sizeof( idMat5 ) );
+	mat[0].x = 0.0f; mat[0].y = 0.0f; mat[0].z = 0.0f; mat[0].s = 0.0f; mat[0].t = 0.0f;
+	mat[1].x = 0.0f; mat[1].y = 0.0f; mat[1].z = 0.0f; mat[1].s = 0.0f; mat[1].t = 0.0f;
+	mat[2].x = 0.0f; mat[2].y = 0.0f; mat[2].z = 0.0f; mat[2].s = 0.0f; mat[2].t = 0.0f;
+	mat[3].x = 0.0f; mat[3].y = 0.0f; mat[3].z = 0.0f; mat[3].s = 0.0f; mat[3].t = 0.0f;
+	mat[4].x = 0.0f; mat[4].y = 0.0f; mat[4].z = 0.0f; mat[4].s = 0.0f; mat[4].t = 0.0f;
 }
 
 ID_INLINE void idMat5::Identity( void ) {
