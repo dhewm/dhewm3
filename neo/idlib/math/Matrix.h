@@ -1065,7 +1065,10 @@ ID_INLINE bool idMat4::operator!=( const idMat4 &a ) const {
 }
 
 ID_INLINE void idMat4::Zero( void ) {
-	memset( mat, 0, sizeof( idMat4 ) );
+	mat[0].x = 0.0f; mat[0].y = 0.0f; mat[0].z = 0.0f; mat[0].w = 0.0f;
+	mat[1].x = 0.0f; mat[1].y = 0.0f; mat[1].z = 0.0f; mat[1].w = 0.0f;
+	mat[2].x = 0.0f; mat[2].y = 0.0f; mat[2].z = 0.0f; mat[2].w = 0.0f;
+	mat[3].x = 0.0f; mat[3].y = 0.0f; mat[3].z = 0.0f; mat[3].w = 0.0f;
 }
 
 ID_INLINE void idMat4::Identity( void ) {
