@@ -886,7 +886,10 @@ ID_INLINE idMat4::idMat4( const idMat3 &rotation, const idVec3 &translation ) {
 }
 
 ID_INLINE idMat4::idMat4( const float src[ 4 ][ 4 ] ) {
-	memcpy( mat, src, 4 * 4 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1]; mat[0].z = src[0][2]; mat[0].w = src[0][3];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1]; mat[1].z = src[1][2]; mat[1].w = src[1][3];
+	mat[2].x = src[2][0]; mat[2].y = src[2][1]; mat[2].z = src[2][2]; mat[2].w = src[2][3];
+	mat[3].x = src[3][0]; mat[3].y = src[3][1]; mat[3].z = src[3][2]; mat[3].w = src[3][3];
 }
 
 ID_INLINE const idVec4 &idMat4::operator[]( int index ) const {
