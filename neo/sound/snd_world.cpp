@@ -127,6 +127,8 @@ idSoundWorldLocal::idSoundWorldLocal
 ===============
 */
 idSoundWorldLocal::idSoundWorldLocal() {
+	listenerEffect                = 0;
+	listenerSlot                  = 0;
 	listenerAreFiltersInitialized = false;
 }
 
