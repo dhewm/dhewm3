@@ -239,8 +239,14 @@ class idProgram;
 class idInterpreter;
 typedef struct prstack_s prstack_t;
 
-// FIXME: this interface needs to be reworked but it properly separates code for the time being
-class idGameEdit {
+
+class idGameEditBase {
+public:
+	virtual						~idGameEditBase( void ) {}
+};
+
+
+class idGameEdit : public idGameEditBase {
 public:
 	virtual						~idGameEdit( void ) {}
 
