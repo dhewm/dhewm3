@@ -397,7 +397,7 @@ public:
 	virtual void				MapEntityTranslate( const char *name, const idVec3 &v ) const;
 };
 
-extern idGameEdit *				gameEdit;
+extern idGameEditBase *				gameEdit;
 
 // In game script Debugging Support
 class idGameEditExt : public idGameEdit {
@@ -467,7 +467,7 @@ typedef struct {
 
 	int							version;				// API version
 	idGame *					game;					// interface to run the game
-	idGameEdit *				gameEdit;				// interface for in-game editing
+	idGameEditBase *			gameEdit;				// interface for in-game editing
 
 } gameExport_t;
 

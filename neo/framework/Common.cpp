@@ -126,7 +126,7 @@ unsigned int	com_msgID = -1;
 
 #ifdef __DOOM_DLL__
 idGame *		game = NULL;
-idGameEdit *	gameEdit = NULL;
+idGameEditBase * gameEdit = NULL;
 #endif
 
 // writes si_version to the config file - in a kinda obfuscated way
