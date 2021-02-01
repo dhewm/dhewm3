@@ -447,6 +447,10 @@ void idGameLocal::SaveGame( idFile *f ) {
 
 	savegame.WriteBuildNumber( BUILD_NUMBER );
 
+	// DG: TODO: write other things (maybe internal savegame version so I don't have to bump BUILD_NUMBER AGAIN)
+	//           and OS, architecture etc, see #344
+	// TODO: adjust InitFromSavegame() accordingly!
+
 	// go through all entities and threads and add them to the object list
 	for( i = 0; i < MAX_GENTITIES; i++ ) {
 		ent = entities[i];
@@ -1239,6 +1243,12 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	idRestoreGame savegame( saveGameFile );
 
 	savegame.ReadBuildNumber();
+
+
+	if(savegame.GetBuildNumber() >= 1305)
+	{
+		// TODO: read stuff additionally written in SaveGame()
+	}
 
 	// Create the list of all objects in the game
 	savegame.CreateObjects();

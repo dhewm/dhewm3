@@ -331,7 +331,7 @@ class idVarDef {
 	friend class idVarDefName;
 
 public:
-	int						num;
+	int						num;			// global index/ID of variable
 	varEval_t				value;
 	idVarDef *				scope;			// function, namespace, or object the var was defined in
 	int						numUsers;		// number of users if this is a constant
@@ -432,11 +432,19 @@ extern	idVarDef	def_boolean;
 
 typedef struct statement_s {
 	unsigned short	op;
+	unsigned short	flags; // DG: added this for ugly hacks
+	enum {
+		// op is OP_OBJECTCALL and when the statement was created the function/method
+		// implementation hasn't been parsed yet (only the declaration/prototype)
+		// see idCompiler::EmitFunctionParms() and idProgram::CalculateChecksum()
+		FLAG_OBJECTCALL_IMPL_NOT_PARSED_YET = 1,
+	};
+	// DG: moved linenumber and file up here to prevent wasting 8 bytes of padding on 64bit
+	unsigned short	linenumber;
+	unsigned short	file;
 	idVarDef		*a;
 	idVarDef		*b;
 	idVarDef		*c;
-	unsigned short	linenumber;
-	unsigned short	file;
 } statement_t;
 
 /***********************************************************************
@@ -488,7 +496,7 @@ public:
 	// save games
 	void										Save( idSaveGame *savefile ) const;
 	bool										Restore( idRestoreGame *savefile );
-	int											CalculateChecksum( void ) const;		// Used to insure program code has not
+	int											CalculateChecksum( bool forOldSavegame ) const;		// Used to insure program code has not
 																						//    changed between savegames
 
 	void										Startup( const char *defaultScript );
