@@ -2837,12 +2837,36 @@ static bool checkForHelp(int argc, char **argv)
 	return false;
 }
 
+#ifdef UINTPTR_MAX // DG: make sure D3_SIZEOFPTR is consistent with reality
+
+#if D3_SIZEOFPTR == 4
+  #if UINTPTR_MAX != 0xFFFFFFFFUL
+    #error "CMake assumes that we're building for a 32bit architecture, but UINTPTR_MAX doesn't match!"
+  #endif
+#elif D3_SIZEOFPTR == 8
+  #if UINTPTR_MAX != 18446744073709551615ULL
+    #error "CMake assumes that we're building for a 64bit architecture, but UINTPTR_MAX doesn't match!"
+  #endif
+#else
+  // Hello future person with a 128bit(?) CPU, I hope the future doesn't suck too much and that you don't still use CMake.
+  // Also, please adapt this check and send a pull request (or whatever way we have to send patches in the future)
+  #error "D3_SIZEOFPTR should really be 4 (for 32bit targets) or 8 (for 64bit targets), what kind of machine is this?!"
+#endif
+
+#endif // UINTPTR_MAX defined
+
 /*
 =================
 idCommonLocal::Init
 =================
 */
 void idCommonLocal::Init( int argc, char **argv ) {
+
+	// in case UINTPTR_MAX isn't defined (or wrong), do a runtime check at startup
+	if ( D3_SIZEOFPTR != sizeof(void*) ) {
+		Sys_Error( "Something went wrong in your build: CMake assumed that sizeof(void*) == %d but in reality it's %d!\n",
+		           (int)D3_SIZEOFPTR, (int)sizeof(void*) );
+	}
 
 	if(checkForHelp(argc, argv))
 	{

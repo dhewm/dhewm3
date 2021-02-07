@@ -450,6 +450,7 @@ public:
 
 private:
 	const static int		INITIAL_SPAWN_COUNT = 1;
+	const static int		INTERNAL_SAVEGAME_VERSION = 1; // DG: added this for >= 1305 savegames
 
 	idStr					mapFileName;			// name of the map, empty string if no map loaded
 	idMapFile *				mapFile;				// will be NULL during the game unless in-game editing is used

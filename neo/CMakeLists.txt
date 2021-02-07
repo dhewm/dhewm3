@@ -74,7 +74,15 @@ elseif(cpu MATCHES "i.86")
 endif()
 
 if(MSVC AND CMAKE_CL_64)
-	set(cpu "amd64")
+	set(cpu "x86_64")
+endif()
+
+add_definitions(-DD3_ARCH="${cpu}" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
+
+if(cpu STREQUAL "x86_64" AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+	# TODO: same for arm64? PPC64?
+	message(SEND_ERROR "CMake thinks sizeof(void*) == 4, but that the target CPU is x86_64!")
+	message(FATAL_ERROR "If you're building in a 32bit chroot on a 64bit host, switch to it with 'linux32 chroot' or at least call cmake with linux32 (or your OSs equivalent)!")
 endif()
 
 # target os
@@ -83,6 +91,8 @@ if(APPLE)
 else()
 	string(TOLOWER "${CMAKE_SYSTEM_NAME}" os)
 endif()
+
+add_definitions(-DD3_OSTYPE="${os}")
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -230,7 +240,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		if(cpu STREQUAL "x86_64")
 			add_compile_options(-arch x86_64 -mmacosx-version-min=10.9)
 			set(ldflags "${ldflags} -arch x86_64 -mmacosx-version-min=10.9")
-                elseif(cpu STREQUAL "arm64")
+		elseif(cpu STREQUAL "arm64")
 			add_compile_options(-arch arm64 -mmacosx-version-min=11.0)
 			set(ldflags "${ldflags} -arch arm64 -mmacosx-version-min=11.0")
 		elseif(cpu STREQUAL "x86")
