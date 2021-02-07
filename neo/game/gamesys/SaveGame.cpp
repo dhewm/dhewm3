@@ -780,6 +780,7 @@ idRestoreGame::RestoreGame
 */
 idRestoreGame::idRestoreGame( idFile *savefile ) {
 	file = savefile;
+	internalSavegameVersion = 0;
 }
 
 /*
