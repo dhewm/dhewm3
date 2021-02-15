@@ -1626,6 +1626,20 @@ void idPhysics_Player::Restore( idRestoreGame *savefile ) {
 
 	savefile->ReadInt( (int &)waterLevel );
 	savefile->ReadInt( waterType );
+
+	/* DG: It can apparently happen that the player saves while the clipModel's axis are
+	 *     modified by idPush::TryRotatePushEntity() -> idPhysics_Player::Rotate() -> idClipModel::Link()
+	 *     Normally idPush seems to reset them to the identity matrix in the next frame,
+	 *     but apparently not when coming from a savegame.
+	 *     Usually clipModel->axis is the identity matrix, and if it isn't there's clipping bugs
+	 *     like CheckGround() reporting that it's steep even though the player is only trying to
+	 *     walk up normal stairs.
+	 *     Resetting the axis to mat3_identity when restoring a savegame works around that issue
+	 *     and makes sure players can go on playing if their savegame was "corrupted" by saving
+	 *     while idPush was active. See https://github.com/dhewm/dhewm3/issues/328 for more details */
+	if ( clipModel != nullptr ) {
+		clipModel->SetPosition( clipModel->GetOrigin(), mat3_identity );
+	}
 }
 
 /*
