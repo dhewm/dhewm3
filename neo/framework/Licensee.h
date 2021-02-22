@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef ID_REPRODUCIBLE_BUILD
 	// for reproducible builds we hardcode values that would otherwise come from __DATE__ and __TIME__
 	// NOTE: remember to update esp. the date for (pre-) releases and RCs and the like
-	#define ID__DATE__  "Feb 06 2021"
+	#define ID__DATE__  "Feb 21 2021"
 	#define ID__TIME__  "13:37:42"
 
 #else // not reproducible build, use __DATE__ and __TIME__ macros
