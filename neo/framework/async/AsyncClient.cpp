@@ -1664,7 +1664,7 @@ void idAsyncClient::SetupConnection( void ) {
 		// do not make the protocol depend on PB
 		msg.WriteShort( 0 );
 		clientPort.SendPacket( serverAddress, msg.GetData(), msg.GetSize() );
-#ifdef ID_ENFORCE_KEY_CLIENT
+#if ID_ENFORCE_KEY_CLIENT
 		if ( idAsyncNetwork::LANServer.GetBool() ) {
 			common->Printf( "net_LANServer is set, connecting in LAN mode\n" );
 		} else {
