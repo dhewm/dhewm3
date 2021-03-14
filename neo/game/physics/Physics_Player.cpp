@@ -1637,7 +1637,7 @@ void idPhysics_Player::Restore( idRestoreGame *savefile ) {
 	 *     Resetting the axis to mat3_identity when restoring a savegame works around that issue
 	 *     and makes sure players can go on playing if their savegame was "corrupted" by saving
 	 *     while idPush was active. See https://github.com/dhewm/dhewm3/issues/328 for more details */
-	if ( clipModel != nullptr ) {
+	if ( clipModel != NULL ) {
 		clipModel->SetPosition( clipModel->GetOrigin(), mat3_identity );
 	}
 }
