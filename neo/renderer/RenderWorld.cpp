@@ -691,6 +691,12 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 		return;
 	}
 
+	const renderView_t *renderViewReal = renderView;
+
+	// if ( r_lockSurfaces.GetBool() ) {
+	// 	renderView = &tr.lockSurfacesViewDef.renderView;
+	// }
+
 	if ( renderView->fov_x <= 0 || renderView->fov_y <= 0 ) {
 		common->Error( "idRenderWorld::RenderScene: bad FOVs: %f, %f", renderView->fov_x, renderView->fov_y );
 	}
@@ -741,21 +747,53 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 		parms->isMirror = true;
 	}
 
+	/*
 	if ( r_lockSurfaces.GetBool() ) {
 		R_LockSurfaceScene( parms );
+		//frameData->cmdHead
 		return;
 	}
+	*/
+
+	if ( r_lockSurfaces.GetBool() ) {
+		tr.lockSurfacesRealViewDef = *parms;
+
+/*
+		viewDef_t* lockedParms = &tr.lockSurfacesViewDef;
+		parms->renderView = lockedParms->renderView;
+		parms->projectionMatrix = lockedParms->projectionMatrix;
+		parms->worldSpace = lockedParms->worldSpace;
+		parms->initialViewAreaOrigin = lockedParms->initialViewAreaOrigin;
+*/
+		const viewDef_t* origParms = &tr.lockSurfacesRealViewDef;
+		*parms = tr.lockSurfacesViewDef;
+		parms->renderWorld = origParms->renderWorld;
+		parms->floatTime = origParms->floatTime;
+		parms->drawSurfs = origParms->drawSurfs; // should be NULL I think
+		parms->numDrawSurfs = origParms->numDrawSurfs;
+		parms->maxDrawSurfs = origParms->maxDrawSurfs;
+		parms->viewLights = origParms->viewLights;
+		parms->viewEntitys = origParms->viewEntitys;
+		parms->connectedAreas = origParms->connectedAreas;
+
+	} else {
+		tr.lockSurfacesViewDef = *parms;
+	}
+
 
 	// save this world for use by some console commands
 	tr.primaryWorld = this;
 	tr.primaryRenderView = *renderView;
 	tr.primaryView = parms;
 
+
+
 	// rendering this view may cause other views to be rendered
 	// for mirrors / portals / shadows / environment maps
 	// this will also cause any necessary entities and lights to be
 	// updated to the demo file
-	R_RenderView( parms );
+	//if ( !r_lockSurfaces.GetBool() )
+	R_RenderView( parms, true );
 
 	// now write delete commands for any modified-but-not-visible entities, and
 	// add the renderView command to the demo

@@ -185,7 +185,7 @@ R_ToggleSmpFrame
 */
 void R_ToggleSmpFrame( void ) {
 	if ( r_lockSurfaces.GetBool() ) {
-		return;
+		//return;
 	}
 	R_FreeDeferredTriSurfs( frameData );
 
@@ -894,7 +894,7 @@ R_SetupProjection
 This uses the "infinite far z" trick
 ===============
 */
-void R_SetupProjection( void ) {
+void R_SetupProjection( viewDef_t * viewDef ) {
 	float	xmin, xmax, ymin, ymax;
 	float	width, height;
 	float	zNear;
@@ -915,48 +915,48 @@ void R_SetupProjection( void ) {
 	// set up projection matrix
 	//
 	zNear	= r_znear.GetFloat();
-	if ( tr.viewDef->renderView.cramZNear ) {
+	if ( viewDef->renderView.cramZNear ) {
 		zNear *= 0.25;
 	}
 
-	ymax = zNear * tan( tr.viewDef->renderView.fov_y * idMath::PI / 360.0f );
+	ymax = zNear * tan( viewDef->renderView.fov_y * idMath::PI / 360.0f );
 	ymin = -ymax;
 
-	xmax = zNear * tan( tr.viewDef->renderView.fov_x * idMath::PI / 360.0f );
+	xmax = zNear * tan( viewDef->renderView.fov_x * idMath::PI / 360.0f );
 	xmin = -xmax;
 
 	width = xmax - xmin;
 	height = ymax - ymin;
 
-	jitterx = jitterx * width / ( tr.viewDef->viewport.x2 - tr.viewDef->viewport.x1 + 1 );
+	jitterx = jitterx * width / ( viewDef->viewport.x2 - viewDef->viewport.x1 + 1 );
 	xmin += jitterx;
 	xmax += jitterx;
-	jittery = jittery * height / ( tr.viewDef->viewport.y2 - tr.viewDef->viewport.y1 + 1 );
+	jittery = jittery * height / ( viewDef->viewport.y2 - viewDef->viewport.y1 + 1 );
 	ymin += jittery;
 	ymax += jittery;
 
-	tr.viewDef->projectionMatrix[0] = 2 * zNear / width;
-	tr.viewDef->projectionMatrix[4] = 0;
-	tr.viewDef->projectionMatrix[8] = ( xmax + xmin ) / width;	// normally 0
-	tr.viewDef->projectionMatrix[12] = 0;
+	viewDef->projectionMatrix[0] = 2 * zNear / width;
+	viewDef->projectionMatrix[4] = 0;
+	viewDef->projectionMatrix[8] = ( xmax + xmin ) / width;	// normally 0
+	viewDef->projectionMatrix[12] = 0;
 
-	tr.viewDef->projectionMatrix[1] = 0;
-	tr.viewDef->projectionMatrix[5] = 2 * zNear / height;
-	tr.viewDef->projectionMatrix[9] = ( ymax + ymin ) / height;	// normally 0
-	tr.viewDef->projectionMatrix[13] = 0;
+	viewDef->projectionMatrix[1] = 0;
+	viewDef->projectionMatrix[5] = 2 * zNear / height;
+	viewDef->projectionMatrix[9] = ( ymax + ymin ) / height;	// normally 0
+	viewDef->projectionMatrix[13] = 0;
 
 	// this is the far-plane-at-infinity formulation, and
 	// crunches the Z range slightly so w=0 vertexes do not
 	// rasterize right at the wraparound point
-	tr.viewDef->projectionMatrix[2] = 0;
-	tr.viewDef->projectionMatrix[6] = 0;
-	tr.viewDef->projectionMatrix[10] = -0.999f;
-	tr.viewDef->projectionMatrix[14] = -2.0f * zNear;
+	viewDef->projectionMatrix[2] = 0;
+	viewDef->projectionMatrix[6] = 0;
+	viewDef->projectionMatrix[10] = -0.999f;
+	viewDef->projectionMatrix[14] = -2.0f * zNear;
 
-	tr.viewDef->projectionMatrix[3] = 0;
-	tr.viewDef->projectionMatrix[7] = 0;
-	tr.viewDef->projectionMatrix[11] = -1;
-	tr.viewDef->projectionMatrix[15] = 0;
+	viewDef->projectionMatrix[3] = 0;
+	viewDef->projectionMatrix[7] = 0;
+	viewDef->projectionMatrix[11] = -1;
+	viewDef->projectionMatrix[15] = 0;
 }
 
 /*
@@ -967,7 +967,8 @@ Setup that culling frustum planes for the current view
 FIXME: derive from modelview matrix times projection matrix
 =================
 */
-static void R_SetupViewFrustum( void ) {
+//static
+void R_SetupViewFrustum( void ) {
 	int		i;
 	float	xs, xc;
 	float	ang;
@@ -1094,7 +1095,7 @@ a mirror / remote location, or a 3D view on a gui surface.
 Parms will typically be allocated with R_FrameAlloc
 ================
 */
-void R_RenderView( viewDef_t *parms ) {
+void R_RenderView( viewDef_t *parms, bool isMain ) {
 	viewDef_t		*oldView;
 
 	if ( parms->renderView.width <= 0 || parms->renderView.height <= 0 ) {
@@ -1119,7 +1120,7 @@ void R_RenderView( viewDef_t *parms ) {
 
 	// we need to set the projection matrix before doing
 	// portal-to-screen scissor box calculations
-	R_SetupProjection();
+	R_SetupProjection( tr.viewDef );
 
 	// identify all the visible portalAreas, and the entityDefs and
 	// lightDefs that are in them and pass culling.
@@ -1158,7 +1159,8 @@ void R_RenderView( viewDef_t *parms ) {
 	}
 
 	// add the rendering commands for this viewDef
-	R_AddDrawViewCmd( parms );
+	//if(!r_lockSurfaces.GetBool() || !isMain)
+		R_AddDrawViewCmd( parms, isMain );
 
 	// restore view in case we are a subview
 	tr.viewDef = oldView;

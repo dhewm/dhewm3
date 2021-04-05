@@ -554,23 +554,26 @@ to actually render the visible surfaces for this view
 =================
 */
 void RB_BeginDrawingView (void) {
+
+	const viewDef_t* viewDef = backEnd.viewDef;
+
 	// set the modelview matrix for the viewer
 	qglMatrixMode(GL_PROJECTION);
-	qglLoadMatrixf( backEnd.viewDef->projectionMatrix );
+	qglLoadMatrixf( viewDef->projectionMatrix );
 	qglMatrixMode(GL_MODELVIEW);
 
 	// set the window clipping
-	qglViewport( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
-		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
-		backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1,
-		backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1 );
+	qglViewport( tr.viewportOffset[0] + viewDef->viewport.x1,
+		tr.viewportOffset[1] + viewDef->viewport.y1,
+		viewDef->viewport.x2 + 1 - viewDef->viewport.x1,
+		viewDef->viewport.y2 + 1 - viewDef->viewport.y1 );
 
 	// the scissor may be smaller than the viewport for subviews
-	qglScissor( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
-		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
-		backEnd.viewDef->scissor.x2 + 1 - backEnd.viewDef->scissor.x1,
-		backEnd.viewDef->scissor.y2 + 1 - backEnd.viewDef->scissor.y1 );
-	backEnd.currentScissor = backEnd.viewDef->scissor;
+	qglScissor( tr.viewportOffset[0] + viewDef->viewport.x1 + viewDef->scissor.x1,
+		tr.viewportOffset[1] + viewDef->viewport.y1 + viewDef->scissor.y1,
+		viewDef->scissor.x2 + 1 - viewDef->scissor.x1,
+		viewDef->scissor.y2 + 1 - viewDef->scissor.y1 );
+	backEnd.currentScissor = viewDef->scissor;
 
 	// ensures that depth writes are enabled for the depth clear
 	GL_State( GLS_DEFAULT );
@@ -847,10 +850,45 @@ void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void (*DrawInterac
 RB_DrawView
 =============
 */
+extern void R_SetupProjection( viewDef_t * viewDef );
 void RB_DrawView( const void *data ) {
 	const drawSurfsCommand_t	*cmd;
 
 	cmd = (const drawSurfsCommand_t *)data;
+
+	if(r_lockSurfaces.GetBool()) {
+		//viewDef = &tr.lockSurfacesRealViewDef;
+		//const viewDef_t origParms = *backEnd.viewDef;
+		viewDef_t* parms = cmd->viewDef;
+		const viewDef_t origParms = *parms;
+
+		*parms = tr.lockSurfacesRealViewDef; // actual current player/camera position - XXX: really? what about projection matrix?
+		parms->renderWorld = origParms.renderWorld;
+		parms->floatTime = origParms.floatTime;
+		parms->drawSurfs = origParms.drawSurfs;
+		parms->numDrawSurfs = origParms.numDrawSurfs;
+		parms->maxDrawSurfs = origParms.maxDrawSurfs;
+		parms->viewLights = origParms.viewLights;
+		parms->viewEntitys = origParms.viewEntitys;
+		parms->connectedAreas = origParms.connectedAreas;
+
+		// TODO: is this really the proper one? maybe should've been set before when origParms.projectionMatrix was set?
+		//memcpy(parms->projectionMatrix, origParms.projectionMatrix, sizeof(origParms.projectionMatrix));
+		//memcpy(parms->worldSpace.modelViewMatrix, origParms.worldSpace.modelViewMatrix, sizeof(origParms.worldSpace.modelViewMatrix));
+		R_SetupProjection(parms);
+		// TODO: R_SetupViewFrustum() ?
+		R_SetViewMatrix(parms);
+
+		// implicit parms->worldSpace = origParms.worldSpace;
+
+		// update the view origin and axis, and all the entity matricies
+		for( viewEntity_t* vModel = tr.lockSurfacesCmd.viewDef->viewEntitys ; vModel ; vModel = vModel->next ) {
+			myGlMultMatrix( vModel->modelMatrix,
+				parms->worldSpace.modelViewMatrix,
+				vModel->modelViewMatrix );
+		}
+
+	}
 
 	backEnd.viewDef = cmd->viewDef;
 
