@@ -34,8 +34,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/Cinematic.h"
 
+// DG: get rid of libjpeg; as far as I can tell no roqs that actually use it exist
+//#define ID_USE_LIBJPEG 1
+#ifdef ID_USE_LIBJPEG
 #include <jpeglib.h>
 #include <jerror.h>
+#endif
 
 #define CIN_system	1
 #define CIN_loop	2
@@ -1284,11 +1288,19 @@ void idCinematicLocal::RoQReset() {
 	status = FMV_LOOPED;
 }
 
+#ifdef ID_USE_LIBJPEG
 /* jpeg error handling */
 struct jpeg_error_mgr jerr;
-
+#endif
 int JPEGBlit( byte *wStatus, byte *data, int datasize )
 {
+#ifndef ID_USE_LIBJPEG
+	// I don't think this code is actually used, because
+	// * the jpeg encoder parts in the roq encoder are disabled with #if 0
+	// * ffmpeg doesn't support ROQ_QUAD_JPEG and can decode all doom3 roqs anyway
+	common->Warning("Contrary to Daniel's assumption, JPEGBlit() is actually called! Please report that as a dhewm3 bug!\n");
+
+#else
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
    */
@@ -1402,7 +1414,7 @@ int JPEGBlit( byte *wStatus, byte *data, int datasize )
   /* At this point you may want to check to see whether any corrupt-data
    * warnings occurred (test whether jerr.pub.num_warnings is nonzero).
    */
-
+#endif
   /* And we're done! */
   return 1;
 }

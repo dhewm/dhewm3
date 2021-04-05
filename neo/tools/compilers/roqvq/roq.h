@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __roq_h__
 
 //#define JPEG_INTERNALS
-#include <jpeglib.h>
+//#include <jpeglib.h> // DG: unused
 
 #include "tools/compilers/roqvq/gdefs.h"
 #include "tools/compilers/roqvq/roqParam.h"
