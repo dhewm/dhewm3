@@ -289,6 +289,19 @@ neo/idlib/hashing/CRC32.cpp
 
 Copyright (C) 1995-1998 Mark Adler
 
+## stb_image and stb_vorbis
+
+neo/renderer/stb_image.h
+neo/sound/stb_vorbis.h
+
+Used to decode JPEG and OGG Vorbis files.
+
+from https://github.com/nothings/stb/
+
+Copyright (c) 2017 Sean Barrett
+
+Released under MIT License and Unlicense (Public Domain)
+
 ## Brandelf utility
 
 neo/sys/linux/setup/brandelf.c
