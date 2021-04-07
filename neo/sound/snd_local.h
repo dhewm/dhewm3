@@ -202,6 +202,7 @@ private:
 	dword			mulDataSize;
 
 	void *			ogg;			// only !NULL when !s_realTimeDecoding
+	byte*			oggData; // the contents of the .ogg for stbi_vorbis (it doesn't support custom reading callbacks)
 	bool			isOgg;
 
 private:

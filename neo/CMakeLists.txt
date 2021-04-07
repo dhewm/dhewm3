@@ -153,15 +153,6 @@ endif()
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-find_package(OGG REQUIRED)
-include_directories(${OGG_INCLUDE_DIR})
-
-find_package(Vorbis REQUIRED)
-include_directories(${VORBIS_INCLUDE_DIR})
-
-find_package(VorbisFile REQUIRED)
-include_directories(${VORBISFILE_INCLUDE_DIR})
-
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
@@ -1014,9 +1005,6 @@ if(CORE)
 	target_link_libraries(${DHEWM3BINARY}
 		idlib
 		${OPENAL_LIBRARY}
-		${VORBISFILE_LIBRARIES}
-		${VORBIS_LIBRARIES}
-		${OGG_LIBRARIES}
 		${CURL_LIBRARY}
 		${ZLIB_LIBRARY}
 		${SDLx_LIBRARY}
@@ -1046,9 +1034,6 @@ if(DEDICATED)
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(${DHEWM3BINARY}ded
 		idlib
-		${VORBISFILE_LIBRARIES}
-		${VORBIS_LIBRARIES}
-		${OGG_LIBRARIES}
 		${CURL_LIBRARY}
 		${ZLIB_LIBRARY}
 		${SDLx_LIBRARY}
