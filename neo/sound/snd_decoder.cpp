@@ -26,9 +26,17 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#define OV_EXCLUDE_STATIC_CALLBACKS
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
+
+#include "SDL_endian.h"
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  #define STB_VORBIS_BIG_ENDIAN
+#endif
+#define STB_VORBIS_NO_STDIO
+#define STB_VORBIS_NO_PUSHDATA_API // we're using the pulldata API
+#include "stb_vorbis.h"
+#undef L // the implementation part of stb_vorbis has these defines, they confuse other code..
+#undef C
+#undef R
 
 #include "sys/platform.h"
 #include "framework/FileSystem.h"
@@ -49,6 +57,9 @@ idDynamicBlockAlloc<byte, 1<<20, 128>		decoderMemoryAllocator;
 
 const int MIN_OGGVORBIS_MEMORY				= 768 * 1024;
 
+// DG: this was only used with original Doom3's patched libvorbis
+// TODO: could use it in stb_vorbis setup_malloc() etc
+#if 0
 extern "C" {
 	void *_decoder_malloc( size_t size );
 	void *_decoder_calloc( size_t num, size_t size );
@@ -78,6 +89,51 @@ void *_decoder_realloc( void *memblock, size_t size ) {
 void _decoder_free( void *memblock ) {
 	decoderMemoryAllocator.Free( (byte *)memblock );
 }
+#endif
+
+static const char* my_stbv_strerror(int stbVorbisError)
+{
+	switch(stbVorbisError)
+	{
+		case VORBIS__no_error: return "No Error";
+#define ERRCASE(X) \
+		case VORBIS_ ## X : return #X;
+
+		ERRCASE( need_more_data )    // not a real error
+
+		ERRCASE( invalid_api_mixing )           // can't mix API modes
+		ERRCASE( outofmem )                     // not enough memory
+		ERRCASE( feature_not_supported )        // uses floor 0
+		ERRCASE( too_many_channels )            // STB_VORBIS_MAX_CHANNELS is too small
+		ERRCASE( file_open_failure )            // fopen() failed
+		ERRCASE( seek_without_length )          // can't seek in unknown-length file
+
+		ERRCASE( unexpected_eof )               // file is truncated?
+		ERRCASE( seek_invalid )                 // seek past EOF
+
+		// decoding errors (corrupt/invalid stream) -- you probably
+		// don't care about the exact details of these
+
+		// vorbis errors:
+		ERRCASE( invalid_setup )
+		ERRCASE( invalid_stream )
+
+		// ogg errors:
+		ERRCASE( missing_capture_pattern )
+		ERRCASE( invalid_stream_structure_version )
+		ERRCASE( continued_packet_flag_invalid )
+		ERRCASE( incorrect_stream_serial_number )
+		ERRCASE( invalid_first_page )
+		ERRCASE( bad_packet_type )
+		ERRCASE( cant_find_last_page )
+		ERRCASE( seek_failed )
+		ERRCASE( ogg_skeleton_not_supported )
+
+#undef ERRCASE
+	}
+	assert(0 && "unknown stb_vorbis errorcode!");
+	return "Unknown Error!";
+}
 
 
 /*
@@ -90,78 +146,10 @@ void _decoder_free( void *memblock ) {
 
 /*
 ====================
-FS_ReadOGG
-====================
-*/
-size_t FS_ReadOGG( void *dest, size_t size1, size_t size2, void *fh ) {
-	idFile *f = reinterpret_cast<idFile *>(fh);
-	return f->Read( dest, size1 * size2 );
-}
-
-/*
-====================
-FS_SeekOGG
-====================
-*/
-int FS_SeekOGG( void *fh, ogg_int64_t to, int type ) {
-	fsOrigin_t retype = FS_SEEK_SET;
-
-	if ( type == SEEK_CUR ) {
-		retype = FS_SEEK_CUR;
-	} else if ( type == SEEK_END ) {
-		retype = FS_SEEK_END;
-	} else if ( type == SEEK_SET ) {
-		retype = FS_SEEK_SET;
-	} else {
-		common->FatalError( "fs_seekOGG: seek without type\n" );
-	}
-	idFile *f = reinterpret_cast<idFile *>(fh);
-	return f->Seek( to, retype );
-}
-
-/*
-====================
-FS_CloseOGG
-====================
-*/
-int FS_CloseOGG( void *fh ) {
-	return 0;
-}
-
-/*
-====================
-FS_TellOGG
-====================
-*/
-long FS_TellOGG( void *fh ) {
-	idFile *f = reinterpret_cast<idFile *>(fh);
-	return f->Tell();
-}
-
-/*
-====================
-ov_openFile
-====================
-*/
-int ov_openFile( idFile *f, OggVorbis_File *vf ) {
-	ov_callbacks callbacks;
-
-	memset( vf, 0, sizeof( OggVorbis_File ) );
-
-	callbacks.read_func = FS_ReadOGG;
-	callbacks.seek_func = FS_SeekOGG;
-	callbacks.close_func = FS_CloseOGG;
-	callbacks.tell_func = FS_TellOGG;
-	return ov_open_callbacks((void *)f, vf, NULL, -1, callbacks);
-}
-
-/*
-====================
 idWaveFile::OpenOGG
 ====================
 */
 int idWaveFile::OpenOGG( const char* strFileName, waveformatex_t *pwfx ) {
-	OggVorbis_File *ov;
 
 	memset( pwfx, 0, sizeof( waveformatex_t ) );
 
@@ -172,11 +160,17 @@ int idWaveFile::OpenOGG( const char* strFileName, waveformatex_t *pwfx ) {
 
 	Sys_EnterCriticalSection( CRITICAL_SECTION_ONE );
 
-	ov = new OggVorbis_File;
+	int fileSize = mhmmio->Length();
+	byte* oggFileData = (byte*)Mem_Alloc( fileSize );
 
-	if( ov_openFile( mhmmio, ov ) < 0 ) {
-		delete ov;
+	mhmmio->Read( oggFileData, fileSize );
+
+	int stbverr = 0;
+	stb_vorbis *ov = stb_vorbis_open_memory( oggFileData, fileSize, &stbverr, NULL );
+	if( ov == NULL ) {
+		Mem_Free( oggFileData );
 		Sys_LeaveCriticalSection( CRITICAL_SECTION_ONE );
+		common->Warning( "Opening OGG file '%s' with stb_vorbis failed: %s\n", strFileName, my_stbv_strerror(stbverr) );
 		fileSystem->CloseFile( mhmmio );
 		mhmmio = NULL;
 		return -1;
@@ -184,20 +178,26 @@ int idWaveFile::OpenOGG( const char* strFileName, waveformatex_t *pwfx ) {
 
 	mfileTime = mhmmio->Timestamp();
 
-	vorbis_info *vi = ov_info( ov, -1 );
+	stb_vorbis_info stbvi = stb_vorbis_get_info( ov );
+	int numSamples = stb_vorbis_stream_length_in_samples( ov );
+	if(numSamples == 0) {
+		stbverr = stb_vorbis_get_error( ov );
+		common->Warning( "Couldn't get sound length of '%s' with stb_vorbis: %s\n", strFileName, my_stbv_strerror(stbverr) );
+		// TODO:  return -1 etc?
+	}
 
-	mpwfx.Format.nSamplesPerSec = vi->rate;
-	mpwfx.Format.nChannels = vi->channels;
+	mpwfx.Format.nSamplesPerSec = stbvi.sample_rate;
+	mpwfx.Format.nChannels = stbvi.channels;
 	mpwfx.Format.wBitsPerSample = sizeof(short) * 8;
-	mdwSize = ov_pcm_total( ov, -1 ) * vi->channels;	// pcm samples * num channels
+	mdwSize = numSamples * stbvi.channels;	// pcm samples * num channels
 	mbIsReadingFromMemory = false;
 
 	if ( idSoundSystemLocal::s_realTimeDecoding.GetBool() ) {
 
-		ov_clear( ov );
+		stb_vorbis_close( ov );
 		fileSystem->CloseFile( mhmmio );
 		mhmmio = NULL;
-		delete ov;
+		Mem_Free( oggFileData );
 
 		mpwfx.Format.wFormatTag = WAVE_FORMAT_TAG_OGG;
 		mhmmio = fileSystem->OpenFileRead( strFileName );
@@ -206,6 +206,7 @@ int idWaveFile::OpenOGG( const char* strFileName, waveformatex_t *pwfx ) {
 	} else {
 
 		ogg = ov;
+		oggData = oggFileData;
 
 		mpwfx.Format.wFormatTag = WAVE_FORMAT_TAG_PCM;
 		mMemSize = mdwSize * sizeof( short );
@@ -226,18 +227,27 @@ idWaveFile::ReadOGG
 ====================
 */
 int idWaveFile::ReadOGG( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead ) {
-	int total = dwSizeToRead;
-	char *bufferPtr = (char *)pBuffer;
-	OggVorbis_File *ov = (OggVorbis_File *) ogg;
+	// DG: Note that stb_vorbis_get_samples_short_interleaved() operates on shorts,
+	//     while VorbisFile's ov_read() operates on bytes, so some numbers are different
+	int total = dwSizeToRead/sizeof(short);
+	short *bufferPtr = (short *)pBuffer;
+	stb_vorbis *ov = (stb_vorbis *) ogg;
 
 	do {
-		int ret = ov_read( ov, bufferPtr, total >= 4096 ? 4096 : total, Swap_IsBigEndian(), 2, 1, NULL );
+		int numShorts = total; // total >= 2048 ? 2048 : total; - I think stb_vorbis doesn't mind decoding all of it
+		int ret = stb_vorbis_get_samples_short_interleaved( ov, mpwfx.Format.nChannels, bufferPtr, numShorts );
 		if ( ret == 0 ) {
 			break;
 		}
 		if ( ret < 0 ) {
+			int stbverr = stb_vorbis_get_error( ov );
+			common->Warning( "idWaveFile::ReadOGG() stb_vorbis_get_samples_short_interleaved() failed: %s\n", my_stbv_strerror(stbverr) );
 			return -1;
 		}
+		// for some reason, stb_vorbis_get_samples_short_interleaved() takes the absolute
+		// number of shorts to read as a function argument, but returns the number of samples
+		// that were read PER CHANNEL
+		ret *= mpwfx.Format.nChannels;
 		bufferPtr += ret;
 		total -= ret;
 	} while( total > 0 );
@@ -257,15 +267,16 @@ idWaveFile::CloseOGG
 ====================
 */
 int idWaveFile::CloseOGG( void ) {
-	OggVorbis_File *ov = (OggVorbis_File *) ogg;
+	stb_vorbis* ov = (stb_vorbis *)ogg;
 	if ( ov != NULL ) {
 		Sys_EnterCriticalSection( CRITICAL_SECTION_ONE );
-		ov_clear( ov );
-		delete ov;
+		stb_vorbis_close( ov );
 		Sys_LeaveCriticalSection( CRITICAL_SECTION_ONE );
 		fileSystem->CloseFile( mhmmio );
 		mhmmio = NULL;
 		ogg = NULL;
+		Mem_Free( oggData );
+		oggData = NULL;
 		return 0;
 	}
 	return -1;
@@ -297,9 +308,8 @@ private:
 	idSoundSample *			lastSample;			// last sample being decoded
 	int						lastSampleOffset;	// last offset into the decoded sample
 	int						lastDecodeTime;		// last time decoding sound
-	idFile_Memory			file;				// encoded file in memory
 
-	OggVorbis_File			ogg;				// OggVorbis file
+	stb_vorbis*				stbv;				// stb_vorbis (Ogg) handle, using lastSample->nonCacheData
 };
 
 idBlockAlloc<idSampleDecoderLocal, 64>		sampleDecoderAllocator;
@@ -376,6 +386,7 @@ void idSampleDecoderLocal::Clear( void ) {
 	lastSample = NULL;
 	lastSampleOffset = 0;
 	lastDecodeTime = 0;
+	stbv = NULL;
 }
 
 /*
@@ -391,8 +402,8 @@ void idSampleDecoderLocal::ClearDecoder( void ) {
 			break;
 		}
 		case WAVE_FORMAT_TAG_OGG: {
-			ov_clear( &ogg );
-			memset( &ogg, 0, sizeof( ogg ) );
+			stb_vorbis_close( stbv );
+			stbv = NULL;
 			break;
 		}
 	}
@@ -526,8 +537,12 @@ int idSampleDecoderLocal::DecodeOGG( idSoundSample *sample, int sampleOffset44k,
 			failed = true;
 			return 0;
 		}
-		file.SetData( (const char *)sample->nonCacheData, sample->objectMemSize );
-		if ( ov_openFile( &file, &ogg ) < 0 ) {
+		assert(stbv == NULL);
+		int stbVorbErr = 0;
+		stbv = stb_vorbis_open_memory( sample->nonCacheData, sample->objectMemSize, &stbVorbErr, NULL );
+		if ( stbv == NULL ) {
+			common->Warning( "idSampleDecoderLocal::DecodeOGG() stb_vorbis_open_memory() for %s failed: %s\n",
+							 sample->name.c_str(), my_stbv_strerror(stbVorbErr) );
 			failed = true;
 			return 0;
 		}
@@ -535,9 +550,22 @@ int idSampleDecoderLocal::DecodeOGG( idSoundSample *sample, int sampleOffset44k,
 		lastSample = sample;
 	}
 
+	if( sample->objectInfo.nChannels > 2 ) {
+		assert( 0 && ">2 channels currently not supported (samplesBuf expects 1 or 2)" );
+		common->Warning( "Ogg Vorbis files with >2 channels are not supported!\n" );
+		// no idea if other parts of the engine support more than stereo;
+		// pretty sure though the standard gamedata doesn't use it (positional sounds must be mono anyway)
+		failed = true;
+		return 0;
+	}
+
 	// seek to the right offset if necessary
 	if ( sampleOffset != lastSampleOffset ) {
-		if ( ov_pcm_seek( &ogg, sampleOffset / sample->objectInfo.nChannels ) != 0 ) {
+		if ( stb_vorbis_seek( stbv, sampleOffset / sample->objectInfo.nChannels ) == 0 ) {
+			int stbVorbErr = stb_vorbis_get_error( stbv );
+			int offset = sampleOffset / sample->objectInfo.nChannels;
+			common->Warning( "idSampleDecoderLocal::DecodeOGG() stb_vorbis_seek(%d) for %s failed: %s\n",
+			                 offset, sample->name.c_str(), my_stbv_strerror( stbVorbErr ) );
 			failed = true;
 			return 0;
 		}
@@ -549,9 +577,16 @@ int idSampleDecoderLocal::DecodeOGG( idSoundSample *sample, int sampleOffset44k,
 	totalSamples = sampleCount;
 	readSamples = 0;
 	do {
-		float **samples;
-		int ret = ov_read_float( &ogg, &samples, totalSamples / sample->objectInfo.nChannels, NULL );
+		// DG: in contrast to libvorbisfile's ov_read_float(), stb_vorbis_get_samples_float() expects you to
+		//     pass a buffer to store the decoded samples in, so limit it to 4096 samples/channel per iteration
+		float samplesBuf[2][MIXBUFFER_SAMPLES];
+		float* samples[2] = { samplesBuf[0], samplesBuf[1] };
+		int reqSamples = Min( MIXBUFFER_SAMPLES, totalSamples / sample->objectInfo.nChannels );
+		int ret = stb_vorbis_get_samples_float( stbv, sample->objectInfo.nChannels, samples, reqSamples );
 		if ( ret == 0 ) {
+			int stbVorbErr = stb_vorbis_get_error( stbv );
+			common->Warning( "idSampleDecoderLocal::DecodeOGG() stb_vorbis_get_samples_float() for %s failed: %s\n",
+			                 sample->name.c_str(), my_stbv_strerror( stbVorbErr ) );
 			failed = true;
 			break;
 		}

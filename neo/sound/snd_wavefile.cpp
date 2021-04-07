@@ -46,6 +46,7 @@ idWaveFile::idWaveFile( void ) {
 	mpbData		= NULL;
 	ogg			= NULL;
 	isOgg		= false;
+	oggData		= NULL;
 }
 
 //-----------------------------------------------------------------------------
