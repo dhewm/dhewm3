@@ -123,7 +123,9 @@ idSurface::idSurface
 ID_INLINE idSurface::idSurface( const idDrawVert *verts, const int numVerts, const int *indexes, const int numIndexes ) {
 	assert( verts != NULL && indexes != NULL && numVerts > 0 && numIndexes > 0 );
 	this->verts.SetNum( numVerts );
-	memcpy( this->verts.Ptr(), verts, numVerts * sizeof( verts[0] ) );
+	for (int i = 0; i < numVerts; i++) {
+		this->verts[i] = verts[i];
+	}
 	this->indexes.SetNum( numIndexes );
 	memcpy( this->indexes.Ptr(), indexes, numIndexes * sizeof( indexes[0] ) );
 	GenerateEdgeIndexes();

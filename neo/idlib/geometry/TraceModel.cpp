@@ -1164,6 +1164,7 @@ int idTraceModel::GetOrderedSilhouetteEdges( const int edgeIsSilEdge[MAX_TRACEMO
 	int i, j, edgeNum, numSilEdges, nextSilVert;
 	int unsortedSilEdges[MAX_TRACEMODEL_EDGES];
 
+	unsortedSilEdges[0] = 0;
 	numSilEdges = 0;
 	for ( i = 1; i <= numEdges; i++ ) {
 		if ( edgeIsSilEdge[i] ) {
@@ -1409,7 +1410,10 @@ void idTraceModel::VolumeIntegrals( struct volumeIntegrals_s &integrals ) const 
 	int i, a, b, c;
 	float nx, ny, nz;
 
-	memset( &integrals, 0, sizeof(volumeIntegrals_t) );
+	integrals.T0 = 0.0f;
+	integrals.T1.Zero();
+	integrals.T2.Zero();
+	integrals.TP.Zero();
 	for ( i = 0; i < numPolys; i++ ) {
 		poly = &polys[i];
 

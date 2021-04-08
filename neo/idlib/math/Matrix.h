@@ -134,7 +134,8 @@ ID_INLINE idMat2::idMat2( const float xx, const float xy, const float yx, const 
 }
 
 ID_INLINE idMat2::idMat2( const float src[ 2 ][ 2 ] ) {
-	memcpy( mat, src, 2 * 2 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1];
 }
 
 ID_INLINE const idVec2 &idMat2::operator[]( int index ) const {
@@ -438,7 +439,9 @@ ID_INLINE idMat3::idMat3( const float xx, const float xy, const float xz, const 
 }
 
 ID_INLINE idMat3::idMat3( const float src[ 3 ][ 3 ] ) {
-	memcpy( mat, src, 3 * 3 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1]; mat[0].z = src[0][2];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1]; mat[1].z = src[1][2];
+	mat[2].x = src[2][0]; mat[2].y = src[2][1]; mat[2].z = src[2][2];
 }
 
 ID_INLINE const idVec3 &idMat3::operator[]( int index ) const {
@@ -595,7 +598,9 @@ ID_INLINE bool idMat3::operator!=( const idMat3 &a ) const {
 }
 
 ID_INLINE void idMat3::Zero( void ) {
-	memset( mat, 0, sizeof( idMat3 ) );
+	mat[0].x = 0.0f; mat[0].y = 0.0f; mat[0].z = 0.0f;
+	mat[1].x = 0.0f; mat[1].y = 0.0f; mat[1].z = 0.0f;
+	mat[2].x = 0.0f; mat[2].y = 0.0f; mat[2].z = 0.0f;
 }
 
 ID_INLINE void idMat3::Identity( void ) {
@@ -881,7 +886,10 @@ ID_INLINE idMat4::idMat4( const idMat3 &rotation, const idVec3 &translation ) {
 }
 
 ID_INLINE idMat4::idMat4( const float src[ 4 ][ 4 ] ) {
-	memcpy( mat, src, 4 * 4 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1]; mat[0].z = src[0][2]; mat[0].w = src[0][3];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1]; mat[1].z = src[1][2]; mat[1].w = src[1][3];
+	mat[2].x = src[2][0]; mat[2].y = src[2][1]; mat[2].z = src[2][2]; mat[2].w = src[2][3];
+	mat[3].x = src[3][0]; mat[3].y = src[3][1]; mat[3].z = src[3][2]; mat[3].w = src[3][3];
 }
 
 ID_INLINE const idVec4 &idMat4::operator[]( int index ) const {
@@ -1057,7 +1065,10 @@ ID_INLINE bool idMat4::operator!=( const idMat4 &a ) const {
 }
 
 ID_INLINE void idMat4::Zero( void ) {
-	memset( mat, 0, sizeof( idMat4 ) );
+	mat[0].x = 0.0f; mat[0].y = 0.0f; mat[0].z = 0.0f; mat[0].w = 0.0f;
+	mat[1].x = 0.0f; mat[1].y = 0.0f; mat[1].z = 0.0f; mat[1].w = 0.0f;
+	mat[2].x = 0.0f; mat[2].y = 0.0f; mat[2].z = 0.0f; mat[2].w = 0.0f;
+	mat[3].x = 0.0f; mat[3].y = 0.0f; mat[3].z = 0.0f; mat[3].w = 0.0f;
 }
 
 ID_INLINE void idMat4::Identity( void ) {
@@ -1219,7 +1230,11 @@ ID_INLINE idMat5::idMat5( void ) {
 }
 
 ID_INLINE idMat5::idMat5( const float src[ 5 ][ 5 ] ) {
-	memcpy( mat, src, 5 * 5 * sizeof( float ) );
+	mat[0].x = src[0][0]; mat[0].y = src[0][1]; mat[0].z = src[0][2]; mat[0].s = src[0][3]; mat[0].t = src[0][4];
+	mat[1].x = src[1][0]; mat[1].y = src[1][1]; mat[1].z = src[1][2]; mat[1].s = src[1][3]; mat[1].t = src[1][4];
+	mat[2].x = src[2][0]; mat[2].y = src[2][1]; mat[2].z = src[2][2]; mat[2].s = src[2][3]; mat[2].t = src[2][4];
+	mat[3].x = src[3][0]; mat[3].y = src[3][1]; mat[3].z = src[3][2]; mat[3].s = src[3][3]; mat[3].t = src[3][4];
+	mat[4].x = src[4][0]; mat[4].y = src[4][1]; mat[4].z = src[4][2]; mat[4].s = src[4][3]; mat[4].t = src[4][4];
 }
 
 ID_INLINE idMat5::idMat5( const idVec5 &v0, const idVec5 &v1, const idVec5 &v2, const idVec5 &v3, const idVec5 &v4 ) {
@@ -1382,7 +1397,11 @@ ID_INLINE bool idMat5::operator!=( const idMat5 &a ) const {
 }
 
 ID_INLINE void idMat5::Zero( void ) {
-	memset( mat, 0, sizeof( idMat5 ) );
+	mat[0].x = 0.0f; mat[0].y = 0.0f; mat[0].z = 0.0f; mat[0].s = 0.0f; mat[0].t = 0.0f;
+	mat[1].x = 0.0f; mat[1].y = 0.0f; mat[1].z = 0.0f; mat[1].s = 0.0f; mat[1].t = 0.0f;
+	mat[2].x = 0.0f; mat[2].y = 0.0f; mat[2].z = 0.0f; mat[2].s = 0.0f; mat[2].t = 0.0f;
+	mat[3].x = 0.0f; mat[3].y = 0.0f; mat[3].z = 0.0f; mat[3].s = 0.0f; mat[3].t = 0.0f;
+	mat[4].x = 0.0f; mat[4].y = 0.0f; mat[4].z = 0.0f; mat[4].s = 0.0f; mat[4].t = 0.0f;
 }
 
 ID_INLINE void idMat5::Identity( void ) {
@@ -1536,7 +1555,12 @@ ID_INLINE idMat6::idMat6( const idVec6 &v0, const idVec6 &v1, const idVec6 &v2, 
 }
 
 ID_INLINE idMat6::idMat6( const float src[ 6 ][ 6 ] ) {
-	memcpy( mat, src, 6 * 6 * sizeof( float ) );
+	memcpy( mat[0].ToFloatPtr(), src[0], 6 * sizeof( float ) );
+	memcpy( mat[1].ToFloatPtr(), src[1], 6 * sizeof( float ) );
+	memcpy( mat[2].ToFloatPtr(), src[2], 6 * sizeof( float ) );
+	memcpy( mat[3].ToFloatPtr(), src[3], 6 * sizeof( float ) );
+	memcpy( mat[4].ToFloatPtr(), src[4], 6 * sizeof( float ) );
+	memcpy( mat[5].ToFloatPtr(), src[5], 6 * sizeof( float ) );
 }
 
 ID_INLINE const idVec6 &idMat6::operator[]( int index ) const {
@@ -1699,7 +1723,9 @@ ID_INLINE bool idMat6::operator!=( const idMat6 &a ) const {
 }
 
 ID_INLINE void idMat6::Zero( void ) {
-	memset( mat, 0, sizeof( idMat6 ) );
+	for (int i = 0; i < 6; i++) {
+		mat[i].Zero();
+	}
 }
 
 ID_INLINE void idMat6::Identity( void ) {
