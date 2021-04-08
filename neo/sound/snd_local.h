@@ -387,6 +387,8 @@ public:
 	ALuint				lastopenalStreamingBuffer[3];
 	bool				stopped;
 
+	bool				paused;					// DG: currently paused, but generally still playing - for when menu is open etc
+
 	bool				disallowSlow;
 
 };
@@ -428,6 +430,9 @@ public:
 	//----------------------------------------------
 
 	void				Clear( void );
+
+	void				PauseAll( void );   // DG: to pause active OpenAL sources when entering menu etc
+	void				UnPauseAll( void ); // DG: to resume active OpenAL sources when leaving menu etc
 
 	void				OverrideParms( const soundShaderParms_t *base, const soundShaderParms_t *over, soundShaderParms_t *out );
 	void				CheckForCompletion( int current44kHzTime );

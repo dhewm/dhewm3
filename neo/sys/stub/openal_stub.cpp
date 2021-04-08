@@ -143,5 +143,6 @@ AL_API void AL_APIENTRY alSourcef( ALuint sid, ALenum param, ALfloat value ) { }
 AL_API void AL_APIENTRY alSourceUnqueueBuffers( ALuint sid, ALsizei numEntries, ALuint *bids ) { }
 
 AL_API void AL_APIENTRY alSourcePlay( ALuint sid ) { }
+AL_API void AL_APIENTRY alSourcePause( ALuint source ) {}
 
 } // extern "C"

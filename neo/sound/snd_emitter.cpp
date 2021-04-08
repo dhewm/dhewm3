@@ -186,6 +186,7 @@ void idSoundChannel::Clear( void ) {
 	memset( &parms, 0, sizeof(parms) );
 
 	triggered = false;
+	paused = false;
 	openalSource = 0;
 	openalStreamingOffset = 0;
 	openalStreamingBuffer[0] = openalStreamingBuffer[1] = openalStreamingBuffer[2] = 0;
@@ -957,6 +958,49 @@ void idSoundEmitterLocal::StopSound( const s_channelType channel ) {
 
 		chan->leadinSample = NULL;
 		chan->soundShader = NULL;
+	}
+
+	Sys_LeaveCriticalSection();
+}
+
+// DG: to pause active OpenAL sources when entering menu etc
+void idSoundEmitterLocal::PauseAll( void ) {
+
+	Sys_EnterCriticalSection();
+
+	for( int i = 0; i < SOUND_MAX_CHANNELS; i++ ) {
+		idSoundChannel	*chan = &channels[i];
+
+		if ( !chan->triggerState ) {
+			continue;
+		}
+
+		if ( alIsSource( chan->openalSource ) ) {
+			alSourcePause( chan->openalSource );
+			chan->paused = true;
+		}
+	}
+
+	Sys_LeaveCriticalSection();
+}
+
+
+// DG: to resume active OpenAL sources when leaving menu etc
+void idSoundEmitterLocal::UnPauseAll( void ) {
+
+	Sys_EnterCriticalSection();
+
+	for( int i = 0; i < SOUND_MAX_CHANNELS; i++ ) {
+		idSoundChannel	*chan = &channels[i];
+
+		if ( !chan->triggerState ) {
+			continue;
+		}
+
+		if ( alIsSource( chan->openalSource ) && chan->paused ) {
+			alSourcePlay( chan->openalSource );
+			chan->paused = false;
+		}
 	}
 
 	Sys_LeaveCriticalSection();
