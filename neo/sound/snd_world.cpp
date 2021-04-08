@@ -1482,6 +1482,16 @@ void idSoundWorldLocal::Pause( void ) {
 	}
 
 	pause44kHz = soundSystemLocal.GetCurrent44kHzTime();
+
+	for ( int i = 0; i < emitters.Num(); i++ ) {
+		idSoundEmitterLocal * emitter = emitters[i];
+
+		// if no channels are active, do nothing
+		if ( emitter == NULL || !emitter->playing ) {
+			continue;
+		}
+		emitter->PauseAll();
+	}
 }
 
 /*
@@ -1501,6 +1511,16 @@ void idSoundWorldLocal::UnPause( void ) {
 	OffsetSoundTime( offset44kHz );
 
 	pause44kHz = -1;
+
+	for ( int i = 0; i < emitters.Num(); i++ ) {
+		idSoundEmitterLocal * emitter = emitters[i];
+
+		// if no channels are active, do nothing
+		if ( emitter == NULL || !emitter->playing ) {
+			continue;
+		}
+		emitter->UnPauseAll();
+	}
 }
 
 /*
