@@ -168,6 +168,8 @@ bool GLimp_Init(glimpParms_t parms) {
 		if (tcolorbits == 24)
 			channelcolorbits = 8;
 
+		int talphabits = r_waylandcompat.GetBool() ? 0 : channelcolorbits;
+
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, channelcolorbits);
@@ -175,10 +177,7 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, tdepthbits);
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, tstencilbits);
 
-		if (r_waylandcompat.GetBool())
-			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-		else
-			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, channelcolorbits);
+		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, talphabits);
 
 		SDL_GL_SetAttribute(SDL_GL_STEREO, parms.stereo ? 1 : 0);
 
@@ -363,12 +362,25 @@ bool GLimp_Init(glimpParms_t parms) {
 		}		
 #endif // defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 
-		common->Printf("Using %d color bits, %d depth, %d stencil display\n",
-						channelcolorbits, tdepthbits, tstencilbits);
+		common->Printf("Requested %d color bits per chan, %d alpha %d depth, %d stencil\n",
+						channelcolorbits, talphabits, tdepthbits, tstencilbits);
 
-		glConfig.colorBits = tcolorbits;
-		glConfig.depthBits = tdepthbits;
-		glConfig.stencilBits = tstencilbits;
+		{
+			int r, g, b, a, d, s;
+			SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &r);
+			SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &g);
+			SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &b);
+			SDL_GL_GetAttribute(SDL_GL_ALPHA_SIZE, &a);
+			SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &d);
+			SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &s);
+
+			common->Printf("Got %d stencil bits, %d depth bits, color bits: r%d g%d b%d a%d\n", s, d, r, g, b, a);
+
+			glConfig.colorBits = r+g+b; // a bit imprecise, but seems to be used only in GfxInfo_f()
+			glConfig.alphabits = a;
+			glConfig.depthBits = d;
+			glConfig.stencilBits = s;
+		}
 
 		glConfig.displayFrequency = 0;
 

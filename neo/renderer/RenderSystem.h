@@ -59,7 +59,7 @@ typedef struct glconfig_s {
 	int					maxTextureImageUnits;
 	float				maxTextureAnisotropy;
 
-	int					colorBits, depthBits, stencilBits;
+	int					colorBits, alphabits, depthBits, stencilBits;
 
 	bool				multitextureAvailable;
 	bool				textureCompressionAvailable;
