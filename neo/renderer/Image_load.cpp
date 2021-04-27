@@ -1373,9 +1373,15 @@ bool idImage::CheckPrecompressedImage( bool fullLoad ) {
 		return false;
 	}
 
+#if 0 // DG: no idea what this was exactly meant to achieve, but it's definitely a bad idea:
+	//     we might try to load the lower mipmap levels of the image, but we'd still have
+	//     to load the whole .dds file first.
+	//     What's even weirder: idImage::ShouldImageBePartiallyCached() returns false
+	//     if the file size is LESS THAN image_cacheMinK * 1024...
 	if ( !fullLoad && len > globalImages->image_cacheMinK.GetInteger() * 1024 ) {
 		len = globalImages->image_cacheMinK.GetInteger() * 1024;
 	}
+#endif
 
 	byte *data = (byte *)R_StaticAlloc( len );
 
