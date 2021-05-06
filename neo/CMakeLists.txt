@@ -293,7 +293,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 elseif(MSVC)
 	add_compile_options(/MP) # parallel build (use all cores, or as many as configured in VS)
 	
-	add_compile_options(/W4)
+	add_compile_options(/W3)
 	add_compile_options(/we4840) # treat as error when passing a class to a vararg-function (probably printf-like)
 	add_compile_options(/wd4100) # unreferenced formal parameter
 	add_compile_options(/wd4127) # conditional expression is constant
@@ -304,6 +304,7 @@ elseif(MSVC)
 	add_compile_options(/wd4996) # 'function': was declared deprecated
 	add_compile_options(/wd4068) # unknown pragma
 	add_compile_options(/wd4458) # declaration of 'variable' hides class member
+	add_compile_options(/wd4312) # smaller type
 	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
@@ -321,8 +322,11 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL "-DNDEBUG ${CMAKE_C_FLAGS_MINSIZEREL}")
 
 # mingw and msvc
 if(WIN32)
-	add_definitions(-DWINVER=0x0501)
-	add_definitions(-D_WIN32_WINNT=0x0501)
+	add_definitions(-DWINVER=0x0A00)
+	add_definitions(-D_WIN32_WINNT=0x0A00)
+	add_definitions(-DNTDDI_VERSION=0x0A000000)
+	#add_definitions(-DWINVER=0x0501)
+	#add_definitions(-D_WIN32_WINNT=0x0501)
 
 	set(sys_libs ${sys_libs}
 		winmm
@@ -859,7 +863,7 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 		"tools/edit_gui_common.h"
 		)
 	SET(CMAKE_MFC_FLAG 2)
-	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;__AFXDLL")
+	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;_AFXDLL")
 else()
 	set(src_editor_tools "tools/edit_stub.cpp" "tools/edit_public.h")
 endif()
