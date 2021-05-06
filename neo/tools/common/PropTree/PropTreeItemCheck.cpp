@@ -65,10 +65,14 @@ void CPropTreeItemCheck::DrawAttribute(CDC* pDC, const RECT& rc)
 		return;
 	}
 
+	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int CHECK_BOX_SIZE_s = int(CHECK_BOX_SIZE * scaling_factor);
+
 	checkRect.left = m_rc.left;
-	checkRect.top = m_rc.top + ((m_rc.bottom - m_rc.top)/2)-CHECK_BOX_SIZE/2;
-	checkRect.right = checkRect.left + CHECK_BOX_SIZE;
-	checkRect.bottom = checkRect.top + CHECK_BOX_SIZE;
+	checkRect.top = m_rc.top + ((m_rc.bottom - m_rc.top)/2)- CHECK_BOX_SIZE_s /2;
+	checkRect.right = checkRect.left + CHECK_BOX_SIZE_s;
+	checkRect.bottom = checkRect.top + CHECK_BOX_SIZE_s;
 
 	if(!m_bActivated)
 		pDC->DrawFrameControl(&checkRect, DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT |(checkState ? DFCS_CHECKED : 0));

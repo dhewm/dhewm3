@@ -656,43 +656,50 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 
 	GetClientRect( clientRect );
 
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96;
+	float scaled_toolbar_height = (TOOLBAR_HEIGHT * scaling_factor);
+	float scaled_button_space = (BUTTON_SPACE * scaling_factor);
+	float scaled_border_size = (BORDER_SIZE * scaling_factor);
+
+
 	if ( declTree.GetSafeHwnd() ) {
-		rect.left = BORDER_SIZE;
-		rect.top = BORDER_SIZE;
-		rect.right = clientRect.Width() - BORDER_SIZE;
-		rect.bottom = clientRect.Height() - 100;
+		rect.left = scaled_border_size;
+		rect.top = scaled_border_size;
+		rect.right = clientRect.Width() - scaled_border_size;
+		rect.bottom = clientRect.Height() - (100 * scaling_factor);
 		declTree.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
 	if ( findNameStatic.GetSafeHwnd() ) {
-		rect.left = BORDER_SIZE + 2;
-		rect.top = clientRect.Height() - 100 + BUTTON_SPACE + 2;
-		rect.right = BORDER_SIZE + 80;
-		rect.bottom = clientRect.Height() - 76 + 2;
+		rect.left = scaled_border_size + (2 * scaling_factor);
+		rect.top = clientRect.Height() - (98 * scaling_factor) + scaled_button_space;
+		rect.right = scaled_border_size + (80 * scaling_factor);
+		rect.bottom = clientRect.Height() - (74 * scaling_factor);
 		findNameStatic.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
 	if ( findTextStatic.GetSafeHwnd() ) {
-		rect.left = BORDER_SIZE + 2;
-		rect.top = clientRect.Height() - 78 + BUTTON_SPACE + 2;
-		rect.right = BORDER_SIZE + 80;
-		rect.bottom = clientRect.Height() - 54 + 2;
+		rect.left = scaled_border_size + (2 * scaling_factor);
+		rect.top = clientRect.Height() - (76 * scaling_factor) + scaled_button_space;
+		rect.right = scaled_border_size + (80 * scaling_factor);
+		rect.bottom = clientRect.Height() - (52 * scaling_factor);
 		findTextStatic.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
 	if ( findNameEdit.GetSafeHwnd() ) {
-		rect.left = BORDER_SIZE + 80;
-		rect.top = clientRect.Height() - 100 + BUTTON_SPACE;
-		rect.right = clientRect.Width() - BORDER_SIZE;
-		rect.bottom = clientRect.Height() - 76;
+		rect.left = scaled_border_size + (80 * scaling_factor);
+		rect.top = clientRect.Height() - (100 * scaling_factor) + scaled_button_space;
+		rect.right = clientRect.Width() - scaled_border_size;
+		rect.bottom = clientRect.Height() - (76 * scaling_factor);
 		findNameEdit.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
 	if ( findTextEdit.GetSafeHwnd() ) {
-		rect.left = BORDER_SIZE + 80;
-		rect.top = clientRect.Height() - 78 + BUTTON_SPACE;
-		rect.right = clientRect.Width() - BORDER_SIZE;
-		rect.bottom = clientRect.Height() - 54;
+		rect.left = scaled_border_size + (80 * scaling_factor);
+		rect.top = clientRect.Height() - (78 * scaling_factor) + scaled_button_space;
+		rect.right = clientRect.Width() - scaled_border_size;
+		rect.bottom = clientRect.Height() - (54 * scaling_factor);
 		findTextEdit.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -700,10 +707,10 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 		findButton.GetClientRect( rect );
 		int width = rect.Width();
 		int height = rect.Height();
-		rect.left = BORDER_SIZE;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
-		rect.right = BORDER_SIZE + width;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.left = scaled_border_size;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
+		rect.right = scaled_border_size + width;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		findButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -711,10 +718,10 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 		editButton.GetClientRect( rect );
 		int width = rect.Width();
 		int height = rect.Height();
-		rect.left = BORDER_SIZE + BUTTON_SPACE + width;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
-		rect.right = BORDER_SIZE + BUTTON_SPACE + 2 * width;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.left = scaled_border_size + scaled_button_space + width;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
+		rect.right = scaled_border_size + scaled_button_space + 2 * width;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		editButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -722,10 +729,10 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 		newButton.GetClientRect( rect );
 		int width = rect.Width();
 		int height = rect.Height();
-		rect.left = BORDER_SIZE + 2 * BUTTON_SPACE + 2 * width;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
-		rect.right = BORDER_SIZE + 2 * BUTTON_SPACE + 3 * width;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.left = scaled_border_size + 2 * scaled_button_space + 2 * width;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
+		rect.right = scaled_border_size + 2 * scaled_button_space + 3 * width;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		newButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -733,10 +740,10 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 		reloadButton.GetClientRect( rect );
 		int width = rect.Width();
 		int height = rect.Height();
-		rect.left = BORDER_SIZE + 3 * BUTTON_SPACE + 3 * width;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
-		rect.right = BORDER_SIZE + 3 * BUTTON_SPACE + 4 * width;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.left = scaled_border_size + 3 * scaled_button_space + 3 * width;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
+		rect.right = scaled_border_size + 3 * scaled_button_space + 4 * width;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		reloadButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -744,18 +751,18 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 		cancelButton.GetClientRect( rect );
 		int width = rect.Width();
 		int height = rect.Height();
-		rect.left = clientRect.Width() - BORDER_SIZE - width;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
-		rect.right = clientRect.Width() - BORDER_SIZE;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.left = clientRect.Width() - scaled_border_size - width;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
+		rect.right = clientRect.Width() - scaled_border_size;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		cancelButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
 	if ( statusBar.GetSafeHwnd() ) {
-		rect.left = clientRect.Width() - 2;
-		rect.top = clientRect.Height() - 2;
-		rect.right = clientRect.Width() - 2;
-		rect.bottom = clientRect.Height() - 2;
+		rect.left = clientRect.Width() - (2 * scaling_factor);
+		rect.top = clientRect.Height() - (2 * scaling_factor);
+		rect.right = clientRect.Width() - (2 * scaling_factor);
+		rect.bottom = clientRect.Height() - (2 * scaling_factor);
 		statusBar.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 

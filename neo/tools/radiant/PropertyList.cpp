@@ -88,6 +88,10 @@ BOOL CPropertyList::PreCreateWindow(CREATESTRUCT& cs) {
 }
 
 void CPropertyList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s20 = int(20 * scaling_factor);
+
 	if (measureItem && !measureItem->m_curValue.IsEmpty()) {
 		CRect rect;
 		GetClientRect(rect);
@@ -96,16 +100,21 @@ void CPropertyList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
 		}
 		rect.left = m_nDivider;
 		CDC * dc = GetDC();
-		dc->DrawText(measureItem->m_curValue, rect, DT_CALCRECT | DT_LEFT | DT_WORDBREAK);
+		int ret = dc->DrawText(measureItem->m_curValue, rect, DT_INTERNAL | DT_CALCRECT | DT_LEFT | DT_WORDBREAK);
 		ReleaseDC(dc);
-		lpMeasureItemStruct->itemHeight = (rect.Height() >= 20) ? rect.Height() : 20; //pixels
+		lpMeasureItemStruct->itemHeight = (ret >= s20) ? ret * scaling_factor : s20; //pixels
 	} else {
-		lpMeasureItemStruct->itemHeight = 20; //pixels
+		lpMeasureItemStruct->itemHeight = s20; //pixels
 	}
 }
 
 
 void CPropertyList::DrawItem(LPDRAWITEMSTRUCT lpDIS) {
+
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s3 = 3;// int(3 * scaling_factor);
+
 	CDC dc;
 	dc.Attach(lpDIS->hDC);
 	CRect rectFull = lpDIS->rcItem;
@@ -115,7 +124,7 @@ void CPropertyList::DrawItem(LPDRAWITEMSTRUCT lpDIS) {
 	}
 	rect.left = m_nDivider;
 	CRect rect2 = rectFull;
-	rect2.right = rect.left - 1;
+	rect2.right = rect.left - (1 * scaling_factor);
 	UINT nIndex = lpDIS->itemID;
 
 	if (nIndex != (UINT) -1) {
@@ -136,12 +145,12 @@ void CPropertyList::DrawItem(LPDRAWITEMSTRUCT lpDIS) {
 
 		//write the property name in the first rectangle
 		dc.SetBkMode(TRANSPARENT);
-		dc.DrawText(pItem->m_propName,CRect(rect2.left+3,rect2.top+3,
-											rect2.right-3,rect2.bottom+3),
+		dc.DrawText(pItem->m_propName,CRect(rect2.left+s3,rect2.top+s3,
+											rect2.right-s3,rect2.bottom+s3),
 					DT_LEFT | DT_SINGLELINE);
 
 		//write the initial property value in the second rectangle
-		dc.DrawText(pItem->m_curValue,CRect(rect.left+3,rect.top+3, rect.right+3,rect.bottom+3), DT_LEFT | (pItem->m_nItemType == PIT_VAR) ? DT_WORDBREAK : DT_SINGLELINE);
+		 dc.DrawText(pItem->m_curValue,CRect(rect.left+s3,rect.top+s3, rect.right+s3,rect.bottom+s3), DT_LEFT | (pItem->m_nItemType == PIT_VAR) ? DT_WORDBREAK : DT_SINGLELINE);
 	}
 	dc.Detach();
 }
@@ -187,6 +196,9 @@ void CPropertyList::OnSelchange() {
 	static int recurse = 0;
 	//m_curSel = GetCurSel();
 
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s3 = int(3 * scaling_factor);
 
 	GetItemRect(m_curSel,rect);
 	rect.left = m_nDivider;
@@ -208,7 +220,7 @@ void CPropertyList::OnSelchange() {
 		if (m_cmbBox) {
 			m_cmbBox.MoveWindow(rect);
 		} else {
-			rect.bottom += 300;
+			rect.bottom += (s3 * 100);
 			m_cmbBox.Create(CBS_DROPDOWNLIST | WS_VSCROLL | WS_VISIBLE | WS_CHILD | WS_BORDER,rect,this,IDC_PROPCMBBOX);
 			m_cmbBox.SetFont(&m_SSerif8Font);
 		}
@@ -242,7 +254,7 @@ void CPropertyList::OnSelchange() {
 		//display edit box
 		m_nLastBox = 1;
 		m_prevSel = m_curSel;
-		rect.bottom -= 3;
+		rect.bottom -= s3;
 		if (m_editBox) {
 			m_editBox.MoveWindow(rect);
 		} else {
@@ -268,11 +280,14 @@ void CPropertyList::DisplayButton(CRect region) {
 	//displays a button if the property is a file/color/font chooser
 	m_nLastBox = 2;
 	m_prevSel = m_curSel;
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s3 = int(3 * scaling_factor);
 
 	if (region.Width() > 25) {
 		region.left = region.right - 25;
 	}
-	region.bottom -= 3;
+	region.bottom -= s3;
 
 	if (m_btnCtrl) {
 		m_btnCtrl.MoveWindow(region);

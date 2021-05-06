@@ -1114,7 +1114,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 		TRACE0("Failed to create toolbar\n");
 		return -1;	// fail to create
 	}
-
 	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT))) {
 		TRACE0("Failed to create status bar\n");
 		return -1;	// fail to create
@@ -1799,23 +1798,25 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy) {
 
 	CRect	rctParent;
 	GetClientRect(rctParent);
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
 
 	UINT	nID;
 	UINT	nStyle;
 	int		nWidth;
 	if (m_wndStatusBar.GetSafeHwnd()) {
 		m_wndStatusBar.GetPaneInfo( 0, nID, nStyle, nWidth);
-		m_wndStatusBar.SetPaneInfo( 0, nID, nStyle, rctParent.Width() * 0.15f );
+		m_wndStatusBar.SetPaneInfo( 0, nID, nStyle, rctParent.Width() * 0.15f * scaling_factor);
 		m_wndStatusBar.GetPaneInfo( 1, nID, nStyle, nWidth);
-		m_wndStatusBar.SetPaneInfo( 1, nID, nStyle, rctParent.Width() * 0.15f);
+		m_wndStatusBar.SetPaneInfo( 1, nID, nStyle, rctParent.Width() * 0.15f * scaling_factor);
 		m_wndStatusBar.GetPaneInfo( 2, nID, nStyle, nWidth);
-		m_wndStatusBar.SetPaneInfo( 2, nID, nStyle, rctParent.Width() * 0.15f );
+		m_wndStatusBar.SetPaneInfo( 2, nID, nStyle, rctParent.Width() * 0.15f * scaling_factor);
 		m_wndStatusBar.GetPaneInfo( 3, nID, nStyle, nWidth);
-		m_wndStatusBar.SetPaneInfo( 3, nID, nStyle, rctParent.Width() * 0.39f );
+		m_wndStatusBar.SetPaneInfo( 3, nID, nStyle, rctParent.Width() * 0.39f * scaling_factor);
 		m_wndStatusBar.GetPaneInfo( 4, nID, nStyle, nWidth);
-		m_wndStatusBar.SetPaneInfo( 4, nID, nStyle, rctParent.Width() * 0.15f );
+		m_wndStatusBar.SetPaneInfo( 4, nID, nStyle, rctParent.Width() * 0.15f * scaling_factor);
 		m_wndStatusBar.GetPaneInfo( 5, nID, nStyle, nWidth);
-		m_wndStatusBar.SetPaneInfo( 5, nID, nStyle, rctParent.Width() * 0.01f );
+		m_wndStatusBar.SetPaneInfo( 5, nID, nStyle, rctParent.Width() * 0.01f * scaling_factor);
 	}
 }
 
@@ -6361,10 +6362,9 @@ void CMainFrame::OnShowLightvolumes() {
  =======================================================================================================================
  */
 void CMainFrame::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized) {
-	CFrameWnd::OnActivate(nState, pWndOther, bMinimized);
-
+	CFrameWnd::OnActivate(nState, pWndOther, bMinimized);	
 	if ( nState != WA_INACTIVE ) {
-		common->ActivateTool( true );
+		common->ActivateTool(true);
 		if (::IsWindowVisible(win32.hWnd)) {
 			::ShowWindow(win32.hWnd, SW_HIDE);
 		}

@@ -586,8 +586,11 @@ bool rvPropertyGrid::ReflectMessage ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 		case WM_MEASUREITEM:
 		{
+			UINT dpi = GetDpiForWindow(hWnd);
+			float scaling_factor = static_cast<float>(dpi) / 96.0f;
+
 			MEASUREITEMSTRUCT* mis = (MEASUREITEMSTRUCT*) lParam;
-			mis->itemHeight = 18;
+			mis->itemHeight = 18 * scaling_factor;
 			return true;
 		}
 	}

@@ -108,6 +108,11 @@ BOOL CMediaPreviewDlg::OnInitDialog()
 
 void CMediaPreviewDlg::OnSize(UINT nType, int cx, int cy)
 {
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s8 = int(8 * scaling_factor);
+	int s4 = int(4 * scaling_factor);
+
 	CDialog::OnSize(nType, cx, cy);
 	if (wndPreview.GetSafeHwnd() == NULL) {
 		return;
@@ -115,8 +120,8 @@ void CMediaPreviewDlg::OnSize(UINT nType, int cx, int cy)
 	CRect rect;
 	GetClientRect(rect);
 	//int h = (mode == GUIS) ? (rect.Width() - 8) / 1.333333f : rect.Height() - 8;
-	int h = rect.Height() - 8;
-	wndPreview.SetWindowPos(NULL, 4, 4, rect.Width() - 8, h, SWP_SHOWWINDOW);
+	int h = rect.Height() - s8;
+	wndPreview.SetWindowPos(NULL, s4, s4, rect.Width() - s8, h, SWP_SHOWWINDOW);
 }
 
 void CMediaPreviewDlg::OnDestroy()

@@ -130,6 +130,11 @@ void CInspectorDialog::OnSize(UINT nType, int cx, int cy)
 	DockedWindowInfo* info = NULL;
 	POSITION pos;
 	WORD wID;
+	
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s5 = int(5 * scaling_factor);
+	int s4 = int(4 * scaling_factor);
 
 	if (!initialized) {
 		return;
@@ -141,12 +146,12 @@ void CInspectorDialog::OnSize(UINT nType, int cx, int cy)
 	CRect tabRect;
 	m_Tabs.GetWindowRect(tabRect);
 	// retain vert size but size 4 in from edges and 4 up from bottom
-	tabRect.left = 4;
-	tabRect.right = rect.Width() - 4;
-	tabRect.top = rect.Height() - tabRect.Height() - 4;
-	tabRect.bottom = rect.Height() - 4;
+	tabRect.left = s4;
+	tabRect.right = rect.Width() - s4;
+	tabRect.top = rect.Height() - tabRect.Height() - s4;
+	tabRect.bottom = rect.Height() - s4;
 	// adjust rect for children size
-	rect.bottom -= 5 + tabRect.Height();
+	rect.bottom -= s5 + tabRect.Height();
 
 	m_Tabs.SetWindowPos(NULL, tabRect.left, tabRect.top, tabRect.Width(), tabRect.Height(), 0);
 
