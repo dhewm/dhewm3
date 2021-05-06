@@ -253,7 +253,7 @@ void DialogAFProperties::ClearFile( void ) {
 DialogAFProperties::OnToolHitTest
 ================
 */
-int DialogAFProperties::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFProperties::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

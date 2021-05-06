@@ -123,10 +123,11 @@ void RadiantInit( void ) {
 		Sys_GrabMouseCursor( false );
 
 		g_DoomInstance = win32.hInstance;
-		CWinApp* pApp = AfxGetApp();
-		CWinThread *pThread = AfxGetThread();
 
 		InitAfx();
+
+		CWinApp* pApp = AfxGetApp();
+		CWinThread *pThread = AfxGetThread();
 
 		// App global initializations (rare)
 		pApp->InitApplication();
@@ -175,7 +176,8 @@ void RadiantRun( void ) {
 			theApp.Run();
 			//qglPopAttrib();
 			//qwglMakeCurrent(0, 0);
-			qwglMakeCurrent(win32.hDC, win32.hGLRC);
+			if (win32.hDC != NULL && win32.hGLRC != NULL)
+				qwglMakeCurrent(win32.hDC, win32.hGLRC);
 		}
 	}
 	catch( idException &ex ) {

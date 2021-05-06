@@ -413,13 +413,13 @@ Dialog Procedure for the open file dialog
 */
 INT_PTR rvOpenFileDialog::DlgProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
-	rvOpenFileDialog* dlg = (rvOpenFileDialog*) GetWindowLong ( wnd, GWL_USERDATA );
+	rvOpenFileDialog* dlg = (rvOpenFileDialog*) GetWindowLongPtr ( wnd, GWLP_USERDATA );
 
 	switch ( msg )
 	{
 		case WM_INITDIALOG:
 			dlg = (rvOpenFileDialog*) lparam;
-			SetWindowLong ( wnd, GWL_USERDATA, lparam );
+			SetWindowLongPtr ( wnd, GWLP_USERDATA, lparam );
 			dlg->mWnd = wnd;
 			dlg->HandleInitDialog ( );
 			return TRUE;

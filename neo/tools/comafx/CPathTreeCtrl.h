@@ -84,7 +84,7 @@ public:
 
 protected:
 	virtual void		PreSubclassWindow();
-	virtual int			OnToolHitTest( CPoint point, TOOLINFO * pTI ) const;
+	virtual INT_PTR		OnToolHitTest( CPoint point, TOOLINFO * pTI ) const;
 	afx_msg BOOL		OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult );
 
 	DECLARE_MESSAGE_MAP()

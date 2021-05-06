@@ -74,7 +74,7 @@ public:
 	afx_msg void OnBnClickedButtonSave();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnDestroy();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButtonGoto();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg LRESULT OnFindDialogMessage(WPARAM wParam, LPARAM lParam);

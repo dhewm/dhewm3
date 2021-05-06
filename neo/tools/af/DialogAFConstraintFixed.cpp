@@ -150,7 +150,7 @@ void DialogAFConstraintFixed::UpdateFile( void ) {
 DialogAFConstraintFixed::OnToolHitTest
 ================
 */
-int DialogAFConstraintFixed::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraintFixed::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

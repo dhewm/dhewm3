@@ -369,7 +369,7 @@ void DialogAFConstraintUniversal::UpdateFile( void ) {
 DialogAFConstraintUniversal::OnToolHitTest
 ================
 */
-int DialogAFConstraintUniversal::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraintUniversal::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

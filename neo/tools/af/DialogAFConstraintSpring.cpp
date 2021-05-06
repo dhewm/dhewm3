@@ -293,7 +293,7 @@ void DialogAFConstraintSpring::UpdateFile( void ) {
 DialogAFConstraintSpring::OnToolHitTest
 ================
 */
-int DialogAFConstraintSpring::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraintSpring::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

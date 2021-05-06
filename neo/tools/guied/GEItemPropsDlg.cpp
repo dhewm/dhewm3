@@ -706,7 +706,7 @@ INT_PTR CALLBACK ModifyItemKeyDlg_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, 
 				SetWindowText ( hwnd, "New Item Key" );
 			}
 
-			SetWindowLong ( hwnd, GWL_USERDATA, lParam );
+			SetWindowLongPtr ( hwnd, GWLP_USERDATA, lParam );
 			return FALSE;
 		}
 
@@ -718,7 +718,7 @@ INT_PTR CALLBACK ModifyItemKeyDlg_WndProc ( HWND hwnd, UINT msg, WPARAM wParam, 
 					char key[1024];
 					char value[1024];
 
-					const idKeyValue* keyValue = (const idKeyValue*) GetWindowLong ( hwnd, GWL_USERDATA );
+					const idKeyValue* keyValue = (const idKeyValue*) GetWindowLongPtr ( hwnd, GWLP_USERDATA );
 
 					GetWindowText ( GetDlgItem ( hwnd, IDC_GUIED_ITEMKEY ), key, 1024 );
 					GetWindowText ( GetDlgItem ( hwnd, IDC_GUIED_ITEMVALUE ), value, 1024 );
@@ -965,25 +965,28 @@ bool rvGEItemPropsKeysPage::SetActive ( void )
 	// Delete anything already in there
 	ListView_DeleteAllItems ( list );
 
-	// Add each key in the properties dictionary
-	for ( i = 0; i < mDict->GetNumKeyVals(); i ++ )
+	if ( mDict != NULL )
 	{
-		const idKeyValue* key = mDict->GetKeyVal ( i );
-		assert ( key );
-
-		// Add the item
-		LVITEM item;
-		ZeroMemory ( &item, sizeof(item) );
-		item.mask = LVIF_TEXT|LVIF_PARAM;
-		item.iItem = ListView_GetItemCount ( list );
-		item.pszText = (LPSTR)key->GetKey().c_str ( );
-		item.lParam = (LONG) key;
-		int index = ListView_InsertItem ( list, &item );
-
-		idStr value;
-		value = key->GetValue();
-		value.StripQuotes ( );
-		ListView_SetItemText ( list, index, 1, (LPSTR)value.c_str() );
+		// Add each key in the properties dictionary
+		for ( i = 0; i < mDict->GetNumKeyVals(); i ++ )
+		{
+			const idKeyValue* key = mDict->GetKeyVal ( i );
+			assert ( key );
+	
+			// Add the item
+			LVITEM item;
+			ZeroMemory ( &item, sizeof(item) );
+			item.mask = LVIF_TEXT|LVIF_PARAM;
+			item.iItem = ListView_GetItemCount ( list );
+			item.pszText = (LPSTR)key->GetKey().c_str ( );
+			item.lParam = (LONG) key;
+			int index = ListView_InsertItem ( list, &item );
+	
+			idStr value;
+			value = key->GetValue();
+			value.StripQuotes ( );
+			ListView_SetItemText ( list, index, 1, (LPSTR)value.c_str() );
+		}
 	}
 
 	return true;
@@ -1077,6 +1080,11 @@ bool rvGEItemPropsGeneralPage::SetActive ( void )
 
 	gApp.GetOptions().SetLastOptionsPage ( RVITEMPROPS_GENERAL );
 
+	if ( mDict == NULL )
+	{
+		return false;
+	}
+	
 	SetWindowText ( GetDlgItem ( mPage, IDC_GUIED_ITEMNAME ), idStr(mDict->GetString ( "name", "unnamed" )).StripQuotes ( ) );
 
 	enable = !IsExpression ( mDict->GetString ( "visible", "1" ) );
@@ -1116,6 +1124,11 @@ Applys the settings currently stored in the property page back into the attached
 */
 bool rvGEItemPropsGeneralPage::KillActive ( void )
 {
+	if ( mDict == NULL )
+	{
+		return false;
+	}
+	
 	char temp[1024];
 
 	GetWindowText ( GetDlgItem(mPage,IDC_GUIED_ITEMNAME), temp, 1024 );

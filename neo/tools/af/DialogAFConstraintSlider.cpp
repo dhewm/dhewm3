@@ -210,7 +210,7 @@ void DialogAFConstraintSlider::UpdateFile( void ) {
 DialogAFConstraintSlider::OnToolHitTest
 ================
 */
-int DialogAFConstraintSlider::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraintSlider::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

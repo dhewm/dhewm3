@@ -273,7 +273,7 @@ void DialogAFConstraintHinge::UpdateFile( void ) {
 DialogAFConstraintHinge::OnToolHitTest
 ================
 */
-int DialogAFConstraintHinge::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraintHinge::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

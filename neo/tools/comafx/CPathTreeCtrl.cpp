@@ -241,7 +241,7 @@ END_MESSAGE_MAP()
 CPathTreeCtrl::OnToolHitTest
 ================
 */
-int CPathTreeCtrl::OnToolHitTest( CPoint point, TOOLINFO * pTI ) const {
+INT_PTR CPathTreeCtrl::OnToolHitTest( CPoint point, TOOLINFO * pTI ) const {
 	RECT rect;
 
 	UINT nFlags;

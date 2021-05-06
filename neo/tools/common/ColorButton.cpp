@@ -47,7 +47,7 @@ void ColorButton_SetColor ( HWND hWnd, COLORREF color )
 	{
 		return;
 	}
-	SetWindowLong ( hWnd, GWL_USERDATA, color );
+	SetWindowLongPtr ( hWnd, GWLP_USERDATA, color );
 	InvalidateRect ( hWnd, NULL, FALSE );
 }
 
@@ -94,7 +94,7 @@ Retrieves the current color button color
 */
 COLORREF ColorButton_GetColor ( HWND hWnd )
 {
-	return (COLORREF) GetWindowLong ( hWnd, GWL_USERDATA );
+	return (COLORREF) GetWindowLongPtr ( hWnd, GWLP_USERDATA );
 }
 
 /*
@@ -198,7 +198,7 @@ void ColorButton_DrawItem ( HWND hWnd, LPDRAWITEMSTRUCT dis )
 	// Draw Color
 	if ((state & ODS_DISABLED) == 0)
 	{
-		HBRUSH color = CreateSolidBrush ( (COLORREF)GetWindowLong ( hWnd, GWL_USERDATA ) );
+		HBRUSH color = CreateSolidBrush ( (COLORREF)GetWindowLongPtr ( hWnd, GWLP_USERDATA ) );
 		FillRect ( hDC, &rDraw, color );
 		FrameRect ( hDC, &rDraw, (HBRUSH)::GetStockObject(BLACK_BRUSH));
 		DeleteObject( color );
