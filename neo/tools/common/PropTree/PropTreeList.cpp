@@ -128,17 +128,19 @@ void CPropTreeList::UpdateResize()
 	SCROLLINFO si;
 	LONG nHeight;
 	CRect rc;
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
 
 	ASSERT(m_pProp!=NULL);
 
 	GetClientRect(rc);
-	nHeight = rc.Height() + 1;
+	nHeight = rc.Height() + scaling_factor;
 
 	ZeroMemory(&si, sizeof(SCROLLINFO));
 	si.cbSize = sizeof(SCROLLINFO);
 	si.fMask = SIF_RANGE|SIF_PAGE;
 	si.nMin = 0;
-	si.nMax = m_pProp->GetRootItem()->GetTotalHeight();
+	si.nMax = m_pProp->GetRootItem()->GetTotalHeight() * scaling_factor;
 	si.nPage = nHeight;
 
 	if ((int)si.nPage>si.nMax)
@@ -166,6 +168,9 @@ void CPropTreeList::OnPaint()
 
 	CRect rc;
 	GetClientRect(rc);
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	rc.InflateRect(scaling_factor, scaling_factor);
 
 	// draw control background
 	memdc.SelectObject(GetSysColorBrush(COLOR_BTNFACE));
@@ -567,9 +572,10 @@ void CPropTreeList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 	LONG nHeight;
 
 	SetFocus();
-
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
 	GetClientRect(rc);
-	nHeight = rc.Height() + 1;
+	nHeight = rc.Height();
 
 	ZeroMemory(&si, sizeof(SCROLLINFO));
 	si.cbSize = sizeof(SCROLLINFO);
@@ -582,11 +588,11 @@ void CPropTreeList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 	switch (nSBCode)
 	{
 		case SB_LINEDOWN:
-			ny += PROPTREEITEM_DEFHEIGHT;
+			ny += PROPTREEITEM_DEFHEIGHT * scaling_factor;
 			break;
 
 		case SB_LINEUP:
-			ny -= PROPTREEITEM_DEFHEIGHT;
+			ny -= PROPTREEITEM_DEFHEIGHT * scaling_factor;
 			break;
 
 		case SB_PAGEDOWN:

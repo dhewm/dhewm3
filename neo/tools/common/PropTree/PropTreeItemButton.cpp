@@ -54,11 +54,16 @@ LONG CPropTreeItemButton::DrawItem( CDC* pDC, const RECT& rc, LONG x, LONG y )
 	nTotal = CPropTreeItem::DrawItem( pDC, rc, x, y );
 
 	textSize = pDC->GetOutputTextExtent( buttonText );
+	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s2 = int(2 * scaling_factor);
+	int s4 = int(4 * scaling_factor);
+	int s12 = int(12 * scaling_factor);
 
-	buttonRect.left = m_rc.right - ( textSize.cx + 12 + 4);
-	buttonRect.top = m_rc.top + ((m_rc.bottom - m_rc.top)/2)-BUTTON_SIZE/2;
-	buttonRect.right = buttonRect.left + textSize.cx + 12;
-	buttonRect.bottom = buttonRect.top + BUTTON_SIZE;
+	buttonRect.left = m_rc.right - ( textSize.cx + s12 + s4);
+	buttonRect.top = m_rc.top + ((m_rc.bottom - m_rc.top)/2)- (textSize.cy + s4) /2;
+	buttonRect.right = buttonRect.left + textSize.cx + s12;
+	buttonRect.bottom = buttonRect.top + (textSize.cy + s4);
 
 	UINT buttonStyle;
 
@@ -70,8 +75,8 @@ LONG CPropTreeItemButton::DrawItem( CDC* pDC, const RECT& rc, LONG x, LONG y )
 	pDC->DrawFrameControl(&buttonRect, DFC_BUTTON, buttonStyle );
 
 	textRect = buttonRect;
-	textRect.left += 4;
-	textRect.right -= 8;
+	textRect.left += s4;
+	textRect.right -= s4-s4;
 	pDC->DrawText( buttonText, textRect, DT_SINGLELINE|DT_VCENTER );
 
 	//Adjust hit test rect to acount for window scrolling

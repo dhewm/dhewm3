@@ -234,20 +234,23 @@ void DialogDeclEditor::LoadDecl( idDecl *decl ) {
 	}
 
 	SetWindowText( va( "Declaration Editor (%s, line %d)", decl->GetFileName(), decl->GetLineNum() ) );
+	
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96;
 
 	rect.left = initialRect.left;
-	rect.right = rect.left + maxCharsPerLine * FONT_WIDTH + 32;
+	rect.right = rect.left + (maxCharsPerLine * FONT_WIDTH + 32) *scaling_factor;
 	rect.top = initialRect.top;
-	rect.bottom = rect.top + numLines * (FONT_HEIGHT+8) + 24 + 56;
+	rect.bottom = rect.top + (numLines * (FONT_HEIGHT+8) + 24 + 56)* scaling_factor;
 	if ( rect.right < initialRect.right ) {
 		rect.right = initialRect.right;
-	} else if ( rect.right - rect.left > 1024 ) {
-		rect.right = rect.left + 1024;
+	} else if ( rect.right - rect.left > (1024 * scaling_factor) ) {
+		rect.right = rect.left + (1024 * scaling_factor);
 	}
 	if ( rect.bottom < initialRect.bottom ) {
 		rect.bottom = initialRect.bottom;
-	} else if ( rect.bottom - rect.top > 768 ) {
-		rect.bottom = rect.top + 768;
+	} else if ( rect.bottom - rect.top > (768 * scaling_factor)  ) {
+		rect.bottom = rect.top + (768 * scaling_factor);
 	}
 	MoveWindow( rect );
 
@@ -383,12 +386,16 @@ void DialogDeclEditor::OnSize( UINT nType, int cx, int cy ) {
 	CDialog::OnSize( nType, cx, cy );
 
 	GetClientRect( clientRect );
+	UINT dpi = GetDpiForWindow(GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96;
+	float scaled_toolbar_height = (TOOLBAR_HEIGHT * scaling_factor);
+	float scaled_button_space = (BUTTON_SPACE * scaling_factor);
 
 	if ( declEdit.GetSafeHwnd() ) {
 		rect.left = BORDER_SIZE;
 		rect.top = BORDER_SIZE;
 		rect.right = clientRect.Width() - BORDER_SIZE;
-		rect.bottom = clientRect.Height() - 56;
+		rect.bottom = clientRect.Height() - (56 * scaling_factor);
 		declEdit.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -397,9 +404,9 @@ void DialogDeclEditor::OnSize( UINT nType, int cx, int cy ) {
 		int width = rect.Width();
 		int height = rect.Height();
 		rect.left = BORDER_SIZE;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
 		rect.right = BORDER_SIZE + width;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		testButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -407,10 +414,10 @@ void DialogDeclEditor::OnSize( UINT nType, int cx, int cy ) {
 		okButton.GetClientRect( rect );
 		int width = rect.Width();
 		int height = rect.Height();
-		rect.left = clientRect.Width() - BORDER_SIZE - BUTTON_SPACE - 2 * width;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
-		rect.right = clientRect.Width() - BORDER_SIZE - BUTTON_SPACE - width;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.left = clientRect.Width() - BORDER_SIZE - scaled_button_space - 2 * width;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
+		rect.right = clientRect.Width() - BORDER_SIZE - scaled_button_space - width;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		okButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 
@@ -419,9 +426,9 @@ void DialogDeclEditor::OnSize( UINT nType, int cx, int cy ) {
 		int width = rect.Width();
 		int height = rect.Height();
 		rect.left = clientRect.Width() - BORDER_SIZE - width;
-		rect.top = clientRect.Height() - TOOLBAR_HEIGHT - height;
+		rect.top = clientRect.Height() - scaled_toolbar_height - height;
 		rect.right = clientRect.Width() - BORDER_SIZE;
-		rect.bottom = clientRect.Height() - TOOLBAR_HEIGHT;
+		rect.bottom = clientRect.Height() - scaled_toolbar_height;
 		cancelButton.MoveWindow( rect.left, rect.top, rect.Width(), rect.Height() );
 	}
 

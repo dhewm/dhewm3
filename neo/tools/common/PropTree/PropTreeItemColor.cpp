@@ -86,17 +86,17 @@ static ColorTableEntry _crColors[] =
 	{RGB(0xFF, 0xFF, 0xFF)}
 };
 
-static void ColorBox(CDC* pDC, CPoint pt, COLORREF clr, BOOL bHover)
+static void ColorBox(CDC* pDC, CPoint pt, COLORREF clr, BOOL bHover,float scale)
 {
 	CBrush br(clr);
 
 	CBrush* obr = pDC->SelectObject(&br);
 
-	pDC->PatBlt(pt.x, pt.y, 13, 13, PATCOPY);
+	pDC->PatBlt(pt.x, pt.y, 13* scale, 13* scale, PATCOPY);
 	pDC->SelectObject(obr);
 
 	CRect rc;
-	rc.SetRect(pt.x - 2, pt.y - 2, pt.x + 15, pt.y + 15);
+	rc.SetRect(pt.x - 2, pt.y - 2, pt.x + 15 * scale, pt.y + 15 * scale);
 
 	pDC->DrawEdge(&rc, (bHover) ? BDR_SUNKENOUTER : BDR_RAISEDINNER, BF_RECT);
 }
@@ -221,9 +221,12 @@ void CPropTreeItemColor::OnActivate(int activateType, CPoint point)
 
 	m_cPrevColor = m_cColor;
 
+	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+
 	r = m_rc;
-	r.right = r.left + 150;
-	r.bottom = r.top + 120;
+	r.right = r.left + 150 * scaling_factor;
+	r.bottom = r.top + 120 * scaling_factor;
 
 	ASSERT(m_pProp!=NULL);
 	m_pProp->GetCtrlParent()->ClientToScreen(r);
@@ -237,7 +240,7 @@ void CPropTreeItemColor::OnActivate(int activateType, CPoint point)
 		DWORD dwStyle = WS_POPUP|WS_DLGFRAME;
 
 		CreateEx(0, pszClassName, _T(""), dwStyle, r, m_pProp->GetCtrlParent(), 0);
-		m_rcButton.SetRect(40, 94, 110, 114);
+		m_rcButton.SetRect(40, 94 * scaling_factor, 110 * scaling_factor, 114 * scaling_factor);
 	}
 
 	SetWindowPos(NULL, r.left, r.top, r.Width() + 1, r.Height(), SWP_NOZORDER|SWP_SHOWWINDOW);
@@ -258,13 +261,20 @@ void CPropTreeItemColor::OnPaint()
 {
 	CPaintDC dc(this);
 	CPoint pt;
+	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int s3 = int(3 * scaling_factor);
+	int s7 = int(7 * scaling_factor);
+	int s13 = int(13 * scaling_factor);
+	int s18 = int(18 * scaling_factor);
 
 	for (LONG i=0; i<40; i++)
 	{
-		pt.x = (i & 7) * 18 + 3;
-		pt.y = (i >> 3) * 18 + 3;
-		ColorBox(&dc, pt, _crColors[i].color, m_nSpot==i);
-		SetRect(&_crColors[i].rcSpot, pt.x, pt.y, pt.x + 13, pt.y + 13);
+		pt.x = (i & 7) * s18 + s3;
+		pt.y = (i >> 3) * s18 + s3;
+		ColorBox(&dc, pt, _crColors[i].color, m_nSpot==i, scaling_factor);
+		SetRect(&_crColors[i].rcSpot, pt.x, pt.y, pt.x + s13, pt.y + s13);
+		InflateRect(&_crColors[i].rcSpot, int(scaling_factor),int(scaling_factor));
 	}
 
 	ASSERT(m_pProp!=NULL);

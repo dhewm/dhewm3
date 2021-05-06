@@ -18,6 +18,7 @@ protected:
 
 public:
 	virtual void OnDraw(CDC* pDC);      // overridden to draw this view
+	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

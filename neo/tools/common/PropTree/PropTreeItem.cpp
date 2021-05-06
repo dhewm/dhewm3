@@ -47,7 +47,7 @@ static void _DotHLine(HDC hdc, LONG x, LONG y, LONG w)
 
 
 // draw the plus/minus button
-static void _DrawExpand(HDC hdc, LONG x, LONG y, BOOL bExpand, BOOL bFill)
+static void _DrawExpand(HDC hdc, LONG x, LONG y, BOOL bExpand, BOOL bFill,LONG EXPANDBOX, LONG EXPANDBOXHALF)
 {
 	HPEN hPen;
 	HPEN oPen;
@@ -57,17 +57,17 @@ static void _DrawExpand(HDC hdc, LONG x, LONG y, BOOL bExpand, BOOL bFill)
 	oPen = (HPEN)SelectObject(hdc, hPen);
 	oBrush = (HBRUSH)SelectObject(hdc, GetStockObject(bFill ? WHITE_BRUSH : NULL_BRUSH));
 
-	Rectangle(hdc, x, y, x + PROPTREEITEM_EXPANDBOX, y + PROPTREEITEM_EXPANDBOX);
+	Rectangle(hdc, x, y, x + EXPANDBOX, y + EXPANDBOX);
 	SelectObject(hdc, GetStockObject(BLACK_PEN));
 
 	if (!bExpand)
 	{
-		MoveToEx(hdc, x + PROPTREEITEM_EXPANDBOXHALF, y + 2, NULL);
-		LineTo(hdc, x + PROPTREEITEM_EXPANDBOXHALF, y + PROPTREEITEM_EXPANDBOX - 2);
+		MoveToEx(hdc, x + EXPANDBOXHALF, y + 2, NULL);
+		LineTo(hdc, x + EXPANDBOXHALF, y + EXPANDBOX - 2);
 	}
 
-	MoveToEx(hdc, x + 2, y + PROPTREEITEM_EXPANDBOXHALF, NULL);
-	LineTo(hdc, x + PROPTREEITEM_EXPANDBOX - 2, y + PROPTREEITEM_EXPANDBOXHALF);
+	MoveToEx(hdc, x + 2, y + EXPANDBOXHALF, NULL);
+	LineTo(hdc, x + EXPANDBOX - 2, y + EXPANDBOXHALF);
 
 	SelectObject(hdc, oPen);
 	SelectObject(hdc, oBrush);
@@ -260,6 +260,12 @@ UINT CPropTreeItem::GetCtrlID()
 
 LONG CPropTreeItem::GetHeight()
 {
+	if (m_pProp)
+	{
+		UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
+		float scaling_factor = static_cast<float>(dpi) / 96.0f;
+		return PROPTREEITEM_DEFHEIGHT * scaling_factor;
+	}
 	return PROPTREEITEM_DEFHEIGHT;
 }
 
@@ -396,6 +402,14 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 
 	ASSERT(m_pProp!=NULL);
 
+	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
+	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	int PNINDENT_s = int(PNINDENT * scaling_factor);
+	int PROPTREEITEM_SPACE_s = int(PROPTREEITEM_SPACE * scaling_factor);
+	int PROPTREEITEM_CHECKBOX_s = int(PROPTREEITEM_CHECKBOX * scaling_factor);
+	int PROPTREEITEM_EXPANDBOX_s = int(PROPTREEITEM_EXPANDBOX * scaling_factor);
+	int PROPTREEITEM_EXPANDCOLUMN_s = int(PROPTREEITEM_EXPANDCOLUMN * scaling_factor);
+	int PROPTREEITEM_EXPANDBOXHALF_s = int(PROPTREEITEM_EXPANDBOXHALF * scaling_factor);
 	// Add TreeItem the list of visble items
 	m_pProp->AddToVisibleList(this);
 
@@ -403,12 +417,12 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 	m_loc = CPoint(x, y);
 
 	// store the items rectangle position
-	m_rc.SetRect(m_pProp->GetOrigin().x + PROPTREEITEM_SPACE, m_loc.y, rc.right, m_loc.y + GetHeight()-1);
+	m_rc.SetRect(m_pProp->GetOrigin().x + PROPTREEITEM_SPACE_s, m_loc.y, rc.right, m_loc.y + GetHeight()-1);
 	m_rc.OffsetRect(0, -m_pProp->GetOrigin().y);
 
 	// init temp drawing variables
 	nTotal = GetHeight();
-	ey = (nTotal >> 1) - (PROPTREEITEM_EXPANDBOX >> 1) - 2;
+	ey = (nTotal >> 1) - (PROPTREEITEM_EXPANDBOX_s >> 1) - 2;
 
 	bool bCheck = false;
 
@@ -418,9 +432,9 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 	nCol = m_pProp->GetOrigin().x;
 
 	if (IsRootLevel())
-		drc.SetRect(pt.x + PROPTREEITEM_EXPANDCOLUMN, pt.y, rc.right, pt.y + nTotal);
+		drc.SetRect(pt.x + PROPTREEITEM_EXPANDCOLUMN_s, pt.y, rc.right, pt.y + nTotal);
 	else
-		drc.SetRect(pt.x + PROPTREEITEM_EXPANDCOLUMN, pt.y, nCol, pt.y + nTotal);
+		drc.SetRect(pt.x + PROPTREEITEM_EXPANDCOLUMN_s, pt.y, nCol, pt.y + nTotal);
 
 	// root level items are shaded
 	if (IsRootLevel())
@@ -433,14 +447,14 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 	// calc/draw expand box position
 	if (GetChild())
 	{
-		m_rcExpand.left = PROPTREEITEM_EXPANDCOLUMN/2 - PROPTREEITEM_EXPANDBOXHALF;
+		m_rcExpand.left = PROPTREEITEM_EXPANDCOLUMN_s /2 - PROPTREEITEM_EXPANDBOXHALF_s;
 		m_rcExpand.top = m_loc.y + ey;
-		m_rcExpand.right = m_rcExpand.left + PROPTREEITEM_EXPANDBOX - 1;
-		m_rcExpand.bottom = m_rcExpand.top + PROPTREEITEM_EXPANDBOX - 1;
+		m_rcExpand.right = m_rcExpand.left + PROPTREEITEM_EXPANDBOX_s - 1;
+		m_rcExpand.bottom = m_rcExpand.top + PROPTREEITEM_EXPANDBOX_s - 1;
 
 		ir = m_rcExpand;
 		ir.OffsetRect(0, -m_pProp->GetOrigin().y);
-		_DrawExpand(pDC->m_hDC, ir.left, ir.top, IsExpanded(), !IsRootLevel());
+		_DrawExpand(pDC->m_hDC, ir.left, ir.top, IsExpanded(), !IsRootLevel(), PROPTREEITEM_EXPANDBOX_s, PROPTREEITEM_EXPANDBOXHALF_s);
 	}
 	else
 		m_rcExpand.SetRectEmpty();
@@ -450,11 +464,11 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 	{
 		bCheck = true;
 
-		ir.left = drc.left + PROPTREEITEM_SPACE;
+		ir.left = drc.left + PROPTREEITEM_SPACE_s;
 		ir.top = m_loc.y + ey;
 
-		ir.right = ir.left + PROPTREEITEM_CHECKBOX;
-		ir.bottom = ir.top + PROPTREEITEM_CHECKBOX;
+		ir.right = ir.left + PROPTREEITEM_CHECKBOX_s;
+		ir.bottom = ir.top + PROPTREEITEM_CHECKBOX_s;
 
 		m_rcCheckbox = ir;
 	}
@@ -472,11 +486,11 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 
 	// calc label position
 	ir = drc;
-	ir.left += PROPTREEITEM_SPACE;
+	ir.left += PROPTREEITEM_SPACE_s;
 
 	// offset the label text if item has a check box
 	if (bCheck)
-		OffsetRect(&ir, PROPTREEITEM_CHECKBOX + PROPTREEITEM_SPACE * 2, 0);
+		OffsetRect(&ir, PROPTREEITEM_CHECKBOX_s + PROPTREEITEM_SPACE_s * 2, 0);
 
 	// draw label
 	if (!m_sLabel.IsEmpty())
@@ -498,7 +512,7 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 
 			CRect dr;
 			dr = drc;
-			dr.left = PROPTREEITEM_EXPANDCOLUMN;
+			dr.left = PROPTREEITEM_EXPANDCOLUMN_s;
 
 			pDC->Rectangle(&dr);
 
@@ -531,7 +545,12 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 	}
 
 	// draw horzontal sep
-	_DotHLine(pDC->m_hDC, PROPTREEITEM_EXPANDCOLUMN, pt.y + nTotal - 1, rc.right - PROPTREEITEM_EXPANDCOLUMN + 1);
+	float tmpScale = scaling_factor;
+	while (tmpScale > 0)
+	{
+		_DotHLine(pDC->m_hDC, PROPTREEITEM_EXPANDCOLUMN_s, pt.y + nTotal - 1, rc.right - PROPTREEITEM_EXPANDCOLUMN_s + 1);
+		tmpScale -= 1.0f;
+	}
 
 	// draw separators
 	if (!IsRootLevel())
