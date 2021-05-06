@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 void SpinButton_SetIncrement ( HWND hWnd, float inc )
 {
-	SetWindowLong ( hWnd, GWL_USERDATA, (long)(inc * 100.0f) );
+	SetWindowLongPtr ( hWnd, GWLP_USERDATA, (long)(inc * 100.0f) );
 }
 
 void SpinButton_SetRange ( HWND hWnd, float minRange, float maxRange )
@@ -51,11 +51,11 @@ void SpinButton_HandleNotify ( NMHDR* hdr )
 	float value;
 	GetWindowText ( (HWND)SendMessage ( hdr->hwndFrom, UDM_GETBUDDY, 0, 0 ), strValue, 63 );
 
-	float inc = (float)GetWindowLong ( hdr->hwndFrom, GWL_USERDATA );
+	float inc = (float)GetWindowLongPtr ( hdr->hwndFrom, GWLP_USERDATA );
 	if ( inc == 0 )
 	{
 		inc = 100.0f;
-		SetWindowLong ( hdr->hwndFrom, GWL_USERDATA, 100 );
+		SetWindowLongPtr ( hdr->hwndFrom, GWLP_USERDATA, 100 );
 	}
 	inc /= 100.0f;
 

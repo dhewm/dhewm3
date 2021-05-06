@@ -72,7 +72,7 @@ void InitAfx( void ) {
 DefaultOnToolHitTest
 ================
 */
-int DefaultOnToolHitTest( const toolTip_t *toolTips, const CDialog *dialog, CPoint point, TOOLINFO* pTI ) {
+INT_PTR DefaultOnToolHitTest( const toolTip_t *toolTips, const CDialog *dialog, CPoint point, TOOLINFO* pTI ) {
 	CWnd *wnd;
 	RECT clientRect, rect;
 

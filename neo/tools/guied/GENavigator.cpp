@@ -139,7 +139,7 @@ Window Procedure
 */
 LRESULT CALLBACK rvGENavigator::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
-	rvGENavigator* nav = (rvGENavigator*) GetWindowLong ( hWnd, GWL_USERDATA );
+	rvGENavigator* nav = (rvGENavigator*) GetWindowLongPtr ( hWnd, GWLP_USERDATA );
 
 	switch ( msg )
 	{
@@ -273,16 +273,16 @@ LRESULT CALLBACK rvGENavigator::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, LP
 			// Attach the class to the window first
 			cs = (LPCREATESTRUCT) lParam;
 			nav = (rvGENavigator*) cs->lpCreateParams;
-			SetWindowLong ( hWnd, GWL_USERDATA, (LONG)nav );
+			SetWindowLongPtr( hWnd, GWLP_USERDATA, (LONG_PTR)nav );
 
 			// Create the List view
 			nav->mTree = CreateWindowEx ( 0, "SysListView32", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_OWNERDRAWFIXED|LVS_NOCOLUMNHEADER|LVS_SHOWSELALWAYS, 0, 0, 0, 0, hWnd, (HMENU)IDC_GUIED_WINDOWTREE, win32.hInstance, 0 );
 			ListView_SetExtendedListViewStyle ( nav->mTree, LVS_EX_FULLROWSELECT );
 			ListView_SetBkColor ( nav->mTree, GetSysColor ( COLOR_3DFACE ) );
 			ListView_SetTextBkColor ( nav->mTree, GetSysColor ( COLOR_3DFACE ) );
-			nav->mListWndProc = (WNDPROC)GetWindowLong ( nav->mTree, GWL_WNDPROC );
-			SetWindowLong ( nav->mTree, GWL_USERDATA, (LONG)nav );
-			SetWindowLong ( nav->mTree, GWL_WNDPROC, (LONG)ListWndProc );
+			nav->mListWndProc = (WNDPROC)GetWindowLongPtr ( nav->mTree, GWLP_WNDPROC );
+			SetWindowLongPtr( nav->mTree, GWLP_USERDATA, (LONG_PTR)nav );
+			SetWindowLongPtr( nav->mTree, GWLP_WNDPROC, (LONG_PTR)ListWndProc );
 
 			// Insert the only column
 			col.mask = 0;
@@ -429,7 +429,7 @@ Window Procedure for the embedded list control
 */
 LRESULT CALLBACK rvGENavigator::ListWndProc ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
-	rvGENavigator* nav = (rvGENavigator*) GetWindowLong ( hWnd, GWL_USERDATA );
+	rvGENavigator* nav = (rvGENavigator*) GetWindowLongPtr ( hWnd, GWLP_USERDATA );
 	assert ( nav );
 
 	switch ( msg )

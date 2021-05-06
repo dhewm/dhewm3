@@ -161,8 +161,8 @@ int rvRollupPanel::InsertItem ( const char* caption, HWND dialog, bool autoDestr
 	item->mDialog		 = dialog;
 	item->mButton		 = button;
 	item->mGroupBox		 = groupbox;
-	item->mOldDlgProc	 = (WNDPROC) GetWindowLong ( dialog, DWL_DLGPROC );
-	item->mOldButtonProc = (WNDPROC) GetWindowLong ( button, GWL_WNDPROC );
+	item->mOldDlgProc	 = (WNDPROC) GetWindowLongPtr ( dialog, DWLP_DLGPROC );
+	item->mOldButtonProc = (WNDPROC) GetWindowLongPtr ( button, GWLP_WNDPROC );
 	item->mAutoDestroy	 = autoDestroy;
 	strcpy ( item->mCaption, caption );
 
@@ -176,17 +176,17 @@ int rvRollupPanel::InsertItem ( const char* caption, HWND dialog, bool autoDestr
 	}
 
 	// Store data with the dialog window in its user data
-	SetWindowLong ( dialog, GWL_USERDATA,	(LONG)item );
+	SetWindowLongPtr ( dialog, GWLP_USERDATA,	(LONG)item );
 
 	// Attach item to button through user data
-	SetWindowLong ( button, GWL_USERDATA,	(LONG)item );
-	SetWindowLong ( button, GWL_ID,			index );
+	SetWindowLongPtr( button, GWLP_USERDATA,	(LONG)item );
+	SetWindowLongPtr( button, GWL_ID,			index );
 
 	// Subclass dialog
-	SetWindowLong ( dialog, DWL_DLGPROC, (LONG)DialogProc );
+	SetWindowLongPtr( dialog, DWLP_DLGPROC, (LONG)DialogProc );
 
 	// SubClass button
-	SetWindowLong ( button, GWL_WNDPROC, (LONG)ButtonProc );
+	SetWindowLongPtr( button, GWLP_WNDPROC, (LONG)ButtonProc );
 
 	// Update
 	mItemHeight += RP_PGBUTTONHEIGHT+(RP_GRPBOXINDENT/2);
@@ -699,8 +699,8 @@ Dialog procedure for items
 */
 LRESULT CALLBACK rvRollupPanel::DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	RPITEM*			item  = (RPITEM*)GetWindowLong ( hWnd, GWL_USERDATA );
-	rvRollupPanel*	_this = (rvRollupPanel*)GetWindowLong ( GetParent ( hWnd ), GWL_USERDATA );
+	RPITEM*			item  = (RPITEM*)GetWindowLongPtr ( hWnd, GWLP_USERDATA );
+	rvRollupPanel*	_this = (rvRollupPanel*)GetWindowLongPtr( GetParent ( hWnd ), GWLP_USERDATA );
 
 	RECT r;
 	GetClientRect ( _this->mWindow, &r );
@@ -771,7 +771,7 @@ LRESULT CALLBACK rvRollupPanel::ButtonProc (HWND hWnd, UINT uMsg, WPARAM wParam,
 		return FALSE;
 	}
 
-	RPITEM* item = (RPITEM*)GetWindowLong(hWnd, GWL_USERDATA);
+	RPITEM* item = (RPITEM*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 	return ::CallWindowProc( item->mOldButtonProc, hWnd, uMsg, wParam, lParam );
 }
 
@@ -785,7 +785,7 @@ Window procedure for rollup panel
 LRESULT CALLBACK rvRollupPanel::WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	rvRollupPanel* panel;
-	panel = (rvRollupPanel*)GetWindowLong (hWnd, GWL_USERDATA);
+	panel = (rvRollupPanel*)GetWindowLongPtr (hWnd, GWLP_USERDATA);
 
 	switch ( uMsg )
 	{
@@ -796,7 +796,7 @@ LRESULT CALLBACK rvRollupPanel::WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam,
 			// Attach the class to the window first
 			cs = (LPCREATESTRUCT) lParam;
 			panel = (rvRollupPanel*) cs->lpCreateParams;
-			SetWindowLong ( hWnd, GWL_USERDATA, (LONG)panel );
+			SetWindowLongPtr ( hWnd, GWLP_USERDATA, (LONG)panel );
 			break;
 		}
 

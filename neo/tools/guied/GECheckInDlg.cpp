@@ -49,12 +49,12 @@ Dialog procedure for the check in dialog
 */
 static INT_PTR CALLBACK GECheckInDlg_GeneralProc ( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
-	GECHECKINDLG* dlg = (GECHECKINDLG*) GetWindowLong ( hwnd, GWL_USERDATA );
+	GECHECKINDLG* dlg = (GECHECKINDLG*) GetWindowLongPtr ( hwnd, GWLP_USERDATA );
 
 	switch ( msg )
 	{
 		case WM_INITDIALOG:
-			SetWindowLong ( hwnd, GWL_USERDATA, lParam );
+			SetWindowLongPtr ( hwnd, GWLP_USERDATA, lParam );
 			dlg = (GECHECKINDLG*) lParam;
 
 			SetWindowText ( GetDlgItem ( hwnd, IDC_GUIED_FILENAME ), dlg->mFilename );

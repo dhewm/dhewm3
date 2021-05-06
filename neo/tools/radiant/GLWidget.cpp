@@ -807,7 +807,7 @@ void idGLWidget::setDrawable(idGLDrawable *d) {
 }
 
 
-void idGLWidget::OnTimer(UINT nIDEvent) {
+void idGLWidget::OnTimer(UINT_PTR nIDEvent) {
 	if (drawable && drawable->getRealTime()) {
 		Invalidate(FALSE);
 	} else {

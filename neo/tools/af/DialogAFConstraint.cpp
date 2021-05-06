@@ -414,7 +414,7 @@ BOOL DialogAFConstraint::OnInitDialog()  {
 DialogAFConstraint::OnToolHitTest
 ================
 */
-int DialogAFConstraint::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraint::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

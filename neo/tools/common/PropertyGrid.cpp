@@ -76,9 +76,9 @@ bool rvPropertyGrid::Create ( HWND parent, int id, int style )
 
 	// Create the List view
 	mWindow = CreateWindowEx ( 0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, (HMENU)id, win32.hInstance, 0 );
-	mListWndProc = (WNDPROC)GetWindowLong ( mWindow, GWL_WNDPROC );
-	SetWindowLong ( mWindow, GWL_USERDATA, (LONG)this );
-	SetWindowLong ( mWindow, GWL_WNDPROC, (LONG)WndProc );
+	mListWndProc = (WNDPROC)GetWindowLongPtr ( mWindow, GWLP_WNDPROC );
+	SetWindowLongPtr ( mWindow, GWLP_USERDATA, (LONG)this );
+	SetWindowLongPtr ( mWindow, GWLP_WNDPROC, (LONG)WndProc );
 
 	LoadLibrary ( "Riched20.dll" );
 	mEdit = CreateWindowEx ( 0, "RichEdit20A", "", WS_CHILD, 0, 0, 0, 0, mWindow, (HMENU) 999, win32.hInstance, NULL );
@@ -383,7 +383,7 @@ Window procedure for property grid
 */
 LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
-	rvPropertyGrid* grid = (rvPropertyGrid*) GetWindowLong ( hWnd, GWL_USERDATA );
+	rvPropertyGrid* grid = (rvPropertyGrid*) GetWindowLongPtr ( hWnd, GWLP_USERDATA );
 
 	switch ( msg )
 	{
@@ -398,7 +398,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			nmkey.hdr.hwndFrom = grid->mWindow;
 			nmkey.nVKey = wParam;
 			nmkey.uFlags = HIWORD(lParam);
-			nmkey.hdr.idFrom = GetWindowLong ( hWnd, GWL_ID );
+			nmkey.hdr.idFrom = GetWindowLongPtr ( hWnd, GWL_ID );
 			SendMessage ( GetParent ( hWnd ), WM_NOTIFY, nmkey.hdr.idFrom, (LPARAM)&nmkey );
 			break;
 		}

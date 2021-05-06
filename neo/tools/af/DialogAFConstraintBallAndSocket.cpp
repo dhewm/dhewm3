@@ -325,7 +325,7 @@ void DialogAFConstraintBallAndSocket::UpdateFile( void ) {
 DialogAFConstraintBallAndSocket::OnToolHitTest
 ================
 */
-int DialogAFConstraintBallAndSocket::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFConstraintBallAndSocket::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

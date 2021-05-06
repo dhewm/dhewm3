@@ -150,7 +150,7 @@ void DialogAFView::DoDataExchange(CDataExchange* pDX) {
 DialogAFView::OnToolHitTest
 ================
 */
-int DialogAFView::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
+INT_PTR DialogAFView::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
 	CDialog::OnToolHitTest( point, pTI );
 	return DefaultOnToolHitTest( toolTips, this, point, pTI );
 }

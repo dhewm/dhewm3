@@ -47,7 +47,7 @@ Window procedure for the property page class.
 */
 INT_PTR CALLBACK rvGEPropertyPage::WndProc ( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
-	rvGEPropertyPage* page = (rvGEPropertyPage*) GetWindowLong ( hwnd, GWL_USERDATA );
+	rvGEPropertyPage* page = (rvGEPropertyPage*) GetWindowLongPtr ( hwnd, GWLP_USERDATA );
 
 	// Pages dont get the init dialog since their Init method is called instead
 	if ( msg == WM_INITDIALOG )
@@ -56,7 +56,7 @@ INT_PTR CALLBACK rvGEPropertyPage::WndProc ( HWND hwnd, UINT msg, WPARAM wParam,
 
 		page = (rvGEPropertyPage*) psp->lParam;
 
-		SetWindowLong ( hwnd, GWL_USERDATA, (LONG)page );
+		SetWindowLongPtr( hwnd, GWLP_USERDATA, (LONG_PTR)page );
 		page->mPage = hwnd;
 
 		page->Init ( );
@@ -89,7 +89,7 @@ int rvGEPropertyPage::HandleMessage ( UINT msg, WPARAM wParam, LPARAM lParam )
 				case PSN_APPLY:
 					if ( !Apply ( ) )
 					{
-						SetWindowLong ( mPage, DWL_MSGRESULT, PSNRET_INVALID );
+						SetWindowLongPtr ( mPage, DWLP_MSGRESULT, PSNRET_INVALID );
 						return TRUE;
 					}
 					break;

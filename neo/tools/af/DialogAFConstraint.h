@@ -54,7 +54,7 @@ public:
 protected:
 	virtual BOOL		OnInitDialog();
 	virtual void		DoDataExchange( CDataExchange* pDX );    // DDX/DDV support
-	virtual int			OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
+	virtual INT_PTR		OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
 	afx_msg BOOL		OnToolTipNotify( UINT id, NMHDR *pNMHDR, LRESULT *pResult );
 	afx_msg void		OnShowWindow( BOOL bShow, UINT nStatus );
 	afx_msg void		OnCbnSelchangeComboConstraints();

@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "qe3.h"
 
-BOOL CALLBACK EditCommandDlgProc (
+INT_PTR CALLBACK EditCommandDlgProc(
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -96,7 +96,7 @@ BOOL CALLBACK EditCommandDlgProc (
 	return FALSE;
 }
 
-BOOL CALLBACK AddCommandDlgProc (
+INT_PTR CALLBACK AddCommandDlgProc (
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -161,7 +161,7 @@ void UpdateBSPCommandList (HWND hwndDlg)
 
 
 // FIXME: turn this into an MFC dialog
-BOOL CALLBACK ProjectDlgProc (
+INT_PTR CALLBACK ProjectDlgProc(
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -255,7 +255,7 @@ void DoProjectSettings()
 
 
 
-BOOL CALLBACK GammaDlgProc (
+INT_PTR CALLBACK GammaDlgProc(
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -390,7 +390,7 @@ void GetSelectionIndex (int *ent, int *brush)
 	;
 }
 
-BOOL CALLBACK FindBrushDlgProc (
+INT_PTR CALLBACK FindBrushDlgProc(
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -450,7 +450,7 @@ void DoFind(void)
 */
 
 
-BOOL CALLBACK RotateDlgProc (
+INT_PTR CALLBACK RotateDlgProc(
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -517,7 +517,7 @@ void DoRotate(void)
 
 bool g_bDoCone = false;
 bool g_bDoSphere = false;
-BOOL CALLBACK SidesDlgProc (
+INT_PTR CALLBACK SidesDlgProc(
 	HWND hwndDlg,	// handle to dialog box
 	UINT uMsg,	// message
 	WPARAM wParam,	// first message parameter
@@ -575,7 +575,7 @@ void DoSides(bool bCone, bool bSphere, bool bTorus)
 DoAbout
 ===================
 */
-BOOL CALLBACK AboutDlgProc( HWND hwndDlg,
+INT_PTR CALLBACK AboutDlgProc( HWND hwndDlg,
 							UINT uMsg,
 							WPARAM wParam,
 							LPARAM lParam )

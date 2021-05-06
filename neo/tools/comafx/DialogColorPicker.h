@@ -112,7 +112,7 @@ protected:
 	afx_msg void	OnChangeEditSat();
 	afx_msg void	OnChangeEditVal();
 	afx_msg void	OnChangeEditOverbright();
-	afx_msg void	OnTimer(UINT nIDEvent);
+	afx_msg void	OnTimer(UINT_PTR nIDEvent);
 	afx_msg void	OnBtnColor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

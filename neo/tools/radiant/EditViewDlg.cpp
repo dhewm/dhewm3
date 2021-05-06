@@ -212,7 +212,7 @@ void CEditViewDlg::SetGuiInfo(const char *name) {
 	UpdateEditPreview();
 }
 
-void CEditViewDlg::OnTimer(UINT nIDEvent) {
+void CEditViewDlg::OnTimer(UINT_PTR nIDEvent) {
 	CDialog::OnTimer(nIDEvent);
 	CWnd *wnd = GetDlgItem(IDC_EDIT_LINE);
 	if (wnd) {
