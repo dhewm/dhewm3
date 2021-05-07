@@ -119,8 +119,6 @@ void MaterialTreeView::InitializeMaterialList(bool includeFile, const char* file
 */
 void MaterialTreeView::BuildMaterialList(bool includeFile, const char* filename) {
 
-	CTreeCtrl& tree = GetTreeCtrl();
-
 	idStrList list(1024);
 
 	int count = declManager->GetNumDecls( DECL_MATERIAL );
@@ -138,10 +136,6 @@ void MaterialTreeView::BuildMaterialList(bool includeFile, const char* filename)
 			idStr filename = mat->GetFileName();
 			if(!filename.Icmp("<implicit file>")) {
 				continue;
-			}
-
-			if(filename.Find("def") != -1) {
-				int x = 0;
 			}
 
 			if(includeFile) {
@@ -1807,7 +1801,7 @@ void MaterialTreeView::SetItemImage(HTREEITEM item, bool mod, bool apply, bool c
 
 	CTreeCtrl& tree = GetTreeCtrl();
 
-	int image;
+	int image = 0;
 
 	DWORD itemType = tree.GetItemData(item);
 	switch(itemType) {

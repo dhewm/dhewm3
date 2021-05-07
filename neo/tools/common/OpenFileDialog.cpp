@@ -306,7 +306,7 @@ void rvOpenFileDialog::HandleInitDialog ( void )
 	SendMessage( mWndLookin,CBEM_SETIMAGELIST,0,(LPARAM) mImageList );
 
 	// Back button is a bitmap button
-	SendMessage( GetDlgItem ( mWnd, IDC_TOOLS_BACK ), BM_SETIMAGE, IMAGE_BITMAP, (LONG) mBackBitmap );
+	SendMessage( GetDlgItem ( mWnd, IDC_TOOLS_BACK ), BM_SETIMAGE, IMAGE_BITMAP, (LONG_PTR) mBackBitmap );
 
 	// Allow custom titles
 	SetWindowText ( mWnd, mTitle );

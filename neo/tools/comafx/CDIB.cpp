@@ -340,8 +340,8 @@ void CDIB::ExpandBlt(int nXDest,int nYDest,int xRatio,int yRatio,CDIB& dibSrc,in
 
 void CDIB::Expand(int nXDest,int nYDest,int xRatio,int yRatio,CDIB& dibSrc,int xSrc,int ySrc,int  nSWidth,int nSHeight)
 {
-int xNum,yNum,xErr,yErr;
-int nDWidth,nDHeight;
+	int xNum,yNum,xErr,yErr;
+	int nDWidth,nDHeight;
 
 	nDWidth = nSWidth*xRatio;
 	nDHeight = nSHeight*yRatio;
@@ -354,8 +354,8 @@ int nDWidth,nDHeight;
 	xErr = nDWidth%xRatio;
 	yErr = nDHeight%yRatio;
 
-unsigned char *buffer,*srcPtr,*destPtr,*ptr;
-int i,j,k;
+	unsigned char *buffer,*srcPtr,*destPtr,*ptr;
+	int i,j,k = 0;
 
 	buffer = (unsigned char *)malloc(nDWidth+20);
 	if(!buffer) return;
@@ -687,7 +687,7 @@ void CDIB::GetPixel(UINT x,UINT y,int& pixel)
 
 BOOL CDIB::Make8Bit(CDIB& dib)
 {
-int nBits;
+	int nBits;
 	ASSERT(Width() == dib.Width());
 	ASSERT(Height() == dib.Height());
 	nBits = dib.GetBitCount();
@@ -708,7 +708,6 @@ int nBits;
 	default:
 		return FALSE;
 	}
-	return FALSE;
 }
 
 /*
@@ -813,7 +812,7 @@ unsigned char cols[256];
 
 int CDIB::ClosestColor(RGBQUAD *pRgb)
 {
-unsigned int dist=BIG_DISTANCE,i,d,c;
+unsigned int dist=BIG_DISTANCE,i,d,c = 0;
 RGBQUAD *pQuad=m_pRGB;
 unsigned int pSize=GetPaletteSize();
 	for(i=0; i < pSize;i++)

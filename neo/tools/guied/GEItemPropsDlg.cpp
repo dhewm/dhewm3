@@ -412,7 +412,7 @@ bool rvGEItemPropsTextPage::Init ( void )
 	SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTALIGN ), CB_ADDSTRING, 0, (LPARAM)"Center" );
 	SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTALIGN ), CB_ADDSTRING, 0, (LPARAM)"Right" );
 
-	SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_ADDSTRING, 0, (LONG)"<default>" );
+	SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_ADDSTRING, 0, (LONG_PTR)"<default>" );
 
 	idFileList *folders;
 	int		  i;
@@ -424,7 +424,7 @@ bool rvGEItemPropsTextPage::Init ( void )
 			continue;
 		}
 
-		SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_ADDSTRING, 0, (LONG)folders->GetFile(i) );
+		SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_ADDSTRING, 0, (LONG_PTR)folders->GetFile(i) );
 	}
 
 	fileSystem->FreeFileList( folders );
@@ -547,7 +547,7 @@ bool rvGEItemPropsTextPage::SetActive ( void )
 	int   fontSel;
 	font.StripQuotes ( );
 	font.StripPath ( );
-	fontSel = SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_FINDSTRING, -1, (LONG)font.c_str () );
+	fontSel = SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_FINDSTRING, -1, (LONG_PTR)font.c_str () );
 	SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_SETCURSEL, 0, 0 );
 	SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_SETCURSEL, fontSel==-1?0:fontSel, 0 );
 
@@ -633,7 +633,7 @@ bool rvGEItemPropsTextPage::KillActive ( void )
 		else
 		{
 			char fontName[MAX_PATH];
-			SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_GETLBTEXT, fontSel, (LONG)fontName );
+			SendMessage ( GetDlgItem ( mPage, IDC_GUIED_ITEMTEXTFONT ), CB_GETLBTEXT, fontSel, (LONG_PTR)fontName );
 			mDict->Set ( "font", idStr("\"fonts/") + idStr(fontName) + idStr("\"" ) );
 		}
 
@@ -816,7 +816,7 @@ int rvGEItemPropsKeysPage::HandleMessage ( UINT msg, WPARAM wParam, LPARAM lPara
 							item.mask = LVIF_TEXT|LVIF_PARAM;
 							item.iItem = ListView_GetItemCount ( list );
 							item.pszText = (LPSTR)key->GetKey().c_str ( );
-							item.lParam = (LONG) key;
+							item.lParam = (LONG_PTR) key;
 							int index = ListView_InsertItem ( list, &item );
 
 							finalValue.StripQuotes ( );
@@ -979,7 +979,7 @@ bool rvGEItemPropsKeysPage::SetActive ( void )
 			item.mask = LVIF_TEXT|LVIF_PARAM;
 			item.iItem = ListView_GetItemCount ( list );
 			item.pszText = (LPSTR)key->GetKey().c_str ( );
-			item.lParam = (LONG) key;
+			item.lParam = (LONG_PTR) key;
 			int index = ListView_InsertItem ( list, &item );
 	
 			idStr value;
@@ -1224,7 +1224,7 @@ bool GEItemPropsDlg_DoModal ( HWND parent, idWindow* window, idDict& dict )
 	propsp[RVITEMPROPS_GENERAL].pszTemplate	= MAKEINTRESOURCE(IDD_GUIED_ITEMPROPS_GENERAL);
 	propsp[RVITEMPROPS_GENERAL].pfnDlgProc	= rvGEPropertyPage::WndProc;
 	propsp[RVITEMPROPS_GENERAL].pszTitle	= "General";
-	propsp[RVITEMPROPS_GENERAL].lParam		= (LONG)new rvGEItemPropsGeneralPage ( &dict, wrapper->GetWindowType ( ) );
+	propsp[RVITEMPROPS_GENERAL].lParam		= (LONG_PTR)new rvGEItemPropsGeneralPage ( &dict, wrapper->GetWindowType ( ) );
 
 	propsp[RVITEMPROPS_IMAGE].dwSize		= sizeof(PROPSHEETPAGE);
 	propsp[RVITEMPROPS_IMAGE].dwFlags		= PSP_USETITLE;
@@ -1232,7 +1232,7 @@ bool GEItemPropsDlg_DoModal ( HWND parent, idWindow* window, idDict& dict )
 	propsp[RVITEMPROPS_IMAGE].pszTemplate	= MAKEINTRESOURCE(IDD_GUIED_ITEMPROPS_IMAGE);
 	propsp[RVITEMPROPS_IMAGE].pfnDlgProc	= rvGEPropertyPage::WndProc;
 	propsp[RVITEMPROPS_IMAGE].pszTitle		= "Image";
-	propsp[RVITEMPROPS_IMAGE].lParam		= (LONG)new rvGEItemPropsImagePage ( &dict );;
+	propsp[RVITEMPROPS_IMAGE].lParam		= (LONG_PTR)new rvGEItemPropsImagePage ( &dict );;
 
 	propsp[RVITEMPROPS_TEXT].dwSize			= sizeof(PROPSHEETPAGE);
 	propsp[RVITEMPROPS_TEXT].dwFlags		= PSP_USETITLE;
@@ -1240,7 +1240,7 @@ bool GEItemPropsDlg_DoModal ( HWND parent, idWindow* window, idDict& dict )
 	propsp[RVITEMPROPS_TEXT].pszTemplate	= MAKEINTRESOURCE(IDD_GUIED_ITEMPROPS_TEXT);
 	propsp[RVITEMPROPS_TEXT].pfnDlgProc		= rvGEPropertyPage::WndProc;
 	propsp[RVITEMPROPS_TEXT].pszTitle		= "Text";
-	propsp[RVITEMPROPS_TEXT].lParam			= (LONG)new rvGEItemPropsTextPage ( &dict );;
+	propsp[RVITEMPROPS_TEXT].lParam			= (LONG_PTR)new rvGEItemPropsTextPage ( &dict );;
 
 	propsp[RVITEMPROPS_KEYS].dwSize			= sizeof(PROPSHEETPAGE);
 	propsp[RVITEMPROPS_KEYS].dwFlags		= PSP_USETITLE;
@@ -1248,7 +1248,7 @@ bool GEItemPropsDlg_DoModal ( HWND parent, idWindow* window, idDict& dict )
 	propsp[RVITEMPROPS_KEYS].pszTemplate	= MAKEINTRESOURCE(IDD_GUIED_ITEMPROPS_KEYS);
 	propsp[RVITEMPROPS_KEYS].pfnDlgProc		= rvGEPropertyPage::WndProc;
 	propsp[RVITEMPROPS_KEYS].pszTitle		= "Keys";
-	propsp[RVITEMPROPS_KEYS].lParam			= (LONG)new rvGEItemPropsKeysPage ( &dict, wrapper );
+	propsp[RVITEMPROPS_KEYS].lParam			= (LONG_PTR)new rvGEItemPropsKeysPage ( &dict, wrapper );
 
 	propsh.dwSize			= sizeof(PROPSHEETHEADER);
 	propsh.nStartPage		= gApp.GetOptions().GetLastOptionsPage ( );

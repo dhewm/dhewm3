@@ -556,7 +556,7 @@ static void MoveSelection( const idVec3 &orgMove ) {
 	if (g_pParentWnd->ActiveXY()->ScaleMode()) {
 		idVec3	v;
 		v[0] = v[1] = v[2] = 1.0f;
-		for (int i = 0; i < 3; i++) {
+		for (i = 0; i < 3; i++) {
 			if ( move[i] > 0.0f ) {
 				v[i] = 1.1f;
 			} else if ( move[i] < 0.0f ) {

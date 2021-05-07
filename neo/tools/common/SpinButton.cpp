@@ -72,7 +72,7 @@ void SpinButton_HandleNotify ( NMHDR* hdr )
 
 	LONG minRange;
 	LONG maxRange;
-	SendMessage ( hdr->hwndFrom, UDM_GETRANGE32, (LONG)&minRange, (LONG)&maxRange );
+	SendMessage ( hdr->hwndFrom, UDM_GETRANGE32, (LONG_PTR)&minRange, (LONG_PTR)&maxRange );
 	if ( minRange !=  0 || maxRange != 0 )
 	{
 		float minRangef = (float)(long)minRange / 100.0f;

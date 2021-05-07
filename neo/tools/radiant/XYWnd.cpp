@@ -1870,8 +1870,6 @@ void CreateSmartEntity(CXYWnd *pWnd, int x, int y, const char *pName) {
 void FinishSmartCreation() {
 	CPtrArray	array;
 	HideInfoDialog();
-
-	brush_t *pEntities = NULL;
 	if (g_strSmartEntity.Find("Smart_Train") >= 0) {
 		g_bScreenUpdates = false;
 		CreateRightClickEntity(g_pParentWnd->ActiveXY(), g_nSmartX, g_nSmartY, "func_train");
@@ -2098,7 +2096,7 @@ bool MergeMenu(CMenu * pMenuDestination, const CMenu * pMenuAdd, bool bTopLevel 
 			HMENU hNewMenu = NewPopupMenu.GetSafeHmenu();
 			if (pMenuDestination->InsertMenu(iInsertPosDefault,
 				MF_BYPOSITION | MF_POPUP | MF_ENABLED,
-				(UINT)hNewMenu, sMenuAddString ))
+				(UINT_PTR)hNewMenu, sMenuAddString ))
 			{
 				// don't forget to correct the item count
 				iMenuDestItemCount++;
@@ -2169,7 +2167,7 @@ void CXYWnd::HandleDrop() {
 					if (pChild) {
 						pMakeEntityPop->AppendMenu (
 							MF_POPUP,
-							reinterpret_cast < unsigned int > (pChild->GetSafeHmenu()),
+							reinterpret_cast <UINT_PTR> (pChild->GetSafeHmenu()),
 							strActive
 						);
 						g_ptrMenus.Add(pChild);
@@ -2188,7 +2186,7 @@ void CXYWnd::HandleDrop() {
 				if (pChild) {
 					pMakeEntityPop->AppendMenu (
 						MF_POPUP,
-						reinterpret_cast < unsigned int > (pChild->GetSafeHmenu()),
+						reinterpret_cast <UINT_PTR> (pChild->GetSafeHmenu()),
 						strActive
 					);
 					g_ptrMenus.Add(pChild);
@@ -2204,7 +2202,7 @@ void CXYWnd::HandleDrop() {
 		if ( pMakeEntityPop != &m_mnuDrop ) {
 			m_mnuDrop.AppendMenu (
 				MF_POPUP,
-				reinterpret_cast < unsigned int > (pMakeEntityPop->GetSafeHmenu()),
+				reinterpret_cast <UINT_PTR> (pMakeEntityPop->GetSafeHmenu()),
 				"Make Entity"
 			);
 		}
@@ -2874,8 +2872,6 @@ void CXYWnd::XY_DrawGrid() {
 		// glColor4f(0, 0, 0, 0);
 		qglColor3fv(g_qeglobals.d_savedinfo.colors[COLOR_GRIDTEXT].ToFloatPtr());
 
-		float	lastRaster = xb;
-
 		for (x = xb; x < xe; x += stepSize) {
 			qglRasterPos2f(x, m_vOrigin[nDim2] + h - 10 / m_fScale);
 			sprintf(text, "%i", (int)x);
@@ -3330,7 +3326,7 @@ void DrawPathLines(void) {
 
 	num_entities = 0;
 	for (te = entities.next; te != &entities && num_entities != MAX_MAP_ENTITIES; te = te->next) {
-		for (int i = 0; i < 2048; i++) {
+		for (i = 0; i < 2048; i++) {
 			if (i == 0) {
 				ent_target[num_entities] = ValueForKey(te, "target");
 			} else {
@@ -4260,9 +4256,7 @@ bool CXYWnd::UndoAvailable() {
 void CXYWnd::Paste()
 {
 #if 1
-
 	CWaitCursor WaitCursor;
-	bool		bPasted = false;
 	UINT		nClipboard = ::RegisterClipboardFormat("RadiantClippings");
 	if (nClipboard > 0 && OpenClipboard() && ::IsClipboardFormatAvailable(nClipboard)) {
 		HANDLE	h = ::GetClipboardData(nClipboard);
@@ -4285,7 +4279,7 @@ void CXYWnd::Paste()
 
 		int		nLen = g_Clipboard.GetLength();
 		char	*pBuffer = new char[nLen + 1];
-		memset(pBuffer, 0, sizeof(*pBuffer) * (nLen + 1));
+		memset(pBuffer, 0, nLen + 1);
 		g_Clipboard.Read(pBuffer, nLen);
 		pBuffer[nLen] = '\0';
 		Map_ImportBuffer(pBuffer, !(GetAsyncKeyState(VK_SHIFT) & 0x8000));
@@ -4505,8 +4499,7 @@ BOOL CXYWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 void CXYWnd::DrawPrecisionCrosshair( void )
 {
 	// FIXME: m_mouseX, m_mouseY, m_axisHoriz, m_axisVert, etc... are never set
-	return;
-
+#if 0
 	idVec3 mouse3dPos (0.0f, 0.0f, 0.0f);
 	float x, y;
 	idVec4 crossEndColor (1.0f, 0.0f, 1.0f, 1.0f); // the RGBA color of the precision crosshair at its ends
@@ -4566,4 +4559,5 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 	// Radiant was in opaque, flat-shaded mode by default; restore this to prevent possible slowdown
 	qglShadeModel( GL_FLAT );
 	qglDisable( GL_BLEND );
+#endif
 }

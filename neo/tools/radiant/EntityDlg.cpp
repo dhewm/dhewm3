@@ -940,7 +940,7 @@ void CEntityDlg::OnCbnDblclkComboClass()
 // =======================================================================================================================
 //
 void CEntityDlg::CreateEntity() {
-	entity_t	*petNew;
+	entity_t	*petNew = NULL;
 	bool		forceFixed = false;
 
 	// check to make sure we have a brush

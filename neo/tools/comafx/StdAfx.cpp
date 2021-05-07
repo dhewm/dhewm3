@@ -108,7 +108,7 @@ BOOL DefaultOnToolTipNotify( const toolTip_t *toolTips, UINT id, NMHDR *pNMHDR, 
 
 	*pResult = 0;
 
-	UINT nID = pNMHDR->idFrom;
+	UINT_PTR nID = pNMHDR->idFrom;
 	if ( pTTTA->uFlags & TTF_IDISHWND ) {
 		// idFrom is actually the HWND of the tool
 		nID = ::GetDlgCtrlID((HWND)nID);

@@ -472,7 +472,7 @@ void rvGENavigator::AddWindow ( idWindow* window )
 	ZeroMemory ( &item, sizeof(item) );
 	item.mask = LVIF_PARAM|LVIF_STATE|LVIF_IMAGE;
 	item.iItem = ListView_GetItemCount ( mTree );
-	item.lParam = (LONG) window;
+	item.lParam = (LONG_PTR) window;
 	item.iImage = 0;
 	item.state = rvGEWindowWrapper::GetWrapper(window)->IsSelected ()? LVIS_SELECTED:0;
 	item.stateMask = LVIS_SELECTED;

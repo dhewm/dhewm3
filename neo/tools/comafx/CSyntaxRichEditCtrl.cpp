@@ -1380,8 +1380,12 @@ CSyntaxRichEditCtrl::OnToolTipNotify
 ================
 */
 BOOL CSyntaxRichEditCtrl::OnToolTipNotify( UINT id, NMHDR *pNMHDR, LRESULT *pResult ) {
+
+#ifdef _UNICODE
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
+#else
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+#endif
 
 	*pResult = 0;
 

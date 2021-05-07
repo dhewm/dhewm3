@@ -1518,10 +1518,6 @@ brush_t *Brush_Parse(idVec3 origin) {
 		// read the texturedef
 		GetToken(false);
 		f->texdef.SetName(token);
-		if (token[0] == '(') {
-			int i = 32;
-		}
-
 		GetToken(false);
 		f->texdef.shift[0] = atoi(token);
 		GetToken(false);
@@ -2063,6 +2059,7 @@ brush_t *Brush_CreatePyramid(idVec3 mins, idVec3 maxs, texdef_t *texdef) {
 	// ++timo handle new brush primitive ? return here ??
 	return Brush_Create(mins, maxs, texdef);
 
+#if 0
 	int i;
 	for (i = 0; i < 3; i++) {
 		if (maxs[i] < mins[i]) {
@@ -2125,6 +2122,7 @@ brush_t *Brush_CreatePyramid(idVec3 mins, idVec3 maxs, texdef_t *texdef) {
 	}
 
 	return b;
+#endif
 }
 
 /*
@@ -2135,7 +2133,7 @@ Brush_MakeSided
 ================
 */
 void Brush_MakeSided(int sides) {
-	int			i, axis;
+	int			i, axis = 0;
 	idVec3		mins, maxs;
 	brush_t		*b;
 	texdef_t	*texdef;
@@ -2537,7 +2535,7 @@ bool Brush_ModelIntersect(brush_t *b, idVec3 origin, idVec3 dir,float &scale) {
 
 		bool matrix = false;
 		idMat3 mat;
-		float a, s, c;
+		float a = 0.0f, s = 0.0f, c = 0.0f;
 		if (GetMatrixForKey(b->owner, "rotation", mat)) {
 			matrix = true;
 		} else {
@@ -3144,7 +3142,6 @@ void Brush_UpdateLightPoints(brush_t *b, const idVec3 &offset) {
 		if (GetVectorForKey(b->owner, "light_center", vCenter)) {
 
 			if (offset.x || offset.y || offset.z) {
-				CString str;
 				VectorAdd(vCenter, offset, vCenter);
 				SetKeyVec3(b->owner, "light_center", vCenter);
 			}
@@ -4356,7 +4353,6 @@ void Brush_DrawCombatNode( brush_t *b, bool cameraView, bool bSelected ) {
 	idVec3 cone_left = leftang.ToForward();
 	idAngles rightang( 0.0f, yaw - fov * 0.5f + 90.0f, 0.0f );
 	idVec3 cone_right = rightang.ToForward();
-	bool disabled = b->owner->epairs.GetBool( "start_off" );
 
 	idVec4 color;
 	if ( bSelected ) {
@@ -4610,7 +4606,7 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 	}
 
 	int maxage = b->owner->curve->GetNumValues();
-	int i, time = 0;
+	int i;
 	qglColor3f( 0.0f, 0.0f, 1.0f );
 	for ( i = 0; i < maxage; i++) {
 

@@ -153,8 +153,8 @@ COLORREF CVectorCtl::CalcLight (double dx, double dy, double dz)
 {
 	double NL = dx * m_dVec[0] + dy * m_dVec[1] + dz * m_dVec[2],
 		   RV = 2.0 * NL,
-		   rx = m_dVec[0] - (dx * RV),
-		   ry = m_dVec[1] - (dy * RV),
+		   //rx = m_dVec[0] - (dx * RV),
+		   //ry = m_dVec[1] - (dy * RV),
 		   rz = m_dVec[2] - (dz * RV);
 
 	if (NL < 0.0)   // Diffuse coefficient

@@ -179,6 +179,8 @@ void CLightInfo::ToDictWriteAllInfo( idDict *e ) {
 
 	if (strTexture.GetLength() > 0 ) {
 		e->Set("texture", strTexture);
+	} else {
+		e->Set("texture", "");
 	}
 
 	idVec3 temp = color;
@@ -940,19 +942,19 @@ void CLightDlg::OnCheckParallel() {
 
 //jhefty - only apply settings that are different
 void CLightDlg::OnApplyDifferences () {
-	idDict differences, modified, original;
+	idDict differences, modifiedlight, originallight;
 
 	UpdateLightInfoFromDialog();
 
-	lightInfo.ToDict( &modified );
-	lightInfoOriginal.ToDictWriteAllInfo( &original );
+	lightInfo.ToDict( &modifiedlight);
+	lightInfoOriginal.ToDictWriteAllInfo( &originallight);
 
-	differences = modified;
+	differences = modifiedlight;
 
 	// jhefty - compile a set of modified values to apply
-	for ( int i = 0; i < modified.GetNumKeyVals (); i ++ ) {
-		const idKeyValue* valModified = modified.GetKeyVal ( i );
-		const idKeyValue* valOriginal = original.FindKey ( valModified->GetKey() );
+	for ( int i = 0; i < modifiedlight.GetNumKeyVals (); i ++ ) {
+		const idKeyValue* valModified = modifiedlight.GetKeyVal ( i );
+		const idKeyValue* valOriginal = originallight.FindKey ( valModified->GetKey() );
 
 		//if it hasn't changed, remove it from the list of values to apply
 		if ( !valOriginal || ( valModified->GetValue() == valOriginal->GetValue() ) ) {
@@ -962,7 +964,7 @@ void CLightDlg::OnApplyDifferences () {
 
 	SaveLightInfo( &differences );
 
-	lightInfoOriginal.FromDict( &modified );
+	lightInfoOriginal.FromDict( &modifiedlight);
 
 	Sys_UpdateWindows( W_ALL );
 }

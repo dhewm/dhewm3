@@ -41,10 +41,10 @@ class CCapDialog : public CDialog
 {
 // Construction
 public:
-  static enum {BEVEL = 0, ENDCAP, IBEVEL, IENDCAP};
+	enum {BEVEL = 0, ENDCAP, IBEVEL, IENDCAP};
 	CCapDialog(CWnd* pParent = NULL);   // standard constructor
 
-  int getCapType() {return m_nCap;};
+	int getCapType() {return m_nCap;};
 // Dialog Data
 	//{{AFX_DATA(CCapDialog)
 	enum { IDD = IDD_DIALOG_CAP };

@@ -59,9 +59,6 @@ patchMesh_t * MakeNewPatch( int width,int height ) {
 
 void Patch_AdjustSize( patchMesh_t *p,int wadj,int hadj ) {
 	idDrawVert	*newverts	= reinterpret_cast< idDrawVert*>(Mem_ClearedAlloc(sizeof(idDrawVert) * (p->width + wadj) * (p->height + hadj)));
-	int			copyWidth	= (wadj < 0) ? p->width + wadj : p->width;
-	int			copyHeight	= (hadj < 0) ? p->height + hadj : p->height;
-	int			copysize	= copyWidth *copyHeight * sizeof(idDrawVert);
 
 	for ( int i = 0; i < p->width; i++ ) {
 		for ( int j = 0; j < p->height; j++ ) {
@@ -1325,7 +1322,6 @@ brush_t * CapSpecial( patchMesh_t *pParent,int nType,bool bFirst ) {
 	vMin[0] = vMin[1] = vMin[2] = 99999;
 	vMax[0] = vMax[1] = vMax[2] = -99999;
 
-	int	nSize	= pParent->width;
 	int	nIndex	= (bFirst) ? 0 : pParent->height - 1;
 
 	// parent bounds are used for some things
@@ -1506,8 +1502,8 @@ void Patch_CapCurrent( bool bInvertedBevel,bool bInvertedEndcap ) {
 //FIXME: Table drive all this crap
 //
 void GenerateEndCaps( brush_t *brushParent,bool bBevel,bool bEndcap,bool bInverted ) {
-	brush_t		*b, *b2;
-	patchMesh_t	*p, *p2, *pParent;
+	brush_t		*b;
+	patchMesh_t	*p, *pParent;
 	idVec3		vTemp, vMin, vMax;
 	int			i, j;
 
@@ -1549,6 +1545,7 @@ void GenerateEndCaps( brush_t *brushParent,bool bBevel,bool bEndcap,bool bInvert
 	Select_Brush(p->pSymbiot);
 	return;
 
+#if 0
 	bool	bCreated	= false;
 
 	if ( bInverted ) {
@@ -1712,7 +1709,7 @@ void GenerateEndCaps( brush_t *brushParent,bool bBevel,bool bEndcap,bool bInvert
 		Select_Delete();
 	}
 	//Select_Brush(brushParent);
-
+#endif
 }
 
 
@@ -2207,9 +2204,7 @@ DrawPatchMesh
 //FIXME: this routine needs to be reorganized.. should be about 1/4 the size and complexity
 void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false ) {
 	int		i, j;
-
 	bool	bOverlay	= pm->bOverlay;
-	int		nDrawMode	= g_pParentWnd->GetCamera()->Camera().draw_mode;
 
 	// patches use two display lists, one for camera one for xy
 	if ( *list <= 0 ) {
@@ -3145,9 +3140,9 @@ void Parse2DMatrix( int y,int x,float *p ) {
 	GetToken(true); // )
 }
 
-void Parse3DMatrix( int z,int y,int x,float *p ) {
+void Parse3DMatrix( int _z,int y,int x,float *p ) {
 	GetToken(true); // (
-	for ( int i = 0; i < z; i++ ) {
+	for ( int i = 0; i < _z; i++ ) {
 		Parse2DMatrix(y, x, p + i * (x * MAX_PATCH_HEIGHT));
 	}
 	GetToken(true); // )
@@ -3904,11 +3899,11 @@ void _Write2DMatrix( FILE *f,int y,int x,float *m ) {
 }
 
 
-void _Write3DMatrix( FILE *f,int z,int y,int x,float *m ) {
+void _Write3DMatrix( FILE *f,int _z,int y,int x,float *m ) {
 	int	i;
 
 	fprintf(f, "(\n");
-	for ( i = 0 ; i < z ; i++ ) {
+	for ( i = 0 ; i < _z ; i++ ) {
 		_Write2DMatrix(f, y, x, m + i * (x * MAX_PATCH_HEIGHT));
 	}
 	fprintf(f, ")\n");
@@ -3940,11 +3935,11 @@ void _Write2DMatrix( CMemFile *f,int y,int x,float *m ) {
 }
 
 
-void _Write3DMatrix( CMemFile *f,int z,int y,int x,float *m ) {
+void _Write3DMatrix( CMemFile *f,int _z,int y,int x,float *m ) {
 	int	i;
 
 	MemFile_fprintf(f, "(\n");
-	for ( i = 0 ; i < z ; i++ ) {
+	for ( i = 0 ; i < _z ; i++ ) {
 		_Write2DMatrix(f, y, x, m + i * (x * MAX_PATCH_HEIGHT));
 	}
 	MemFile_fprintf(f, ")\n");
@@ -4381,11 +4376,6 @@ void Patch_FromTriangle( idVec5 vx,idVec5 vy,idVec5 vz ) {
 	p->ctrl(2, 1).st[1] = vMidYZ[4];
 	p->ctrl(2, 2).st[0] = vz[3];
 	p->ctrl(2, 2).st[1] = vz[4];
-
-
-	//Patch_Naturalize(p);
-
-	brush_t	*b	= AddBrushForPatch(p);
 }
 
 

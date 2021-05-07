@@ -58,9 +58,9 @@ bool rvGEWorkspace::SaveFile ( const char* filename )
 	ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_savepath" );
 
 	// Open the output file for write
-	if ( !(file = fileSystem->OpenFileWrite ( tempfile ) ) )
+	file = fileSystem->OpenFileWrite(tempfile);
+	if ( !file )
 	{
-		int error = GetLastError ( );
 		SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW ) ) );
 		return false;
 	}

@@ -768,7 +768,6 @@ void MaterialDoc::ParseStage(idLexer* src) {
 */
 void MaterialDoc::AddSpecialMapStage(const char* stageName, const char* map) {
 	MEStage_t* newStage = new MEStage_t();
-	int index = editMaterial.stages.Append(newStage);
 	newStage->stageData.Set("name", stageName);
 	newStage->stageData.Set("map", map);
 	newStage->stageData.SetInt("stagetype", STAGE_TYPE_SPECIALMAP);

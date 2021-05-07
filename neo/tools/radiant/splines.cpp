@@ -403,7 +403,6 @@ idSplineList::buildSpline
 ================
 */
 void idSplineList::buildSpline() {
-	int start = Sys_Milliseconds();
 	clearSpline();
 	for(int i = 3; i < controlPoints.Num(); i++) {
 		for (float tension = 0.0f; tension < 1.001f; tension += granularity) {
@@ -419,7 +418,6 @@ void idSplineList::buildSpline() {
 		}
 	}
 	dirty = false;
-	//common->Printf("Spline build took %f seconds\n", (float)(Sys_Milliseconds() - start) / 1000);
 }
 
 /*
@@ -792,7 +790,6 @@ idCameraDef::addTarget
 ================
 */
 void idCameraDef::addTarget(const char *name, idCameraPosition::positionType type) {
-	const char *text = (name == NULL) ? va("target0%d", numTargets()+1) : name;
 	idCameraPosition *pos = newFromType(type);
 	if (pos) {
 		pos->setName(name);
@@ -1080,7 +1077,6 @@ idCameraDef::buildCamera
 
 void idCameraDef::buildCamera() {
 	int i;
-	int lastSwitch = 0;
 	idList<float> waits;
 	idList<int> targets;
 
@@ -1089,7 +1085,6 @@ void idCameraDef::buildCamera() {
 	// we have a base time layout for the path and the target path
 	// now we need to layer on any wait or speed changes
 	for (i = 0; i < events.Num(); i++) {
-		idCameraEvent *ev = events[i];
 		events[i]->setTriggered(false);
 		switch (events[i]->getType()) {
 			case idCameraEvent::EVENT_TARGET : {
@@ -1673,21 +1668,12 @@ idInterpolatedPosition::getPosition
 */
 const idVec3 *idInterpolatedPosition::getPosition( long t ) {
 	static idVec3 interpolatedPos;
-
-	if (t - startTime > 6000) {
-		int i = 0;
-	}
-
 	float velocity = getVelocity(t);
 	float timePassed = t - lastTime;
 	lastTime = t;
 
 	// convert to seconds
 	timePassed /= 1000;
-
-	if (velocity != getBaseVelocity()) {
-		int i = 0;
-	}
 
 	float distToTravel = timePassed * velocity;
 
@@ -2021,7 +2007,7 @@ const idVec3 *idSplinePosition::getPosition(long t) {
 
 		idVec3 v1 = *target.getSegmentPoint(i - 1);
 		idVec3 v2 = *target.getSegmentPoint(i);
-		double percent = (lastDistance2 - targetDistance) / (lastDistance2 - lastDistance1);
+		percent = (lastDistance2 - targetDistance) / (lastDistance2 - lastDistance1);
 		v2 *= (1.0f - percent);
 		v1 *= percent;
 		v2 += v1;

@@ -281,11 +281,6 @@ void Error(char *error, ...) {
 void Warning(char *error, ...) {
 	va_list argptr;
 	char	text[1024];
-	int		err;
-
-	err = GetLastError();
-
-	int i = qglGetError();
 
 	va_start(argptr, error);
 	vsprintf(text, error, argptr);
@@ -320,7 +315,7 @@ static char			szFilter[260] =			/* filter string */
 static char			szProjectFilter[260] =	/* filter string */
 "Q3Radiant project (*.qe4, *.prj)\0*.qe4\0*.prj\0\0";
 static char			chReplace;				/* string separator for szFilter */
-static int			i, cbString;			/* integer count variables */
+static int			cbString;				/* integer count variables */
 static HANDLE		hf;						/* file handle */
 
 /*

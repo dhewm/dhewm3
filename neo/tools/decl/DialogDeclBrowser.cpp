@@ -559,8 +559,11 @@ DialogDeclBrowser::OnToolTipNotify
 */
 BOOL DialogDeclBrowser::OnToolTipNotify( UINT id, NMHDR *pNMHDR, LRESULT *pResult ) {
 	// need to handle both ANSI and UNICODE versions of the message
+#ifdef _UNICODE
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
+#else
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+#endif
 
 	if ( pNMHDR->hwndFrom == declTree.GetSafeHwnd() ) {
 		CString toolTip;
@@ -807,7 +810,6 @@ DialogDeclBrowser::OnTreeSelChanged
 ================
 */
 void DialogDeclBrowser::OnTreeSelChanged( NMHDR* pNMHDR, LRESULT* pResult ) {
-	LV_KEYDOWN* pLVKeyDow = (LV_KEYDOWN*)pNMHDR;
 
 	const idDecl *decl = GetSelectedDecl();
 	if ( decl ) {

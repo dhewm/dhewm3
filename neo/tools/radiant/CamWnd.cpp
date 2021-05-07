@@ -199,7 +199,6 @@ brush_t *g_pSplitList = NULL;
  */
 void CCamWnd::OnPaint() {
 	CPaintDC	dc(this);	// device context for painting
-	bool		bPaint = true;
 
 	if (!qwglMakeCurrent(dc.m_hDC, win32.hGLRC)) {
 		common->Printf("ERROR: wglMakeCurrent failed..\n ");
@@ -762,7 +761,7 @@ bool CCamWnd::CullBrush(brush_t *b, bool cubicOnly) {
 		float distance = g_PrefsDlg.m_nCubicScale * 64;
 
 		idVec3 mid;
-		for (int i = 0; i < 3; i++) {
+		for (i = 0; i < 3; i++) {
 			mid[i] = (b->mins[i] + ((b->maxs[i] - b->mins[i]) / 2));
 		}
 
@@ -1065,7 +1064,7 @@ void CCamWnd::Cam_Draw() {
 	int nCount = g_ptrSelectedFaces.GetSize();
 
 	if (!renderMode) {
-		for (int i = 0; i < nCount; i++) {
+		for (i = 0; i < nCount; i++) {
 			face_t	*selFace = reinterpret_cast < face_t * > (g_ptrSelectedFaces.GetAt(i));
 			Face_Draw(selFace);
 			DrawAxial(selFace);
@@ -1079,7 +1078,7 @@ void CCamWnd::Cam_Draw() {
 
 	if (renderMode) {
 		qglColor3f(1, 0, 0);
-		for (int i = 0; i < nCount; i++) {
+		for (i = 0; i < nCount; i++) {
 			face_t	*selFace = reinterpret_cast < face_t * > (g_ptrSelectedFaces.GetAt(i));
 			Face_Draw(selFace);
 		}
@@ -1394,7 +1393,6 @@ void Tris_ToOBJ(const char *outFile, idTriList *tris, idMatList *mats) {
 		int i, j, k;
 		int indexBase = 1;
 		idStr lastMaterial("");
-		int matCount = 0;
 		//idStr basePath = cvarSystem->GetCVarString( "fs_savepath" );
 		f->Printf( "mtllib %s.mtl\n", out );
 		for (i = 0; i < tris->Num(); i++) {
@@ -1429,7 +1427,7 @@ void Tris_ToOBJ(const char *outFile, idTriList *tris, idMatList *mats) {
 				}
 			}
 
-			for (int j = 0; j < tri->numIndexes; j += 3) {
+			for (j = 0; j < tri->numIndexes; j += 3) {
 				int i1, i2, i3;
 				i1 = tri->indexes[j+2] + indexBase;
 				i2 = tri->indexes[j+1] + indexBase;
@@ -1461,7 +1459,7 @@ int Brush_TransformModel(brush_t *brush, idTriList *tris, idMatList *mats) {
 		idRenderModel *model = brush->modelHandle;
 		if (model) {
 			float	a = FloatForKey(brush->owner, "angle");
-			float	s, c;
+			float	s = 0.0f, c = 0.0f;
 			//FIXME: support full rotation matrix
 			bool matrix = false;
 			if (a) {

@@ -147,9 +147,9 @@ void CPreviewDlg::AddCommentedItems() {
 	if (fileSystem->ReadFile(path, (void**)&buffer, NULL) && buffer) {
 		src.LoadMemory(buffer, strlen(buffer), path);
 		if (src.IsLoaded()) {
-			idToken token, tok1, tok2, tok3;
-			while( src.ReadToken( &token ) ) {
-				if (token == "{") {
+			idToken commenttoken, tok1, tok2, tok3;
+			while( src.ReadToken( &commenttoken) ) {
+				if (commenttoken == "{") {
 					// start a new commented item
 					CommentedItem ci;
 					if (src.ReadToken(&tok1) && src.ReadToken(&tok2) && src.ReadToken(&tok3)) {
@@ -278,7 +278,6 @@ void CPreviewDlg::AddStrList( const char *root, const idStrList &list, int id ) 
 
 void CPreviewDlg::OnTvnSelchangedTreeMedia(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	HTREEITEM item = treeMedia.GetSelectedItem();
 	mediaName = "";
 	CWnd *add = GetDlgItem(IDC_BUTTON_ADD);

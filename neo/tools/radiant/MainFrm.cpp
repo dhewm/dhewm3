@@ -728,7 +728,7 @@ static UINT indicators[] = {
  =======================================================================================================================
  */
 void CMainFrame::OnDisplayChange( WPARAM wp, LPARAM lp ) {
-	int n = wp;
+//	int n = wp;
 }
 
 /*
@@ -1025,7 +1025,6 @@ MFCCreate
 */
 void MFCCreate( HINSTANCE hInstance )
 {
-	HMENU hMenu = NULL;
 	int i = sizeof(g_qeglobals.d_savedinfo);
 	long l = i;
 
@@ -1079,8 +1078,8 @@ void MFCCreate( HINSTANCE hInstance )
 
 		// old size was smaller, reload original prefs
 		if (nOldSize > 0 && nOldSize < sizeof(g_qeglobals.d_savedinfo)) {
-			long l = nOldSize;
-			LoadRegistryInfo("radiant_SavedInfo", &g_qeglobals.d_savedinfo, &l);
+			long lOldSize = nOldSize;
+			LoadRegistryInfo("radiant_SavedInfo", &g_qeglobals.d_savedinfo, &lOldSize);
 		}
 	}
 }
@@ -2134,7 +2133,7 @@ This is the new all-internal bsp
 ============
 */
 void RunBsp (const char *command) {
-	char	sys[2048];
+	char	system[2048];
 	char	name[2048];
 	char	*in;
 
@@ -2182,28 +2181,28 @@ void RunBsp (const char *command) {
 
 		::GetModuleFileName(AfxGetApp()->m_hInstance, buff, sizeof(buff));
 		if (strlen(command) > strlen("bspext")) {
-			idStr::snPrintf( sys, sizeof(sys), "%s %s +set r_fullscreen 0 +dmap editorOutput %s %s +quit", buff, paths.c_str(), command + strlen("bspext"), in );
+			idStr::snPrintf( system, sizeof(system), "%s %s +set r_fullscreen 0 +dmap editorOutput %s %s +quit", buff, paths.c_str(), command + strlen("bspext"), in );
 		} else {
-			idStr::snPrintf( sys, sizeof(sys), "%s %s +set r_fullscreen 0 +dmap editorOutput %s +quit", buff, paths.c_str(), in );
+			idStr::snPrintf( system, sizeof(system), "%s %s +set r_fullscreen 0 +dmap editorOutput %s +quit", buff, paths.c_str(), in );
 		}
 
 		::GetStartupInfo (&startupinfo);
-		if (!CreateProcess(NULL, sys, NULL, NULL, FALSE, 0, NULL, NULL, &startupinfo, &ProcessInformation)) {
+		if (!CreateProcess(NULL, system, NULL, NULL, FALSE, 0, NULL, NULL, &startupinfo, &ProcessInformation)) {
 			common->Printf("Could not start bsp process %s %s/n", buff, sys);
 		}
 		g_pParentWnd->SetFocus();
 
 	} else { // assumes bsp is the command
 		if (strlen(command) > strlen("bsp")) {
-			idStr::snPrintf( sys, sizeof(sys), "dmap %s %s", command + strlen("bsp"), in );
+			idStr::snPrintf( system, sizeof(system), "dmap %s %s", command + strlen("bsp"), in );
 		} else {
-			idStr::snPrintf( sys, sizeof(sys), "dmap %s", in );
+			idStr::snPrintf( system, sizeof(system), "dmap %s", in );
 		}
 
 		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "disconnect\n" );
 
 		// issue the bsp command
-		Dmap_f( idCmdArgs( sys, false ) );
+		Dmap_f( idCmdArgs( system, false ) );
 	}
 }
 
@@ -2743,8 +2742,8 @@ LPCSTR String_ToLower(LPCSTR psString)
 bool FindNextBrush(brush_t* pPrevFoundBrush)	// can be NULL for fresh search
 {
 	bool bFoundSomething = false;
-	entity_t *pLastFoundEnt;
-	brush_t  *pLastFoundBrush;
+	entity_t *pLastFoundEnt = NULL;
+	brush_t  *pLastFoundBrush = NULL;
 
 	CWaitCursor waitcursor;
 
@@ -3007,8 +3006,7 @@ void CMainFrame::OnMiscSetViewPos()
 		if (iArgsFound == 3)
 		{
 			// try for an optional 4th (note how this wasn't part of the sscanf() above, so I can check 1st-3, not just any 3)
-			//
-			int iArgsFound = sscanf(psNewCoords,"%f %f %f %f", &v3Viewpos[0], &v3Viewpos[1], &v3Viewpos[2], &fYaw);
+			iArgsFound = sscanf(psNewCoords,"%f %f %f %f", &v3Viewpos[0], &v3Viewpos[1], &v3Viewpos[2], &fYaw);
 			if (iArgsFound != 4)
 			{
 				fYaw = 0;	// jic

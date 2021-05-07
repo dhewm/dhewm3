@@ -465,8 +465,8 @@ void idGLDrawableMaterial::draw(int x, int y, int w, int h) {
 		refdef.time = eventLoop->Milliseconds();
 
 		world->RenderScene( &refdef );
-		int frontEnd, backEnd;
-		renderSystem->EndFrame( &frontEnd, &backEnd );
+		int rsFrontEnd, rsBackEnd;
+		renderSystem->EndFrame( &rsFrontEnd, &rsBackEnd );
 
 		qglMatrixMode( GL_MODELVIEW );
 		qglLoadIdentity();

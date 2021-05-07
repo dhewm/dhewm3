@@ -887,7 +887,7 @@ int	rvGEWorkspace::HandleRButtonDown ( WPARAM wParam, LPARAM lParam )
 		AppendMenu ( popup, MF_STRING|MF_ENABLED|(wrapper->IsSelected()?MF_CHECKED:0), ID_GUIED_SELECT_FIRST + i, mSelectMenu[i]->GetName() );
 	}
 
-	InsertMenu ( menu, 1, MF_POPUP|MF_BYPOSITION, (LONG) popup, "Select" );
+	InsertMenu ( menu, 1, MF_POPUP|MF_BYPOSITION, (UINT_PTR) popup, "Select" );
 
 	// Bring up the popup menu
 	ClientToScreen ( mWnd, &point );
