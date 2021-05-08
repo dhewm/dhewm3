@@ -580,31 +580,31 @@ void rvGEWorkspace::UpdateCursor ( rvGESelectionMgr::EHitTest type )
 	switch ( type )
 	{
 		case rvGESelectionMgr::HT_SELECT:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_ARROW ) );
 			break;
 
 		case rvGESelectionMgr::HT_MOVE:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_SIZEALL) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_SIZEALL ) );
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_LEFT:
 		case rvGESelectionMgr::HT_SIZE_RIGHT:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_SIZEWE ) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_SIZEWE ) );
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_TOP:
 		case rvGESelectionMgr::HT_SIZE_BOTTOM:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_SIZENS ) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_SIZENS ) );
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_TOPRIGHT:
 		case rvGESelectionMgr::HT_SIZE_BOTTOMLEFT:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_SIZENESW ) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_SIZENESW ) );
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_BOTTOMRIGHT:
 		case rvGESelectionMgr::HT_SIZE_TOPLEFT:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_SIZENWSE ) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_SIZENWSE ) );
 			break;
 	}
 }
@@ -627,7 +627,7 @@ void rvGEWorkspace::UpdateCursor ( float x, float y )
 	}
 	else
 	{
-		SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW ) ) );
+		SetCursor ( LoadCursor ( NULL, IDC_ARROW ) );
 	}
 }
 

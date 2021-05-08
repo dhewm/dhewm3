@@ -146,7 +146,7 @@ void CEntityListDlg::OnLbnSelchangeListEntities()
 			int count = pEntity->epairs.GetNumKeyVals();
 			for (int i = 0; i < count; i++) {
 				int nParent = m_lstEntity.InsertItem(0, pEntity->epairs.GetKeyVal(i)->GetKey());
-				m_lstEntity.SetItem(nParent, 1, LVIF_TEXT, pEntity->epairs.GetKeyVal(i)->GetValue(), 0, 0, 0, reinterpret_cast<DWORD>(pEntity));
+				m_lstEntity.SetItem(nParent, 1, LVIF_TEXT, pEntity->epairs.GetKeyVal(i)->GetValue(), 0, 0, 0, (LPARAM)(pEntity));
 			}
 		}
 	}

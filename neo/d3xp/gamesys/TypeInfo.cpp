@@ -569,10 +569,18 @@ int idTypeInfoTools::WriteVariable_r( const void *varPtr, const char *varName, c
 		return typeSize;
 	}
 
+#if D3_SIZEOFPTR == 4
+	const uintptr_t uninitPtr = (uintptr_t)0xcdcdcdcdUL;
+#elif D3_SIZEOFPTR == 8
+	const uintptr_t uninitPtr = (uintptr_t)0xcdcdcdcdcdcdcdcdULL;
+#else
+#error "Unexpected pointer size"
+#endif
+
 	// if this is a pointer
 	isPointer = 0;
 	for ( i = typeString.Length(); i > 0 && typeString[i - 1] == '*'; i -= 2 ) {
-		if ( varPtr == (void *)0xcdcdcdcd || ( varPtr != NULL && *((unsigned int *)varPtr) == 0xcdcdcdcd ) ) {
+		if ( varPtr == (void*)uninitPtr || ( varPtr != NULL && *((unsigned int *)varPtr) == 0xcdcdcdcd ) ) {
 			common->Warning( "%s%s::%s%s references uninitialized memory", prefix, scope, varName, "" );
 			return typeSize;
 		}

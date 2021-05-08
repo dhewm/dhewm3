@@ -75,7 +75,8 @@ bool rvPropertyGrid::Create ( HWND parent, int id, int style )
 	mStyle = style;
 
 	// Create the List view
-	mWindow = CreateWindowEx ( 0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, (HMENU)id, win32.hInstance, 0 );
+	const HMENU hmenuID = (HMENU)(intptr_t)id; // DG: apparently an int ID (instead of a handle/pointer) can be valid here, depending on window style
+	mWindow = CreateWindowEx ( 0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, hmenuID, win32.hInstance, 0 );
 	mListWndProc = (WNDPROC)GetWindowLongPtr ( mWindow, GWLP_WNDPROC );
 	SetWindowLongPtr ( mWindow, GWLP_USERDATA, (LONG_PTR)this );
 	SetWindowLongPtr ( mWindow, GWLP_WNDPROC, (LONG_PTR)WndProc );
@@ -198,7 +199,7 @@ void rvPropertyGrid::FinishEdit ( void )
 		nmpg.mName  = item->mName;
 		nmpg.mValue = value;
 
-		if ( !SendMessage ( GetParent ( mWindow ), WM_NOTIFY, 0, (LONG)&nmpg ) )
+		if ( !SendMessage ( GetParent ( mWindow ), WM_NOTIFY, 0, (LPARAM)&nmpg ) )
 		{
 			mState = STATE_EDIT;
 			SetFocus ( mEdit );
@@ -281,7 +282,7 @@ int rvPropertyGrid::AddItem ( const char* name, const char* value, EItemType typ
 
 	insert = SendMessage(mWindow,LB_GETCOUNT,0,0) - ((mStyle&PGS_ALLOWINSERT)?1:0);
 
-	return SendMessage ( mWindow, LB_INSERTSTRING, insert, (LONG)item );
+	return SendMessage ( mWindow, LB_INSERTSTRING, insert, (LPARAM)item );
 }
 
 /*
@@ -330,7 +331,7 @@ void rvPropertyGrid::RemoveAllItems ( void )
 		item = new rvPropertyGridItem;
 		item->mName = "";
 		item->mValue = "";
-		SendMessage ( mWindow, LB_ADDSTRING, 0, (LONG)item );
+		SendMessage ( mWindow, LB_ADDSTRING, 0, (LPARAM)item );
 	}
 }
 
@@ -462,7 +463,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 		}
 
 		case WM_COMMAND:
-			if ( lParam == (long)grid->mEdit )
+			if ( lParam == (LPARAM)grid->mEdit )
 			{
 				if ( HIWORD(wParam) == EN_KILLFOCUS )
 				{
@@ -545,7 +546,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc ( HWND hWnd, UINT msg, WPARAM wParam, L
 			ScreenToClient ( hWnd, &point );
 			if ( point.x >= grid->mSplitter - 2 && point.x <= grid->mSplitter + 2 )
 			{
-				SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_SIZEWE)));
+				SetCursor ( LoadCursor ( NULL, IDC_SIZEWE));
 				return TRUE;
 			}
 			break;

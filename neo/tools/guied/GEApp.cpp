@@ -572,10 +572,10 @@ int rvGEApp::HandleCommand ( WPARAM wParam, LPARAM lParam )
 			break;
 
 		case ID_GUIED_TOOLS_RELOADMATERIALS:
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_WAIT) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_WAIT ) );
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "reloadImages\n" );
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "reloadMaterials\n" );
-			SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW) ) );
+			SetCursor ( LoadCursor ( NULL, IDC_ARROW ) );
 			break;
 
 		case ID_GUIED_EDIT_COPY:
@@ -1191,7 +1191,7 @@ bool rvGEApp::OpenFile ( const char* filename )
 		}
 	}
 
-	SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_WAIT ) ) );
+	SetCursor ( LoadCursor ( NULL, IDC_WAIT ) );
 
 	// Setup the default error.
 	error = va("Failed to parse '%s'", filename );
@@ -1224,7 +1224,7 @@ bool rvGEApp::OpenFile ( const char* filename )
 		MessageBox ( error, MB_OK|MB_ICONERROR );
 	}
 
-	SetCursor ( LoadCursor ( NULL, MAKEINTRESOURCE(IDC_ARROW ) ) );
+	SetCursor ( LoadCursor ( NULL, IDC_ARROW ) );
 
 	return result;;
 }

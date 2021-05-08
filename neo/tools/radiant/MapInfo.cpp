@@ -91,9 +91,9 @@ BOOL CMapInfo::OnInitDialog()
 
   CMapStringToPtr mapEntity;
 
-  int nValue = 0;
-	for (entity_t* pEntity=entities.next ; pEntity != &entities ; pEntity=pEntity->next)
-	{
+  intptr_t nValue = 0;
+  for (entity_t* pEntity=entities.next ; pEntity != &entities ; pEntity=pEntity->next)
+  {
 	m_nTotalEntities++;
 	nValue = 0;
 	mapEntity.Lookup(pEntity->eclass->name, reinterpret_cast<void*&>(nValue));
