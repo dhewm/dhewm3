@@ -440,7 +440,9 @@ void idChoiceWindow::Draw(int time, float x, float y) {
 		color = hoverColor;
 	}
 
-	dc->DrawText( choices[currentChoice], textScale, textAlign, color, textRect, false, -1 );
+	if(choices.Num() > 0) {
+		dc->DrawText( choices[currentChoice], textScale, textAlign, color, textRect, false, -1 );
+	}
 }
 
 void idChoiceWindow::Activate( bool activate, idStr &act ) {
