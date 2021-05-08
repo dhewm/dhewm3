@@ -295,6 +295,8 @@ elseif(MSVC)
 	
 	add_compile_options(/W4)
 	add_compile_options(/we4840) # treat as error when passing a class to a vararg-function (probably printf-like)
+	# treat several kinds of truncating int<->pointer conversions as errors (for more 64bit-safety)
+	add_compile_options(/we4306 /we4311 /we4312 /we4302)
 	add_compile_options(/wd4100) # unreferenced formal parameter
 	add_compile_options(/wd4127) # conditional expression is constant
 	add_compile_options(/wd4244) # possible loss of data
