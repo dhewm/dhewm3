@@ -88,8 +88,7 @@ BOOL CPropertyList::PreCreateWindow(CREATESTRUCT& cs) {
 }
 
 void CPropertyList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s20 = int(20 * scaling_factor);
 
 	if (measureItem && !measureItem->m_curValue.IsEmpty()) {
@@ -111,8 +110,7 @@ void CPropertyList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
 
 void CPropertyList::DrawItem(LPDRAWITEMSTRUCT lpDIS) {
 
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s3 = 3;// int(3 * scaling_factor);
 
 	CDC dc;
@@ -196,8 +194,7 @@ void CPropertyList::OnSelchange() {
 	static int recurse = 0;
 	//m_curSel = GetCurSel();
 
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s3 = int(3 * scaling_factor);
 
 	GetItemRect(m_curSel,rect);
@@ -280,8 +277,7 @@ void CPropertyList::DisplayButton(CRect region) {
 	//displays a button if the property is a file/color/font chooser
 	m_nLastBox = 2;
 	m_prevSel = m_curSel;
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s3 = int(3 * scaling_factor);
 
 	if (region.Width() > 25) {

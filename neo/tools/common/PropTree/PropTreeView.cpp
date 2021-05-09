@@ -103,8 +103,7 @@ void CPropTreeView::OnPaint()
 }
 
 void CPropTreeView::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s20 = int(20 * scaling_factor);
 
 	// #HvGNote : This should be the right way to do it, but hardcoded is fine too.

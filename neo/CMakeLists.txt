@@ -863,6 +863,7 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 		${src_sound_editor}
 		"tools/edit_public.h"
 		"tools/edit_gui_common.h"
+		"tools/edit_gui_common.cpp"
 		)
 	SET(CMAKE_MFC_FLAG 2)
 	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;_AFXDLL")

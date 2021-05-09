@@ -1797,8 +1797,7 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy) {
 
 	CRect	rctParent;
 	GetClientRect(rctParent);
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 
 	UINT	nID;
 	UINT	nStyle;

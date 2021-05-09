@@ -659,8 +659,7 @@ void DialogDeclBrowser::OnSize( UINT nType, int cx, int cy ) {
 
 	GetClientRect( clientRect );
 
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	float scaled_toolbar_height = (TOOLBAR_HEIGHT * scaling_factor);
 	float scaled_button_space = (BUTTON_SPACE * scaling_factor);
 	float scaled_border_size = (BORDER_SIZE * scaling_factor);

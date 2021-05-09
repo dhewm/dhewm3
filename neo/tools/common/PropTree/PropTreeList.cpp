@@ -128,8 +128,8 @@ void CPropTreeList::UpdateResize()
 	SCROLLINFO si;
 	LONG nHeight;
 	CRect rc;
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 
 	ASSERT(m_pProp!=NULL);
 
@@ -168,8 +168,7 @@ void CPropTreeList::OnPaint()
 
 	CRect rc;
 	GetClientRect(rc);
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	rc.InflateRect(scaling_factor, scaling_factor);
 
 	// draw control background
@@ -572,8 +571,7 @@ void CPropTreeList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 	LONG nHeight;
 
 	SetFocus();
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	GetClientRect(rc);
 	nHeight = rc.Height();
 

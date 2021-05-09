@@ -54,8 +54,7 @@ LONG CPropTreeItemButton::DrawItem( CDC* pDC, const RECT& rc, LONG x, LONG y )
 	nTotal = CPropTreeItem::DrawItem( pDC, rc, x, y );
 
 	textSize = pDC->GetOutputTextExtent( buttonText );
-	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 	int s2 = int(2 * scaling_factor);
 	int s4 = int(4 * scaling_factor);
 	int s12 = int(12 * scaling_factor);
