@@ -27,6 +27,8 @@ LANGUAGE 9, 1
 
 #include "ScriptEditor.rc"
 
+#include "PDAEditor.rc"
+
 #include "GuiEd.rc"
 #include "Debugger.rc"
 #include "MaterialEditor.rc"
