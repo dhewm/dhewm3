@@ -241,8 +241,7 @@ void MaterialEditView::OnSize(UINT nType, int cx, int cy) {
 	m_tabs.GetItemRect(0, tabRect);
 
 
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s2 = int(2 * scaling_factor);
 	int s8 = int(8 * scaling_factor);
 	int s4 = int(4 * scaling_factor);

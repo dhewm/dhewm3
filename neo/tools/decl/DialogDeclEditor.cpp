@@ -235,8 +235,7 @@ void DialogDeclEditor::LoadDecl( idDecl *decl ) {
 
 	SetWindowText( va( "Declaration Editor (%s, line %d)", decl->GetFileName(), decl->GetLineNum() ) );
 	
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 
 	rect.left = initialRect.left;
 	rect.right = rect.left + (maxCharsPerLine * FONT_WIDTH + 32) *scaling_factor;
@@ -386,8 +385,7 @@ void DialogDeclEditor::OnSize( UINT nType, int cx, int cy ) {
 	CDialog::OnSize( nType, cx, cy );
 
 	GetClientRect( clientRect );
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	float scaled_toolbar_height = (TOOLBAR_HEIGHT * scaling_factor);
 	float scaled_button_space = (BUTTON_SPACE * scaling_factor);
 

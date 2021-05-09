@@ -939,8 +939,7 @@ void CDialogTextures::OnSize(UINT nType, int cx, int cy)
 		return;
 	}
 
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s8 = int(8 * scaling_factor);
 	int s4 = int(4 * scaling_factor);
 	int s12 = int(12 * scaling_factor);

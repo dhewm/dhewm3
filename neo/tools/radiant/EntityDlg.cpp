@@ -164,9 +164,8 @@ void CEntityDlg::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 	CRect rect, crect, crect2;
 	GetClientRect(rect);
+	float scaling_factor = GetWindowScalingFactor(staticTitle.GetSafeHwnd());
 
-	UINT dpi = GetDpiForWindow(staticTitle.GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
 	int s2 =  int(	2 * scaling_factor);
 	int s8 =  int(	8 * scaling_factor);
 	int s4 =  int(	4 * scaling_factor);

@@ -65,8 +65,7 @@ void CPropTreeItemCheck::DrawAttribute(CDC* pDC, const RECT& rc)
 		return;
 	}
 
-	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 	int CHECK_BOX_SIZE_s = int(CHECK_BOX_SIZE * scaling_factor);
 
 	checkRect.left = m_rc.left;

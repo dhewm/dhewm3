@@ -221,8 +221,7 @@ void CPropTreeItemColor::OnActivate(int activateType, CPoint point)
 
 	m_cPrevColor = m_cColor;
 
-	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 
 	r = m_rc;
 	r.right = r.left + 150 * scaling_factor;
@@ -261,8 +260,7 @@ void CPropTreeItemColor::OnPaint()
 {
 	CPaintDC dc(this);
 	CPoint pt;
-	UINT dpi = GetDpiForWindow(m_pProp->GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 	int s3 = int(3 * scaling_factor);
 	int s7 = int(7 * scaling_factor);
 	int s13 = int(13 * scaling_factor);

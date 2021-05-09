@@ -131,8 +131,7 @@ void CInspectorDialog::OnSize(UINT nType, int cx, int cy)
 	POSITION pos;
 	WORD wID;
 	
-	UINT dpi = GetDpiForWindow(GetSafeHwnd());
-	float scaling_factor = static_cast<float>(dpi) / 96.0f;
+	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
 	int s5 = int(5 * scaling_factor);
 	int s4 = int(4 * scaling_factor);
 
