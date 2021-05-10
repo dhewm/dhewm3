@@ -117,11 +117,8 @@ extern PFNGLDEPTHBOUNDSEXTPROC              qglDepthBoundsEXT;
 
 #if defined( _WIN32 ) && defined(ID_ALLOW_TOOLS)
 
-extern  int   (WINAPI * qwglChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR *);
-extern  int   (WINAPI * qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
-extern  int   (WINAPI * qwglGetPixelFormat)(HDC);
-extern  BOOL(WINAPI * qwglSetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR *);
 extern  BOOL(WINAPI * qwglSwapBuffers)(HDC);
+extern int Win_ChoosePixelFormat(HDC hdc);
 
 extern BOOL(WINAPI * qwglCopyContext)(HGLRC, HGLRC, UINT);
 extern HGLRC(WINAPI * qwglCreateContext)(HDC);

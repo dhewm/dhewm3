@@ -36,7 +36,66 @@ If you have questions concerning this license or the applicable additional terms
 #if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 #include "sys/win32/win_local.h"
 #include <SDL_syswm.h>
+
+// from SDL_windowsopengl.h (internal SDL2 header)
+#ifndef WGL_ARB_pixel_format
+#define WGL_NUMBER_PIXEL_FORMATS_ARB   0x2000
+#define WGL_DRAW_TO_WINDOW_ARB         0x2001
+#define WGL_DRAW_TO_BITMAP_ARB         0x2002
+#define WGL_ACCELERATION_ARB           0x2003
+#define WGL_NEED_PALETTE_ARB           0x2004
+#define WGL_NEED_SYSTEM_PALETTE_ARB    0x2005
+#define WGL_SWAP_LAYER_BUFFERS_ARB     0x2006
+#define WGL_SWAP_METHOD_ARB            0x2007
+#define WGL_NUMBER_OVERLAYS_ARB        0x2008
+#define WGL_NUMBER_UNDERLAYS_ARB       0x2009
+#define WGL_TRANSPARENT_ARB            0x200A
+#define WGL_TRANSPARENT_RED_VALUE_ARB  0x2037
+#define WGL_TRANSPARENT_GREEN_VALUE_ARB 0x2038
+#define WGL_TRANSPARENT_BLUE_VALUE_ARB 0x2039
+#define WGL_TRANSPARENT_ALPHA_VALUE_ARB 0x203A
+#define WGL_TRANSPARENT_INDEX_VALUE_ARB 0x203B
+#define WGL_SHARE_DEPTH_ARB            0x200C
+#define WGL_SHARE_STENCIL_ARB          0x200D
+#define WGL_SHARE_ACCUM_ARB            0x200E
+#define WGL_SUPPORT_GDI_ARB            0x200F
+#define WGL_SUPPORT_OPENGL_ARB         0x2010
+#define WGL_DOUBLE_BUFFER_ARB          0x2011
+#define WGL_STEREO_ARB                 0x2012
+#define WGL_PIXEL_TYPE_ARB             0x2013
+#define WGL_COLOR_BITS_ARB             0x2014
+#define WGL_RED_BITS_ARB               0x2015
+#define WGL_RED_SHIFT_ARB              0x2016
+#define WGL_GREEN_BITS_ARB             0x2017
+#define WGL_GREEN_SHIFT_ARB            0x2018
+#define WGL_BLUE_BITS_ARB              0x2019
+#define WGL_BLUE_SHIFT_ARB             0x201A
+#define WGL_ALPHA_BITS_ARB             0x201B
+#define WGL_ALPHA_SHIFT_ARB            0x201C
+#define WGL_ACCUM_BITS_ARB             0x201D
+#define WGL_ACCUM_RED_BITS_ARB         0x201E
+#define WGL_ACCUM_GREEN_BITS_ARB       0x201F
+#define WGL_ACCUM_BLUE_BITS_ARB        0x2020
+#define WGL_ACCUM_ALPHA_BITS_ARB       0x2021
+#define WGL_DEPTH_BITS_ARB             0x2022
+#define WGL_STENCIL_BITS_ARB           0x2023
+#define WGL_AUX_BUFFERS_ARB            0x2024
+#define WGL_NO_ACCELERATION_ARB        0x2025
+#define WGL_GENERIC_ACCELERATION_ARB   0x2026
+#define WGL_FULL_ACCELERATION_ARB      0x2027
+#define WGL_SWAP_EXCHANGE_ARB          0x2028
+#define WGL_SWAP_COPY_ARB              0x2029
+#define WGL_SWAP_UNDEFINED_ARB         0x202A
+#define WGL_TYPE_RGBA_ARB              0x202B
+#define WGL_TYPE_COLORINDEX_ARB        0x202C
 #endif
+
+#ifndef WGL_ARB_multisample
+#define WGL_SAMPLE_BUFFERS_ARB         0x2041
+#define WGL_SAMPLES_ARB                0x2042
+#endif
+
+#endif // _WIN32 and ID_ALLOW_TOOLS
 
 idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
 idCVar r_waylandcompat("r_waylandcompat", "0", CVAR_SYSTEM | CVAR_NOCHEAT | CVAR_ARCHIVE, "wayland compatible framebuffer");
@@ -315,7 +374,7 @@ bool GLimp_Init(glimpParms_t parms) {
 
 #if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 
-#ifndef SDL_VERSION_ATLEAST(2, 0, 0)
+#if ! SDL_VERSION_ATLEAST(2, 0, 0)
 	#error "dhewm3 only supports the tools with SDL2, not SDL1!"
 #endif
 
@@ -334,28 +393,70 @@ bool GLimp_Init(glimpParms_t parms) {
 			// NOTE: hInstance is set in main()
 			win32.hGLRC = qwglGetCurrentContext();
 
-			PIXELFORMATDESCRIPTOR src =
+			int pfIdx = GetPixelFormat(win32.hDC);
+			PIXELFORMATDESCRIPTOR src = {};
+			if (DescribePixelFormat(win32.hDC, pfIdx, sizeof(PIXELFORMATDESCRIPTOR), &win32.pfd) == 0)
 			{
-				sizeof(PIXELFORMATDESCRIPTOR),	// size of this pfd
-				1,								// version number
-				PFD_DRAW_TO_WINDOW |			// support window
-				PFD_SUPPORT_OPENGL |			// support OpenGL
-				PFD_DOUBLEBUFFER,				// double buffered
-				PFD_TYPE_RGBA,					// RGBA type
-				32,								// 32-bit color depth
-				0, 0, 0, 0, 0, 0,				// color bits ignored
-				8,								// 8 bit destination alpha
-				0,								// shift bit ignored
-				0,								// no accumulation buffer
-				0, 0, 0, 0, 					// accum bits ignored
-				24,								// 24-bit z-buffer	
-				8,								// 8-bit stencil buffer
-				0,								// no auxiliary buffer
-				PFD_MAIN_PLANE,					// main layer
-				0,								// reserved
-				0, 0, 0							// layer masks ignored
-			};
-			memcpy(&win32.pfd, &src, sizeof(PIXELFORMATDESCRIPTOR));
+				common->Warning("DescribePixelFormat() failed: %d!\n", GetLastError());
+				PIXELFORMATDESCRIPTOR src =
+				{
+					sizeof(PIXELFORMATDESCRIPTOR),	// size of this pfd
+					1,								// version number
+					PFD_DRAW_TO_WINDOW |			// support window
+					PFD_SUPPORT_OPENGL |			// support OpenGL
+					PFD_DOUBLEBUFFER,				// double buffered
+					PFD_TYPE_RGBA,					// RGBA type
+					32,								// 32-bit color depth
+					0, 0, 0, 0, 0, 0,				// color bits ignored
+					8,								// 8 bit destination alpha
+					0,								// shift bit ignored
+					0,								// no accumulation buffer
+					0, 0, 0, 0, 					// accum bits ignored
+					24,								// 24-bit z-buffer
+					8,								// 8-bit stencil buffer
+					0,								// no auxiliary buffer
+					PFD_MAIN_PLANE,					// main layer
+					0,								// reserved
+					0, 0, 0							// layer masks ignored
+				};
+				memcpy(&win32.pfd, &src, sizeof(PIXELFORMATDESCRIPTOR));
+			}
+			
+			win32.piAttribIList = NULL;
+
+			win32.wglGetPixelFormatAttribivARB = (BOOL(WINAPI*)(HDC,int,int,UINT,const int*,int*))SDL_GL_GetProcAddress("wglGetPixelFormatAttribivARB");
+			win32.wglChoosePixelFormatARB = (BOOL(WINAPI*)(HDC,const int*,const FLOAT*,UINT,int*piFormats,UINT*))SDL_GL_GetProcAddress("wglChoosePixelFormatARB");
+
+			if(win32.wglGetPixelFormatAttribivARB != NULL && win32.wglChoosePixelFormatARB != NULL) {
+				const int queryAttributes[] = {
+					// equivalents of all the SDL_GL_* attributes we set above (and ones set implicitly)
+					WGL_DRAW_TO_WINDOW_ARB,
+					WGL_RED_BITS_ARB,
+					WGL_GREEN_BITS_ARB,
+					WGL_BLUE_BITS_ARB,
+					WGL_ALPHA_BITS_ARB,
+					WGL_DOUBLE_BUFFER_ARB,
+					WGL_DEPTH_BITS_ARB,
+					WGL_STENCIL_BITS_ARB,
+					// WGL_ACCUM_*_BITS_ARB - not used
+					WGL_STEREO_ARB,
+					WGL_SAMPLE_BUFFERS_ARB,
+					WGL_SAMPLES_ARB,
+					// WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB - not used
+					WGL_ACCELERATION_ARB,
+				};
+				enum { NUM_ATTRIBUTES = sizeof(queryAttributes)/sizeof(queryAttributes[0]) };
+				int queryResults[NUM_ATTRIBUTES] = {};
+				
+				win32.wglGetPixelFormatAttribivARB(win32.hDC, pfIdx, PFD_MAIN_PLANE, NUM_ATTRIBUTES, queryAttributes, queryResults);
+				
+				static int attribIList[2*NUM_ATTRIBUTES+2] = {}; // +2 for terminating 0, 0 pair
+				for(int i=0; i<NUM_ATTRIBUTES; ++i) {
+					attribIList[i*2] = queryAttributes[i];
+					attribIList[i*2+1] = queryResults[i];
+				}
+				win32.piAttribIList = attribIList;
+			}
 		} else {
 			// TODO: can we just disable them?
 			common->Error("SDL_GetWindowWMInfo(), which is needed for Tools to work, failed!");

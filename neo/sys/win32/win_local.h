@@ -64,7 +64,14 @@ struct Win32Vars_t {
 #ifdef ID_ALLOW_TOOLS
 	HDC				hDC; // handle to device
 	HGLRC			hGLRC; // handle to GL rendering context
-	PIXELFORMATDESCRIPTOR pfd;
+	PIXELFORMATDESCRIPTOR pfd; // for ChoosePixelFormat
+	const int* piAttribIList; // for wglChoosePixelFormatARB, if available, set in GLimp_Init()
+
+	// the following are set in GLimp_Init()
+	BOOL(WINAPI *wglChoosePixelFormatARB) (HDC hdc, const int* piAttribIList,
+		 const FLOAT* pfAttribFList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
+	BOOL(WINAPI *wglGetPixelFormatAttribivARB) (HDC hdc, int iPixelFormat,
+		 int iLayerPlane, UINT nAttributes, const int* piAttributes, int* piValues);
 #endif
 
 	static idCVar	win_outputDebugString;

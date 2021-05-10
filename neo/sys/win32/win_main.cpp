@@ -66,16 +66,8 @@ Win32Vars_t	win32;
 
 static HMODULE hOpenGL_DLL;
 
-typedef int  (WINAPI * PWGLCHOOSEPIXELFORMAT) (HDC, CONST PIXELFORMATDESCRIPTOR *);
-typedef int   (WINAPI * PWGLDESCRIBEPIXELFORMAT) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
-typedef int   (WINAPI * PWGLGETPIXELFORMAT)(HDC);
-typedef BOOL(WINAPI * PWGLSETPIXELFORMAT)(HDC, int, CONST PIXELFORMATDESCRIPTOR *);
 typedef BOOL(WINAPI * PWGLSWAPBUFFERS)(HDC);
 
-PWGLCHOOSEPIXELFORMAT	qwglChoosePixelFormat;
-PWGLDESCRIBEPIXELFORMAT	qwglDescribePixelFormat;
-PWGLGETPIXELFORMAT		qwglGetPixelFormat;
-PWGLSETPIXELFORMAT		qwglSetPixelFormat;
 PWGLSWAPBUFFERS			qwglSwapBuffers;
 
 typedef BOOL(WINAPI * PWGLCOPYCONTEXT)(HGLRC, HGLRC, UINT);
@@ -602,7 +594,7 @@ uintptr_t Sys_DLL_Load( const char *dllName ) {
 		}
 	} else {
 		DWORD e = GetLastError();
-		LPVOID msgBuf = nullptr;
+		LPVOID msgBuf = NULL;
 
 		FormatMessage(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -731,10 +723,6 @@ void Sys_Shutdown( void ) {
 	qwglSwapLayerBuffers = NULL;
 	qwglUseFontBitmaps = NULL;
 	qwglUseFontOutlines = NULL;
-	qwglChoosePixelFormat = NULL;
-	qwglDescribePixelFormat = NULL;
-	qwglGetPixelFormat = NULL;
-	qwglSetPixelFormat = NULL;
 	qwglSwapBuffers = NULL;
 #endif // ID_ALLOW_TOOLS
 
@@ -902,11 +890,26 @@ static void loadWGLpointers() {
 
 
 	// These by default exist in windows
-	qwglChoosePixelFormat = ChoosePixelFormat;
-	qwglDescribePixelFormat = DescribePixelFormat;
-	qwglGetPixelFormat = GetPixelFormat;
-	qwglSetPixelFormat = SetPixelFormat;
 	qwglSwapBuffers = SwapBuffers;
+}
+
+// calls wglChoosePixelFormatARB() or ChoosePixelFormat() matching the main window from SDL
+int Win_ChoosePixelFormat(HDC hdc)
+{
+	if (win32.wglChoosePixelFormatARB != NULL && win32.piAttribIList != NULL) {
+		int formats[4];
+		UINT numFormats = 0;
+		if (win32.wglChoosePixelFormatARB(hdc, win32.piAttribIList, NULL, 4, formats, &numFormats) && numFormats > 0) {
+			return formats[0];
+		}
+		static bool haveWarned = false;
+		if(!haveWarned) {
+			common->Warning("wglChoosePixelFormatARB() failed, falling back to ChoosePixelFormat()!\n");
+			haveWarned = true;
+		}
+	}
+	// fallback to normal ChoosePixelFormats() - doesn't support MSAA!
+	return ChoosePixelFormat(hdc, &win32.pfd);
 }
 #endif
 

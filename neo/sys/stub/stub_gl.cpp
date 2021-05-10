@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// for each gl function we get an inconsistent dll linkage warning, because SDL_OpenGL.h says they're dllimport
+// showing one warning is enough and it doesn't matter anyway (these stubs are for the dedicated server)
+#pragma warning( once : 4273 )
+#endif
+
 void APIENTRY glAccum(GLenum op, GLfloat value){};
 void APIENTRY glAlphaFunc(GLenum func, GLclampf ref){};
 GLboolean APIENTRY glAreTexturesResident(GLsizei n, const GLuint *textures, GLboolean *residences){ return false; };
@@ -388,3 +395,7 @@ void GLimp_SwapBuffers() {};
 void GLimp_ActivateContext() {};
 void GLimp_DeactivateContext() {};
 void GLimp_GrabInput(int flags) {};
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

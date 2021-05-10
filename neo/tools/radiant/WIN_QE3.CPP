@@ -176,7 +176,7 @@ int WINAPI QEW_SetupPixelFormat(HDC hDC, bool zbuffer)
 {
 #if 1
 
-	int pixelFormat = ChoosePixelFormat(hDC, &win32.pfd);
+	int pixelFormat = Win_ChoosePixelFormat(hDC);
 	if (pixelFormat > 0) {
 		if (SetPixelFormat(hDC, pixelFormat, &win32.pfd) == NULL) {
 			Error("SetPixelFormat failed.");

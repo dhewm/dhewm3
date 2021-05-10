@@ -453,7 +453,7 @@ bool rvGEViewer::SetupPixelFormat ( void )
 	HDC	 hDC    = GetDC ( mWnd );
 	bool result = true;
 
-	int pixelFormat = ChoosePixelFormat(hDC, &win32.pfd);
+	int pixelFormat = Win_ChoosePixelFormat(hDC);
 	if (pixelFormat > 0)
 	{
 		if (SetPixelFormat(hDC, pixelFormat, &win32.pfd) == NULL)

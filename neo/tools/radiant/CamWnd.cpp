@@ -360,7 +360,7 @@ int CCamWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if( qwglMakeCurrent ( hDC, win32.hGLRC ) == FALSE ) {
 		common->Warning("wglMakeCurrent failed: %d", ::GetLastError());
 		if ( r_multiSamples.GetInteger() > 0 ) {
-			common->Warning("\n!!! Remember to set r_multiSamples 0 when using the editor !!!\n");
+			common->Warning("\n!!! Try setting r_multiSamples 0 when using the editor !!!\n");
 		}
 	}
 
