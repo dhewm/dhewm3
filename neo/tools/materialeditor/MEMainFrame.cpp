@@ -334,7 +334,7 @@ void MEMainFrame::OnSize(UINT nType, int cx, int cy)
 
 	CFrameWnd::OnSize(nType, cx, cy);
 
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 	int s5 = int(5 * scaling_factor);
 
 	CRect statusRect;

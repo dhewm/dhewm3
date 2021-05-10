@@ -108,7 +108,7 @@ BOOL CMediaPreviewDlg::OnInitDialog()
 
 void CMediaPreviewDlg::OnSize(UINT nType, int cx, int cy)
 {
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 	int s8 = int(8 * scaling_factor);
 	int s4 = int(4 * scaling_factor);
 

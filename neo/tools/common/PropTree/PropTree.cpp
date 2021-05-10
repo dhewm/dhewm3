@@ -191,7 +191,7 @@ void CPropTree::OnSize(UINT nType, int cx, int cy)
 
 void CPropTree::ResizeChildWindows(int cx, int cy)
 {
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 	int sh = int(m_nInfoHeight * scaling_factor);
 
 	if (m_bShowInfo)
@@ -212,7 +212,7 @@ void CPropTree::ResizeChildWindows(int cx, int cy)
 
 void CPropTree::InitGlobalResources()
 {
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 	
 
 	NONCLIENTMETRICS info;

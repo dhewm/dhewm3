@@ -262,7 +262,7 @@ LONG CPropTreeItem::GetHeight()
 {
 	if (m_pProp)
 	{
-		float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
+		float scaling_factor = Win_GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 		return PROPTREEITEM_DEFHEIGHT * scaling_factor;
 	}
 	return PROPTREEITEM_DEFHEIGHT;
@@ -401,7 +401,7 @@ LONG CPropTreeItem::DrawItem(CDC* pDC, const RECT& rc, LONG x, LONG y)
 
 	ASSERT(m_pProp!=NULL);
 
-	float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 	int PNINDENT_s = int(PNINDENT * scaling_factor);
 	int PROPTREEITEM_SPACE_s = int(PROPTREEITEM_SPACE * scaling_factor);
 	int PROPTREEITEM_CHECKBOX_s = int(PROPTREEITEM_CHECKBOX * scaling_factor);

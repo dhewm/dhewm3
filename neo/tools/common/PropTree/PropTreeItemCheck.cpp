@@ -65,7 +65,7 @@ void CPropTreeItemCheck::DrawAttribute(CDC* pDC, const RECT& rc)
 		return;
 	}
 
-	float scaling_factor = GetWindowScalingFactor(m_pProp->GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(m_pProp->GetSafeHwnd());
 	int CHECK_BOX_SIZE_s = int(CHECK_BOX_SIZE * scaling_factor);
 
 	checkRect.left = m_rc.left;

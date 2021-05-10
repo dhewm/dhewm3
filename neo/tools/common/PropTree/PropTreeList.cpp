@@ -129,7 +129,7 @@ void CPropTreeList::UpdateResize()
 	LONG nHeight;
 	CRect rc;
 
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 
 	ASSERT(m_pProp!=NULL);
 
@@ -168,7 +168,7 @@ void CPropTreeList::OnPaint()
 
 	CRect rc;
 	GetClientRect(rc);
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 	rc.InflateRect(scaling_factor, scaling_factor);
 
 	// draw control background
@@ -571,7 +571,7 @@ void CPropTreeList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 	LONG nHeight;
 
 	SetFocus();
-	float scaling_factor = GetWindowScalingFactor(GetSafeHwnd());
+	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
 	GetClientRect(rc);
 	nHeight = rc.Height();
 

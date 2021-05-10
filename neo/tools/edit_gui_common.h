@@ -179,5 +179,6 @@
 // Compilers for map, model, video etc. processing.
 #include "tools/compilers/compiler_public.h"
 
-float GetWindowScalingFactor(HWND window);
+// scaling factor based on DPI (dpi/96.0f, so 1.0 by default); implemented in win_main.cpp
+float Win_GetWindowScalingFactor(HWND window);
 #endif // TOOLS_EDIT_GUI_COMMON_H
