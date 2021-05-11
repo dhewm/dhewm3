@@ -39,8 +39,13 @@ If you have questions concerning this license or the applicable additional terms
 #include "PlayerIcon.h"
 #include "GameEdit.h"
 
+#include "AFEntity.h"
+#include "PlayerView.h"
+
+
 class idAI;
 class idFuncMountedObject;
+
 
 /*
 ===============================================================================
@@ -49,6 +54,8 @@ class idFuncMountedObject;
 
 ===============================================================================
 */
+
+
 
 extern const idEventDef EV_Player_GetButtons;
 extern const idEventDef EV_Player_GetMove;
@@ -70,6 +77,8 @@ const int MAX_WEAPONS = 32;
 #else
 const int MAX_WEAPONS = 16;
 #endif
+
+const int MAX_AMMOTYPES = 3;	// ########################### SR
 
 const int DEAD_HEARTRATE = 0;			// fall to as you die
 const int LOWHEALTH_HEARTRATE_ADJ = 20; //
@@ -155,7 +164,10 @@ public:
 	int						armor;
 	int						maxarmor;
 	int						ammo[ AMMO_NUMTYPES ];
-	int						clip[ MAX_WEAPONS ];
+	
+	int						clip[ MAX_WEAPONS ][ MAX_AMMOTYPES ];	// ########################### SR + MAX_AMMOTYPES
+	//int						clipNum;				// ########################### SR 
+	
 	int						powerupEndTime[ MAX_POWERUPS ];
 
 #ifdef _D3XP
@@ -299,6 +311,7 @@ public:
 	idScriptBool			AI_TURN_LEFT;
 	idScriptBool			AI_TURN_RIGHT;
 
+	
 	// inventory
 	idInventory				inventory;
 
@@ -469,7 +482,7 @@ public:
 
 	void					DrawHUD( idUserInterface *hud );
 
-	void					WeaponFireFeedback( const idDict *weaponDef );
+	void					WeaponFireFeedback( const idDict *weaponDef, idEntity *hitEnt, float dodge_time, bool headshot );	// ##### SR + *hitEnt, dodge_time, headshot
 
 	float					DefaultFov( void ) const;
 	float					CalcFov( bool honorZoom );
@@ -555,7 +568,7 @@ public:
 	void					Event_StopAudioLog( void );
 	void					StartAudioLog( void );
 	void					StopAudioLog( void );
-	void					ShowTip( const char *title, const char *tip, bool autoHide );
+	void					ShowTip( idStr tip1, const char *key, idStr tip2, bool autoHide );
 	void					HideTip( void );
 	bool					IsTipVisible( void ) { return tipUp; };
 	void					ShowObjective( const char *obj );
@@ -619,6 +632,19 @@ public:
 	bool					SelfSmooth( void );
 	void					SetSelfSmooth( bool b );
 
+ // ############################# SR	
+ 
+	void 					TeletypeGui( idStr tmsg, float gap, float _pause, float _wipetime );
+	bool					fadingIn; 
+	bool					fadingOut; 
+	bool					showhints; 
+	int						achievements[128];
+	float 					dodge_time;
+	
+	int						currentWeapon;	// made public
+	
+ // ############################# EMD SR	
+	
 private:
 	jointHandle_t			hipJoint;
 	jointHandle_t			chestJoint;
@@ -628,6 +654,53 @@ private:
 
 	idList<aasLocation_t>	aasLocation;		// for AI tracking the player
 
+	// ########################################################################## SR
+	
+	bool					typing; 
+	bool					wiping; 	
+	idStr 					typemsg;
+	float					typegap;
+	float					pause;
+	float					wipetime;
+	int						typecount;
+	float					nexttype;
+	float					nextfade;
+	int						buggy_speed;
+	bool					buggy_thirdPerson;
+	bool					inBuggy;
+	float					viewDist, maxViewDist, minViewDist, viewStep, maxBuggyYaw;
+	float					viewHeight, maxViewHeight, minViewHeight, viewStepH, zoomStep;
+	float					probe, probeh, weather;
+	bool					zooming;
+	void 					SwapView( void );
+	void 					ZoomView( void );
+	void 					Flashlight( void );
+	void 					BuggyThink( void );
+	int						zoomBuggyFov;
+	idEntityPtr<idAFEntity_Vehicle>	buggy;	
+	
+	void 					CycleWeaponAmmo( void );
+	
+	void 					LaunchHook( void );
+	void 					ShowGrappleRope( void ); 
+	bool 					skyHook;
+	bool					hooking;
+	bool					hookSailing;
+	idVec3					hookTarget;
+	idVec3					hookDir;
+	idEntity *				grapple;
+	jointHandle_t 			grappleJoint;
+	jointHandle_t 			grappleJointFP;
+	
+	idAI *					dodger;
+	
+	bool					tempfix;
+	
+
+	
+	// ########################################################################### END
+	
+	
 	int						bobFoot;
 	float					bobFrac;
 	float					bobfracsin;
@@ -644,7 +717,6 @@ private:
 	int						landChange;
 	int						landTime;
 
-	int						currentWeapon;
 	int						idealWeapon;
 	int						previousWeapon;
 	int						weaponSwitchTime;
@@ -782,7 +854,7 @@ private:
 	bool					WeaponAvailable( const char* name );
 #endif
 
-	void					UseVehicle( void );
+	void					UseEnt( void );
 
 	void					Event_GetButtons( void );
 	void					Event_GetMove( void );
@@ -815,6 +887,7 @@ private:
 	void					Event_ToggleBloom( int on );
 	void					Event_SetBloomParms( float speed, float intensity );
 #endif
+
 };
 
 ID_INLINE bool idPlayer::IsReady( void ) {

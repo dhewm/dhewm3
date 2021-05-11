@@ -283,6 +283,7 @@ bool idAASFindAttackPosition::TestArea( const idAAS *aas, int areaNum ) {
 	return self->GetAimDir( fromPos, target, self, dir );
 }
 
+
 /*
 =====================
 idAI::idAI
@@ -870,6 +871,31 @@ void idAI::Spawn( void ) {
 	headFocusRate		= spawnArgs.GetFloat( "head_focus_rate", "0.1" );
 	focusAlignTime		= SEC2MS( spawnArgs.GetFloat( "focus_align_time", "1" ) );
 
+	
+	
+		// ################################################# SR
+
+	ejectReloadJoint 	= animator.GetJointHandle( "eject" );
+		
+	// reload brass
+	const char *brassDefName;
+	brassReloadDict.Clear();
+
+	brassDefName = spawnArgs.GetString( "def_ejectReloadBrass" );
+	if ( brassDefName[0] ) {
+		const idDeclEntityDef *brassDef = gameLocal.FindEntityDef( brassDefName, false );
+		if ( !brassDef ) {
+			gameLocal.Warning( "Unknown brass '%s'", brassDefName );
+		} else {
+			brassReloadDict = brassDef->dict;
+		}
+	}
+	
+	AI_INCOMING	= false;
+	AI_HEADSHOT	= false;
+	
+	// ################################################### END SR
+	
 	flashJointWorld = animator.GetJointHandle( "flash" );
 
 	if ( head.GetEntity() ) {
@@ -1012,6 +1038,9 @@ void idAI::Gib( const idVec3 &dir, const char *damageDefName ) {
 }
 #endif
 
+
+
+
 /*
 ===================
 idAI::InitMuzzleFlash
@@ -1020,6 +1049,10 @@ idAI::InitMuzzleFlash
 void idAI::InitMuzzleFlash( void ) {
 	const char			*shader;
 	idVec3				flashColor;
+	
+	// muzzle flash shadows control begins
+	bool drawMuzzleFlashShadows = g_muzzleFlashNoShadows.GetBool();
+	// muzzle flash shadows control ends
 
 	spawnArgs.GetString( "mtr_flashShader", "muzzleflash", &shader );
 	spawnArgs.GetVector( "flashColor", "0 0 0", flashColor );
@@ -1038,7 +1071,10 @@ void idAI::InitMuzzleFlash( void ) {
 	worldMuzzleFlash.lightRadius[0] = flashRadius;
 	worldMuzzleFlash.lightRadius[1]	= flashRadius;
 	worldMuzzleFlash.lightRadius[2]	= flashRadius;
-
+	// muzzle flash shadows control begins
+	worldMuzzleFlash.noShadows = drawMuzzleFlashShadows;
+	worldMuzzleFlash.noSpecular = true;
+	// muzzle flash shadows control ends
 	worldMuzzleFlashHandle = -1;
 }
 
@@ -1270,6 +1306,10 @@ void idAI::LinkScriptVariables( void ) {
 	AI_HIT_ENEMY.LinkTo(		scriptObject, "AI_HIT_ENEMY" );
 	AI_OBSTACLE_IN_PATH.LinkTo(	scriptObject, "AI_OBSTACLE_IN_PATH" );
 	AI_PUSHED.LinkTo(			scriptObject, "AI_PUSHED" );
+	
+	AI_INCOMING.LinkTo(			scriptObject, "AI_INCOMING" );	// ######################### SR
+	AI_HEADSHOT.LinkTo(			scriptObject, "AI_HEADSHOT" );	// ######################### SR
+	
 }
 
 /*
@@ -1693,7 +1733,8 @@ idAI::MoveToEnemyHeight
 bool idAI::MoveToEnemyHeight( void ) {
 	idActor	*enemyEnt = enemy.GetEntity();
 
-	if ( !enemyEnt || ( move.moveType != MOVETYPE_FLY ) ) {
+	const char *highflier;	// #################################### SR								\/
+	if ( !enemyEnt || ( move.moveType != MOVETYPE_FLY ) || spawnArgs.GetString( "fly_high", "", &highflier ) ) {
 		StopMove( MOVE_STATUS_DEST_NOT_FOUND );
 		return false;
 	}
@@ -3040,9 +3081,9 @@ void idAI::AdjustFlyHeight( idVec3 &vel, const idVec3 &goalPos ) {
 			goLower = true;
 		}
 
-		if ( ai_debugMove.GetBool() ) {
+		//if ( ai_debugMove.GetBool() ) {	//############################################## SR
 			gameRenderWorld->DebugBounds( goLower ? colorRed : colorGreen, physicsObj.GetBounds(), path.endPos, gameLocal.msec );
-		}
+		//}
 	}
 
 	if ( !goLower ) {
@@ -3453,7 +3494,7 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 
 	Unbind();
 
-	if ( StartRagdoll() ) {
+	if ( StartRagdoll() ) {	
 		StartSound( "snd_death", SND_CHANNEL_VOICE, 0, false, NULL );
 	}
 
@@ -4646,6 +4687,9 @@ idAI::UpdateMuzzleFlash
 ================
 */
 void idAI::UpdateMuzzleFlash( void ) {
+	// muzzle flash shadows control begins
+	bool drawMuzzleFlashShadows = g_muzzleFlashNoShadows.GetBool();
+	// muzzle flash shadows control ends
 	if ( worldMuzzleFlashHandle != -1 ) {
 		if ( gameLocal.time >= muzzleFlashEnd ) {
 			gameRenderWorld->FreeLightDef( worldMuzzleFlashHandle );
@@ -4656,6 +4700,10 @@ void idAI::UpdateMuzzleFlash( void ) {
 			animator.GetJointTransform( flashJointWorld, gameLocal.time, muzzle, worldMuzzleFlash.axis );
 			muzzle = physicsObj.GetOrigin() + ( muzzle + modelOffset ) * viewAxis * physicsObj.GetGravityAxis();
 			worldMuzzleFlash.origin = muzzle;
+			// muzzle flash shadows control begins
+			worldMuzzleFlash.noShadows = drawMuzzleFlashShadows;
+			worldMuzzleFlash.noSpecular = true;
+			// muzzle flash shadows control ends
 			gameRenderWorld->UpdateLightDef( worldMuzzleFlashHandle, &worldMuzzleFlash );
 		}
 	}
@@ -5348,3 +5396,5 @@ void idCombatNode::Event_MarkUsed( void ) {
 		disabled = true;
 	}
 }
+
+

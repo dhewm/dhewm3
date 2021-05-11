@@ -1,9 +1,9 @@
 SetCompressor lzma
 
 ; HM NIS Edit Wizard helper defines
-!define PRODUCT_NAME "Doom 3 SDK"
-!define PRODUCT_VERSION "1.3.1"
-!define PRODUCT_PUBLISHER "id Software"
+!define PRODUCT_NAME "Steel Storm 2 SDK"
+!define PRODUCT_VERSION "1.0.1"
+!define PRODUCT_PUBLISHER "Kot-in-Action Creative Artel"
 !define PRODUCT_WEB_SITE "http://www.iddevnet.com"
 
 ; MUI 1.67 compatible ------

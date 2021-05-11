@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Sound.h"
 
+#include "Game_local.h"
+
 /*
 ===============================================================================
 
@@ -128,6 +130,12 @@ void idSound::Spawn( void ) {
 	} else {
 		timerOn = false;
 	}
+	// music volume control begins
+	if ( spawnArgs.GetBool( "s_bgmusic" ) ) 
+	{
+		gameLocal.musicSpeakers.Append( entityNumber );
+	}
+	// music volume control ends
 }
 
 /*

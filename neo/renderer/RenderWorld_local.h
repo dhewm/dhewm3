@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/RenderWorld.h"
 #include "renderer/tr_local.h"
 
+// indetifying cvar to determine what virtual screen size to set; must be set when changing aspect ratio
+extern idCVar	r_screenAspectRatio;
+
 class idRenderLightLocal;
 
 // assume any lightDef or entityDef index above this is an internal error
@@ -137,6 +140,11 @@ public:
 
 	virtual void			DrawText( const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align = 1, const int lifetime = 0, bool depthTest = false );
 
+	
+	virtual void 			ClearQuads( int time );			// ########################### SR
+	virtual void 			DrawQuad( const idVec4 &color, const idWinding &winding, float lifeTime, float fadeTime );	// ########################### SR 
+
+	
 	//-----------------------
 
 	idStr					mapName;				// ie: maps/tim_dm2.proc, written to demoFile

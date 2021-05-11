@@ -57,7 +57,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 	case PATH_CONFIG:
 	case PATH_SAVE:
-		sprintf(buf, "%s/Library/Application Support/dhewm3", [NSHomeDirectory() cString]);
+		sprintf(buf, "%s/Library/Application Support/Steel Storm 2", [NSHomeDirectory() cString]);
 		path = buf;
 		return true;
 

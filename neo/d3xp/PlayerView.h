@@ -387,6 +387,9 @@ public:
 
 	// temp for view testing
 	void				EnableBFGVision( bool b ) { bfgVision = b; };
+	
+	// glow
+	void				renderGlow();
 
 private:
 	void				SingleView( idUserInterface *hud, const renderView_t *view );
@@ -424,6 +427,17 @@ public:
 
 	idPlayer *			player;
 	renderView_t		view;
+	
+	// glow
+	const idMaterial *	glowMaterial;
+	const idMaterial *	glowCompMaterial;
+	const idMaterial *	blurX_16_512;
+	const idMaterial *	blurY_16_512;
+	const idMaterial *	blurX_16_256;
+	const idMaterial *	blurY_16_256;
+	const idMaterial *	blurX_16_128;
+	const idMaterial *	blurY_16_128;
+	// glow ends
 
 #ifdef _D3XP
 	FullscreenFXManager	*fxManager;

@@ -61,6 +61,15 @@ struct Win32Vars_t {
 
 	OSVERSIONINFOEX	osversion;
 
+	// when we get a windows message, we store the time off so keyboard processing
+	// can know the exact time of an event (not really needed now that we use async direct input)
+	int				sysMsgTime;
+
+	HDC				hDC;							// handle to device context
+	HGLRC			hGLRC;						// handle to GL rendering context
+	PIXELFORMATDESCRIPTOR pfd;
+	int				pixelformat;
+
 	static idCVar	win_outputDebugString;
 	static idCVar	win_outputEditString;
 	static idCVar	win_viewlog;

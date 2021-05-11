@@ -99,6 +99,10 @@ public:
 	bool					IsCrouching( void ) const;
 	bool					OnLadder( void ) const;
 	const idVec3 &			PlayerGetOrigin( void ) const;	// != GetOrigin
+	
+	void 					SetLadderJumpDist( const float newLadderJumpDist, const float newLadderJumpHeight, const float newLadderWeaponAng );	// ######################### SR 
+	
+
 
 public:	// common physics interface
 	bool					Evaluate( int timeStepMSec, int endTimeMSec );
@@ -132,6 +136,11 @@ public:	// common physics interface
 	void					WriteToSnapshot( idBitMsgDelta &msg ) const;
 	void					ReadFromSnapshot( const idBitMsgDelta &msg );
 
+	// ############ SR
+	bool 					ladderWeapon;
+	bool					laddering;
+	// ############ END SR
+	
 private:
 	// player physics state
 	playerPState_t			current;
@@ -143,6 +152,7 @@ private:
 	float					maxStepHeight;
 	float					maxJumpHeight;
 	int						debugLevel;				// if set, diagnostic output will be printed
+
 
 	// player input
 	usercmd_t				command;
@@ -164,6 +174,16 @@ private:
 	// ladder movement
 	bool					ladder;
 	idVec3					ladderNormal;
+	
+	// ########################################### SR
+	float 					ladderJumpDist;
+	float 					ladderJumpHeight;	
+	float					ladderWeaponAng;
+	float					ladderYaw;
+	bool					ladderJumping;
+	idVec3					ladderDir;	
+	// ################ END SR
+	
 
 	// results of last evaluate
 	waterLevel_t			waterLevel;

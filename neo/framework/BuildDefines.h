@@ -72,14 +72,26 @@ If you have questions concerning this license or the applicable additional terms
 
 // don't define ID_ALLOW_TOOLS when we don't want tool code in the executable.
 #if defined( _WIN32 ) && defined(_MFC_VER) && !defined( ID_DEDICATED )
+#ifndef ID_ALLOW_TOOLS
 	#define	ID_ALLOW_TOOLS
 #endif
+#endif
 
+#define ID_ENFORCE_KEY 0
 #ifndef ID_ENFORCE_KEY
 #	if !defined( ID_DEDICATED )
-#		define ID_ENFORCE_KEY 1
+#		define ID_ENFORCE_KEY 0
 #	else
 #		define ID_ENFORCE_KEY 0
+#	endif
+#endif
+
+// preventing game from using CDKey authentication 
+#ifndef ID_ENFORCE_KEY_CLIENT
+#	if ID_ENFORCE_KEY
+#		define ID_ENFORCE_KEY_CLIENT 0
+#	else
+#		define ID_ENFORCE_KEY_CLIENT 0
 #	endif
 #endif
 

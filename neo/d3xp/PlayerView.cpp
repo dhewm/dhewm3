@@ -39,12 +39,14 @@ If you have questions concerning this license or the applicable additional terms
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
 #ifdef _D3XP
+//Portal sky begins
 static int MakePowerOfTwo( int num ) {
 	int		pot;
 	for (pot = 1 ; pot < num ; pot<<=1) {
 	}
 	return pot;
 }
+//Portal sky ends
 #endif
 
 const int IMPULSE_DELAY = 150;
@@ -76,6 +78,16 @@ idPlayerView::idPlayerView() {
 	fadeToColor.Zero();
 	fadeColor.Zero();
 	shakeAng.Zero();
+	// glow
+	glowMaterial = declManager->FindMaterial( "textures/glowMaterial" );
+	glowCompMaterial = declManager->FindMaterial( "textures/glowComp" );
+	blurX_16_512 = declManager->FindMaterial( "textures/blurX_16_512" );
+	blurY_16_512 = declManager->FindMaterial( "textures/blurY_16_512" );
+	blurX_16_256 = declManager->FindMaterial( "textures/blurX_16_256" );
+	blurY_16_256 = declManager->FindMaterial( "textures/blurY_16_256" );
+	//blurX_16_128 = declManager->FindMaterial( "textures/blurX_16_128" );
+	//blurY_16_128 = declManager->FindMaterial( "textures/blurY_16_128" );
+	//
 #ifdef _D3XP
 	fxManager = NULL;
 
@@ -484,17 +496,56 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 	hackedView.viewaxis = hackedView.viewaxis * ShakeAxis();
 
 #ifdef _D3XP
+	//Portal sky begins
+	idVec3 		diff, currentEyePos, PSOrigin, Zero;
+	
+	Zero.Zero();
+		
+	if ( ( gameLocal.CheckGlobalPortalSky() ) || ( gameLocal.GetCurrentPortalSkyType() == PORTALSKY_LOCAL ) ) {		
+		// in a case of a moving portalSky
+		
+		currentEyePos = hackedView.vieworg;
+	
+		
+		if ( gameLocal.playerOldEyePos == Zero ) {
+			gameLocal.playerOldEyePos = currentEyePos;
+			//initialize playerOldEyePos, this will only happen in one tick.
+		}
+
+		diff = ( currentEyePos - gameLocal.playerOldEyePos) / gameLocal.portalSkyScale;
+		gameLocal.portalSkyGlobalOrigin += diff; // this is for the global portalSky.
+							 // It should keep going even when not active.
+	}
+
 	if ( gameLocal.portalSkyEnt.GetEntity() && gameLocal.IsPortalSkyAcive() && g_enablePortalSky.GetBool() ) {
+		
+		if ( gameLocal.GetCurrentPortalSkyType() == PORTALSKY_STANDARD ) {
+			PSOrigin = gameLocal.portalSkyOrigin;
+		}
+	
+		
+		if ( gameLocal.GetCurrentPortalSkyType() == PORTALSKY_GLOBAL ) {
+			PSOrigin = gameLocal.portalSkyGlobalOrigin;
+ 		}
+
+		
+		if ( gameLocal.GetCurrentPortalSkyType() == PORTALSKY_LOCAL ) {
+			gameLocal.portalSkyOrigin += diff;
+			PSOrigin = gameLocal.portalSkyOrigin;
+		}
+	
+		gameLocal.playerOldEyePos = currentEyePos;
+
 		renderView_t	portalView = hackedView;
-		portalView.vieworg = gameLocal.portalSkyEnt.GetEntity()->GetPhysics()->GetOrigin();
+		portalView.vieworg = PSOrigin;
 
 		// setup global fixup projection vars
 		if ( 1 ) {
 			int vidWidth, vidHeight;
 			idVec2 shiftScale;
-
+	
 			renderSystem->GetGLSettings( vidWidth, vidHeight );
-
+	
 			float pot;
 			int	 w = vidWidth;
 			pot = MakePowerOfTwo( w );
@@ -509,18 +560,28 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 		}
 
 		gameRenderWorld->RenderScene( &portalView );
-		renderSystem->CaptureRenderToImage( "_currentRender" );
-
+		renderSystem->CaptureRenderToImage( "_currentRender" );		
+		
 		hackedView.forceUpdate = true;				// FIX: for smoke particles not drawing when portalSky present
+	
+	}
+	else {
+
+		gameLocal.playerOldEyePos = currentEyePos;	// 
+								// so if g_enablePortalSky is disabled GlobalPortalSkies don't broke
+								// when g_enablePortalSky gets re-enabled GlPS keep working 
 	}
 
-	// process the frame
+	//gameRenderWorld->RenderScene( &hackedView ); //was fxManager->Process( &hackedView );	
 	fxManager->Process( &hackedView );
+      //Portal sky ends
 #endif
 
 	if ( player->spectating ) {
 		return;
-	}
+	}	
+
+	renderGlow(); // glow
 
 #ifdef _D3XP
 	if ( !hud ) {
@@ -547,7 +608,7 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 				renderSystem->DrawStretchPic( blob->x, blob->y, blob->w, blob->h,blob->s1, blob->t1, blob->s2, blob->t2, blob->material );
 			}
 		}
-		player->DrawHUD( hud );
+		//player->DrawHUD( hud );	// ################### SR
 
 		// armor impulse feedback
 		float	armorPulse = ( gameLocal.fast.time - player->lastArmorPulse ) / 250.0f;
@@ -585,6 +646,12 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 
 	}
 
+	// #################################### SR
+	if ( !pm_thirdPerson.GetBool() ) {
+		player->DrawHUD( hud );
+	}
+	// #################################### END SR
+	
 	// test a single material drawn over everything
 	if ( g_testPostProcess.GetString()[0] ) {
 		const idMaterial *mtr = declManager->FindMaterial( g_testPostProcess.GetString(), false );
@@ -1853,3 +1920,91 @@ void FullscreenFXManager::Process( const renderView_t *view ) {
 
 
 #endif
+
+// glow postprocess
+void idPlayerView::renderGlow() {
+	static int	lastW = 0, lastH = 0;
+	float		npotAdjustX, npotAdjustY;
+	int			curW, curH, potW, potH;
+
+	renderSystem->GetGLSettings( curW, curH );
+
+	// get power-of-two snapped sizes
+	potW = 1;
+	while( potW < curW ) {
+		potW <<= 1;
+	}
+	potH = 1;
+	while( potH < curH ) {
+		potH <<= 1;
+	}
+
+	npotAdjustX = (float)curW / (float)potW;
+	npotAdjustY = (float)curH / (float)potH;
+	//
+
+	renderSystem->CaptureRenderToImage( "_currentRender" );
+
+	float
+		stride512_X = r_glowStride_512_X.GetFloat(),
+		stride512_Y = r_glowStride_512_Y.GetFloat(),
+		stride256_X = r_glowStride_256_X.GetFloat(),
+		stride256_Y = r_glowStride_256_Y.GetFloat(),
+		strideModX	= r_glowStrideMod_X.GetFloat(),
+		strideModY	= r_glowStrideMod_Y.GetFloat();
+
+	// get 512x512 glow image
+	renderSystem->CropRenderSize( 512, 512, true );
+	renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 0.0f, npotAdjustX, npotAdjustY, glowMaterial );
+	renderSystem->CaptureRenderToImage( "_glow512" );
+
+	int	i;
+
+	// blur iterations
+	for( i = 0; i != r_glowBI_512_X.GetInteger(); ++i ) {
+		renderSystem->SetColor4( stride512_X, 1, 1, 1 );
+		renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 1.0f, 0.0f, blurX_16_512 );
+		renderSystem->CaptureRenderToImage( "_glow512" );
+	}
+
+	for( i = 0; i != r_glowBI_512_Y.GetInteger(); ++i ) {
+		renderSystem->SetColor4( stride512_Y, 1, 1, 1 );
+		renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 1.0f, 0.0f, blurY_16_512 );
+		renderSystem->CaptureRenderToImage( "_glow512" );
+	}
+
+	renderSystem->UnCrop();
+
+	// get 256x256 glow image
+	renderSystem->CropRenderSize( 256, 256, true );
+	renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 0.0f, npotAdjustX, npotAdjustY, glowMaterial );
+	renderSystem->CaptureRenderToImage( "_glow256" );
+
+	// blur iterations
+	for( i = 0; i != r_glowBI_256_X.GetInteger(); ++i ) {
+		renderSystem->SetColor4( stride256_X, 1, 1, 1 );
+		renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 1.0f, 0.0f, blurX_16_256 );
+		renderSystem->CaptureRenderToImage( "_glow256" );
+
+		stride256_X *= strideModX;
+	}
+
+	for( i = 0; i != r_glowBI_256_Y.GetInteger(); ++i ) {
+		renderSystem->SetColor4( stride256_Y, 1, 1, 1 );
+		renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 1.0f, 0.0f, blurY_16_256 );
+		renderSystem->CaptureRenderToImage( "_glow256" );
+
+		stride256_Y *= strideModY;
+	}
+
+	renderSystem->UnCrop();
+
+	// final composite
+	renderSystem->SetColor4(
+		r_glowScale.GetFloat() * r_glowScale_512.GetFloat(),
+		r_glowScale.GetFloat() * r_glowScale_256.GetFloat(),
+		1.0f, 1.0f
+	);
+	renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 0.0f, 1.0f, 1.0f, glowCompMaterial );
+} 
+// glow ends

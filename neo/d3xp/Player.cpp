@@ -41,6 +41,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "Fx.h"
 #include "Misc.h"
 
+#include "Mover.h"	// ###### SR
+#include "framework/KeyInput.h"	// #### SR
+
 const int ASYNC_PLAYER_INV_AMMO_BITS = idMath::BitsForInteger( 999 );	// 9 bits to cover the range [0, 999]
 const int ASYNC_PLAYER_INV_CLIP_BITS = -7;								// -7 bits to cover the range [-1, 60]
 /*
@@ -180,8 +183,15 @@ void idInventory::Clear( void ) {
 	ClearPowerUps();
 
 	// set to -1 so that the gun knows to have a full clip the first time we get it and at the start of the level
-	memset( clip, -1, sizeof( clip ) );
 
+	//memset( clip, -1, sizeof( clip ) );	// ########################## SR
+	
+	int i, num;
+	for( i = 0; i < MAX_WEAPONS; i++ ) {	// ################################ SR
+		for( num = 0; num < MAX_AMMOTYPES; num++ ) {	// ################################ SR
+			clip[i][num] = -1;
+		}	
+	}
 	items.DeleteContents( true );
 	memset(pdasViewed, 0, 4 * sizeof( pdasViewed[0] ) );
 	pdas.Clear();
@@ -290,8 +300,12 @@ void idInventory::GetPersistantData( idDict &dict ) {
 
 #ifdef _D3XP
 	//Save the clip data
+	int count = 0;	// ################################ SR
 	for( i = 0; i < MAX_WEAPONS; i++ ) {
-		dict.SetInt( va("clip%i", i), clip[ i ] );
+		for( num = 0; num < MAX_AMMOTYPES; num++ ) {	// ################################ SR
+			dict.SetInt( va("clip%count", count ), clip[ i ][ num ] );
+			count++;	// ################################ SR
+		}	
 	}
 #endif
 
@@ -394,8 +408,12 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 
 #ifdef _D3XP
 	//Restore the clip data
+	int count = 0;	// ################################ SR
 	for( i = 0; i < MAX_WEAPONS; i++ ) {
-		clip[i] = dict.GetInt(va("clip%i", i), "-1");
+		for( num = 0; num < MAX_AMMOTYPES; num++ ) {	// ################################ SR
+			clip[i][num] = dict.GetInt(va("clip%count", count ), "-1");	// ########### + num
+			count++;	// ################################ SR
+		}	
 	}
 #endif
 
@@ -478,7 +496,7 @@ idInventory::Save
 ==============
 */
 void idInventory::Save( idSaveGame *savefile ) const {
-	int i;
+	int i, num;
 
 	savefile->WriteInt( maxHealth );
 	savefile->WriteInt( weapons );
@@ -495,7 +513,9 @@ void idInventory::Save( idSaveGame *savefile ) const {
 		savefile->WriteInt( ammo[ i ] );
 	}
 	for( i = 0; i < MAX_WEAPONS; i++ ) {
-		savefile->WriteInt( clip[ i ] );
+		for( num = 0; num < MAX_AMMOTYPES; num++ ) {	// ################################ SR
+			savefile->WriteInt( clip[ i ][ num ] );
+		}	
 	}
 	for( i = 0; i < MAX_POWERUPS; i++ ) {
 		savefile->WriteInt( powerupEndTime[ i ] );
@@ -599,7 +619,9 @@ void idInventory::Restore( idRestoreGame *savefile ) {
 		savefile->ReadInt( ammo[ i ] );
 	}
 	for( i = 0; i < MAX_WEAPONS; i++ ) {
-		savefile->ReadInt( clip[ i ] );
+		for( num = 0; num < MAX_AMMOTYPES; num++ ) {	// ################################ SR
+			savefile->ReadInt( clip[ i ][ num ] );	// ######### + num
+		}	
 	}
 	for( i = 0; i < MAX_POWERUPS; i++ ) {
 		savefile->ReadInt( powerupEndTime[ i ] );
@@ -718,7 +740,7 @@ ammo_t idInventory::AmmoIndexForAmmoClass( const char *ammo_classname ) const {
 
 /*
 ==============
-idInventory::AmmoIndexForAmmoClass
+idInventory::MaxAmmoForAmmoClass
 ==============
 */
 int idInventory::MaxAmmoForAmmoClass( idPlayer *owner, const char *ammo_classname ) const {
@@ -755,6 +777,17 @@ int idInventory::WeaponIndexForAmmoClass( const idDict & spawnArgs, const char *
 		if ( !idStr::Icmp( ammo_classname, decl->dict.GetString( "ammoType" ) ) ) {
 			return i;
 		}
+		// ####################################### SR
+		
+		if ( !idStr::Icmp( ammo_classname, decl->dict.GetString( "ammoType1" ) ) ) {
+			return i;
+		}
+		if ( !idStr::Icmp( ammo_classname, decl->dict.GetString( "ammoType2" ) ) ) {
+			return i;
+		}
+		
+		// ######################################## END SR
+		
 	}
 	return -1;
 }
@@ -826,6 +859,7 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 	idItemInfo				info;
 	const char				*name;
 
+/*	
 #ifdef _D3XP
 	if ( !idStr::Icmp( statname, "ammo_bloodstone" ) ) {
 		i = AmmoIndexForAmmoClass( statname );
@@ -848,6 +882,7 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 		}
 	} else
 #endif
+*/
 
 	if ( !idStr::Icmpn( statname, "ammo_", 5 ) ) {
 		i = AmmoIndexForAmmoClass( statname );
@@ -891,7 +926,7 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 		if ( i != -1 ) {
 			// set, don't add. not going over the clip size limit.
 #ifndef _D3XP
-			clip[ i ] = atoi( value );
+			clip[ i ][ weapon.GetEntity()->ammoCurrent ] = atoi( value );
 #endif
 		}
 #ifdef _D3XP
@@ -1005,7 +1040,9 @@ void idInventory::Drop( const idDict &spawnArgs, const char *weapon_classname, i
 	weapons &= ( 0xffffffff ^ ( 1 << weapon_index ) );
 	ammo_t ammo_i = AmmoIndexForWeaponClass( weapon_classname, NULL );
 	if ( ammo_i ) {
-		clip[ weapon_index ] = -1;
+		clip[ weapon_index ][0] = -1;
+		clip[ weapon_index ][1] = -1;	// ######### SR
+		clip[ weapon_index ][2] = -1;	// ##########
 		ammo[ ammo_i ] = 0;
 	}
 }
@@ -1038,8 +1075,9 @@ idInventory::HasAmmo
 */
 int idInventory::HasAmmo( const char *weapon_classname, bool includeClip, idPlayer* owner ) {		//_D3XP
 	int ammoRequired;
-	ammo_t ammo_i = AmmoIndexForWeaponClass( weapon_classname, &ammoRequired );
+	//ammo_t ammo_i = AmmoIndexForWeaponClass( weapon_classname, &ammoRequired );
 
+/*	
 #ifdef _D3XP
 	int ammoCount = HasAmmo( ammo_i, ammoRequired );
 	if(includeClip && owner) {
@@ -1049,7 +1087,48 @@ int idInventory::HasAmmo( const char *weapon_classname, bool includeClip, idPlay
 #else
 	return HasAmmo( ammo_i, ammoRequired );
 #endif
+*/
 
+// ########################## SR
+
+	const idDeclEntityDef *decl = gameLocal.FindEntityDef( weapon_classname, false );
+	if ( !decl ) {
+		gameLocal.Error( "Unknown weapon in decl '%s'", weapon_classname );
+	}
+	
+	ammoRequired = decl->dict.GetInt( "ammoRequired" );
+	ammo_t ammo_1 = AmmoIndexForAmmoClass( decl->dict.GetString( "ammoType" ) );
+	ammo_t ammo_2 = AmmoIndexForAmmoClass( decl->dict.GetString( "ammoType1" ) );
+	ammo_t ammo_3 = AmmoIndexForAmmoClass( decl->dict.GetString( "ammoType2" ) );
+	
+	int ammoCount = HasAmmo( ammo_1, ammoRequired );
+	if ( ammoCount <= 0 ) {
+		ammoCount = HasAmmo( ammo_2, ammoRequired );
+		if ( ammoCount <= 0 ) {
+			ammoCount = HasAmmo( ammo_3, ammoRequired );
+		}	
+	}	
+	/*
+	if ( ammoCount < 0 ) {
+		ammoCount = 0;
+	}	
+	*/
+	
+	//int ammoCount = HasAmmo( ammo_1, ammoRequired ) + HasAmmo( ammo_2, ammoRequired ) + HasAmmo( ammo_3, ammoRequired );
+#ifdef _D3XP
+	if(includeClip && owner) {
+		int slot = owner->SlotForWeapon(weapon_classname);
+		for ( int i = 0; i < MAX_AMMOTYPES; i++ ) {
+			if ( clip[slot][i] > 0 ) {		// we don't want unused clip slots (-1)
+				ammoCount += clip[slot][i];
+			}
+		}		
+	}
+#endif
+	return ammoCount;
+
+	// ###################### END SR
+	
 }
 
 #ifdef _D3XP
@@ -1060,7 +1139,7 @@ idInventory::HasEmptyClipCannotRefill
 */
 bool idInventory::HasEmptyClipCannotRefill(const char *weapon_classname, idPlayer* owner) {
 
-	int clipSize = clip[owner->SlotForWeapon(weapon_classname)];
+	int clipSize = clip[owner->SlotForWeapon(weapon_classname)][0];
 	if(clipSize) {
 		return false;
 	}
@@ -1412,6 +1491,15 @@ idPlayer::idPlayer() {
 	isChatting				= false;
 
 	selfSmooth				= false;
+	
+	// ################################################### SR
+	
+	buggy_thirdPerson		= false;
+	inBuggy					= false;	
+	buggy 					= NULL;
+	grapple					= NULL;
+	
+	// ################################################### END
 }
 
 /*
@@ -1441,6 +1529,8 @@ void idPlayer::LinkScriptVariables( void ) {
 	AI_TELEPORT.LinkTo(			scriptObject, "AI_TELEPORT" );
 	AI_TURN_LEFT.LinkTo(		scriptObject, "AI_TURN_LEFT" );
 	AI_TURN_RIGHT.LinkTo(		scriptObject, "AI_TURN_RIGHT" );
+	
+	
 }
 
 /*
@@ -1479,6 +1569,68 @@ void idPlayer::Init( void ) {
 	const char			*value;
 	const idKeyValue	*kv;
 
+	// ################################################### SR
+	typing 					= false;
+	wiping 					= false;
+	fadingIn				= false;
+	fadingOut				= false;
+	typemsg 				= "";
+	typegap 				= 0.2f;
+	typecount 				= 1;
+	nexttype				= 0;
+	pause					= 0;
+	wipetime				= 0;
+	
+	buggy_thirdPerson 		= false;
+	inBuggy					= false;	
+	buggy 					= NULL;
+	grapple					= NULL;
+	maxBuggyYaw				= spawnArgs.GetFloat( "max_buggy_viewangle", "100" );
+	
+	maxViewDist 			= g_vehicleMaxViewDist.GetFloat();
+	minViewDist 			= g_vehicleMinViewDist.GetFloat();
+	maxViewHeight 			= g_vehicleMaxViewHeight.GetFloat();
+	minViewHeight 			= g_vehicleMinViewHeight.GetFloat();
+	zoomStep 				= g_vehicleZoomStep.GetFloat();
+
+	zooming					= false;
+	viewStep 				= ( maxViewDist - minViewDist ) / zoomStep;	
+	viewStepH 				= ( maxViewHeight - minViewHeight ) / zoomStep;
+	
+	viewDist 				= minViewDist;
+	viewHeight 				= minViewHeight;
+	
+	//cvarSystem->SetCVarFloat( "pm_thirdPerson", 0.0f );	// ### always start in FP
+	
+	const idDict *LODdict = gameLocal.FindEntityDefDict( "sr_particleLOD", false );
+	if ( LODdict ) {
+		probe 	= LODdict->GetFloat( "LODdistance" );
+		probeh 	= LODdict->GetFloat( "LODheight" );
+	}
+	
+	weather = cvarSystem->GetCVarFloat( "g_showWeather" );
+	
+	
+	float ladderJump		= spawnArgs.GetFloat( va( "ladder_jump", 200.0f ) );
+	float ladderJumpHeight	= spawnArgs.GetFloat( va( "ladder_jumpheight", 64.0f ) );
+	float ladderWeaponAng	= spawnArgs.GetFloat( va( "ladder_noweapon_angle", 45.0f ) );
+	ladderWeaponAng 		= 180.0f - ladderWeaponAng;
+	
+	physicsObj.SetLadderJumpDist( ladderJump, ladderJumpHeight, ladderWeaponAng );
+	
+	skyHook			= true;	// ###!!!!!!!!!!!!!!!!!!!!
+	hooking 		= false;
+	hookSailing 	= false;
+	hookTarget.Zero();
+	hookDir.Zero();
+	showhints 		= true; 	// ###!!!!!!!!!!!!!!!!!!!! 
+	
+	dodge_time 		= 0.0f;
+	dodger 			= NULL;
+	
+	// ################################################### END	
+	
+	
 	noclip					= false;
 	godmode					= false;
 
@@ -1500,6 +1652,7 @@ void idPlayer::Init( void ) {
 	weapon_bloodstone_active3 = SlotForWeapon( "weapon_bloodstone_active3" );
 	harvest_lock			= false;
 #endif
+
 	showWeaponViewModel		= GetUserInfo()->GetBool( "ui_showGun" );
 
 
@@ -1680,6 +1833,7 @@ void idPlayer::Init( void ) {
 	AI_TELEPORT		= false;
 	AI_TURN_LEFT	= false;
 	AI_TURN_RIGHT	= false;
+	
 
 	// reset the script object
 	ConstructScriptObject();
@@ -1714,8 +1868,11 @@ void idPlayer::Init( void ) {
 
 	if ( hud ) {
 		hud->HandleNamedEvent( "aim_clear" );
+		//hud->SetStateBool( "inBuggy", false );		// ######################### SR
+		//hud->SetStateBool( "NotinBuggy", true );	// ######################### SR
 	}
-
+	
+	
 	//isChatting = false;
 	cvarSystem->SetCVarBool("ui_chat", false);
 }
@@ -1734,6 +1891,10 @@ void idPlayer::Spawn( void ) {
 	if ( entityNumber >= MAX_CLIENTS ) {
 		gameLocal.Error( "entityNum > MAX_CLIENTS for player.  Player may only be spawned with a client." );
 	}
+
+	// music volume control begins
+	s_bgmusic_volume.SetModified(); // Music volume is set on spawn
+	// music volume control ends
 
 	// allow thinking during cinematics
 	cinematic = true;
@@ -1976,6 +2137,16 @@ void idPlayer::Spawn( void ) {
 	bloomSpeed				= 1;
 	bloomIntensity			= -0.01f;
 #endif
+
+
+// ##################################################### SR
+
+	// Skyhook
+	const char *grappleJointName = spawnArgs.GetString( "grapple_joint", "Rhand1" );
+	grappleJoint = animator.GetJointHandle( grappleJointName );
+
+// ##################################################### END SR
+	
 }
 
 /*
@@ -2215,7 +2386,7 @@ void idPlayer::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( lastTeleFX );
 
 	savefile->WriteFloat( pm_stamina.GetFloat() );
-
+	
 	if ( hud ) {
 		hud->SetStateString( "message", common->GetLanguageDict()->GetString( "#str_02916" ) );
 		hud->HandleNamedEvent( "Message" );
@@ -2243,6 +2414,35 @@ void idPlayer::Save( idSaveGame *savefile ) const {
 	savefile->WriteFloat( bloomIntensity );
 
 #endif
+
+	// ################################################### SR
+
+	savefile->WriteFloat( viewStep );
+	savefile->WriteFloat( viewStepH );
+	savefile->WriteFloat( zoomStep );
+	savefile->WriteFloat( viewDist );
+	savefile->WriteFloat( viewHeight );
+	savefile->WriteFloat( maxViewDist );
+	savefile->WriteFloat( minViewDist );	
+	savefile->WriteFloat( maxViewHeight );
+	savefile->WriteFloat( minViewHeight );	
+	savefile->WriteFloat( maxBuggyYaw );	
+	savefile->WriteFloat( probe );	
+	savefile->WriteFloat( probeh );	
+	savefile->WriteFloat( weather );	
+	
+	savefile->WriteBool( hooking );
+	savefile->WriteBool( hookSailing );
+	savefile->WriteBool( skyHook );
+	savefile->WriteVec3( hookTarget );
+	
+	savefile->WriteBool( inBuggy	);
+	if ( inBuggy ) {
+		buggy.Save( savefile );
+		savefile->WriteInt( buggy_speed );
+	}
+	
+	// ################################################### END
 }
 
 /*
@@ -2536,6 +2736,42 @@ void idPlayer::Restore( idRestoreGame *savefile ) {
 	savefile->ReadFloat( bloomSpeed );
 	savefile->ReadFloat( bloomIntensity );
 #endif
+
+	// ################################################### SR
+
+	savefile->ReadFloat( viewStep );
+	savefile->ReadFloat( viewStepH );
+	savefile->ReadFloat( zoomStep );
+	savefile->ReadFloat( viewDist );
+	savefile->ReadFloat( viewHeight );
+	savefile->ReadFloat( maxViewDist );
+	savefile->ReadFloat( minViewDist );	
+	savefile->ReadFloat( maxViewHeight );
+	savefile->ReadFloat( minViewHeight );	
+	savefile->ReadFloat( maxBuggyYaw );
+	savefile->ReadFloat( probe );	
+	savefile->ReadFloat( probeh );	
+	savefile->ReadFloat( weather );
+	
+	savefile->ReadBool( hooking );
+	savefile->ReadBool( hookSailing );
+	savefile->ReadBool( skyHook );
+	savefile->ReadVec3( hookTarget );
+	
+	savefile->ReadBool( inBuggy );
+	if ( inBuggy ) {
+		buggy.Restore( savefile );
+		savefile->ReadInt( buggy_speed );
+	} else {
+		buggy = NULL;
+	}
+
+	cvarSystem->SetCVarFloat( "pm_thirdPerson", 0.0f );	// ### always start in FP
+	
+	dodge_time = 0.0f;
+	
+	// ################################################### END
+
 }
 
 /*
@@ -2842,7 +3078,7 @@ void idPlayer::UpdateSkinSetup( bool restart ) {
 		baseSkinName = "skins/characters/player/marine_mp";
 	}
 	skin = declManager->FindSkin( baseSkinName, false );
-	assert( skin );
+	//assert( skin );	// ########################################################################## !!!!!!!!!!!!!!!!!!!!!
 	// match the skin to a color band for scoreboard
 	if ( baseSkinName.Find( "red" ) != -1 ) {
 		colorBarIndex = 1;
@@ -3030,7 +3266,7 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 	//Let the HUD know the total amount of ammo regardless of the ammo required value
 	_hud->SetStateString( "player_ammo_count", va("%i", weapon.GetEntity()->AmmoCount()));
 #endif
-
+/*
 #ifdef _D3XP
 	//Make sure the hud always knows how many bloodstone charges there are
 	int ammoRequired;
@@ -3039,6 +3275,7 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 	_hud->SetStateString("player_bloodstone_ammo", va("%i", bloodstoneAmmo));
 	_hud->HandleNamedEvent( "bloodstoneAmmoUpdate" );
 #endif
+	*/
 
 	_hud->HandleNamedEvent( "updateAmmo" );
 }
@@ -3061,6 +3298,8 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 	} else {
 		staminapercentage = idMath::FtoiFast( 100.0f * stamina / max_stamina );
 	}
+
+	//_hud->SetStateInt( "buggy_speed", buggy_speed );
 
 	_hud->SetStateInt( "player_health", health );
 	_hud->SetStateInt( "player_stamina", staminapercentage );
@@ -3186,10 +3425,18 @@ idPlayer::DrawHUD
 */
 void idPlayer::DrawHUD( idUserInterface *_hud ) {
 
-	if ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !_hud || !g_showHud.GetBool() ) {
+	// ############################### SR
+	//if ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !_hud || !g_showHud.GetBool() ) {
+	if ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || !_hud || !g_showHud.GetBool() ) {
 		return;
 	}
-
+	if ( gameLocal.GetCamera() ) {
+		_hud->SetStateBool( "NotCinematic", false );
+	} else {
+		_hud->SetStateBool( "NotCinematic", true );
+	}
+	// ############################## END SR
+	
 	UpdateHudStats( _hud );
 
 	_hud->SetStateString( "weapicon", weapon.GetEntity()->Icon() );
@@ -3204,7 +3451,7 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 	_hud->Redraw( gameLocal.realClientTime );
 
 	// weapon targeting crosshair
-	if ( !GuiActive() ) {
+	if ( !GuiActive() && !inBuggy ) {
 		if ( cursor && weapon.GetEntity()->ShowCrosshair() ) {
 
 #ifdef _D3XP
@@ -3270,6 +3517,7 @@ void idPlayer::EnterCinematic( void ) {
 	AI_TELEPORT		= false;
 	AI_TURN_LEFT	= false;
 	AI_TURN_RIGHT	= false;
+	
 }
 
 /*
@@ -3336,12 +3584,28 @@ WeaponFireFeedback
 Called when a weapon fires, generates head twitches, etc
 ==================
 */
-void idPlayer::WeaponFireFeedback( const idDict *weaponDef ) {
+void idPlayer::WeaponFireFeedback( const idDict *weaponDef, idEntity *hitEnt, float dodgeTime, bool headshot ) { // ####### SR added hitEnt, dodgeTime
 	// force a blink
 	blink_time = 0;
 
 	// play the fire animation
 	AI_WEAPON_FIRED = true;
+	
+	// ################################# SR
+
+	dodge_time = dodgeTime;
+	if ( hitEnt && hitEnt->IsType( idAI::Type ) ) {
+		dodger = static_cast<idAI *>( hitEnt );
+		dodger->AI_INCOMING = true;
+		if ( headshot ) {
+			dodger->AI_HEADSHOT = true;
+		}	
+			
+	}
+
+	// ################################# END SR
+	
+	blink_time = 0;
 
 	// update view feedback
 	playerView.WeaponFireFeedback( weaponDef );
@@ -3385,6 +3649,7 @@ void idPlayer::FireWeapon( void ) {
 		if ( weapon.GetEntity()->AmmoInClip() || weapon.GetEntity()->AmmoAvailable() ) {
 			AI_ATTACK_HELD = true;
 			weapon.GetEntity()->BeginAttack();
+			/*
 			if ( ( weapon_soulcube >= 0 ) && ( currentWeapon == weapon_soulcube ) ) {
 				if ( hud ) {
 					hud->HandleNamedEvent( "soulCubeNotReady" );
@@ -3404,8 +3669,10 @@ void idPlayer::FireWeapon( void ) {
 					}
 				}
 			}
-#endif
+#endif	*/
+
 		} else {
+			inventory.clip[ currentWeapon ][ weapon.GetEntity()->ammoCurrent ] = 0;
 			NextBestWeapon();
 		}
 	}
@@ -4370,6 +4637,23 @@ idPlayer::NextBestWeapon
 ===============
 */
 void idPlayer::NextBestWeapon( void ) {
+
+	// #################################### SR
+	
+	
+	if ( weapon.GetEntity()->ammoTypes > 0 ) {
+		if ( inventory.HasAmmo( weapon.GetEntity()->ammoType1, 1 ) > 0 || inventory.HasAmmo( weapon.GetEntity()->ammoType2, 1 ) > 0  || inventory.HasAmmo( weapon.GetEntity()->ammoType3, 1 ) > 0 ) {
+			//gameLocal.Printf( "HASAMMO %d, %d, %d\n", inventory.HasAmmo( weapon.GetEntity()->ammoType1, 1 ), inventory.HasAmmo( weapon.GetEntity()->ammoType2, 1 ), inventory.HasAmmo( weapon.GetEntity()->ammoType3, 1 ) );
+			CycleWeaponAmmo();
+			return;
+		} else if ( inventory.clip[idealWeapon][0] > 0 || inventory.clip[idealWeapon][1] > 0 || inventory.clip[idealWeapon][2] > 0 ) {	
+			//gameLocal.Printf( "HASCLIP %d, %d, %d\n", inventory.clip[idealWeapon][0], inventory.clip[idealWeapon][1], inventory.clip[idealWeapon][2] );
+			CycleWeaponAmmo();
+			return;
+		}	
+	} 
+	
+	// ################################### END SR
 	const char *weap;
 	int w = MAX_WEAPONS;
 
@@ -4448,7 +4732,9 @@ void idPlayer::NextWeapon( void ) {
 		}
 
 #ifdef _D3XP
-		if ( inventory.HasAmmo( weap, true, this ) || w == weapon_bloodstone ) {
+		if ( inventory.HasAmmo( weap, true, this ) ) {
+			
+			gameLocal.Printf( "NEXT WEP CLIPS: %d, %d, %d\n", inventory.clip[w][0], inventory.clip[w][1], inventory.clip[w][2] );	// #########################
 #else
 		if ( inventory.HasAmmo( weap ) ) {
 #endif
@@ -4503,7 +4789,7 @@ void idPlayer::PrevWeapon( void ) {
 			continue;
 		}
 #ifdef _D3XP
-		if ( inventory.HasAmmo( weap, true, this ) || w == weapon_bloodstone ) {
+		if ( inventory.HasAmmo( weap, true, this ) ) {
 #else
 		if ( inventory.HasAmmo( weap ) ) {
 #endif
@@ -4617,7 +4903,7 @@ void idPlayer::SelectWeapon( int num, bool force ) {
 			}
 			idealWeapon = previousWeapon;
 		} else if ( ( weapon_pda >= 0 ) && ( num == weapon_pda ) && ( inventory.pdas.Num() == 0 ) ) {
-			ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
+			ShowTip( spawnArgs.GetString( "text_infoTitle" ), "", spawnArgs.GetString( "text_noPDA" ), true );
 			return;
 		} else {
 			idealWeapon = num;
@@ -4757,7 +5043,7 @@ void idPlayer::StealWeapon( idPlayer *player ) {
 	inventory.ammo[ ammo_i ] += ammoavailable;
 
 #ifndef _D3XP
-	inventory.clip[ newweap ] = inclip;
+	inventory.clip[ newweap ][0] = inclip;
 #endif
 }
 
@@ -4806,7 +5092,24 @@ void idPlayer::Weapon_Combat( void ) {
 			currentWeapon = idealWeapon;
 			weaponGone = false;
 			animPrefix = spawnArgs.GetString( va( "def_weapon%d", currentWeapon ) );
-			weapon.GetEntity()->GetWeaponDef( animPrefix, inventory.clip[ currentWeapon ] );
+			
+			// ####################################################### SR
+			int clipcontents 	= -1;
+			int clipType		= 0;
+			if ( inventory.clip[ currentWeapon ][0] > 0 ) {
+				clipcontents = inventory.clip[ currentWeapon ][0];
+				clipType = 1;
+			} else if ( inventory.clip[ currentWeapon ][1] > 0 ) {
+				clipcontents = inventory.clip[ currentWeapon ][1];
+				clipType = 2;
+			} else if ( inventory.clip[ currentWeapon ][2] > 0 ) {
+				clipcontents = inventory.clip[ currentWeapon ][2];
+				clipType = 3;
+			}
+			
+			// ####################################################### 
+			
+			weapon.GetEntity()->GetWeaponDef( animPrefix, clipcontents, clipType );	// inventory.clip[ currentWeapon ][0]
 			animPrefix.Strip( "weapon_" );
 
 			weapon.GetEntity()->NetCatchup();
@@ -4831,7 +5134,26 @@ void idPlayer::Weapon_Combat( void ) {
 				currentWeapon = idealWeapon;
 				weaponGone = false;
 				animPrefix = spawnArgs.GetString( va( "def_weapon%d", currentWeapon ) );
-				weapon.GetEntity()->GetWeaponDef( animPrefix, inventory.clip[ currentWeapon ] );
+				
+				// ####################################################### SR
+				
+				int clipcontents 	= -1;
+				int clipType		= 0;
+				if ( inventory.clip[ currentWeapon ][0] > 0 ) {
+					clipcontents = inventory.clip[ currentWeapon ][0];
+					clipType = 1;
+				} else if ( inventory.clip[ currentWeapon ][1] > 0 ) {
+					clipcontents = inventory.clip[ currentWeapon ][1];
+					clipType = 2;
+				} else if ( inventory.clip[ currentWeapon ][2] > 0 ) {
+					clipcontents = inventory.clip[ currentWeapon ][2];
+					clipType = 3;
+				}
+				
+		
+				// ####################################################### 
+				
+				weapon.GetEntity()->GetWeaponDef( animPrefix, clipcontents, clipType ); // inventory.clip[ currentWeapon ][0]
 				animPrefix.Strip( "weapon_" );
 
 				weapon.GetEntity()->Raise();
@@ -4841,8 +5163,21 @@ void idPlayer::Weapon_Combat( void ) {
 		weaponGone = false;	// if you drop and re-get weap, you may miss the = false above
 		if ( weapon.GetEntity()->IsHolstered() ) {
 			if ( !weapon.GetEntity()->AmmoAvailable() ) {
-				// weapons can switch automatically if they have no more ammo
-				NextBestWeapon();
+				// ########################################### SR
+				
+				// if more than one ammo type, check other types
+				/*if ( weapon.GetEntity()->ammoTypes == 2 && ( inventory.HasAmmo( weapon.GetEntity()->ammoType1, 1 ) || inventory.HasAmmo( weapon.GetEntity()->ammoType2, 1 ) || inventory.HasAmmo( weapon.GetEntity()->ammoType3, 1 ) ) ) {
+					CycleWeaponAmmo();
+				} else if ( weapon.GetEntity()->ammoTypes == 1 && ( inventory.HasAmmo( weapon.GetEntity()->ammoType1, 1 ) || inventory.HasAmmo( weapon.GetEntity()->ammoType2, 1 ) ) ) {
+					CycleWeaponAmmo();
+				} else {*/
+					// weapons can switch automatically if they have no more ammo
+					//inventory.clip[ currentWeapon ][ weapon.GetEntity()->ammoCurrent ] = 0;	// ############### SR - empty current clip
+					inventory.clip[ currentWeapon ][ weapon.GetEntity()->ammoCurrent ] = 0;
+					NextBestWeapon();
+				//}	
+				
+					
 			} else {
 				weapon.GetEntity()->Raise();
 				state = GetScriptFunction( "RaiseWeapon" );
@@ -4866,7 +5201,7 @@ void idPlayer::Weapon_Combat( void ) {
 
 	// update our ammo clip in our inventory
 	if ( ( currentWeapon >= 0 ) && ( currentWeapon < MAX_WEAPONS ) ) {
-		inventory.clip[ currentWeapon ] = weapon.GetEntity()->AmmoInClip();
+		inventory.clip[ currentWeapon ][ weapon.GetEntity()->ammoCurrent ] = weapon.GetEntity()->AmmoInClip();
 		if ( hud && ( currentWeapon == idealWeapon ) ) {
 			UpdateHudAmmo( hud );
 		}
@@ -5002,7 +5337,25 @@ void idPlayer::UpdateWeapon( void ) {
 	if ( !weapon.GetEntity()->IsLinked() ) {
 		if ( idealWeapon != -1 ) {
 			animPrefix = spawnArgs.GetString( va( "def_weapon%d", idealWeapon ) );
-			weapon.GetEntity()->GetWeaponDef( animPrefix, inventory.clip[ idealWeapon ] );
+			
+			// ####################################################### SR
+			
+			int clipcontents 	= -1;
+			int clipType		= 0;
+			if ( inventory.clip[ idealWeapon ][0] > 0 ) {
+				clipcontents = inventory.clip[ idealWeapon ][0];
+				clipType = 1;
+			} else if ( inventory.clip[ idealWeapon ][1] > 0 ) {
+				clipcontents = inventory.clip[ idealWeapon ][1];
+				clipType = 2;
+			} else if ( inventory.clip[ idealWeapon ][2] > 0 ) {
+				clipcontents = inventory.clip[ idealWeapon ][2];
+				clipType = 3;
+			}
+			
+			gameLocal.Printf( "UPDATE: Num/Type: %d, %d\n", clipcontents, clipType );
+			
+			weapon.GetEntity()->GetWeaponDef( animPrefix, clipcontents, clipType );
 			assert( weapon.GetEntity()->IsLinked() );
 		} else {
 			return;
@@ -5029,6 +5382,14 @@ void idPlayer::UpdateWeapon( void ) {
 	if ( hiddenWeapon ) {
 		weapon.GetEntity()->LowerWeapon();
 	}
+	
+	if ( physicsObj.OnLadder() && !physicsObj.ladderWeapon ) {
+      StopFiring();
+      weapon.GetEntity()->LowerWeapon();
+   }
+
+
+
 
 	// update weapon state, particles, dlights, etc
 	weapon.GetEntity()->PresentWeapon( showWeaponViewModel );
@@ -5566,7 +5927,7 @@ void idPlayer::CrashLand( const idVec3 &oldOrigin, const idVec3 &oldVelocity ) {
 	idVec3		origin, velocity;
 	idVec3		gravityVector, gravityNormal;
 	float		delta;
-	float		hardDelta, fatalDelta;
+	float		hardDelta, fatalDelta, softDelta;
 	float		dist;
 	float		vel, acc;
 	float		t;
@@ -5641,14 +6002,27 @@ void idPlayer::CrashLand( const idVec3 &oldOrigin, const idVec3 &oldVelocity ) {
 	}
 
 	// allow falling a bit further for multiplayer
-	if ( gameLocal.isMultiplayer ) {
+
+/*	if ( gameLocal.isMultiplayer ) {
 		fatalDelta	= 75.0f;
 		hardDelta	= 50.0f;
 	} else {
 		fatalDelta	= 65.0f;
 		hardDelta	= 45.0f;
 	}
-
+*/
+	// ################################## SR
+	if ( gameLocal.isMultiplayer ) {
+		fatalDelta	= 75.0f;
+		hardDelta	= 50.0f;
+		softDelta	= 30.0f;
+	} else {
+		fatalDelta	= spawnArgs.GetFloat( va( "fall_fatal", 75.0f ));
+		hardDelta	= spawnArgs.GetFloat( va( "fall_hard", 50.0f ));
+		softDelta	= spawnArgs.GetFloat( va( "fall_soft", 30.0f ));
+	}	
+	// ################################## END SR
+	
 	if ( delta > fatalDelta ) {
 		AI_HARDLANDING = true;
 		landChange = -32;
@@ -5665,7 +6039,7 @@ void idPlayer::CrashLand( const idVec3 &oldOrigin, const idVec3 &oldVelocity ) {
 			pain_debounce_time = gameLocal.time + pain_delay + 1;  // ignore pain since we'll play our landing anim
 			Damage( NULL, NULL, idVec3( 0, 0, -1 ), "damage_hardfall", 1.0f, 0 );
 		}
-	} else if ( delta > 30 ) {
+	} else if ( delta > softDelta ) {	// ##### was 30.0f ## SR
 		AI_HARDLANDING = true;
 		landChange	= -16;
 		landTime	= gameLocal.time;
@@ -5917,6 +6291,102 @@ void idPlayer::UpdateViewAngles( void ) {
 		}
 	}
 
+	// ######################################################################## SR
+	
+	if ( inBuggy ) {
+		// don't let the player aim too high or low while driving
+		if ( viewAngles.pitch > 10.0f ) {
+			viewAngles.pitch = 10.0f;
+		} else if ( viewAngles.pitch < -25.0f ) {
+			viewAngles.pitch = -25.0f;
+		}
+		// don't let the player look more than 'maxBuggyYaw' degrees left/right while driving
+		
+		//idVec3 dir = buggy->GetPhysics()->GetAxis().ToAngles().ToForward();
+		//float bugyaw = buggy->GetPhysics()->GetAxis().ToAngles().yaw;
+		//delta = viewAngles;
+		//float playerang = delta.Normalize360().yaw;
+		//float bugang = 0;
+		//playerang.Normalize360();	
+		/*
+		if ( ( playerang > bugyaw && playerang - bugyaw < 180.0f ) || (	playerang < bugyaw && bugyaw - playerang > 180.0f ) ) {// looking right
+			bugang = bugyaw + maxBuggyYaw;
+			if ( bugang > 360.0f ) {
+				bugang -= 360.0f;
+			}
+			if ( playerang > bugang ) {
+				gameLocal.Printf( "Player ang  %.1f\n", playerang );
+				gameLocal.Printf( "Buggy ang %.1f\n", bugang );
+				viewAngles.yaw = bugang;	// idMath::AngleNormalize180( bugang );
+			}	
+		} else if ( ( playerang < bugyaw && bugyaw - playerang < 180.0f ) || (	playerang > bugyaw && playerang - bugyaw > 180.0f ) ){
+			bugang = bugyaw - maxBuggyYaw;
+			if ( bugang < 0.0f ) {
+				bugang += 360.0f;
+			}
+			if ( playerang < bugang ) {
+				viewAngles.yaw = bugang;	//idMath::AngleNormalize180( bugang );
+			}
+		}	
+		*/
+		/*
+		idRotation turretRotation;
+		idVec3 origin;
+		idMat3 axis;
+		buggy->GetAnimator()->GetJointTransform( buggy->eyesJoint, gameLocal.time, origin, axis );
+		float gunang = axis.ToAngles().yaw;
+
+		if ( gunang > maxBuggyYaw ) {
+			turretRotation.SetAngle( maxBuggyYaw );
+			turretRotation.SetVec( -1, 0, 0 );
+			animator.SetJointAxis( buggy->eyesJoint, JOINTMOD_LOCAL, turretRotation.ToMat3() ); 	
+		}
+		if ( gunang < -maxBuggyYaw ) {
+			turretRotation.SetAngle( -maxBuggyYaw );
+			turretRotation.SetVec( -1, 0, 0 );
+			animator.SetJointAxis( buggy->eyesJoint, JOINTMOD_LOCAL, turretRotation.ToMat3() ); 	
+		}
+		// buggy->GetPhysics()->GetAxis().ToAngles().yaw;
+		float ang = 0;
+		delta = viewAngles;
+		//delta.Normalize360();		// 0-360
+		float playeryaw = delta.yaw;
+		idAngles bugang = buggy->GetPhysics()->GetAxis().ToAngles();
+		bugang.Normalize180();
+		float buggyyaw = bugang.yaw;
+		//delta = axis.ToAngles();
+		*/
+		
+		/*
+		if ( zoomStep < gameLocal.time ) {
+			zoomStep = gameLocal.time + 200;
+			gameLocal.Printf( "Buggy yaw %.1f\n", buggyyaw );
+			gameLocal.Printf( "Player yaw %.1f\n\n", playeryaw );
+		}
+		*/
+
+		/*
+		if ( playeryaw >= 0.0f || buggyyaw < 0.0f ) {		
+			if ( buggyyaw - playeryaw > maxBuggyYaw ) {	// looking right
+				viewAngles.yaw = buggyyaw - maxBuggyYaw; 
+			}
+		} else if ( buggyyaw >= 0.0f && playeryaw < 0.0f ) {	// looking right
+			if ( buggyyaw - playeryaw > maxBuggyYaw ) {
+				viewAngles.yaw = buggyyaw - maxBuggyYaw; 
+			}		
+
+			if ( playeryaw - buggyyaw > maxBuggyYaw ) {
+				//ang = idMath::AngleNormalize180( ang );
+				viewAngles.yaw = buggyyaw + maxBuggyYaw; 
+				//gameLocal.Printf( "Gun ang << %.1f\n", gunang );
+				//gameLocal.Printf( "Buggy %.1f\n", buggyyaw );
+				//gameLocal.Printf( "Player %.1f\n\n", playeryaw );
+			}
+		}*/
+	}
+	
+	// ######################################################################### END SR	
+	
 	UpdateDeltaViewAngles( viewAngles );
 
 	// orient the model towards the direction we're looking
@@ -5924,6 +6394,7 @@ void idPlayer::UpdateViewAngles( void ) {
 
 	// save in the log for analyzing weapon angle offsets
 	loggedViewAngles[ gameLocal.framenum & (NUM_LOGGED_VIEW_ANGLES-1) ] = viewAngles;
+	
 }
 
 /*
@@ -6403,7 +6874,7 @@ void idPlayer::TogglePDA( void ) {
 	}
 
 	if ( inventory.pdas.Num() == 0 ) {
-		ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
+		ShowTip( spawnArgs.GetString( "text_infoTitle" ), "", spawnArgs.GetString( "text_noPDA" ), true );
 		return;
 	}
 
@@ -6486,9 +6957,10 @@ void idPlayer::Spectate( bool spectate ) {
 	// track invisible player bug
 	// all hiding and showing should be performed through Spectate calls
 	// except for the private camera view, which is used for teleports
-	assert( ( teleportEntity.GetEntity() != NULL ) || ( IsHidden() == spectating ) );
+	assert( ( teleportEntity.GetEntity() != NULL ) || ( IsHidden() == spectating ) || inBuggy );
 
 	if ( spectating == spectate ) {
+
 		return;
 	}
 
@@ -6553,31 +7025,236 @@ void idPlayer::SetClipModel( void ) {
 
 /*
 ==============
-idPlayer::UseVehicle
+idPlayer::UseEnt
 ==============
 */
-void idPlayer::UseVehicle( void ) {
+void idPlayer::UseEnt( void ) {
 	trace_t	trace;
 	idVec3 start, end;
 	idEntity *ent;
-
-	if ( GetBindMaster() && GetBindMaster()->IsType( idAFEntity_Vehicle::Type ) ) {
+	
+	if ( inBuggy ||buggy.IsValid()) {
+		
+		// ############################################################################## SR
+		
+		inBuggy = false;	
+		//hud->SetStateBool( "inBuggy", false );
+		if(buggy.IsValid())
+		{
+			buggy.GetEntity()->Use( this );
+		}
+		buggy = NULL;
+		physicsObj.EnableClip();
 		Show();
-		static_cast<idAFEntity_Vehicle*>(GetBindMaster())->Use( this );
+		Event_EnableWeapon();
+		
+		// ############################################################################## END
 	} else {
 		start = GetEyePosition();
-		end = start + viewAngles.ToForward() * 80.0f;
+		float udist = spawnArgs.GetFloat( "use_distance", "45" );
+		end = start + viewAngles.ToForward() * udist;
+		
 		gameLocal.clip.TracePoint( trace, start, end, MASK_SHOT_RENDERMODEL, this );
 		if ( trace.fraction < 1.0f ) {
 			ent = gameLocal.entities[ trace.c.entityNum ];
-			if ( ent && ent->IsType( idAFEntity_Vehicle::Type ) ) {
-				Hide();
-				static_cast<idAFEntity_Vehicle*>(ent)->Use( this );
+			
+			if ( ent ) {	// ############################################################################## SR
+				if ( ent->IsType( idAFEntity_Vehicle::Type ) ) {
+					buggy = static_cast<idAFEntity_Vehicle*>( ent );
+					inBuggy = true;
+					//hud->SetStateBool( "inBuggy", true );
+					SetPhysics( &physicsObj );
+					physicsObj.DisableClip();
+					Hide();	
+					Event_DisableWeapon();
+					//if ( achievements[1] != 1 ) {
+					//	hud->SetStateString( "achievement", "Used a vehicle, yay!" );
+					//	hud->HandleNamedEvent( "ShowAchievement" );
+					//	achievements[1] = 1;
+					//}	
+					if(buggy.IsValid())
+					{
+						buggy.GetEntity()->Use( this );
+					}
+				} else if ( ent->IsType( idDoor::Type ) && !( ent->spawnArgs.GetFloat( "locked" ) > 0 ) ) {
+					static_cast< idDoor * >( ent )->Open();	
+					if ( achievements[2] != 1 ) {
+						hud->SetStateString( "achievement", "Opened a door, yay!" );
+						hud->HandleNamedEvent( "ShowAchievement" );
+						achievements[2] = 1;
+					}	
+				}
+				// ############################################################################## END
 			}
 		}
 	}
 }
 
+// #################################### SR
+/*
+==============
+idPlayer::SwapView	// Swap first person / third person views (IMPULSE_16)
+==============
+*/
+void idPlayer::SwapView( void ) {
+	if ( inBuggy ) {
+		if ( buggy_thirdPerson ) {	
+			buggy_thirdPerson = false;
+		} else {
+			buggy_thirdPerson = true;
+		}
+	}	
+}
+
+/*
+==============
+idPlayer::ZoomView	// change view pos in buggy third person  (IMPULSE_21)
+==============
+*/
+void idPlayer::ZoomView( void ) {
+	if ( buggy_thirdPerson && !zooming ) {	
+		if ( ( viewDist >= maxViewDist && viewStep > 0 ) || ( viewDist <= minViewDist && viewStep < 0 ) ) {
+			viewStep *= -1.0f;
+		}
+		zooming = true;
+	}	
+}
+/*
+==============
+idPlayer::Flashlight	// buggy headlight (IMPULSE_24)
+==============
+*/
+void idPlayer::Flashlight( void ) {
+	if ( inBuggy ) {	
+		if(buggy.IsValid()) {
+			buggy.GetEntity()->LightOnOff();
+		}
+	}
+}
+
+
+/*
+==============
+idPlayer::CycleWeaponAmmo	//  (IMPULSE_26)
+==============
+*/
+void idPlayer::CycleWeaponAmmo( void ) {
+	weapon.GetEntity()->CycleAmmo();	
+}
+
+
+/*
+================
+idPlayer::TeletypeGui
+================
+*/
+void idPlayer::TeletypeGui( idStr tmsg, float gap, float _pause, float _wipetime ) {
+	typing 		= true;
+	hud->HandleNamedEvent( "startTeleType" );
+	if ( tmsg.Left(1) == "#" ) {
+		typemsg = common->GetLanguageDict()->GetString( tmsg );
+	} else {	
+		typemsg = tmsg;
+	}	
+	typegap 	= gap;
+	pause 		= _pause * 1000;
+	wipetime	= _wipetime * 1000;
+	typecount 	= 1;
+	nexttype	= gameLocal.time + 1500; // allow time for hud to animate msgbox 		######### adjust!!!!
+}
+
+/*
+==============
+idPlayer::LaunchHook	// Launch Grapple Hook (IMPULSE_23)
+==============
+*/
+void idPlayer::LaunchHook( void ) {
+	if ( hookSailing || physicsObj.laddering ) {
+		return;
+	}	
+
+	float gdist = spawnArgs.GetFloat( "grapple_distance", "1400.0" );
+	idVec3 dir;
+	trace_t collision;
+	idVec3 origin;
+	idMat3 axis;
+	idStr gsnd;
+	animator.GetJointTransform( grappleJoint, gameLocal.time, origin, axis ); 
+	origin = GetPhysics()->GetOrigin() + origin * GetPhysics()->GetAxis();
+	dir = firstPersonViewAxis[0];
+	dir.Normalize();
+	gameLocal.clip.Translation( collision, origin, origin + dir * gdist, NULL, mat3_identity, MASK_SHOT_RENDERMODEL, this );
+	if ( collision.fraction < 1.0f ) {
+		hooking = true;
+		hookTarget = collision.endpos - dir * 5.0f;
+		if ( !grapple ) {
+			idDict 	args;
+			args.Set( "spawnclass", "idMover" );
+			args.Set( "origin", origin.ToString() );
+			args.Set( "model", spawnArgs.GetString( "grapple_model", "ss2_rocket.prt" ) );
+			args.Set( "solid", "0" );
+			args.Set( "hide", "1" );
+			//args.Set( "accel_time", spawnArgs.GetString( "grapple_acceltime", "0.25" ) );
+			args.Set( "move_speed", spawnArgs.GetString( "grapple_speed", "2000.0" ) );
+			grapple = gameLocal.SpawnEntityType( idMover::Type, &args );
+		}
+		grapple->SetOrigin( origin );
+		grapple->Show();
+		static_cast<idMover *>( grapple )->MoveToPos( hookTarget );
+		gsnd = spawnArgs.GetString( "snd_grapple_fire" );
+	} else {
+		gsnd = spawnArgs.GetString( "snd_grapple_bad" );
+	}
+	StartSoundShader( declManager->FindSound( gsnd ), SND_CHANNEL_ANY, 0, false, NULL );
+}
+
+
+/*				
+==================
+idPlayer::ShowGrappleRope	
+==================
+*/
+void idPlayer::ShowGrappleRope( void ) {
+	idWinding wt, wtb;
+	idVec3 origin, origin2, hookTarget2;
+	idMat3 axis;
+	idVec4 color = idVec4( 0.3f, 0.6f, 1.0f, 0.2f );
+	idVec3 trailoffset = idVec3( 0.0f, 15.0f, 0.0f ); // ############################!!!!!! from Def?
+	const char *grappleJointName2 = spawnArgs.GetString( "grapple_jointFP", "forearm.R" );
+	grappleJointFP = weapon.GetEntity()->GetAnimator()->GetJointHandle( grappleJointName2 );
+	weapon.GetEntity()->GetAnimator()->GetJointTransform( grappleJointFP, gameLocal.time, origin, axis );
+	origin = weapon.GetEntity()->GetPhysics()->GetOrigin() + origin * weapon.GetEntity()->GetPhysics()->GetAxis();
+	origin2 = origin + firstPersonViewAxis.ToAngles().ToRight() * 2.0f; //trailoffset;
+	hookTarget2 = hookTarget + trailoffset;
+	
+	
+	wt.SetNumPoints( 4 );
+	wt.InsertPoint( origin, 0 );
+	wt.InsertPoint( origin2, 1 );
+	wt.InsertPoint( hookTarget2, 2 );
+	wt.InsertPoint( hookTarget, 3 );
+
+	wtb.SetNumPoints( 4 );
+	wtb.InsertPoint( origin2, 0 );
+	wtb.InsertPoint( origin, 1 );
+	wtb.InsertPoint( hookTarget, 2 );
+	wtb.InsertPoint( hookTarget2, 3 );
+			
+	//if ( trailcount > 0 ) {		// skip first frame
+	
+		const idWinding &rwt = wt;
+		gameRenderWorld->DrawQuad( color, rwt, 2.0f, 0.0f ); 
+		const idWinding &rwtb = wtb;
+		gameRenderWorld->DrawQuad( color, rwtb, 2.0f, 0.0f ); 	
+	//}
+
+}
+
+
+// #################################### END SR
+	
+	
+	
 /*
 ==============
 idPlayer::PerformImpulse
@@ -6614,10 +7291,41 @@ void idPlayer::PerformImpulse( int impulse ) {
 			PrevWeapon();
 			break;
 		}
+		// ########################## SR
+		case IMPULSE_16: {
+			SwapView();
+			break;
+		}
+		case IMPULSE_21: {		
+			ZoomView();	
+			break;
+		}
+		case IMPULSE_23: {		// ALT FIRE
+			if ( inBuggy ) {
+				if(buggy.IsValid()) {
+					buggy.GetEntity()->FireBomb();
+				}
+			} else if ( skyHook ) {
+				LaunchHook();
+			}		
+			break;
+		}
+		case IMPULSE_24: {		
+			Flashlight();
+			break;
+		}
+		case IMPULSE_26: {		
+			CycleWeaponAmmo();
+			break;
+		}
+		// ##################### END
+
 		case IMPULSE_17: {
 			if ( gameLocal.isClient || entityNumber == gameLocal.localClientNum ) {
 				gameLocal.mpGame.ToggleReady();
-			}
+			} else {
+				UseEnt();
+			}	
 			break;
 		}
 		case IMPULSE_18: {
@@ -6700,7 +7408,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 			break;
 		}
 		case IMPULSE_40: {
-			UseVehicle();
+			UseEnt();
 			break;
 		}
 #ifdef _D3XP
@@ -6743,8 +7451,16 @@ void idPlayer::EvaluateControls( void ) {
 			forceRespawn = true;
 		} else if ( gameLocal.time > maxRespawnTime ) {
 			forceRespawn = true;
-		}
+		}	
+	// ################################################################################################# SR
+	} else if ( inBuggy ) {
+		if ( usercmd.buttons & BUTTON_ATTACK ) {
+			if(buggy.IsValid()) {
+				buggy.GetEntity()->FireBullet();
+			}
+		}	
 	}
+	// ################################################################################################## END	
 
 	// in MP, idMultiplayerGame decides spawns
 	if ( forceRespawn && !gameLocal.isMultiplayer && !g_testDeath.GetBool() ) {
@@ -6756,6 +7472,7 @@ void idPlayer::EvaluateControls( void ) {
 		PerformImpulse( usercmd.impulse );
 	}
 
+	
 	scoreBoardOpen = ( ( usercmd.buttons & BUTTON_SCORES ) != 0 || forceScoreBoard );
 
 	oldFlags = usercmd.flags;
@@ -6820,6 +7537,7 @@ void idPlayer::AdjustSpeed( void ) {
 
 	physicsObj.SetSpeed( speed, pm_crouchspeed.GetFloat() );
 }
+
 
 /*
 ==============
@@ -6894,6 +7612,8 @@ void idPlayer::AdjustBodyAngles( void ) {
 	legsAxis = idAngles( 0.0f, legsYaw, 0.0f ).ToMat3();
 	animator.SetJointAxis( hipJoint, JOINTMOD_WORLD, legsAxis );
 
+
+	
 	// calculate the blending between down, straight, and up
 	frac = viewAngles.pitch / 90.0f;
 	if ( frac > 0.0f ) {
@@ -7354,15 +8074,118 @@ void idPlayer::Think( void ) {
 		centerView.Init( gameLocal.time, 200, viewAngles.pitch, 0 );
 	}
 
+	
+	// ############ SR
 	// zooming
 	if ( ( usercmd.buttons ^ oldCmd.buttons ) & BUTTON_ZOOM ) {
-		if ( ( usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ) {
+		if ( ( usercmd.buttons & BUTTON_ZOOM ) && inBuggy ) {
+			if(buggy.IsValid()) {
+			zoomFov.Init( gameLocal.time, 200.0f, CalcFov( false ), buggy.GetEntity()->GetZoomFov() );
+			}
+		} else if ( ( usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ) {
 			zoomFov.Init( gameLocal.time, 200.0f, CalcFov( false ), weapon.GetEntity()->GetZoomFov() );
 		} else {
 			zoomFov.Init( gameLocal.time, 200.0f, zoomFov.GetCurrentValue( gameLocal.time ), DefaultFov() );
 		}
 	}
 
+	// switch LOD particles		
+	if ( weather ) {
+		idClipModel *clipModelList[ MAX_GENTITIES ];
+		idClipModel *clip;
+		idEntity *ent;
+		int			listedClipModels;
+		idVec3		start, frontleft, frontright, rearleft, rearright;
+		idVec3		vecForward, vecRight;
+		idMat3 		axis;
+
+		start = GetPhysics()->GetOrigin();
+		axis = GetPhysics()->GetAxis();
+
+		vecForward 		= axis.ToAngles().ToForward();
+		vecRight 		= axis.ToAngles().ToRight();
+		frontleft		= start + vecForward * probe - vecRight * probe;
+		frontleft.z 	= start.z + probeh;
+		frontright 		= start + vecForward * probe + vecRight * probe;
+		frontright.z 	= start.z + probeh;
+		rearleft 		= start - vecForward * probe - vecRight * probe;
+		rearleft.z		= start.z - probeh;
+		rearright 		= start - vecForward * probe + vecRight * probe;
+		rearright.z		= start.z - probeh;
+		idBounds bounds( frontleft );
+		bounds.AddPoint( frontright );
+		bounds.AddPoint( rearright );
+		bounds.AddPoint( rearleft );	
+		//gameRenderWorld->DebugBounds( colorGreen, bounds, vec3_zero, 1 );
+		listedClipModels = gameLocal.clip.ClipModelsTouchingBounds( bounds, -1, clipModelList, MAX_GENTITIES );
+		for ( int i = 0; i < listedClipModels; i++ ) {
+			clip = clipModelList[ i ];
+			ent = clip->GetEntity();
+			if ( ent->IsType( idItem::Type ) ) {
+				static_cast<idItem *>( ent )->RunScriptFunc( "checkdist" );
+			}
+		}	
+	}	
+	
+	// typing
+	if ( typing && nexttype <= gameLocal.time ) {
+		hud->SetStateString( "msgbox", typemsg.Left( typecount ) );
+		StartSound( "snd_typing", SND_CHANNEL_PDA, 0, false, NULL );
+		typecount++;
+		nexttype = gameLocal.time + ( typegap );
+		if ( typecount > typemsg.Length() ) {
+			typing = false;
+			wiping = true;
+			typecount = 1;
+			nexttype = gameLocal.time + ( pause );
+			//StopSound( SND_CHANNEL_PDA, false ); if looping sound is used
+		}
+	} else if ( wiping && nexttype <= gameLocal.time ) {
+		wiping = false;
+		hud->SetStateFloat( "wipetime", wipetime );
+		hud->HandleNamedEvent( "stopTeleType" );
+	}
+
+
+	
+	if ( hookSailing ) {
+		idVec3 origin;
+		idMat3 axis;
+		animator.GetJointTransform( grappleJoint, gameLocal.time, origin, axis );
+		origin = GetPhysics()->GetOrigin() + origin * GetPhysics()->GetAxis();
+		if ( ( hookTarget - origin ).Length() > 100.0f && usercmd.upmove <= 0 ) {
+			ShowGrappleRope();
+			physicsObj.SetLinearVelocity( hookDir * spawnArgs.GetFloat( "grapple_flyspeed", "1" ) );
+		} else {
+			grapple->Hide();
+			hookSailing = false;	
+			StopSound( 1, false );
+		}
+	}	
+	if ( hooking ) {
+		ShowGrappleRope();
+		if ( !static_cast<idMover *>( grapple )->moving ) {
+			idVec3 origin;
+			idMat3 axis;
+			animator.GetJointTransform( grappleJoint, gameLocal.time, origin, axis );
+			origin = GetPhysics()->GetOrigin() + origin * GetPhysics()->GetAxis();
+			hooking = false;
+			hookSailing = true;
+			physicsObj.laddering = false;
+			hookDir = hookTarget - origin; 
+			StartSoundShader( declManager->FindSound( spawnArgs.GetString( "snd_grapple_playerfly" ) ), 1, 0, false, NULL );
+		}
+	}	
+	
+	if ( ( gameLocal.time >= dodge_time ) && dodger ) {	// AI dodge
+		dodger->AI_INCOMING = false;
+		dodger->AI_HEADSHOT = false;
+		dodger = NULL;
+	}	
+	
+	// ################ END SR
+	
+	
 	// if we have an active gui, we will unrotate the view angles as
 	// we turn the mouse movements into gui events
 	idUserInterface *gui = ActiveGui();
@@ -7431,7 +8254,10 @@ void idPlayer::Think( void ) {
 		// clear out our pain flag so we can tell if we recieve any damage between now and the next time we think
 		AI_PAIN = false;
 	}
-
+	if ( inBuggy ) {
+		BuggyThink();
+	}	
+	
 	// calculate the exact bobbed view position, which is used to
 	// position the view weapon, among other things
 	CalculateFirstPersonView();
@@ -7555,13 +8381,52 @@ void idPlayer::Think( void ) {
 			lastHealthRechargeTime += intervals*rechargeSpeed;
 		}
 	}
-
+	//Portal sky begins
 	// determine if portal sky is in pvs
 	gameLocal.portalSkyActive = gameLocal.pvs.CheckAreasForPortalSky( gameLocal.GetPlayerPVS(), GetPhysics()->GetOrigin() );
+	//Portal sky ends
 #endif
 }
 
 #ifdef _D3XP
+
+
+
+	// ################################################################### SR
+
+/*
+==============
+idPlayer::BuggyThink
+==============
+*/
+void idPlayer::BuggyThink( void ) {
+	
+	// If the player is driving a vehicle, aim the vehicle's weapon
+	// and do camera zoom if needed
+	if ( buggy.IsValid() ) {
+		buggy.GetEntity()->Aim();	
+		if ( zooming ) {
+			viewDist += viewStep;
+			if ( viewStep > 0 ) {
+				viewHeight += viewStepH;
+			} else {
+				viewHeight -= viewStepH;
+			}
+			if ( viewDist >= maxViewDist ) {
+				viewDist = maxViewDist;
+				viewHeight = maxViewHeight;
+				zooming = false;
+			} else if ( viewDist <= minViewDist ) {
+				viewDist = minViewDist;
+				viewHeight = minViewHeight;
+				zooming = false;
+			}
+		}
+	}
+}	
+	// ######################################################################### END SR		
+
+
 /*
 =================
 idPlayer::StartHealthRecharge
@@ -8320,9 +9185,10 @@ Fixed fov at intermissions, otherwise account for fov variable and zooms.
 ====================
 */
 float idPlayer::CalcFov( bool honorZoom ) {
-	float fov;
+	//float fov;
+	float fov = DefaultFov(); // Dandel's fix for FOV
 
-	if ( fxFov ) {
+/*	if ( fxFov ) {
 		return DefaultFov() + 10.0f + cos( ( gameLocal.time + 2000 ) * 0.01 ) * 10.0f;
 	}
 
@@ -8331,10 +9197,38 @@ float idPlayer::CalcFov( bool honorZoom ) {
 	}
 
 	if ( zoomFov.IsDone( gameLocal.time ) ) {
-		fov = ( honorZoom && usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ? weapon.GetEntity()->GetZoomFov() : DefaultFov();
+		if ( inBuggy ) {
+			fov = ( honorZoom && usercmd.buttons & BUTTON_ZOOM ) && inBuggy ? buggy->GetZoomFov() : DefaultFov(); // #################### SR
+		} else {
+			fov = ( honorZoom && usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ? weapon.GetEntity()->GetZoomFov() : DefaultFov();
+		}	
 	} else {
-		fov = zoomFov.GetCurrentValue( gameLocal.time );
+		fov = zoomFov.GetCurrentValue( gameLocal.time ); */
+	// ++++++++++++++++++++++++++++++++++ Dandel's fix for FOV begins ++++++++++++++++++++++++++++++++++ 
+	if ( fxFov ) {
+		fov += 10.0f + cos( ( gameLocal.time + 2000 ) * 0.01 ) * 10.0f;
+	} else {
+		if ( influenceFov ) {
+			return influenceFov;
+		}
+		if ( zoomFov.IsDone( gameLocal.time ) ) {
+			if( honorZoom && usercmd.buttons & BUTTON_ZOOM )
+			{
+				if(inBuggy)	{
+				if ( buggy.IsValid() ) {
+					fov = buggy.GetEntity()->GetZoomFov();
+					}
+				} else {
+					if ( weapon.GetEntity() ) {
+						fov = weapon.GetEntity()->GetZoomFov();
+					}
+				}
+			}
+ 		} else {
+			fov = zoomFov.GetCurrentValue( gameLocal.time );
+		}
 	}
+	// ++++++++++++++++++++++++++++++++++ Dandel's fix for FOV ends ++++++++++++++++++++++++++++++++++
 
 	// bound normal viewsize
 	if ( fov < 1 ) {
@@ -8416,26 +9310,26 @@ idVec3	idPlayer::GunAcceleratingOffset( void ) {
 
 	ofs.Zero();
 
-	weapon.GetEntity()->GetWeaponTimeOffsets( &weaponOffsetTime, &weaponOffsetScale );
 
-	int stop = currentLoggedAccel - NUM_LOGGED_ACCELS;
-	if ( stop < 0 ) {
-		stop = 0;
-	}
-	for ( int i = currentLoggedAccel-1 ; i > stop ; i-- ) {
-		loggedAccel_t	*acc = &loggedAccel[i&(NUM_LOGGED_ACCELS-1)];
-
-		float	f;
-		float	t = gameLocal.time - acc->time;
-		if ( t >= weaponOffsetTime ) {
-			break;	// remainder are too old to care about
+	if ( !hookSailing ) {	// ######################################## SR
+		weapon.GetEntity()->GetWeaponTimeOffsets( &weaponOffsetTime, &weaponOffsetScale );
+		int stop = currentLoggedAccel - NUM_LOGGED_ACCELS;
+		if ( stop < 0 ) {
+			stop = 0;
 		}
+		for ( int i = currentLoggedAccel-1 ; i > stop ; i-- ) {
+			loggedAccel_t	*acc = &loggedAccel[i&(NUM_LOGGED_ACCELS-1)];
+			float	f;
+			float	t = gameLocal.time - acc->time;
+			if ( t >= weaponOffsetTime ) {
+				break;	// remainder are too old to care about
+			}
 
-		f = t / weaponOffsetTime;
-		f = ( cos( f * 2.0f * idMath::PI ) - 1.0f ) * 0.5f;
-		ofs += f * weaponOffsetScale * acc->dir;
+			f = t / weaponOffsetTime;
+			f = ( cos( f * 2.0f * idMath::PI ) - 1.0f ) * 0.5f;
+			ofs += f * weaponOffsetScale * acc->dir;
+		}
 	}
-
 	return ofs;
 }
 
@@ -8713,6 +9607,10 @@ void idPlayer::CalculateRenderView( void ) {
 			}
 		} else if ( pm_thirdPerson.GetBool() ) {
 			OffsetThirdPersonView( pm_thirdPersonAngle.GetFloat(), pm_thirdPersonRange.GetFloat(), pm_thirdPersonHeight.GetFloat(), pm_thirdPersonClip.GetBool() );
+		// ########## SR	
+		} else if ( inBuggy && buggy_thirdPerson ) {
+			OffsetThirdPersonView( 0.0f, viewDist, viewHeight, true );
+		// ######### END
 		} else if ( pm_thirdPersonDeath.GetBool() ) {
 			range = gameLocal.time < minRespawnTime ? ( gameLocal.time + RAGDOLL_DEATH_TIME - minRespawnTime ) * ( 120.0f / RAGDOLL_DEATH_TIME ) : 120.0f;
 			OffsetThirdPersonView( 0.0f, 20.0f + range, 0.0f, false );
@@ -9327,6 +10225,10 @@ void idPlayer::ClientPredictionThink( void ) {
 		AdjustBodyAngles();
 	}
 
+	if ( inBuggy ) {
+		BuggyThink();
+	}
+	
 	if ( !isLagged ) {
 		// don't allow client to move when lagged
 		Move();
@@ -9437,10 +10339,12 @@ void idPlayer::ClientPredictionThink( void ) {
 	}
 
 #ifdef _D3XP
+	//Portal sky begins
 	// determine if portal sky is in pvs
 	pvsHandle_t	clientPVS = gameLocal.pvs.SetupCurrentPVS( GetPVSAreas(), GetNumPVSAreas() );
 	gameLocal.portalSkyActive = gameLocal.pvs.CheckAreasForPortalSky( clientPVS, GetPhysics()->GetOrigin() );
 	gameLocal.pvs.FreeCurrentPVS( clientPVS );
+	//Portal sky ends
 #endif
 }
 
@@ -9541,6 +10445,9 @@ void idPlayer::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	msg.WriteBits( weaponGone, 1 );
 	msg.WriteBits( isLagged, 1 );
 	msg.WriteBits( isChatting, 1 );
+	
+	msg.WriteBits( inBuggy, 1 );	// ############## SR
+	
 #ifdef CTF
 	/* Needed for the scoreboard */
 	msg.WriteBits( carryingFlag, 1 );
@@ -9585,6 +10492,9 @@ void idPlayer::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 	weaponGone = msg.ReadBits( 1 ) != 0;
 	isLagged = msg.ReadBits( 1 ) != 0;
 	isChatting = msg.ReadBits( 1 ) != 0;
+	
+	inBuggy = msg.ReadBits( 1 ) != 0;	// ############## SR
+	
 #ifdef CTF
 	carryingFlag = msg.ReadBits( 1 ) != 0;
 #endif
@@ -9692,7 +10602,7 @@ idPlayer::WritePlayerStateToSnapshot
 ================
 */
 void idPlayer::WritePlayerStateToSnapshot( idBitMsgDelta &msg ) const {
-	int i;
+	int i, j;
 
 	msg.WriteByte( bobCycle );
 	msg.WriteInt( stepUpTime );
@@ -9708,7 +10618,9 @@ void idPlayer::WritePlayerStateToSnapshot( idBitMsgDelta &msg ) const {
 		msg.WriteBits( inventory.ammo[i], ASYNC_PLAYER_INV_AMMO_BITS );
 	}
 	for( i = 0; i < MAX_WEAPONS; i++ ) {
-		msg.WriteBits( inventory.clip[i], ASYNC_PLAYER_INV_CLIP_BITS );
+		for( j = 0; j < MAX_AMMOTYPES; j++ ) {	// ################################################ SR
+			msg.WriteBits( inventory.clip[i][j], ASYNC_PLAYER_INV_CLIP_BITS );
+		}	
 	}
 }
 
@@ -9718,7 +10630,7 @@ idPlayer::ReadPlayerStateFromSnapshot
 ================
 */
 void idPlayer::ReadPlayerStateFromSnapshot( const idBitMsgDelta &msg ) {
-	int i, ammo;
+	int i, j, ammo;
 
 	bobCycle = msg.ReadByte();
 	stepUpTime = msg.ReadInt();
@@ -9737,7 +10649,9 @@ void idPlayer::ReadPlayerStateFromSnapshot( const idBitMsgDelta &msg ) {
 		}
 	}
 	for( i = 0; i < MAX_WEAPONS; i++ ) {
-		inventory.clip[i] = msg.ReadBits( ASYNC_PLAYER_INV_CLIP_BITS );
+		for( j = 0; j < MAX_AMMOTYPES; j++ ) {	// ################################################ SR
+			inventory.clip[i][j] = msg.ReadBits( ASYNC_PLAYER_INV_CLIP_BITS );
+		}	
 	}
 }
 
@@ -9875,12 +10789,24 @@ void idPlayer::StopAudioLog( void ) {
 idPlayer::ShowTip
 ===============
 */
-void idPlayer::ShowTip( const char *title, const char *tip, bool autoHide ) {
+void idPlayer::ShowTip( idStr tip1, const char *key, idStr tip2, bool autoHide ) {
 	if ( tipUp ) {
 		return;
 	}
-	hud->SetStateString( "tip", tip );
-	hud->SetStateString( "tiptitle", title );
+	// ######################## SR
+	idStr msg;												
+	idStr msg1 = tip1;
+	idStr msg2 = tip2;
+	if ( tip1.Left(1) == "#" ) {
+		msg1 = common->GetLanguageDict()->GetString( tip1 );
+	}
+	if ( tip2.Left(1) == "#" ) {
+		msg2 = common->GetLanguageDict()->GetString( tip2 );
+	}
+	msg = msg1 + " \"" + common->KeysFromBinding( key ) + "\" " + msg2;		
+	// ###################### END SR
+	
+	hud->SetStateString( "tip", msg );
 	hud->HandleNamedEvent( "tipWindowUp" );
 	if ( autoHide ) {
 		PostEventSec( &EV_Player_HideTip, 5.0f );

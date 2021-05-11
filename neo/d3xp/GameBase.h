@@ -30,9 +30,14 @@ If you have questions concerning this license or the applicable additional terms
 #define	__GAMEBASE_H__
 
 // default scripts
+/*
 #define SCRIPT_DEFAULTDEFS		"script/doom_defs.script"
 #define SCRIPT_DEFAULT			"script/doom_main.script"
 #define SCRIPT_DEFAULTFUNC		"doom_main"
+*/
+#define SCRIPT_DEFAULTDEFS		"script_v1/steelstorm2_defs.script"
+#define SCRIPT_DEFAULT			"script_v1/steelstorm2_main.script"
+#define SCRIPT_DEFAULTFUNC		"steelstorm2_main"
 
 #define TIME_GROUP1				0
 #define TIME_GROUP2				1
@@ -50,10 +55,10 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // the "gameversion" client command will print this plus compile date
-#define	GAME_VERSION			"baseDOOM-1"
+#define	GAME_VERSION			"Steel Storm 2 v0.1"
 
 #define	MAX_CLIENTS				32
-#define	GENTITYNUM_BITS			12
+#define	GENTITYNUM_BITS			13 // supposedly makes 8192 entity number limit
 #define	MAX_GENTITIES			(1<<GENTITYNUM_BITS)
 #define	ENTITYNUM_NONE			(MAX_GENTITIES-1)
 #define	ENTITYNUM_WORLD			(MAX_GENTITIES-2)

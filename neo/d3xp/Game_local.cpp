@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
+#include "Sound.h"
+
 const int NUM_RENDER_PORTAL_BITS	= idMath::BitsForInteger( PS_BLOCK_ALL );
 
 const float DEFAULT_GRAVITY			= 1066.0f;
@@ -97,7 +99,9 @@ const char *idGameLocal::sufaceTypeNames[ MAX_SURFACE_TYPES ] = {
 #ifdef _D3XP
 // List of all defs used by the player that will stay on the fast timeline
 static const char* fastEntityList[] = {
-	"player_doommarine",
+		"player_female",
+		"weapon_flintlock",
+		"projectile_plasma"
 		"weapon_chainsaw",
 		"weapon_fists",
 		"weapon_flashlight",
@@ -224,6 +228,9 @@ void idGameLocal::Clear( void ) {
 	num_entities = 0;
 	spawnedEntities.Clear();
 	activeEntities.Clear();
+	// music volume control begins
+	musicSpeakers.Clear();
+	// music volume control ends
 	numEntitiesToDeactivate = 0;
 	sortPushers = false;
 	sortTeamMasters = false;
@@ -290,12 +297,15 @@ void idGameLocal::Clear( void ) {
 
 	memset( lagometer, 0, sizeof( lagometer ) );
 
+//Portal sky begins
 #ifdef _D3XP
 	portalSkyEnt			= NULL;
 	portalSkyActive			= false;
-
+	playerOldEyePos.Zero();			 
+	globalPortalSky			= false;
 	ResetSlowTimeVars();
 #endif
+//Portal sky begins
 }
 
 /*
@@ -335,9 +345,27 @@ void idGameLocal::Init( void ) {
 	declManager->RegisterDeclType( "export",			DECL_MODELEXPORT,	idDeclAllocator<idDecl> );
 
 	// register game specific decl folders
-	declManager->RegisterDeclFolder( "def",				".def",				DECL_ENTITYDEF );
-	declManager->RegisterDeclFolder( "fx",				".fx",				DECL_FX );
-	declManager->RegisterDeclFolder( "particles",		".prt",				DECL_PARTICLE );
+	declManager->RegisterDeclFolder( "def_v1",				".def",				DECL_ENTITYDEF ); // SS2 idTech4 based
+	declManager->RegisterDeclFolder( "fx_v1",				".fx",				DECL_FX ); // SS2 idTech4 based
+	int	oldSpec	= cvarSystem->GetCVarInteger( "com_machineSpec"	);
+	if ((oldSpec == 3) || (oldSpec == -1))
+		{ declManager->RegisterDeclFolder( "particles",		".prt",				DECL_PARTICLE );
+//		gameLocal.Printf( "com_machinespec 3, .prt " );
+	}
+	if (oldSpec == 2)
+		{ declManager->RegisterDeclFolder( "particles",		"_LOD2.prt",		DECL_PARTICLE );
+//		gameLocal.Printf( "com_machinespec 2, _LOD2.prt " );
+	}
+	if (oldSpec == 1)
+		{ declManager->RegisterDeclFolder( "particles",		"_LOD1.prt",		DECL_PARTICLE );
+//		gameLocal.Printf( "com_machinespec 1, _LOD1.prt " );
+	}
+	if (oldSpec == 0)
+		{ declManager->RegisterDeclFolder( "particles",		"_LOD0.prt",		DECL_PARTICLE );
+//		gameLocal.Printf( "com_machinespec 0, _LOD0.prt " );
+	}
+
+
 	declManager->RegisterDeclFolder( "af",				".af",				DECL_AF );
 	declManager->RegisterDeclFolder( "newpdas",			".pda",				DECL_PDA );
 
@@ -377,7 +405,7 @@ void idGameLocal::Init( void ) {
 			gamedir = cvarSystem->GetCVarString( "fs_game" );
 		}
 		if( gamedir.Length() > 0 ) {
-			idStr scriptFile = va( "script/%s_main.script", gamedir.c_str() );
+			idStr scriptFile = va( "script_v1/%s_main.script", gamedir.c_str() );
 			if ( fileSystem->ReadFile( scriptFile.c_str(), NULL ) > 0 ) {
 				program.CompileFile( scriptFile.c_str() );
 				program.FinishCompilation();
@@ -617,8 +645,15 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteFloat( clientSmoothing );
 
 #ifdef _D3XP
+	//Portal sky begins
 	portalSkyEnt.Save( &savegame );
 	savegame.WriteBool( portalSkyActive );
+	savegame.WriteBool( globalPortalSky );		
+	savegame.WriteInt( currentPortalSkyType );	
+	savegame.WriteVec3( playerOldEyePos );		
+	savegame.WriteVec3( portalSkyGlobalOrigin );	
+	savegame.WriteVec3( portalSkyOrigin );	
+	//Portal sky ends
 
 	fast.Save( &savegame );
 	slow.Save( &savegame );
@@ -935,6 +970,12 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 
 	// clear the sound system
 	gameSoundWorld->ClearAllSoundEmitters();
+	
+	// ##### SR
+	//if ( isMultiplayer ) {
+	//	cvarSystem->SetCVarFloat( "g_showWeather", 0.0f );
+	//}
+	// ##### END	
 
 #ifdef _D3XP
 	// clear envirosuit sound fx
@@ -968,6 +1009,11 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	memset( usercmds, 0, sizeof( usercmds ) );
 	memset( spawnIds, -1, sizeof( spawnIds ) );
 	spawnCount = INITIAL_SPAWN_COUNT;
+	
+	// music volume control begins
+	s_bgmusic_volume.ClearModified(); 
+	s_bgmusic_volume.SetModified();
+	// music volume control ends
 
 	spawnedEntities.Clear();
 	activeEntities.Clear();
@@ -1005,9 +1051,12 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	nextGibTime		= 0;
 
 #ifdef _D3XP
+	//Portal sky begins
 	portalSkyEnt			= NULL;
 	portalSkyActive			= false;
-
+	playerOldEyePos.Zero();			
+	globalPortalSky			= false;
+	//Portal sky ends
 	ResetSlowTimeVars();
 #endif
 
@@ -1301,6 +1350,12 @@ idGameLocal::InitFromNewMap
 */
 void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed ) {
 
+	// music volume control begins
+	musicSpeakers.Clear(); // since we are not reloading the map, but loading a new one from scratch - clear the list
+	// music volume control ends
+
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "heartbeat\n" ); // fix from iddevnet to keep server from dropping off master list
+
 	this->isServer = isServer;
 	this->isClient = isClient;
 	this->isMultiplayer = isServer || isClient;
@@ -1379,7 +1434,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	g_skill.SetInteger( i );
 
 	// precache the player
-	FindEntityDef( "player_doommarine", false );
+	FindEntityDef( "player_female", false );
 
 	// precache any media specified in the map
 	for ( i = 0; i < mapFile->GetNumEntities(); i++ ) {
@@ -1387,8 +1442,8 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 		if ( !InhibitEntitySpawn( mapEnt->epairs ) ) {
 			CacheDictionaryMedia( &mapEnt->epairs );
-			const char *classname = mapEnt->epairs.GetString( "classname" );
-			if ( classname != '\0' ) {
+			const char *classname;
+			if ( mapEnt->epairs.GetString( "classname", "", &classname ) ) {
 				FindEntityDef( classname, false );
 			}
 		}
@@ -1496,8 +1551,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadFloat( clientSmoothing );
 
 #ifdef _D3XP
+	//Portal sky begins
 	portalSkyEnt.Restore( &savegame );
 	savegame.ReadBool( portalSkyActive );
+	savegame.ReadBool( globalPortalSky );
+	savegame.ReadInt( currentPortalSkyType );
+	savegame.ReadVec3( playerOldEyePos );
+	savegame.ReadVec3( portalSkyGlobalOrigin );
+	savegame.ReadVec3( portalSkyOrigin );
+	//Portal sky ends
 
 	fast.Restore( &savegame );
 	slow.Restore( &savegame );
@@ -1799,8 +1861,7 @@ void idGameLocal::GetShakeSounds( const idDict *dict ) {
 	const char *soundShaderName;
 	idStr soundName;
 
-	soundShaderName = dict->GetString( "s_shader" );
-	if ( soundShaderName != '\0' && dict->GetFloat( "s_shakes" ) != 0.0f ) {
+	if ( dict->GetString( "s_shader", "", &soundShaderName ) && dict->GetFloat( "s_shakes" ) != 0.0f ) {
 		soundShader = declManager->FindSound( soundShaderName );
 
 		for ( int i = 0; i < soundShader->GetNumSounds(); i++ ) {
@@ -2020,9 +2081,9 @@ void idGameLocal::SpawnPlayer( int clientNum ) {
 	else if ( isMultiplayer && gameType == GAME_CTF )
 		args.Set( "classname", "player_doommarine_ctf" );
 	else
-		args.Set( "classname", "player_doommarine" );
+		args.Set( "classname", "player_female" );
 #else
-	args.Set( "classname", isMultiplayer ? "player_doommarine_mp" : "player_doommarine" );
+	args.Set( "classname", isMultiplayer ? "player_doommarine_mp" : "player_female" );
 #endif
 	if ( !SpawnEntityDef( args, &ent ) || !entities[ clientNum ] ) {
 		Error( "Failed to spawn player as '%s'", args.GetString( "classname" ) );
@@ -2194,6 +2255,7 @@ void idGameLocal::SetupPlayerPVS( void ) {
 		}
 
 #ifdef _D3XP
+		//Portal sky begins
 		// if portalSky is preset, then merge into pvs so we get rotating brushes, etc
 		if ( portalSkyEnt.GetEntity() ) {
 			idEntity *skyEnt = portalSkyEnt.GetEntity();
@@ -2210,6 +2272,7 @@ void idGameLocal::SetupPlayerPVS( void ) {
 			pvs.FreeCurrentPVS( otherPVS );
 			playerConnectedAreas = newPVS;
 		}
+		//Portal sky ends
 #endif
 	}
 }
@@ -2641,12 +2704,20 @@ Calculates the horizontal and vertical field of view based on a horizontal field
 void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	float	x;
 	float	y;
+// hi-def GUI patch starts
+//	float   scr_x;
+//	float   scr_y;
+// hi-def GUI patch ends
 	float	ratio_x;
 	float	ratio_y;
 
 	// first, calculate the vertical fov based on a 640x480 view
-	x = 640.0f / tan( base_fov / 360.0f * idMath::PI );
-	y = atan2( 480.0f, x );
+//	x = 640.0f / tan( base_fov / 360.0f * idMath::PI );
+//	y = atan2( 480.0f, x );
+// hi-def GUI patch starts
+	x = SCREEN_WIDTH / tan( base_fov / 360.0f * idMath::PI );
+	y = atan2( SCREEN_HEIGHT, x );
+// hi-def GUI patch ends
 	fov_y = y * 360.0f / idMath::PI;
 
 	// FIXME: somehow, this is happening occasionally
@@ -2656,7 +2727,24 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 	}
 
 	switch( r_aspectRatio.GetInteger() ) {
-	default :
+	default :			
+	
+	case -1 :
+	/*
+	// auto mode => use aspect ratio from resolution, assuming screen's pixels are squares
+	ratio_x = renderSystem->GetScreenWidth();
+	ratio_y = renderSystem->GetScreenHeight();
+    break; */
+		// ++++++++++++++++++++++++++++++++++ Dandel's fix for auto aspect ratio begins ++++++++++++++++++++++++++++++++++
+		if ( isClient || !isMultiplayer ) {
+			// Client Only function.
+			// auto mode => use aspect ratio from resolution, assuming screen's pixels are squares
+			ratio_x = renderSystem->GetScreenWidth();
+			ratio_y = renderSystem->GetScreenHeight();
+			break;
+		}
+		// ++++++++++++++++++++++++++++++++++ Dandel's fix for auto aspect ratio ends ++++++++++++++++++++++++++++++++++
+
 	case 0 :
 		// 4:3
 		fov_x = base_fov;
@@ -2710,6 +2798,19 @@ bool idGameLocal::Draw( int clientNum ) {
 		return false;
 	}
 
+	// music volume control begins
+	if ( s_bgmusic_volume.IsModified() )  // set music volume
+	{
+		for ( int i = 0; i < musicSpeakers.Num(); i++ ) 
+		{
+			idSound* ent = static_cast<idSound *>( entities[ musicSpeakers[ i ] ] );
+				if (ent)
+					ent->SetMusicVolume( 0, s_bgmusic_volume.GetFloat(), 0 );
+		}
+		s_bgmusic_volume.ClearModified();
+	}
+	// music volume control ends
+
 	// render the scene
 	player->playerView.RenderPlayerView( player->hud );
 
@@ -2749,6 +2850,8 @@ idUserInterface* idGameLocal::StartMenu( void ) {
 	}
 	return mpGame.StartMenu();
 }
+
+
 
 /*
 ================
@@ -4731,9 +4834,11 @@ void idGameLocal::ThrottleUserInfo( void ) {
 }
 
 #ifdef _D3XP
+//Portal sky begins
+
 /*
 =================
-idPlayer::SetPortalSkyEnt
+idGameLocal::SetPortalSkyEnt
 =================
 */
 void idGameLocal::SetPortalSkyEnt( idEntity *ent ) {
@@ -4742,12 +4847,56 @@ void idGameLocal::SetPortalSkyEnt( idEntity *ent ) {
 
 /*
 =================
-idPlayer::IsPortalSkyAcive
+idGameLocal::IsPortalSkyAcive
 =================
 */
 bool idGameLocal::IsPortalSkyAcive() {
 	return portalSkyActive;
 }
+
+/*
+=================
+idGameLocal::CheckGlobalPortalSky			--> 7318
+=================
+*/
+bool idGameLocal::CheckGlobalPortalSky() {
+	return globalPortalSky;
+}
+
+/*
+=================
+idGameLocal::SetGlobalPortalSky			--> 7318
+=================
+*/
+void idGameLocal::SetGlobalPortalSky( const char *name ) {
+
+	if ( CheckGlobalPortalSky() ) {
+		Error( "more than one global portalSky:\ndelete them until you have just one.\nportalSky '%s' causes it.", name );
+	}
+	else {
+		globalPortalSky = true;
+	}
+}
+
+/*
+=================
+idGameLocal::SetCurrentPortalSkyType		--> 7318
+=================
+*/
+void idGameLocal::SetCurrentPortalSkyType( int type ) {
+	currentPortalSkyType = type;
+}
+
+/*
+=================
+idGameLocal::GetCurrentPortalSkyType		--> 7318
+=================
+*/
+int idGameLocal::GetCurrentPortalSkyType() {
+	return currentPortalSkyType;
+}
+
+//Portal sky ends
 
 /*
 ===========

@@ -31,11 +31,16 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/async/AsyncNetwork.h"
 #include "framework/Licensee.h"
 #include "framework/UsercmdGen.h"
+#include "renderer/qgl.h"
 #include "renderer/tr_local.h"
 #include "sys/win32/rc/CreateResourceIDs.h"
 #include "sys/sys_local.h"
 
 #include "sys/win32/win_local.h"
+
+#ifdef ID_ALLOW_TOOLS
+#include "tools/edit_public.h"
+#endif
 
 #include <errno.h>
 #include <float.h>
@@ -52,12 +57,70 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #include <SDL_main.h>
+//#include <SDL_opengl.h>
 
 idCVar Win32Vars_t::win_outputDebugString( "win_outputDebugString", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_outputEditString( "win_outputEditString", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_viewlog( "win_viewlog", "0", CVAR_SYSTEM | CVAR_INTEGER, "" );
-
+HMODULE hOpenGL_DLL;
+bool enableToolsSupport = true;
 Win32Vars_t	win32;
+
+/* These are required for tools */
+typedef int  (WINAPI * PWGLCHOOSEPIXELFORMAT) (HDC, CONST PIXELFORMATDESCRIPTOR *);
+typedef int   ( WINAPI * PWGLDESCRIBEPIXELFORMAT) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
+typedef int   ( WINAPI * PWGLGETPIXELFORMAT)(HDC);
+typedef BOOL  ( WINAPI * PWGLSETPIXELFORMAT)(HDC, int, CONST PIXELFORMATDESCRIPTOR *);
+typedef BOOL  ( WINAPI * PWGLSWAPBUFFERS)(HDC);
+
+PWGLCHOOSEPIXELFORMAT	qwglChoosePixelFormat;
+PWGLDESCRIBEPIXELFORMAT	qwglDescribePixelFormat;
+PWGLGETPIXELFORMAT		qwglGetPixelFormat;
+PWGLSETPIXELFORMAT		qwglSetPixelFormat;
+PWGLSWAPBUFFERS			qwglSwapBuffers;
+
+typedef BOOL  ( WINAPI * PWGLCOPYCONTEXT)(HGLRC, HGLRC, UINT);
+typedef HGLRC ( WINAPI * PWGLCREATECONTEXT)(HDC);
+typedef HGLRC ( WINAPI * PWGLCREATELAYERCONTEXT)(HDC, int);
+typedef BOOL  ( WINAPI * PWGLDELETECONTEXT)(HGLRC);
+typedef HGLRC ( WINAPI * PWGLGETCURRENTCONTEXT)(VOID);
+typedef HDC   ( WINAPI * PWGLGETCURRENTDC)(VOID);
+typedef PROC  ( WINAPI * PWGLGETPROCADDRESS)(LPCSTR);
+typedef BOOL  ( WINAPI * PWGLMAKECURRENT)(HDC, HGLRC);
+typedef BOOL  ( WINAPI * PWGLSHARELISTS)(HGLRC, HGLRC);
+typedef BOOL  ( WINAPI * PWGLUSEFONTBITMAPS)(HDC, DWORD, DWORD, DWORD);
+
+
+PWGLCOPYCONTEXT			qwglCopyContext;
+PWGLCREATECONTEXT		qwglCreateContext;
+PWGLCREATELAYERCONTEXT	qwglCreateLayerContext;
+PWGLDELETECONTEXT		qwglDeleteContext;
+PWGLGETCURRENTCONTEXT	qwglGetCurrentContext;
+PWGLGETCURRENTDC		qwglGetCurrentDC;
+PWGLGETPROCADDRESS		qwglGetProcAddress;
+PWGLMAKECURRENT			qwglMakeCurrent;
+PWGLSHARELISTS			qwglShareLists;
+PWGLUSEFONTBITMAPS		qwglUseFontBitmaps;
+
+typedef BOOL  ( WINAPI * PWGLUSEFONTOUTLINES)(HDC, DWORD, DWORD, DWORD, FLOAT,
+                                           FLOAT, int, LPGLYPHMETRICSFLOAT);
+typedef BOOL ( WINAPI * PWGLDESCRIBELAYERPLANE)(HDC, int, int, UINT,
+                                            LPLAYERPLANEDESCRIPTOR);
+typedef int  ( WINAPI * PWGLSETLAYERPALETTEENTRIES)(HDC, int, int, int,
+                                                CONST COLORREF *);
+typedef int  ( WINAPI * PWGLGETLAYERPALETTEENTRIES)(HDC, int, int, int,
+                                                COLORREF *);
+typedef BOOL ( WINAPI * PWGLREALIZELAYERPALETTE)(HDC, int, BOOL);
+typedef BOOL ( WINAPI * PWGLSWAPLAYERBUFFERS)(HDC, UINT);
+
+PWGLUSEFONTOUTLINES			qwglUseFontOutlines;
+PWGLDESCRIBELAYERPLANE		qwglDescribeLayerPlane;
+PWGLSETLAYERPALETTEENTRIES	qwglSetLayerPaletteEntries;
+PWGLGETLAYERPALETTEENTRIES	qwglGetLayerPaletteEntries;
+PWGLREALIZELAYERPALETTE		qwglRealizeLayerPalette;
+PWGLSWAPLAYERBUFFERS		qwglSwapLayerBuffers;
+/* End stuff required for tools */
+
 
 /*
 =============
@@ -69,7 +132,8 @@ Show the early console as an error dialog
 void Sys_Error( const char *error, ... ) {
 	va_list		argptr;
 	char		text[4096];
-	MSG        msg;
+
+	MSG        msg; //dedicated server window fix for WIN
 
 	va_start( argptr, error );
 	vsprintf( text, error, argptr );
@@ -109,6 +173,11 @@ Sys_Quit
 ==============
 */
 void Sys_Quit( void ) {
+	// Free OpenGL DLL.
+	if(hOpenGL_DLL)
+	{
+		FreeLibrary(hOpenGL_DLL);
+	}
 	timeEndPeriod( 1 );
 	Sys_ShutdownInput();
 	Sys_DestroyConsole();
@@ -274,7 +343,7 @@ static int WPath2A(char *dst, size_t size, const WCHAR *src) {
 
 /*
 ==============
-Returns "My Documents"/My Games/dhewm3 directory (or equivalent - "CSIDL_PERSONAL").
+Returns "My Documents"/My Games/SteelStorm2 directory (or equivalent - "CSIDL_PERSONAL").
 To be used with Sys_DefaultSavePath(), so savegames, screenshots etc will be
 saved to the users files instead of systemwide.
 
@@ -295,8 +364,7 @@ static int GetHomeDir(char *dst, size_t size)
 	if (len == 0)
 		return 0;
 
-	idStr::Append(dst, size, "/My Games/dhewm3");
-
+	idStr::Append(dst, size, "/My Games/SteelStorm2");
 	return len;
 }
 
@@ -338,6 +406,14 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		if (Sys_GetPath(PATH_EXE, path)) {
 			path.StripFilename();
 
+			s = path;
+			s.AppendPath(BASE_GAMEDIR);
+			if (_stat(s.c_str(), &st) != -1 && st.st_mode & _S_IFDIR)
+				return true;
+			common->Warning("base path '%s' does not exits", s.c_str());
+
+			// For debug.
+			path.AppendPath("../../../");
 			s = path;
 			s.AppendPath(BASE_GAMEDIR);
 			if (_stat(s.c_str(), &st) != -1 && st.st_mode & _S_IFDIR)
@@ -597,6 +673,18 @@ void Sys_Init( void ) {
 	}
 
 	common->Printf( "%d MB System Memory\n", Sys_GetSystemRam() );
+
+
+	// Free OpenGL DLL.
+	if(hOpenGL_DLL == NULL)
+	{
+		// Load OpenGL DLL.
+		hOpenGL_DLL = LoadLibrary("opengl32.dll");
+		if(hOpenGL_DLL == NULL) {
+			Sys_Error( GAME_NAME " Cannot Load opengl32.dll - Disabling TOOLS" );
+			enableToolsSupport = false;
+		}
+	}
 }
 
 /*
@@ -605,6 +693,28 @@ Sys_Shutdown
 ================
 */
 void Sys_Shutdown( void ) {
+	qwglCopyContext              = NULL;
+	qwglCreateContext            = NULL;
+	qwglCreateLayerContext       = NULL;
+	qwglDeleteContext            = NULL;
+	qwglDescribeLayerPlane       = NULL;
+	qwglGetCurrentContext        = NULL;
+	qwglGetCurrentDC             = NULL;
+	qwglGetLayerPaletteEntries   = NULL;
+	qwglGetProcAddress           = NULL;
+	qwglMakeCurrent              = NULL;
+	qwglRealizeLayerPalette      = NULL;
+	qwglSetLayerPaletteEntries   = NULL;
+	qwglShareLists               = NULL;
+	qwglSwapLayerBuffers         = NULL;
+	qwglUseFontBitmaps           = NULL;
+	qwglUseFontOutlines          = NULL;
+	qwglChoosePixelFormat        = NULL;
+	qwglDescribePixelFormat      = NULL;
+	qwglGetPixelFormat           = NULL;
+	qwglSetPixelFormat           = NULL;
+	qwglSwapBuffers              = NULL;
+
 	CoUninitialize();
 }
 
@@ -679,6 +789,44 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
+	// opengl32.dll found... grab the addresses.
+	if(enableToolsSupport)
+	{
+		//wglGetProcAddress("blah");
+		qwglGetProcAddress			 = (PWGLGETPROCADDRESS)GetProcAddress(hOpenGL_DLL,"wglGetProcAddress");
+		
+		// Context controls
+		qwglCopyContext              = (PWGLCOPYCONTEXT)GetProcAddress(hOpenGL_DLL,"wglCopyContext");
+		qwglCreateContext            = (PWGLCREATECONTEXT)GetProcAddress(hOpenGL_DLL,"wglCreateContext");
+		qwglCreateLayerContext       = (PWGLCREATELAYERCONTEXT)GetProcAddress(hOpenGL_DLL,"wglCreateLayerContext");
+		qwglDeleteContext            = (PWGLDELETECONTEXT)GetProcAddress(hOpenGL_DLL,"wglDeleteContext");
+		qwglGetCurrentContext        = (PWGLGETCURRENTCONTEXT)GetProcAddress(hOpenGL_DLL,"wglGetCurrentContext");
+		qwglGetCurrentDC             = (PWGLGETCURRENTDC)GetProcAddress(hOpenGL_DLL,"wglGetCurrentDC");
+		qwglMakeCurrent              = (PWGLMAKECURRENT)GetProcAddress(hOpenGL_DLL,"wglMakeCurrent");
+		qwglShareLists               = (PWGLSHARELISTS)GetProcAddress(hOpenGL_DLL,"wglShareLists");
+
+		// Fonts
+		qwglUseFontBitmaps           = (PWGLUSEFONTBITMAPS)GetProcAddress(hOpenGL_DLL,"wglUseFontBitmapsA");
+		qwglUseFontOutlines          = (PWGLUSEFONTOUTLINES)GetProcAddress(hOpenGL_DLL,"wglUseFontOutlinesA");
+		
+		// Layers.
+		qwglDescribeLayerPlane       = (PWGLDESCRIBELAYERPLANE)GetProcAddress(hOpenGL_DLL,"wglDescribeLayerPlane");
+		qwglSwapLayerBuffers         = (PWGLSWAPLAYERBUFFERS)GetProcAddress(hOpenGL_DLL,"wglSwapLayerBuffers");
+	
+		// Palette controls
+		qwglGetLayerPaletteEntries   = (PWGLGETLAYERPALETTEENTRIES)GetProcAddress(hOpenGL_DLL,"wglGetLayerPaletteEntries");
+		qwglRealizeLayerPalette      = (PWGLREALIZELAYERPALETTE)GetProcAddress(hOpenGL_DLL,"wglRealizeLayerPalette");
+		qwglSetLayerPaletteEntries   = (PWGLSETLAYERPALETTEENTRIES)GetProcAddress(hOpenGL_DLL,"wglSetLayerPaletteEntries");
+
+
+		// These by default exist in windows
+		qwglChoosePixelFormat        = ChoosePixelFormat;
+		qwglDescribePixelFormat      = DescribePixelFormat;
+		qwglGetPixelFormat           = GetPixelFormat;
+		qwglSetPixelFormat           = SetPixelFormat;
+		qwglSwapBuffers              = SwapBuffers;
+	}
+
 	::SetFocus( win32.hWnd );
 
 	// main game loop
@@ -701,7 +849,7 @@ int main(int argc, char *argv[]) {
 		Win_Frame();
 
 #ifdef ID_ALLOW_TOOLS
-		if ( com_editors ) {
+		if ( com_editors && enableToolsSupport) {
 			if ( com_editors & EDITOR_GUI ) {
 				// GUI editor
 				GUIEditorRun();
@@ -745,8 +893,21 @@ int main(int argc, char *argv[]) {
 			}
 		}
 #endif
+
+#ifdef ID_ALLOW_TOOLS
+
+		// Only run the master frame if the GUI or Radiant editor have
+		// not been started
+		if((com_editors & (EDITOR_GUI | EDITOR_RADIANT)) == 0)
+		{
+			// run the game
+			common->Frame();
+		}
+#else
 		// run the game
 		common->Frame();
+#endif
+
 	}
 
 	// never gets here

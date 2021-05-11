@@ -149,20 +149,28 @@ void R_RenderGuiSurf( idUserInterface *gui, drawSurf_t *drawSurf ) {
 	float	guiModelMatrix[16];
 	float	modelMatrix[16];
 
-	guiModelMatrix[0] = axis[0][0] / 640.0;
-	guiModelMatrix[4] = axis[1][0] / 480.0;
+// hi-def GUI patch starts
+//	guiModelMatrix[0] = axis[0][0] / 640.0;
+//	guiModelMatrix[4] = axis[1][0] / 480.0;
+	guiModelMatrix[0] = axis[0][0] / SCREEN_WIDTH;
+	guiModelMatrix[4] = axis[1][0] / SCREEN_HEIGHT;
 	guiModelMatrix[8] = axis[2][0];
 	guiModelMatrix[12] = origin[0];
 
-	guiModelMatrix[1] = axis[0][1] / 640.0;
-	guiModelMatrix[5] = axis[1][1] / 480.0;
+//	guiModelMatrix[1] = axis[0][1] / 640.0;
+//	guiModelMatrix[5] = axis[1][1] / 480.0;
+	guiModelMatrix[1] = axis[0][1] / SCREEN_WIDTH;
+	guiModelMatrix[5] = axis[1][1] / SCREEN_HEIGHT;
 	guiModelMatrix[9] = axis[2][1];
 	guiModelMatrix[13] = origin[1];
 
-	guiModelMatrix[2] = axis[0][2] / 640.0;
-	guiModelMatrix[6] = axis[1][2] / 480.0;
+//	guiModelMatrix[2] = axis[0][2] / 640.0;
+//	guiModelMatrix[6] = axis[1][2] / 480.0;
+	guiModelMatrix[2] = axis[0][2] / SCREEN_WIDTH;
+	guiModelMatrix[6] = axis[1][2] / SCREEN_HEIGHT;
 	guiModelMatrix[10] = axis[2][2];
 	guiModelMatrix[14] = origin[2];
+// hi-def GUI patch ends
 
 	guiModelMatrix[3] = 0;
 	guiModelMatrix[7] = 0;

@@ -668,7 +668,7 @@ bool idWinding2D::LineIntersection( const idVec2 &start, const idVec2 &end ) con
 	}
 	d1 = edges[1].x * start.x + edges[1].y * start.y + edges[1].z;
 	d2 = edges[1].x * end.x + edges[1].y * end.y + edges[1].z;
-	if ( FLOATSIGNBITNOTSET( d1 ) & FLOATSIGNBITNOTSET( d2 ) ) {
+	if ( FLOATSIGNBITNOTSET( d1 ) & FLOATSIGNBITNOTSET( d2 ) )  {
 		return false;
 	}
 	return true;

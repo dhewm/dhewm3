@@ -1,4 +1,4 @@
-project(dhewm3)
+project(SteelStorm2)
 cmake_minimum_required(VERSION 2.6)
 
 # TODO
@@ -19,52 +19,67 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
 set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
+# Uncomment this next line to force "Show all files" in msvc
+# set_property( GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(CheckCXXCompilerFlag)
 include(CheckFunctionExists)
-include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
+include(SourceFileUtilities)
 
 option(CORE			"Build the core" ON)
-option(BASE			"Build the base game code" ON)
+option(BASE			"Build the base game code" OFF)
 option(D3XP			"Build the d3xp game code" ON)
-option(DEDICATED	"Build the dedicated server" OFF)
+option(TOOLS		"build the tools game code ( Windows only )" ON)
+option(DEDICATED	"Build the dedicated server" ON)
+option(X86			"Cross compile for x86 (only applicable on x86_64)" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
+option(ALLOWRESOURCES "Enable Resource compilation into files" ON)
 
-if(NOT CMAKE_SYSTEM_PROCESSOR)
+if (NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
 endif()
 
-if(NOT CMAKE_SYSTEM_NAME)
+if (NOT CMAKE_SYSTEM_NAME)
 	message(FATAL_ERROR "No target OS set")
 endif()
 
 # target cpu
 set(cpu ${CMAKE_SYSTEM_PROCESSOR})
-if(cpu STREQUAL "powerpc")
+if (cpu STREQUAL "powerpc")
 	set(cpu "ppc")
-elseif(cpu MATCHES "i.86")
+elseif (cpu MATCHES "i.86")
 	set(cpu "x86")
 endif()
 
-if(MSVC AND CMAKE_CL_64)
-	set(cpu "amd64")
+if (cpu STREQUAL "x86_64" AND X86)
+	set(cpu "x86")
 endif()
 
+if (MSVC AND CMAKE_CL_64)
+	set(cpu "x86_64")
+#	set(cpu "amd64")
+endif()
+
+# game library suffix
+set(gamesuffix ${cpu})
+
 # target os
-if(APPLE)
+if (APPLE)
+# no suffix for .dylib
+	set(gamesuffix "")
 	set(os "macosx")
 else()
 	string(TOLOWER "${CMAKE_SYSTEM_NAME}" os)
 endif()
 
 # build type
-if(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
-# precompiled libraries from the dhewm3-libs repo
-if(DHEWM3LIBS)
-	if(CMAKE_CROSSCOMPILING)
+# precompiled libraries from the SteelStorm2-libs repo
+if (DHEWM3LIBS)
+	if (CMAKE_CROSSCOMPILING)
 		set(CMAKE_FIND_ROOT_PATH ${DHEWM3LIBS})
 	else()
 		set(ENV{CMAKE_PREFIX_PATH} ${DHEWM3LIBS})
@@ -98,28 +113,37 @@ include_directories(${VORBISFILE_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
+#find_package(OpenGL REQUIRED)
+#include_directories(${OPENGL_INCLUDE_DIR})
+
 find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 
 find_package(CURL QUIET)
-if(CURL_FOUND)
+if (CURL_FOUND)
 	set(ID_ENABLE_CURL ON)
 	include_directories(${CURL_INCLUDE_DIR})
 else()
 	message(STATUS "libcurl not found, server downloads won't be available")
 	set(ID_ENABLE_CURL OFF)
-	set(CURL_LIBRARY "")
 endif()
 
+# This is required for tools on windows.
+find_package(MFC)
+
 # compiler specific flags
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-pipe)
 	add_definitions(-Wall)
 
-	if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
+	if (NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 		add_definitions(-march=native)
-	elseif(NOT APPLE AND cpu STREQUAL "x86")
+	elseif (NOT APPLE AND cpu STREQUAL "x86")
 		add_definitions(-march=pentium3)
+	elseif(cpu STREQUAL "x86_64")
+		# These two defines will fix issues involving Collision bugs with floating point round off error.
+		add_definitions(-mfpmath=387) # sets x87 fpu as generic fpu by default.
+		add_definitions(-msse2) # Enable SSE2 extensions... This should work by default.
 	endif()
 
 	set(CMAKE_C_FLAGS_DEBUG "-g -D_DEBUG -O1")
@@ -135,7 +159,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-fno-strict-aliasing)
 
 	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
-	if(NOT cxx_has_fvisibility)
+	if (NOT cxx_has_fvisibility)
 		message(FATAL_ERROR "Compiler does not support -fvisibility")
 	endif()
 	add_definitions(-fvisibility=hidden)
@@ -146,28 +170,28 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	add_definitions(-Wno-format-security)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
-	if(cxx_has_Woverload_virtual)
+	if (cxx_has_Woverload_virtual)
 		add_definitions(-Woverloaded-virtual)
 	endif()
 
-	if(APPLE)
+	if (APPLE)
 		add_definitions(-DMACOS_X=1)
 
-		if(cpu STREQUAL "x86_64")
+		if (cpu STREQUAL "x86_64")
 			add_definitions(-arch x86_64 -mmacosx-version-min=10.6)
 			set(ldflags "${ldflags} -arch x86_64 -mmacosx-version-min=10.6")
-		elseif(cpu STREQUAL "x86")
+		elseif (cpu STREQUAL "x86")
 			CHECK_CXX_COMPILER_FLAG("-arch i386" cxx_has_arch_i386)
-			if(cxx_has_arch_i386)
+			if (cxx_has_arch_i386)
 				add_definitions(-arch i386)
 				set(ldflags "${ldflags} -arch i386")
 			endif()
 
 			add_definitions(-mmacosx-version-min=10.4)
 			set(ldflags "${ldflags} -mmacosx-version-min=10.4")
-		elseif(cpu STREQUAL "ppc")
+		elseif (cpu STREQUAL "ppc")
 			CHECK_CXX_COMPILER_FLAG("-arch ppc" cxx_has_arch_ppc)
-			if(cxx_has_arch_ppc)
+			if (cxx_has_arch_ppc)
 				add_definitions(-arch ppc)
 				set(ldflags "${ldflags} -arch ppc")
 			endif()
@@ -178,13 +202,19 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 			message(FATAL_ERROR "Unsupported CPU architecture for OSX")
 		endif()
 
+		#set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework OpenGL -framework IOKit")
 		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework IOKit")
 	else()
-		if(os STREQUAL "linux")
+		if (cpu STREQUAL "x86" AND X86)
+			add_definitions(-m32)
+			set(ldflags "${ldflags} -m32")
+		endif()
+
+		if (os STREQUAL "linux")
 			set(sys_libs ${sys_libs} dl)
 		endif()
 	endif()
-elseif(MSVC)
+elseif (MSVC)
 	add_definitions(/W4)
 	add_definitions(/wd4100) # unreferenced formal parameter
 	add_definitions(/wd4127) # conditional expression is constant
@@ -193,6 +223,9 @@ elseif(MSVC)
 	add_definitions(/wd4267) # possible loss of data
 	add_definitions(/wd4714) # 'function' marked as __forceinline not inlined
 	add_definitions(/wd4996) # 'function': was declared deprecated
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+	add_definitions(/Oi) # enable intrinsics.
 	set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
 	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi /MD")
@@ -207,7 +240,7 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
 set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
 
 # mingw and msvc
-if(WIN32)
+if (WIN32)
 	add_definitions(-DWINVER=0x0501)
 	add_definitions(-D_WIN32_WINNT=0x0501)
 
@@ -218,419 +251,71 @@ if(WIN32)
 	)
 endif()
 
-# fallback for cmake versions without GNUInstallDirs
-if(GNUINSTALLDIRS MATCHES "NOTFOUND")
-	set(CMAKE_INSTALL_BINDIR		"bin"
-		CACHE PATH "user executables (bin)")
-	set(CMAKE_INSTALL_LIBDIR		"lib${LIB_SUFFIX}"
-		CACHE PATH "object code libraries (lib${LIB_SUFFIX})")
-	set(CMAKE_INSTALL_DATAROOTDIR	"share"
-		CACHE PATH "read-only architecture-independent data root (share)")
-	set(CMAKE_INSTALL_DATADIR		"${CMAKE_INSTALL_DATAROOTDIR}"
-		CACHE PATH "read-only architecture-independent data (DATAROOTDIR)")
-
-	mark_as_advanced(CMAKE_INSTALL_BINDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_DATAROOTDIR CMAKE_INSTALL_DATADIR)
-	foreach(dir BINDIR LIBDIR DATAROOTDIR DATADIR)
-		if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_${dir}})
-			set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
-		else()
-			set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_${dir}}")
-		endif()
-	endforeach()
+if (APPLE)
+	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
+	SET(libdir		"${CMAKE_INSTALL_PREFIX}")
+	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
+	SET(datadir		"${datarootdir}")
+elseif (WIN32)
+	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
+	SET(libdir		"${CMAKE_INSTALL_PREFIX}/lib")
+	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
+	SET(datadir		"${datarootdir}")
+else()
+	SET(bindir		"${CMAKE_INSTALL_PREFIX}")
+	SET(libdir		"${CMAKE_INSTALL_PREFIX}/lib")
+	SET(datarootdir	"${CMAKE_INSTALL_PREFIX}")
+	SET(datadir		"${datarootdir}")
 endif()
 
-set(bindir		"${CMAKE_INSTALL_FULL_BINDIR}")
-set(libdir		"${CMAKE_INSTALL_FULL_LIBDIR}/dhewm3")
-set(datadir		"${CMAKE_INSTALL_FULL_DATADIR}/dhewm3")
-
 configure_file(
-	"${CMAKE_SOURCE_DIR}/config.h.in"
-	"${CMAKE_BINARY_DIR}/config.h"
+    "${CMAKE_SOURCE_DIR}/config.h.in"
+    "${CMAKE_BINARY_DIR}/config.h"
 )
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
 
-if(NOT APPLE AND NOT WIN32)
-	message(STATUS "The install target will use the following directories:")
-	message(STATUS "  Binary directory:  ${bindir}")
-	message(STATUS "  Library directory: ${libdir}")
-	message(STATUS "  Data directory:    ${datadir}")
-endif()
+# Renderer.
+file(GLOB src_renderer "renderer/*.cpp")
 
-set(src_renderer
-	renderer/jpeg_memory_src.cpp
-	renderer/Cinematic.cpp
-	renderer/GuiModel.cpp
-	renderer/Image_files.cpp
-	renderer/Image_init.cpp
-	renderer/Image_load.cpp
-	renderer/Image_process.cpp
-	renderer/Image_program.cpp
-	renderer/Interaction.cpp
-	renderer/Material.cpp
-	renderer/MegaTexture.cpp
-	renderer/Model.cpp
-	renderer/ModelDecal.cpp
-	renderer/ModelManager.cpp
-	renderer/ModelOverlay.cpp
-	renderer/Model_beam.cpp
-	renderer/Model_ase.cpp
-	renderer/Model_liquid.cpp
-	renderer/Model_lwo.cpp
-	renderer/Model_ma.cpp
-	renderer/Model_md3.cpp
-	renderer/Model_md5.cpp
-	renderer/Model_prt.cpp
-	renderer/Model_sprite.cpp
-	renderer/RenderEntity.cpp
-	renderer/RenderSystem.cpp
-	renderer/RenderSystem_init.cpp
-	renderer/RenderWorld.cpp
-	renderer/RenderWorld_demo.cpp
-	renderer/RenderWorld_load.cpp
-	renderer/RenderWorld_portals.cpp
-	renderer/VertexCache.cpp
-	renderer/draw_arb2.cpp
-	renderer/draw_common.cpp
-	renderer/tr_backend.cpp
-	renderer/tr_deform.cpp
-	renderer/tr_font.cpp
-	renderer/tr_guisurf.cpp
-	renderer/tr_light.cpp
-	renderer/tr_lightrun.cpp
-	renderer/tr_main.cpp
-	renderer/tr_orderIndexes.cpp
-	renderer/tr_polytope.cpp
-	renderer/tr_render.cpp
-	renderer/tr_rendertools.cpp
-	renderer/tr_shadowbounds.cpp
-	renderer/tr_stencilshadow.cpp
-	renderer/tr_subview.cpp
-	renderer/tr_trace.cpp
-	renderer/tr_trisurf.cpp
-	renderer/tr_turboshadow.cpp
-)
+# Framework
+file(GLOB_RECURSE src_framework "framework/*.cpp")
 
-set(src_framework
-	framework/CVarSystem.cpp
-	framework/CmdSystem.cpp
-	framework/Common.cpp
-	framework/Compressor.cpp
-	framework/Console.cpp
-	framework/DemoFile.cpp
-	framework/DeclAF.cpp
-	framework/DeclEntityDef.cpp
-	framework/DeclFX.cpp
-	framework/DeclManager.cpp
-	framework/DeclParticle.cpp
-	framework/DeclPDA.cpp
-	framework/DeclSkin.cpp
-	framework/DeclTable.cpp
-	framework/EditField.cpp
-	framework/EventLoop.cpp
-	framework/File.cpp
-	framework/FileSystem.cpp
-	framework/KeyInput.cpp
-	framework/Unzip.cpp
-	framework/UsercmdGen.cpp
-	framework/Session_menu.cpp
-	framework/Session.cpp
-	framework/async/AsyncClient.cpp
-	framework/async/AsyncNetwork.cpp
-	framework/async/AsyncServer.cpp
-	framework/async/MsgChannel.cpp
-	framework/async/NetworkSystem.cpp
-	framework/async/ServerScan.cpp
-)
+#Collision Model.
+file(GLOB src_cm "cm/*.cpp")	
 
-set(src_cm
-	cm/CollisionModel_contacts.cpp
-	cm/CollisionModel_contents.cpp
-	cm/CollisionModel_debug.cpp
-	cm/CollisionModel_files.cpp
-	cm/CollisionModel_load.cpp
-	cm/CollisionModel_rotate.cpp
-	cm/CollisionModel_trace.cpp
-	cm/CollisionModel_translate.cpp
-)
+# Dmap
+file(GLOB src_dmap "tools/compilers/dmap/*.cpp")	
 
-set(src_dmap
-	tools/compilers/dmap/dmap.cpp
-	tools/compilers/dmap/facebsp.cpp
-	tools/compilers/dmap/gldraw.cpp
-	tools/compilers/dmap/glfile.cpp
-	tools/compilers/dmap/leakfile.cpp
-	tools/compilers/dmap/map.cpp
-	tools/compilers/dmap/optimize.cpp
-	tools/compilers/dmap/output.cpp
-	tools/compilers/dmap/portals.cpp
-	tools/compilers/dmap/shadowopt3.cpp
-	tools/compilers/dmap/tritjunction.cpp
-	tools/compilers/dmap/tritools.cpp
-	tools/compilers/dmap/ubrush.cpp
-	tools/compilers/dmap/usurface.cpp
-)
+# AAS builder.
+file(GLOB src_aas "tools/compilers/aas/*.cpp")	
 
-set(src_aas
-	tools/compilers/aas/AASBuild.cpp
-	tools/compilers/aas/AASBuild_file.cpp
-	tools/compilers/aas/AASBuild_gravity.cpp
-	tools/compilers/aas/AASBuild_ledge.cpp
-	tools/compilers/aas/AASBuild_merge.cpp
-	tools/compilers/aas/AASCluster.cpp
-	tools/compilers/aas/AASFile.cpp
-	tools/compilers/aas/AASFile_optimize.cpp
-	tools/compilers/aas/AASFile_sample.cpp
-	tools/compilers/aas/AASReach.cpp
-	tools/compilers/aas/AASFileManager.cpp
-	tools/compilers/aas/Brush.cpp
-	tools/compilers/aas/BrushBSP.cpp
-)
+# ROQVQ compiler.
+file(GLOB src_roq "tools/compilers/roqvq/*.cpp")	
 
-set(src_roq
-	tools/compilers/roqvq/NSBitmapImageRep.cpp
-	tools/compilers/roqvq/codec.cpp
-	tools/compilers/roqvq/roq.cpp
-	tools/compilers/roqvq/roqParam.cpp
-)
+# renderbump
+file(GLOB src_renderbump "tools/compilers/renderbump/*.cpp")	
 
-set(src_renderbump
-	tools/compilers/renderbump/renderbump.cpp
-)
+# Sound
+file(GLOB src_snd "sound/*.cpp")	
 
-set(src_snd
-	sound/snd_cache.cpp
-	sound/snd_decoder.cpp
-	sound/snd_efxfile.cpp
-	sound/snd_emitter.cpp
-	sound/snd_shader.cpp
-	sound/snd_system.cpp
-	sound/snd_wavefile.cpp
-	sound/snd_world.cpp
-)
+# UI
+file(GLOB src_ui "ui/*.cpp")	
 
-set(src_ui
-	ui/BindWindow.cpp
-	ui/ChoiceWindow.cpp
-	ui/DeviceContext.cpp
-	ui/EditWindow.cpp
-	ui/FieldWindow.cpp
-	ui/GameBearShootWindow.cpp
-	ui/GameBustOutWindow.cpp
-	ui/GameSSDWindow.cpp
-	ui/GuiScript.cpp
-	ui/ListGUI.cpp
-	ui/ListWindow.cpp
-	ui/MarkerWindow.cpp
-	ui/RegExp.cpp
-	ui/RenderWindow.cpp
-	ui/SimpleWindow.cpp
-	ui/SliderWindow.cpp
-	ui/UserInterface.cpp
-	ui/Window.cpp
-	ui/Winvar.cpp
-)
+# Gui editor stub.
+file(GLOB src_tools "tools/guied/*_stub.cpp")	
 
-set(src_tools
-	tools/guied/GEWindowWrapper_stub.cpp
-)
+# ID Library.
+file(GLOB_RECURSE src_idlib "idlib/*.cpp")	
+GENERATE_SOURCE_GROUPS(${src_idlib})
 
-set(src_idlib
-	idlib/bv/Bounds.cpp
-	idlib/bv/Frustum.cpp
-	idlib/bv/Sphere.cpp
-	idlib/bv/Box.cpp
-	idlib/geometry/DrawVert.cpp
-	idlib/geometry/Winding2D.cpp
-	idlib/geometry/Surface_SweptSpline.cpp
-	idlib/geometry/Winding.cpp
-	idlib/geometry/Surface.cpp
-	idlib/geometry/Surface_Patch.cpp
-	idlib/geometry/TraceModel.cpp
-	idlib/geometry/JointTransform.cpp
-	idlib/hashing/CRC32.cpp
-	idlib/hashing/MD4.cpp
-	idlib/hashing/MD5.cpp
-	idlib/math/Angles.cpp
-	idlib/math/Lcp.cpp
-	idlib/math/Math.cpp
-	idlib/math/Matrix.cpp
-	idlib/math/Ode.cpp
-	idlib/math/Plane.cpp
-	idlib/math/Pluecker.cpp
-	idlib/math/Polynomial.cpp
-	idlib/math/Quat.cpp
-	idlib/math/Rotation.cpp
-	idlib/math/Simd.cpp
-	idlib/math/Simd_Generic.cpp
-	idlib/math/Simd_AltiVec.cpp
-	idlib/math/Simd_MMX.cpp
-	idlib/math/Simd_3DNow.cpp
-	idlib/math/Simd_SSE.cpp
-	idlib/math/Simd_SSE2.cpp
-	idlib/math/Simd_SSE3.cpp
-	idlib/math/Vector.cpp
-	idlib/BitMsg.cpp
-	idlib/LangDict.cpp
-	idlib/Lexer.cpp
-	idlib/Lib.cpp
-	idlib/containers/HashIndex.cpp
-	idlib/Dict.cpp
-	idlib/Str.cpp
-	idlib/Parser.cpp
-	idlib/MapFile.cpp
-	idlib/CmdArgs.cpp
-	idlib/Token.cpp
-	idlib/Base64.cpp
-	idlib/Timer.cpp
-	idlib/Heap.cpp
-)
+# Normal game code ( Base)
+file(GLOB_RECURSE src_game "game/*.cpp")
+GENERATE_SOURCE_GROUPS(${src_game})
 
-set(src_game
-	game/AF.cpp
-	game/AFEntity.cpp
-	game/Actor.cpp
-	game/Camera.cpp
-	game/Entity.cpp
-	game/BrittleFracture.cpp
-	game/Fx.cpp
-	game/GameEdit.cpp
-	game/Game_local.cpp
-	game/Game_network.cpp
-	game/Item.cpp
-	game/IK.cpp
-	game/Light.cpp
-	game/Misc.cpp
-	game/Mover.cpp
-	game/Moveable.cpp
-	game/MultiplayerGame.cpp
-	game/Player.cpp
-	game/PlayerIcon.cpp
-	game/PlayerView.cpp
-	game/Projectile.cpp
-	game/Pvs.cpp
-	game/SecurityCamera.cpp
-	game/SmokeParticles.cpp
-	game/Sound.cpp
-	game/Target.cpp
-	game/Trigger.cpp
-	game/Weapon.cpp
-	game/WorldSpawn.cpp
-	game/ai/AAS.cpp
-	game/ai/AAS_debug.cpp
-	game/ai/AAS_pathing.cpp
-	game/ai/AAS_routing.cpp
-	game/ai/AI.cpp
-	game/ai/AI_events.cpp
-	game/ai/AI_pathing.cpp
-	game/ai/AI_Vagary.cpp
-	game/gamesys/DebugGraph.cpp
-	game/gamesys/Class.cpp
-	game/gamesys/Event.cpp
-	game/gamesys/SaveGame.cpp
-	game/gamesys/SysCmds.cpp
-	game/gamesys/SysCvar.cpp
-	game/gamesys/TypeInfo.cpp
-	game/anim/Anim.cpp
-	game/anim/Anim_Blend.cpp
-	game/anim/Anim_Import.cpp
-	game/anim/Anim_Testmodel.cpp
-	game/script/Script_Compiler.cpp
-	game/script/Script_Interpreter.cpp
-	game/script/Script_Program.cpp
-	game/script/Script_Thread.cpp
-	game/physics/Clip.cpp
-	game/physics/Force.cpp
-	game/physics/Force_Constant.cpp
-	game/physics/Force_Drag.cpp
-	game/physics/Force_Field.cpp
-	game/physics/Force_Spring.cpp
-	game/physics/Physics.cpp
-	game/physics/Physics_AF.cpp
-	game/physics/Physics_Actor.cpp
-	game/physics/Physics_Base.cpp
-	game/physics/Physics_Monster.cpp
-	game/physics/Physics_Parametric.cpp
-	game/physics/Physics_Player.cpp
-	game/physics/Physics_RigidBody.cpp
-	game/physics/Physics_Static.cpp
-	game/physics/Physics_StaticMulti.cpp
-	game/physics/Push.cpp
-)
-
-set(src_d3xp
-	d3xp/AF.cpp
-	d3xp/AFEntity.cpp
-	d3xp/Actor.cpp
-	d3xp/Camera.cpp
-	d3xp/Entity.cpp
-	d3xp/BrittleFracture.cpp
-	d3xp/Fx.cpp
-	d3xp/GameEdit.cpp
-	d3xp/Game_local.cpp
-	d3xp/Game_network.cpp
-	d3xp/Item.cpp
-	d3xp/IK.cpp
-	d3xp/Light.cpp
-	d3xp/Misc.cpp
-	d3xp/Mover.cpp
-	d3xp/Moveable.cpp
-	d3xp/MultiplayerGame.cpp
-	d3xp/Player.cpp
-	d3xp/PlayerIcon.cpp
-	d3xp/PlayerView.cpp
-	d3xp/Projectile.cpp
-	d3xp/Pvs.cpp
-	d3xp/SecurityCamera.cpp
-	d3xp/SmokeParticles.cpp
-	d3xp/Sound.cpp
-	d3xp/Target.cpp
-	d3xp/Trigger.cpp
-	d3xp/Weapon.cpp
-	d3xp/WorldSpawn.cpp
-	d3xp/ai/AAS.cpp
-	d3xp/ai/AAS_debug.cpp
-	d3xp/ai/AAS_pathing.cpp
-	d3xp/ai/AAS_routing.cpp
-	d3xp/ai/AI.cpp
-	d3xp/ai/AI_events.cpp
-	d3xp/ai/AI_pathing.cpp
-	d3xp/ai/AI_Vagary.cpp
-	d3xp/gamesys/DebugGraph.cpp
-	d3xp/gamesys/Class.cpp
-	d3xp/gamesys/Event.cpp
-	d3xp/gamesys/SaveGame.cpp
-	d3xp/gamesys/SysCmds.cpp
-	d3xp/gamesys/SysCvar.cpp
-	d3xp/gamesys/TypeInfo.cpp
-	d3xp/anim/Anim.cpp
-	d3xp/anim/Anim_Blend.cpp
-	d3xp/anim/Anim_Import.cpp
-	d3xp/anim/Anim_Testmodel.cpp
-	d3xp/script/Script_Compiler.cpp
-	d3xp/script/Script_Interpreter.cpp
-	d3xp/script/Script_Program.cpp
-	d3xp/script/Script_Thread.cpp
-	d3xp/physics/Clip.cpp
-	d3xp/physics/Force.cpp
-	d3xp/physics/Force_Constant.cpp
-	d3xp/physics/Force_Drag.cpp
-	d3xp/physics/Force_Field.cpp
-	d3xp/physics/Force_Spring.cpp
-	d3xp/physics/Physics.cpp
-	d3xp/physics/Physics_AF.cpp
-	d3xp/physics/Physics_Actor.cpp
-	d3xp/physics/Physics_Base.cpp
-	d3xp/physics/Physics_Monster.cpp
-	d3xp/physics/Physics_Parametric.cpp
-	d3xp/physics/Physics_Player.cpp
-	d3xp/physics/Physics_RigidBody.cpp
-	d3xp/physics/Physics_Static.cpp
-	d3xp/physics/Physics_StaticMulti.cpp
-	d3xp/physics/Push.cpp
-	d3xp/Grabber.cpp
-	d3xp/physics/Force_Grab.cpp
-)
+# Expansion pack code ( d3xp)
+file(GLOB_RECURSE src_d3xp "d3xp/*.cpp")
+GENERATE_SOURCE_GROUPS(${src_d3xp})
 
 set(src_core
 	${src_renderer}
@@ -644,11 +329,67 @@ set(src_core
 	${src_ui}
 	${src_tools}
 )
+GENERATE_SOURCE_GROUPS(${src_core})
 
 set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
+set(src_stub_util		sys/stub/util_stub.cpp)
 
-if(APPLE)
+# Begin normal tools code
+if (TOOLS AND MFC_FOUND AND MSVC)
+	set(ALLOWRESOURCES ON)
+	# Common files.
+	file(GLOB src_comafx "tools/comafx/*.cpp")
+	file(GLOB_RECURSE src_tools_common "tools/common/*.cpp")
+
+	#Compilers.
+	file(GLOB src_compiler_renderbump "neo/tools/compilers/renderbump/*.cpp")
+	file(GLOB src_compiler_roqvq	  "neo/tools/compilers/roqvq/*.cpp")
+	#tools
+	# Articulated Frame editor.
+	file(GLOB src_afeditor "tools/af/*.cpp")
+	# Declaration editor
+	file(GLOB src_decleditor "tools/decl/*.cpp")
+	# GUI Editor.
+	file(GLOB src_gui_editor "tools/guied/*.cpp")
+	# Material editor
+	file(GLOB src_materialeditor "tools/materialeditor/*.cpp")
+	# Particle Editor
+	file(GLOB src_particleeditor "tools/particle/*.cpp")
+	# PDA editor
+	file(GLOB src_pdaeditor "tools/pda/*.cpp")
+	# Radiant ( Map editor )
+	file(GLOB src_map_editor "tools/radiant/*.cpp")
+	# Script editor
+	file(GLOB src_script_editor "tools/script/*.cpp")
+	# sound editor?
+	file(GLOB src_sound_editor "tools/sound/*.cpp")
+	
+
+	# The numerous tools in a nice list.
+	list(APPEND src_editor_tools
+		${src_comafx}
+		${src_tools_common}
+		${src_compiler_renderbump}
+		${src_afeditor}
+		${src_decleditor}
+		${src_gui_editor}
+		${src_materialeditor}
+		${src_particleeditor}
+		${src_pdaeditor}
+		${src_map_editor}
+		${src_script_editor}
+		${src_sound_editor}
+		)
+	SET(CMAKE_MFC_FLAG 2)
+	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;__AFXDLL")
+else()
+	# TODO: Add more platforms for tools
+	set(src_editor_tools "tools/edit_stub.cpp")
+endif()
+GENERATE_SOURCE_GROUPS(${src_editor_tools})
+
+if (APPLE)
 	set(OSX_RESOURCE_FILES
 			"${CMAKE_SOURCE_DIR}/sys/osx/Doom3.icns"
 			"${CMAKE_SOURCE_DIR}/sys/osx/Doom 3.rsrc"
@@ -672,7 +413,7 @@ if(APPLE)
 		sys/osx/SDLMain.m
 		${OSX_RESOURCE_FILES}
 	)
-elseif(WIN32)
+elseif (WIN32)
 	set(src_sys_base
 		sys/cpu.cpp
 		sys/threads.cpp
@@ -686,9 +427,17 @@ elseif(WIN32)
 		sys/win32/SDL_win32_main.c
 	)
 
+	# Misc resource files.
+	if(ALLOWRESOURCES OR TOOLS)
+		file(GLOB src_windows_rc "sys/win32/rc/doom.rc" )
+	endif()
+
 	set(src_sys_core
+		${src_stub_util}
 		sys/glimp.cpp
+		${src_windows_rc}
 	)
+
 else()
 	set(src_sys_base
 		sys/cpu.cpp
@@ -701,31 +450,46 @@ else()
 	)
 
 	set(src_sys_core
+		${src_stub_util}
 		sys/glimp.cpp
 	)
 endif()
 
+# Make sure the numerous sys sources get sorted out.
+GENERATE_SOURCE_GROUPS(
+		${src_sys_core}
+		${src_sys_base}
+		${src_stub_openal}
+		${src_stub_gl}
+		${src_stub_util}
+		)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
+if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
 	set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
-if(CORE)
-	add_executable(dhewm3 WIN32 MACOSX_BUNDLE
-		${src_core}
-		${src_sys_base}
-		${src_sys_core}
-	)
+if (CORE)
 
-	set_target_properties(dhewm3 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__")
-	set_target_properties(dhewm3 PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(dhewm3 PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
+	add_executable(SteelStorm2 WIN32 MACOSX_BUNDLE
+			${src_core}
+			${src_sys_base}
+			${src_sys_core}
+			${src_editor_tools}
+		)
+	set_target_properties(SteelStorm2 PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;${TOOLS_DEFINES}")
+	set_target_properties(SteelStorm2 PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(SteelStorm2 PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 
-	target_link_libraries(dhewm3
+	if (cpu STREQUAL "x86_64")
+		set_target_properties(SteelStorm2 PROPERTIES SUFFIX "_64")
+	endif()
+	
+	target_link_libraries(SteelStorm2
 		idlib
+		#${OPENGL_gl_LIBRARY}
 		${OPENAL_LIBRARY}
 		${OGG_LIBRARIES}
 		${VORBISFILE_LIBRARIES}
@@ -737,26 +501,36 @@ if(CORE)
 		${sys_libs}
 	)
 
-	if(NOT APPLE AND NOT WIN32)
-		install(TARGETS dhewm3
+	if (NOT APPLE AND NOT WIN32)
+		install(TARGETS SteelStorm2
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
-	endif()
+	endif ()
 endif()
 
-if(DEDICATED)
-	add_executable(dhewm3ded WIN32 MACOSX_BUNDLE
+if (DEDICATED)
+	add_executable(SteelStorm2ded WIN32 MACOSX_BUNDLE
 		${src_core}
 		${src_stub_openal}
 		${src_stub_gl}
+		${src_stub_util}
 		${src_sys_base}
 	)
 
-	set_target_properties(dhewm3ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
-	set_target_properties(dhewm3ded PROPERTIES LINK_FLAGS "${ldflags}")
-	target_link_libraries(dhewm3ded
+	set_target_properties(SteelStorm2ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
+	set_target_properties(SteelStorm2ded PROPERTIES LINK_FLAGS "${ldflags}")
+	if (MSVC_IDE)
+		# set this property to avoid Relese and debug directories.
+		# Only applies to executables.
+		# set_target_properties (SteelStorm2ded${gamesuffix} PROPERTIES PREFIX "../../../")
+	endif()
+	
+	if (cpu STREQUAL "x86_64")
+		set_target_properties(SteelStorm2ded PROPERTIES SUFFIX "_64")
+	endif()
+	target_link_libraries(SteelStorm2ded
 		idlib
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}
@@ -767,47 +541,72 @@ if(DEDICATED)
 		${sys_libs}
 	)
 
-	if(NOT APPLE AND NOT WIN32)
-		install(TARGETS dhewm3ded
+	if (NOT APPLE AND NOT WIN32)
+		install(TARGETS SteelStorm2ded
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
-	endif()
+	endif ()
 endif()
 
-if(BASE)
-	add_library(base SHARED ${src_game})
-	set_target_properties(base PROPERTIES PREFIX "")
-	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
-	set_target_properties(base PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
-	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(base idlib)
+#if (BASE)
+#add_library(base${gamesuffix} SHARED ${src_game})
+#set_target_properties(base${gamesuffix} PROPERTIES PREFIX "")
+#set_target_properties(base${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+##set_target_properties(base${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
+#set_target_properties(base${gamesuffix} PROPERTIES INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR};${CMAKE_SOURCE_DIR}/game" )
+#set_target_properties(base${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
+#set_target_properties(base${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
+#target_link_libraries(base${gamesuffix} idlib)
+#
+#	add_library(base SHARED ${src_game})
+#	set_target_properties(base PROPERTIES PREFIX "")
+#	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+#	set_target_properties(base PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/game")
+#	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
+#	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
+#	target_link_libraries(base idlib)
+#
+#	if (NOT APPLE AND NOT WIN32)
+#		install(TARGETS base
+#				RUNTIME DESTINATION "${bindir}"
+#				LIBRARY DESTINATION "${libdir}"
+#				ARCHIVE DESTINATION "${libdir}"
+#		)
+#	endif ()
+#endif()
 
-	if(NOT APPLE AND NOT WIN32)
-		install(TARGETS base
-				RUNTIME DESTINATION "${bindir}"
-				LIBRARY DESTINATION "${libdir}"
-				ARCHIVE DESTINATION "${libdir}"
-		)
-	endif()
-endif()
+if (D3XP)
+	add_library(base${gamesuffix} SHARED ${src_d3xp})
+	set_target_properties(base${gamesuffix} PROPERTIES PREFIX "")
+	set_target_properties(base${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
+	#set_target_properties(base${gamesuffix} PROPERTIES COMPILE_FLAGS -I\"${CMAKE_SOURCE_DIR}/d3xp\")
+	set_target_properties(base${gamesuffix} PROPERTIES INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR};${CMAKE_SOURCE_DIR}/d3xp" )
+	set_target_properties(base${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(base${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(base${gamesuffix} idlib)
+	#add_library(d3xp${gamesuffix} SHARED ${src_d3xp})
+	#set_target_properties(d3xp${gamesuffix} PROPERTIES PREFIX "")
+	#set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
+	#set_target_properties(d3xp${gamesuffix} PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
+	#set_target_properties(d3xp${gamesuffix} PROPERTIES LINK_FLAGS "${ldflags}")
+	#set_target_properties(d3xp${gamesuffix} PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	#target_link_libraries(d3xp${gamesuffix} idlib)
 
-if(D3XP)
-	add_library(d3xp SHARED ${src_d3xp})
-	set_target_properties(d3xp PROPERTIES PREFIX "")
-	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
-	set_target_properties(d3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
-	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(d3xp idlib)
+#	add_library(d3xp SHARED ${src_d3xp})
+#	set_target_properties(d3xp PROPERTIES PREFIX "")
+#	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
+#	set_target_properties(d3xp PROPERTIES COMPILE_FLAGS "-I${CMAKE_SOURCE_DIR}/d3xp")
+#	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
+#	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+#	target_link_libraries(d3xp idlib)
 
-	if(NOT APPLE AND NOT WIN32)
-		install(TARGETS d3xp
-				RUNTIME DESTINATION "${bindir}"
-				LIBRARY DESTINATION "${libdir}"
-				ARCHIVE DESTINATION "${libdir}"
-		)
-	endif()
+#	if (NOT APPLE AND NOT WIN32)
+#		install(TARGETS d3xp
+#				RUNTIME DESTINATION "${bindir}"
+#				LIBRARY DESTINATION "${libdir}"
+#				ARCHIVE DESTINATION "${libdir}"
+#		)
+#	endif ()
 endif()

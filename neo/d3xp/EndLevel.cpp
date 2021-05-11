@@ -25,7 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
+#if 0
+// TODO: Remove this... it's not used.
 #include "sys/platform.h"
 
 #include "EndLevel.h"
@@ -182,3 +183,4 @@ const char *idTarget_EndLevel::ExitCommand() {
 
 	return exitCommand;
 }
+#endif

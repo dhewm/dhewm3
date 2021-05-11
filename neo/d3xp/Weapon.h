@@ -45,6 +45,7 @@ class idFuncEmitter;
 ===============================================================================
 */
 
+
 #ifdef _D3XP
 extern const idEventDef EV_Weapon_State;
 #endif
@@ -111,7 +112,7 @@ public:
 
 	// Weapon definition management
 	void					Clear( void );
-	void					GetWeaponDef( const char *objectname, int ammoinclip );
+	void					GetWeaponDef( const char *objectname, int ammoinclip, int clipType );
 	bool					IsLinked( void );
 	bool					IsWorldModelReady( void );
 
@@ -145,6 +146,21 @@ public:
 	idEntity *				DropItem( const idVec3 &velocity, int activateDelay, int removeDelay, bool died );
 	bool					CanDrop( void ) const;
 	void					WeaponStolen( void );
+	
+	void					CycleAmmo( void );	// #################################### SR
+
+	// ################################### SR
+	
+	int						ammoTypes;	
+	ammo_t					ammoType1;
+	ammo_t					ammoType2;
+	ammo_t					ammoType3;
+	
+	int						ammoCurrent;
+	
+	// ################################### END SR
+	
+	
 
 #ifdef _D3XP
 	weaponStatus_t			GetStatus() { return status; };
@@ -205,6 +221,9 @@ private:
 	idScriptBool			WEAPON_NETFIRING;
 	idScriptBool			WEAPON_RAISEWEAPON;
 	idScriptBool			WEAPON_LOWERWEAPON;
+	
+	idScriptBool			WEAPON_AMMO_SWITCH;		//######################## SR
+	idScriptBool			WEAPON_AMMO_FIRSTLOAD;	//######################## SR
 	weaponStatus_t			status;
 	idThread *				thread;
 	idStr					state;
@@ -257,6 +276,29 @@ private:
 	idDict					brassDict;
 	int						brassDelay;
 	idStr					icon;
+	
+	// ##################################### SR
+	
+	idDict					brassReloadDict;
+	idDict					projectileDict1;
+	idDict					projectileDict2;
+	idDict					projectileDict3;
+	
+	int						clipSize1;	
+	int						clipSize2;	
+	int						clipSize3;	
+	
+	int						numProjectiles;	
+	int						numProjectiles1;	
+	int						numProjectiles2;	
+	int						numProjectiles3;
+	int						spread;	
+	int						spread1;
+	int						spread2;
+	int						spread3;
+		
+	
+	// #################################### END SR
 
 	// view weapon gui light
 	renderLight_t			guiLight;
@@ -304,6 +346,9 @@ private:
 	jointHandle_t			barrelJointView;
 	jointHandle_t			flashJointView;
 	jointHandle_t			ejectJointView;
+	
+	jointHandle_t			ejectReloadJointView;	// ################# SR
+	
 	jointHandle_t			guiLightJointView;
 	jointHandle_t			ventLightJointView;
 
@@ -398,7 +443,26 @@ private:
 	void					Event_NetReload( void );
 	void					Event_IsInvisible( void );
 	void					Event_NetEndReload( void );
+	
+	
+// ########################################################### SR	
 
+	void					Event_Start_Attack( void );
+	void					Event_Stop_Attack( void );	
+	void					Event_EjectReloadBrass( void );	
+	void 					Event_NumProjectiles( void );
+	void 					Event_Spread( void );
+	void					Sword_Attack( void );			
+	bool 					EntHit( int entNum );		
+
+	
+	bool					ATTACKING;
+	int						ent_hitlist[5];
+	int						ents_hit;	
+
+// ############################################################	
+	
+	
 #ifdef _D3XP
 	idGrabber				grabber;
 	int						grabberState;

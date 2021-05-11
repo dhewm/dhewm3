@@ -98,7 +98,9 @@ public:
 #endif
 
 #ifdef _D3XP
+	//Portal sky begins
 	bool				CheckAreasForPortalSky( const pvsHandle_t handle, const idVec3 &origin );
+	//Portal sky ends
 #endif
 
 private:

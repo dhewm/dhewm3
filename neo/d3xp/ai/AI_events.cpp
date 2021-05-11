@@ -172,9 +172,9 @@ const idEventDef AI_TriggerFX( "triggerFX", "ss" );
 const idEventDef AI_StartEmitter( "startEmitter", "sss", 'e' );
 const idEventDef AI_GetEmitter( "getEmitter", "s", 'e' );
 const idEventDef AI_StopEmitter( "stopEmitter", "s" );
-
-
 #endif
+
+const idEventDef AI_AIEjectReloadBrass( "ai_EjectReloadBrass" );	// ################################## SR
 
 CLASS_DECLARATION( idActor, idAI )
 	EVENT( EV_Activate,							idAI::Event_Activate )
@@ -316,7 +316,55 @@ CLASS_DECLARATION( idActor, idAI )
 	EVENT( AI_GetEmitter,						idAI::Event_GetEmitter )
 	EVENT( AI_StopEmitter,						idAI::Event_StopEmitter )
 #endif
+
+	EVENT( AI_AIEjectReloadBrass,				idAI::Event_AIEjectReloadBrass )	// ##################### SR
+
 END_CLASS
+
+
+// ####################################################################### SR
+
+/*
+================
+idAI::Event_AIEjectReloadBrass
+
+Toss a shell model out from the breach if the bone is present
+================
+*/
+void idAI::Event_AIEjectReloadBrass( void ) {
+	if ( !g_showBrass.GetBool() ) {
+		return;
+	}
+	if ( ejectReloadJoint == INVALID_JOINT || !brassReloadDict.GetNumKeyVals() ) {
+		return;
+	}
+
+	/*	MP ?????
+	if ( gameLocal.isClient ) {
+		return;
+	}
+	*/
+	idMat3 axis;
+	idVec3 origin;	//, linear_velocity, angular_velocity;
+	idEntity *ent;
+
+	GetJointWorldTransform( ejectReloadJoint, gameLocal.time, origin, axis );
+	//origin.z += 10;
+
+	gameLocal.SpawnEntityDef( brassReloadDict, &ent, false );
+	if ( !ent || !ent->IsType( idDebris::Type ) ) {
+		gameLocal.Error( "not an idDebris ai def_ejectReloadBrass" );
+	}
+	idDebris *debris = static_cast<idDebris *>(ent);
+	debris->Create( this, origin, axis );
+	debris->Launch();
+	debris->GetPhysics()->SetOrigin( origin );
+	debris->GetPhysics()->SetAxis( axis );
+}
+
+// ########################################################################### END SR
+
+
 
 /*
 =====================

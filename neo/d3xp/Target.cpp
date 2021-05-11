@@ -659,7 +659,7 @@ void idTarget_GiveEmail::Event_Activate( idEntity *activator ) {
 	if ( pda ) {
 		player->GiveEmail( spawnArgs.GetString( "email" ) );
 	} else {
-		player->ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_PDANeeded" ), true );
+		player->ShowTip( spawnArgs.GetString( "text_infoTitle" ), "", spawnArgs.GetString( "text_PDANeeded" ), true );
 	}
 }
 
@@ -1615,7 +1615,7 @@ void idTarget_Tip::Event_Activate( idEntity *activator ) {
 			PostEventSec( &EV_Activate, 5.1f, activator );
 			return;
 		}
-		player->ShowTip( spawnArgs.GetString( "text_title" ), spawnArgs.GetString( "text_tip" ), false );
+		player->ShowTip( spawnArgs.GetString( "tip1" ), spawnArgs.GetString( "key" ), spawnArgs.GetString( "tip2" ), false );
 		PostEventMS( &EV_GetPlayerPos, 2000 );
 	}
 }

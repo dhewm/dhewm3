@@ -211,7 +211,7 @@ static pureExclusion_t pureExclusions[] = {
 	{ 0,	0,	NULL,											".pda",		excludeExtension },
 	{ 0,	0,	NULL,											".gui",		excludeExtension },
 	{ 0,	0,	NULL,											".pd",		excludeExtension },
-	{ 0,	0,	NULL,											".lang",	excludeExtension },
+	{ 0,	0,	NULL,											".langold",	excludeExtension },
 	{ 0,	0,	"sound/VO",										".ogg",		excludePathPrefixAndExtension },
 	{ 0,	0,	"sound/VO",										".wav",		excludePathPrefixAndExtension },
 #if	defined DOOM3_PURE_SPECIAL_CASES
@@ -1762,7 +1762,7 @@ idModList *idFileSystemLocal::ListMods( void ) {
 	}
 
 	list->mods.Insert( "" );
-	list->descriptions.Insert( "dhewm 3" );
+	list->descriptions.Insert( "Steel Storm 2" );
 
 	assert( list->mods.Num() == list->descriptions.Num() );
 

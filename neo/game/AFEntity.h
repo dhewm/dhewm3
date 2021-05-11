@@ -335,6 +335,15 @@ protected:
 	float					wheelRadius;
 	float					steerAngle;
 	float					steerSpeed;
+	//added for reading suspension info from .def file
+	float					suspensionDamp;			//Damping
+	float					suspensionKComp;		//KCompress
+	float					suspensionUpMotion;
+	float					suspensionDownMotion;
+	float					suspensionTireFriction;
+	float					vehicleVelocity;
+	float					vehicleForce;
+	//end my added stuff
 	const idDeclParticle *	dustSmoke;
 
 	float					GetSteerAngle( void );
@@ -355,6 +364,57 @@ public:
 
 							idAFEntity_VehicleSimple( void );
 							~idAFEntity_VehicleSimple( void );
+
+	void					Spawn( void );
+	virtual void			Think( void );
+
+protected:
+	idClipModel *			wheelModel;
+	idAFConstraint_Suspension *	suspension[4];
+	jointHandle_t			wheelJoints[4];
+	float					wheelAngles[4];
+};
+
+/*
+===============================================================================
+
+idAFEntity_VehicleSimple_4wd
+
+===============================================================================
+*/
+
+class idAFEntity_VehicleSimple_4wd : public idAFEntity_Vehicle {
+public:
+	CLASS_PROTOTYPE( idAFEntity_VehicleSimple_4wd );
+
+							idAFEntity_VehicleSimple_4wd( void );
+							~idAFEntity_VehicleSimple_4wd( void );
+
+	void					Spawn( void );
+	virtual void			Think( void );
+
+protected:
+	//idAFBody *				wheels[4];
+	idClipModel *			wheelModel;
+	idAFConstraint_Suspension *	suspension[4];
+	jointHandle_t			wheelJoints[4];
+	float					wheelAngles[4];
+};
+
+/*
+===============================================================================
+
+idAFEntity_VehicleSimple_2 wheels
+
+===============================================================================
+*/
+
+class idAFEntity_VehicleSimple_2 : public idAFEntity_Vehicle {
+public:
+	CLASS_PROTOTYPE( idAFEntity_VehicleSimple_2 );
+
+							idAFEntity_VehicleSimple_2( void );
+							~idAFEntity_VehicleSimple_2( void );
 
 	void					Spawn( void );
 	virtual void			Think( void );

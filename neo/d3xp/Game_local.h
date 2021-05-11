@@ -168,6 +168,14 @@ typedef struct {
 
 //============================================================================
 
+//Portal sky begins
+enum {
+	PORTALSKY_STANDARD = 0,			// classic portalsky
+	PORTALSKY_GLOBAL = 1,			// always following portal sky
+	PORTALSKY_LOCAL = 2,			// following portal sky from a spot
+};
+//Portal sky ends
+
 class idEventQueue {
 public:
 	typedef enum {
@@ -321,11 +329,24 @@ public:
 	int						lastGUI;				// last GUI on the lastGUIEnt
 
 #ifdef _D3XP
-	idEntityPtr<idEntity>	portalSkyEnt;
+	//Portal sky begins
+        idEntityPtr<idEntity>	                portalSkyEnt;
 	bool					portalSkyActive;
+	bool					globalPortalSky;	
+	int					portalSkyScale;		
+	int					currentPortalSkyType;	//0 = classic, 1 = global, 2 = local 
+	idVec3					portalSkyOrigin;	
+	idVec3					portalSkyGlobalOrigin;	
+	idVec3					playerOldEyePos;	
 
 	void					SetPortalSkyEnt( idEntity *ent );
 	bool					IsPortalSkyAcive();
+
+	bool					CheckGlobalPortalSky();	
+	void					SetGlobalPortalSky(const char *name);
+	void					SetCurrentPortalSkyType(int type);	// 0 = classic, 1 = global, 2 = local
+	int					GetCurrentPortalSkyType();	//0 = classic, 1 = global, 2 = local
+	//Portal sky ends
 
 	timeState_t				fast;
 	timeState_t				slow;
@@ -348,6 +369,9 @@ public:
 
 	bool					NeedRestart();
 #endif
+	// music volume control begins
+	idList<int>				musicSpeakers;
+	// music volume control ends
 
 	void					Tokenize( idStrList &out, const char *in );
 
@@ -398,7 +422,7 @@ public:
 	virtual void				GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] );
 
 	// ---------------------- Public idGameLocal Interface -------------------
-
+	
 	void					Printf( const char *fmt, ... ) const id_attribute((format(printf,2,3)));
 	void					DPrintf( const char *fmt, ... ) const id_attribute((format(printf,2,3)));
 	void					Warning( const char *fmt, ... ) const id_attribute((format(printf,2,3)));
@@ -446,7 +470,9 @@ public:
 	bool					InPlayerPVS( idEntity *ent ) const;
 	bool					InPlayerConnectedArea( idEntity *ent ) const;
 #ifdef _D3XP
+	// Portal sky begins
 	pvsHandle_t				GetPlayerPVS()			{ return playerPVS; };
+	// Portal sky ends
 #endif
 
 	void					SetCamera( idCamera *cam );
@@ -690,7 +716,7 @@ ID_INLINE int idEntityPtr<type>::GetEntityNum( void ) const {
 
 //
 // these defines work for all startsounds from all entity types
-// make sure to change script/doom_defs.script if you add any channels, or change their order
+// make sure to change script/steelstorm2_defs.script if you add any channels, or change their order
 //
 typedef enum {
 	SND_CHANNEL_ANY = SCHANNEL_ANY,

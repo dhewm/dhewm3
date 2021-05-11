@@ -542,9 +542,7 @@ void idRenderSystemLocal::SetBackEndRenderer() {
 	if ( !r_renderer.IsModified() ) {
 		return;
 	}
-
-	bool oldVPstate = backEndRendererHasVertexPrograms;
-
+		
 	backEndRenderer = BE_BAD;
 
 	if ( idStr::Icmp( r_renderer.GetString(), "arb2" ) == 0 ) {
@@ -560,30 +558,18 @@ void idRenderSystemLocal::SetBackEndRenderer() {
 			backEndRenderer = BE_ARB2;
 		}
 	}
-
-	backEndRendererHasVertexPrograms = false;
+		
 	backEndRendererMaxLight = 1.0;
 
 	switch( backEndRenderer ) {
 	case BE_ARB2:
-		common->Printf( "using ARB2 renderSystem\n" );
-		backEndRendererHasVertexPrograms = true;
+		common->Printf( "using ARB2 renderSystem\n" );		
 		backEndRendererMaxLight = 999;
 		break;
 	default:
 		common->FatalError( "SetbackEndRenderer: bad back end" );
 	}
-
-	// clear the vertex cache if we are changing between
-	// using vertex programs and not, because specular and
-	// shadows will be different data
-	if ( oldVPstate != backEndRendererHasVertexPrograms ) {
-		vertexCache.PurgeAll();
-		if ( primaryWorld ) {
-			primaryWorld->FreeInteractions();
-		}
-	}
-
+	
 	r_renderer.ClearModified();
 }
 

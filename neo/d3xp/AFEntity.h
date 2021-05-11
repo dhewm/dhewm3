@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Entity.h"
 #include "AF.h"
 
+#include "Light.h"	
+
 /*
 ===============================================================================
 
@@ -159,6 +161,11 @@ public:
 	void					Save( idSaveGame *savefile ) const;
 	void					Restore( idRestoreGame *savefile );
 
+	//ivan start
+	//recreate dynamically-added constraints to 'constraints' while physics obejct is being restored
+	virtual void			RecreateDynamicConstraints( idList<idAFConstraint *> *constraints );
+	//ivan end
+	
 	virtual void			Think( void );
 	virtual void			GetImpactInfo( idEntity *ent, int id, const idVec3 &point, impactInfo_t *info );
 	virtual void			ApplyImpulse( idEntity *ent, int id, const idVec3 &point, const idVec3 &impulse );
@@ -191,6 +198,7 @@ public:
 	virtual void			ShowEditingDialog( void );
 
 	static void				DropAFs( idEntity *ent, const char *type, idList<idEntity *> *list );
+	
 
 protected:
 	idAF					af;				// articulated figure
@@ -201,6 +209,7 @@ protected:
 	int						nextSoundTime;	// next time this can make a sound
 
 	void					Event_SetConstraintPosition( const char *name, const idVec3 &pos );
+	
 };
 
 /*
@@ -343,14 +352,95 @@ public:
 
 	void					Spawn( void );
 	void					Use( idPlayer *player );
+	virtual void			Init();
+	// ########################################################## SR	
 
-protected:
-	idPlayer *				player;
+	void 					HitObject( void );	// const trace_t &collision, const idVec3 &velocity  );
+	void					FireBullet( void );	
+	void					FireBomb( void );	
+	void 					Aim( void );							
+	void					Save( idSaveGame *savefile ) const;	
+	void					Restore( idRestoreGame *savefile );	
+	int						GetZoomFov( void );
+	void 					LightOnOff( void );
+	bool					lightOn;
+
+	jointHandle_t			aimJoint;	
+	jointHandle_t			turnJoint;	
+	jointHandle_t			fireJoint;
+	jointHandle_t			barrelJoint;	
+	
 	jointHandle_t			eyesJoint;
 	jointHandle_t			steeringWheelJoint;
+	
+	jointHandle_t			headlightJoint;	
+	jointHandle_t			exhaustJoint1;	
+	jointHandle_t			exhaustJoint2;
+	jointHandle_t			exhaustJoint3;
+	jointHandle_t			exhaustJoint4;
+	
+	idEntityPtr<idPlayer>	player;
+	
+	// ####################################################### SR END
+	
+protected:
+
+// ############################################################# SR	
+
+	bool					netSyncPhysics; 
+	bool					isAccelerating; 
+	bool					isDecelerating; 
+	
+	void 					TireTrack( const idVec3 &origin, float size, float angle, const char *material );
+	void 					LaunchProjectile( float spread, const char *projSound );	
+	
+	int						zoomFov;	
+	int 					accelTime;
+	
+	idDict					brassDict;
+	int						brassDelay;
+	jointHandle_t			ejectJointView;
+	
+	idMat3					muzzleAxis;
+	idVec3					muzzleOrigin;
+	idVec3					oldOrigin;
+	idPhysics_AF				physicsObj;
+	idDict 					projectileDict;
+	idDict 					bulletDict;
+	idDict 					bombDict;
+	
+	idEntityPtr<idLight>		headlight;
+	idEntityPtr<idLight> 	headlighta;
+
+	idRotation 				barrelRotation;
+	const idDeclParticle *	dustSmoke2;
+	const idDeclParticle *	gunSmoke;
+	const idDeclParticle *	exhaustSmoke;
+	const idDeclEntityDef *	vehicleDef;		
+	float					fireTime;
+	float 					fireDelay;
+	float					nextTrackTime;
+	float 					maxSteerAngle;
+	float 					shutDown;
+	float 					brakes;
+	
+	float					vehicleVelocity;
+	float					vehicleForce;
+	float					vehicleSuspensionUp;
+	float					vehicleSuspensionDown;
+	float					vehicleSuspensionKCompress;
+	float					vehicleSuspensionDamping;
+	float					vehicleTireFriction;	
+	
+	
+// ######################################################## SR END		
+
+	//idPlayer *				player;
+	
 	float					wheelRadius;
 	float					steerAngle;
 	float					steerSpeed;
+
 	const idDeclParticle *	dustSmoke;
 
 	float					GetSteerAngle( void );
@@ -371,6 +461,77 @@ public:
 
 							idAFEntity_VehicleSimple( void );
 							~idAFEntity_VehicleSimple( void );
+
+	void					Spawn( void );
+	virtual void			Think( void );
+
+protected:
+	idClipModel *			wheelModel;
+	idAFConstraint_Suspension *	suspension[4];
+	jointHandle_t			wheelJoints[4];
+	float					wheelAngles[4];
+};
+
+/*
+===============================================================================
+
+idAFEntity_VehicleSimple_4wd
+
+===============================================================================
+*/
+
+class idAFEntity_VehicleSimple_4wd : public idAFEntity_Vehicle {
+public:
+	CLASS_PROTOTYPE( idAFEntity_VehicleSimple_4wd );
+
+							idAFEntity_VehicleSimple_4wd( void );
+							~idAFEntity_VehicleSimple_4wd( void );
+
+	void					Spawn( void );
+	virtual void			Think( void );
+	
+	// ############### SR
+	virtual void			WriteToSnapshot( idBitMsgDelta &msg ) const;
+	virtual void			ReadFromSnapshot( const idBitMsgDelta &msg );	
+	virtual void			ClientPredictionThink( void );
+	float					bvelocity;
+	float					bforce;
+	// ############### END	
+
+	//ivan start
+	void					Save( idSaveGame *savefile ) const;
+	void					Restore( idRestoreGame *savefile );
+	virtual void			RecreateDynamicConstraints( idList<idAFConstraint *> *constraints );
+	//ivan end
+
+protected:
+	//idAFBody *				wheels[4];
+	idClipModel *			wheelModel;
+	idAFConstraint_Suspension *	suspension[4];
+	jointHandle_t			wheelJoints[4];
+	float					wheelAngles[4];
+	
+	float					tempAngles[4];	// #### SR
+	idVec3 					wheelorigin[4];	// #### SR
+	
+	virtual bool			Collide( const trace_t &collision, const idVec3 &velocity ); // #########  SR
+	
+};
+
+/*
+===============================================================================
+
+idAFEntity_VehicleSimple_2 wheels
+
+===============================================================================
+*/
+
+class idAFEntity_VehicleSimple_2 : public idAFEntity_Vehicle {
+public:
+	CLASS_PROTOTYPE( idAFEntity_VehicleSimple_2 );
+
+							idAFEntity_VehicleSimple_2( void );
+							~idAFEntity_VehicleSimple_2( void );
 
 	void					Spawn( void );
 	virtual void			Think( void );

@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 //===============================================================
 
 #if defined(_MSC_VER) && defined(_M_IX86)
-
+//#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 /*
 ============
 idSIMD_3DNow::GetName

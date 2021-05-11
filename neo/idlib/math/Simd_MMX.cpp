@@ -47,6 +47,7 @@ const char * idSIMD_MMX::GetName( void ) const {
 }
 
 #elif defined(_MSC_VER) && defined(_M_IX86)
+//#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 
 #define EMMS_INSTRUCTION		__asm emms
 

@@ -5442,6 +5442,7 @@ void idPlayer::Spectate( bool spectate ) {
 	assert( ( teleportEntity.GetEntity() != NULL ) || ( IsHidden() == spectating ) );
 
 	if ( spectating == spectate ) {
+
 		return;
 	}
 
@@ -6394,6 +6395,10 @@ void idPlayer::Think( void ) {
 		}
 		gameLocal.Printf( "%d: enemies\n", num );
 	}
+	//Portal sky begins
+	// determine if portal sky is in pvs
+	gameLocal.portalSkyActive = gameLocal.pvs.CheckAreasForPortalSky( gameLocal.GetPlayerPVS(), GetPhysics()->GetOrigin() );
+	//Portal sky ends
 }
 
 /*
@@ -7923,6 +7928,12 @@ void idPlayer::ClientPredictionThink( void ) {
 	if ( gameLocal.isNewFrame && entityNumber == gameLocal.localClientNum ) {
 		playerView.CalculateShake();
 	}
+	//Portal sky begins
+	// determine if portal sky is in pvs
+	pvsHandle_t	clientPVS = gameLocal.pvs.SetupCurrentPVS( GetPVSAreas(), GetNumPVSAreas() );
+	gameLocal.portalSkyActive = gameLocal.pvs.CheckAreasForPortalSky( clientPVS, GetPhysics()->GetOrigin() );
+	gameLocal.pvs.FreeCurrentPVS( clientPVS );
+	//Portal sky ends
 }
 
 /*

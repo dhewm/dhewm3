@@ -1423,6 +1423,7 @@ void idPVS::ReadPVS( const pvsHandle_t handle, const idBitMsg &msg ) {
 
 
 #ifdef _D3XP
+//Portal sky begins
 /*
 ================
 idPVS::CheckAreasForPortalSky
@@ -1438,6 +1439,14 @@ bool idPVS::CheckAreasForPortalSky( const pvsHandle_t handle, const idVec3 &orig
 	sourceArea = gameRenderWorld->PointInArea( origin );
 
 	if ( sourceArea == -1 ) {
+
+		// this is the case where the player is not in any AAS area; 
+		// this is, he is in noclip mode out of the map. let's do a global/local PS check!
+		
+		if ( gameLocal.CheckGlobalPortalSky() || ( gameLocal.GetCurrentPortalSkyType() == PORTALSKY_LOCAL ) ) {
+			//this is... if the current PS is local, or there exist a global PS in the map, even if it's not current...
+			return true;	// in any one of those cases keep callculating for the global or the local portalSky 
+		}
 		return false;
 	}
 
@@ -1452,6 +1461,15 @@ bool idPVS::CheckAreasForPortalSky( const pvsHandle_t handle, const idVec3 &orig
 		}
 	}
 
+	// here if the player is in an unreachable AAS like inisde a sealed room, where he teleports in,
+	// the function will return false. so let's repeat the global/local PS check!
+
+	
+	if ( gameLocal.CheckGlobalPortalSky()  || ( gameLocal.GetCurrentPortalSkyType() == PORTALSKY_LOCAL ) ) {
+		//this is... if the current PS is local, or there exist a global PS in the map, even if it's not current...
+		return true;	// in any one of those cases keep callculating for the global or the local portalSky 
+	}
 	return false;
 }
+//Portal sky ends
 #endif

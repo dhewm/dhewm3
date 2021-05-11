@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "physics/Physics_Parametric.h"
 #include "Entity.h"
 
+
 extern const idEventDef EV_TeamBlocked;
 extern const idEventDef EV_PartBlocked;
 extern const idEventDef EV_ReachedPos;
@@ -65,6 +66,10 @@ public:
 	virtual void			Show( void );
 
 	void					SetPortalState( bool open );
+	
+	float					move_speed;	// ######################## SR
+	void					MoveToPos( const idVec3 &pos);	// #################### SR
+	bool					moving;	// ###################### SR
 
 protected:
 	typedef enum {
@@ -82,7 +87,7 @@ protected:
 	} moverCommand_t;
 
 	//
-	// mover directions.  make sure to change script/doom_defs.script if you add any, or change their order
+	// mover directions.  make sure to change script/steelstorm2_defs.script if you add any, or change their order
 	//
 	typedef enum {
 		DIR_UP				= -1,
@@ -121,7 +126,7 @@ protected:
 	void					Event_ClosePortal( void );
 	void					Event_PartBlocked( idEntity *blockingEntity );
 
-	void					MoveToPos( const idVec3 &pos);
+	//void					MoveToPos( const idVec3 &pos);	// ###### made public
 	void					UpdateMoveSound( moveStage_t stage );
 	void					UpdateRotationSound( moveStage_t stage );
 	void					SetGuiStates( const char *state );
@@ -143,7 +148,7 @@ private:
 	idAngles				angle_delta;
 	idVec3					dest_position;
 	idVec3					move_delta;
-	float					move_speed;
+	//float					move_speed;
 	int						move_time;
 	int						deceltime;
 	int						acceltime;

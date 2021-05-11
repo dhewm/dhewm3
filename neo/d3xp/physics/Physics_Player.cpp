@@ -636,6 +636,8 @@ void idPhysics_Player::AirMove( void ) {
 		current.velocity.ProjectOntoPlane( groundTrace.c.normal, OVERCLIP );
 	}
 
+	ladderJumping = true;	// ############################################## SR
+	
 	idPhysics_Player::SlideMove( true, false, false, false );
 }
 
@@ -669,6 +671,7 @@ void idPhysics_Player::WalkMove( void ) {
 		}
 		return;
 	}
+	
 
 	idPhysics_Player::Friction();
 
@@ -856,6 +859,21 @@ void idPhysics_Player::LadderMove( void ) {
 	float	wishspeed, scale;
 	float	upscale;
 
+	// ######################################### SR
+	if ( idPhysics_Player::CheckJump() ) {
+		// jumping off ladder
+		laddering = false;
+		ladderJumping = true;
+		idPhysics_Player::AirMove();
+		return;
+	}
+	
+	if ( ladderWeapon ) {
+		return;
+	}
+	// ######################################### END SR
+
+	
 	// stick to the ladder
 	wishvel = -100.0f * ladderNormal;
 	current.velocity = (gravityNormal * current.velocity) * gravityNormal + wishvel;
@@ -1033,6 +1051,8 @@ void idPhysics_Player::CheckGround( void ) {
 	groundPlane = true;
 	walking = true;
 
+	ladderJumping = false;	// ############################################## SR
+	
 	// hitting solid ground will end a waterjump
 	if ( current.movementFlags & PMF_TIME_WATERJUMP ) {
 		current.movementFlags &= ~( PMF_TIME_WATERJUMP | PMF_TIME_LAND );
@@ -1123,7 +1143,8 @@ void idPhysics_Player::CheckLadder( void ) {
 	idVec3		forward, start, end;
 	trace_t		trace;
 	float		tracedist;
-
+	
+	
 	if ( current.movementTime ) {
 		return;
 	}
@@ -1137,16 +1158,62 @@ void idPhysics_Player::CheckLadder( void ) {
 	forward = viewForward - (gravityNormal * viewForward) * gravityNormal;
 	forward.Normalize();
 
-	if ( walking ) {
+	if ( walking || ladderJumping ) {
 		// don't want to get sucked towards the ladder when still walking
 		tracedist = 1.0f;
 	} else {
 		tracedist = 48.0f;
 	}
 
+	
+	// ################################ SR
+	
+	if ( laddering ) {
+		laddering = false;
+		end = current.origin + tracedist * ladderDir;
+		gameLocal.clip.Translation( trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
+		if ( trace.fraction < 1.0f ) {
+			if ( trace.c.material && ( trace.c.material->GetSurfaceFlags() & SURF_LADDER ) ) {
+				end = current.origin - gravityNormal * ( maxStepHeight * 0.75f );
+				gameLocal.clip.Translation( trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
+				start = trace.endpos;
+				end = start + tracedist * ladderDir;
+				gameLocal.clip.Translation( trace, start, end, clipModel, clipModel->GetAxis(), clipMask, self );
+				if ( trace.fraction < 1.0f ) {
+					if ( trace.c.material && trace.c.material->GetSurfaceFlags() & SURF_LADDER ) {
+						ladder = true;
+						laddering = true;
+						ladderWeapon = true;
+						float playerYaw = forward.ToAngles().yaw;
+						ladderYaw = ladderNormal.ToAngles().yaw;
+						if ( ladderYaw <= ladderWeaponAng ) {
+							ladderYaw = 360.0f - ladderYaw;
+							playerYaw = 360.0f - playerYaw;
+						}	
+						float ladderGap = playerYaw - ladderYaw;
+						if ( ladderGap > ( 360.0f - ladderWeaponAng ) || ladderGap < -( 360.0f - ladderWeaponAng ) ) {
+							playerYaw = 360.0f - playerYaw;
+							ladderGap = playerYaw - ladderYaw;
+						}	
+						if ( ( ladderGap > ladderWeaponAng ) || ( ladderGap < -ladderWeaponAng ) ) {
+							ladderWeapon = false;
+						}		
+					} 
+				}
+			}
+		}	
+		return;
+	}
+	
+	// ################################ END SR
+	
+	
+	
+	
 	end = current.origin + tracedist * forward;
 	gameLocal.clip.Translation( trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
 
+	
 	// if near a surface
 	if ( trace.fraction < 1.0f ) {
 
@@ -1167,6 +1234,12 @@ void idPhysics_Player::CheckLadder( void ) {
 				if ( trace.c.material && trace.c.material->GetSurfaceFlags() & SURF_LADDER ) {
 					ladder = true;
 					ladderNormal = trace.c.normal;
+					
+						// ######################## SR
+					laddering = true;
+					ladderJumping = false;
+					ladderDir = -ladderNormal;
+						// ######################## END SR
 				}
 			}
 		}
@@ -1198,12 +1271,23 @@ bool idPhysics_Player::CheckJump( void ) {
 
 	groundPlane = false;		// jumping away
 	walking = false;
+	
 	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
 
-	addVelocity = 2.0f * maxJumpHeight * -gravityVector;
-	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
-	current.velocity += addVelocity;
-
+	
+	
+	// ############################################ SR
+	if ( laddering ) {
+		addVelocity = 2.0f * ladderJumpHeight * -gravityVector;
+		addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
+		addVelocity += viewForward * ladderJumpDist;
+		current.velocity = addVelocity;
+	} else {	// ############################### END
+		addVelocity = 2.0f * maxJumpHeight * -gravityVector;
+		addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
+		current.velocity += addVelocity;
+	}
+	
 	return true;
 }
 
@@ -1325,7 +1409,7 @@ void idPhysics_Player::MovePlayer( int msec ) {
 	walking = false;
 	groundPlane = false;
 	ladder = false;
-
+	
 	// determine the time
 	framemsec = msec;
 	frametime = framemsec * 0.001f;
@@ -1388,7 +1472,7 @@ void idPhysics_Player::MovePlayer( int msec ) {
 
 	// set clip model size
 	idPhysics_Player::CheckDuck();
-
+	
 	// handle timers
 	idPhysics_Player::DropTimers();
 
@@ -1426,6 +1510,22 @@ void idPhysics_Player::MovePlayer( int msec ) {
 	current.velocity += current.pushVelocity;
 	current.pushVelocity.Zero();
 }
+
+
+// ############################################### SR
+
+/*
+================
+idPhysics_Player::SetLadderJumpDist
+================
+*/
+void idPhysics_Player::SetLadderJumpDist( const float newLadderJumpDist, const float newLadderJumpHeight, const float newLadderWeaponAng ) {
+	ladderJumpDist = newLadderJumpDist;
+	ladderJumpHeight = newLadderJumpHeight;
+	ladderWeaponAng = newLadderWeaponAng;
+}
+
+// ############################################### END SR
 
 /*
 ================
@@ -1520,6 +1620,17 @@ idPhysics_Player::idPhysics_Player( void ) {
 	ladderNormal.Zero();
 	waterLevel = WATERLEVEL_NONE;
 	waterType = 0;
+	
+	// ##################### SR
+	laddering = false;
+	ladderWeapon = false;
+	ladderJumping = false;
+	ladderJumpDist = 300.0f;
+	ladderJumpHeight = 64.0f;	
+	ladderWeaponAng = 0.0f;
+	ladderYaw = 0.0f;
+	ladderDir.Zero();
+	// ######################
 }
 
 /*
@@ -1589,6 +1700,17 @@ void idPhysics_Player::Save( idSaveGame *savefile ) const {
 
 	savefile->WriteInt( (int)waterLevel );
 	savefile->WriteInt( waterType );
+	
+	// ####################################### SR
+	savefile->WriteBool( laddering );
+	savefile->WriteBool( ladderJumping );
+	savefile->WriteBool( ladderWeapon );	
+	savefile->WriteFloat( ladderJumpDist );
+	savefile->WriteFloat( ladderJumpHeight );	
+	savefile->WriteFloat( ladderWeaponAng );	
+	savefile->WriteFloat( ladderYaw );
+	savefile->WriteVec3( ladderDir );
+	// #################
 }
 
 /*
@@ -1626,6 +1748,17 @@ void idPhysics_Player::Restore( idRestoreGame *savefile ) {
 
 	savefile->ReadInt( (int &)waterLevel );
 	savefile->ReadInt( waterType );
+	
+	// ########################################### SR
+	savefile->ReadBool( laddering );
+	savefile->ReadBool( ladderJumping );
+	savefile->ReadBool( ladderWeapon );
+	savefile->ReadFloat( ladderJumpDist );
+	savefile->ReadFloat( ladderJumpHeight );
+	savefile->ReadFloat( ladderWeaponAng );	
+	savefile->ReadFloat( ladderYaw );
+	savefile->ReadVec3( ladderDir );
+		// ########################
 }
 
 /*

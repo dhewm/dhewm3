@@ -33,6 +33,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Mover.h"
 
+
+#include "framework/Common.h"
+
+
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
 // a mover will update any gui entities in it's target list with
@@ -380,6 +384,8 @@ void idMover::Spawn( void ) {
 	if ( health ) {
 		fl.takedamage = true;
 	}
+	
+	moving = false;	// ########################### SR
 
 }
 
@@ -615,7 +621,7 @@ void idMover::DoneMoving( void ) {
 		// set our final position so that we get rid of any numerical inaccuracy
 		physicsObj.SetLinearExtrapolation( EXTRAPOLATION_NONE, 0, 0, dest_position, vec3_origin, vec3_origin );
 	}
-
+	moving = false;
 	lastCommand	= MOVER_NONE;
 	idThread::ObjectMoveDone( move_thread, this );
 	move_thread = 0;
@@ -1083,6 +1089,7 @@ idMover::MoveToPos
 */
 void idMover::MoveToPos( const idVec3 &pos ) {
 	dest_position = GetLocalCoordinates( pos );
+	moving = true; // ############################# SR
 	BeginMove( NULL );
 }
 
@@ -2423,14 +2430,20 @@ void idMover_Binary::UpdateMoverSound( moverState_t state ) {
 	if ( moveMaster == this ) {
 		switch( state ) {
 			case MOVER_POS1:
+				StopSound( SND_CHANNEL_BODY2, false );	// ################################## SR
+				StartSound( "snd_stop", SND_CHANNEL_BODY, 0, false, NULL );	// ########## SR
 				break;
 			case MOVER_POS2:
+				StopSound( SND_CHANNEL_BODY2, false );	// ################################## SR
+				StartSound( "snd_stop", SND_CHANNEL_BODY, 0, false, NULL );	// ########## SR
 				break;
 			case MOVER_1TO2:
-				StartSound( "snd_open", SND_CHANNEL_ANY, 0, false, NULL );
+				StartSound( "snd_start", SND_CHANNEL_ANY, 0, false, NULL );
+				StartSound( "snd_move", SND_CHANNEL_BODY2, 0, false, NULL );	// ########## SR	
 				break;
 			case MOVER_2TO1:
-				StartSound( "snd_close", SND_CHANNEL_ANY, 0, false, NULL );
+				StartSound( "snd_start", SND_CHANNEL_ANY, 0, false, NULL );
+				StartSound( "snd_move", SND_CHANNEL_BODY2, 0, false, NULL );	// ########## SR	
 				break;
 		}
 	}
@@ -3861,6 +3874,16 @@ void idDoor::Event_Touch( idEntity *other, trace_t *trace ) {
 		return;
 	}
 
+	// ################### SR	
+	idPlayer	*p;								
+	p = static_cast< idPlayer * >( other );		
+	if ( IsNoTouch() && moverState == MOVER_POS1 && p->showhints ) {
+		p->ShowTip( "Press", "_impulse40", "to open unlocked doors", true );
+	}
+	
+	// ################### END SR
+
+
 	if ( trigger && trace->c.id == trigger->GetId() ) {
 		if ( !IsNoTouch() && !IsLocked() && GetMoverState() != MOVER_1TO2 ) {
 #ifdef _D3XP
@@ -3936,6 +3959,7 @@ void idDoor::Event_Activate( idEntity *activator ) {
 		old_lock = spawnArgs.GetInt( "locked" );
 		Lock( 0 );
 		if ( old_lock == 2 ) {
+		StartSound( "snd_unlocked", SND_CHANNEL_ANY, 0, false, NULL );	// #################################### SR
 			return;
 		}
 	}

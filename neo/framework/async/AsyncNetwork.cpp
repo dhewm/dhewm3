@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <SDL.h>
+
 #include "sys/platform.h"
 #include "idlib/LangDict.h"
 #include "framework/Console.h"
@@ -171,7 +173,10 @@ idAsyncNetwork::RunFrame
 ==================
 */
 void idAsyncNetwork::RunFrame( void ) {
-	if ( console->Active() ) {
+	// not only release mouse when editors run from the game, but also from the cmd line
+	if ( console->Active() 
+		|| ( com_editors & (EDITOR_RADIANT | EDITOR_GUI) )
+		|| (SDL_GetAppState() & SDL_APPINPUTFOCUS) == 0) {
 		Sys_GrabMouseCursor( false );
 		usercmdGen->InhibitUsercmd( INHIBIT_ASYNC, true );
 	} else {

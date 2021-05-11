@@ -96,7 +96,7 @@ typedef enum {
 
 //
 // status results from move commands
-// make sure to change script/doom_defs.script if you add any, or change their order
+// make sure to change script/steelstorm2_defs.script if you add any, or change their order
 //
 typedef enum {
 	MOVE_STATUS_DONE,

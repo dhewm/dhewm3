@@ -1553,7 +1553,7 @@ On exit, the idImage will have a valid OpenGL texture number that can be bound
 ===============
 */
 void	idImage::ActuallyLoadImage( bool checkForPrecompressed, bool fromBackEnd ) {
-	int		width, height;
+	unsigned int		width, height;
 	byte	*pic;
 
 	// this is the ONLY place generatorFunction will ever be called
@@ -1895,6 +1895,16 @@ This should just be part of copyFramebuffer once we have a proper image type fie
 void idImage::CopyDepthbuffer( int x, int y, int imageWidth, int imageHeight ) {
 	Bind();
 
+// ink stuff begins
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+
+	qglCopyTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, x, y, imageWidth, imageHeight, 0 );
+// ink stuff ends
+
+/*
 	// if the size isn't a power of 2, the image must be increased in size
 	int	potWidth, potHeight;
 
@@ -1923,6 +1933,7 @@ void idImage::CopyDepthbuffer( int x, int y, int imageWidth, int imageHeight ) {
 
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+*/
 }
 
 /*

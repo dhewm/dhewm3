@@ -48,6 +48,7 @@ const char * idSIMD_SSE3::GetName( void ) const {
 }
 
 #elif defined(_MSC_VER) && defined(_M_IX86)
+//#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 
 #include <xmmintrin.h>
 
@@ -218,19 +219,6 @@ const char * idSIMD_SSE3::GetName( void ) const {
 	_asm _emit 0x0F									\
 	_asm _emit 0xF0									\
 	_asm _emit ( ( dst & 7 ) << 3 ) | src
-
-
-#define DRAWVERT_SIZE				60
-#define DRAWVERT_XYZ_OFFSET			(0*4)
-#define DRAWVERT_ST_OFFSET			(3*4)
-#define DRAWVERT_NORMAL_OFFSET		(5*4)
-#define DRAWVERT_TANGENT0_OFFSET	(8*4)
-#define DRAWVERT_TANGENT1_OFFSET	(11*4)
-#define DRAWVERT_COLOR_OFFSET		(14*4)
-
-#define JOINTQUAT_SIZE				(7*4)
-#define JOINTMAT_SIZE				(4*3*4)
-#define JOINTWEIGHT_SIZE			(4*4)
 
 
 /*

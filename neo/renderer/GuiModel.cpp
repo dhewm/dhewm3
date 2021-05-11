@@ -265,9 +265,13 @@ void idGuiModel::EmitFullScreen( void ) {
 
 	viewDef->floatTime = tr.frameShaderTime;
 
-	// qglOrtho( 0, 640, 480, 0, 0, 1 );		// always assume 640x480 virtual coordinates
-	viewDef->projectionMatrix[0] = 2.0f / 640.0f;
-	viewDef->projectionMatrix[5] = -2.0f / 480.0f;
+//	qglOrtho( 0, 640, 480, 0, 0, 1 );		// always assume 640x480 virtual coordinates
+//	viewDef->projectionMatrix[0] = 2.0f / 640.0f;
+//	viewDef->projectionMatrix[5] = -2.0f / 480.0f;
+// hi-def GUI patch starts
+	viewDef->projectionMatrix[0] = 2.0f / SCREEN_WIDTH;
+	viewDef->projectionMatrix[5] = -2.0f / SCREEN_HEIGHT;
+// hi-def GUI patch ends
 	viewDef->projectionMatrix[10] = -2.0f / 1.0f;
 	viewDef->projectionMatrix[12] = -1.0f;
 	viewDef->projectionMatrix[13] = 1.0f;
@@ -480,15 +484,24 @@ void idGuiModel::DrawStretchPic( float x, float y, float w, float h, float s1, f
 		h += y;
 		y = 0;
 	}
-	if ( x + w > 640 ) {
+/*	if ( x + w > 640 ) {
 		s2 -= ( s2 - s1 ) * ( x + w - 640 ) / w;
 		w = 640 - x;
 	}
 	if ( y + h > 480 ) {
 		t2 -= ( t2 - t1 ) * ( y + h - 480 ) / h;
 		h = 480 - y;
+	} */
+// hi-def GUI patch starts
+	if ( x + w > SCREEN_WIDTH ) {
+		s2 -= ( s2 - s1 ) * ( x + w - SCREEN_WIDTH ) / w;
+		w = SCREEN_WIDTH - x;
 	}
-
+	if ( y + h > SCREEN_HEIGHT ) {
+		t2 -= ( t2 - t1 ) * ( y + h - SCREEN_HEIGHT ) / h;
+		h = SCREEN_HEIGHT - y;
+	}
+// hi-def GUI patch ends
 	if ( w <= 0 || h <= 0 ) {
 		return;		// completely clipped away
 	}
@@ -556,7 +569,10 @@ void idGuiModel::DrawStretchPic( float x, float y, float w, float h, float s1, f
 	verts[3].tangents[1][1] = 1;
 	verts[3].tangents[1][2] = 0;
 
-	DrawStretchPic( &verts[0], &indexes[0], 4, 6, hShader, false, 0.0f, 0.0f, 640.0f, 480.0f );
+//	DrawStretchPic( &verts[0], &indexes[0], 4, 6, hShader, false, 0.0f, 0.0f, 640.0f, 480.0f );
+// hi-def GUI patch starts
+	DrawStretchPic( &verts[0], &indexes[0], 4, 6, hShader, false, 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT );
+// hi-def GUI patch ends
 }
 
 /*

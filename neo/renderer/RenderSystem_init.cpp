@@ -45,6 +45,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/win32/win_local.h"
 #endif
 
+// hi-def GUI patch starts
+//int SCREEN_WIDTH;
+//int SCREEN_HEIGHT;
+// hi-def GUI patch ends
+
 // functions that are not called every frame
 
 glconfig_t	glConfig;
@@ -73,9 +78,6 @@ idCVar r_useTurboShadow( "r_useTurboShadow", "1", CVAR_RENDERER | CVAR_BOOL, "us
 idCVar r_useTwoSidedStencil( "r_useTwoSidedStencil", "1", CVAR_RENDERER | CVAR_BOOL, "do stencil shadows in one pass with different ops on each side" );
 idCVar r_useDeferredTangents( "r_useDeferredTangents", "1", CVAR_RENDERER | CVAR_BOOL, "defer tangents calculations after deform" );
 idCVar r_useCachedDynamicModels( "r_useCachedDynamicModels", "1", CVAR_RENDERER | CVAR_BOOL, "cache snapshots of dynamic models" );
-
-idCVar r_useVertexBuffers( "r_useVertexBuffers", "1", CVAR_RENDERER | CVAR_INTEGER, "use ARB_vertex_buffer_object for vertexes", 0, 1, idCmdSystem::ArgCompletion_Integer<0,1>  );
-idCVar r_useIndexBuffers( "r_useIndexBuffers", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "use ARB_vertex_buffer_object for indexes", 0, 1, idCmdSystem::ArgCompletion_Integer<0,1>  );
 
 idCVar r_useStateCaching( "r_useStateCaching", "1", CVAR_RENDERER | CVAR_BOOL, "avoid redundant state changes in GL_*() calls" );
 idCVar r_useInfiniteFarZ( "r_useInfiniteFarZ", "1", CVAR_RENDERER | CVAR_BOOL, "use the no-far-clip-plane trick" );
@@ -225,6 +227,10 @@ idCVar r_debugRenderToTexture( "r_debugRenderToTexture", "0", CVAR_RENDERER | CV
 #define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
 #include "renderer/qgl_proc.h"
 
+// hi-def GUI patch starts
+idCVar r_screenAspectRatio( "r_screenAspectRatio", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "aspect ratio of virtual screen:\n0 = 4:3\n1 = 16:9\n2 = 16:10", 0, 2 );
+// hi-def GUI patch ends
+
 void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 void ( APIENTRY * qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
@@ -233,6 +239,7 @@ void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
 void (APIENTRY *qglTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *);
 
 void (APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void * );
+
 
 // EXT_stencil_two_side
 PFNGLACTIVESTENCILFACEEXTPROC			qglActiveStencilFaceEXT;
@@ -264,8 +271,21 @@ PFNGLGENPROGRAMSARBPROC					qglGenProgramsARB;
 PFNGLPROGRAMENVPARAMETER4FVARBPROC		qglProgramEnvParameter4fvARB;
 PFNGLPROGRAMLOCALPARAMETER4FVARBPROC	qglProgramLocalParameter4fvARB;
 
+// ARB_framebuffer_object
+PFNGLISRENDERBUFFERPROC					qglIsRenderBuffer;
+PFNGLBINDRENDERBUFFERPROC				qglBindRenderBuffer;
+PFNGLDELETERENDERBUFFERSPROC			qglDeleteRenderBuffer;
+PFNGLGENRENDERBUFFERSPROC				qglGenFramebuffers;
+PFNGLFRAMEBUFFERTEXTURE2DPROC			qglFramebufferTexture2D;
+PFNGLFRAMEBUFFERTEXTURE3DPROC			qglFramebufferTexture3D;
+PFNGLFRAMEBUFFERRENDERBUFFERPROC		qglFramebufferRenderbuffer;
+
 // GL_EXT_depth_bounds_test
 PFNGLDEPTHBOUNDSEXTPROC                 qglDepthBoundsEXT;
+
+// ARB_map_buffer_range
+PFNGLMAPBUFFERRANGEPROC					qglMapBufferRange;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC			qglFlushMappedBufferRange;
 
 /*
 =================
@@ -384,7 +404,7 @@ static void R_CheckPortableExtensions( void ) {
 	glConfig.twoSidedStencilAvailable = R_CheckExtension( "GL_EXT_stencil_two_side" );
 	if ( glConfig.twoSidedStencilAvailable )
 		qglActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)GLimp_ExtensionPointer( "glActiveStencilFaceEXT" );
-
+	
 	// ARB_vertex_buffer_object
 	glConfig.ARBVertexBufferObjectAvailable = R_CheckExtension( "GL_ARB_vertex_buffer_object" );
 	if(glConfig.ARBVertexBufferObjectAvailable) {
@@ -428,6 +448,37 @@ static void R_CheckPortableExtensions( void ) {
 		}
 	}
 
+	// ARB_framebuffer_object
+	glConfig.ARBFrameBufferObjectAvailable = R_CheckExtension( "GL_ARB_framebuffer_object");
+	if(glConfig.ARBFrameBufferObjectAvailable) {
+		// TODO: Determine the functions that will be used from this extension.
+		qglIsRenderBuffer = (PFNGLISRENDERBUFFERPROC) GLimp_ExtensionPointer("glIsRenderBuffer");
+		qglBindRenderBuffer = (PFNGLBINDRENDERBUFFERPROC) GLimp_ExtensionPointer("glBindRenderBuffer");
+		qglDeleteRenderBuffer = (PFNGLDELETERENDERBUFFERSPROC) GLimp_ExtensionPointer("glDeleteRenderBuffer");
+		qglGenFramebuffers = (PFNGLGENRENDERBUFFERSPROC) GLimp_ExtensionPointer("glGenFramebuffers");
+		qglFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC) GLimp_ExtensionPointer("glFramebufferTexture2D");
+		qglFramebufferTexture3D = (PFNGLFRAMEBUFFERTEXTURE3DPROC) GLimp_ExtensionPointer("glFramebufferTexture3D");
+		qglFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFERPROC) GLimp_ExtensionPointer("glFramebufferRenderbuffer");
+	}
+
+	// ARB_pixel_buffer_object
+	glConfig.ARBPixelBufferObjectAvailable = R_CheckExtension( "GL_ARB_pixel_buffer_object");
+	if(glConfig.ARBPixelBufferObjectAvailable) {
+		// TODO: Determine the functions that will be used from this extension.
+	}
+
+	// GL_ARB_transform_feedback2
+	glConfig.ARBTransformFeedback2Available = R_CheckExtension( "GL_ARB_transform_feedback2");
+	if(glConfig.ARBTransformFeedback2Available) {
+		// TODO: Determine the functions that will be used from this extension.
+	}
+
+	// GL_ARB_transform_feedback3
+	glConfig.ARBTransformFeedback3Available = R_CheckExtension( "GL_ARB_transform_feedback3");
+	if(glConfig.ARBTransformFeedback3Available) {
+		// TODO: Determine the functions that will be used from this extension.
+	}
+
 	// check for minimum set
 	if ( !glConfig.multitextureAvailable || !glConfig.textureEnvCombineAvailable || !glConfig.cubeMapAvailable
 		|| !glConfig.envDot3Available ) {
@@ -440,6 +491,12 @@ static void R_CheckPortableExtensions( void ) {
 		qglDepthBoundsEXT = (PFNGLDEPTHBOUNDSEXTPROC)GLimp_ExtensionPointer( "glDepthBoundsEXT" );
 	}
 
+	// check for availability of GL_ARB_map_buffer_range extension
+	glConfig.ARBMapBufferRangeAvailable = R_CheckExtension( "GL_ARB_map_buffer_range" );
+	if ( glConfig.ARBMapBufferRangeAvailable ) {
+		qglMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)GLimp_ExtensionPointer( "glMapBufferRange" );
+		qglFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)GLimp_ExtensionPointer( "glFlushMappedBufferRange" );
+	}
 }
 
 
@@ -466,8 +523,27 @@ vidmode_t r_vidModes[] = {
 	{ "Mode  4: 800x600",		800,	600 },
 	{ "Mode  5: 1024x768",		1024,	768 },
 	{ "Mode  6: 1152x864",		1152,	864 },
-	{ "Mode  7: 1280x1024",		1280,	1024 },
-	{ "Mode  8: 1600x1200",		1600,	1200 },
+	{ "Mode  7: 1280x960",		1280,	960 },
+	{ "Mode  8: 1280x1024",		1280,	1024 },
+	{ "Mode  9: 1400x1050",		1400,	1050 },
+	{ "Mode 10: 1440x1080",		1440,	1080 },
+	{ "Mode 11: 1600x1200",		1600,	1200 },
+	{ "Mode 12: 640x360",		640,	360 },
+	{ "Mode 13: 960x540",		960,	540 },
+	{ "Mode 14: 1024x576",		1024,	576 },
+	{ "Mode 15: 1280x720",		1280,	720 },
+	{ "Mode 16: 1600x900",		1600,	900 },
+	{ "Mode 17: 1920x1080",		1920,	1080 },
+	{ "Mode 18: 2048x1152",		2048,	1152 },
+	{ "Mode 19: 2560x1440",		2560,	1440 },
+	{ "Mode 20: 768x480",		768,	480 },
+	{ "Mode 21: 1024x640",		1024,	640 },
+	{ "Mode 22: 1280x800",		1280,	800 },
+	{ "Mode 23: 1400x900",		1400,	900 },
+	{ "Mode 24: 1680x1050",		1680,	1050 },
+	{ "Mode 25: 1920x1200",		1920,	1200 },
+	{ "Mode 26: 2560x1600",		2560,	1600 },
+	{ "Mode 27: 2880x1800",		2880,	1800 },
 };
 static int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
@@ -546,6 +622,33 @@ void R_InitOpenGL( void ) {
 		parms.stereo = false;
 
 		if ( GLimp_Init( parms ) ) {
+			// hi-def GUI patch starts
+/*			int ScreenAspectRatio = r_screenAspectRatio.GetInteger();
+			switch ( ScreenAspectRatio )
+			{
+				case 0 :
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Aspect Ratio : %u \n", ScreenAspectRatio );
+					SCREEN_WIDTH = 1600;
+					SCREEN_HEIGHT = 1200;
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Width : %u \n", SCREEN_WIDTH );
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Width : %u \n", SCREEN_HEIGHT );
+					break;
+				case 1 :
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Aspect Ratio : %u \n", ScreenAspectRatio );
+					SCREEN_WIDTH = 1920;
+					SCREEN_HEIGHT = 1080;
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Width : %u \n", SCREEN_WIDTH );
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Width : %u \n", SCREEN_HEIGHT );
+					break;
+				case 2 :
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Aspect Ratio : %u \n", ScreenAspectRatio );
+					SCREEN_WIDTH = 1920;
+					SCREEN_HEIGHT = 1200;
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Width : %u \n", SCREEN_WIDTH );
+					common->Printf( " ================== ++++++++++++++++++++++ Virtual Screen Width : %u \n", SCREEN_HEIGHT );
+					break;
+			} */
+			// hi-def GUI patch ends
 			// it worked
 			break;
 		}
@@ -905,7 +1008,7 @@ void R_ReportImageDuplication_f( const idCmdArgs &args ) {
 			continue;
 		}
 		byte	*data1;
-		int		w1, h1;
+		unsigned int		w1, h1;
 
 		R_LoadImageProgram( image1->imgName, &data1, &w1, &h1, NULL );
 
@@ -937,7 +1040,7 @@ void R_ReportImageDuplication_f( const idCmdArgs &args ) {
 			}
 
 			byte	*data2;
-			int		w2, h2;
+			unsigned int		w2, h2;
 
 			R_LoadImageProgram( image2->imgName, &data2, &w2, &h2, NULL );
 
@@ -1084,7 +1187,7 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 				tr.primaryWorld->RenderScene( ref );
 				tr.EndFrame( NULL, NULL );
 			} else {
-				session->UpdateScreen();
+				session->UpdateScreen(false); // FIXME
 			}
 
 			int w = oldWidth;
@@ -1114,6 +1217,8 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 	tr.viewportOffset[1] = 0;
 	tr.tiledViewport[0] = 0;
 	tr.tiledViewport[1] = 0;
+	// restore Previous view matrix.
+	//R_SetViewMatrix( tr.primaryView);
 
 	R_StaticFree( temp );
 
@@ -1511,7 +1616,7 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 		"_pz.tga", "_nz.tga" };
 	int			outSize;
 	byte		*buffers[6];
-	int			width, height;
+	unsigned int			width, height;
 
 	if ( args.Argc() != 2 && args.Argc() != 3 ) {
 		common->Printf( "USAGE: ambientshot <basename> [size]\n" );
@@ -1689,6 +1794,7 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	common->Printf( "GL_RENDERER: %s\n", glConfig.renderer_string );
 	common->Printf( "GL_VERSION: %s\n", glConfig.version_string );
 	common->Printf( "GL_EXTENSIONS: %s\n", glConfig.extensions_string );
+
 	common->Printf( "GL_MAX_TEXTURE_SIZE: %d\n", glConfig.maxTextureSize );
 	common->Printf( "GL_MAX_TEXTURE_UNITS_ARB: %d\n", glConfig.maxTextureUnits );
 	common->Printf( "GL_MAX_TEXTURE_COORDS_ARB: %d\n", glConfig.maxTextureCoords );
@@ -1953,8 +2059,7 @@ void idRenderSystemLocal::Clear( void ) {
 	viewportOffset[1] = 0;
 	tiledViewport[0] = 0;
 	tiledViewport[1] = 0;
-	backEndRenderer = BE_BAD;
-	backEndRendererHasVertexPrograms = false;
+	backEndRenderer = BE_BAD;	
 	backEndRendererMaxLight = 1.0f;
 	ambientLightVector.Zero();
 	sortOffset = 0;
@@ -1985,6 +2090,7 @@ idRenderSystemLocal::Init
 ===============
 */
 void idRenderSystemLocal::Init( void ) {
+
 	// clear all our internal state
 	viewCount = 1;		// so cleared structures never match viewCount
 	// we used to memset tr, but now that it is a class, we can't, so

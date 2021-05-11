@@ -45,6 +45,7 @@ public:
 
 	idQuat			q;
 	idVec3			t;
+	float			w; // Padding.	
 };
 
 
@@ -89,6 +90,16 @@ public:
 private:
 	float			mat[3*4];
 };
+
+// offsets for SIMD code
+#define JOINTQUAT_SIZE				(8*4)		// sizeof( idJointQuat )
+#define JOINTQUAT_SIZE_SHIFT			5			// log2( sizeof( idJointQuat ) )
+#define JOINTQUAT_Q_OFFSET			(0*4)		// offsetof( idJointQuat, q )
+#define JOINTQUAT_T_OFFSET			(4*4)		// offsetof( idJointQuat, t )
+#define JOINTWEIGHT_SIZE				(4*4)
+#define JOINTMAT_SIZE				(4*3*4)		// sizeof( idJointMat )
+#define JOINTMAT_TYPESIZE			( 4 * 4 )
+
 
 ID_INLINE void idJointMat::SetRotation( const idMat3 &m ) {
 	// NOTE: idMat3 is transposed because it is column-major

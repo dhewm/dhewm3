@@ -2679,7 +2679,8 @@ int lwResolvePolySurfaces( lwPolygonList *polygon, lwTagList *tlist,
 {
    lwSurface **s, *st;
    int i;
-   ptrdiff_t index;
+   //ptrdiff_t index;
+   intptr_t index;
 
    if ( tlist->count == 0 ) return 1;
 
@@ -2698,7 +2699,8 @@ int lwResolvePolySurfaces( lwPolygonList *polygon, lwTagList *tlist,
    }
 
    for ( i = 0; i < polygon->count; i++ ) {
-	  index = ( ptrdiff_t ) polygon->pol[ i ].surf;
+	  //index = ( ptrdiff_t ) polygon->pol[ i ].surf;
+	  index = ( intptr_t ) polygon->pol[ i ].surf;
 	  if ( index < 0 || index > tlist->count ) return 0;
 	  if ( !s[ index ] ) {
 		 s[ index ] = lwDefaultSurface();

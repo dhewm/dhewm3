@@ -30,9 +30,14 @@ If you have questions concerning this license or the applicable additional terms
 #define	__GAMEBASE_H__
 
 // default scripts
+/*
 #define SCRIPT_DEFAULTDEFS		"script/doom_defs.script"
 #define SCRIPT_DEFAULT			"script/doom_main.script"
 #define SCRIPT_DEFAULTFUNC		"doom_main"
+*/
+#define SCRIPT_DEFAULTDEFS		"script/steelstorm2_defs.script"
+#define SCRIPT_DEFAULT			"script/steelstorm2_main.script"
+#define SCRIPT_DEFAULTFUNC		"steelstorm2_main"
 
 #define LAGO_IMG_WIDTH			64
 #define LAGO_IMG_HEIGHT			64
@@ -47,7 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // the "gameversion" client command will print this plus compile date
-#define	GAME_VERSION			"baseDOOM-1"
+#define	GAME_VERSION			"Steel Storm 2 v0.1"
 
 #define	MAX_CLIENTS				32
 #define	GENTITYNUM_BITS			12

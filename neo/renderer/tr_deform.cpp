@@ -813,7 +813,8 @@ AddTriangleToIsland_r
 
 =====================
 */
-#define	MAX_EYEBALL_TRIS	10
+//#define	MAX_EYEBALL_TRIS	10
+#define	MAX_EYEBALL_TRIS	60
 #define	MAX_EYEBALL_ISLANDS	6
 
 typedef struct {
@@ -966,27 +967,6 @@ static void R_EyeballDeform( drawSurf_t *surf ) {
 		idVec3	dir = focus - origin;
 		dir.Normalize();
 
-		const idVec3 &p1 = tri->verts[tri->indexes[islands[originIsland].tris[0]+0]].xyz;
-		const idVec3 &p2 = tri->verts[tri->indexes[islands[originIsland].tris[0]+1]].xyz;
-		const idVec3 &p3 = tri->verts[tri->indexes[islands[originIsland].tris[0]+2]].xyz;
-
-		idVec3	v1 = p2 - p1;
-		v1.Normalize();
-		idVec3	v2 = p3 - p1;
-		v2.Normalize();
-
-		// texVec[0] will be the normal to the origin triangle
-		idVec3	texVec[2];
-
-		texVec[0].Cross( v1, v2 );
-
-		texVec[1].Cross( texVec[0], dir );
-
-		for ( j = 0 ; j < 2 ; j++ ) {
-			texVec[j] -= dir * ( texVec[j] * dir );
-			texVec[j].Normalize();
-		}
-
 		// emit these triangles, generating the projected texcoords
 
 		for ( j = 0 ; j < islands[i].numTris ; j++ ) {
@@ -998,10 +978,12 @@ static void R_EyeballDeform( drawSurf_t *surf ) {
 
 				ac[index].xyz = tri->verts[index].xyz;
 
-				idVec3	local = tri->verts[index].xyz - origin;
-
-				ac[index].st[0] = 0.5 + local * texVec[0];
-				ac[index].st[1] = 0.5 + local * texVec[1];
+				ac[index].st[0] = tri->verts[index].st[0];
+				ac[index].st[0] = 2*ac[index].st[0] - 0.5;
+				ac[index].st[0] -= dir.y;
+				ac[index].st[1] = tri->verts[index].st[1];
+				ac[index].st[1] = 2*ac[index].st[1] - 0.5;
+				ac[index].st[1] += dir.z;
 			}
 		}
 	}

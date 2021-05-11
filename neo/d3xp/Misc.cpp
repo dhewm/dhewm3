@@ -765,6 +765,8 @@ void idSpring::Spawn( void ) {
 	PostEventMS( &EV_PostSpawn, 0 );
 }
 
+// FIXME: add idSpring::Save() and Restore() !
+
 /*
 ===============================================================================
 
@@ -918,6 +920,10 @@ const idEventDef EV_LaunchMissiles( "launchMissiles", "ssssdf" );
 const idEventDef EV_LaunchMissilesUpdate( "<launchMissiles>", "dddd" );
 const idEventDef EV_AnimDone( "<AnimDone>", "d" );
 const idEventDef EV_StartRagdoll( "startRagdoll" );
+
+const idEventDef EV_StartAnim( "startAnim", "s" );	// ################### SR
+const idEventDef EV_GetAName( "getAName", NULL, 's' );	// ################## SR
+
 #ifdef _D3XP
 const idEventDef EV_SetAnimation( "setAnimation", "s" );
 const idEventDef EV_GetAnimationLength( "getAnimationLength", NULL, 'f' );
@@ -933,6 +939,10 @@ CLASS_DECLARATION( idAFEntity_Gibbable, idAnimated )
 	EVENT( EV_FootstepRight,		idAnimated::Event_Footstep )
 	EVENT( EV_LaunchMissiles,		idAnimated::Event_LaunchMissiles )
 	EVENT( EV_LaunchMissilesUpdate,	idAnimated::Event_LaunchMissilesUpdate )
+	
+	EVENT( EV_StartAnim,			idAnimated::Event_StartAnim )	// ################### SR
+	EVENT( EV_GetAName,				idAnimated::Event_GetAName )	// ################### SR
+	
 #ifdef _D3XP
 	EVENT( EV_SetAnimation,			idAnimated::Event_SetAnimation )
 	EVENT( EV_GetAnimationLength,	idAnimated::Event_GetAnimationLength )
@@ -953,7 +963,7 @@ idAnimated::idAnimated() {
 	activator = NULL;
 	current_anim_index = 0;
 	num_anims = 0;
-
+	num_cycleanims = 0;	// ########## SR
 }
 
 /*
@@ -974,6 +984,7 @@ idAnimated::Save
 void idAnimated::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( current_anim_index );
 	savefile->WriteInt( num_anims );
+	savefile->WriteInt( num_cycleanims );	// ########## SR
 	savefile->WriteInt( anim );
 	savefile->WriteInt( blendFrames );
 	savefile->WriteJoint( soundJoint );
@@ -989,6 +1000,7 @@ idAnimated::Restore
 void idAnimated::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( current_anim_index );
 	savefile->ReadInt( num_anims );
+	savefile->ReadInt( num_cycleanims );	// ########## SR
 	savefile->ReadInt( anim );
 	savefile->ReadInt( blendFrames );
 	savefile->ReadJoint( soundJoint );
@@ -1029,6 +1041,7 @@ void idAnimated::Spawn( void ) {
 
 	current_anim_index = 0;
 	spawnArgs.GetInt( "num_anims", "0", num_anims );
+	spawnArgs.GetInt( "num_cycleanims", "0", num_cycleanims );
 
 	blendFrames = spawnArgs.GetInt( "blend_in" );
 
@@ -1141,6 +1154,10 @@ void idAnimated::PlayNextAnim( void ) {
 		return;
 	}
 
+	if ( current_anim_index >= num_cycleanims) {
+		return;
+	}
+	
 	Show();
 	current_anim_index++;
 
@@ -1206,7 +1223,7 @@ void idAnimated::Event_AnimDone( int animindex ) {
 	if ( ( animindex >= num_anims ) && spawnArgs.GetBool( "remove" ) ) {
 		Hide();
 		PostEventMS( &EV_Remove, 0 );
-	} else if ( spawnArgs.GetBool( "auto_advance" ) ) {
+	} else if ( spawnArgs.GetBool( "auto_advance" ) && animindex <= num_cycleanims) {
 		PlayNextAnim();
 	} else {
 		activated = false;
@@ -1276,6 +1293,54 @@ void idAnimated::Event_Start( void ) {
 	UpdateVisuals();
 	Present();
 }
+
+
+// ###################################################################### SR
+
+/*
+===============
+idAnimated::Event_StartAnim
+================
+*/
+void idAnimated::Event_StartAnim( const char *startanim ) {
+	int cycle;
+	int len;
+	int anim;
+
+	spawnArgs.GetInt( "cycle", "1", cycle );
+	anim = animator.GetAnim( startanim );
+	if ( !anim ) {
+		gameLocal.Warning( "missing anim '%s' ", startanim );
+		return;
+	}
+	animator.CycleAnim( ANIMCHANNEL_ALL, anim, gameLocal.time, FRAME2MS( blendFrames ) );
+	animator.CurrentAnim( ANIMCHANNEL_ALL )->SetCycleCount( cycle );
+
+	len = animator.CurrentAnim( ANIMCHANNEL_ALL )->PlayLength();
+	if ( len >= 0 ) {
+		PostEventMS( &EV_AnimDone, len, 1 );
+	}
+
+	// offset the start time of the shader to sync it to the game time
+	renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = -MS2SEC( gameLocal.time );
+
+	animator.ForceUpdate();
+	UpdateAnimation();
+	UpdateVisuals();
+	Present();
+}
+
+/*
+================
+idAnimated::Event_GetAName
+================
+*/
+void idAnimated::Event_GetAName( void ) {
+	idThread::ReturnString( name.c_str() );
+}
+
+// ################################################################### END SR
+
 
 /*
 ===============
@@ -1487,8 +1552,9 @@ void idStaticEntity::Spawn( void ) {
 
 	idStr model = spawnArgs.GetString( "model" );
 	if ( model.Find( ".prt" ) >= 0 ) {
-		// we want the parametric particles out of sync with each other
+			// we want the parametric particles out of sync with each other
 		renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = gameLocal.random.RandomInt( 32767 );
+
 	}
 
 	fadeFrom.Set( 1, 1, 1, 1 );
@@ -3695,11 +3761,7 @@ void idFuncMountedWeapon::Event_PostSpawn( void ) {
 	}
 }
 
-
-
-
-
-
+//Portal sky begins
 /*
 ===============================================================================
 
@@ -3737,9 +3799,18 @@ idPortalSky::Spawn
 ===============
 */
 void idPortalSky::Spawn( void ) {
+
+	if ( spawnArgs.GetInt( "type" ) == PORTALSKY_GLOBAL ) {
+		gameLocal.SetGlobalPortalSky( spawnArgs.GetString( "name" ) );
+		gameLocal.portalSkyGlobalOrigin = GetPhysics()->GetOrigin();
+	}
+	
+		
 	if ( !spawnArgs.GetBool( "triggered" ) ) {
 		PostEventMS( &EV_PostSpawn, 1 );
 	}
+
+	
 }
 
 /*
@@ -3748,6 +3819,15 @@ idPortalSky::Event_PostSpawn
 ================
 */
 void idPortalSky::Event_PostSpawn() {
+
+	gameLocal.SetCurrentPortalSkyType( spawnArgs.GetInt( "type", "0" ) );
+
+	if ( gameLocal.GetCurrentPortalSkyType() != PORTALSKY_GLOBAL ) {
+		gameLocal.portalSkyOrigin = GetPhysics()->GetOrigin();
+		// both standard and local portalSky share the origin, it's in the execution that things change.
+	}
+
+	gameLocal.portalSkyScale = spawnArgs.GetInt( "scale", "16" );	
 	gameLocal.SetPortalSkyEnt( this );
 }
 
@@ -3757,6 +3837,16 @@ idPortalSky::Event_Activate
 ================
 */
 void idPortalSky::Event_Activate( idEntity *activator ) {
+
+	gameLocal.SetCurrentPortalSkyType( spawnArgs.GetInt( "type", "0" ) );
+
+	if ( gameLocal.GetCurrentPortalSkyType() != PORTALSKY_GLOBAL ) {
+		gameLocal.portalSkyOrigin = GetPhysics()->GetOrigin();
+		// both standard and local portalSky share the origin, it's in the execution that things change.
+	}	
+
+	gameLocal.portalSkyScale = spawnArgs.GetInt( "scale", "16" );	
 	gameLocal.SetPortalSkyEnt( this );
 }
+//Portal sky ends
 #endif /* _D3XP */

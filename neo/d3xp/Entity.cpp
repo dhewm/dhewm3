@@ -120,6 +120,7 @@ const idEventDef EV_StartFx( "startFx", "s" );
 const idEventDef EV_HasFunction( "hasFunction", "s", 'd' );
 const idEventDef EV_CallFunction( "callFunction", "s" );
 const idEventDef EV_SetNeverDormant( "setNeverDormant", "d" );
+
 #ifdef _D3XP
 const idEventDef EV_SetGui ( "setGui", "ds" );
 const idEventDef EV_PrecacheGui ( "precacheGui", "s" );
@@ -194,6 +195,7 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_HasFunction,			idEntity::Event_HasFunction )
 	EVENT( EV_CallFunction,			idEntity::Event_CallFunction )
 	EVENT( EV_SetNeverDormant,		idEntity::Event_SetNeverDormant )
+	
 #ifdef _D3XP
 	EVENT( EV_SetGui,				idEntity::Event_SetGui )
 	EVENT( EV_PrecacheGui,			idEntity::Event_PrecacheGui )
@@ -2632,6 +2634,7 @@ bool idEntity::RunPhysics( void ) {
 	idEntity *	part, *blockedPart, *blockingEntity;
 	bool		moved;
 
+	blockingEntity =NULL;	// ########### SR - fix warning
 	// don't run physics if not enabled
 	if ( !( thinkFlags & TH_PHYSICS ) ) {
 		// however do update any animation controllers
@@ -3257,6 +3260,32 @@ void idEntity::DeconstructScriptObject( void ) {
 		delete thread;
 	}
 }
+
+
+// ####################################### SR
+
+/*
+================
+idEntity::RunScriptFunc
+================
+*/
+void idEntity::RunScriptFunc( const char *name ) {
+	const function_t *func;
+	
+	if ( scriptObject.HasObject() ) {
+		func = scriptObject.GetFunction( name );
+		if ( func ) {
+			idThread *thread = new idThread();
+			thread->CallFunction( this, func, true );
+			thread->DelayedStart( 0 );
+		}
+	}
+}
+
+// ####################################### END SR
+
+
+
 
 /*
 ================
@@ -4208,6 +4237,21 @@ void idEntity::Event_FadeSound( int channel, float to, float over ) {
 		refSound.referenceSound->FadeSound( channel, to, over );
 	}
 }
+
+// music volume control begins
+/*
+================
+idEntity::SetMusicVolume
+================
+*/
+void idEntity::SetMusicVolume( int channel, float to, float over ) 
+{
+	if ( spawnArgs.GetBool( "s_bgmusic" ) )
+	{
+		Event_FadeSound( channel, to, over );
+	}
+}
+// music volume control ends
 
 /*
 ================
@@ -5373,6 +5417,7 @@ void idAnimatedEntity::AddLocalDamageEffect( jointHandle_t jointNum, const idVec
 	damageEffect_t	*de;
 	idVec3 origin, dir;
 	idMat3 axis;
+	float flesh_wound_size; // SS2 wound decal size
 
 #ifdef _D3XP
 	SetTimeState ts( timeGroup );
@@ -5411,6 +5456,10 @@ void idAnimatedEntity::AddLocalDamageEffect( jointHandle_t jointNum, const idVec
 		gameLocal.BloodSplat( origin, dir, 64.0f, splat );
 	}
 
+	// SS2 wound decal size
+	spawnArgs.GetFloat( "flesh_wound_size", "20", flesh_wound_size );
+	flesh_wound_size = idMath::ClampFloat( 0.0f, 30.0f, flesh_wound_size );
+
 	// can't see wounds on the player model in single player mode
 	if ( !( IsType( idPlayer::Type ) && !gameLocal.isMultiplayer ) ) {
 		// place a wound overlay on the model
@@ -5420,7 +5469,7 @@ void idAnimatedEntity::AddLocalDamageEffect( jointHandle_t jointNum, const idVec
 			decal = def->dict.RandomPrefix( key, gameLocal.random );
 		}
 		if ( *decal != '\0' ) {
-			ProjectOverlay( origin, dir, 20.0f, decal );
+			ProjectOverlay( origin, dir, flesh_wound_size, decal ); // was 20.0f
 		}
 	}
 

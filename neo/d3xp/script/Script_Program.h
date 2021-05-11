@@ -43,7 +43,7 @@ class idEntity;
 class idSaveGame;
 class idRestoreGame;
 
-#define MAX_STRING_LEN		128
+#define MAX_STRING_LEN		512	//128 ################################################## SR
 #ifdef _D3XP
 #define MAX_GLOBALS			296608			// in bytes
 #else

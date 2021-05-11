@@ -594,10 +594,10 @@ typedef struct {
 
 
 typedef struct {
-	int		current2DMap;
-	int		current3DMap;
-	int		currentCubeMap;
-	int		texEnv;
+	unsigned int		current2DMap;
+	unsigned int		current3DMap;
+	unsigned int		currentCubeMap;
+	unsigned int		texEnv;
 	textureType_t	textureType;
 } tmu_t;
 
@@ -705,8 +705,11 @@ public:
 	virtual bool			RegisterFont( const char *fontName, fontInfoEx_t &font );
 	virtual void			SetColor( const idVec4 &rgba );
 	virtual void			SetColor4( float r, float g, float b, float a );
-	virtual void			DrawStretchPic ( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
-											bool clip = true, float x = 0.0f, float y = 0.0f, float w = 640.0f, float h = 0.0f );
+//	virtual void			DrawStretchPic ( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
+//											bool clip = true, float x = 0.0f, float y = 0.0f, float w = 640.0f, float h = 0.0f );
+// hi-def GUI patch starts
+	virtual void			DrawStretchPic ( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material, bool clip = true, float x = 0.0f, float y = 0.0f, float w = SCREEN_WIDTH, float h = SCREEN_HEIGHT );
+// hi-def GUI patch ends
 	virtual void			DrawStretchPic ( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material );
 
 	virtual void			DrawStretchTri ( idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVec2 t2, idVec2 t3, const idMaterial *material );
@@ -755,9 +758,8 @@ public:
 	int						viewportOffset[2];	// for doing larger-than-window tiled renderings
 	int						tiledViewport[2];
 
-	// determines which back end to use, and if vertex programs are in use
-	backEndName_t			backEndRenderer;
-	bool					backEndRendererHasVertexPrograms;
+	// determines which back end to use
+	backEndName_t			backEndRenderer;	
 	float					backEndRendererMaxLight;	// 1.0 for standard, unlimited for floats
 														// determines how much overbrighting needs
 														// to be done post-process
@@ -864,8 +866,6 @@ extern idCVar r_useScissor;				// 1 = scissor clip as portals and lights are pro
 extern idCVar r_usePortals;				// 1 = use portals to perform area culling, otherwise draw everything
 extern idCVar r_useStateCaching;		// avoid redundant state changes in GL_*() calls
 extern idCVar r_useCombinerDisplayLists;// if 1, put all nvidia register combiner programming in display lists
-extern idCVar r_useVertexBuffers;		// if 0, don't use ARB_vertex_buffer_object for vertexes
-extern idCVar r_useIndexBuffers;		// if 0, don't use ARB_vertex_buffer_object for indexes
 extern idCVar r_useEntityCallbacks;		// if 0, issue the callback immediately at update time, rather than defering
 extern idCVar r_lightAllBackFaces;		// light all the back faces, even when they would be shadowed
 extern idCVar r_useDepthBoundsTest;     // use depth bounds test to reduce shadow fill
@@ -983,7 +983,7 @@ void	GL_SelectTexture( int unit );
 void	GL_CheckErrors( void );
 void	GL_ClearStateDelta( void );
 void	GL_State( int stateVector );
-void	GL_TexEnv( int env );
+void	GL_TexEnv( unsigned int env );
 void	GL_Cull( int cullType );
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
@@ -1160,7 +1160,6 @@ void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const 
 				   const idRenderLightLocal *light, const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow );
 
 bool R_CreateAmbientCache( srfTriangles_t *tri, bool needsLighting );
-bool R_CreateLightingCache( const idRenderEntityLocal *ent, const idRenderLightLocal *light, srfTriangles_t *tri );
 void R_CreatePrivateShadowCache( srfTriangles_t *tri );
 void R_CreateVertexProgramShadowCache( srfTriangles_t *tri );
 
@@ -1556,6 +1555,23 @@ void RB_ShowDestinationAlpha( void );
 void RB_ShowOverdraw( void );
 void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs );
 void RB_ShutdownDebugTools( void );
+
+
+/*
+=============================================================
+
+Draw Quads ######################################################## SR
+
+=============================================================
+*/
+
+void RB_AddQuad( const idVec4 &color, const idWinding &winding, float lifeTime, float fadeTime );
+void RB_ClearQuads( int time );
+
+
+
+
+
 
 /*
 =============================================================

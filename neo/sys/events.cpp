@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Common.h"
 #include "framework/KeyInput.h"
 #include "renderer/RenderSystem.h"
+#include "renderer/tr_local.h"
 
 #include "sys/sys_public.h"
 
@@ -271,7 +272,11 @@ static void GrabInput(bool grab, bool hide_cursor, bool set_state) {
 	if (in_nograb.GetBool())
 		grab = false;
 
-	if (grab)
+	// Only grab the mouse if there is:
+	// - A request to grab
+	// - The window is focused.
+	Uint8 focusState = SDL_GetAppState();
+	if (grab && focusState & (SDL_APPINPUTFOCUS))
 		SDL_WM_GrabInput(SDL_GRAB_ON);
 	else
 		SDL_WM_GrabInput(SDL_GRAB_OFF);
@@ -393,6 +398,21 @@ sysEvent_t Sys_GetEvent() {
 	if (SDL_PollEvent(&ev)) {
 		switch (ev.type) {
 		case SDL_ACTIVEEVENT:
+// Alt-Tab fullscreen autoswitching issue fix begins
+			if(ev.active.gain) {
+				// unset modifier, in case alt-tab was used to leave window and ALT is still set
+				// as that can cause fullscreen-toggling when pressing enter...
+				SDLMod currentmod = SDL_GetModState();
+				int newmod = KMOD_NONE;
+				if (currentmod | KMOD_CAPS) // preserve capslock
+					newmod |= KMOD_CAPS;
+
+				SDL_SetModState((SDLMod)newmod);
+			}
+			else {
+				// zens
+			}
+// Alt-Tab fullscreen autoswitching issue fix ends
 			GrabInput(grabbed && ev.active.gain == 1, ev.active.gain == 1, false);
 			return res_none;
 

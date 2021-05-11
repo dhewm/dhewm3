@@ -41,7 +41,23 @@ If you have questions concerning this license or the applicable additional terms
 		#define WINGDIAPI
 	#endif
 #endif
+/* Do not use SDL_OpenGL Extensions */
+#define NO_SDL_GLEXT
 #include <SDL_opengl.h>
+
+/* include the OpenGL Extensions files */
+#if defined(__MACOSX__)
+#include <OpenGL/glext.h>
+#elif defined(__MACOS__)
+#include <glext.h>
+#else
+#include <GL/glext.h>
+#endif
+
+/* Test for Outdated OpenGL Extensions file */
+#if GL_GLEXT_VERSION < 64
+#error "OpenGL Extension File (glext.h) is Outdated, a newer version from OpenGL Website is required: http://www.opengl.org/registry/"
+#endif
 
 #if defined( ID_DEDICATED ) && defined( _WIN32 )
 // restore WINGDIAPI
@@ -91,6 +107,7 @@ extern void ( APIENTRY *qglTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, G
 // shared texture palette
 extern	void ( APIENTRY *qglColorTableEXT)( int, int, int, int, int, const void * );
 
+
 // EXT_stencil_two_side
 extern	PFNGLACTIVESTENCILFACEEXTPROC	qglActiveStencilFaceEXT;
 
@@ -108,7 +125,58 @@ extern PFNGLGENPROGRAMSARBPROC				qglGenProgramsARB;
 extern PFNGLPROGRAMENVPARAMETER4FVARBPROC	qglProgramEnvParameter4fvARB;
 extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC	qglProgramLocalParameter4fvARB;
 
+// ARB_framebuffer_object
+extern PFNGLISRENDERBUFFERPROC				qglIsRenderBuffer;
+extern PFNGLBINDRENDERBUFFERPROC			qglBindRenderBuffer;
+extern PFNGLDELETERENDERBUFFERSPROC			qglDeleteRenderBuffer;
+extern PFNGLGENRENDERBUFFERSPROC			qglGenFramebuffers;
+extern PFNGLFRAMEBUFFERTEXTURE2DPROC		qglFramebufferTexture2D;
+extern PFNGLFRAMEBUFFERTEXTURE3DPROC		qglFramebufferTexture3D;
+extern PFNGLFRAMEBUFFERRENDERBUFFERPROC		qglFramebufferRenderbuffer;
+
 // GL_EXT_depth_bounds_test
 extern PFNGLDEPTHBOUNDSEXTPROC              qglDepthBoundsEXT;
+
+// ARB_map_buffer_range (string name GL_ARB_map_buffer_range)
+// ARB_map_buffer_range expands the buffer object API to allow greater
+// performance when a client application only needs to write to a sub-range
+// of a buffer object. To that end, this extension introduces two new buffer
+// object features: non-serialized buffer modification and explicit sub-range
+// flushing for mapped buffer objects.
+extern PFNGLMAPBUFFERRANGEPROC				qglMapBufferRange;
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC		qglFlushMappedBufferRange;
+
+#if defined( _WIN32 ) && defined(ID_ALLOW_TOOLS)
+
+extern  int   ( WINAPI * qwglChoosePixelFormat )(HDC, CONST PIXELFORMATDESCRIPTOR *);
+extern  int   ( WINAPI * qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
+extern  int   ( WINAPI * qwglGetPixelFormat)(HDC);
+extern  BOOL  ( WINAPI * qwglSetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR *);
+extern  BOOL  ( WINAPI * qwglSwapBuffers)(HDC);
+
+extern BOOL  ( WINAPI * qwglCopyContext)(HGLRC, HGLRC, UINT);
+extern HGLRC ( WINAPI * qwglCreateContext)(HDC);
+extern HGLRC ( WINAPI * qwglCreateLayerContext)(HDC, int);
+extern BOOL  ( WINAPI * qwglDeleteContext)(HGLRC);
+extern HGLRC ( WINAPI * qwglGetCurrentContext)(VOID);
+extern HDC   ( WINAPI * qwglGetCurrentDC)(VOID);
+extern PROC  ( WINAPI * qwglGetProcAddress)(LPCSTR);
+extern BOOL  ( WINAPI * qwglMakeCurrent)(HDC, HGLRC);
+extern BOOL  ( WINAPI * qwglShareLists)(HGLRC, HGLRC);
+extern BOOL  ( WINAPI * qwglUseFontBitmaps)(HDC, DWORD, DWORD, DWORD);
+
+extern BOOL  ( WINAPI * qwglUseFontOutlines)(HDC, DWORD, DWORD, DWORD, FLOAT,
+                                           FLOAT, int, LPGLYPHMETRICSFLOAT);
+
+extern BOOL ( WINAPI * qwglDescribeLayerPlane)(HDC, int, int, UINT,
+                                            LPLAYERPLANEDESCRIPTOR);
+extern int  ( WINAPI * qwglSetLayerPaletteEntries)(HDC, int, int, int,
+                                                CONST COLORREF *);
+extern int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
+                                                COLORREF *);
+extern BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
+extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
+
+#endif	// _WIN32 && ID_ALLOW_TOOLS
 
 #endif

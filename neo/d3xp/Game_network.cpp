@@ -590,6 +590,7 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 	pvsHandle = gameLocal.pvs.SetupCurrentPVS( sourceAreas, numSourceAreas, PVS_NORMAL );
 
 #ifdef _D3XP
+	//Portal sky begins
 	// Add portalSky areas to PVS
 	if ( portalSkyEnt.GetEntity() ) {
 		pvsHandle_t	otherPVS, newPVS;
@@ -601,6 +602,7 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 		pvs.FreeCurrentPVS( otherPVS );
 		pvsHandle = newPVS;
 	}
+	//Portal sky ends
 #endif
 
 #if ASYNC_WRITE_TAGS
@@ -1135,6 +1137,7 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int sequence, const int gam
 	pvsHandle = gameLocal.pvs.SetupCurrentPVS( sourceAreas, numSourceAreas, PVS_NORMAL );
 
 #ifdef _D3XP
+	//Portal sky begins
 	// Add portalSky areas to PVS
 	if ( portalSkyEnt.GetEntity() ) {
 		pvsHandle_t	otherPVS, newPVS;
@@ -1146,6 +1149,7 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int sequence, const int gam
 		pvs.FreeCurrentPVS( otherPVS );
 		pvsHandle = newPVS;
 	}
+	//Portal sky ends
 #endif
 
 	// read the PVS from the snapshot

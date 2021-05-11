@@ -74,11 +74,6 @@ typedef struct dominantTri_s {
 	float						normalizationScale[3];
 } dominantTri_t;
 
-typedef struct lightingCache_s {
-	idVec3						localLightVector;		// this is the statically computed vector to the light
-														// in texture space for cards without vertex programs
-} lightingCache_t;
-
 typedef struct shadowCache_s {
 	idVec4						xyz;					// we use homogenous coordinate tricks
 } shadowCache_t;
@@ -137,8 +132,7 @@ typedef struct srfTriangles_s {
 
 	// data in vertex object space, not directly readable by the CPU
 	struct vertCache_s *		indexCache;				// int
-	struct vertCache_s *		ambientCache;			// idDrawVert
-	struct vertCache_s *		lightingCache;			// lightingCache_t
+	struct vertCache_s *		ambientCache;			// idDrawVert	
 	struct vertCache_s *		shadowCache;			// shadowCache_t
 } srfTriangles_t;
 

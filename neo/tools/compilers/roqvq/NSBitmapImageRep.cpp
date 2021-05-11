@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tools/compilers/roqvq/roq.h"
 
-void R_LoadImage( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2 );
+void R_LoadImage( const char *name, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp, bool makePowerOf2 );
 
 NSBitmapImageRep::NSBitmapImageRep( void ) {
 	bmap = NULL;

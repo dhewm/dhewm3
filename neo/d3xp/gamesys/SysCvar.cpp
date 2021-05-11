@@ -116,7 +116,7 @@ idCVar ui_chat(						"ui_chat",					"0",			CVAR_GAME | CVAR_USERINFO | CVAR_BOOL
 // change anytime vars
 idCVar developer(					"developer",				"0",			CVAR_GAME | CVAR_BOOL, "" );
 
-idCVar r_aspectRatio(				"r_aspectRatio",			"0",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "aspect ratio of view:\n0 = 4:3\n1 = 16:9\n2 = 16:10", 0, 2 );
+idCVar r_aspectRatio(				"r_aspectRatio",			"-1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "aspect ratio of view:\n0 = 4:3\n1 = 16:9\n2 = 16:10\n-1 = auto (guess from resolution)", -1, 2 );
 
 idCVar g_cinematic(					"g_cinematic",				"1",			CVAR_GAME | CVAR_BOOL, "skips updating entities that aren't marked 'cinematic' '1' during cinematics" );
 idCVar g_cinematicMaxSkipTime(		"g_cinematicMaxSkipTime",	"600",			CVAR_GAME | CVAR_FLOAT, "# of seconds to allow game to run when skipping cinematic.  prevents lock-up when cinematic doesn't end.", 0, 3600 );
@@ -178,8 +178,9 @@ idCVar g_debugShockwave(			"g_debugShockwave",			"0",			CVAR_GAME | CVAR_BOOL, "
 
 idCVar g_enableSlowmo(				"g_enableSlowmo",			"0",			CVAR_GAME | CVAR_BOOL, "for testing purposes only" );
 idCVar g_slowmoStepRate(			"g_slowmoStepRate",			"0.02",			CVAR_GAME | CVAR_FLOAT, "" );
-
+//Portal sky begins
 idCVar g_enablePortalSky(			"g_enablePortalSky",		"1",			CVAR_GAME | CVAR_BOOL, "enables the portal sky" );
+//Portal sky begins
 idCVar g_testFullscreenFX(			"g_testFullscreenFX",		"-1",			CVAR_GAME | CVAR_INTEGER, "index will activate specific fx, -2 is for all on, -1 is off" );
 idCVar g_testHelltimeFX(			"g_testHelltimeFX",			"-1",			CVAR_GAME | CVAR_INTEGER, "set to 0, 1, 2 to test helltime, -1 is off" );
 idCVar g_testMultiplayerFX(			"g_testMultiplayerFX",		"-1",			CVAR_GAME | CVAR_INTEGER, "set to 0, 1, 2 to test multiplayer, -1 is off" );
@@ -247,6 +248,21 @@ idCVar g_vehicleSuspensionDown(		"g_vehicleSuspensionDown",	"20",			CVAR_GAME | 
 idCVar g_vehicleSuspensionKCompress("g_vehicleSuspensionKCompress","200",		CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_vehicleSuspensionDamping(	"g_vehicleSuspensionDamping","400",			CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_vehicleTireFriction(		"g_vehicleTireFriction",	"0.8",			CVAR_GAME | CVAR_FLOAT, "" );
+
+// ########## SR
+
+// Buggy view begins
+idCVar g_vehicleMaxViewDist(		"g_vehicleMaxViewDist",		"250",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "" );
+idCVar g_vehicleMinViewDist(		"g_vehicleMinViewDist",		"120",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "" );
+idCVar g_vehicleMaxViewHeight(		"g_vehicleMaxViewHeight",	"50",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "" );
+idCVar g_vehicleMinViewHeight(		"g_vehicleMinViewHeight",	"20",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "" );
+idCVar g_vehicleZoomStep(			"g_vehicleZoomStep",		"10",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "" );
+// Buggy ends
+
+idCVar g_showWeather(				"g_showWeather",			"1",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "" );
+
+// ########### END SR
+
 #ifdef _D3XP
 idCVar g_vehicleDebug(				"g_vehicleDebug",			"0",			CVAR_GAME | CVAR_BOOL, "" );
 #endif
@@ -327,7 +343,7 @@ idCVar pm_thirdPersonRange(			"pm_thirdPersonRange",		"80",			CVAR_GAME | CVAR_N
 idCVar pm_thirdPersonHeight(		"pm_thirdPersonHeight",		"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "height of camera from normal view height in 3rd person" );
 idCVar pm_thirdPersonAngle(			"pm_thirdPersonAngle",		"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_FLOAT, "direction of camera from player in 3rd person in degrees (0 = behind player, 180 = in front)" );
 idCVar pm_thirdPersonClip(			"pm_thirdPersonClip",		"1",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL, "clip third person view into world space" );
-idCVar pm_thirdPerson(				"pm_thirdPerson",			"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL, "enables third person view" );
+idCVar pm_thirdPerson(				"pm_thirdPerson",			"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL| CVAR_ARCHIVE, "enables third person view" );
 idCVar pm_thirdPersonDeath(			"pm_thirdPersonDeath",		"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL, "enables third person view when player dies" );
 idCVar pm_modelView(				"pm_modelView",				"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER, "draws camera from POV of player model (1 = always, 2 = when dead)", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
 idCVar pm_airTics(					"pm_air",					"1800",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER, "how long in milliseconds the player can go without air before he starts taking damage" );
@@ -417,3 +433,33 @@ idCVar g_xp_bind_run_once( "g_xp_bind_run_once", "0", CVAR_GAME | CVAR_BOOL | CV
 idCVar net_serverDownload(			"net_serverDownload",		"0",			CVAR_GAME | CVAR_INTEGER | CVAR_ARCHIVE, "enable server download redirects. 0: off 1: redirect to si_serverURL 2: use builtin download. see net_serverDl cvars for configuration" );
 idCVar net_serverDlBaseURL(			"net_serverDlBaseURL",		"",				CVAR_GAME | CVAR_ARCHIVE, "base URL for the download redirection" );
 idCVar net_serverDlTable(			"net_serverDlTable",		"",				CVAR_GAME | CVAR_ARCHIVE, "pak names for which download is provided, seperated by ;" );
+
+// music volume control begins
+idCVar s_bgmusic_volume(                 "s_bgmusic_volume",              "0",            CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE , "this cvar controls the volume of all speakers (in dB) with the s_bgmusic key" );
+// music volume control ends
+
+// projectiles and muzzle flash shadows control begins
+idCVar g_projectileNoShadows( "g_projectileNoShadows", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "turn shadows cast by projectiles' lights on (0) or off (1)", 0, 1 );
+idCVar g_muzzleFlashNoShadows( "g_muzzleFlashNoShadows", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "turn shadows cast by muzzle flashes' lights on (0) or off (1)", 0, 1 );
+// projectiles and muzzle flash shadows control ends
+
+// glow
+// effect scale variables
+idCVar r_glowScale(					"r_glowScale",	"1.0",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "glow effect scale, can be greater than 1.0" );
+idCVar r_glowScale_256(					"r_glowScale_256",	"1.0",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "glow effect scale, can be greater than 1.0" );
+idCVar r_glowScale_512(					"r_glowScale_512",	"1.0",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "glow effect scale, can be greater than 1.0" );
+
+// blur iterations per image and axis
+idCVar r_glowBI_256_X(				"r_glowBI_256_X",	"1",	CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+idCVar r_glowBI_256_Y(				"r_glowBI_256_Y",	"1",	CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "blur passes in y direction on 256 image" );
+idCVar r_glowBI_512_X(				"r_glowBI_512_X",	"1",	CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "blur passes in x direction on 512 image" );
+idCVar r_glowBI_512_Y(				"r_glowBI_512_Y",	"1",	CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "blur passes in y direction on 512 image" );
+
+idCVar r_glowStride_256_X(			"r_glowStride_256_X",	"0.03",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+idCVar r_glowStride_256_Y(			"r_glowStride_256_Y",	"0.03",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+idCVar r_glowStride_512_X(			"r_glowStride_512_X",	"0.03",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+idCVar r_glowStride_512_Y(			"r_glowStride_512_Y",	"0.03",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+
+idCVar r_glowStrideMod_X(			"r_glowStrideMod_X",	"1",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+idCVar r_glowStrideMod_Y(			"r_glowStrideMod_Y",	"1",	CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "blur passes in x direction on 256 image" );
+//

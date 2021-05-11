@@ -1883,6 +1883,399 @@ void idAFEntity_VehicleSimple::Think( void ) {
 	}
 }
 
+/*
+===============================================================================
+
+  idAFEntity_VehicleSimple_4wd
+
+===============================================================================
+*/
+
+CLASS_DECLARATION( idAFEntity_Vehicle, idAFEntity_VehicleSimple_4wd )
+END_CLASS
+
+/*
+================
+idAFEntity_VehicleSimple_4wd::idAFEntity_VehicleSimple_4wd
+================
+*/
+idAFEntity_VehicleSimple_4wd::idAFEntity_VehicleSimple_4wd( void ) {
+	int i;
+	for ( i = 0; i < 4; i++ ) {
+		suspension[i] = NULL;
+	}
+}
+
+/*
+================
+idAFEntity_VehicleSimple_4wd::~idAFEntity_VehicleSimple_4wd
+================
+*/
+idAFEntity_VehicleSimple_4wd::~idAFEntity_VehicleSimple_4wd( void ) {
+	delete wheelModel;
+	wheelModel = NULL;
+}
+
+/*
+================
+idAFEntity_VehicleSimple_4wd::Spawn
+================
+*/
+void idAFEntity_VehicleSimple_4wd::Spawn( void ) {
+	static const char *wheelJointKeys[] = {
+		"wheelJointFrontLeft",
+		"wheelJointFrontRight",
+		"wheelJointRearLeft",
+		"wheelJointRearRight"
+	};
+	static idVec3 wheelPoly[4] = { idVec3( 2, 2, 0 ), idVec3( 2, -2, 0 ), idVec3( -2, -2, 0 ), idVec3( -2, 2, 0 ) };
+
+	int i;
+	idVec3 origin;
+	idMat3 axis;
+	idTraceModel trm;
+
+	trm.SetupPolygon( wheelPoly, 4 );
+	trm.Translate( idVec3( 0, 0, -wheelRadius ) );
+	wheelModel = new idClipModel( trm );
+	//Added for getting suspension var's from .def file
+	spawnArgs.GetFloat( "suspensionDamp", "400", suspensionDamp );
+	spawnArgs.GetFloat( "suspensionKComp", "200", suspensionKComp );
+	spawnArgs.GetFloat( "suspensionUpMotion", "32", suspensionUpMotion );
+	spawnArgs.GetFloat( "suspensionDownMotion", "20", suspensionDownMotion );
+	spawnArgs.GetFloat( "suspensionTireFriction", "0.8", suspensionTireFriction );
+
+	spawnArgs.GetFloat( "vehicleVelocity", "1000", vehicleVelocity );
+	spawnArgs.GetFloat( "vehicleForce", "50000", vehicleForce );
+
+	for ( i = 0; i < 4; i++ ) {
+		const char *wheelJointName = spawnArgs.GetString( wheelJointKeys[i], "" );
+		if ( !wheelJointName[0] ) {
+			gameLocal.Error( "idAFEntity_VehicleSimple_4wd '%s' no '%s' specified", name.c_str(), wheelJointKeys[i] );
+		}
+		wheelJoints[i] = animator.GetJointHandle( wheelJointName );
+		if ( wheelJoints[i] == INVALID_JOINT ) {
+			gameLocal.Error( "idAFEntity_VehicleSimple_4wd '%s' can't find wheel joint '%s'", name.c_str(), wheelJointName );
+		}
+
+		GetAnimator()->GetJointTransform( wheelJoints[i], 0, origin, axis );
+		origin = renderEntity.origin + origin * renderEntity.axis;
+
+		suspension[i] = new idAFConstraint_Suspension();
+		suspension[i]->Setup( va( "suspension%d", i ), af.GetPhysics()->GetBody( 0 ), origin, af.GetPhysics()->GetAxis( 0 ), wheelModel );
+		suspension[i]->SetSuspension(	suspensionUpMotion,
+										suspensionDownMotion,
+										suspensionKComp,
+										suspensionDamp,
+										suspensionTireFriction );
+
+		af.GetPhysics()->AddConstraint( suspension[i] );
+	}
+
+	memset( wheelAngles, 0, sizeof( wheelAngles ) );
+	BecomeActive( TH_THINK );
+}
+
+/*
+================
+idAFEntity_VehicleSimple_4wd::Think
+================
+*/
+void idAFEntity_VehicleSimple_4wd::Think( void ) {
+	int i;
+	float force = 0.0f, velocity = 0.0f, steerAngle = 0.0f;
+	idVec3 origin;
+	idMat3 axis;
+	idRotation wheelRotation, steerRotation;
+
+	if ( thinkFlags & TH_THINK ) {
+
+		if ( player ) {
+			// capture the input from a player
+			velocity = vehicleVelocity;			//g_vehicleVelocity.GetFloat();
+			if ( player->usercmd.forwardmove < 0 ) {
+				velocity = -velocity;
+			}
+			force = idMath::Fabs( player->usercmd.forwardmove *  vehicleForce) * (1.0f / 128.0f);		//g_vehicleForce.GetFloat()
+			steerAngle = GetSteerAngle();
+		}
+
+		// update the wheel motor force and steering.  
+		for ( i = 0; i < 4; i++ ) {
+		//Aww heck, make it 4wd by default!  By Steve
+
+			// front wheel drive
+			if ( velocity != 0.0f ) {
+				suspension[i]->EnableMotor( true );		
+			} else {
+				suspension[i]->EnableMotor( false );
+			}
+			suspension[i]->SetMotorVelocity( velocity );
+			suspension[i]->SetMotorForce( force );
+		}
+			//Now, just have the front wheels steer.  By Steve.
+			// update the wheel steering
+			suspension[0]->SetSteerAngle( steerAngle );
+			suspension[1]->SetSteerAngle( steerAngle );
+		
+
+		// adjust wheel velocity for better steering because there are no differentials between the wheels
+/*		if ( steerAngle < 0.0f ) {
+			suspension[0]->SetMotorVelocity( velocity * 0.5f );
+		} else if ( steerAngle > 0.0f ) {
+			suspension[1]->SetMotorVelocity( velocity * 0.5f );
+		}*/
+
+		// update suspension with latest cvar settings
+		for ( i = 0; i < 4; i++ ) {
+			suspension[i]->SetSuspension(	suspensionUpMotion,
+										suspensionDownMotion,
+										suspensionKComp,
+										suspensionDamp,
+										suspensionTireFriction );
+		}
+
+		// run the physics
+		RunPhysics();
+
+		// move and rotate the wheels visually
+		for ( i = 0; i < 4; i++ ) {
+			idAFBody *body = af.GetPhysics()->GetBody( 0 );
+
+			origin = suspension[i]->GetWheelOrigin();
+			velocity = body->GetPointVelocity( origin ) * body->GetWorldAxis()[0];
+			wheelAngles[i] += velocity * MS2SEC( gameLocal.msec ) / wheelRadius;
+
+			// additional rotation about the wheel axis
+			wheelRotation.SetAngle( RAD2DEG( wheelAngles[i] ) );
+			wheelRotation.SetVec( 0, -1, 0 );
+
+			if ( i < 2 ) {
+				// rotate the wheel for steering
+				steerRotation.SetAngle( steerAngle );
+				steerRotation.SetVec( 0, 0, 1 );
+				// set wheel rotation
+				animator.SetJointAxis( wheelJoints[i], JOINTMOD_WORLD, wheelRotation.ToMat3() * steerRotation.ToMat3() );
+			} else {
+				// set wheel rotation
+				animator.SetJointAxis( wheelJoints[i], JOINTMOD_WORLD, wheelRotation.ToMat3() );
+			}
+
+			// set wheel position for suspension
+			origin = ( origin - renderEntity.origin ) * renderEntity.axis.Transpose();
+			GetAnimator()->SetJointPos( wheelJoints[i], JOINTMOD_WORLD_OVERRIDE, origin );
+		}
+/*
+		// spawn dust particle effects
+		if ( force != 0.0f && !( gameLocal.framenum & 7 ) ) {
+			int numContacts;
+			idAFConstraint_Contact *contacts[2];
+			for ( i = 0; i < 4; i++ ) {
+				numContacts = af.GetPhysics()->GetBodyContactConstraints( wheels[i]->GetClipModel()->GetId(), contacts, 2 );
+				for ( int j = 0; j < numContacts; j++ ) {
+					gameLocal.smokeParticles->EmitSmoke( dustSmoke, gameLocal.time, gameLocal.random.RandomFloat(), contacts[j]->GetContact().point, contacts[j]->GetContact().normal.ToMat3() );
+				}
+			}
+		}*/
+
+	}
+
+	UpdateAnimation();
+	if ( thinkFlags & TH_UPDATEVISUALS ) {
+		Present();
+		LinkCombat();
+	}
+}
+
+
+/*
+===============================================================================
+
+  idAFEntity_VehicleSimple_2
+
+===============================================================================
+*/
+
+CLASS_DECLARATION( idAFEntity_Vehicle, idAFEntity_VehicleSimple_2 )
+END_CLASS
+
+/*
+================
+idAFEntity_VehicleSimple_2::idAFEntity_VehicleSimple_2
+================
+*/
+idAFEntity_VehicleSimple_2::idAFEntity_VehicleSimple_2( void ) {
+	int i;
+	for ( i = 0; i < 2; i++ ) {
+		suspension[i] = NULL;
+	}
+}
+
+/*
+================
+idAFEntity_VehicleSimple_2::~idAFEntity_VehicleSimple_2
+================
+*/
+idAFEntity_VehicleSimple_2::~idAFEntity_VehicleSimple_2( void ) {
+	delete wheelModel;
+	wheelModel = NULL;
+}
+
+/*
+================
+idAFEntity_VehicleSimple_2::Spawn
+================
+*/
+void idAFEntity_VehicleSimple_2::Spawn( void ) {
+	static const char *wheelJointKeys[] = {
+		"wheelJointFront",
+		"wheelJointRear"
+	};
+	static idVec3 wheelPoly[2] = { idVec3( 0, 2, 0 ), idVec3( 0, -2, 0 )};
+
+	int i;
+	idVec3 origin;
+	idMat3 axis;
+	idTraceModel trm;
+
+	trm.SetupPolygon( wheelPoly, 2 );
+	trm.Translate( idVec3( 0, 0, -wheelRadius ) );
+	wheelModel = new idClipModel( trm );
+
+	for ( i = 0; i < 2; i++ ) {
+		const char *wheelJointName = spawnArgs.GetString( wheelJointKeys[i], "" );
+		if ( !wheelJointName[0] ) {
+			gameLocal.Error( "idAFEntity_VehicleSimple_2 '%s' no '%s' specified", name.c_str(), wheelJointKeys[i] );
+		}
+		wheelJoints[i] = animator.GetJointHandle( wheelJointName );
+		if ( wheelJoints[i] == INVALID_JOINT ) {
+			gameLocal.Error( "idAFEntity_VehicleSimple_2 '%s' can't find wheel joint '%s'", name.c_str(), wheelJointName );
+		}
+
+		GetAnimator()->GetJointTransform( wheelJoints[i], 0, origin, axis );
+		origin = renderEntity.origin + origin * renderEntity.axis;
+
+		suspension[i] = new idAFConstraint_Suspension();
+		suspension[i]->Setup( va( "suspension%d", i ), af.GetPhysics()->GetBody( 0 ), origin, af.GetPhysics()->GetAxis( 0 ), wheelModel );
+		suspension[i]->SetSuspension(	g_vehicleSuspensionUp.GetFloat(),
+										g_vehicleSuspensionDown.GetFloat(),
+										g_vehicleSuspensionKCompress.GetFloat(),
+										g_vehicleSuspensionDamping.GetFloat(),
+										g_vehicleTireFriction.GetFloat() );
+
+		af.GetPhysics()->AddConstraint( suspension[i] );
+	}
+
+	memset( wheelAngles, 0, sizeof( wheelAngles ) );
+	BecomeActive( TH_THINK );
+}
+
+/*
+================
+idAFEntity_VehicleSimple_2::Think
+================
+*/
+void idAFEntity_VehicleSimple_2::Think( void ) {
+	int i;
+	float force = 0.0f, velocity = 0.0f, steerAngle = 0.0f;
+	idVec3 origin;
+	idMat3 axis;
+	idRotation wheelRotation, steerRotation;
+
+	if ( thinkFlags & TH_THINK ) {
+
+		if ( player ) {
+			// capture the input from a player
+			velocity = g_vehicleVelocity.GetFloat();
+			if ( player->usercmd.forwardmove < 0 ) {
+				velocity = -velocity;
+			}
+			force = idMath::Fabs( player->usercmd.forwardmove * g_vehicleForce.GetFloat() ) * (1.0f / 128.0f);
+			steerAngle = GetSteerAngle();
+		}
+
+		// update the wheel motor force and steering.  This does rear wheel drive.
+//		for ( i = 0; i < 1; i++ ) {
+
+			if ( velocity != 0.0f ) {
+				suspension[1]->EnableMotor( true );		
+			} else {
+				suspension[1]->EnableMotor( false );
+			}
+			suspension[1]->SetMotorVelocity( velocity );
+			suspension[1]->SetMotorForce( force );
+
+			// update the wheel steering
+			suspension[0]->SetSteerAngle( steerAngle );
+		//}
+
+		// adjust wheel velocity for better steering because there are no differentials between the wheels
+		if ( steerAngle < 0.0f ) {
+			suspension[0]->SetMotorVelocity( velocity * 0.5f );
+		} else if ( steerAngle > 0.0f ) {
+			suspension[0]->SetMotorVelocity( velocity * 0.5f );
+		}
+
+		// update suspension with latest cvar settings
+		for ( i = 0; i < 2; i++ ) {
+			suspension[i]->SetSuspension(	g_vehicleSuspensionUp.GetFloat(),
+											g_vehicleSuspensionDown.GetFloat(),
+											g_vehicleSuspensionKCompress.GetFloat(),
+											g_vehicleSuspensionDamping.GetFloat(),
+											g_vehicleTireFriction.GetFloat() );
+		}
+
+		// run the physics
+		RunPhysics();
+
+		// move and rotate the wheels visually
+		for ( i = 0; i < 2; i++ ) {
+			idAFBody *body = af.GetPhysics()->GetBody( 0 );
+
+			origin = suspension[i]->GetWheelOrigin();
+			velocity = body->GetPointVelocity( origin ) * body->GetWorldAxis()[0];
+			wheelAngles[i] += velocity * MS2SEC( gameLocal.msec ) / wheelRadius;
+
+			// additional rotation about the wheel axis
+			wheelRotation.SetAngle( RAD2DEG( wheelAngles[i] ) );
+			wheelRotation.SetVec( 0, -1, 0 );
+
+			if ( i < 1 ) {
+				// rotate the wheel for steering
+				steerRotation.SetAngle( steerAngle );
+				steerRotation.SetVec( 0, 0, 1 );
+				// set wheel rotation
+				animator.SetJointAxis( wheelJoints[i], JOINTMOD_WORLD, wheelRotation.ToMat3() * steerRotation.ToMat3() );
+			} else {
+				// set wheel rotation
+				animator.SetJointAxis( wheelJoints[i], JOINTMOD_WORLD, wheelRotation.ToMat3() );
+			}
+
+			// set wheel position for suspension
+			origin = ( origin - renderEntity.origin ) * renderEntity.axis.Transpose();
+			GetAnimator()->SetJointPos( wheelJoints[i], JOINTMOD_WORLD_OVERRIDE, origin );
+		}
+/*
+		// spawn dust particle effects
+		if ( force != 0.0f && !( gameLocal.framenum & 7 ) ) {
+			int numContacts;
+			idAFConstraint_Contact *contacts[2];
+			for ( i = 0; i < 4; i++ ) {
+				numContacts = af.GetPhysics()->GetBodyContactConstraints( wheels[i]->GetClipModel()->GetId(), contacts, 2 );
+				for ( int j = 0; j < numContacts; j++ ) {
+					gameLocal.smokeParticles->EmitSmoke( dustSmoke, gameLocal.time, gameLocal.random.RandomFloat(), contacts[j]->GetContact().point, contacts[j]->GetContact().normal.ToMat3() );
+				}
+			}
+		}
+*/
+	}
+
+	UpdateAnimation();
+	if ( thinkFlags & TH_UPDATEVISUALS ) {
+		Present();
+		LinkCombat();
+	}
+}
 
 /*
 ===============================================================================
@@ -2682,8 +3075,8 @@ idGameEdit::AF_CreateMesh
 */
 idRenderModel *idGameEdit::AF_CreateMesh( const idDict &args, idVec3 &meshOrigin, idMat3 &meshAxis, bool &poseIsSet ) {
 	int i, jointNum;
-	const idDeclAF *af;
-	const idDeclAF_Body *fb;
+	const idDeclAF *af = NULL;
+	const idDeclAF_Body *fb = NULL;
 	renderEntity_t ent;
 	idVec3 origin, *bodyOrigin, *newBodyOrigin, *modifiedOrigin;
 	idMat3 axis, *bodyAxis, *newBodyAxis, *modifiedAxis;

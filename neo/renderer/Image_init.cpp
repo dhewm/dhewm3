@@ -386,6 +386,21 @@ static void R_RGBA8Image( idImage *image ) {
 		TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY );
 }
 
+// GLOW begins
+static void R_RGB8ZeroClampImage( idImage *image ) {
+	byte    data[DEFAULT_SIZE][DEFAULT_SIZE][4];
+ 
+	memset( data, 0, sizeof( data ) );
+	data[0][0][0] = 0;
+	data[0][0][1] = 0;
+	data[0][0][2] = 0;
+	data[0][0][3] = 0;
+
+	image->GenerateImage( (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE,
+		TF_LINEAR, false, TR_CLAMP_TO_ZERO, TD_HIGH_QUALITY );
+}
+// GLOW ends
+
 #if 0
 static void R_RGB8Image( idImage *image ) {
 	byte	data[DEFAULT_SIZE][DEFAULT_SIZE][4];
@@ -1716,7 +1731,7 @@ void R_CombineCubeImages_f( const idCmdArgs &args ) {
 	for ( int frameNum = 1 ; frameNum < 10000 ; frameNum++ ) {
 		char	filename[MAX_IMAGE_NAME];
 		byte	*pics[6];
-		int		width, height;
+		unsigned int		width, height;
 		int		side;
 		int		orderRemap[6] = { 1,3,4,2,5,6 };
 		for ( side = 0 ; side < 6 ; side++ ) {
@@ -1985,6 +2000,14 @@ void idImageManager::Init() {
 	accumImage = ImageFromFunction("_accum", R_RGBA8Image );
 	scratchCubeMapImage = ImageFromFunction("_scratchCubeMap", makeNormalizeVectorCubeMap );
 	currentRenderImage = ImageFromFunction("_currentRender", R_RGBA8Image );
+	// rebb : custom feature images
+	// glow begins
+	currentGlowImage	= ImageFromFunction("_currentGlow", R_RGBA8Image );
+	glowImage512 = ImageFromFunction( "_glow512", R_RGB8ZeroClampImage );
+	glowImage256 = ImageFromFunction( "_glow256", R_RGB8ZeroClampImage );
+	glowImage128 = ImageFromFunction( "_glow128", R_RGB8ZeroClampImage );
+	// glow ends
+	currentDepthImage = ImageFromFunction("_currentDepth", R_RGBA8Image );  // ink stuff
 
 	cmdSystem->AddCommand( "reloadImages", R_ReloadImages_f, CMD_FL_RENDERER, "reloads images" );
 	cmdSystem->AddCommand( "listImages", R_ListImages_f, CMD_FL_RENDERER, "lists images" );

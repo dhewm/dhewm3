@@ -207,6 +207,20 @@ extern idCVar	pm_thirdPersonDeath;
 extern idCVar	pm_modelView;
 extern idCVar	pm_airTics;
 
+// ############### SR
+
+// Buggy begins
+extern idCVar	g_vehicleMaxViewDist;
+extern idCVar	g_vehicleMinViewDist;
+extern idCVar	g_vehicleMaxViewHeight;
+extern idCVar	g_vehicleMinViewHeight;
+extern idCVar	g_vehicleZoomStep;
+// Buggy ends
+
+extern idCVar	g_showWeather;
+
+// ############# END SR
+
 extern idCVar	g_showPlayerShadow;
 extern idCVar	g_showHud;
 extern idCVar	g_showProjectilePct;
@@ -302,5 +316,34 @@ extern idCVar	net_clientLagOMeter;
 extern const char *si_gameTypeArgs[];
 
 extern const char *ui_skinArgs[];
+
+//Portal sky begins
+extern idCVar	g_enablePortalSky;
+//Portal sky ends
+
+// music volume control begins
+extern idCVar   s_bgmusic_volume;
+// music volume control ends
+
+// projectiles and muzzle flash shadows control begins
+extern idCVar	g_projectileNoShadows;
+extern idCVar	g_muzzleFlashNoShadows;
+// projectiles and muzzleflash shadows control ends
+
+// glow
+extern idCVar	r_glowScale;
+extern idCVar	r_glowScale_256;
+extern idCVar	r_glowScale_512;
+extern idCVar	r_glowBI_256_X;
+extern idCVar	r_glowBI_256_Y;
+extern idCVar	r_glowBI_512_X;
+extern idCVar	r_glowBI_512_Y;
+extern idCVar	r_glowStride_256_X;
+extern idCVar	r_glowStride_256_Y;
+extern idCVar	r_glowStride_512_X;
+extern idCVar	r_glowStride_512_Y;
+extern idCVar	r_glowStrideMod_X;
+extern idCVar	r_glowStrideMod_Y;
+//
 
 #endif /* !__SYS_CVAR_H__ */

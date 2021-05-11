@@ -25,6 +25,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
+// This is a generated file, so make this work as a include in class.cpp.
+#if defined(__SYS_CLASS_H__) && !defined(__SYS_CALLBACKS_GENERATED__)
+#define __SYS_CALLBACKS_GENERATED__
 // generated file - see CREATE_EVENT_CODE
 
 	/*******************************************************
@@ -2624,3 +2628,5 @@ If you have questions concerning this license or the applicable additional terms
 		typedef void ( idClass::*eventCallback_ffffffff_t )( const float, const float, const float, const float, const float, const float, const float, const float );
 		( this->*( eventCallback_ffffffff_t )callback )( *( float * )&data[ 0 ], *( float * )&data[ 1 ], *( float * )&data[ 2 ], *( float * )&data[ 3 ], *( float * )&data[ 4 ], *( float * )&data[ 5 ], *( float * )&data[ 6 ], *( float * )&data[ 7 ] );
 		break;
+
+#endif

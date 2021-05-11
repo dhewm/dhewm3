@@ -254,4 +254,7 @@ extern const char *si_gameTypeArgs[];
 
 extern const char *ui_skinArgs[];
 
+//Portal sky begins
+extern idCVar	g_enablePortalSky;
+//Portal sky ends
 #endif /* !__SYS_CVAR_H__ */

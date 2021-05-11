@@ -124,7 +124,7 @@ void R_WritePalTGA( const char *filename, const byte *data, const byte *palette,
 }
 
 
-static void LoadBMP( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp );
+static void LoadBMP( const char *name, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp );
 static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp );
 static void LoadJPG( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp );
 
@@ -204,14 +204,14 @@ typedef struct
 LoadBMP
 ==============
 */
-static void LoadBMP( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp )
+static void LoadBMP( const char *name, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp )
 {
 	int		columns, rows, numPixels;
 	byte	*pixbuf;
 	int		row, column;
 	byte	*buf_p;
 	byte	*buffer;
-	int		length;
+	unsigned int		length;
 	BMPHeader_t bmpHeader;
 	byte		*bmpRGBA;
 
@@ -373,7 +373,7 @@ PCX LOADING
 LoadPCX
 ==============
 */
-static void LoadPCX ( const char *filename, byte **pic, byte **palette, int *width, int *height,
+static void LoadPCX ( const char *filename, byte **pic, byte **palette, unsigned int *width, unsigned int *height,
 					 ID_TIME_T *timestamp ) {
 	byte	*raw;
 	pcx_t	*pcx;
@@ -473,7 +473,7 @@ static void LoadPCX ( const char *filename, byte **pic, byte **palette, int *wid
 LoadPCX32
 ==============
 */
-static void LoadPCX32 ( const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp) {
+static void LoadPCX32 ( const char *filename, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp) {
 	byte	*palette;
 	byte	*pic8;
 	int		i, c, p;
@@ -517,7 +517,7 @@ TARGA LOADING
 LoadTGA
 =============
 */
-static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp ) {
+static void LoadTGA( const char *name, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp ) {
 	int		columns, rows, numPixels, fileSize, numBytes;
 	byte	*pixbuf;
 	int		row, column;
@@ -754,7 +754,7 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 LoadJPG
 =============
 */
-static void LoadJPG( const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp ) {
+static void LoadJPG( const char *filename, unsigned char **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp ) {
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
    */
@@ -948,7 +948,7 @@ If pic is NULL, the image won't actually be loaded, it will just find the
 timestamp.
 =================
 */
-void R_LoadImage( const char *cname, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2 ) {
+void R_LoadImage( const char *cname, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamp, bool makePowerOf2 ) {
 	idStr name = cname;
 
 	if ( pic ) {
@@ -1037,15 +1037,15 @@ R_LoadCubeImages
 Loads six files with proper extensions
 =======================
 */
-bool R_LoadCubeImages( const char *imgName, cubeFiles_t extensions, byte *pics[6], int *outSize, ID_TIME_T *timestamp ) {
-	int		i, j;
+bool R_LoadCubeImages( const char *imgName, cubeFiles_t extensions, byte *pics[6], unsigned int *outSize, ID_TIME_T *timestamp ) {
+	unsigned int		i, j;
 	const char	*cameraSides[6] =  { "_forward.tga", "_back.tga", "_left.tga", "_right.tga",
 		"_up.tga", "_down.tga" };
 	const char	*axisSides[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga",
 		"_pz.tga", "_nz.tga" };
 	const char	**sides;
 	char	fullName[MAX_IMAGE_NAME];
-	int		width, height, size = 0;
+	unsigned int		width, height, size = 0;
 
 	if ( extensions == CF_CAMERA ) {
 		sides = cameraSides;

@@ -43,7 +43,7 @@ const int ANIM_MaxAnimsPerChannel	= 3;
 const int ANIM_MaxSyncedAnims		= 3;
 
 //
-// animation channels.  make sure to change script/doom_defs.script if you add any channels, or change their order
+// animation channels.  make sure to change script/steelstorm2_defs.script if you add any channels, or change their order
 //
 const int ANIMCHANNEL_ALL			= 0;
 const int ANIMCHANNEL_TORSO			= 1;
@@ -86,7 +86,7 @@ typedef struct {
 } jointInfo_t;
 
 //
-// joint modifier modes.  make sure to change script/doom_defs.script if you add any, or change their order.
+// joint modifier modes.  make sure to change script/steelstorm2_defs.script if you add any, or change their order.
 //
 typedef enum {
 	JOINTMOD_NONE,				// no modification

@@ -97,6 +97,10 @@ public:
 	void				ReadPVS( const pvsHandle_t handle, const idBitMsg &msg );
 #endif
 
+	//Portal sky begins
+	bool				CheckAreasForPortalSky( const pvsHandle_t handle, const idVec3 &origin );
+	//Portal sky ends
+
 private:
 	int					numAreas;
 	int					numPortals;

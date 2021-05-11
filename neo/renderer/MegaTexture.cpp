@@ -363,7 +363,9 @@ void idTextureLevel::UpdateTile( int localX, int localY, int globalX, int global
 
 	if ( idMegaTexture::r_showMegaTextureLabels.GetBool() ) {
 		// put a color marker in it
-		byte	color[4] = { 255 * localX / TILE_PER_LEVEL, 255 * localY / TILE_PER_LEVEL, 0, 0 };
+		//byte	color[4] = { 255 * localX / TILE_PER_LEVEL, 255 * localY / TILE_PER_LEVEL, 0, 0 };
+		// localX and localY are < TILE_PER_LEVEL => that fits perfectly into a byte.
+		byte  color[4] = { (byte)(255 * localX / TILE_PER_LEVEL), (byte)(255 * localY / TILE_PER_LEVEL), 0, 0 };
 		for ( int x = 0 ; x < 8 ; x++ ) {
 			for ( int y = 0 ; y < 8 ; y++ ) {
 				*(int *)&data[ ( ( y + TILE_SIZE/2 - 4 ) * TILE_SIZE + x + TILE_SIZE/2 - 4 ) * 4 ] = *(int *)color;

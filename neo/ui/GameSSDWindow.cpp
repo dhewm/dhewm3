@@ -39,8 +39,13 @@ If you have questions concerning this license or the applicable additional terms
 #define Z_FAR  4000.0f
 #define ENTITY_START_DIST 3000
 
-#define V_WIDTH 640.0f
-#define V_HEIGHT 480.0f
+//#define V_WIDTH 640.0f
+//#define V_HEIGHT 480.0f
+
+// hi-def GUI patch starts
+#define V_WIDTH SCREEN_WIDTH
+#define V_HEIGHT SCREEN_HEIGHT
+// hi-def GUI patch neds
 
 /*
 *****************************************************************************

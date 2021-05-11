@@ -589,6 +589,20 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 	numSourceAreas = gameRenderWorld->BoundsInAreas( spectated->GetPlayerPhysics()->GetAbsBounds(), sourceAreas, idEntity::MAX_PVS_AREAS );
 	pvsHandle = gameLocal.pvs.SetupCurrentPVS( sourceAreas, numSourceAreas, PVS_NORMAL );
 
+	//Portal sky begins
+	// Add portalSky areas to PVS
+	if ( portalSkyEnt.GetEntity() ) {
+		pvsHandle_t	otherPVS, newPVS;
+		idEntity *skyEnt = portalSkyEnt.GetEntity();
+
+		otherPVS = gameLocal.pvs.SetupCurrentPVS( skyEnt->GetPVSAreas(), skyEnt->GetNumPVSAreas() );
+		newPVS = gameLocal.pvs.MergeCurrentPVS( pvsHandle, otherPVS );
+		pvs.FreeCurrentPVS( pvsHandle );
+		pvs.FreeCurrentPVS( otherPVS );
+		pvsHandle = newPVS;
+	}
+	//Portal sky ends
+
 #if ASYNC_WRITE_TAGS
 	idRandom tagRandom;
 	tagRandom.SetSeed( random.RandomInt() );
@@ -1119,6 +1133,20 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int sequence, const int gam
 	// don't use PVSAreas for networking - PVSAreas depends on animations (and md5 bounds), which are not synchronized
 	numSourceAreas = gameRenderWorld->BoundsInAreas( spectated->GetPlayerPhysics()->GetAbsBounds(), sourceAreas, idEntity::MAX_PVS_AREAS );
 	pvsHandle = gameLocal.pvs.SetupCurrentPVS( sourceAreas, numSourceAreas, PVS_NORMAL );
+
+	//Portal sky begins
+	// Add portalSky areas to PVS
+	if ( portalSkyEnt.GetEntity() ) {
+		pvsHandle_t	otherPVS, newPVS;
+		idEntity *skyEnt = portalSkyEnt.GetEntity();
+
+		otherPVS = gameLocal.pvs.SetupCurrentPVS( skyEnt->GetPVSAreas(), skyEnt->GetNumPVSAreas() );
+		newPVS = gameLocal.pvs.MergeCurrentPVS( pvsHandle, otherPVS );
+		pvs.FreeCurrentPVS( pvsHandle );
+		pvs.FreeCurrentPVS( otherPVS );
+		pvsHandle = newPVS;
+	}
+	//Portal sky ends
 
 	// read the PVS from the snapshot
 #if ASYNC_WRITE_PVS

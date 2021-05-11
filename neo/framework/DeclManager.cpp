@@ -181,10 +181,10 @@ public:
 	idStr						fileName;
 	declType_t					defaultType;
 
-	ID_TIME_T						timestamp;
-	int							checksum;
-	int							fileSize;
-	int							numLines;
+	ID_TIME_T					timestamp;
+	unsigned int				checksum;
+	unsigned int				fileSize;
+	unsigned int				numLines;
 
 	idDeclLocal *				decls;
 };
@@ -834,7 +834,7 @@ void idDeclManagerLocal::Init( void ) {
 	RegisterDeclType( "video",				DECL_VIDEO,			idDeclAllocator<idDeclVideo> );
 	RegisterDeclType( "audio",				DECL_AUDIO,			idDeclAllocator<idDeclAudio> );
 
-	RegisterDeclFolder( "materials",		".mtr",				DECL_MATERIAL );
+	RegisterDeclFolder( "materials_v1",		".mtr",				DECL_MATERIAL );
 	RegisterDeclFolder( "skins",			".skin",			DECL_SKIN );
 	RegisterDeclFolder( "sound",			".sndshd",			DECL_SOUND );
 
@@ -1394,7 +1394,7 @@ idDecl *idDeclManagerLocal::CreateNewDecl( declType_t type, const char *name, co
 		loadedFiles.Append( sourceFile );
 	}
 
-	idDeclLocal *decl = new idDeclLocal;
+	idDeclLocal *decl = new idDeclLocal();
 	decl->name = canonicalName;
 	decl->type = type;
 	decl->declState = DS_UNPARSED;
@@ -1765,6 +1765,7 @@ idDeclLocal::idDeclLocal
 =================
 */
 idDeclLocal::idDeclLocal( void ) {
+	self = NULL;
 	name = "unnamed";
 	textSource = NULL;
 	textLength = 0;

@@ -33,6 +33,15 @@ If you have questions concerning this license or the applicable additional terms
 #include "gamesys/Class.h"
 #include "gamesys/Event.h"
 
+
+		// ####################################### SR
+		
+extern const idEventDef EV_Thread_TeletypeGui;
+extern const idEventDef EV_Thread_FadeScreenIn;
+extern const idEventDef EV_Thread_FadeScreenOut;
+
+		// ####################################### END SR
+
 extern const idEventDef EV_Thread_Execute;
 extern const idEventDef EV_Thread_SetCallback;
 extern const idEventDef EV_Thread_TerminateThread;
@@ -111,6 +120,15 @@ private:
 	//
 	// script callable Events
 	//
+	
+	 // ############ SR
+	
+	void						Event_TeletypeGui( const char *tmsg, float gap, float pause, float wipetime );
+	void						Event_FadeScreenIn( float fadetime );
+	void						Event_FadeScreenOut( float fadetime );
+	
+	 // ############ END SR
+	
 	void						Event_TerminateThread( int num );
 	void						Event_Pause( void );
 	void						Event_Wait( float time );

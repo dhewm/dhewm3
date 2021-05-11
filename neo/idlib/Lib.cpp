@@ -517,5 +517,6 @@ void AssertFailed( const char *file, int line, const char *expression ) {
 #elif defined( __GNUC__ )
 	__builtin_trap();
 #endif
-	_exit(1);
+	// Do not Bail on Assert Fails, even on Windows.
+	//_exit(1);
 }

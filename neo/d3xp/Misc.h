@@ -282,6 +282,9 @@ public:
 
 private:
 	int						num_anims;
+	
+	int						num_cycleanims;	// ################################# SR
+	
 	int						current_anim_index;
 	int						anim;
 	int						blendFrames;
@@ -298,6 +301,10 @@ private:
 	void					Event_Footstep( void );
 	void					Event_LaunchMissiles( const char *projectilename, const char *sound, const char *launchjoint, const char *targetjoint, int numshots, int framedelay );
 	void					Event_LaunchMissilesUpdate( int launchjoint, int targetjoint, int numshots, int framedelay );
+	
+	void					Event_StartAnim( const char *startanim );	// ######################### SR	
+	void					Event_GetAName( void );	// ######################### SR	
+	
 #ifdef _D3XP
 	void					Event_SetAnimation( const char *animName );
 	void					Event_GetAnimationLength();
@@ -876,6 +883,7 @@ private:
 	void				Event_PostSpawn( void );
 };
 
+//Portal sky begins
 /*
 ===============================================================================
 
@@ -894,6 +902,7 @@ public:
 	void				Event_PostSpawn();
 	void				Event_Activate( idEntity *activator );
 };
+//Portal sky ends
 
 #endif /* _D3XP */
 

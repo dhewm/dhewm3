@@ -56,7 +56,8 @@ public :
 	void					Restore( idRestoreGame *savefile );
 
 	void					Create( idEntity *owner, const idVec3 &start, const idVec3 &dir );
-	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f );
+			// ########### SR added trailNum\/
+	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f, const int projNum = 0 );
 	virtual void			FreeLightDef( void );
 
 	idEntity *				GetOwner( void ) const;
@@ -88,9 +89,11 @@ public :
 	virtual void			WriteToSnapshot( idBitMsgDelta &msg ) const;
 	virtual void			ReadFromSnapshot( const idBitMsgDelta &msg );
 	virtual bool			ClientReceiveEvent( int event, int time, const idBitMsg &msg );
+	
+	idEntityPtr<idEntity>	owner;	// ###### SR
 
 protected:
-	idEntityPtr<idEntity>	owner;
+	//idEntityPtr<idEntity>	owner;	// ### SR
 
 	struct projectileFlags_s {
 		bool				detonate_on_world			: 1;
@@ -122,7 +125,7 @@ protected:
 #endif
 
 	typedef enum {
-		// must update these in script/doom_defs.script if changed
+		// must update these in script/steelstorm2_defs.script if changed
 		SPAWNED = 0,
 		CREATED = 1,
 		LAUNCHED = 2,
@@ -131,6 +134,22 @@ protected:
 	} projectileState_t;
 
 	projectileState_t		state;
+	
+	// ####################### SR
+	
+	void					showTrail( void );
+	bool					showtrails;		
+	idVec4 					trailshade[10];	
+	idVec3 					bfl, bfr, bbl, bbr;
+	idVec3 					trailoffset, trailorigin;
+	int						trailcount;
+	int						trailTime;		
+	int						trailNum;		
+	int						trailcolour;		
+	float 					trailwidth;
+	float					twister;
+	
+	// ########################## END
 
 private:
 	bool					netSyncPhysics;
@@ -156,7 +175,7 @@ public :
 
 	void					Spawn( void );
 	virtual void			Think( void );
-	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f );
+	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f, const int projNum = 0 ); // ### SR + projNum
 #ifdef _D3XP
 	void					SetEnemy( idEntity *ent );
 	void					Event_SetEnemy(idEntity *ent);
@@ -178,6 +197,9 @@ private:
 	bool					unGuided;
 	float					burstDist;
 	float					burstVelocity;
+	
+	idVec3					target;	// ###### SR
+	
 };
 
 class idSoulCubeMissile : public idGuidedProjectile {
@@ -189,7 +211,7 @@ public:
 
 	void					Spawn( void );
 	virtual void			Think( void );
-	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float power = 1.0f, const float dmgPower = 1.0f );
+	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f, const int projNum = 0 );
 
 protected:
 	virtual void			GetSeekPos( idVec3 &out );
@@ -228,7 +250,7 @@ public :
 
 	void					Spawn( void );
 	virtual void			Think( void );
-	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f );
+	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f, const int projNum = 0 );
 	virtual void			Explode( const trace_t &collision, idEntity *ignore );
 
 private:

@@ -285,7 +285,8 @@ initialize the sound system
 ===============
 */
 void idSoundSystemLocal::Init() {
-	common->Printf( "----- Initializing OpenAL -----\n" );
+
+	common->Printf( "----- Initializing OpenAL ------\n" );
 
 	isInitialized = false;
 	muted = false;

@@ -81,7 +81,7 @@ enum {
 
 //
 // Signals
-// make sure to change script/doom_defs.script if you add any, or change their order
+// make sure to change script/steelstorm2_defs.script if you add any, or change their order
 //
 typedef enum {
 	SIG_TOUCH,				// object was touched

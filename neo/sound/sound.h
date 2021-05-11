@@ -110,6 +110,8 @@ public:
 	virtual const char *	GetSound( int index ) const;
 
 	virtual bool			CheckShakesAndOgg( void ) const;
+	
+	soundShaderParms_t		parms;	// ######################################### SR
 
 private:
 	friend class idSoundWorldLocal;
@@ -118,7 +120,7 @@ private:
 	friend class idSoundCache;
 
 	// options from sound shader text
-	soundShaderParms_t		parms;						// can be overriden on a per-channel basis
+	//soundShaderParms_t		parms;						// can be overriden on a per-channel basis
 
 	bool					onDemand;					// only load when played, and free when finished
 	int						speakerMask;

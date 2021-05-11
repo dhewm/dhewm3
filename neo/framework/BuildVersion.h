@@ -25,4 +25,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-const int BUILD_NUMBER = 1304;
+#ifndef __BUILD_VERSION_H__
+#define __BUILD_VERSION_H__
+const int BUILD_NUMBER = 480;
+#endif

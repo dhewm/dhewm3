@@ -24,6 +24,7 @@ LANGUAGE 9, 1
 #include "SoundEditor.rc"
 #include "ParticleEditor.rc"
 #include "DeclEditor.rc"
+#include "PDAEditor.rc"
 
 #include "ScriptEditor.rc"
 
@@ -104,7 +105,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "res\\doom.ico"
+//IDI_ICON1               ICON                    "res\\doom.ico"
+IDI_ICON1               ICON                    "res\\steelstorm2.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

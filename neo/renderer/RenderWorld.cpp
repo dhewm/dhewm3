@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+
+
 /*
 ===================
 R_ListRenderLightDefs_f
@@ -160,6 +162,8 @@ idRenderWorldLocal::~idRenderWorldLocal() {
 	RB_ClearDebugPolygons( 0 );
 	RB_ClearDebugLines( 0 );
 	RB_ClearDebugText( 0 );
+	
+	RB_ClearQuads( 0 );		// ####################################### SR
 }
 
 /*
@@ -952,7 +956,8 @@ int idRenderWorldLocal::BoundsInAreas( const idBounds &bounds, int *areas, int m
 
 	assert( areas );
 	assert( bounds[0][0] <= bounds[1][0] && bounds[0][1] <= bounds[1][1] && bounds[0][2] <= bounds[1][2] );
-	assert( bounds[1][0] - bounds[0][0] < 1e4f && bounds[1][1] - bounds[0][1] < 1e4f && bounds[1][2] - bounds[0][2] < 1e4f );
+	//assert( bounds[1][0] - bounds[0][0] < 1e4f && bounds[1][1] - bounds[0][1] < 1e4f && bounds[1][2] - bounds[0][2] < 1e4f );
+	assert( bounds[1][0] - bounds[0][0] < 1.2e5f && bounds[1][1] - bounds[0][1] < 1.2e5f && bounds[1][2] - bounds[0][2] < 1.2e5f ); // this one works with large levels
 
 	if ( !areaNodes ) {
 		return numAreas;
@@ -2074,6 +2079,36 @@ idRenderWorldLocal::DrawText
 void idRenderWorldLocal::DrawText( const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align, const int lifetime, const bool depthTest ) {
 	RB_AddDebugText( text, origin, scale, color, viewAxis, align, lifetime, depthTest );
 }
+
+
+// ###################### SR
+
+
+/*
+====================
+idRenderWorldLocal::ClearQuads
+====================
+*/
+void idRenderWorldLocal::ClearQuads( int time ) {
+	RB_ClearQuads( time );
+}
+
+
+
+/*
+====================
+idRenderWorldLocal::DrawQuad
+====================
+*/
+void idRenderWorldLocal::DrawQuad( const idVec4 &color, const idWinding &winding, float lifeTime, float fadeTime ) {
+	RB_AddQuad( color, winding, lifeTime, fadeTime );
+}
+
+// ###################### END SR
+
+
+
+
 
 /*
 ===============

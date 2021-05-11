@@ -34,10 +34,19 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "script/Script_Thread.h"
 
+
+
 const idEventDef EV_Thread_Execute( "<execute>", NULL );
 const idEventDef EV_Thread_SetCallback( "<script_setcallback>", NULL );
 
 // script callable events
+
+	// ############################### SR
+const idEventDef EV_Thread_TeletypeGui( "teletypeGui", "sfff" );
+const idEventDef EV_Thread_FadeScreenIn( "fadeScreenIn", "f" );
+const idEventDef EV_Thread_FadeScreenOut( "fadeScreenOut", "f" );
+	// ############################### END SR
+	
 const idEventDef EV_Thread_TerminateThread( "terminate", "d" );
 const idEventDef EV_Thread_Pause( "pause", NULL );
 const idEventDef EV_Thread_Wait( "wait", "f" );
@@ -126,6 +135,15 @@ const idEventDef EV_Thread_DrawText( "drawText", "svfvdf" );
 const idEventDef EV_Thread_InfluenceActive( "influenceActive", NULL, 'd' );
 
 CLASS_DECLARATION( idClass, idThread )
+
+// ############################### SR
+
+	EVENT( EV_Thread_TeletypeGui,			idThread::Event_TeletypeGui )
+	EVENT( EV_Thread_FadeScreenIn,			idThread::Event_FadeScreenIn )	
+	EVENT( EV_Thread_FadeScreenOut,			idThread::Event_FadeScreenOut )	
+
+// ############################### END SR
+	
 	EVENT( EV_Thread_Execute,				idThread::Event_Execute )
 	EVENT( EV_Thread_TerminateThread,		idThread::Event_TerminateThread )
 	EVENT( EV_Thread_Pause,					idThread::Event_Pause )
@@ -941,6 +959,45 @@ void idThread::WaitFrame( void ) {
   Script callable events
 
 ***********************************************************************/
+
+
+// ################################## SR
+
+/*
+================
+idThread::Event_TeletypeGui
+================
+*/
+void idThread::Event_TeletypeGui( const char *tmsg, float gap, float pause, float wipetime ) {
+	idPlayer *player = gameLocal.GetLocalPlayer();
+	player->TeletypeGui( tmsg, gap, pause, wipetime );
+}
+
+/*
+================
+idThread::Event_FadeScreenIn
+================
+*/
+void idThread::Event_FadeScreenIn( float fadetime ) {
+	idPlayer *player = gameLocal.GetLocalPlayer();
+	//playerView.Fade( colorBlack, fadetime );
+	player->hud->SetStateFloat( "fadetime", fadetime * 1000.0f );
+	player->hud->HandleNamedEvent( "fadescreen_in" );
+}
+
+/*
+================
+idThread::Event_FadeScreenOut
+================
+*/
+void idThread::Event_FadeScreenOut( float fadetime ) {
+	idPlayer *player = gameLocal.GetLocalPlayer();
+	//player->fadingIn = true; 
+	player->hud->SetStateFloat( "fadetime", fadetime * 1000.0f );
+	player->hud->HandleNamedEvent( "fadescreen_out" );
+}	
+	
+// ################################## END SR	
 
 /*
 ================

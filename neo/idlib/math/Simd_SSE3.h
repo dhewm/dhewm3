@@ -45,6 +45,7 @@ public:
 	virtual const char * VPCALL GetName( void ) const;
 
 #elif defined(_MSC_VER) && defined(_M_IX86)
+//#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 	virtual const char * VPCALL GetName( void ) const;
 
 	virtual void VPCALL TransformVerts( idDrawVert *verts, const int numVerts, const idJointMat *joints, const idVec4 *weights, const int *index, const int numWeights );

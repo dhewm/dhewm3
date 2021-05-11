@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <SDL.h>
+
 #include "sys/platform.h"
 #include "idlib/hashing/CRC32.h"
 #include "idlib/LangDict.h"
@@ -477,7 +479,10 @@ void idSessionLocal::StartWipe( const char *_wipeMaterial, bool hold ) {
 	console->Close();
 
 	// render the current screen into a texture for the wipe model
-	renderSystem->CropRenderSize( 640, 480, true );
+//	renderSystem->CropRenderSize( 640, 480, true );
+// hi-def GUI patch starts
+	renderSystem->CropRenderSize( SCREEN_WIDTH, SCREEN_HEIGHT, true );
+// hi-def GUI patch ends
 
 	Draw();
 
@@ -2227,7 +2232,10 @@ void	idSessionLocal::DrawWipeModel() {
 
 	float fade = ( float )( latchedTic - wipeStartTic ) / ( wipeStopTic - wipeStartTic );
 	renderSystem->SetColor4( 1, 1, 1, fade );
-	renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, wipeMaterial );
+//	renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, wipeMaterial );
+// hi-def GUI patch starts
+	renderSystem->DrawStretchPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, wipeMaterial );
+// hi-def GUI patch ends
 }
 
 /*
@@ -2380,7 +2388,10 @@ void idSessionLocal::Draw() {
 		// clear the background, in case the tested gui is transparent
 		// NOTE that you can't use this for aviGame recording, it will tick at real com_frameTime between screenshots..
 		renderSystem->SetColor( colorBlack );
-		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+//		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+// hi-def GUI patch starts
+		renderSystem->DrawStretchPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+// hi-def GUI patch ends
 		guiTest->Redraw( com_frameTime );
 	} else if ( guiActive && !guiActive->State().GetBool( "gameDraw" ) ) {
 
@@ -2410,7 +2421,10 @@ void idSessionLocal::Draw() {
 		}
 		if ( !gameDraw ) {
 			renderSystem->SetColor( colorBlack );
-			renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+//			renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+// hi-def GUI patch starts
+			renderSystem->DrawStretchPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+// hi-def GUI patch ends
 		}
 
 		// save off the 2D drawing from the game
@@ -2521,7 +2535,7 @@ void idSessionLocal::Frame() {
 
 	// if the console is down, we don't need to hold
 	// the mouse cursor
-	if ( console->Active() || com_editorActive ) {
+	if ( console->Active() || com_editorActive || (SDL_GetAppState() & SDL_APPINPUTFOCUS) == 0) {
 		Sys_GrabMouseCursor( false );
 	} else {
 		Sys_GrabMouseCursor( true );
@@ -3248,7 +3262,8 @@ idSessionLocal::CDKeysAuthReply
 ===============
 */
 void idSessionLocal::CDKeysAuthReply( bool valid, const char *auth_msg ) {
-	assert( authEmitTimeout > 0 );
+	// preventing assertion crash upon connection to the server
+	// assert( authEmitTimeout > 0 );
 	if ( authWaitBox ) {
 		// close the wait box
 		StopBox();

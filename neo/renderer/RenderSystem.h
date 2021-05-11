@@ -52,7 +52,6 @@ typedef struct glconfig_s {
 
 	float				glVersion;				// atof( version_string )
 
-
 	int					maxTextureSize;			// queried from GL
 	int					maxTextureUnits;
 	int					maxTextureCoords;
@@ -75,6 +74,11 @@ typedef struct glconfig_s {
 	bool				ARBVertexBufferObjectAvailable;
 	bool				ARBVertexProgramAvailable;
 	bool				ARBFragmentProgramAvailable;
+	bool				ARBFrameBufferObjectAvailable;
+	bool				ARBPixelBufferObjectAvailable;
+	bool				ARBTransformFeedback2Available;
+	bool				ARBTransformFeedback3Available;
+	bool				ARBMapBufferRangeAvailable; // needed for availability check of GL_ARB_map_buffer_range extension
 	bool				twoSidedStencilAvailable;
 	bool				textureNonPowerOfTwoAvailable;
 	bool				depthBoundsTestAvailable;
@@ -142,11 +146,15 @@ const int BIGCHAR_HEIGHT		= 16;
 
 // all drawing is done to a 640 x 480 virtual screen size
 // and will be automatically scaled to the real resolution
-const int SCREEN_WIDTH			= 640;
-const int SCREEN_HEIGHT			= 480;
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
+// hi-def GUI patch starts
+//extern int SCREEN_WIDTH;
+//extern int SCREEN_HEIGHT;
+// hi-def GUI patch ends
 
 class idRenderWorld;
-
 
 class idRenderSystem {
 public:
@@ -188,8 +196,11 @@ public:
 	virtual void			SetColor( const idVec4 &rgba ) = 0;
 	virtual void			SetColor4( float r, float g, float b, float a ) = 0;
 
-	virtual void			DrawStretchPic( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
-											bool clip = true, float min_x = 0.0f, float min_y = 0.0f, float max_x = 640.0f, float max_y = 480.0f ) = 0;
+//	virtual void			DrawStretchPic( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
+//											bool clip = true, float min_x = 0.0f, float min_y = 0.0f, float max_x = 640.0f, float max_y = 480.0f ) = 0;
+// hi-def GUI patch starts
+	virtual void			DrawStretchPic( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material, bool clip = true, float min_x = 0.0f, float min_y = 0.0f, float max_x = SCREEN_WIDTH, float max_y = SCREEN_HEIGHT ) = 0;
+// hi-def GUI patch end
 	virtual void			DrawStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) = 0;
 
 	virtual void			DrawStretchTri ( idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVec2 t2, idVec2 t3, const idMaterial *material ) = 0;

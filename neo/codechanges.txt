@@ -1,0 +1,58 @@
+[ draw_common.cpp ]
+
+=== Find :
+
+RB_STD_FillDepthBuffer( drawSurfs, numDrawSurfs );
+
+=== Paste below :
+
+if( backEnd.viewDef->viewEntitys && tr.backEndRenderer == BE_ARB2 ) {
+	globalImages->currentDepthImage->CopyDepthbuffer(
+		backEnd.viewDef->viewport.x1, backEnd.viewDef->viewport.y1,
+		backEnd.viewDef->viewport.x2 -  backEnd.viewDef->viewport.x1 + 1,
+		backEnd.viewDef->viewport.y2 -  backEnd.viewDef->viewport.y1 + 1
+	);
+}
+
+[ Image.h ]
+
+=== Find :
+
+idImage *borderClampImage;			// white inside, black outside
+
+=== Paste below :
+
+idImage *currentDepthImage;
+
+
+
+[ Image_Init.cpp ]
+
+=== Find :
+
+currentRenderImage = ImageFromFunction("_currentRender", R_RGBA8Image );
+
+=== Paste below :
+
+currentDepthImage = ImageFromFunction("_currentDepth", R_RGBA8Image );
+
+[ Image_Load.cpp ]
+
+=== Find Function :
+
+idImage::CopyDepthbuffer
+
+=== Do :
+
+- comment out all the contents of the function
+
+=== Below that, paste :
+
+Bind();
+
+qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+
+qglCopyTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, x, y, imageWidth, imageHeight, 0 );

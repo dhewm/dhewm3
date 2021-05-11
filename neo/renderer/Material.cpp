@@ -1142,6 +1142,13 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 			continue;
 		}
 
+		// rebb : mark a glow stage by adding the "glow" keyword
+		if ( !token.Icmp( "glow" ) ) {
+			ss->extraFlags |= 1;
+			continue;
+		}
+		//
+
 		if (  !token.Icmp( "map" ) ) {
 			str = R_ParsePastImageProgram( src );
 			idStr::Copynz( imageName, str, sizeof( imageName ) );

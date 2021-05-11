@@ -56,6 +56,9 @@ public:
 	virtual bool			Pickup( idPlayer *player );
 	virtual void			Think( void );
 	virtual void			Present();
+	
+	void 				RunScriptFunc( const char *name );	// ######## SR 
+	
 
 	enum {
 		EVENT_PICKUP = idEntity::EVENT_MAXEVENTS,

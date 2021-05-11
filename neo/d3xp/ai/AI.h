@@ -98,7 +98,7 @@ typedef enum {
 
 //
 // status results from move commands
-// make sure to change script/doom_defs.script if you add any, or change their order
+// make sure to change script/steelstorm2_defs.script if you add any, or change their order
 //
 typedef enum {
 	MOVE_STATUS_DONE,
@@ -297,6 +297,10 @@ public:
 	virtual void			Gib( const idVec3 &dir, const char *damageDefName );
 #endif
 
+	idScriptBool			AI_INCOMING;	//#################### SR
+	idScriptBool			AI_HEADSHOT;	//#################### SR
+
+
 protected:
 	// navigation
 	idAAS *					aas;
@@ -311,6 +315,14 @@ protected:
 	int						blockedMoveTime;
 	int						blockedAttackTime;
 
+	// ################# SR	
+		
+	idDict					brassReloadDict;
+	jointHandle_t			ejectReloadJoint;
+
+
+	// ################# 
+	
 	// turning
 	float					ideal_yaw;
 	float					current_yaw;
@@ -447,7 +459,8 @@ protected:
 	idScriptBool			AI_DEST_UNREACHABLE;
 	idScriptBool			AI_HIT_ENEMY;
 	idScriptBool			AI_PUSHED;
-
+	
+	
 	//
 	// ai/ai.cpp
 	//
@@ -571,6 +584,9 @@ protected:
 	//
 	// ai/ai_events.cpp
 	//
+	
+	void					Event_AIEjectReloadBrass( void );	// ##################### SR
+	
 	void					Event_Activate( idEntity *activator );
 	void					Event_Touch( idEntity *other, trace_t *trace );
 	void					Event_FindEnemy( int useFOV );

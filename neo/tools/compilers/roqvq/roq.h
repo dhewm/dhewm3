@@ -58,9 +58,9 @@ public:
 private:
 
 	byte *				bmap;
-	int					width;
-	int					height;
-	ID_TIME_T				timestamp;
+	unsigned int		width;
+	unsigned int		height;
+	ID_TIME_T			timestamp;
 
 };
 

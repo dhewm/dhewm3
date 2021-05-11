@@ -862,8 +862,8 @@ idGameBustOutWindow::LoadBoardFiles
 =============================
 */
 void idGameBustOutWindow::LoadBoardFiles( void ) {
-	int i;
-	int w,h;
+	unsigned int i;
+	unsigned int w,h;
 	ID_TIME_T time;
 	int boardSize;
 	byte *currentBoard;

@@ -1279,8 +1279,9 @@ void idAsyncClient::ProcessAuthKeyMessage( const netadr_t from, const idBitMsg &
 		return;
 	}
 
+	bool override = false;
 	authMsg = (authKeyMsg_t)msg.ReadByte();
-	if ( authMsg == AUTHKEY_BADKEY ) {
+	if ( override ) {	//( authMsg == AUTHKEY_BADKEY ) {
 		valid[ 0 ] = valid[ 1 ] = true;
 		key_index = 0;
 		authBadStatus = (authBadKeyStatus_t)msg.ReadByte();
@@ -1665,6 +1666,7 @@ void idAsyncClient::SetupConnection( void ) {
 		msg.WriteShort( 0 );
 		clientPort.SendPacket( serverAddress, msg.GetData(), msg.GetSize() );
 
+#ifdef ID_ENFORCE_KEY_CLIENT // preventing game from using CDKEy authentication
 		if ( idAsyncNetwork::LANServer.GetBool() ) {
 			common->Printf( "net_LANServer is set, connecting in LAN mode\n" );
 		} else {
@@ -1686,6 +1688,12 @@ void idAsyncClient::SetupConnection( void ) {
 			}
 			clientPort.SendPacket( idAsyncNetwork::GetMasterAddress(), msg.GetData(), msg.GetSize() );
 		}
+#else
+		if (! Sys_IsLANAddress( serverAddress ) ) {
+			common->Printf( "Build Does not have CD Key Enforcement enabled. The Server ( %s ) is not within the lan addresses. Attemting to connect.\n", Sys_NetAdrToString( serverAddress ) );
+		}		
+		common->Printf( "Not Testing key.\n" );
+#endif
 	} else {
 		return;
 	}

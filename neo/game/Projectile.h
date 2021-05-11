@@ -111,7 +111,7 @@ protected:
 	int						smokeFlyTime;
 
 	typedef enum {
-		// must update these in script/doom_defs.script if changed
+		// must update these in script/steelstorm2_defs.script if changed
 		SPAWNED = 0,
 		CREATED = 1,
 		LAUNCHED = 2,

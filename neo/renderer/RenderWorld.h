@@ -428,6 +428,11 @@ public:
 
 	// Text drawing for debug visualization.
 	virtual void			DrawText( const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align = 1, const int lifetime = 0, bool depthTest = false ) = 0;
+
+	
+	virtual void 			ClearQuads( int time ) = 0;															// ########################### SR
+	virtual void 			DrawQuad( const idVec4 &color, const idWinding &winding, float lifeTime, float fadeTime ) = 0;	// ########################### SR 
+	
 };
 
 #endif /* !__RENDERWORLD_H__ */

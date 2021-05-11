@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+
 #define MAX_DEBUG_LINES			16384
 
 typedef struct debugLine_s {
@@ -79,6 +80,28 @@ int				rb_numDebugPolygons = 0;
 int				rb_debugPolygonTime = 0;
 
 static void RB_DrawText( const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align );
+
+
+// ############################### SR
+
+#define MAX_QUADS		8192
+
+typedef struct drawQuad_s {
+	idVec4		rgb;
+	idWinding	winding;
+	float		lifeTime;
+	float		fadeTime;
+	float		qalpha;
+} drawQuad_t;
+
+drawQuad_t		rb_drawQuads[ MAX_QUADS ];
+int				rb_numdrawQuads = 0;
+int				rb_drawQuadTime = 0;
+
+
+
+// ############################### END SR
+
 
 /*
 ================
@@ -2324,6 +2347,144 @@ void RB_TestImage( void ) {
 	qglMatrixMode( GL_MODELVIEW );
 }
 
+
+// ###################################################### SR
+
+/*
+================
+RB_ClearQuads
+================
+*/
+void RB_ClearQuads( int time ) {
+	int			i;
+	int			num;
+	float		qcolor;
+	drawQuad_t	*poly;
+
+	rb_drawQuadTime++;	// = time;
+
+	if ( !time ) {
+		rb_numdrawQuads = 0;
+		return;
+	}
+
+	num	= 0;
+
+	poly = rb_drawQuads;
+	for ( i = 0 ; i < rb_numdrawQuads; i++, poly++ ) {
+		if ( poly->lifeTime > rb_drawQuadTime ) {	//time ) {
+			if ( num != i ) { 
+				if ( poly->fadeTime > ( poly->lifeTime - rb_drawQuadTime ) ) {
+					qcolor = poly->rgb[ 3 ];
+					qcolor -= ( poly->qalpha / poly->fadeTime );
+					if ( qcolor < 0 ) {
+						qcolor = 0;
+					}
+					poly->rgb[ 3 ] = qcolor;		
+				}	
+				rb_drawQuads[ num ] = *poly;
+			}
+			num++;
+		}
+	}
+	rb_numdrawQuads = num;
+}
+
+
+
+
+/*
+================
+RB_AddQuad
+================
+*/
+void RB_AddQuad( const idVec4 &color, const idWinding &winding, float lifeTime, float fadeTime ) {
+	drawQuad_t *poly;
+
+	if ( fadeTime > lifeTime ) {
+		fadeTime = lifeTime;
+	}	
+	
+	if ( rb_numdrawQuads < MAX_QUADS ) {
+		poly = &rb_drawQuads[ rb_numdrawQuads++ ];
+		poly->rgb		= color;
+		poly->qalpha	= color[3];
+		poly->winding	= winding;
+		poly->lifeTime	= rb_drawQuadTime + lifeTime;
+		poly->fadeTime	= fadeTime;
+	}
+}
+
+/*
+================
+RB_ShowQuads
+================
+*/
+void RB_ShowQuads( void ) {
+	int				i;
+	drawQuad_t	*poly;
+	bool		r_quadFilled;
+
+	r_quadFilled = true;
+
+	RB_ClearQuads( rb_drawQuadTime + 1 );
+	
+	if ( !rb_numdrawQuads ) {
+		return;
+	}
+
+	RB_SimpleWorldSetup();
+	globalImages->BindNull();
+	qglDisable( GL_TEXTURE_2D );
+	qglDisable( GL_STENCIL_TEST );
+	qglEnable( GL_DEPTH_TEST );
+
+	if ( r_quadFilled ) {
+		GL_State( GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHMASK );
+		qglPolygonOffset( -1, -2 );
+		qglEnable( GL_POLYGON_OFFSET_FILL );
+	} else {
+		GL_State( GLS_POLYMODE_LINE );
+		qglPolygonOffset( -1, -2 );
+		qglEnable( GL_POLYGON_OFFSET_LINE );
+	}
+
+	poly = rb_drawQuads;
+	for ( i = 0 ; i < rb_numdrawQuads; i++, poly++ ) {
+		qglColor4fv( poly->rgb.ToFloatPtr() );
+
+		//qglBegin( GL_QUADS );
+		//for ( j = 0; j < poly->winding.GetNumPoints(); j++) {
+		//	qglVertex3fv( poly->winding[j].ToFloatPtr() );
+		//}
+		
+		qglBegin( GL_TRIANGLES );
+		qglVertex3fv( poly->winding[0].ToFloatPtr() );
+		qglVertex3fv( poly->winding[1].ToFloatPtr() );
+		qglVertex3fv( poly->winding[2].ToFloatPtr() );
+		
+		qglVertex3fv( poly->winding[0].ToFloatPtr() );
+		qglVertex3fv( poly->winding[2].ToFloatPtr() );
+		qglVertex3fv( poly->winding[3].ToFloatPtr() );
+
+		qglEnd();
+	}
+
+	GL_State( GLS_DEFAULT );
+
+	if ( r_quadFilled ) {
+		qglDisable( GL_POLYGON_OFFSET_FILL );
+	} else {
+		qglDisable( GL_POLYGON_OFFSET_LINE );
+	}
+
+	qglDepthRange( 0, 1 );
+	GL_State( GLS_DEFAULT );
+}
+
+// ################################################ END SR
+
+
 /*
 =================
 RB_RenderDebugTools
@@ -2372,6 +2533,9 @@ void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	RB_ShowDebugText();
 	RB_ShowDebugPolygons();
 	RB_ShowTrace( drawSurfs, numDrawSurfs );
+	
+	
+	RB_ShowQuads();	// ################ SR
 }
 
 /*
@@ -2383,4 +2547,12 @@ void RB_ShutdownDebugTools( void ) {
 	for ( int i = 0; i < MAX_DEBUG_POLYGONS; i++ ) {
 		rb_debugPolygons[i].winding.Clear();
 	}
+	
+	// ############### SR
+	
+	for ( int j = 0; j < MAX_QUADS; j++ ) {
+		rb_drawQuads[j].winding.Clear();
+	}
+	
+	// ############### END SR
 }

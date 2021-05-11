@@ -262,6 +262,7 @@ void idMsgChannel::Init( const netadr_t adr, const int id ) {
 	this->id = id;
 	this->maxRate = 50000;
 	this->compressor = idCompressor::AllocRunLength_ZeroBased();
+	//this->compressor = idCompressor::AllocLZW(); // Dandel: networking compression set to LZW now
 
 	lastSendTime = 0;
 	lastDataBytes = 0;

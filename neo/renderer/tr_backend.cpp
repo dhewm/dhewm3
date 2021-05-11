@@ -170,7 +170,7 @@ void GL_Cull( int cullType ) {
 GL_TexEnv
 ====================
 */
-void GL_TexEnv( int env ) {
+void GL_TexEnv( unsigned int env ) {
 	tmu_t	*tmu;
 
 	tmu = &backEnd.glState.tmu[backEnd.glState.currenttmu];
@@ -405,7 +405,10 @@ void RB_SetGL2D( void ) {
 	}
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity();
-	qglOrtho( 0, 640, 480, 0, 0, 1 );		// always assume 640x480 virtual coordinates
+//	qglOrtho( 0, 640, 480, 0, 0, 1 );		// always assume 640x480 virtual coordinates
+// hi-def GUI patch starts
+	qglOrtho( 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1 );
+// hi-def GUI patch ends
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity();
 

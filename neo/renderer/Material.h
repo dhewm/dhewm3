@@ -218,6 +218,10 @@ typedef struct {
 	float				privatePolygonOffset;	// a per-stage polygon offset
 
 	newShaderStage_t	*newStage;			// vertex / fragment program based stage
+	
+	// rebb : for new material flags, ie glow
+	int				extraFlags;
+	//
 } shaderStage_t;
 
 typedef enum {
@@ -272,7 +276,7 @@ typedef enum {
 	MF_EDITOR_VISIBLE			= BIT(6)	// in use (visible) per editor
 } materialFlags_t;
 
-// contents flags, NOTE: make sure to keep the defines in doom_defs.script up to date with these!
+// contents flags, NOTE: make sure to keep the defines in steelstorm2_defs.script up to date with these!
 typedef enum {
 	CONTENTS_SOLID				= BIT(0),	// an eye is never valid in a solid
 	CONTENTS_OPAQUE				= BIT(1),	// blocks visibility (for ai)

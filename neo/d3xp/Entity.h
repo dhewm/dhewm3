@@ -81,7 +81,7 @@ enum {
 
 //
 // Signals
-// make sure to change script/doom_defs.script if you add any, or change their order
+// make sure to change script/steelstorm2_defs.script if you add any, or change their order
 //
 typedef enum {
 	SIG_TOUCH,				// object was touched
@@ -158,6 +158,8 @@ public:
 		bool				networkSync			:1; // if true the entity is synchronized over the network
 		bool				grabbed				:1;	// if true object is currently being grabbed
 	} fl;
+	
+	void 					RunScriptFunc( const char *name ); 	// ############################### SR	
 
 #ifdef _D3XP
 	int						timeGroup;
@@ -274,6 +276,7 @@ public:
 	bool					GetMasterPosition( idVec3 &masterOrigin, idMat3 &masterAxis ) const;
 	void					GetWorldVelocities( idVec3 &linearVelocity, idVec3 &angularVelocity ) const;
 
+	
 	// physics
 							// set a new physics object to be used by this entity
 	void					SetPhysics( idPhysics *phys );
@@ -376,6 +379,9 @@ public:
 
 	void					ServerSendEvent( int eventId, const idBitMsg *msg, bool saveEvent, int excludeClient ) const;
 	void					ClientSendEvent( int eventId, const idBitMsg *msg ) const;
+	// music volume control begins
+	void					SetMusicVolume( int channel, float to, float over );
+	// music volume control ends
 
 protected:
 	renderEntity_t			renderEntity;						// used to present a model to the renderer
@@ -385,7 +391,7 @@ protected:
 private:
 	idPhysics_Static		defaultPhysicsObj;					// default physics object
 	idPhysics *				physics;							// physics used for this entity
-	idEntity *				bindMaster;							// entity bound to if unequal NULL
+	idEntity *				bindMaster;							// entity bound to if unequal NULL	
 	jointHandle_t			bindJoint;							// joint bound to if unequal INVALID_JOINT
 	int						bindBody;							// body bound to if unequal -1
 	idEntity *				teamMaster;							// master of the physics team
@@ -481,6 +487,7 @@ private:
 	void					Event_HasFunction( const char *name );
 	void					Event_CallFunction( const char *name );
 	void					Event_SetNeverDormant( int enable );
+	
 #ifdef _D3XP
 	void					Event_SetGui( int guiNum, const char *guiName);
 	void					Event_PrecacheGui( const char *guiName );

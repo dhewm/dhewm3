@@ -56,11 +56,11 @@ If you have questions concerning this license or the applicable additional terms
 #define IDC_EDIT_FROM                            8223
 #define IDC_EDIT_DATE                            8224
 #define IDC_EDIT_BODY                            8225
-#define IDC_BUTTON_SAVE                          8226
+//#define IDC_BUTTON_SAVE                          8226
 #define IDC_BUTTON_PDA_ADD                       8227
 #define IDC_BUTTON_PDA_                          8228
 #define IDC_BUTTON_PDA_DEL                       8229
-#define IDC_EDIT1                                8230
+//#define IDC_EDIT1                                8230
 
 
 // Next default values for new objects

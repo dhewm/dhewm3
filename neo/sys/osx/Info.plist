@@ -5,17 +5,17 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>dhewm3</string>
+	<string>Steel Storm 2</string>
 	<key>CFBundleIconFile</key>
-	<string>Doom3.icns</string>
+	<string>Steel Storm 2.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.dhewg.dhewm3</string>
+	<string>kia.steelstorm2</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
-	<string>DHM3</string>
+	<string>SS2</string>
 	<key>CFBundleVersion</key>
 	<string>3000</string>
 	<key>NSMainNibFile</key>

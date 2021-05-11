@@ -55,6 +55,32 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 	switch(type) {
 	case PATH_BASE:
+		if (Sys_GetPath(PATH_EXE, path)) {
+			path.StripFilename();
+			idStr::snPrintf(buf, sizeof(buf), "%s/" , path.c_str());
+			if (stat(buf, &st) != -1 && S_ISDIR(st.st_mode)) {
+				path = buf;
+				return true;
+			} else {
+				common->Printf("no '%s' directory in exe path %s, skipping\n", BASE_GAMEDIR, path.c_str());
+			}
+		}
+
+		s = Posix_Cwd();
+		if (path != s) {
+			idStr::snPrintf(buf, sizeof(buf), "%s/" , s);
+			if (stat(buf, &st) != -1 && S_ISDIR(st.st_mode)) {
+				path = buf;
+				return true;
+			} else {
+				common->Printf("no '%s' directory in cwd path %s, skipping\n", BASE_GAMEDIR, s);
+			}
+		}
+
+		common->Printf("WARNING: using hardcoded default base path\n");
+		path = LINUX_DEFAULT_PATH;
+		return true;
+/*
 		if (stat(BUILD_DATADIR, &st) != -1 && S_ISDIR(st.st_mode)) {
 			path = BUILD_DATADIR;
 			return true;
@@ -71,13 +97,13 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		}
 
 		return false;
-
+*/
 	case PATH_CONFIG:
 		s = getenv("XDG_CONFIG_HOME");
 		if (s)
-			idStr::snPrintf(buf, sizeof(buf), "%s/dhewm3", s);
+			idStr::snPrintf(buf, sizeof(buf), "%s/steelstorm2", s);
 		else
-			idStr::snPrintf(buf, sizeof(buf), "%s/.config/dhewm3", getenv("HOME"));
+			idStr::snPrintf(buf, sizeof(buf), "%s/.config/steelstorm2", getenv("HOME"));
 
 		path = buf;
 		return true;
@@ -85,9 +111,9 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 	case PATH_SAVE:
 		s = getenv("XDG_DATA_HOME");
 		if (s)
-			idStr::snPrintf(buf, sizeof(buf), "%s/dhewm3", s);
+			idStr::snPrintf(buf, sizeof(buf), "%s/steelstorm2", s);
 		else
-			idStr::snPrintf(buf, sizeof(buf), "%s/.local/share/dhewm3", getenv("HOME"));
+			idStr::snPrintf(buf, sizeof(buf), "%s/.local/share/steelstorm2", getenv("HOME"));
 
 		path = buf;
 		return true;

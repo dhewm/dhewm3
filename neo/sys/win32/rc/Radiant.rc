@@ -53,7 +53,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\doom.ico"
+//IDR_MAINFRAME           ICON                    "res\\doom.ico"
+IDR_MAINFRAME           ICON                    "res\\steelstorm2.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1046,7 +1047,7 @@ END
 
 IDD_ABOUT DIALOG  0, 0, 275, 223
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About DOOM Radiant"
+CAPTION "About SS2 Radiant"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,236,7,35,14
@@ -1057,7 +1058,7 @@ BEGIN
     LTEXT           "Version:\t\t1.1",IDC_ABOUT_GLVERSION,10,111,249,10
     LTEXT           "Renderer:\tWHATEVER",IDC_ABOUT_GLRENDERER,10,121,253,24
     GROUPBOX        "OpenGL Extensions",IDC_STATIC,5,152,265,65
-    CONTROL         "DOOM Radiant 1.0 build 199\nCopyright ©1999, 2003 Id Software, Inc.\n\n",
+    CONTROL         "SS2Radiant 1.0 build 199\nCopyright ©1999, 2003 - 2004 idSoftware, Inc.\n\nCopyright © 2012 - 2014 Kot-in-Action Creative Artel\n\n",
                     IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,99,7,
                     132,78
     EDITTEXT        IDC_ABOUT_GLEXTENSIONS,10,162,256,53,ES_MULTILINE | 
@@ -2104,13 +2105,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "id Software"
-            VALUE "FileDescription", "DOOM 3"
+            VALUE "CompanyName", "Kot-in-Action Creative Artel"
+            VALUE "FileDescription", "Steel Storm 2"
             VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "DOOM 3"
-            VALUE "LegalCopyright", "Copyright (C) 2004 id Software"
-            VALUE "OriginalFilename", "Doom.EXE"
-            VALUE "ProductName", "DOOM 3"
+            VALUE "InternalName", "Steel Storm 2"
+            VALUE "LegalCopyright", "Copyright (C) 2004 - 2013 id Software; Kot-in-Action Creative Artel"
+            VALUE "OriginalFilename", "SteelStorm2.EXE"
+            VALUE "ProductName", "Steel Storm 2"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
@@ -2491,14 +2492,14 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "Doom 3"
+    IDR_MAINFRAME           "Steel Storm 2"
     IDR_RADIANTYPE          "\nRadian\nRadian\n\n\nRadiant.Document\nRadian Document"
     IDR_SHADERTYPE          "\nUntitled\nSHADER Document\nShader Files (*.shader)\n.shader\nShaderFileType\nSHADER File Type\nSHADER\nShader Files\n"
 END
 
 STRINGTABLE 
 BEGIN
-    AFX_IDS_APP_TITLE       "DOOM"
+    AFX_IDS_APP_TITLE       "SteelStorm2"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
@@ -2799,7 +2800,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_SHOW_LIGHTVOLUMES    "Show Light Volumes\nShow Light Volumes"
-    ID_SHOW_DOOM            "Enable DOOM\n"
+    ID_SHOW_DOOM            "Enable Steel Storm 2\n"
     ID_SELECTION_MOVEONLY   "Move selection only ( No size )\nMove selection only ( No size )"
 END
 

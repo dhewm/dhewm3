@@ -368,7 +368,7 @@ If both pic and timestamps are NULL, it will just advance past it, which can be
 used to parse an image program from a text stream.
 ===================
 */
-static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *height,
+static bool R_ParseImageProgram_r( idLexer &src, byte **pic, unsigned int *width, unsigned int *height,
 								  ID_TIME_T *timestamps, textureDepth_t *depth ) {
 	idToken		token;
 	float		scale;
@@ -404,7 +404,7 @@ static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *he
 
 	if ( !token.Icmp( "addnormals" ) ) {
 		byte	*pic2;
-		int		width2, height2;
+		unsigned int		width2, height2;
 
 		MatchAndAppendToken( src, "(" );
 
@@ -455,7 +455,7 @@ static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *he
 
 	if ( !token.Icmp( "add" ) ) {
 		byte	*pic2;
-		int		width2, height2;
+		unsigned int		width2, height2;
 
 		MatchAndAppendToken( src, "(" );
 
@@ -609,7 +609,7 @@ static bool R_ParseImageProgram_r( idLexer &src, byte **pic, int *width, int *he
 R_LoadImageProgram
 ===================
 */
-void R_LoadImageProgram( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamps, textureDepth_t *depth ) {
+void R_LoadImageProgram( const char *name, byte **pic, unsigned int *width, unsigned int *height, ID_TIME_T *timestamps, textureDepth_t *depth ) {
 	idLexer src;
 
 	src.LoadMemory( name, strlen(name), name );

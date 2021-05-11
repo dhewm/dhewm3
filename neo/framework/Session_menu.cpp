@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <SDL.h>
+
 #include "sys/platform.h"
 #include "idlib/LangDict.h"
 #include "framework/async/AsyncNetwork.h"
@@ -76,12 +78,15 @@ void idSessionLocal::StartMenu( bool playIntro ) {
 	SetGUI( guiMainMenu, NULL );
 	guiMainMenu->HandleNamedEvent( playIntro ? "playIntro" : "noIntro" );
 
+	guiMainMenu->SetStateString("game_list", common->GetLanguageDict()->GetString( "#str_00009" ));
 
-	if(fileSystem->HasD3XP()) {
+//      Checking if there is RoE expansion pack present; Steel Storm 2 doesn't need that
+/*	if(fileSystem->HasD3XP()) {
 		guiMainMenu->SetStateString("game_list", common->GetLanguageDict()->GetString( "#str_07202" ));
 	} else {
 		guiMainMenu->SetStateString("game_list", common->GetLanguageDict()->GetString( "#str_07212" ));
 	}
+*/
 
 	console->Close();
 
@@ -1184,7 +1189,7 @@ void idSessionLocal::GuiFrameEvents() {
 
 	// stop generating move and button commands when a local console or menu is active
 	// running here so SP, async networking and no game all go through it
-	if ( console->Active() || guiActive ) {
+	if ( console->Active() || guiActive || (SDL_GetAppState() & SDL_APPINPUTFOCUS) == 0) {
 		usercmdGen->InhibitUsercmd( INHIBIT_SESSION, true );
 	} else {
 		usercmdGen->InhibitUsercmd( INHIBIT_SESSION, false );

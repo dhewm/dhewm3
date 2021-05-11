@@ -132,6 +132,29 @@ void idItem::Restore( idRestoreGame *savefile ) {
 	itemShellHandle = -1;
 }
 
+// ####################################### SR
+
+/*
+================
+idItem::RunScriptFunc
+================
+*/
+void idItem::RunScriptFunc( const char *name ) {
+	const function_t *func;
+	
+	if ( scriptObject.HasObject() ) {
+		func = scriptObject.GetFunction( name );
+		if ( func ) {
+			idThread *thread = new idThread();
+			thread->CallFunction( this, func, true );
+			thread->DelayedStart( 0 );
+		}
+	}
+}
+
+// ####################################### END SR
+
+
 /*
 ================
 idItem::UpdateRenderEntity
@@ -1426,6 +1449,7 @@ void idObjective::Event_CamShot( ) {
 			fullView.height = SCREEN_HEIGHT;
 
 #ifdef _D3XP
+			//Portal sky begins
 			// HACK : always draw sky-portal view if there is one in the map, this isn't real-time
 			if ( gameLocal.portalSkyEnt.GetEntity() && g_enablePortalSky.GetBool() ) {
 				renderView_t	portalView = fullView;
@@ -1460,6 +1484,7 @@ void idObjective::Event_CamShot( ) {
 				gameRenderWorld->RenderScene( &portalView );
 				renderSystem->CaptureRenderToImage( "_currentRender" );
 			}
+			//Portal sky ends
 #endif
 
 			// draw a view to a texture
@@ -1721,6 +1746,7 @@ void idMoveableItem::Spawn( void ) {
 
 	// setup the physics
 	physicsObj.SetSelf( this );
+	
 	physicsObj.SetClipModel( new idClipModel( trm ), density );
 	physicsObj.SetOrigin( GetPhysics()->GetOrigin() );
 	physicsObj.SetAxis( GetPhysics()->GetAxis() );
