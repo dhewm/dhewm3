@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "DebuggerQuickWatchDlg.h"
 #include "DebuggerFindDlg.h"
 
-#define DEBUGGERWINDOWCLASS		"QUAKE4_DEBUGGER_WINDOW"
+#define DEBUGGERWINDOWCLASS		"DHEWM3_DEBUGGER_WINDOW"
 #define ID_DBG_WINDOWMIN		18900
 #define ID_DBG_WINDOWMAX		19900
 
@@ -49,6 +49,7 @@ If you have questions concerning this license or the applicable additional terms
 #define IDC_DBG_WATCH			31007
 #define IDC_DBG_THREADS			31008
 #define IDC_DBG_TOOLBAR			31009
+#define IDC_DBG_SCRIPTLIST		31010
 
 #define ID_DBG_FILE_MRU1		10000
 
@@ -167,7 +168,7 @@ bool rvDebuggerWindow::Create ( HINSTANCE instance )
 
 	UpdateTitle ( );
 
-	Printf ( "Quake 4 Script Debugger v0.1\n\n" );
+	Printf ( "Dhewm3 Script Debugger v1.0\n\n" );
 
 	ShowWindow ( mWnd, SW_SHOW );
 	UpdateWindow ( mWnd );
@@ -347,6 +348,20 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc ( HWND wnd, UINT msg, WPARAM wp
 
 			break;
 		}
+		case WM_SIZE:
+		{
+			float scaling_factor = Win_GetWindowScalingFactor(wnd);
+			int s18 = int(18 * scaling_factor);
+			int s10 = int(10 * scaling_factor);
+
+			RECT rect;
+			window->mMarginSize = window->mZoomScaleDem ? ((long)(s18 * (float)window->mZoomScaleNum / (float)window->mZoomScaleDem)) : s18;
+
+			GetWindowRect(window->mWndToolbar, &rect);
+			MoveWindow(window->mWndMargin, 0, 0, window->mMarginSize, window->mSplitterRect.top - (rect.bottom - rect.top), TRUE);
+			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
+
+		}
 	}
 
 	return CallWindowProc ( wndproc, wnd, msg, wparam, lparam );
@@ -384,14 +399,20 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 		case WM_PAINT:
 		{
 			HDC dc;
+			float scaling_factor = Win_GetWindowScalingFactor(wnd);
+			int s2 = int(2 * scaling_factor);
+			int s4 = int(4 * scaling_factor);
+			int s22 = int(22 * scaling_factor);
+			int width,height;
 
-			int size = window->mMarginSize - 2;
+			window->ResizeImageList(width,height);
 
 			PAINTSTRUCT ps;
 			RECT rect;
 			GetClientRect ( wnd, &rect );
+
 			dc = BeginPaint ( wnd, &ps );
-			FillRect ( dc, &rect, GetSysColorBrush ( COLOR_3DFACE ) );
+			FillRect ( dc, &rect, GetSysColorBrush ( COLOR_3DSHADOW ) );
 
 			if ( window->mScripts.Num ( ) )
 			{
@@ -407,7 +428,7 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 
 						c = SendMessage ( window->mWndScript, EM_LINEINDEX, bp->GetLineNumber ( ) - 1, 0 );
 						SendMessage ( window->mWndScript, EM_POSFROMCHAR, (WPARAM)&pos, c );
-						ImageList_DrawEx ( window->mImageList, 2, dc, rect.left, pos.y, size, size, CLR_NONE, CLR_NONE, ILD_NORMAL );
+						ImageList_DrawEx ( window->mTmpImageList, 2, dc, rect.left, pos.y, width, height, CLR_NONE, CLR_NONE, ILD_NORMAL );						
 					}
 				}
 
@@ -421,7 +442,7 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 
 						c = SendMessage ( window->mWndScript, EM_LINEINDEX, window->mClient->GetBreakLineNumber() - 1, 0 );
 						SendMessage ( window->mWndScript, EM_POSFROMCHAR, (WPARAM)&pos, c );
-						ImageList_DrawEx ( window->mImageList, 3, dc, rect.left, pos.y, size, size, CLR_NONE, CLR_NONE, ILD_NORMAL );
+						ImageList_DrawEx ( window->mTmpImageList, 3, dc, rect.left, pos.y, width, height, CLR_NONE, CLR_NONE, ILD_NORMAL );
 					}
 				}
 
@@ -434,17 +455,19 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 
 						c = SendMessage ( window->mWndScript, EM_LINEINDEX, window->mClient->GetCallstack()[window->mCurrentStackDepth]->mLineNumber - 1, 0 );
 						SendMessage ( window->mWndScript, EM_POSFROMCHAR, (WPARAM)&pos, c );
-						ImageList_DrawEx ( window->mImageList, 1, dc, rect.left, pos.y, size, size, CLR_NONE, CLR_NONE, ILD_NORMAL );
+						ImageList_DrawEx ( window->mTmpImageList, 1, dc, rect.left, pos.y, width, height, CLR_NONE, CLR_NONE, ILD_NORMAL );
 					}
 				}
 			}
+			RECT tmp = rect;
 
-			rect.right-=2;
-			rect.left = rect.right + 1;
-			HPEN pen = CreatePen ( PS_SOLID, 1, GetSysColor ( COLOR_3DSHADOW ) );
+			rect.right -= s2;
+			rect.left = rect.right + s2;
+			HPEN pen = CreatePen ( PS_SOLID, s2, GetSysColor ( COLOR_BACKGROUND ) );
 			HPEN old = (HPEN)SelectObject ( dc, pen );
 			MoveToEx ( dc, rect.right, rect.top, NULL );
 			LineTo ( dc, rect.right, rect.bottom );
+			
 			SelectObject ( dc, old );
 			DeleteObject ( pen );
 			EndPaint ( wnd, &ps );
@@ -466,7 +489,7 @@ void rvDebuggerWindow::UpdateTitle ( void )
 {
 	idStr title;
 
-	title = "Quake 4 Script Debugger - ";
+	title = "Dhewm3 Script Debugger - ";
 
 	if ( mClient->IsConnected ( ) )
 	{
@@ -487,7 +510,10 @@ void rvDebuggerWindow::UpdateTitle ( void )
 	if ( mScripts.Num ( ) )
 	{
 		title += " - [";
-		title += idStr( mScripts[mActiveScript]->GetFilename() ).StripPath ( );
+		if (mActiveScript != -1)
+			title += idStr( mScripts[mActiveScript]->GetFilename() ).StripPath ( );
+		else
+			title += "Load Error";
 		title += "]";
 	}
 
@@ -587,6 +613,33 @@ void rvDebuggerWindow::UpdateCallstack ( void )
 		ListView_SetItemText ( mWndCallstack, item.iItem, 1, (LPSTR)entry->mFunction.c_str() );
 		ListView_SetItemText ( mWndCallstack, item.iItem, 2, va("%d", entry->mLineNumber ) );
 		ListView_SetItemText ( mWndCallstack, item.iItem, 3, (LPSTR)entry->mFilename.c_str() );
+	}
+}
+
+void rvDebuggerWindow::UpdateScriptList(void)
+{
+	LVITEM item;
+	ListView_DeleteAllItems(mWndScriptList);
+	ZeroMemory(&item, sizeof(item));
+	item.mask = LVIF_TEXT | LVIF_IMAGE;
+
+	idStrList& scripts = mClient->GetServerScripts();
+	for (int i = 0; i < scripts.Num(); i++)
+	{
+		item.iItem = ListView_GetItemCount(mWndScriptList);
+		item.pszText = "";
+		//find in activeScripts
+		item.iImage = 0;
+		for (int j = 0; j < mScripts.Num(); j++)
+		{
+			if (!idStr::Icmp(mScripts[j]->GetFilename(), scripts[i]))
+			{
+				item.iImage = 1;
+				break;
+			}
+		}
+		ListView_InsertItem(mWndScriptList, &item);
+		ListView_SetItemText(mWndScriptList, item.iItem, 1, (LPSTR)scripts[i].c_str());
 	}
 }
 
@@ -737,6 +790,32 @@ int rvDebuggerWindow::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 	return 0;
 }
 
+
+void rvDebuggerWindow::ResizeImageList(int& widthOut, int& heightOut)
+{
+	//mTmpImageList
+	float scaling_factor = Win_GetWindowScalingFactor(mWnd);
+	int s16 = int(16 * scaling_factor);
+
+	TEXTMETRIC	tm;
+	HDC			dc;
+	dc = GetDC(mWndScript);
+
+	GetTextMetrics(dc, &tm);
+	int height = mZoomScaleDem ? (tm.tmHeight * (float)mZoomScaleNum / (float)mZoomScaleDem)  : 16;
+	int width = mZoomScaleDem ? (s16 * (float)mZoomScaleNum / (float)mZoomScaleDem) : 16;
+
+	ImageList_Destroy(mTmpImageList);
+	mTmpImageList = ImageList_Create(width, height, ILC_COLOR | ILC_MASK , 0, 2);
+	ImageList_AddIcon(mTmpImageList, (HICON)LoadImage(mInstance, MAKEINTRESOURCE(IDI_DBG_EMPTY), IMAGE_ICON, width, height, LR_DEFAULTSIZE | LR_DEFAULTCOLOR));
+	ImageList_AddIcon(mTmpImageList, (HICON)LoadImage(mInstance, MAKEINTRESOURCE(IDI_DBG_CURRENT), IMAGE_ICON, width, height, LR_DEFAULTSIZE | LR_DEFAULTCOLOR));
+	ImageList_AddIcon(mTmpImageList, (HICON)LoadImage(mInstance, MAKEINTRESOURCE(IDI_DBG_BREAKPOINT), IMAGE_ICON, width, height, LR_DEFAULTSIZE | LR_DEFAULTCOLOR));
+	ImageList_AddIcon(mTmpImageList, (HICON)LoadImage(mInstance, MAKEINTRESOURCE(IDI_DBG_CURRENTLINE), IMAGE_ICON, width, height, LR_DEFAULTSIZE | LR_DEFAULTCOLOR));
+
+	widthOut = width;
+	heightOut = height;
+}
+
 /*
 ================
 rvDebuggerWindow::HandleCreate
@@ -760,7 +839,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	// Create the script window
 	LoadLibrary ( "Riched20.dll" );
 	mWndScript = CreateWindow ( "RichEdit20A", "", WS_CHILD|WS_BORDER|ES_NOHIDESEL|ES_READONLY|ES_MULTILINE|ES_WANTRETURN|ES_AUTOVSCROLL|ES_AUTOHSCROLL|WS_VSCROLL|WS_HSCROLL, 0, 0, 100, 100, mWnd, (HMENU) IDC_DBG_SCRIPT, mInstance, 0 );
-	SendMessage ( mWndScript, EM_SETEVENTMASK, 0, ENM_SCROLL|ENM_CHANGE  );
+	SendMessage ( mWndScript, EM_SETEVENTMASK, 0, ENM_SCROLL | ENM_CHANGE | ENM_UPDATE | ENM_SCROLLEVENTS | ENM_REQUESTRESIZE) ;
 	SendMessage ( mWndScript, EM_SETWORDBREAKPROC, 0, (LPARAM) ScriptWordBreakProc );
 	mOldScriptProc = (WNDPROC)GetWindowLong ( mWndScript, GWL_WNDPROC );
 	SetWindowLong ( mWndScript, GWL_USERDATA, (LONG)this );
@@ -782,6 +861,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	SendMessage ( mWndOutput, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
 	SendMessage ( mWndOutput, EM_SETMARGINS, EC_LEFTMARGIN|EC_RIGHTMARGIN, MAKELONG(18,10) );
 	SendMessage ( mWndOutput, EM_SETBKGNDCOLOR, 0, GetSysColor ( COLOR_3DFACE ) );
+	SendMessage ( mWndOutput, EM_SETEVENTMASK, 0, ENM_SCROLL | ENM_CHANGE | ENM_UPDATE | ENM_SCROLLEVENTS);
 
 	mWndConsole = CreateWindow ( "RichEdit20A", "", WS_CHILD|ES_READONLY|ES_MULTILINE|ES_WANTRETURN|ES_AUTOVSCROLL|ES_AUTOHSCROLL|WS_VSCROLL|WS_HSCROLL, 0, 0, 100, 100, mWnd, (HMENU) IDC_DBG_CONSOLE, mInstance, 0 );
 	SendMessage ( mWndConsole, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
@@ -816,13 +896,24 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	TabCtrl_InsertItem ( mWndTabs, 3, &item );
 	item.pszText = "Threads";
 	TabCtrl_InsertItem ( mWndTabs, 4, &item );
+	item.pszText = "Scripts";
+	TabCtrl_InsertItem ( mWndTabs, 5, &item );
 
 	mWndCallstack = CreateWindow ( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_CALLSTACK, mInstance, NULL );
 	mWndWatch     = CreateWindow ( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_EDITLABELS|LVS_OWNERDRAWFIXED, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_WATCH, mInstance, NULL );
 	mWndThreads   = CreateWindow ( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_THREADS, mInstance, NULL );
+	mWndScriptList = CreateWindow( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_SCRIPTLIST, mInstance, NULL );
 
 	LVCOLUMN col;
 	col.mask = LVCF_WIDTH|LVCF_TEXT;
+
+	col.cx = 20;
+	col.pszText = "";
+	ListView_InsertColumn ( mWndScriptList, 0, &col);
+	col.cx = 150;
+	col.pszText = "Filename";
+	ListView_InsertColumn ( mWndScriptList, 1, &col );
+
 	col.cx = 20;
 	col.pszText = "";
 	ListView_InsertColumn ( mWndCallstack, 0, &col );
@@ -863,13 +954,19 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	ImageList_AddIcon ( mImageList, (HICON)LoadImage ( mInstance, MAKEINTRESOURCE(IDI_DBG_CURRENT), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE|LR_DEFAULTCOLOR) );
 	ImageList_AddIcon ( mImageList, (HICON)LoadImage ( mInstance, MAKEINTRESOURCE(IDI_DBG_BREAKPOINT), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE|LR_DEFAULTCOLOR) );
 	ImageList_AddIcon ( mImageList, (HICON)LoadImage ( mInstance, MAKEINTRESOURCE(IDI_DBG_CURRENTLINE), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE|LR_DEFAULTCOLOR) );
+	
+	int w, h;
+	ResizeImageList(w, h);
+	ListView_SetImageList ( mWndScriptList, mTmpImageList, LVSIL_SMALL );
 	ListView_SetImageList ( mWndThreads, mImageList, LVSIL_SMALL );
 	ListView_SetImageList ( mWndCallstack, mImageList, LVSIL_SMALL );
 
 	EnableWindows ( FALSE );
-
+	EnableWindow ( mWndScriptList, true );
+	
 	ListView_SetExtendedListViewStyle ( mWndCallstack, LVS_EX_FULLROWSELECT );
 	ListView_SetExtendedListViewStyle ( mWndThreads, LVS_EX_FULLROWSELECT );
+	ListView_SetExtendedListViewStyle ( mWndScriptList, LVS_EX_FULLROWSELECT );
 
 	gDebuggerApp.GetOptions().GetColumnWidths ( "cw_callstack", mWndCallstack );
 	gDebuggerApp.GetOptions().GetColumnWidths ( "cw_threads", mWndThreads );
@@ -919,6 +1016,10 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 
 		AddWatch ( s );
 	}
+
+	RECT t;
+	GetClientRect(mWndScript, &t);
+	SendMessage(mWndScript, WM_SIZE, 0, MAKELPARAM(t.right - t.left, t.bottom - t.top));
 
 	return 0;
 }
@@ -1055,7 +1156,7 @@ int rvDebuggerWindow::HandleCommand ( WPARAM wparam, LPARAM lparam )
 				mZoomScaleNum = num;
 				mZoomScaleDem = dem;
 				GetClientRect ( mWndScript, &t );
-				SendMessage ( mWnd, WM_SIZE, 0, MAKELPARAM(t.right-t.left,t.bottom-t.top) );
+				SendMessage ( mWndScript, WM_SIZE, 0, MAKELPARAM(t.right-t.left ,t.bottom-t.top) );
 			}
 			else
 			{
@@ -1202,8 +1303,13 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 
 		case WM_SIZE:
 		{
+			float scaling_factor = Win_GetWindowScalingFactor(wnd);
+			int s18 = int(18 * scaling_factor);
+			int s4 = int(4 * scaling_factor);
+			int s10 = int(10 * scaling_factor);
+
 			RECT rect;
-			window->mMarginSize = window->mZoomScaleDem ? ((long)(18.0f * (float)window->mZoomScaleNum / (float)window->mZoomScaleDem)):18;
+			window->mMarginSize = window->mZoomScaleDem ? ((long)(s18 * (float)window->mZoomScaleNum / (float)window->mZoomScaleDem)): s18;
 			window->mSplitterRect.left = 0;
 			window->mSplitterRect.right = LOWORD(lparam);
 
@@ -1215,7 +1321,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			SetRect ( &rect, 0, window->mSplitterRect.bottom, LOWORD(lparam), HIWORD(lparam) );
 			MoveWindow ( window->mWndTabs, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			SendMessage ( window->mWndTabs, TCM_ADJUSTRECT, FALSE, (LPARAM)&rect );
-			rect.bottom -= 4 ;
+			rect.bottom -= s4;
 			MoveWindow ( window->mWndBorder, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			InflateRect ( &rect, -1, -1 );
 			MoveWindow ( window->mWndOutput, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
@@ -1223,6 +1329,13 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			MoveWindow ( window->mWndCallstack, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndWatch, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndThreads, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
+			MoveWindow ( window->mWndScriptList, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
+
+			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
+			SendMessage(window->mWndCallstack, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
+			SendMessage(window->mWndOutput, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
+			SendMessage(window->mWndConsole, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
+
 			break;
 		}
 
@@ -1258,7 +1371,17 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			}
 			break;
 		}
+		case WM_MOUSEWHEEL:
+		{
+			HDC dc = GetDC(wnd);
+			DrawFocusRect(dc, &window->mSplitterRect);
+			ReleaseDC(wnd, dc);
 
+			RECT client;
+			GetClientRect(wnd, &client);
+			SendMessage(wnd, WM_SIZE, 0, MAKELPARAM(client.right - client.left, client.bottom - client.top));
+
+		}
 		case WM_LBUTTONUP:
 			if ( window->mSplitterDrag )
 			{
@@ -1454,6 +1577,31 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 						}
 					}
 					break;
+				case IDC_DBG_SCRIPTLIST:
+					if ( hdr->code == NM_DBLCLK )
+					{
+						int sel = ListView_GetNextItem(hdr->hwndFrom, -1, LVNI_SELECTED);
+
+						if (sel != -1)
+						{
+							LVITEM item = { 0 }; 
+							char   temp[1024] = { 0 };
+							item.mask = LVIF_TEXT;
+							item.pszText = temp;
+							item.cchTextMax = sizeof(temp) - 1;
+							item.iSubItem = 1;
+							item.iItem = sel;
+
+							ListView_GetItem(hdr->hwndFrom, &item);
+
+							if (strlen(item.pszText) > 0)
+							{
+								window->OpenScript(item.pszText);
+								window->UpdateScriptList();
+							}
+						}
+					}
+					break;
 				case IDC_DBG_TABS:
 					if ( hdr->code == TCN_SELCHANGE )
 					{
@@ -1462,6 +1610,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 						ShowWindow ( window->mWndCallstack, SW_HIDE );
 						ShowWindow ( window->mWndWatch, SW_HIDE );
 						ShowWindow ( window->mWndThreads, SW_HIDE );
+						ShowWindow ( window->mWndScriptList, SW_HIDE );
 						switch ( TabCtrl_GetCurSel ( hdr->hwndFrom ) )
 						{
 							case 0:
@@ -1482,6 +1631,9 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 
 							case 4:
 								ShowWindow ( window->mWndThreads, SW_SHOW );
+								break;
+							case 5:
+								ShowWindow(window->mWndScriptList, SW_SHOW);
 								break;
 						}
 					}
@@ -1535,14 +1687,19 @@ rvDebuggerWindow::ProcessNetMessage
 Process an incoming network message
 ================
 */
-void rvDebuggerWindow::ProcessNetMessage ( msg_t* msg )
+void rvDebuggerWindow::ProcessNetMessage ( idBitMsg* msg )
 {
-	unsigned short command;
+	short command;
 
-	command = (unsigned short)MSG_ReadShort ( msg );
+	command = msg->ReadShort( );
 
 	switch ( command )
 	{
+		case DBMSG_REMOVEBREAKPOINT:
+			MessageBeep(MB_ICONEXCLAMATION);
+			InvalidateRect(mWndScript, NULL, FALSE);
+			break;
+
 		case DBMSG_RESUMED:
 			UpdateTitle ( );
 			UpdateToolbar ( );
@@ -1554,9 +1711,9 @@ void rvDebuggerWindow::ProcessNetMessage ( msg_t* msg )
 			char temp2[1024];
 			int	 i;
 
-			MSG_ReadShort ( msg );
-			MSG_ReadString ( msg, temp, 1024 );
-			MSG_ReadString ( msg, temp2, 1024 );
+			msg->ReadShort ( );
+			msg->ReadString (  temp, 1024 );
+			msg->ReadString (  temp2, 1024 );
 			if ( mTooltipVar.Icmp ( temp ) == 0 )
 			{
 				mTooltipValue = temp2;
@@ -1625,7 +1782,7 @@ void rvDebuggerWindow::ProcessNetMessage ( msg_t* msg )
 
 		case DBMSG_PRINT:
 			SendMessage ( mWndConsole, EM_SETSEL, -1, -1 );
-			SendMessage ( mWndConsole, EM_REPLACESEL, 0, (LPARAM)(const char*)(msg->data) + msg->readcount );
+			SendMessage ( mWndConsole, EM_REPLACESEL, 0, (LPARAM)(const char*)(msg->GetData()) + msg->GetReadCount() );
 			SendMessage ( mWndConsole, EM_SCROLLCARET, 0, 0 );
 			break;
 
@@ -1637,13 +1794,17 @@ void rvDebuggerWindow::ProcessNetMessage ( msg_t* msg )
 			mClient->InspectVariable ( mTooltipVar, mCurrentStackDepth );
 			UpdateWatch ( );
 			EnableWindows ( TRUE );
-			OpenScript ( mClient->GetBreakFilename(), mClient->GetBreakLineNumber() - 1 );
+			OpenScript ( mClient->GetBreakFilename(), mClient->GetBreakLineNumber() - 1, mClient->GetBreakProgram());
 			UpdateTitle ( );
 			UpdateToolbar ( );
 			SetForegroundWindow ( mWnd );
 			break;
 		}
-
+		case DBMSG_INSPECTSCRIPTS:
+		{
+			UpdateScriptList ( );
+			break;
+		}
 		case DBMSG_INSPECTCALLSTACK:
 		{
 			UpdateCallstack ( );
@@ -1719,7 +1880,7 @@ Opens the script with the given filename and will scroll to the given line
 number if one is specified
 ================
 */
-bool rvDebuggerWindow::OpenScript ( const char* filename, int lineNumber )
+bool rvDebuggerWindow::OpenScript ( const char* filename, int lineNumber, idProgram* program )
 {
 	int i;
 
@@ -1748,7 +1909,6 @@ bool rvDebuggerWindow::OpenScript ( const char* filename, int lineNumber )
 		// Load the script
 		if ( !script->Load ( filename ) )
 		{
-			delete script;
 			SetCursor ( LoadCursor ( NULL, IDC_ARROW ) );
 			return false;
 		}
@@ -1777,7 +1937,7 @@ bool rvDebuggerWindow::OpenScript ( const char* filename, int lineNumber )
 	// Move to a specific line number?
 	if ( lineNumber != -1 )
 	{
-		int		c;
+		long	c;
 
 		// Put the caret on the line number specified and scroll it into position.
 		// This is a bit of a hack since we set the selection twice, but setting the
@@ -1785,10 +1945,10 @@ bool rvDebuggerWindow::OpenScript ( const char* filename, int lineNumber )
 		// and then scroll before going back to (c,c).
 		// NOTE: We scroll to the line before the one we want so its more visible
 		SetFocus ( mWndScript );
-		c = SendMessage ( mWndScript, EM_LINEINDEX, lineNumber - 1, 0 );
+		c = SendMessage ( mWndScript, EM_LINEINDEX, (long)lineNumber - 1, 0 );
 		SendMessage ( mWndScript, EM_SETSEL, c, c + 1 );
 		SendMessage ( mWndScript, EM_SCROLLCARET, 0, 0 );
-		c = SendMessage ( mWndScript, EM_LINEINDEX, lineNumber, 0 );
+		c = SendMessage ( mWndScript, EM_LINEINDEX, (long)lineNumber, 0 );
 		SendMessage ( mWndScript, EM_SETSEL, c, c );
 	}
 	else
@@ -2193,7 +2353,7 @@ then the last text used will be searched for.
 */
 bool rvDebuggerWindow::FindNext ( const char* text )
 {
-	int		 start;
+	long	 start;
 	FINDTEXT ft;
 
 	if ( text )
@@ -2230,7 +2390,7 @@ bool rvDebuggerWindow::FindNext ( const char* text )
 		}
 	}
 
-	SendMessage ( mWndScript, EM_SETSEL, start, start + mFind.Length() );
+	SendMessage ( mWndScript, EM_SETSEL, start, start + (long)mFind.Length() );
 	SendMessage ( mWndScript, EM_SCROLLCARET, 0, 0 );
 
 	return true;
@@ -2247,7 +2407,7 @@ then the last text used will be searched for.
 */
 bool rvDebuggerWindow::FindPrev ( const char* text )
 {
-	int		 start;
+	long	 start;
 	FINDTEXT ft;
 
 	if ( text )

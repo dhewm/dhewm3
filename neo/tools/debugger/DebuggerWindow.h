@@ -52,38 +52,56 @@ public:
 	rvDebuggerWindow ( );
 	~rvDebuggerWindow ( );
 
-	bool			Create				( HINSTANCE hInstance );
+	bool							Create				( HINSTANCE hInstance );
 
-	static bool		Activate			( void );
+	static bool						Activate			( void );
 
-	void			ProcessNetMessage	( msg_t* msg );
+	void							ProcessNetMessage	( idBitMsg * msg );
 
-	void			Printf				( const char* format, ... );
+	void							Printf				( const char* format, ... );
 
-	HWND			GetWindow			( void );
+	HWND							GetWindow			( void );
 
-	void			AddWatch			( const char* name, bool update = true );
+	void							AddWatch			( const char* name, bool update = true );
 
-	HINSTANCE		GetInstance			( void );
+	HINSTANCE						GetInstance			( void );
 
-protected:
+private:
+	bool							RegisterClass	( void );
+	void							CreateToolbar	( void );
+	bool							InitRecentFiles	( void );
 
-	bool					FindPrev			( const char* text = NULL );
-	bool					FindNext			( const char* text = NULL );
+	int								HandleInitMenu			( WPARAM wParam, LPARAM lParam );
+	int								HandleCommand			( WPARAM wParam, LPARAM lParam );
+	int								HandleCreate			( WPARAM wparam, LPARAM lparam );
+	int								HandleActivate			( WPARAM wparam, LPARAM lparam );
+	int								HandleDrawItem			( WPARAM wparam, LPARAM lparam );
+	void							HandleTooltipGetDispInfo( WPARAM wparam, LPARAM lparam );
 
-	void					UpdateWatch			( void );
-	void					UpdateWindowMenu	( void );
-	void					UpdateScript		( void );
-	void					UpdateToolbar		( void );
-	void					UpdateTitle			( void );
-	void					UpdateCallstack		( void );
-	void					UpdateRecentFiles	( void );
-	bool					OpenScript			( const char* filename, int lineNumber = -1  );
-	void					EnableWindows		( bool state );
+	void							ResizeImageList				( int& widthOut, int& heightOut);
+	static LRESULT					CALLBACK WndProc			( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
+	static LRESULT					CALLBACK MarginWndProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
+	static LRESULT					CALLBACK ScriptWndProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
+	static INT_PTR					CALLBACK AboutDlgProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
+	static int						CALLBACK ScriptWordBreakProc( LPTSTR text, int current, int max, int action );
 
-	int						GetSelectedText		( idStr& text );
+	bool							FindPrev			( const char* text = NULL );
+	bool							FindNext			( const char* text = NULL );
 
-	void					ToggleBreakpoint	( void );
+	void							UpdateScriptList	( void );
+	void							UpdateWatch			( void );
+	void							UpdateWindowMenu	( void );
+	void							UpdateScript		( void );
+	void							UpdateToolbar		( void );
+	void							UpdateTitle			( void );
+	void							UpdateCallstack		( void );
+	void							UpdateRecentFiles	( void );
+	bool							OpenScript			( const char* filename, int lineNumber = -1, idProgram* program = nullptr );
+	void							EnableWindows		( bool state );
+
+	int								GetSelectedText		( idStr& text );
+
+	void							ToggleBreakpoint	( void );
 
 	HWND							mWnd;
 	HWND							mWndScript;
@@ -93,6 +111,7 @@ protected:
 	HWND							mWndBorder;
 	HWND							mWndConsole;
 	HWND							mWndCallstack;
+	HWND							mWndScriptList;
 	HWND							mWndWatch;
 	HWND							mWndThreads;
 	HWND							mWndToolTips;
@@ -108,6 +127,7 @@ protected:
 
 	HINSTANCE						mInstance;
 	HIMAGELIST						mImageList;
+	HIMAGELIST						mTmpImageList;
 
 	RECT							mSplitterRect;
 	bool							mSplitterDrag;
@@ -129,25 +149,6 @@ protected:
 	rvDebuggerClient*				mClient;
 
 	rvDebuggerWatchList				mWatches;
-
-private:
-
-	bool		RegisterClass				( void );
-	void		CreateToolbar				( void );
-	bool		InitRecentFiles				( void );
-
-	int			HandleInitMenu				( WPARAM wParam, LPARAM lParam );
-	int			HandleCommand				( WPARAM wParam, LPARAM lParam );
-	int			HandleCreate				( WPARAM wparam, LPARAM lparam );
-	int			HandleActivate				( WPARAM wparam, LPARAM lparam );
-	int			HandleDrawItem				( WPARAM wparam, LPARAM lparam );
-	void		HandleTooltipGetDispInfo	( WPARAM wparam, LPARAM lparam );
-
-	static LRESULT CALLBACK WndProc				( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
-	static LRESULT CALLBACK MarginWndProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
-	static LRESULT CALLBACK ScriptWndProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
-	static INT_PTR CALLBACK AboutDlgProc		( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
-	static int     CALLBACK ScriptWordBreakProc ( LPTSTR text, int current, int max, int action );
 };
 
 /*

@@ -28,20 +28,15 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERSERVER_H_
 #define DEBUGGERSERVER_H_
 
-#ifndef DEBUGGERMESSAGES_H_
+
 #include "DebuggerMessages.h"
-#endif
-
-#ifndef DEBUGGERBREAKPOINT_H_
 #include "DebuggerBreakpoint.h"
-#endif
+#include "framework/Game.h"
 
-#ifndef __GAME_LOCAL_H__
-#include "../../game/Game.h"
-#endif
 
-class idInterpreter;
-class idProgram;
+
+class function_t;
+typedef struct prstack_s prstack_t;
 
 class rvDebuggerServer
 {
@@ -50,22 +45,40 @@ public:
 	rvDebuggerServer ( );
 	~rvDebuggerServer ( );
 
-	bool		Initialize			( void );
-	void		Shutdown			( void );
+	bool		Initialize				( void );
+	void		Shutdown				( void );
 
-	bool		ProcessMessages		( void );
+	bool		ProcessMessages			( void );
 
-	bool		IsConnected			( void );
+	bool		IsConnected				( void );
 
-	void		CheckBreakpoints	( idInterpreter* interpreter, idProgram* program, int instructionPointer );
+	void		CheckBreakpoints		( idInterpreter* interpreter, idProgram* program, int instructionPointer );
 
-	void		Print				( const char* text );
+	void		Print					( const char* text );
 
-	void		OSPathToRelativePath( const char *osPath, idStr &qpath );
+	void		OSPathToRelativePath	( const char *osPath, idStr &qpath );
 
-protected:
+	bool		GameSuspended			( void );
+private:
 
-	// protected member variables
+	void		ClearBreakpoints		( void );
+
+	void		Break					( idInterpreter* interpreter, idProgram* program, int instructionPointer );
+	void		Resume					( void );
+
+	void		SendMessage				( EDebuggerMessage dbmsg );
+	void		SendPacket				( void* data, int datasize );
+
+	// Message handlers
+	void		HandleAddBreakpoint		( idBitMsg * msg );
+	void		HandleRemoveBreakpoint	( idBitMsg * msg );
+	void		HandleResume			( idBitMsg * msg );
+	void		HandleInspectVariable	( idBitMsg * msg );
+	void		HandleInspectCallstack	( idBitMsg * msg );
+	void		HandleInspectThreads	( idBitMsg * msg );
+	void		HandleInspectScripts	( idBitMsg * msg );
+	////
+
 	bool							mConnected;
 	netadr_t						mClientAdr;
 	idPort							mPort;
@@ -87,27 +100,9 @@ protected:
 
 	idStr							mLastStatementFile;
 	int								mLastStatementLine;
+	uintptr_t						mGameDLLHandle;
+	idStrList						mScriptFileList;
 
-private:
-
-	void		ClearBreakpoints				( void );
-
-	void		Break							( idInterpreter* interpreter, idProgram* program, int instructionPointer );
-	void		Resume							( void );
-
-	void		SendMessage						( EDebuggerMessage dbmsg );
-	void		SendPacket						( void* data, int datasize );
-
-	// Message handlers
-	void		HandleAddBreakpoint				( msg_t* msg );
-	void		HandleRemoveBreakpoint			( msg_t* msg );
-	void		HandleResume					( msg_t* msg );
-	void		HandleInspectVariable			( msg_t* msg );
-	void		HandleInspectCallstack			( msg_t* msg );
-	void		HandleInspectThreads			( msg_t* msg );
-
-	// MSG helper routines
-	void		MSG_WriteCallstackFunc			( msg_t* msg, const prstack_t* stack );
 };
 
 /*
@@ -128,6 +123,16 @@ rvDebuggerServer::SendPacket
 ID_INLINE void rvDebuggerServer::SendPacket ( void* data, int size )
 {
 	mPort.SendPacket ( mClientAdr, data, size );
+}
+
+/*
+================
+rvDebuggerServer::GameSuspended
+================
+*/
+ID_INLINE bool rvDebuggerServer::GameSuspended( void )
+{
+	return mBreak;
 }
 
 #endif // DEBUGGERSERVER_H_

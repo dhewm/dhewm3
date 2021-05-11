@@ -28,6 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERBREAKPOINT_H_
 #define DEBUGGERBREAKPOINT_H_
 
+class idProgram;
+
 class rvDebuggerBreakpoint
 {
 public:
@@ -46,7 +48,6 @@ protected:
 	int		mID;
 	int		mLineNumber;
 	idStr	mFilename;
-
 private:
 
 	static int	mNextID;

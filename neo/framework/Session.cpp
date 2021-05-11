@@ -1646,7 +1646,7 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 
 	// load and spawn all other entities ( from a savegame possibly )
 	if ( loadingSaveGame && savegameFile ) {
-		if ( game->InitFromSaveGame( fullMapName + ".map", rw, sw, savegameFile ) == false ) {
+		if ( game->InitFromSaveGame( fullMapName + ".map", rw, sw, savegameFile, com_editors ) == false ) {
 			// If the loadgame failed, restart the map with the player persistent data
 			loadingSaveGame = false;
 			fileSystem->CloseFile( savegameFile );
@@ -1655,11 +1655,11 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 			common->Warning( "WARNING: Loading savegame failed, will restart the map with the player persistent data!" );
 
 			game->SetServerInfo( mapSpawnData.serverInfo );
-			game->InitFromNewMap( fullMapName + ".map", rw, sw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds() );
+			game->InitFromNewMap( fullMapName + ".map", rw, sw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds(),com_editors );
 		}
 	} else {
 		game->SetServerInfo( mapSpawnData.serverInfo );
-		game->InitFromNewMap( fullMapName + ".map", rw, sw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds() );
+		game->InitFromNewMap( fullMapName + ".map", rw, sw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds(), com_editors);
 	}
 
 	if ( !idAsyncNetwork::IsActive() && !loadingSaveGame ) {
@@ -1681,7 +1681,7 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 	if ( !idAsyncNetwork::IsActive() && !loadingSaveGame ) {
 		// run a few frames to allow everything to settle
 		for ( i = 0; i < 10; i++ ) {
-			game->RunFrame( mapSpawnData.mapSpawnUsercmd );
+			game->RunFrame( mapSpawnData.mapSpawnUsercmd, com_editors);
 		}
 	}
 
@@ -2785,7 +2785,7 @@ void idSessionLocal::RunGameTic() {
 
 	// run the game logic every player move
 	int	start = Sys_Milliseconds();
-	gameReturn_t	ret = game->RunFrame( &cmd );
+	gameReturn_t	ret = game->RunFrame( &cmd, com_editors);
 
 	int end = Sys_Milliseconds();
 	time_gameFrame += end - start;	// note time used for com_speeds

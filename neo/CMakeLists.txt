@@ -862,6 +862,9 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 	# Script editor
 	file(GLOB src_script_editor "tools/script/*.cpp")
 	add_globbed_headers(src_script_editor "tools/script")
+	# Script Debugger
+	file(GLOB src_script_debugger "tools/debugger/*.cpp")
+	add_globbed_headers(src_script_debugger "tools/debugger")
 	# sound editor?
 	file(GLOB src_sound_editor "tools/sound/*.cpp")
 	add_globbed_headers(src_sound_editor "tools/sound")
@@ -881,6 +884,7 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 		${src_map_editor}
 		${src_script_editor}
 		${src_sound_editor}
+		${src_script_debugger}
 		"tools/edit_public.h"
 		"tools/edit_gui_common.h"
 		)

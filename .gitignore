@@ -12,3 +12,4 @@
 /neo/out*
 /neo/build*
 
+/neo/CMakeSettings.json

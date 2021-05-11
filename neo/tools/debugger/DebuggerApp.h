@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #define DEBUGGERAPP_H_
 
 #include "../../sys/win32/win_local.h"
-#include "../../framework/sync/Msg.h"
+//#include "../../framework/sync/Msg.h"
 
 #ifndef REGISTRYOPTIONS_H_
 #include "../common/RegistryOptions.h"
@@ -49,13 +49,15 @@ If you have questions concerning this license or the applicable additional terms
 
 // These were changed to static by ID so to make it easy we just throw them
 // in this header
-const int MAX_MSGLEN = 1400;
+// we need a lot to be able to list all threads in mars_city1
+const int MAX_MSGLEN = 8600;
 
 class rvDebuggerApp
 {
 public:
 
 	rvDebuggerApp ( );
+	~rvDebuggerApp();
 
 	bool				Initialize				( HINSTANCE hInstance );
 	int					Run						( void );

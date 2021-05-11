@@ -2442,7 +2442,7 @@ void idAsyncServer::RunFrame( void ) {
 		DuplicateUsercmds( gameFrame, gameTime );
 
 		// advance game
-		gameReturn_t ret = game->RunFrame( userCmds[gameFrame & ( MAX_USERCMD_BACKUP - 1 ) ] );
+		gameReturn_t ret = game->RunFrame( userCmds[gameFrame & ( MAX_USERCMD_BACKUP - 1 ) ], com_editors );
 
 		idAsyncNetwork::ExecuteSessionCommand( ret.sessionCommand );
 

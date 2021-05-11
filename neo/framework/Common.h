@@ -111,6 +111,8 @@ struct MemInfo_t {
 };
 
 class idLangDict;
+class idInterpreter;
+class idProgram;
 
 class idCommon {
 public:
@@ -157,6 +159,9 @@ public:
 
 								// Writes cvars with the given flags to a file.
 	virtual void				WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd ) = 0;
+
+								// Debbugger hook to check if a breakpoint has been hit
+	virtual void				DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer) = 0;
 
 								// Begins redirection of console output to the given buffer.
 	virtual void				BeginRedirect( char *buffer, int buffersize, void (*flush)( const char * ) ) = 0;

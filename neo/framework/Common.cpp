@@ -142,6 +142,7 @@ public:
 	virtual void				ActivateTool( bool active );
 	virtual void				WriteConfigToFile( const char *filename );
 	virtual void				WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd );
+	virtual void				DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer);
 	virtual void				BeginRedirect( char *buffer, int buffersize, void (*flush)( const char * ) );
 	virtual void				EndRedirect( void );
 	virtual void				SetRefreshOnPrint( bool set );
@@ -382,12 +383,17 @@ void idCommonLocal::VPrintf( const char *fmt, va_list args ) {
 	// remove any color codes
 	idStr::RemoveColors( msg );
 
-	// echo to dedicated console and early console
-	Sys_Printf( "%s", msg );
 
+
+#ifdef ID_ALLOW_TOOLS
 	// print to script debugger server
-	// DebuggerServerPrint( msg );
-
+	if (com_editors & EDITOR_DEBUGGER)
+		DebuggerServerPrint(msg);
+	else
+#endif
+		// only echo to dedicated console and early console when debugger is not running so no 
+		// deadlocks occur if engine functions called from the debuggerthread trace stuff..
+		Sys_Printf("%s", msg);
 #if 0	// !@#
 #if defined(_DEBUG) && defined(WIN32)
 	if ( strlen( msg ) < 512 ) {
@@ -1134,8 +1140,7 @@ Com_ScriptDebugger_f
 static void Com_ScriptDebugger_f( const idCmdArgs &args ) {
 	// Make sure it wasnt on the command line
 	if ( !( com_editors & EDITOR_DEBUGGER ) ) {
-		common->Printf( "Script debugger is currently disabled\n" );
-		// DebuggerClientLaunch();
+		 DebuggerClientLaunch();
 	}
 }
 
@@ -2020,6 +2025,7 @@ void Com_LocalizeMaps_f( const idCmdArgs &args ) {
 		strCount += LocalizeMap(args.Argv(2), strTable, listHash, excludeList, write);
 	} else {
 		idStrList files;
+		//wow, what now? a hardcoded path?
 		GetFileList("z:/d3xp/d3xp/maps/game", "*.map", files);
 		for ( int i = 0; i < files.Num(); i++ ) {
 			idStr file =  fileSystem->OSPathToRelativePath(files[i]);
@@ -2666,7 +2672,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 	gameImport.AASFileManager			= ::AASFileManager;
 	gameImport.collisionModelManager	= ::collisionModelManager;
 
-	gameExport							= *GetGameAPI( &gameImport );
+	gameExport							= *GetGameAPI( &gameImport);
 
 	if ( gameExport.version != GAME_API_VERSION ) {
 		Sys_DLL_Unload( gameDLL );
@@ -3164,8 +3170,10 @@ void idCommonLocal::InitGame( void ) {
 	// initialize the user interfaces
 	uiManager->Init();
 
+#if defined(ID_ALLOW_TOOLS)
 	// startup the script debugger
-	// DebuggerServerInit();
+	DebuggerServerInit();
+#endif;
 
 	PrintLoadingMessage( common->GetLanguageDict()->GetString( "#str_04350" ) );
 
@@ -3202,8 +3210,10 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 		sw->StopAllSounds();
 	}
 
+#if defined(ID_ALLOW_TOOLS)
 	// shutdown the script debugger
-	// DebuggerServerShutdown();
+	 DebuggerServerShutdown();
+#endif
 
 	idAsyncNetwork::client.Shutdown();
 
@@ -3298,6 +3308,10 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 	}
 }
 
+void idCommonLocal::DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer)
+{
+	DebuggerServerCheckBreakpoint(interpreter, program, instructionPointer);
+}
 
 idGameCallbacks gameCallbacks;
 

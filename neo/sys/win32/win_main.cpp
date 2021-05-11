@@ -629,7 +629,30 @@ Sys_DLL_GetProcAddress
 =====================
 */
 void *Sys_DLL_GetProcAddress( uintptr_t dllHandle, const char *procName ) {
-	return (void *)GetProcAddress( (HINSTANCE)dllHandle, procName );
+	void * adr = (void*)GetProcAddress((HINSTANCE)dllHandle, procName);
+	if (!adr)
+	{
+		DWORD e = GetLastError();
+		LPVOID msgBuf = nullptr;
+
+		FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			e,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&msgBuf,
+			0, NULL);
+
+		idStr errorStr = va("[%i (0x%X)]\t%s", e, e, msgBuf);
+
+		if (errorStr.Length())
+			common->Warning("GetProcAddress( %i %s) Failed ! %s", dllHandle, procName, errorStr.c_str());
+
+		::LocalFree(msgBuf);
+	}
+	return adr;
 }
 
 /*
@@ -969,7 +992,7 @@ int main(int argc, char *argv[]) {
 
 	// Launch the script debugger
 	if ( strstr( GetCommandLine(), "+debugger" ) ) {
-		// DebuggerClientInit( lpCmdLine );
+		DebuggerClientInit(GetCommandLine());
 		return 0;
 	}
 

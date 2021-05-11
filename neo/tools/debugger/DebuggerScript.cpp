@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "DebuggerApp.h"
 #include "DebuggerScript.h"
-#include "../../game/script/Script_Program.h"
 #include "../../ui/Window.h"
 #include "../../ui/UserInterfaceLocal.h"
 
@@ -57,6 +56,7 @@ rvDebuggerScript::~rvDebuggerScript ( void )
 	Unload ( );
 }
 
+
 /*
 ================
 rvDebuggerScript::Unload
@@ -71,10 +71,6 @@ void rvDebuggerScript::Unload ( void )
 	if ( mInterface )
 	{
 		delete mInterface;
-	}
-	else
-	{
-		delete mProgram;
 	}
 
 	mContents  = NULL;
@@ -91,7 +87,7 @@ appropriate for the file being loaded.  If the script cant be compiled
 the loading of the script fails
 ================
 */
-bool rvDebuggerScript::Load ( const char* filename )
+bool rvDebuggerScript::Load ( const char* filename)
 {
 	void* buffer;
 	int	  size;
@@ -116,60 +112,7 @@ bool rvDebuggerScript::Load ( const char* filename )
 
 	// Cleanup
 	fileSystem->FreeFile ( buffer );
-
-	// Now compile the script so we can tell what a valid line is, etc..  If its
-	// a gui file then we need to parse it using the userinterface system rather
-	// than the normal script compiler.
-	try
-	{
-		// Parse the script using the script compiler
-		mProgram = new idProgram;
-		mProgram->BeginCompilation ( );
-		mProgram->CompileFile ( SCRIPT_DEFAULT );
-
-		//BSM Nerve: Loads a game specific main script file
-		idStr gamedir = cvarSystem->GetCVarString( "fs_game" );
-		if(gamedir.Length() > 0) {
-
-			idStr scriptFile = va("script/%s_main.script", gamedir.c_str());
-			if(fileSystem->ReadFile(scriptFile.c_str(), NULL) > 0) {
-				mProgram.CompileFile(scriptFile.c_str());
-			}
-
-		}
-
-		// Make sure the file isnt already compiled before trying to compile it again
-		for ( int f = mProgram->NumFilenames() - 1; f >= 0; f -- )
-		{
-			idStr qpath;
-			qpath = fileSystem->OSPathToRelativePath ( mProgram->GetFilename ( f ) );
-			qpath.BackSlashesToSlashes ( );
-			if ( !qpath.Cmp ( filename ) )
-			{
-				break;
-			}
-		}
-
-		if ( f < 0 )
-		{
-			mProgram->CompileText ( filename, mContents, false );
-		}
-
-		mProgram->FinishCompilation ( );
-	}
-	catch ( idException& )
-	{
-		// Failed to parse the script so fail to load the file
-		delete mProgram;
-		mProgram = NULL;
-		delete[] mContents;
-		mContents = NULL;
-
-		// TODO: Should cache the error for the dialog box
-
-		return false;
-	}
-
+	
 	return true;
 }
 
@@ -194,21 +137,8 @@ Determines whether or not the given line number within the script is a valid lin
 */
 bool rvDebuggerScript::IsLineCode ( int linenumber )
 {
-	int i;
-
-	assert ( mProgram );
-
-	// Run through all the statements in the program and see if any match the
-	// linenumber that we are checking.
-	for ( i	= 0; i < mProgram->NumStatements ( ); i ++ )
-	{
-		if ( mProgram->GetStatement ( i ).linenumber == linenumber )
-		{
-			return true;
-		}
-	}
-
-	return false;
+	//we let server decide.
+	return true;
 }
 
 /*

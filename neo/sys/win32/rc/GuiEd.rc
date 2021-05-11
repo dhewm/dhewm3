@@ -269,8 +269,6 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "GUI Editor",IDC_STATIC,35,7,62,8
     LTEXT           "Version 0.15",IDC_STATIC,35,17,41,8
-    LTEXT           "Original version by Raven",IDC_STATIC,35,
-                    28,134,8
     DEFPUSHBUTTON   "OK",IDOK,165,50,50,14
     ICON            IDI_GUIED,IDC_STATIC,7,7,20,20
 END
