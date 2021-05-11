@@ -1,0 +1,25 @@
+// default video in PDA 
+video/default_pda_video {
+	translucent {
+		videomap "video/default_pda_video.roq"
+		linear
+	}
+}
+
+video/placeholder {
+	translucent {
+		map guis/assets/video_placeholder_material.tga
+	}
+}
+
+video/loadvideo {
+	translucent {
+		videomap video/loadvideo.RoQ		
+	}
+}
+
+video/communication_stream {
+	translucent {
+		videomap video/loadvideo.RoQ		
+	}
+}

@@ -1,0 +1,115 @@
+!!ARBvp1.0
+OPTION ARB_position_invariant;
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbvp1 -posinv
+# source file: inkCustom_vert.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbvp1
+#program main
+#semantic main.inParms : C0
+#semantic main.inParms2 : C1
+#semantic main.inParms3 : C2
+#semantic main.inParms4 : C3
+#var float4 inParms : C0 : c[0] : 0 : 1
+#var float4 inParms2 : C1 : c[1] : 1 : 1
+#var float4 inParms3 : C2 : c[2] : 2 : 1
+#var float4 inParms4 : C3 : c[3] : 3 : 1
+#var float4 genParms : $vout.TEXCOORD4 : TEX4 : 4 : 1
+#var float4 genParms2 : $vout.TEXCOORD5 : TEX5 : 5 : 1
+#var float4 genParms3 : $vout.TEXCOORD6 : TEX6 : 6 : 1
+#var float4 genParms4 : $vout.TEXCOORD7 : TEX7 : 7 : 1
+PARAM c[4] = { program.local[0..3] };
+MOV result.texcoord[4], c[0];
+MOV result.texcoord[5], c[1];
+MOV result.texcoord[6], c[2];
+MOV result.texcoord[7], c[3];
+END
+# 4 instructions, 0 R-regs
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbfp1 -fastmath -fastprecision
+# source file: inkCustom_frag.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbfp1
+#program main
+#semantic main.screenAdjust : ENV1
+#semantic main.depthImage : TEXUNIT0
+#var float4 screenAdjust : ENV1 : env[1] : 0 : 1
+#var sampler2D depthImage : TEXUNIT0 : texunit 0 : 1 : 1
+#var float4 genParms : $vin.TEXCOORD4 : TEX4 : 2 : 1
+#var float4 genParms2 : $vin.TEXCOORD5 :  : 3 : 0
+#var float4 genParms3 : $vin.TEXCOORD6 :  : 4 : 0
+#var float4 genParms4 : $vin.TEXCOORD7 : TEX7 : 5 : 1
+#var float2 fragPos : $vin.WPOS : WPOS : 6 : 1
+#var float4 outColor : $vout.COLOR : COL : 7 : 1
+#const c[0] = 1 2995 3000 -15000
+#const c[1] = 256 0.0078125 -1 0
+#const c[2] = 1 0 2 -1
+#const c[3] = 0.25
+PARAM c[4] = { { 1, 2995, 3000, -15000 },
+		{ 256, 0.0078125, -1, 0 },
+		{ 1, 0, 2, -1 },
+		{ 0.25 } };
+PARAM env[] = { program.env[0..1] };
+TEMP R0;
+TEMP R1;
+TEMP R2;
+MUL R0.zw, fragment.position.xyxy, env[1].xyxy;
+TEX R0.x, R0.zwzw, texture[0], 2D;
+MAD R0.y, R0.x, c[0], -c[0].z;
+RCP R0.y, R0.y;
+MOV R1.z, fragment.texcoord[4].x;
+MAD R1.x, R0.y, c[0].w, -fragment.texcoord[7].y;
+RCP R1.y, fragment.texcoord[7].z;
+MUL_SAT R1.x, R1, R1.y;
+ADD R1.z, fragment.texcoord[7].x, -R1;
+MAD R1.y, R1.x, R1.z, fragment.texcoord[4].x;
+MAD R2.xy, R1.y, c[1].wzzw, R0.zwzw;
+MAD R1.zw, R1.y, c[2].xyyx, R0;
+TEX R1.x, R2, texture[0], 2D;
+TEX R2.x, R1.zwzw, texture[0], 2D;
+ADD R1.z, -R0.x, R1.x;
+ADD R1.x, R0, -R2;
+ADD R2.z, R1.x, -R1;
+MAD R2.xy, R1.y, c[2], R0.zwzw;
+MAD R1.zw, R1.y, c[1], R0;
+TEX R1.x, R2, texture[0], 2D;
+TEX R2.x, R1.zwzw, texture[0], 2D;
+ADD R1.z, -R0.x, R1.x;
+ADD R1.x, R0, -R2;
+ADD R1.x, R1, -R1.z;
+MAD R2.xy, R1.y, c[2].xwzw, R0.zwzw;
+MAD_SAT R1.z, -R2, c[2], fragment.texcoord[7].w;
+MAD_SAT R1.x, -R1, c[2].z, fragment.texcoord[7].w;
+ADD R2.z, R1.x, R1;
+MAD R1.zw, R1.y, c[2].xywx, R0;
+TEX R1.x, R2, texture[0], 2D;
+TEX R2.x, R1.zwzw, texture[0], 2D;
+ADD R1.z, -R0.x, R1.x;
+ADD R1.x, R0, -R2;
+ADD R2.y, R1.x, -R1.z;
+ADD R1.zw, R0, R1.y;
+ADD R0.zw, R0, -R1.y;
+TEX R2.x, R0.zwzw, texture[0], 2D;
+TEX R1.x, R1.zwzw, texture[0], 2D;
+ADD R0.z, -R0.x, R1.x;
+ADD R0.x, R0, -R2;
+ADD R0.z, R0.x, -R0;
+MAD_SAT R0.x, -R2.y, c[2].z, fragment.texcoord[7].w;
+ADD R0.x, R2.z, R0;
+MAD_SAT R0.z, -R0, c[2], fragment.texcoord[7].w;
+ADD R0.z, R0.x, R0;
+MUL R0.x, R0.y, c[0].w;
+MAD R0.y, -R0.z, c[3].x, R0.z;
+ADD R0.x, R0, -c[1];
+MUL R0.z, R0, c[3].x;
+MUL_SAT R0.x, R0, c[1].y;
+MAD R0.x, R0, R0.y, R0.z;
+MUL_SAT R0.x, R0, fragment.texcoord[4].z;
+MAD result.color.xyz, -R0.x, fragment.texcoord[4].y, c[0].x;
+MOV result.color.w, c[0].x;
+END
+# 54 instructions, 3 R-regs

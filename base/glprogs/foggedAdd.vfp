@@ -1,0 +1,22 @@
+!!ARBvp1.0
+OPTION ARB_position_invariant;
+PARAM c[6] = { program.local[0..5] };
+MOV result.texcoord[1], c[0];
+MOV result.texcoord[2], c[1];
+MOV result.color, vertex.color;
+MOV result.texcoord[0].xy, vertex.texcoord[0];
+END
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+PARAM c[1] = { { 1 } };
+TEMP R0;
+TEMP R1;
+RCP R0.x, fragment.position.w;
+MUL R0.x, fragment.position.z, R0;
+MAD_SAT R1.x, R0, fragment.texcoord[2], fragment.texcoord[2].y;
+TEX R0, fragment.texcoord[0], texture[0], 2D;
+MUL R0, R0, fragment.color.primary;
+ADD R1.x, -R1, c[0];
+MUL result.color.xyz, R0, R1.x;
+MOV result.color.w, R0;
+END

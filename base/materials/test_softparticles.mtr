@@ -1,0 +1,22 @@
+// soft particle test
+textures/particles/smokepuff_soft
+{
+	qer_editorimage textures/particles/smokepuffb.tga
+	noShadows
+	translucent
+	sort 10
+
+	{
+		blend add
+
+		vertexProgram		softParticleRGB.vfp
+
+		vertexParm 	0  	0.1, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleRGB.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/smokepuffx.tga // certain textures should be forced to high quality for the shader to work properly
+
+		//vertexColor
+	}
+}

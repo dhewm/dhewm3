@@ -1,0 +1,591 @@
+// ------------------------------------------------------------------------------
+//                             WEATHER
+// ------------------------------------------------------------------------------
+textures/particles/snowflake1
+{
+	qer_editorimage textures/particles/snowflake1a.tga
+	noShadows
+	translucent
+	nonsolid
+//	sort 110
+//	{       
+//		blend	blend
+//		map		textures/particles/snowflake1a.tga
+//	} 
+	{
+		//blend add
+		blend blend
+		
+		//vertexProgram		softParticleRGB.vfp
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.1, 0, 0, 0 // "softness" factor
+
+		//fragmentProgram		softParticleRGB.vfp
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		//fragmentMap	1	forceHighQuality textures/particles/snowflake1b.tga // certain textures should be forced to high quality for the shader to work properly
+		fragmentMap	1	forceHighQuality textures/particles/snowflake1b_alpha.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+	/*{
+		blend blend
+
+		vertexProgram		foggedBlendSoft.vfp
+		vertexParm 	0  	0.39, 0.44, 0.48, 1	// fog color
+		vertexParm	1		0.000001219512, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+		vertexParm	2  	0.1, 0, 0, 0 		// "softness" factor
+
+		fragmentProgram	foggedBlendSoft.vfp
+		fragmentMap	0		forceHighQuality textures/particles/snowflake1b_alpha.tga	// source texture ( preferably with alpha-channel )
+		fragmentMap 1		_currentDepth								// depth image
+	}*/
+}
+
+textures/particles/snowflakes_blowdust1
+{
+	//qer_editorimage textures/particles/snowflakes_blowdust1a.tga
+	qer_editorimage textures/particles/snowflakes_blowdust1a_trans.tga
+	noShadows
+	translucent
+	nonsolid
+	//sort 110
+	/*{       
+		blend	add
+		map		textures/particles/snowflakes_blowdust1.tga
+	} 
+	{       
+		blend	blend
+		map		textures/particles/snowflakes_blowdust1a_trans.tga
+		alpha 1
+	}*/ 
+	{
+		//blend add
+		blend blend
+
+		//vertexProgram		softParticleRGB.vfp
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.005, 0, 0, 0 // "softness" factor
+
+		//fragmentProgram		softParticleRGB.vfp
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		//fragmentMap	1	forceHighQuality textures/particles/snowflakes_blowdust1a.tga // certain textures should be forced to high quality for the shader to work properly
+		fragmentMap	1	forceHighQuality textures/particles/snowflakes_blowdust1a_alpha.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+	/*{
+		blend blend
+
+		vertexProgram		foggedBlendSoft.vfp
+		vertexParm 	0  	0.39, 0.44, 0.48, 1	// fog color
+		vertexParm	1		0.000001219512, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+		vertexParm	2  	0.005, 0, 0, 0 		// "softness" factor
+
+		fragmentProgram	foggedBlendSoft.vfp
+		fragmentMap	0		forceHighQuality textures/particles/snowflakes_blowdust1a_alpha.tga	// source texture ( preferably with alpha-channel )
+		fragmentMap 1		_currentDepth								// depth image
+	}*/
+}
+
+textures/particles/snowflakes_blowdust_ground1
+{
+	qer_editorimage textures/particles/snowflakes_blowdust_ground1.tga
+	noShadows
+	translucent
+	nonsolid
+	twosided
+	polygonOffset 0.1
+//	{       
+//		blend	add
+//		map		textures/particles/snowflakes_blowdust1.tga
+//	} 
+	{
+		blend add
+		//blend blend
+
+		vertexProgram		softParticleRGB.vfp
+		//vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleRGB.vfp
+		//fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/snowflakes_blowdust_ground1.tga // certain textures should be forced to high quality for the shader to work properly
+		//fragmentMap	1	forceHighQuality textures/particles/snowflakes_blowdust_ground1_alpha.tga // certain textures should be forced to high quality for the shader to work properly
+	} 
+}
+
+textures/particles/snowflakes_small_blowdust_ground1
+{
+	qer_editorimage textures/particles/snowflakes_small_blowdust_ground1.tga
+	noShadows
+	translucent
+	nonsolid
+//	twosided
+//	polygonOffset 0.1
+//	{       
+//		blend	add
+//		map		textures/particles/snowflakes_blowdust1.tga
+//	} 
+	{
+		//blend add
+		blend blend
+
+		//vertexProgram		softParticleRGB.vfp
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		//fragmentProgram		softParticleRGB.vfp
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		//fragmentMap	1	forceHighQuality textures/particles/snowflakes_small_blowdust_ground1.tga // certain textures should be forced to high quality for the shader to work properly
+		fragmentMap	1	forceHighQuality textures/particles/snowflakes_small_blowdust_ground1_alpha.tga // certain textures should be forced to high quality for the shader to work properly
+	} 
+}
+
+// ------------------------------------------------------------------------------
+//                       P R O J E C T I L E S 
+// ------------------------------------------------------------------------------
+textures/particles/rocket_flame
+{
+	noselfShadow
+	noshadows	
+	translucent
+	discrete
+	nonsolid
+	noimpact
+	//sort decal	
+	//sort 110
+	sort nearest	
+	/*{      
+	    blend add
+		map	textures/particles/rocket_flame_a.tga		
+		vertexcolor
+		colored
+	}	*/
+	/*{
+		blend add
+
+		vertexProgram		foggedAdd.vfp
+		vertexParm 	0  	0.39, 0.44, 0.48, 1	// fog color
+		vertexParm	1		0.00001219512, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; ) where fadeRange is shaderParms 3 of the fog, fadeStart is distance from the camera in game's units
+
+		fragmentProgram	foggedAdd.vfp
+		fragmentMap	0		textures/particles/rocket_flame_a.tga	// source texture
+		vertexcolor
+		colored
+	}*/
+}
+
+textures/particles/rocket_smoke
+{
+	noselfShadow
+	noshadows	
+	translucent
+	discrete
+	nonsolid
+	noimpact
+	//sort decal
+	sort 110
+	
+	/* { 
+		blend blend
+		map	textures/particles/rocket_smoke_a.tga		
+		vertexcolor
+		colored
+	} */
+	{
+		blend blend
+
+		vertexProgram		foggedBlend.vfp
+		vertexParm 	0  	0.39, 0.44, 0.48, 1	// fog color
+		vertexParm	1		0.00001219512, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; ) where fadeRange is shaderParms 3 of the fog, fadeStart is distance from the camera in game's units
+
+		fragmentProgram	foggedBlend.vfp
+		fragmentMap	0		textures/particles/rocket_smoke_a.tga	// source texture ( preferably with alpha-channel )
+		vertexcolor
+		colored
+	}
+/*	{
+		blend blend
+
+		vertexProgram		particleBlend_SoftDistFog.glsl
+
+		vertexParm 0		0.1, 0, 0, 0 // "softness" factor
+		vertexParm 1 		128, 128, 0, 0 // distanceFadeStart, distanceFadeRange
+		vertexParm 2		1.0, 1.0, 1.0, 0.00005 // pseudoFog color RGB, "fog thickness" value
+
+		fragmentProgram		particleBlend_SoftDistFog.glsl
+		fragmentMap 0 		_currentDepth
+		fragmentMap 1 		textures/particles/rocket_smoke_a.tga
+
+		vertexColor
+	}*/			//used in bfg engine
+}
+
+textures/particles/sentinelCOMAR_jetstream_small_dark
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided	
+	//sort 120
+	clamp	
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/round_sharp_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+textures/particles/sentinelCOMAR_jetstream_small_light
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided	
+	//sort 121
+	clamp	
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/round_sharp_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+textures/particles/sentinelCOMAR_jetstream_main_dark
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided	
+	//sort 121
+	clamp	
+	/*{
+		blend blend
+		map textures/particles/round_sharp_blend.tga		
+		clamp
+		vertexColor
+	}*/
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.1, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/round_sharp_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+textures/particles/sentinelCOMAR_jetstream_main_light
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided	
+	//sort 122
+	clamp	
+	/*{
+		blend blend
+		map textures/particles/round_sharp_blend.tga		
+		vertexColor
+		clamp
+	}*/
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.1, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/round_sharp_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+// ------------------------------------------------------------------------------
+//                       S M O K E S
+// ------------------------------------------------------------------------------
+
+textures/particles/smoke_anime_dark
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided
+	//sort 101
+	//sort 120
+	sort 110	
+/*	{
+		blend blend
+		map textures/particles/smoke_anime3_test_blend.tga		
+		vertexColor
+		//clamp
+	} */
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/smoke_anime3_test_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+/*	{
+		blend blend
+
+		vertexProgram		particleBlend_SoftDistFog.glsl
+
+		vertexParm 0		0.05, 0, 0, 0 // "softness" factor
+		vertexParm 1 		128, 128, 0, 0 // distanceFadeStart, distanceFadeRange
+		vertexParm 2		1, 1, 1, 0.000005 // pseudoFog color RGB, "fog thickness" value
+
+		fragmentProgram		particleBlend_SoftDistFog.glsl
+		fragmentMap 0 		_currentDepth
+		fragmentMap 1 		textures/particles/smoke_anime3_test_blend.tga
+
+		vertexColor
+	}*/				// in bfg engine
+}
+
+textures/particles/smoke_anime_light
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided
+	//sort 102
+	//sort 121
+	sort 111
+	/*{
+		blend blend
+		map textures/particles/smoke_anime3_test_blend.tga		
+		vertexColor
+		clamp
+	}*/
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/smoke_anime3_test_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+/*	{
+		blend blend
+
+		vertexProgram		particleBlend_SoftDistFog.glsl
+
+		vertexParm 0		0.05, 0, 0, 0 // "softness" factor
+		vertexParm 1 		128, 128, 0, 0 // distanceFadeStart, distanceFadeRange
+		vertexParm 2		1, 1, 1, 0.000005 // pseudoFog color RGB, "fog thickness" value
+
+		fragmentProgram		particleBlend_SoftDistFog.glsl
+		fragmentMap 0 		_currentDepth
+		fragmentMap 1 		textures/particles/smoke_anime3_test_blend.tga
+
+		vertexColor
+	}*/
+}
+
+textures/particles/smoke_anime_details
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided	
+	//sort 103
+	//sort 122
+	/*{
+		blend blend
+		map textures/particles/smoke_anime3detail_test_blend.tga		
+		vertexColor
+		clamp
+	}*/
+	{
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/smoke_anime3detail_test_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+textures/particles/smoke_anime_stripe1_dark
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided
+	//sort 102
+	//sort 121
+	{
+		blend blend
+		map textures/particles/smoke_anime_stripe1_blend.tga		
+		vertexColor
+		clamp
+	}
+	/
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/smoke_anime3_test_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+textures/particles/smoke_anime_stripe2_dark
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twosided
+	//sort 102
+	//sort 121
+	{
+		blend blend
+		map textures/particles/smoke_anime_stripe2_blend.tga		
+		vertexColor
+		clamp
+	}
+	/
+		blend blend
+		vertexColor
+		
+		vertexProgram		softParticleAlpha.vfp
+
+		vertexParm 	0  	0.01, 0, 0, 0 // "softness" factor
+
+		fragmentProgram		softParticleAlpha.vfp
+		fragmentMap	0	_currentDepth
+		fragmentMap	1	forceHighQuality textures/particles/smoke_anime3_test_blend.tga // certain textures should be forced to high quality for the shader to work properly
+	}
+}
+
+textures/particles/plasma_burn_smoke_puff
+{
+	noSelfShadow
+	noShadows	
+	translucent
+	discrete
+	nonsolid		
+	sort 122
+	clamp
+	{
+		blend blend
+		map textures/particles/smoke_puff1.tga		
+		colored
+		vertexColor
+	}
+}
+
+// --------------------------------------------------------
+//                BLOOD PARTICLES
+// --------------------------------------------------------
+
+textures/particles/blood_blob1
+{
+	noSelfShadow
+	noShadows
+	translucent
+	discrete
+	twosided
+	nonsolid
+	noimpact	
+	{
+		blend blend
+	    map textures/particles/blood_particle1.tga
+        vertexColor
+        colored
+	}
+}
+
+textures/particles/blood_blob2
+{
+	noSelfShadow
+	noShadows
+	translucent
+	discrete
+	twosided
+	nonsolid
+	noimpact
+	{
+		blend blend
+	    map textures/particles/blood_particle2.tga
+        vertexColor
+        colored
+	}
+}
+
+textures/particles/blood_blob3
+{
+	noSelfShadow
+	noShadows
+	translucent
+	discrete
+	twosided
+	nonsolid
+	noimpact
+	{
+		blend blend
+	    map textures/particles/blood_particle3.tga
+        vertexColor
+        colored
+	}
+}
+
+textures/particles/blood_splatter1_thin
+{
+	noSelfShadow
+	noShadows
+	translucent
+	discrete
+	twosided
+	nonsolid
+	noimpact	
+	{
+		blend blend
+	    map textures/particles/blood_splatter1_thin.tga
+        vertexColor
+        colored
+	}
+}

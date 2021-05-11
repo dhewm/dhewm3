@@ -1,0 +1,3 @@
+interaction.vfp : Toon + Specular (needs to be controlled by the materials) + Improved ambient
+interaction_nospecular.vfp : Toon with no Specular
+interaction_original.vfp : Original shader compatible with Doom 3

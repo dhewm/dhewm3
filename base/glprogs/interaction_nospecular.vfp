@@ -1,0 +1,174 @@
+# Interaction Vertex Program
+#
+# Vertex Attributes
+# 	8		texcoord
+#	9		vertex normal(?)
+#	10		vertex tangent(?)
+#	11		vertex bintangent(?)
+#
+# Environment Values
+#	4		local light position
+#	5		local view position
+#	6-8		light projection UVW
+#	9		light falloff U
+#	10-11	normal map UV
+#	12-13	diffuse map UV
+#	14-15	specular map UV
+#	16		vertex colour modulate
+#	17		vertex colour add
+
+!!ARBvp1.0
+
+OPTION	ARB_position_invariant;
+
+TEMP	R0, R1;
+
+PARAM	clearTC = { 0.0, 0.5, 0.0, 1.0 };
+
+SUB		R0.xyz, program.env[4], vertex.position;
+
+# tc0 : light vector in texture space
+DP3		result.texcoord[0].x, R0, vertex.attrib[9];
+DP3		result.texcoord[0].y, R0, vertex.attrib[10];
+DP3		result.texcoord[0].z, R0, vertex.attrib[11];
+
+# tc1 : normal map UV
+DP4		result.texcoord[1].x, vertex.attrib[8], program.env[10];
+DP4		result.texcoord[1].y, vertex.attrib[8], program.env[11];
+
+# tc2 : light falloff
+DP4		result.texcoord[2].x, vertex.position, program.env[9];
+MOV		result.texcoord[2].yzw, clearTC;
+
+# tc3 : light projection
+DP4		result.texcoord[3].x, vertex.position, program.env[6];
+DP4		result.texcoord[3].y, vertex.position, program.env[7];
+DP4		result.texcoord[3].w, vertex.position, program.env[8];
+
+# tc4 : diffuse map UV
+DP4		result.texcoord[4].x, vertex.attrib[8], program.env[12];
+DP4		result.texcoord[4].y, vertex.attrib[8], program.env[13];
+
+# tc5 : specular map UV
+DP4		result.texcoord[5].x, vertex.attrib[8], program.env[14];
+DP4		result.texcoord[5].y, vertex.attrib[8], program.env[15];
+
+SUB		R1.xyz, program.env[5], vertex.position;
+
+# tc6 : view vector in texture space
+DP3		result.texcoord[6].x, R1, vertex.attrib[9];
+DP3		result.texcoord[6].y, R1, vertex.attrib[10];
+DP3		result.texcoord[6].z, R1, vertex.attrib[11];
+
+# calculate vertex color ( output = vertexColor * env[16] + env[17] )
+#
+#				env[16]		env[17]
+# 1.0			0			1
+# color			1			0
+# 1.0 - color	-1			1
+
+MAD		result.color, vertex.color, program.env[16], program.env[17];
+
+END
+
+# Interaction Fragment Program
+#
+# Textures
+#	0	normalization cube map ( not used in this version )
+#	1	normal map
+#	2	light falloff texture
+#	3	light projection texture
+#	4	diffuse map
+#	5	specular map
+#	6	specular lookup table
+#
+# Environment Values
+#	0	diffuse modifier
+#	1	specular modifier
+
+!!ARBfp1.0
+
+OPTION	ARB_precision_hint_fastest;
+
+# parms0 : specular power
+PARAM	parms0	= { 24.0, 0.0, 0.0, 0.0 };
+
+TEMP	toView, toLight, halfVec, zeDots, lightProj, R0, R1, diffColor, specColor, outColor, localNormal;
+
+# normalize view vector
+DP3		toView.w, fragment.texcoord[6], fragment.texcoord[6];
+RSQ		toView.w, toView.w;
+MUL		toView.xyz, toView.w, fragment.texcoord[6];
+
+# normalize light vector
+DP3		toLight.w, fragment.texcoord[0], fragment.texcoord[0];
+RSQ		toLight.w, toLight.w;
+MUL		toLight.xyz, toLight.w, fragment.texcoord[0];
+
+# construct half vector
+ADD		halfVec.xyz, toView, toLight;
+DP3		halfVec.w, halfVec, halfVec;
+RSQ		halfVec.w, halfVec.w;
+MUL		halfVec.xyz, halfVec.w, halfVec;
+
+# look up normal ( rxgb swizzle )
+TEX		localNormal, fragment.texcoord[1], texture[1], 2D;
+MAD		localNormal.xyz, localNormal.wyzw, 2.0, -1.0;
+
+DP3		R0.x, localNormal, localNormal;
+RSQ		R0.x, R0.x;
+MUL		localNormal.xyz, R0.x, localNormal;
+
+# load light projection and falloff
+TXP		lightProj.xyz, fragment.texcoord[3], texture[3], 2D;
+TXP		R0.xyz, fragment.texcoord[2], texture[2], 2D;
+MUL		lightProj.xyz, lightProj, R0;
+
+# load diffuse map
+TEX		diffColor.xyz, fragment.texcoord[4], texture[4], 2D;
+MUL		diffColor.xyz, diffColor, program.env[0];
+
+# calculate dotproducts for diffuse/specular
+DP3		zeDots.x, toLight, localNormal;
+DP3_SAT	zeDots.y, halfVec, localNormal;
+
+# apply specular power
+POW		R0.x, zeDots.y, parms0.x;
+MUL		R0.x, R0, program.env[1];
+
+# default Doom3 doubles the specularity
+ADD		R0.x, R0, R0;
+
+# look up specular map
+TEX		specColor.xyz, fragment.texcoord[5], texture[5], 2D;
+
+# assemble lighting
+MAD		outColor.xyz, specColor, R0.x, diffColor;
+
+# TOON (unoptimized wip)
+DP3		zeDots.w, toView, localNormal;
+DP3		zeDots.x, toLight, localNormal;
+MAD		zeDots.z, zeDots.x, 0.6, 0.4;
+ADD_SAT	zeDots.x, zeDots, 0.1;
+MAD_SAT	zeDots.x, zeDots, 24, -11.5;
+
+MAD		R0.x, R0, 0.5, 0.5;
+FLR		R0.x, R0.x;
+MUL		R0.x, R0.x, 2;
+MUL		R0.x, R0.x, 0;
+
+MUL		zeDots.x, zeDots.x, zeDots.z;
+LRP		zeDots.x, zeDots.x, 1.0, 0.3;
+MOV		outColor, diffColor;
+MAD		outColor, specColor, R0.x, diffColor;
+MAD_SAT	zeDots.w, zeDots, 90, -6;
+MUL		outColor, zeDots.w, outColor;
+#
+
+MUL		outColor.xyz, outColor, zeDots.x;
+MUL		outColor.xyz, outColor, lightProj;
+
+# apply vertex color
+MUL		result.color.xyz, outColor, fragment.color;
+
+END

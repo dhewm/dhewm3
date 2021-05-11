@@ -1,0 +1,66 @@
+textures/test/fresnel
+{
+	{
+		map _black
+	}
+	{
+		blend add
+		
+		vertexProgram		simpleFresnel.vfp
+		vertexParm 0		4, 0.5, 0, 0 // fresnelPower, fresnelScale, fresnelBias
+		vertexParm 1		1, 1, 1, 1 // RGBA Tint
+
+		fragmentProgram		simpleFresnel.vfp
+		fragmentMap 0 		normalMap textures/sfx/heathaze_local.tga // normalmap, use _flat otherwise
+		fragmentMap 1 		textures/sfx/heathaze_local.tga // optional texture to multiply with
+	}
+}
+
+textures/test/reflectiveBlurred
+{
+	noshadows
+	{
+		mirrorRenderMap		512 256
+		blend				blend
+		alpha	1
+		translate			0.5 , 0.5 
+		scale				0.5 , 0.5
+    }
+}
+
+textures/fresnel_sphere
+{	
+	{	
+		blend bumpmap // this stage is needed to workaround issue of not having cubeMap reflections without diffusemap stage
+		map _flat
+	}	
+	{
+        vertexProgram heatHaze.vfp
+        vertexParm  0  0 , 0  // texture scrolling
+        vertexParm  1  3.75  // magnitude of the distortion
+
+        fragmentProgram heatHaze.vfp
+        fragmentMap 0  _currentRender
+        fragmentMap 1  normalMap textures/sfx/heathaze_local.tga // the normal map for distortion
+    }
+	{
+        blend gl_dst_alpha, gl_one
+        maskalpha        
+		cubeMap env/test        // envshot cmd has to be issues when in 640x480 resolution (r_mode 3) and g_fov 90 to avoid artifacts
+		red     Parm0
+        green   Parm1
+        blue    Parm2
+        texgen  reflect
+    }
+	{
+		blend add
+		
+		vertexProgram		simpleFresnel.vfp
+		vertexParm 0		5, 1, 0, 0 // fresnelPower, fresnelScale, fresnelBias
+		vertexParm 1		0, 1, 1, 1 // RGBA Tint
+
+		fragmentProgram		simpleFresnel.vfp
+		fragmentMap 0 		normalMap textures/sfx/heathaze_local.tga // normalmap, use _flat otherwise
+		fragmentMap 1 		textures/sfx/heathaze_local.tga // optional texture to multiply with
+	}
+}

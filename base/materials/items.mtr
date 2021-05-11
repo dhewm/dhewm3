@@ -1,0 +1,119 @@
+//-------------------------------------------------------------------------
+//
+//                          PDA gadget pick-ups
+//
+//-------------------------------------------------------------------------
+
+// ======================== PDA Audio log pick-up radio ========================
+
+table lcdFlicker { { 0.5, 0.5, 0.5, 0.5, 0.44, 0.47, 0.45, 0.45, 0.5, 0.5, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4 } }
+table lcdFlicker2 { { 0.6, 0.6, 0.6, 0.6, 0.54, 0.57, 0.55, 0.55, 0.6, 0.6, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 } }
+table lcdFlicker3 { { 0.3, 0.3, 0.3, 0.3, 0.24, 0.27, 0.25, 0.25, 0.3, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2 } }
+
+models/items/pda_pickups/pda_audio1
+{
+	qer_editorimage models/items/pda_pickups/pda_audio1_d.tga
+	
+	diffusemap models/items/pda_pickups/pda_audio1_d.tga
+	//specularmap models/items/pda_pickups/pda_audio1_s.tga
+	bumpmap models/items/pda_pickups/pda_audio1_local.tga
+	{
+		blend add
+		map models/items/pda_pickups/pda_audio1_d.tga
+		rgb 0.02
+	}
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+
+		vertexParm 0		0.75, 0.0025, -0.01, 0	// inkAmount, nearFarScale, nearFarBias
+		vertexParm 1		1.5, 5000, -0.35, 0		// inkSize, inkScale, inkBias (near)
+		vertexParm 2		1.2, 10000, -0.005, 0		// inkSize, inkScale, inkBias (far)
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+	/*{
+		blend filter
+		
+		vertexProgram		inkEffect_skinned.glsl
+		vertexParm 0		0.75, 0.0025, -0.01, 0	// inkAmount, nearFarScale, nearFarBias
+		vertexParm 1		1.5, 5000, -0.35, 0		// inkSize, inkScale, inkBias (near)
+		vertexParm 2		1.2, 10000, -0.005, 0		// inkSize, inkScale, inkBias (far)
+
+		fragmentProgram		inkEffect_skinned.glsl
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}*/
+}
+
+models/items/pda_pickups/pda_audio1_top_screen
+{
+	qer_editorimage				models/items/pda_pickups/pda_audio1_top_screen_d.tga
+	translucent
+	{
+		blend	blend
+		map 	models/items/pda_pickups/pda_audio1_top_screen_d.tga
+		alpha lcdFlicker[ time * 0.5 ]
+	}
+	{
+		blend	add
+		map 	models/items/pda_pickups/pda_audio1_top_screen_d.tga
+		rgb 0.01
+	}	
+}
+
+models/items/pda_pickups/pda_audio1_middle_screen
+{
+	qer_editorimage				models/items/pda_pickups/pda_audio1_middle_screen_d.tga
+	translucent
+	{
+		blend	blend
+		map 	models/items/pda_pickups/pda_audio1_middle_screen_d.tga
+		alpha lcdFlicker2[ time * 0.7 ]
+	}
+	{
+		blend	add
+		map 	models/items/pda_pickups/pda_audio1_middle_screen_d.tga
+		rgb 0.05
+	}	
+}
+
+models/items/pda_pickups/pda_audio1_bottom_screen
+{
+	qer_editorimage				models/items/pda_pickups/pda_audio1_bottom_screen_d.tga
+	translucent
+	{
+		blend	blend
+		map 	models/items/pda_pickups/pda_audio1_bottom_screen_d.tga
+		alpha lcdFlicker3[ time ]
+	}
+	{
+		blend	add
+		map 	models/items/pda_pickups/pda_audio1_bottom_screen_d.tga
+		rgb 0.03
+	}	
+}
+
+// --------------- Placeholders for health ---------------------------------
+textures/items/health/health01
+ {
+      	qer_editorimage   models/items/health/health01.tga
+	diffusemap	  models/items/health/health01.tga
+ }
+
+textures/items/health/armor01
+ {
+      	qer_editorimage   models/items/armor/armor01.tga
+	diffusemap	  models/items/armor/armor01.tga
+ }
+
+textures/items/invigorator/invigorator
+ {
+      	qer_editorimage   models/items/invigorator/invigorator.tga
+	diffusemap	  models/items/invigorator/invigorator.tga
+ }

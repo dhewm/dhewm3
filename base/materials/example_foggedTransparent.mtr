@@ -1,0 +1,131 @@
+textures/foggedBlend
+{
+	noSelfShadow
+	noshadows
+	translucent
+	nonsolid
+	noimpact
+	sort 110
+
+	{
+		blend blend
+
+		vertexProgram		foggedBlend.vfp
+		vertexParm 	0  	.39, .39, .39, 1	// fog color
+		vertexParm	1		0.001, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+
+		fragmentProgram	foggedBlend.vfp
+		fragmentMap	0		textures/particles/smokepuffb.tga	// source texture ( preferably with alpha-channel )
+	}
+}
+
+textures/foggedAdd
+{
+	noSelfShadow
+	noshadows
+	translucent
+	nonsolid
+	noimpact
+	sort 110
+
+	{
+		blend add
+
+		vertexProgram		foggedAdd.vfp
+		vertexParm 	0  	.39, .39, .39, 1	// fog color
+		vertexParm	1		0.001, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+
+		fragmentProgram	foggedAdd.vfp
+		fragmentMap	0		textures/particles/smokepuffb.tga	// source texture
+	}
+}
+
+textures/foggedMul
+{
+	noSelfShadow
+	noshadows
+	translucent
+	nonsolid
+	noimpact
+	sort 110
+
+	{
+		blend filter
+
+		vertexProgram		foggedMul.vfp
+		vertexParm 	0  	.39, .39, .39, 1	// fog color
+		vertexParm	1		0.001, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+
+		fragmentProgram	foggedMul.vfp
+		fragmentMap	0		invertColor( textures/particles/barrelpoof.tga )	// source texture
+	}
+}
+
+textures/foggedBlendSoft
+{
+	noSelfShadow
+	noshadows
+	translucent
+	nonsolid
+	noimpact
+	sort 110
+
+	{
+		blend blend
+
+		vertexProgram		foggedBlendSoft.vfp
+		vertexParm 	0  	.39, .39, .39, 1	// fog color
+		vertexParm	1		0.001, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+		vertexParm	2  	0.1, 0, 0, 0 		// "softness" factor
+
+		fragmentProgram	foggedBlendSoft.vfp
+		fragmentMap	0		textures/particles/smokepuffb.tga	// source texture ( preferably with alpha-channel )
+		fragmentMap 1		_currentDepth								// depth image
+	}
+}
+
+textures/foggedAddSoft
+{
+	noSelfShadow
+	noshadows
+	translucent
+	nonsolid
+	noimpact
+	sort 110
+
+	{
+		blend add
+
+		vertexProgram		foggedAddSoft.vfp
+		vertexParm 	0  	.39, .39, .39, 1	// fog color
+		vertexParm	1		0.001, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+		vertexParm	2  	0.1, 0, 0, 0 		// "softness" factor
+
+		fragmentProgram	foggedAddSoft.vfp
+		fragmentMap	0		textures/particles/smokepuffb.tga	// source texture
+		fragmentMap 1		_currentDepth								// depth image
+	}
+}
+
+textures/foggedMulSoft
+{
+	noSelfShadow
+	noshadows
+	translucent
+	nonsolid
+	noimpact
+	sort 110
+
+	{
+		blend filter
+
+		vertexProgram		foggedMulSoft.vfp
+		vertexParm 	0  	.39, .39, .39, 1	// fog color
+		vertexParm	1		0.001, 0.0, 0, 0	// fog fade range, fog start distance ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+		vertexParm	2  	0.1, 0, 0, 0 		// "softness" factor
+
+		fragmentProgram	foggedMulSoft.vfp
+		fragmentMap	0		invertColor( textures/particles/barrelpoof.tga )	// source texture
+		fragmentMap 1		_currentDepth													// depth image
+	}
+}

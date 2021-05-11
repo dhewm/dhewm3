@@ -1,0 +1,14 @@
+!!ARBvp1.0
+OPTION ARB_position_invariant;
+PARAM c[6] = { program.local[0..5] };
+MOV result.texcoord[0], c[0];
+MOV result.texcoord[1], c[1];
+END
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+TEMP R0;
+RCP R0.x, fragment.position.w;
+MUL R0.x, fragment.position.z, R0;
+MAD_SAT R0.x, R0, fragment.texcoord[0], fragment.texcoord[0].y;
+MUL result.color, R0.x, fragment.texcoord[1];
+END

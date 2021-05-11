@@ -1,0 +1,254 @@
+textures/blurX_16_512
+{
+	{
+		blend			gl_one, gl_zero
+
+		vertexProgram	gaussBlurX_15.vfp
+		vertexParm		0 parm0
+
+		fragmentProgram	gaussBlurX_15.vfp
+		fragmentMap		0 _glow512
+	}
+}
+
+textures/blurY_16_512
+{
+	{
+		blend			gl_one, gl_zero
+
+		vertexProgram	gaussBlurY_15.vfp
+		vertexParm		0 parm0
+
+		fragmentProgram	gaussBlurY_15.vfp
+		fragmentMap		0 _glow512
+	}
+}
+
+textures/blurX_16_256
+{
+	{
+		blend			gl_one, gl_zero
+
+		vertexProgram	gaussBlurX_15.vfp
+		vertexParm		0	parm0
+
+		fragmentProgram	gaussBlurX_15.vfp
+		fragmentMap		0 _glow256
+	}
+}
+
+textures/blurY_16_256
+{
+	{
+		blend			gl_one, gl_zero
+
+		vertexProgram	gaussBlurY_15.vfp
+		vertexParm		0	parm0
+
+		fragmentProgram	gaussBlurY_15.vfp
+		fragmentMap		0 _glow256
+	}
+}
+
+textures/blurX_16_128
+{
+	{
+		blend blend
+
+		vertexProgram	blurX_16_128.vfp
+
+		fragmentProgram	blurX_16_128.vfp
+		fragmentMap		0 _glow128
+
+		//colored
+	}
+}
+
+
+
+textures/blurY_16_128
+{
+	{
+		blend blend
+
+		vertexProgram	blurY_16_128.vfp
+
+		fragmentProgram	blurY_16_128.vfp
+		fragmentMap		0 _glow128
+
+		//colored
+	}
+}
+
+textures/glowComp
+{
+	{
+       	blend blend
+		vertexProgram		glowComp.vfp
+		vertexParm		0	parm0, parm1, 1, 1	// effect scale of 512 image, effect scale of 256 image, unused, unused
+
+		fragmentProgram		glowComp.vfp
+		fragmentMap	0		_currentRender
+		fragmentMap	1		_glow512
+		fragmentMap	2		_glow256
+	}
+}
+
+textures/glowMaterial
+{
+	{
+		blend blend
+		map _currentGlow
+	}
+}
+
+// glow test materials
+
+textures/inkTest/btex1a_glow
+{
+	qer_editorimage	textures/base_floor/a_bluetex1a_02.tga
+
+	{
+		blend diffusemap
+		map _white
+		red 0.5
+		green 0.5
+		blue 0.5
+	}
+	{
+		blend specularmap
+		map _white
+		rgb 0.5
+	}
+	{
+		blend bumpmap
+		map _flat
+	}
+	{
+		blend filter
+
+		vertexProgram		depthTest.vfp
+
+		vertexParm 	0  0.002, 0.75, 700, 1 // ink line size, ink strength
+		vertexParm	1		0.0075, 0.75, 32.0, 64.0 // inner edge threshold near, inner edge threshold far, nearDistance, lerpRange
+		vertexParm	2		1200.0, 1024.0 // fadeStart, fadeRange
+		vertexParm 	3  0.00095, 512.0, 4096.0, -0.00060
+
+		fragmentProgram		depthTest.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+	{
+		blend blend
+		map _white
+		glow
+	}
+}
+
+textures/inkTest/btex1a_glow2
+{
+	qer_editorimage	textures/base_floor/a_bluetex1a_02.tga
+
+	{
+		blend diffusemap
+		map _white
+		red 0.5
+		green 0.5
+		blue 0.5
+	}
+	{
+		blend specularmap
+		map _white
+		rgb 0.5
+	}
+	{
+		blend bumpmap
+		map _flat
+	}
+	{
+		blend filter
+
+		vertexProgram		depthTest.vfp
+
+		vertexParm 	0  0.002, 0.75, 700, 1 // ink line size, ink strength
+		vertexParm	1		0.0075, 0.75, 32.0, 64.0 // inner edge threshold near, inner edge threshold far, nearDistance, lerpRange
+		vertexParm	2		1200.0, 1024.0 // fadeStart, fadeRange
+		vertexParm 	3  0.00095, 512.0, 4096.0, -0.00060
+
+		fragmentProgram		depthTest.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+	{
+		blend add
+		map textures/glowtest.tga
+		rgb 0.5
+	}
+	{
+		blend blend
+		map textures/glowtest.tga
+		glow
+	}
+}
+
+textures/sfx/flare_glow
+{
+	noshadows
+	translucent
+	nonsolid
+	deform flare 		32
+	qer_editorimage		textures/editor/flare.tga
+	{
+		if ( parm7 == 0 )
+		blend		add
+		map		_quadratic
+		//colored
+		rgb 0.25
+		vertexcolor
+		glow
+	}
+}
+
+models/mapobjects_static/glowing_cube
+{
+	qer_editorimage models/mapobjects_static/glowing_cube_d.tga
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/mapobjects_static/glowing_cube_d.tga
+	}
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+
+						// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.0015, 0.0001, 2048.0, 3000.0
+
+						// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	1		700, 0.75, -0.00085, 0.0005
+
+		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	2		2048.0, 1024.0, 9.0, 256.0
+
+						// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		2048.0, 2, 3
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+	{
+		blend add
+		map models/mapobjects_static/glowing_cube_glow.tga
+		rgb 0.85
+	}
+	{
+		blend blend
+		map models/mapobjects_static/glowing_cube_glow.tga
+		glow
+	}
+}

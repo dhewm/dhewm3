@@ -1,0 +1,28 @@
+textures/bigchars
+{
+	{	
+		blend blend
+		maskDepth
+		colored
+		nopicmip
+		linear
+		map textures/conchars.tga
+	}
+}
+
+console
+{
+	{
+		map textures/colors/black.tga
+		linear // no mip maps
+	}
+}
+
+splashScreen
+{
+	{  
+		forceHighQuality  
+		blend blend  
+		map guis/assets/splash/init.tga  
+	}
+}

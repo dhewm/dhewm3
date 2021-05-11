@@ -1,0 +1,83 @@
+# Normal-Mapped CubeMap Lookup Vertex Program
+#
+# Vertex Attributes
+#	9		tangent(?)
+#	10		bitangent(?)
+#
+# Environment Values
+# 	5		local view position
+#	6		modelMatrix[0]
+#	7		modelMatrix[1]
+#	8		modelMatrix[2]
+
+!!ARBvp1.0
+
+OPTION	ARB_position_invariant;
+
+TEMP	R0;
+
+# tc0 : normal-map UV
+MOV		result.texcoord[0], vertex.texcoord[0];
+
+SUB		R0, program.env[5], vertex.position;
+
+# tc1 : view vector in global space
+DP3		result.texcoord[1].x, program.env[6], R0;
+DP3		result.texcoord[1].y, program.env[7], R0;
+DP3		result.texcoord[1].z, program.env[8], R0;
+
+# tc2-4 : tangent-space to global-space matrix
+DP3		result.texcoord[2].x, program.env[6], vertex.attrib[9];
+DP3		result.texcoord[3].x, program.env[7], vertex.attrib[9];
+DP3		result.texcoord[4].x, program.env[8], vertex.attrib[9];
+
+DP3		result.texcoord[2].y, program.env[6], vertex.attrib[10];
+DP3		result.texcoord[3].y, program.env[7], vertex.attrib[10];
+DP3		result.texcoord[4].y, program.env[8], vertex.attrib[10];
+
+DP3		result.texcoord[2].z, program.env[6], vertex.normal;
+DP3		result.texcoord[3].z, program.env[7], vertex.normal;
+DP3		result.texcoord[4].z, program.env[8], vertex.normal;
+
+MOV		result.color, vertex.color;
+
+END
+
+# Normal-Mapped CubeMap Lookup Fragment Program
+#
+# Textures
+#	0		environment cubemap
+#	1		normalmap
+
+!!ARBfp1.0
+
+OPTION	ARB_precision_hint_fastest;
+
+TEMP	globalEye, localNormal, globalNormal, reflVec, R0;
+
+# load normal map and normalize
+TEX		localNormal, fragment.texcoord[0], texture[1], 2D;
+MAD		localNormal.xyz, localNormal.wyzw, 2.0, -1.0;
+
+DP3		R0.x, localNormal, localNormal;
+RSQ		R0.x, R0.x;
+MUL		localNormal.xyz, R0.x, localNormal;
+
+# normalize global view vector
+DP3		R0.x, fragment.texcoord[1], fragment.texcoord[1];
+RSQ		R0.x, R0.x;
+MUL		globalEye, R0.x, fragment.texcoord[1];
+
+# transform local normal to global space
+DP3		globalNormal.x, fragment.texcoord[2], localNormal;
+DP3		globalNormal.y, fragment.texcoord[3], localNormal;
+DP3		globalNormal.z, fragment.texcoord[4], localNormal;
+
+# construct reflection vector and look up cubemap
+DP3		R0.x, globalNormal, globalEye;
+MUL		reflVec, R0.x, globalNormal;
+MAD		reflVec, reflVec, 2.0, -globalEye;
+
+TEX		result.color.xyz, reflVec, texture[0], CUBE;
+
+END

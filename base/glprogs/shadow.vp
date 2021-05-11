@@ -1,0 +1,13 @@
+!!ARBvp1.0
+
+TEMP	R0;
+
+SUB		R0, vertex.position, program.env[4];
+MAD		R0, program.env[4], R0.w, R0;
+
+DP4		result.position.x, state.matrix.mvp.row[0], R0;
+DP4		result.position.y, state.matrix.mvp.row[1], R0;
+DP4		result.position.z, state.matrix.mvp.row[2], R0;
+DP4		result.position.w, state.matrix.mvp.row[3], R0;
+
+END

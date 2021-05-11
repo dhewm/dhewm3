@@ -1,0 +1,60 @@
+!!ARBvp1.0
+OPTION ARB_position_invariant;
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbvp1 -posinv
+# source file: softParticleRGB_vert.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbvp1
+#program main
+#semantic main.inParms : C0
+#var float4 inParms : C0 : c[0] : 0 : 1
+#var float4 vertexTC : $vin.TEXCOORD0 : TEXCOORD0 : 1 : 1
+#var float4 vertexColor : $vin.COLOR0 : COLOR0 : 2 : 1
+#var float4 texCoord : $vout.TEXCOORD0 : TEX0 : 3 : 1
+#var float4 genParms : $vout.TEXCOORD4 : TEX4 : 4 : 1
+#var float4 outColor : $vout.COLOR : COL0 : 5 : 1
+PARAM c[1] = { program.local[0] };
+MOV result.texcoord[0], vertex.texcoord[0];
+MOV result.texcoord[4], c[0];
+MOV result.color, vertex.color;
+END
+# 3 instructions, 0 R-regs
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbfp1 -fastmath -fastprecision
+# source file: softParticleRGB_frag.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbfp1
+#program main
+#semantic main.screenAdjust : ENV1
+#semantic main.depthImage : TEXUNIT0
+#semantic main.mainImage : TEXUNIT1
+#var float4 screenAdjust : ENV1 : env[1] : 0 : 1
+#var sampler2D depthImage : TEXUNIT0 : texunit 0 : 1 : 1
+#var sampler2D mainImage : TEXUNIT1 : texunit 1 : 2 : 1
+#var float3 fragPos : $vin.WPOS : WPOS : 3 : 1
+#var float4 texCoord : $vin.TEXCOORD0 : TEX0 : 4 : 1
+#var float4 genParms : $vin.TEXCOORD4 : TEX4 : 5 : 1
+#var float4 vColor : $vin.COLOR : COL0 : 6 : 1
+#var float4 outColor : $vout.COLOR : COL : 7 : 1
+#const c[0] = -15000 2995 3000
+PARAM c[1] = { { -15000, 2995, 3000 } };
+PARAM env[] = { program.env[0..1] };
+TEMP R0;
+MUL R0.xy, fragment.position, env[1];
+TEX R0.x, R0, texture[0], 2D;
+MAD R0.y, fragment.position.z, c[0], -c[0].z;
+MAD R0.x, R0, c[0].y, -c[0].z;
+RCP R0.y, R0.y;
+RCP R0.x, R0.x;
+ADD R0.x, R0, -R0.y;
+MUL R0.w, R0.x, fragment.texcoord[4].x;
+TEX R0.xyz, fragment.texcoord[0], texture[1], 2D;
+MUL_SAT R0.w, R0, c[0].x;
+MUL R0.xyz, R0, fragment.color.primary;
+MUL result.color.xyz, R0, R0.w;
+END
+# 12 instructions, 1 R-regs

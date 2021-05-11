@@ -1,0 +1,37 @@
+!!ARBvp1.0
+OPTION ARB_position_invariant;
+PARAM c[8] = { program.local[0..7] };
+MOV result.texcoord[1], c[0];
+MOV result.texcoord[2], c[1];
+MOV result.texcoord[3], c[2];
+MOV result.texcoord[4], c[3];
+MOV result.color, vertex.color;
+MOV result.texcoord[0].xy, vertex.texcoord[0];
+END
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+PARAM c[1] = { { -15000, 2995, 3000 } };
+PARAM env[] = { program.env[0..1] };
+TEMP R0;
+TEMP R1;
+TEMP R2;
+MUL R1.xy, fragment.position, env[1];
+TEX R2.x, R1, texture[1], 2D;
+MAD R1.w, R2.x, c[0].y, -c[0].z;
+RCP R2.x, R1.w;
+TEX R0, fragment.texcoord[0], texture[0], 2D;
+MUL R0, R0, fragment.color.primary;
+MAD R2.y, fragment.position.z, c[0], -c[0].z;
+RCP R2.y, R2.y;
+ADD R2.x, R2, -R2.y;
+RCP R1.w, fragment.position.w;
+MUL R1.w, fragment.position.z, R1;
+ADD R1.xyz, -R0, fragment.texcoord[1];
+MAD_SAT R2.y, R1.w, fragment.texcoord[2].x, fragment.texcoord[2];
+MAD result.color.xyz, R2.y, R1, R0;
+MUL R2.x, R2, fragment.texcoord[3];
+MUL_SAT R0.x, R2, c[0];
+MAD_SAT R0.y, R1.w, fragment.texcoord[4].x, fragment.texcoord[4];
+MUL R0.x, R0.w, R0;
+MUL result.color.w, R0.x, R0.y;
+END

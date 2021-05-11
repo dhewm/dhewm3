@@ -1,3 +1,29 @@
+# dhewm3 branch of StormEngine2
+
+Before StormEngine2 switched to (RB)Doom3BFG, it was based on dhewm3.
+
+This branch contains all the changes, based on the same old dhewm3 commit it (apparently) used.
+
+Furthermore, in `base/` you can find its materials and shaders.
+* The shaders (`base/glprogs/*`) are released under GPLv3 (same as Doom3 sourcecode).
+* The materials (`base/materials/*`) are released under
+  [*CreativeCommons Attribution-ShareAlike*](https://creativecommons.org/licenses/by-sa/4.0/) (**CC BY-SA 4.0**).
+
+Thanks a lot to **motorsep** for donating this code and game data!
+
+Some features this code (together with the shaders) have, that standard Doom3 and dhewm3 don't:
+- soft particles with custom translucency sorting and fogging
+- ink/cel shading
+- image-based bloom
+- blurry reflections
+- Fresnel
+- *maybe* improved heat haze
+- improved vehicles
+- LODs
+
+--------------------
+Below: original dhewm3 ReadMe:
+
 # ABOUT
 
 _dhewm 3_ is a _Doom 3_ GPL source modification.

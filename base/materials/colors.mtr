@@ -1,0 +1,12 @@
+// --------------------------------------------------------------
+//				COMMON COLORS
+// --------------------------------------------------------------
+textures/color/black
+{
+	noFragment
+	{
+		blend diffusemap
+		map textures/colors/black.tga
+		linear // no mip maps
+	}
+}

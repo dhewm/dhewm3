@@ -1,0 +1,74 @@
+# Normal-Mapped Masked Refraction Vertex Program
+#
+# Local Values
+#	0	UV scrolling values
+#	1	magnitude of deformation
+
+!!ARBvp1.0
+
+OPTION	ARB_position_invariant;
+
+PARAM	clearVec = { 1.0, 0.0, 0.0, 1.0 };
+TEMP	R0, R1, R2;
+
+# tc0 : unmodified UV
+MOV		result.texcoord[0].xy, vertex.texcoord[0];
+
+# tc1 : scrolled UV
+ADD		result.texcoord[1].xy, vertex.texcoord[0], program.local[0];
+
+# tc2 : deformation magnitude scaled by projection distance
+MOV		R0, clearVec;
+DP4		R0.z, state.matrix.modelview.row[2], vertex.position;
+
+DP4		R1.x, state.matrix.projection.row[0], R0;
+DP4		R1.y, state.matrix.projection.row[3], R0;
+
+MAX		R1.y, R1, 1.0;
+RCP		R1.y, R1.y;
+MUL		R1.x, R1.x, R1.y;
+MIN		R1.x, R1, 0.02;
+
+MUL		result.texcoord[2], R1.x, program.local[1];
+
+END
+
+# Normal-Mapped Masked Refraction Fragment Program
+#
+# Textures
+#	0	_currentRender
+#	1	normalmap
+#	2	mask texture
+#
+# Environment Values
+#	0	screen non power of two adjust
+#	1	fragment.position to 0.0-1.0 screen coordinates factor
+
+!!ARBfp1.0
+
+OPTION	ARB_precision_hint_fastest;
+
+TEMP	R0, localNormal, maskTex;
+
+PARAM	subOne = { -1, -1, -1, -1 };
+PARAM	scaleTwo = { 2, 2, 2, 2 };
+
+# load mask texture, skip pixel if value too low
+TEX		maskTex.xy, fragment.texcoord[0], texture[2], 2D;
+SUB		maskTex.xy, maskTex, 0.01;
+KIL		maskTex;
+
+# load normalmap and adjust by mask
+TEX		localNormal, fragment.texcoord[1], texture[1], 2D;
+MAD		localNormal.xyz, localNormal.wyzw, 2.0, -1.0;
+MUL		localNormal, localNormal, maskTex;
+
+# offset normalized screen coordinates by scaled normal, then apply npot adjustment
+MUL		R0.xy, fragment.position, program.env[1];
+MAD_SAT	R0.xy, localNormal, fragment.texcoord[2], R0;
+MUL		R0.xy, R0, program.env[0];
+
+# look up _currentRender
+TEX		result.color.xyz, R0, texture[0], 2D;
+
+END

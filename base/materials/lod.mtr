@@ -1,0 +1,66 @@
+// ===========================================================================
+//
+//    LOD system test materials
+//
+// ===========================================================================
+
+models/lod_thing/lod1
+{
+	qer_editorimage models/mapobjects_static/lod_thing/lod1.tga
+	noShadows
+	lod1
+	bumpmap _flat
+	{
+		blend diffusemap
+		map models/mapobjects_static/lod_thing/lod1.tga
+	}	
+}
+
+models/lod_thing/lod2
+{
+	qer_editorimage models/mapobjects_static/lod_thing/lod2.tga
+	noShadows
+	lod2
+	bumpmap _flat
+	{
+		blend diffusemap
+		map models/mapobjects_static/lod_thing/lod2.tga
+	}	
+}
+
+models/lod_thing/lod3
+{
+	qer_editorimage models/mapobjects_static/lod_thing/lod3.tga
+	noShadows
+	lod3
+	bumpmap _flat
+	{
+		blend diffusemap
+		map models/mapobjects_static/lod_thing/lod3.tga
+	}	
+}
+
+models/lod_thing/lod4
+{
+	qer_editorimage models/mapobjects_static/lod_thing/lod4.tga	
+	noShadows
+	lod4
+	bumpmap _flat
+	{
+		blend diffusemap
+		map models/mapobjects_static/lod_thing/lod4.tga
+	}	
+}
+
+models/lod_thing/lod4_persistent
+{
+	qer_editorimage models/mapobjects_static/lod_thing/lod4.tga	
+	noShadows
+	lod4
+	persistentLOD
+	bumpmap _flat
+	{
+		blend diffusemap
+		map models/mapobjects_static/lod_thing/lod4.tga
+	}	
+}

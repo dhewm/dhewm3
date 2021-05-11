@@ -1,0 +1,307 @@
+_default 
+{
+	{
+		map	_default
+	}
+}
+
+_tracemodel
+{
+	collision
+}
+
+// a caulk brush will behave as a normal solid surface
+// for collision detection and utility flood filling, and
+// should be used whenever you know the area isn't going to
+// be visible, but it needs to be closed off for things to
+// work right.  Curves and models don't stop the utility
+// flood filling, so you need to have solid brushes behind
+// them.  Setting the faces that won't ever be seen to
+// caulk will save some rendering time and data space.
+textures/common/caulk
+{
+	qer_editorimage textures/editor/caulk.tga
+	noshadows
+	forceOpaque			// will still seal levels
+}
+
+//==================================================================================
+//                           Clipping materials begins
+//==================================================================================
+// a monster clip brush is solid to monsters only
+textures/common/monster_clip
+{
+	qer_editorimage textures/editor/monsterclip.jpg
+	nonsolid
+	monsterclip
+	noshadows
+}
+
+// only solid for players
+textures/common/player_clip
+{
+	qer_editorimage textures/editor/playerclip.tga
+	noimpact
+	nonsolid
+	playerclip
+	noshadows
+}
+
+// solid for all entities, including projectiles 
+textures/common/full_clip
+{
+	qer_editorimage textures/editor/fullclip.tga
+	monsterclip
+	playerclip
+	moveableclip
+	noshadows
+}
+
+// solid only for projectiles 
+textures/common/weapon_clip
+{
+	qer_editorimage textures/editor/weap_clip.tga	
+	moveableclip
+	noshadows
+}
+
+// solid to players and monsters only
+textures/common/clip
+{
+	qer_editorimage textures/editor/clip.tga
+	noimpact
+	nonsolid
+	monsterclip
+	playerclip
+	noshadows
+}
+
+// ASE/LWO models can have a hull (simplified copy of the original mesh) with this material so that engine
+// uses lower poly model for collision detection instead of the actual visible model to improve performance
+textures/common/collision
+{
+	qer_editorimage textures/editor/collision.tga
+	noshadows
+	collision
+}
+
+textures/common/collision_terrain
+{
+	qer_editorimage textures/editor/collision.tga
+	noshadows
+	noSelfShadow
+	noimpact
+	nosteps
+	noOverlays
+	collision
+}
+//==================================================================================
+//                           Clipping materials end
+//==================================================================================
+
+// aassolid brushes create solid space in AAS files
+textures/common/aassolid
+{
+	qer_editorimage	textures/editor/aas_solid.tga
+	qer_nocarve
+	nonsolid
+	noshadows
+	aassolid
+}
+
+// aasobstacle brushes are used to compile obstacles into AAS
+// that can be enabled/disabled
+textures/common/aasobstacle
+{
+	qer_editorimage	textures/editor/aas_obstacle.tga
+	qer_nocarve
+	nonsolid
+	noshadows
+	aasobstacle
+}
+
+// surfaces with this material will not render in-game
+textures/common/nodraw
+{
+	qer_editorimage textures/editor/nodraw.tga
+	nonsolid
+	noShadows
+	noSelfShadow
+}
+
+// sound speaker entity needs a material too :)
+textures/common/speaker
+{
+	qer_editorimage textures/editor/speaker.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/common/shadow
+{
+	noSelfShadow
+	nonsolid
+	noimpact
+	nosteps	
+	forceShadows
+}
+
+textures/common/ladder
+{
+	qer_editorimage textures/common/ladder.tga
+	nonsolid
+	monsterclip
+	playerclip
+	noimpact
+	ladder
+	noshadows
+}
+
+
+//======================================================================
+//                      GUIs Begin
+//======================================================================
+// Use this material for the interactive view screen and use
+// a "gui" key referencing appropriate gui file, like "guis/yourguifile.gui" on the entity.
+// A model-entity can only have 3 GUI screens
+textures/common/entityGui {
+	qer_editorimage	textures/editor/entityGui.tga
+	discrete
+	playerclip
+	guiSurf	entity
+}
+
+textures/common/entityGui2 {
+	qer_editorimage	textures/editor/entityGui2.tga
+	discrete
+	playerclip
+	guiSurf	entity2
+}
+
+textures/common/entityGui3 {
+	qer_editorimage	textures/editor/entityGui3.tga
+	discrete
+	guiSurf	entity3
+	playerclip
+}
+//======================================================================
+//                      GUIs End
+//======================================================================
+
+// vis portal brushes (one face with vizportal material and the rest 5 with nodraw material) are used to prevent engine
+// from rendering what's not in the player's view to improve performance
+textures/editor/visportal
+{
+	qer_editorimage	textures/editor/visportal.tga
+	areaportal
+	noshadows
+}
+
+
+//======================================================================
+//                      For De Triggers
+//======================================================================
+
+// standard trigger uses this one
+textures/common/trig_std
+{
+	qer_editorimage 	textures/editor/trigger_std.tga
+	qer_nocarve		// don't let an awry CSG operation cut it up
+	noshadows
+	trigger
+}
+
+textures/common/trig_relay
+{
+	qer_editorimage 	textures/editor/trigger_relay.tga
+	qer_nocarve		// don't let an awry CSG operation cut it up
+	noshadows
+	trigger
+}
+
+textures/common/trig_hurt  //de pain, DE PAIN!!!
+{
+	qer_editorimage 	textures/editor/trigger_hurt.tga
+	qer_nocarve		// don't let an awry CSG operation cut it up
+	noshadows
+	trigger
+}
+
+textures/common/trig_touch
+{
+	qer_editorimage 	textures/editor/trigger_touch.tga
+	qer_nocarve		// don't let an awry CSG operation cut it up
+	noshadows
+	trigger
+}
+
+//======================================================================
+//                      Triggers End!
+//======================================================================
+
+//======================================================================
+//                      MISC TEXTURES FOR ENTITIES
+//======================================================================
+
+textures/editor/location
+{
+	qer_editorimage 	textures/editor/location.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/location_separator
+{
+	qer_editorimage 	textures/editor/location_separator.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/quest
+{
+	qer_editorimage 	textures/editor/quest.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/quest_complete
+{
+	qer_editorimage 	textures/editor/quest_complete.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/quest_primary
+{
+	qer_editorimage 	textures/editor/quest_primary.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/commstream
+{
+	qer_editorimage 	textures/editor/commstream.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/camera_view
+{
+	qer_editorimage 	textures/editor/camera_view.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/target_null
+{
+	qer_editorimage 	textures/editor/target_null.tga
+	qer_nocarve
+	noshadows
+}
+
+textures/editor/tip
+{
+	qer_editorimage 	textures/editor/tip.tga
+	qer_nocarve
+	noshadows
+}

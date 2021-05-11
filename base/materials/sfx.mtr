@@ -1,0 +1,146 @@
+table strip6frames { snap { 0, 1, 2, 3, 4, 5 } } // used to playback blood animation strip of 6 frames
+
+// --------------------------------------------------------------------------------
+//                         SPECIAL EFFECT MATERIALS
+// --------------------------------------------------------------------------------
+
+textures/sfx/door_lights1_onoff
+{
+	translucent	
+	noshadows
+	noSelfShadow	
+	nonsolid
+	//forceoverlays
+	sort decal	
+	{
+		if ( parm7 == 0 )
+		blend blend
+		map textures/sfx/door_lights1.tga
+		red     ( 255 / 255 )
+        green   ( 15 / 255 )
+        blue    ( 0 / 255 )
+		alphaTest 0.5
+	}
+	{
+		if ( parm7 == 0 )
+		blend add        
+		map textures/sfx/door_lights1.tga
+		red     ( 255 / 255 )
+        green   ( 15 / 255 )
+        blue    ( 0 / 255 )	
+		glow		
+	}
+	{
+		if ( parm7 == 1 )
+		blend blend
+		map textures/sfx/door_lights1.tga
+		red     ( 142 / 255 )
+        green   ( 219 / 255 )
+        blue    ( 255 / 255 )
+		alphaTest 0.5
+	}
+	{
+		if ( parm7 == 1 )
+		blend add        
+		map textures/sfx/door_lights1.tga
+		red     ( 142 / 255 )
+        green   ( 219 / 255 )
+        blue    ( 255 / 255 )	
+		glow		
+	}
+}
+
+textures/sfx/door_lights1_locked // red lights
+{
+	translucent	
+	noshadows
+	noSelfShadow	
+	nonsolid	
+	sort decal	
+	{	
+		blend blend
+		map textures/sfx/door_lights1.tga
+		red     ( 255 / 255 )
+        green   ( 15 / 255 )
+        blue    ( 0 / 255 )
+		alphaTest 0.5
+	}
+	{	
+		blend add        
+		map textures/sfx/door_lights1.tga
+		red     ( 255 / 255 )
+        green   ( 15 / 255 )
+        blue    ( 0 / 255 )	
+		glow		
+	}
+}
+
+textures/sfx/door_lights1_open // blue lights
+{
+	translucent	
+	noshadows
+	noSelfShadow	
+	nonsolid	
+	sort decal		
+	{		
+		blend blend
+		map textures/sfx/door_lights1.tga
+		red     ( 142 / 255 )
+        green   ( 219 / 255 )
+        blue    ( 255 / 255 )
+		alphaTest 0.5
+	}
+	{	
+		blend add        
+		map textures/sfx/door_lights1.tga
+		red     ( 142 / 255 )
+        green   ( 219 / 255 )
+        blue    ( 255 / 255 )	
+		glow		
+	}
+}
+
+// -------------------------------------------------------------------------
+//         animated blood splatter (on impact with living bodies)
+// -------------------------------------------------------------------------
+textures/sfx/blood_string1
+{
+	noSelfShadow
+	noshadows
+	translucent
+	discrete
+	twosided
+	nonsolid
+	noimpact
+
+	qer_editorimage		textures/sfx/blood_string1_strip.tga
+	
+	{
+		blend blend
+		map textures/sfx/blood_string1_strip.tga
+		scale 1 , 1 / 6
+		scroll 0 , strip6frames[ time * 2 ]
+		colored
+		vertexColor	
+	}
+}
+
+// --------------------------------------------------------------------------------
+//                         FLARES
+// --------------------------------------------------------------------------------
+
+textures/sfx/flare_basic
+{
+	noshadows
+	translucent
+	nonsolid
+	deform flare 		( 16 + parm4 ) // shaderParm4 set on flare's entity sets its size; e.g. shaderParm4 10 would result in ( 16 + 10 )
+	qer_editorimage		textures/editor/flare.tga
+	{
+		if ( parm7 == 0 ) // if a light with this flare breaks, flare gets removed
+		blend		add
+		map			_quadratic
+		colored
+		vertexcolor
+	}
+}

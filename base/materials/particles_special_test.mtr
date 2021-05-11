@@ -1,0 +1,71 @@
+textures/particles/particletest_blend_soft
+{
+	qer_editorimage textures/particles/smokepuffb.tga
+	noShadows
+	translucent
+	sort 10
+
+	{
+		blend blend
+
+		vertexProgram		particleBlend_SoftDistFog.vfp
+
+		vertexParm 0		0.1, 0, 0, 0 // "softness" factor
+		vertexParm 1 		128, 128, 0, 0 // distanceFadeStart, distanceFadeRange
+		vertexParm 2		0, 0, 1, 0.001 // pseudoFog color RGB, "fog thickness" value
+
+		fragmentProgram		particleBlend_SoftDistFog.vfp
+		fragmentMap 0 		_currentDepth
+		fragmentMap 1 		textures/particles/smoke01.tga
+
+		vertexColor
+	}
+}
+
+textures/particles/particletest_add_soft
+{
+	qer_editorimage textures/particles/smokepuffb.tga
+	noShadows
+	translucent
+	sort 10
+
+	{
+		blend add
+
+		vertexProgram		particleAdd_SoftDistFog.vfp
+
+		vertexParm 0		0.1, 0, 0, 0 // "softness" factor
+		vertexParm 1 		128, 128, 0, 0
+		vertexParm 2		0, 0, 1, 0.001
+
+		fragmentProgram		particleAdd_SoftDistFog.vfp
+		fragmentMap 0 		_currentDepth
+		fragmentMap 1 		textures/particles/smoke01.tga
+
+		vertexColor
+	}
+}
+
+textures/particles/particletest_filter_soft
+{
+	qer_editorimage textures/particles/smokepuffb.tga
+	noShadows
+	translucent
+	sort 10
+
+	{
+		blend filter
+
+		vertexProgram		particleFilter_SoftDistFog.vfp
+
+		vertexParm 0		0.1, 0, 0, 0 // "softness" factor
+		vertexParm 1 		128, 128, 0, 0 // 
+		vertexParm 2		0, 0, 1, 0.001
+
+		fragmentProgram		particleFilter_SoftDistFog.vfp
+		fragmentMap 0 		_currentDepth
+		fragmentMap 1 		textures/particles/smoke_filter.tga
+
+		vertexColor
+	}
+}

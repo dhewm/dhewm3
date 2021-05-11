@@ -1,0 +1,16 @@
+textures/fresnelTest {
+	noshadows
+	noimpact
+	translucent
+
+	{
+		blend add
+
+		vertexProgram		simpleFresnel.vfp
+
+		vertexParm 	0  	4, 0.9, 0.1, 0	// fresnel power, scale, bias
+		vertexParm	1	1, 0, 1, 1	// RGBA
+
+		fragmentProgram		simpleFresnel.vfp
+	}
+}

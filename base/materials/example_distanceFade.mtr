@@ -1,0 +1,24 @@
+// 
+// fading mesh / particles with this material as player approaches it
+// 
+textures/distanceFade {
+	noshadows
+	noimpact
+	translucent
+
+	{
+		vertexProgram		zFadeSimple.vfp
+
+		vertexParm 	0  	0.00390625, -0.5, 0, 0	// zScale, zBias ( to "sync" to scene units : zScale = 1.0 / fadeRange; zBias = -( 1.0 / fadeRange ) * fadeStart; )
+		vertexParm	1	1, 1, 1, 1 // RGBA multiplier
+
+		fragmentProgram		zFadeSimple.vfp
+
+		maskColor
+	}
+	{
+		blend gl_dst_alpha, gl_one_minus_dst_alpha
+		map _black
+		maskAlpha		
+	}
+}

@@ -1,0 +1,399 @@
+table distortCompassAlpha { { 1, 1, 1, 1, 0.95, } }
+table simpleNoise { { 
+0.456193348, 0.48338368, 0.413897276, 0.274924468, 0.27190332, 0.04531722, 0.395770388, 
+0.039274924, 0.607250748, 0.28700906, 0.290030208, 0.160120844, 0.586102712, 0.703927484, 
+0.021148036, 0.6797583, 0.42296072, 0.108761328, 0.311178244, 0.09063444, 0.208459212, 
+0.429003016, 0.024169184, 0.299093652, 0.111782476, 0.72507552, 0.063444108, 0.03021148, 
+0.069486404, 0.57401812, 0.018126888, 0.447129904, 0.746223556, 0.36253776, 0.706948632, 
+0.2265861, 0.003021148, 0.078549848, 0.595166156, 0.187311176, 0.283987912, 0.761329296, 
+0.661631412, 0.613293044, 0.353474316, 0.10574018, 0.033232628, 0.096676736, 0.172205436, 
+0.534743196, 0.099697884, 0.265861024, 0.716012076, 0.450151052, 0.169184288, 0.262839876, 
+0.525679752, 0.06042296, 0.3776435, 0.410876128, 0.516616308, 0.507552864, 0.205438064, 
+0.5287009, 0.223564952, 0.49848942, 0.214501508, 0.404833832, 0.419939572, 0.145015104, 
+0.081570996, 0.501510568, 0.232628396, 0.441087608, 0.477341384, 0.697885188, 0.250755284, 
+0.335347428, 0.691842892, 0.368580056, 0.18126888, 0.637462228, 0.401812684, 0.69486404, 
+0.66465256, 0.31722054, 0.277945616, 0.123867068, 0.16616314, 0.138972808, 0.74018126, 
+0.12084592, 0.737160112, 0.308157096, 0.432024164, 0.163141992, 0.19637462, 0.0755287, 
+0.190332324, 0.486404828, 0.003021148, 0.652567968, 0.24169184, 0.220543804, 0.631419932, 
+0.229607248, 0.398791536, 0.564954676, 0.628398784, 0.268882172, 0.054380664, 0.510574012, 
+0.6042296, 0.592145008, 0.40785498, 0.39274924, 0.350453168, 0.567975824, 0.480362532, 
+0.259818728, 0.495468272, 0.3021148, 0.329305132, 0.598187304, 0.522658604, 0.561933528, 
+0.009063444, 0.193353472, 0.157099696, 0.655589116, 0.682779448, 0.755287, 0.374622352, 
+0.371601204, 0.01510574, 0.610271896, 0.114803624, 0.444108756, 0.356495464, 0.380664648, 
+0.77039274, 0.247734136, 0.25679758, 0.640483376, 0.625377636, 0.622356488, 0.178247732, 
+0.685800596, 0.141993956, 0.048338368, 0.175226584, 0.051359516, 0.549848936, 0.570996972, 
+0.084592144, 0.126888216, 0.673716004, 0.552870084, 0.51359516, 0.643504524, 0.359516612, 
+0.749244704, 0.459214496, 0.006042296, 0.132930512, 0.465256792, 0.492447124, 0.21148036, 
+0.667673708, 0.462235644, 0.305135948, 0.46827794, 0.504531716, 0.129909364, 0.519637456, 
+0.027190332, 0.389728092, 0.066465256, 0.117824772, 0.764350444, 0.057401812, 0.296072504, 
+0.326283984, 0.33232628, 0.238670692, 0.341389724, 0.676737152, 0.700906336, 0.537764344, 
+0.55891238, 0.338368576, 0.314199392, 0.658610264, 0.743202408, 0.293051356, 0.688821744, 
+0.758308148, 0.102719032, 0.731117816, 0.583081564, 0.719033224, 0.63444108, 0.435045312, 
+0.036253776, 0.577039268, 0.540785492, 0.489425976, 0.728096668, 0.244712988, 0.154078548, 
+0.43806646, 0.70996978, 0.752265852, 0.042296072, 0.722054372, 0.323262836, 0.148036252, 
+0.580060416, 0.646525672, 0.093655588, 0.546827788, 0.601208452, 0.320241688, 0.474320236, 
+0.555891232, 0.253776432, 0.616314192, 0.531722048, 0.34743202, 0.365558908, 0.1510574, 
+0.13595166, 0.383685796, 0.012084592, 0.4531722, 0.767371592, 0.416918424, 0.712990928, 
+0.61933534, 0.280966764, 0.670694856, 0.344410872, 0.202416916, 0.087613292, 0.072507552, 
+0.217522656, 0.734138964, 0.425981868, 0.386706944, 0.58912386, 0.235649544, 0.199395768, 
+0.64954682, 0.184290028, 0.471299088, 0.54380664 } }
+
+//-------------------------------------------------------------------------
+//
+//                          VIEW GADGETS
+//
+//-------------------------------------------------------------------------
+
+// ============  Compass ============
+
+models/gadgets/compass
+{
+	//noShadows
+	noSelfShadow
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/md5/gadgets/view_compass/compass.tga
+	}
+	{
+		blend filter
+		
+		vertexProgram		inkEffect_skinned.glsl
+		vertexParm 0		0.75, 0.0025, -0.01, 0	// inkAmount, nearFarScale, nearFarBias
+		vertexParm 1		1.5, 5000, -0.0001, 0		// inkSize, inkScale, inkBias (near)
+		vertexParm 2		1.2, 10000, -0.005, 0		// inkSize, inkScale, inkBias (far)
+
+		fragmentProgram		inkEffect_skinned.glsl
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+models/gadgets/compass_lens
+{
+	noShadows
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/md5/gadgets/view_compass/compass_lens_d.tga
+	}
+	{
+		blend specularmap
+		map models/md5/gadgets/view_compass/compass_lens_s.tga
+	}
+	{
+		blend add
+		map models/md5/gadgets/view_compass/compass_lens_anim.tga
+		scroll 1, time * -70
+	}
+	{
+		blend add
+		map models/md5/gadgets/view_compass/compass_lens_anim.tga
+		translate 1, 7
+		scroll 1, time * 7
+	}	
+	{
+		blend filter
+		
+		vertexProgram		inkEffect_skinned.glsl
+		vertexParm 0		0.75, 0.0025, -0.01, 0	// inkAmount, nearFarScale, nearFarBias
+		vertexParm 1		1.5, 5000, -0.0001, 0		// inkSize, inkScale, inkBias (near)
+		vertexParm 2		1.2, 100000, -0.005, 0		// inkSize, inkScale, inkBias (far)
+
+		fragmentProgram		inkEffect_skinned.glsl
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+models/gadgets/compass_screen_arrow
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest	
+	{
+		noBlur
+		//uncompressed
+		linear				
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_arrow.tga		
+	}	
+	{		
+		noBlur
+		//uncompressed		
+		linear
+		blend add		
+		map models/md5/gadgets/view_compass/compass_screen_arrow.tga
+		rgb 0.025
+	}	
+}
+
+models/gadgets/compass_screen_nswe
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{		
+		noBlur
+		//uncompressed
+		linear		
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_nswe.tga
+		
+	}	
+	{
+		noBlur
+		//uncompressed
+		linear		
+		blend add	
+		map models/md5/gadgets/view_compass/compass_screen_nswe.tga
+		rgb 0.01
+	}
+}
+
+models/gadgets/compass_disk_debug1
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	//sort nearest
+	{
+		noBlur
+		//blend add
+		blend blend
+		map models/md5/gadgets/view_compass/compass_pquest1_debug.tga
+		
+	}	
+	{
+		noBlur
+		blend add	
+		map models/md5/gadgets/view_compass/compass_pquest1_debug.tga
+		rgb 0.01
+	}
+}
+
+models/gadgets/axis_debug
+{
+	noShadows
+	noimpact
+	//translucent
+	noOverlays
+	clamp
+	//sort nearest
+	{
+		noBlur		
+		blend diffusemap
+		map models/md5/gadgets/view_compass/axis_debug.tga
+		
+	}	
+	{
+		noBlur
+		blend add	
+		map models/md5/gadgets/view_compass/axis_debug.tga
+		rgb 0.05
+	}
+}
+
+//--------------- Primary Quests dots ----------------------------------
+models/gadgets/compass_dot_pquest1
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{
+		if ( parm9 == 121 )
+		uncompressed
+		//linear
+		noBlur
+		blend blend
+		map models/md5/gadgets/view_compass/compass_dot_pquest1.tga		
+	}	
+	{
+		if ( parm9 == 121 )
+		uncompressed
+		//linear
+		noBlur
+		blend add
+		map models/md5/gadgets/view_compass/compass_dot_pquest1.tga		
+		rgb 0.25		
+	}	
+}
+
+models/gadgets/compass_dot_pquest2
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{
+		if ( parm10 == 121 )
+		uncompressed
+		//linear
+		noBlur
+		blend blend
+		map models/md5/gadgets/view_compass/compass_dot_pquest2.tga				
+	}	
+	{
+		if ( parm10 == 121 )		
+		uncompressed
+		//linear
+		noBlur
+		blend add
+		map models/md5/gadgets/view_compass/compass_dot_pquest2.tga
+		rgb 0.25		
+	}	
+}
+
+models/gadgets/compass_dot_pquest3
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{
+		if ( parm11 == 121 )
+		uncompressed
+		//linear
+		noBlur
+		blend blend
+		map models/md5/gadgets/view_compass/compass_dot_pquest3.tga		
+	}	
+	{
+		if ( parm11 == 121 )
+		uncompressed
+		//linear
+		noBlur
+		blend add
+		map models/md5/gadgets/view_compass/compass_dot_pquest3.tga
+		rgb 0.25		
+	}	
+}
+//---------------------------------------------------------------------------
+
+models/gadgets/compass_screen_pquest1
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{
+		noBlur
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_pquest1.tga		
+	}	
+	{
+		noBlur
+		blend add
+		map models/md5/gadgets/view_compass/compass_screen_pquest1.tga		
+		rgb 0.85
+	}	
+}
+
+models/gadgets/compass_screen_pquest2
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{
+		noBlur
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_pquest2.tga
+	}	
+	{
+		noBlur
+		blend add
+		map models/md5/gadgets/view_compass/compass_screen_pquest2.tga
+		rgb 0.85
+	}	
+}
+
+models/gadgets/compass_screen_pquest3
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp
+	sort nearest
+	{
+		noBlur
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_pquest3.tga
+	}	
+	{
+		noBlur
+		blend add
+		map models/md5/gadgets/view_compass/compass_screen_pquest3.tga
+		rgb 0.85
+	}	
+}
+
+//----------------------------- Compass Pick-up model disks materials--------------------------------------
+
+models/gadgets/compass_screen_arrow_pickup
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp	
+	//deform turbulent simpleNoise 0.07 (time * 0.2) 0.5
+	deform turbulent simpleNoise 0.1 * simpleNoise[ time * 0.07 ] simpleNoise[ time * 0.2 ] simpleNoise [ time * 0.5 ]
+	{		
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_arrow.tga
+		alpha 2 * simpleNoise[ time * 0.05 ]		
+	}	
+	{	
+		blend add		
+		map models/md5/gadgets/view_compass/compass_screen_arrow.tga
+		rgb 0.015
+		alpha 2 * simpleNoise[ time * 0.07 ]		
+	}	
+}
+
+models/gadgets/compass_screen_nswe_pickup
+{
+	noShadows
+	noimpact
+	translucent
+	noOverlays
+	clamp	
+	{		
+		blend blend
+		map models/md5/gadgets/view_compass/compass_screen_nswe.tga
+		alpha simpleNoise[ time * 0.01 ]
+		rotate 2 * sinTable[ time * 0.04 ]
+		
+	}	
+	{		
+		blend add	
+		map models/md5/gadgets/view_compass/compass_screen_nswe.tga		
+		rgb 0.01
+		alpha simpleNoise[ time * 0.01 ]
+		rotate 2 * sinTable[ time * 0.04 ]
+	}
+}
+//------------------------------------------------------------------------------------

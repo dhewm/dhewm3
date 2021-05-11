@@ -1,0 +1,69 @@
+!!ARBvp1.0
+OPTION ARB_position_invariant;
+PARAM c[5] = { program.local[0..3],
+		{ 0.14285715 } };
+TEMP R0;
+MOV R0.x, c[0];
+MOV result.texcoord[0], vertex.texcoord[0];
+MOV result.texcoord[4].xzw, c[0];
+MUL result.texcoord[4].y, R0.x, c[4].x;
+END
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+PARAM c[3] = { { 0, 0.015625, 0.03125, 0.046875 },
+		{ 0.0625, 0.078125, 0.09375, 0.109375 },
+		{ 0.125 } };
+TEMP R0;
+TEMP R1;
+TEMP R2;
+TEMP R3;
+MOV R2.y, c[0].x;
+MOV R2.x, fragment.texcoord[4].y;
+MOV R0.y, c[0].x;
+MOV R0.x, fragment.texcoord[4];
+ADD R3.xy, fragment.texcoord[0], -R0;
+ADD R1.xy, R3, R2;
+ADD R2.zw, R1.xyxy, R2.xyxy;
+TEX R0.xyz, R1, texture[0], 2D;
+MUL R1.xyz, R0, c[0].z;
+TEX R0.xyz, R3, texture[0], 2D;
+MAD R0.xyz, R0, c[0].y, R1;
+TEX R1.xyz, R2.zwzw, texture[0], 2D;
+ADD R3.xy, R2.zwzw, R2;
+MAD R0.xyz, R1, c[0].w, R0;
+TEX R1.xyz, R3, texture[0], 2D;
+ADD R2.zw, R3.xyxy, R2.xyxy;
+MAD R0.xyz, R1, c[1].x, R0;
+TEX R1.xyz, R2.zwzw, texture[0], 2D;
+ADD R3.xy, R2.zwzw, R2;
+MAD R0.xyz, R1, c[1].y, R0;
+TEX R1.xyz, R3, texture[0], 2D;
+ADD R2.zw, R3.xyxy, R2.xyxy;
+MAD R0.xyz, R1, c[1].z, R0;
+TEX R1.xyz, R2.zwzw, texture[0], 2D;
+ADD R3.xy, R2.zwzw, R2;
+MAD R0.xyz, R1, c[1].w, R0;
+TEX R1.xyz, R3, texture[0], 2D;
+ADD R2.zw, R3.xyxy, R2.xyxy;
+MAD R0.xyz, R1, c[2].x, R0;
+TEX R1.xyz, R2.zwzw, texture[0], 2D;
+ADD R3.xy, R2.zwzw, R2;
+MAD R0.xyz, R1, c[1].w, R0;
+TEX R1.xyz, R3, texture[0], 2D;
+ADD R2.zw, R3.xyxy, R2.xyxy;
+MAD R0.xyz, R1, c[1].z, R0;
+TEX R1.xyz, R2.zwzw, texture[0], 2D;
+ADD R3.xy, R2.zwzw, R2;
+MAD R0.xyz, R1, c[1].y, R0;
+TEX R1.xyz, R3, texture[0], 2D;
+ADD R2.zw, R3.xyxy, R2.xyxy;
+ADD R3.xy, R2.zwzw, R2;
+MAD R0.xyz, R1, c[1].x, R0;
+TEX R1.xyz, R2.zwzw, texture[0], 2D;
+MAD R0.xyz, R1, c[0].w, R0;
+TEX R1.xyz, R3, texture[0], 2D;
+MAD R0.xyz, R1, c[0].z, R0;
+ADD R2.xy, R3, R2;
+TEX R1.xyz, R2, texture[0], 2D;
+MAD result.color.xyz, R1, c[0].y, R0;
+END

@@ -1,0 +1,120 @@
+# Normal-Mapped Refraction Vertex Program
+#
+# Local Values
+#	0	UV scrolling values
+#	1	magnitude of deformation
+
+!!ARBvp1.0
+
+OPTION	ARB_position_invariant;
+
+PARAM	clearVec = { 1.0, 0.0, 0.0, 1.0 };
+TEMP	R0, R1;
+
+# tc0 : scrolled texture coordinates
+ADD		result.texcoord[0].xy, vertex.texcoord[0], program.local[0];
+
+# tc1 : deformation magnitude scaled by projection distance
+MOV		R0, clearVec;
+DP4		R0.z, state.matrix.modelview.row[2], vertex.position;
+
+DP4		R1.x, state.matrix.projection.row[0], R0;
+DP4		R1.y, state.matrix.projection.row[3], R0;
+
+MAX		R1.y, R1, 1.0;
+RCP		R1.y, R1.y;
+MUL		R1.x, R1.x, R1.y;
+MIN		R1.x, R1, 0.02;
+
+MUL		result.texcoord[1], R1.x, program.local[1];
+
+MOV		result.texcoord[2], program.local[2];
+MOV		result.texcoord[3], program.local[3];
+
+END
+
+# Normal-Mapped Refraction Fragment Program
+#
+# Textures
+#	0	_currentRender
+#	1	normalmap
+#
+# Environment Values
+#	0	screen non power of two adjust
+#	1	fragment.position to 0.0-1.0 screen coordinates factor
+
+!!ARBfp1.0
+
+OPTION	ARB_precision_hint_fastest;
+
+TEMP	R0, localNormal, basePos, sPos, outCol;
+
+PARAM	off1	= { -1.0, 0.0, 1.0, 1.0 };
+
+# load normalmap
+TEX		localNormal, fragment.texcoord[0], texture[1], 2D;
+MAD		localNormal.xyz, localNormal.wyzw, 2.0, -1.0;
+
+PARAM	weight = { 0.1111111,1,1,1 };
+
+# offset normalized screen coordinates by scaled normal, then apply npot adjustment
+MUL		basePos.xy, fragment.position, program.env[1];
+MAD_SAT	basePos.xy, localNormal, fragment.texcoord[1], basePos;
+TEX		outCol.xyz, basePos, texture[0], 2D;
+MUL		outCol.xyz, outCol, weight.x;
+
+TEMP offs;
+
+MUL		offs.xy, fragment.texcoord[2].xyyy, fragment.texcoord[2].z;
+
+MOV		sPos.z, 0;
+MOV		sPos.w, fragment.texcoord[2].w;
+
+# everything's a blur ( 3x3 box )
+# 1
+MAD		sPos.xy, off1.xxxx, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 2
+MAD		sPos.xy, off1.xyyy, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 3
+MAD		sPos.xy, off1.xzzz, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 4
+MAD		sPos.xy, off1.yxxx, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 5
+MAD		sPos.xy, off1.yzzz, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 6
+MAD		sPos.xy, off1.zxxx, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 7
+MAD		sPos.xy, off1.zyyy, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+# 8
+MAD		sPos.xy, off1.zzzz, offs, basePos;
+#TEX		R0.xyz, sPos, texture[0], 2D;
+TXB		R0.xyz, sPos, texture[0], 2D;
+MAD		outCol.xyz, R0, weight.x, outCol;
+
+MUL		outCol.xyz, outCol, fragment.texcoord[3].x;
+
+MOV		result.color.xyz, outCol;
+
+
+END

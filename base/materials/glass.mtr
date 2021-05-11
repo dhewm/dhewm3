@@ -1,0 +1,69 @@
+textures/glass/device_glass
+{
+    noSelfShadow
+    noshadows
+    twosided
+    translucent
+    glass
+    forceoverlays
+    sort decal
+
+    qer_editorimage textures/glass/device_glass_d
+    {
+        blend blend
+        map textures/glass/device_glass.tga	
+		alpha 0.5
+	}
+
+    {
+        blend blend
+        map textures/glass/device_glass_d
+		alpha 0.65
+    }
+}
+
+textures/glass/reflective_glass
+{
+    noSelfShadow
+    noshadows
+    twosided
+    translucent
+    glass
+    forceoverlays
+    sort decal
+
+    qer_editorimage textures/glass/device_glass_d
+
+	{	
+		blend bumpmap // this stage is needed to workaround issue of not having cubeMap reflections without diffusemap stage
+		map _flat
+	}	
+	{
+        vertexProgram heatHaze.vfp
+        vertexParm  0  0 , 0  // texture scrolling
+        vertexParm  1  .5  // magnitude of the distortion
+
+        fragmentProgram heatHaze.vfp
+        fragmentMap 0  _currentRender
+        fragmentMap 1  normalMap textures/sfx/heathaze_local.tga // the normal map for distortion
+    }
+    {
+        maskcolor				
+        map makealpha( textures/glass/device_glass.tga	)
+		alpha 0.3 // tweak alpha to tune reflection strength 
+    }	
+    {
+        blend gl_dst_alpha, gl_one
+        maskalpha        
+		cubeMap env/test        // envshot cmd has to be issues when in 640x480 resolution (r_mode 3) and g_fov 90 to avoid artifacts
+		red     Parm0
+        green   Parm1
+        blue    Parm2
+        texgen  reflect
+    }
+    {
+        blend blend
+        map textures/glass/device_glass_d
+		alpha 0.5
+    }
+}

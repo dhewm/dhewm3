@@ -1,0 +1,425 @@
+// --------------------------------------------------------------------------------
+//                         S T A T I C    M A P    M O D E L S
+// --------------------------------------------------------------------------------
+
+models\static_vehicles\starship_parked
+{
+	metal	
+	unsmoothedTangents
+	{
+		blend	diffusemap
+		map		textures/grid1024.tga
+	}
+	/*{
+		blend filter
+
+		vertexProgram		inkEffectLinear.vfp
+
+							// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.00085, 0.0001, 1024.0, 5000.0
+
+							// line strength, line "blackness", edge-bias, far-edge-bias multiplier
+		vertexParm	1		700, 0.75, -6.25, 11.0
+
+							// far-edge-bias start, far-edge-bias range, far-ink-strength multiplier, far-ink-strength start
+		vertexParm	2		512.0, 2048.0, 5.0, 512.0
+
+							// far-ink-strength range, near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		512.0, 1.5, 2
+		
+		fragmentProgram		inkEffectLinear.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}*/
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+
+						// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.0015, 0.0005, 2048.0, 5000.0
+
+						// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	1		700, 0.75, -0.0007, 0.05
+
+		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0
+
+						// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		512.0, 1.5, 2.5
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+// ---------------------------------------------------------------------------------------
+//								PLANETS
+// ---------------------------------------------------------------------------------------
+models/planets/phaeton_clouds
+{
+	translucent
+	noShadows
+	noSelfShadow
+	discrete
+	nonsolid
+	noimpact
+	{
+		forceHighQuality 
+ 		nopicmip 
+		maskColor
+		map makealpha(models/planets/cloud_layer_mask.tga)
+	}
+	{
+		//blend gl_dst_color, gl_one
+		blend gl_dst_alpha, gl_one
+		maskAlpha
+		forceHighQuality 
+   		nopicmip 
+		//blend blend
+		map models/planets/cloud_layer_deform_add.tga
+		translate time * 0.0025, 1
+	}	
+}
+
+models/planets/ganymede_clouds
+{
+	translucent
+	noShadows
+	noSelfShadow
+	discrete
+	nonsolid
+	noimpact
+	{
+		forceHighQuality 
+ 		nopicmip 
+		maskColor
+		map makealpha(models/planets/cloud_layer_mask.tga)
+	}
+	{
+		//blend gl_dst_color, gl_one
+		blend gl_dst_alpha, gl_one
+		maskAlpha
+		forceHighQuality 
+   		nopicmip 
+		//blend blend
+		map models/planets/cloud_layer_deform_add.tga
+		translate time * 0.015, 1
+	}	
+}
+
+models/planets/phaeton_surface
+{
+	noShadows
+	noSelfShadow
+	nonsolid
+	noimpact
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/planets/phaeton_surface_d.tga
+		vertexColor
+	}
+	{
+		blend bumpmap
+		map models/planets/phaeton_surface_local.tga
+	}
+	// atmospheric glow is experimental; seems to only apply to physical polygons and is affected by vertex color of the mesh
+	{
+		blend add
+		map models/planets/glow_mask2.tga
+		vertexColor
+		red 0.157
+		green 0.694
+		blue 1.0		
+		//glow
+	}	
+}
+
+models/planets/ganymede_surface
+{
+	noShadows
+	noSelfShadow
+	nonsolid
+	noimpact
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/planets/ganymede_surface_d.tga
+		vertexColor
+	}
+	{
+		blend bumpmap
+		map models/planets/phaeton_surface_local.tga
+	}
+	// atmospheric glow is experimental; seems to only apply to physical polygons and is affected by vertex color of the mesh
+	{
+		blend add
+		map models/planets/glow_mask2.tga
+		vertexColor
+		red 0.157
+		green 0.694
+		blue 1.0		
+		//glow
+	}
+}
+
+models/planets/moon_surface
+{
+	noShadows
+	noSelfShadow
+	nonsolid
+	noimpact
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/planets/moon_surface_d.tga
+		vertexColor
+	}
+	// atmospheric glow is experimental; seems to only apply to physical polygons and is affected by vertex color of the mesh
+	{
+		blend add
+		map models/planets/glow_mask2.tga
+		vertexColor
+		red 0.157
+		green 0.694
+		blue 1.0		
+		//glow
+	}
+}
+
+models/planets/phaeton_atmosphere
+{
+	noshadows
+	noimpact
+	translucent	
+	{
+		forceHighQuality 
+ 		nopicmip 
+		maskColor
+		map makealpha(models/planets/fresnel_mask.tga)		
+	}
+
+	/*{
+		blend gl_dst_alpha, gl_one
+		maskAlpha
+		forceHighQuality 
+   		nopicmip 
+
+		vertexProgram		simpleFresnel.vfp
+
+		vertexParm 	0  	2, 1.2, 0.0075, 0	// fresnel power, scale, bias
+		vertexParm	1	0.157, 0.694, 1, 0.5	// RGBA
+
+		fragmentProgram		simpleFresnel.vfp
+	}*/			
+	/*{
+		blend add
+		
+		vertexProgram		simpleFresnel.vfp
+
+		vertexParm 	0  	3, 0.5, 0.0075, 0	// fresnel power, scale, bias
+		vertexParm	1	0.157, 0.694, 1, 0.5	// RGBA
+
+		fragmentProgram		simpleFresnel.vfp		
+	}*/
+}
+
+models/planets/ganymede_atmosphere
+{
+	noshadows
+	noimpact
+	translucent	
+	{
+		forceHighQuality 
+ 		nopicmip 
+		maskColor
+		map makealpha(models/planets/fresnel_mask.tga)		
+	}
+	/*{
+		blend gl_dst_alpha, gl_one
+		maskAlpha
+		forceHighQuality 
+   		nopicmip 
+
+		vertexProgram		simpleFresnel.vfp
+
+		vertexParm 	0  	2, 1.2, 0.0075, 0	// fresnel power, scale, bias
+		//vertexParm	1	0.157, 0.694, 1, 0.5	// RGBA
+		vertexParm	1	0.545, 0.698, 0.796, 0.5	// RGBA
+
+		fragmentProgram		simpleFresnel.vfp
+	}	*/			
+}
+
+models/planets/planetary_debris
+{
+	noShadows
+	//noSelfShadow
+	nonsolid
+	noimpact
+	unsmoothedTangents
+	{
+		blend diffusemap
+		map models/planets/planetary_debris_d.tga	
+	}
+	{
+		blend bumpmap
+		map models/planets/planetary_debris_local.tga
+	}
+}
+
+// --------------------------------------------------------------------------------------------------
+//                                        ARCHITECTURE
+// --------------------------------------------------------------------------------------------------
+models/arch/ganymede_landing_pad
+{
+	unsmoothedTangents
+	stone
+	noShadows
+	{
+		blend diffusemap
+		map models/mapobjects_static/architecture/landing_pad_d3.tga
+	}
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+		vertexParm 	0  		0.0012, 0.0003, 2048.0, 5000.0	// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm	1		700, 0.75, -0.0002, 0.1		// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0	// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	3		512.0, 1, 2.5			// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+models/arch/ganymede_landing_pad_ramp
+{
+	unsmoothedTangents
+	metal
+	//noShadows
+	{
+		blend diffusemap
+		map models/mapobjects_static/architecture/landing_pad_ramp_d.tga
+	}
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+
+						// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.0015, 0.0005, 2048.0, 5000.0
+
+						// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	1		700, 0.75, -0.0007, 0.05
+
+		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0
+
+						// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		512.0, 1.5, 2.5
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+models/arch/ganymede_landing_pad_railing
+{
+	//unsmoothedTangents
+	metal
+	{
+		blend diffusemap
+		map models/mapobjects_static/architecture/landing_pad_railing_d.tga
+	}
+	/*{
+		blend bumpmap
+		map models/mapobjects_static/architecture/landing_pad_railing_local.tga
+	}*/
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+		vertexParm 	0  		0.001, 0.0003, 2048.0, 5000.0		// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm	1		700, 0.75, -0.0002, 0.1			// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	3		512.0, 1, 2.5				// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+// --------------------------------------------------------------------------
+//                        DOORS
+// --------------------------------------------------------------------------
+
+models/arch/personel_entry_door
+{
+	metal
+//	noShadows
+//	nonsolid
+//	forceshadows
+	collision
+//	unsmoothedTangents
+	qer_editorimage models/mapobjects_static/doors/personnel_entry_door1_d.tga
+	{
+		blend diffusemap
+		map models/mapobjects_static/doors/personnel_entry_door1_d.tga
+	}
+	specularmap models/mapobjects_static/doors/personnel_entry_door1_s.tga
+	bumpmap models/mapobjects_static/doors/personnel_entry_door1_local.tga
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+		vertexParm 	0  		0.001, 0.0003, 2048.0, 5000.0		// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm	1		700, 0.75, -0.0002, 0.1			// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	3		512.0, 1, 2.5				// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}
+
+// --------------------------------------------------------------------------
+//                        Devices with GUIs
+// --------------------------------------------------------------------------
+
+models/devices/touchscreen_device1_2screens
+{
+	metal
+	noShadows
+	unsmoothedTangents
+	qer_editorimage models/md5/mapobjects_animated/devices/touchscreen_device1_2screens_d.tga
+	{
+		blend diffusemap
+		map models/md5/mapobjects_animated/devices/touchscreen_device1_2screens_d.tga
+	}
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+		vertexParm 	0  		0.001, 0.0003, 2048.0, 5000.0		// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm	1		700, 0.75, -0.0002, 0.1			// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	3		512.0, 1, 2.5				// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}

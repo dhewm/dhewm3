@@ -1,0 +1,18 @@
+# this really just displays a texture in screen-space
+
+!!ARBvp1.0
+
+OPTION	ARB_position_invariant;
+
+MOV		result.texcoord[0], vertex.texcoord[0];
+END
+
+!!ARBfp1.0
+
+OPTION	ARB_precision_hint_fastest;
+
+TEMP	R0;
+MUL		R0.xy, fragment.position, program.env[1];
+MUL		R0.xy, R0, program.env[0];
+TEX		result.color.xyz, R0, texture[0], 2D;
+END

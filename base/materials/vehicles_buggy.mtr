@@ -1,0 +1,124 @@
+// ---------------------------------------------------------------------------
+//                     PLAYER's BUGGY 
+// ---------------------------------------------------------------------------
+
+models/md5/vehicles/buggy/buggy
+{
+	noShadows
+	noSelfShadow
+	unsmoothedTangents
+	{
+		blend	diffusemap          
+		map		models/md5/vehicles/buggy/buggy2_d.tga
+	}
+	{	
+		maskcolor				
+	    map	makealpha( scale( models/md5/vehicles/buggy/buggy2_reflection_mask1.tga, 1.0, 0.5, 0.85, 1.0 )) // same as alpha 0.85, but can manipulate particular RGB values for more elaborate reflections
+		//map	makealpha(models/md5/vehicles/buggy/buggy2_reflection_mask1.tga)		
+		//alpha 0.85 // used for fine tuning of cubemap reflections
+	}
+	{
+		//blend gl_dst_color, gl_one
+	    blend gl_dst_alpha, gl_one
+	    maskalpha
+       	cubeMap		env/cubemap_start
+		texgen	reflect		
+	}
+	/*{
+		blend	bumpmap          
+		map		models/md5/vehicles/buggy/buggy2_local.tga
+	} */
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+
+						// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.0008, 0.0003, 2048.0, 5000.0
+
+						// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	1		700, 0.75, -0.0007, 0.01
+
+		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0
+
+						// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		512.0, 2, 3.5
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+	/*{
+		blend filter
+
+		vertexProgram		inkEffectLinear.vfp
+
+							// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.00085, 0.0001, 128.0, 2024.0
+
+							// line strength, line "blackness", edge-bias, far-edge-bias multiplier
+		vertexParm	1		700, 0.75, -2.37, 10.0
+
+							// far-edge-bias start, far-edge-bias range, far-ink-strength multiplier, far-ink-strength start
+		vertexParm	2		32.0, 512.0, 6.0, 128.0
+
+							// far-ink-strength range, near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		2048.0, 2, 1.0
+
+		fragmentProgram		inkEffectLinear.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	} */
+	{
+		blend add
+		map		models/md5/vehicles/buggy/buggy2_lights.tga
+		//scale 4 , 4
+	}
+	{
+		blend add
+		map		models/md5/vehicles/buggy/buggy2_glow.tga
+		//scale 4 , 4
+		glow
+	}
+}
+
+models/vehicles/buggy_tire
+{
+	noShadows
+	noSelfShadow
+	//unsmoothedTangents
+	//nonsolid
+	{
+		blend diffusemap
+		map models/md5/vehicles/buggy/tire2_d.tga
+	}
+	{
+		blend bumpmap
+		map models/md5/vehicles/buggy/tire2_local.tga
+	}
+	{
+		blend filter
+
+		vertexProgram		inkEffect.vfp
+
+						// ink line size, ink line size far, ink size change start, ink size change range
+		vertexParm 	0  		0.001, 0.0003, 2048.0, 5000.0
+
+						// line strength, line "blackness", edge-bias (lower values produce more inking on inner creases close up), far-edge-bias multiplier (?)
+		vertexParm	1		700, 0.75, -0.0002, 0.1
+
+		// far-edge-bias start (how far from the view far-range algo kicks in; 2048 is a good value), far-edge-bias range (), far-ink-strength multiplier (the higher the more crease inking on the far away objects), far-ink-strength start
+		vertexParm	2		2048.0, 3072.0, 180.0, 56.0
+
+						// far-ink-strength range (higher number will fade away inks sooner), near ink edge scale, far ink edge scale ( based on far bias range settings )
+		vertexParm	3		512.0, 1, 2.5
+
+		fragmentProgram		inkEffect.vfp
+		fragmentMap	0		_currentDepth
+
+		maskDepth
+	}
+}

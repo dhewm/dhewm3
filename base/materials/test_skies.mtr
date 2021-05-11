@@ -1,0 +1,77 @@
+textures/skies/test_skybox
+{
+	qer_editorimage   textures/editor/test_skybox.tga
+	noFragment
+	noshadows
+	nooverlays
+	noimpact
+	forceOpaque // allows for transparent windows to be drawn on top (in front) of the sky
+	{
+		blend		add // allows for transparent windows to be drawn on top (in front) of the sky
+		forceHighQuality
+		//cameraCubeMap	env/test_sky2t
+		cameraCubeMap	env/sky_gray_cloudy2_fogged
+		texgen		skybox
+		texgen		wobblesky .0 .0 .0
+	}
+}
+
+textures/skies/clouds_gray_layer1
+{
+	qer_editorimage textures/skies/clouds_gray_layer1.tga
+	translucent
+	noshadows
+	{
+		forceHighQuality 
+ 		nopicmip 
+		maskcolor
+		map makealpha(textures/skies/skydome_cloud_mask.tga)
+	}
+	{
+		blend gl_dst_alpha, gl_one
+		maskalpha
+		forceHighQuality 
+   		nopicmip 
+		//map	textures/skies/clouds_gray_layer1_add.tga
+		map	textures/skies/clouds_gray1_add.tga
+		//red 0.4
+		//blue 0.01
+		//green 0.1		
+		scale 1.55, 1.55
+		translate time * 0.001, time * 0.015
+	}	
+}
+
+textures/skies/skybox_black
+{
+	qer_editorimage   textures/colors/black.tga
+	noFragment
+	noshadows
+	nooverlays
+	noimpact
+	forceOpaque // allows for transparent windows to be drawn on top (in front) of the sky
+	{
+		blend		add // allows for transparent windows to be drawn on top (in front) of the sky
+		forceHighQuality
+		cameraCubeMap	env/pure_black
+		texgen		skybox
+		texgen		wobblesky .0 .0 .0
+	}
+}
+
+textures/skies/skybox_deep_space
+{
+	qer_editorimage   textures/editor/skybox_deep_space.tga
+	noFragment
+	noshadows
+	nooverlays
+	noimpact
+	forceOpaque // allows for transparent windows to be drawn on top (in front) of the sky
+	{
+		blend		add // allows for transparent windows to be drawn on top (in front) of the sky
+		forceHighQuality
+		cameraCubeMap	env/deep_space
+		texgen		skybox
+		texgen		wobblesky .01 .01 .01
+	}
+}

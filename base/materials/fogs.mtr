@@ -1,0 +1,25 @@
+fogs/defaultFog
+{
+	fogLight	
+	noShadows
+	lightFalloffImage	lights/fog_simple_falloff.tga
+	{
+		map			lights/fog_simple_falloff.tga
+		//map		_fog	// internal fog image
+		colored			// use entity's color assigned in the editor or via shaderparms 
+		zeroClamp
+	}
+}
+
+fogs/defaultFancyFog
+{
+	fogLight	
+	noShadows
+	lightFalloffImage	lights/fog_fancy_falloff.tga
+	{
+		map			lights/fog_fancy.tga
+		//map		_fog	// internal fog image
+		colored			// use entity's color assigned in the editor or via shaderparms 
+		zeroClamp
+	}
+}
