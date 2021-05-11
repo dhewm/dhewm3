@@ -611,7 +611,13 @@ void rvDebuggerServer::Break ( idInterpreter* interpreter, idProgram* program, i
 	msg.WriteShort ( (short)DBMSG_BREAK );
 	msg.WriteInt ( linenumber );
 	msg.WriteString ( fileStr.c_str() );
+
+#if D3_SIZEOFPTR == 4 // 32 bit
 	msg.WriteInt( (int)mBreakProgram );
+#else
+	msg.WriteInt64( (int64_t)mBreakProgram );
+#endif
+
 	SendPacket ( msg.GetData(), msg.GetSize() );
 
 	// Suspend the game thread.  Since this will be called from within the main game thread

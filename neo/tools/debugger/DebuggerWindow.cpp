@@ -249,7 +249,7 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc ( HWND wnd, UINT msg, WPARAM wp
 {
 	static int		  lastStart = -1;
 	static int		  lastEnd   = -1;
-	rvDebuggerWindow* window    = (rvDebuggerWindow*)GetWindowLong ( wnd, GWL_USERDATA );
+	rvDebuggerWindow* window    = (rvDebuggerWindow*)GetWindowLongPtr ( wnd, GWLP_USERDATA );
 	WNDPROC			  wndproc   = window->mOldScriptProc;
 
 	switch ( msg )
@@ -369,7 +369,7 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc ( HWND wnd, UINT msg, WPARAM wp
 
 LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
-	rvDebuggerWindow* window = (rvDebuggerWindow*) GetWindowLong ( wnd, GWL_USERDATA );
+	rvDebuggerWindow* window = (rvDebuggerWindow*) GetWindowLongPtr ( wnd, GWLP_USERDATA );
 
 	switch ( msg )
 	{
@@ -841,9 +841,9 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	mWndScript = CreateWindow ( "RichEdit20A", "", WS_CHILD|WS_BORDER|ES_NOHIDESEL|ES_READONLY|ES_MULTILINE|ES_WANTRETURN|ES_AUTOVSCROLL|ES_AUTOHSCROLL|WS_VSCROLL|WS_HSCROLL, 0, 0, 100, 100, mWnd, (HMENU) IDC_DBG_SCRIPT, mInstance, 0 );
 	SendMessage ( mWndScript, EM_SETEVENTMASK, 0, ENM_SCROLL | ENM_CHANGE | ENM_UPDATE | ENM_SCROLLEVENTS | ENM_REQUESTRESIZE) ;
 	SendMessage ( mWndScript, EM_SETWORDBREAKPROC, 0, (LPARAM) ScriptWordBreakProc );
-	mOldScriptProc = (WNDPROC)GetWindowLong ( mWndScript, GWL_WNDPROC );
-	SetWindowLong ( mWndScript, GWL_USERDATA, (LONG)this );
-	SetWindowLong ( mWndScript, GWL_WNDPROC, (LONG)ScriptWndProc );
+	mOldScriptProc = (WNDPROC)GetWindowLongPtr ( mWndScript, GWLP_WNDPROC );
+	SetWindowLongPtr ( mWndScript, GWLP_USERDATA, (LONG_PTR)this );
+	SetWindowLongPtr ( mWndScript, GWLP_WNDPROC, (LONG_PTR)ScriptWndProc );
 
 	SendMessage ( mWndScript, EM_SETTABSTOPS, 1, (LPARAM)&tabsize );
 
@@ -869,8 +869,8 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	SendMessage ( mWndConsole, EM_SETBKGNDCOLOR, 0, GetSysColor ( COLOR_3DFACE ) );
 
 	mWndMargin = CreateWindow ( "STATIC", "", WS_VISIBLE|WS_CHILD, 0, 0, 0, 0, mWndScript, (HMENU)IDC_DBG_SPLITTER, mInstance, NULL );
-	SetWindowLong ( mWndMargin, GWL_USERDATA, (LONG)this );
-	SetWindowLong ( mWndMargin, GWL_WNDPROC, (LONG)MarginWndProc );
+	SetWindowLongPtr ( mWndMargin, GWLP_USERDATA, (LONG_PTR)this );
+	SetWindowLongPtr ( mWndMargin, GWLP_WNDPROC, (LONG_PTR)MarginWndProc );
 
 	mWndBorder = CreateWindow ( "STATIC", "", WS_VISIBLE|WS_CHILD|SS_GRAYFRAME, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_BORDER, mInstance, NULL );
 
@@ -1150,7 +1150,7 @@ int rvDebuggerWindow::HandleCommand ( WPARAM wparam, LPARAM lparam )
 			LONG	num;
 			LONG	dem;
 
-			SendMessage ( mWndScript, EM_GETZOOM, (LONG)&num, (LONG)&dem );
+			SendMessage ( mWndScript, EM_GETZOOM, (WPARAM)&num, (LPARAM)&dem );
 			if ( num != mZoomScaleNum || dem != mZoomScaleDem )
 			{
 				mZoomScaleNum = num;
@@ -1254,7 +1254,7 @@ Window procedure for the deubgger window
 */
 LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
-	rvDebuggerWindow* window = (rvDebuggerWindow*) GetWindowLong ( wnd, GWL_USERDATA );
+	rvDebuggerWindow* window = (rvDebuggerWindow*) GetWindowLongPtr ( wnd, GWLP_USERDATA );
 
 	switch ( msg )
 	{
@@ -1277,7 +1277,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			gDebuggerApp.GetOptions().SetString ( va("watch%d", i ), "" );
 
 			window->mWnd = NULL;
-			SetWindowLong ( wnd, GWL_USERDATA, 0 );
+			SetWindowLongPtr ( wnd, GWLP_USERDATA, 0 );
 			break;
 		}
 
@@ -1443,7 +1443,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 		{
 			CREATESTRUCT* cs = (CREATESTRUCT*) lparam;
 			window = (rvDebuggerWindow*) cs->lpCreateParams;
-			SetWindowLong ( wnd, GWL_USERDATA, (LONG)cs->lpCreateParams );
+			SetWindowLongPtr ( wnd, GWLP_USERDATA, (LONG_PTR)cs->lpCreateParams );
 
 			window->mWnd = wnd;
 			window->HandleCreate ( wparam, lparam );
