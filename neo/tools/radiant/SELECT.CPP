@@ -26,11 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
-#include "../../renderer/model_local.h"	// for idRenderModelPrt
+#include "renderer/model_local.h"	// for idRenderModelPrt
 
 // externs
 CPtrArray	g_SelectedFaces;

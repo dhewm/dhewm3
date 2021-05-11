@@ -26,18 +26,19 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/guied_resource.h"
-#include "../../renderer/tr_local.h"
-#include "../../sys/win32/win_local.h"
-#include "../../ui/DeviceContext.h"
-#include "../../ui/EditWindow.h"
-#include "../../ui/ListWindow.h"
-#include "../../ui/BindWindow.h"
-#include "../../ui/RenderWindow.h"
-#include "../../ui/ChoiceWindow.h"
+#include "sys/win32/rc/guied_resource.h"
+#include "renderer/tr_local.h"
+#include "sys/win32/win_local.h"
+#include "ui/DeviceContext.h"
+#include "ui/EditWindow.h"
+#include "ui/ListWindow.h"
+#include "ui/BindWindow.h"
+#include "ui/RenderWindow.h"
+#include "ui/ChoiceWindow.h"
 
 #include "GEApp.h"
 #include "GEItemPropsDlg.h"
@@ -274,7 +275,7 @@ void rvGEWorkspace::Render ( HDC hdc )
 	if (!qwglMakeCurrent( hdc, win32.hGLRC ))
 	{
 		common->Printf("ERROR: wglMakeCurrent failed.. Error:%i\n", qglGetError());
-		common->Printf("Please restart Q3Radiant if the Map view is not working\n");
+		common->Printf("Please restart SS2Ed if the Map view is not working\n");
 		return;
 	}
 
@@ -289,11 +290,11 @@ void rvGEWorkspace::Render ( HDC hdc )
 	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render the workspace below
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
 	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	qglColor3f ( mApplication->GetOptions().GetWorkspaceColor()[0], mApplication->GetOptions().GetWorkspaceColor()[1], mApplication->GetOptions().GetWorkspaceColor()[2] );
 	qglBegin ( GL_QUADS );
@@ -337,11 +338,11 @@ void rvGEWorkspace::Render ( HDC hdc )
 
 	qglViewport(0, 0, mWindowWidth, mWindowHeight );
 	qglScissor(0, 0, mWindowWidth, mWindowHeight );
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
 	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	RenderGrid ( );
 

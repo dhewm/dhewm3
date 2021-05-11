@@ -2,7 +2,8 @@
 //
 
 //#include "stdafx.h"
-#include "../../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 
@@ -99,5 +100,5 @@ void CPropTreeView::OnSize(UINT nType, int cx, int cy)
 
 void CPropTreeView::OnPaint()
 {
-	Default();
+	Default();	
 }

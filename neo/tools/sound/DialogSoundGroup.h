@@ -25,6 +25,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
 #if !defined(AFX_DIALOGSOUNDGROUP_H__3503E935_1F86_4484_903F_021CBDAB7729__INCLUDED_)
 #define AFX_DIALOGSOUNDGROUP_H__3503E935_1F86_4484_903F_021CBDAB7729__INCLUDED_
 

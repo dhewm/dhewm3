@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -37,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "PreviewDlg.h"
 #include "CurveDlg.h"
 
-#include "../../renderer/model_local.h"		// for idRenderModelPrt
+#include "renderer/model_local.h"		// for idRenderModelPrt
 
 void	Select_Ungroup();
 
@@ -1033,7 +1034,7 @@ void CEntityDlg::OnLbnDblclkListkeyval()
 	editVal.GetWindowText( Value );
 	if ( stricmp( Key, "script" ) == 0 ) {
 		Key = Value;
-		Value = "script/" + Key;
+		Value = "script_v1/" + Key;
 		if ( fileSystem->ReadFile( Value, NULL, NULL ) == -1) {
 			sprintf( work, "// Script for %s\n// \n\nvoid main() {\n\n}\n\n", currentmap );
 			fileSystem->WriteFile( Value, work.c_str(), work.Length(), "fs_devpath" );

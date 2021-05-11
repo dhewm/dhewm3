@@ -25,12 +25,12 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/common_resource.h"
-
+#include "sys/win32/rc/common_resource.h"
+#if 0
 idCVar rbfg_DefaultWidth( "rbfg_DefaultWidth", "0", 0, "" );
 idCVar rbfg_DefaultHeight( "rbfg_DefaultHeight", "0", 0, "" );
 
@@ -108,3 +108,4 @@ void DoRBFDialog(const char *FileName)
 
 	Sys_GrabMouseCursor( true );
 }
+#endif

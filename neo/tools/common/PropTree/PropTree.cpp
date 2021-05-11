@@ -17,6 +17,7 @@
 //	useful.
 
 //#include "stdafx.h"
+#include <afxwin.h>
 #include "../../../idlib/precompiled.h"
 #pragma hdrstop
 

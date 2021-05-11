@@ -26,19 +26,20 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../game/game.h"
-#include "../../sys/win32/win_local.h"
-#include "../../sys/win32/rc/common_resource.h"
-#include "../../sys/win32/rc/Radiant_resource.h"
-#include "../../sys/win32/rc/ParticleEditor_resource.h"
-#include "../comafx/DialogName.h"
-#include "../comafx/VectorCtl.h"
-#include "../comafx/DialogColorPicker.h"
-#include "../radiant/GLWidget.h"
-#include "../radiant/PreviewDlg.h"
+#include "game/GameBase.h"
+#include "sys/win32/win_local.h"
+#include "sys/win32/rc/common_resource.h"
+#include "sys/win32/rc/Radiant_resource.h"
+#include "sys/win32/rc/ParticleEditor_resource.h"
+#include "tools/comafx/DialogName.h"
+#include "tools/comafx/VectorCtl.h"
+#include "tools/comafx/DialogColorPicker.h"
+#include "tools/radiant/GLWidget.h"
+#include "tools/radiant/PreviewDlg.h"
 
 #include "DialogParticleEditor.h"
 
@@ -1273,7 +1274,15 @@ BOOL CDialogParticleEditor::OnInitDialog() {
 
 void CDialogParticleEditor::OnHScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar ) {
 	CDialog::OnHScroll( nSBCode, nPos, pScrollBar );
-	CSliderCtrl *ctrl = dynamic_cast< CSliderCtrl* >( pScrollBar );
+
+	// Something funky is going on with the RTTI.  The dynamic_cast even to a CRangeSlider*
+	// was not happening correctly.  Whatever is getting to this callback from the CRangeSlider
+	// must not be one of the basic slider types or even a CRangeSlider.  What is weird is the
+	// objects coming in have the same addresses as the various CRangeSliders on the dlg, so they
+	// should cast correctly.  Turns out it does not matter because once the addresses matche up
+	// this code just uses the dlg member reference so all I need is for the address check to
+	// go through correctly.
+	CRangeSlider* ctrl = (CRangeSlider*)pScrollBar;
 	if ( !ctrl ) {
 		return;
 	}

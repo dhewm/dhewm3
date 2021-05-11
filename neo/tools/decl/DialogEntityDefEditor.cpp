@@ -25,14 +25,15 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#if 0 // TODO: FIX this.
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/Common_resource.h"
-#include "../../sys/win32/rc/DeclEditor_resource.h"
+#include "sys/win32/rc/Common_resource.h"
+#include "sys/win32/rc/DeclEditor_resource.h"
 
-#include "../comafx/CPathTreeCtrl.h"
+#include "tools/comafx/CPathTreeCtrl.h"
 #include "DialogDeclBrowser.h"
 #include "DialogDeclEditor.h"
 #include "DialogEntityDefEditor.h"
@@ -858,3 +859,4 @@ void DialogEntityDefEditor::OnBnClickedDelete() {
 		MessageBox("Cannot delete an inherited value");
 	}
 }
+#endif

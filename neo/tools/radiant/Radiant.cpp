@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -239,7 +240,7 @@ BOOL CRadiantApp::InitInstance()
 		do
 		{
 			sprintf( iBuf, "%d", i );
-			key = "Software\\Q3Radiant\\IniPrefs" + CString(iBuf);
+			key = "Software\\SS2Ed\\IniPrefs" + CString(iBuf); // might need original Q3Radiant instead of SS2Ed
 			// does this key exists ?
 			if ( RegOpenKeyEx( HKEY_CURRENT_USER, key, 0, KEY_ALL_ACCESS, &hkResult ) != ERROR_SUCCESS )
 			{

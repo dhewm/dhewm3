@@ -25,14 +25,15 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include <io.h>
 
-#include "../../sys/win32/rc/guied_resource.h"
-#include "../../ui/DeviceContext.h"
+
+#include "sys/win32/rc/guied_resource.h"
+#include "ui/DeviceContext.h"
 
 #include "GEApp.h"
 #include "GEOptionsDlg.h"
@@ -113,7 +114,7 @@ bool rvGEApp::Initialize ( void )
 
 	// Create the main window
 	mMDIFrame = CreateWindow ( "QUAKE4_GUIEDITOR_CLASS",
-							  "Quake IV GUI Editor",
+							  "Steel Storm 2 GUI Editor",
 							  WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,
 							  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 							  NULL, NULL, mInstance, (LPVOID)this );
@@ -1155,8 +1156,12 @@ bool rvGEApp::NewFile ( void )
 								WS_CHILD|WS_VISIBLE|WS_CLIPCHILDREN|WS_HSCROLL|WS_VSCROLL|WS_MAXIMIZE,
 								CW_USEDEFAULT,
 								CW_USEDEFAULT,
-								640,
-								480,
+								//640,
+								//480,
+								// hi-def GUI patch starts
+								SCREEN_WIDTH,
+								SCREEN_HEIGHT,
+								// hi-def GUI patch ends
 								mMDIClient,
 								mInstance,
 								(LONG)workspace );
@@ -1206,8 +1211,12 @@ bool rvGEApp::OpenFile ( const char* filename )
 								WS_CHILD|WS_VISIBLE|WS_CLIPCHILDREN|WS_HSCROLL|WS_VSCROLL|WS_MAXIMIZE,
 								CW_USEDEFAULT,
 								CW_USEDEFAULT,
-								640,
-								480,
+								//640,
+								//480,
+								// hi-def GUI patch starts
+								SCREEN_WIDTH,
+								SCREEN_HEIGHT,
+								// hi-def GUI patch ends
 								mMDIClient,
 								mInstance,
 								(LONG)workspace );

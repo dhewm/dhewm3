@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -34,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "NewTexWnd.h"
 #include "io.h"
 
-#include "../../renderer/tr_local.h"
+#include "renderer/tr_local.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -369,7 +370,6 @@ void CNewTexWnd::OnPaint() {
 		m_bNeedRange = false;
 		SetScrollRange(SB_VERT, 0, g_qeglobals.d_texturewin.m_nTotalHeight, TRUE);
 	}
-
 	//ReleaseDC(hdcTexture);
 }
 

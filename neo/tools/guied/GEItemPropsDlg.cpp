@@ -26,12 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/guied_resource.h"
-#include "../common/ColorButton.h"
-#include "../common/MaskEdit.h"
+#include "sys/win32/rc/guied_resource.h"
+#include "tools/common/ColorButton.h"
+#include "tools/common/MaskEdit.h"
 
 #include "GEApp.h"
 #include "GEItemPropsDlg.h"

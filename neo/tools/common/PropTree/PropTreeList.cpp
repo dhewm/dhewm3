@@ -17,11 +17,12 @@
 //	useful.
 
 //#include "stdafx.h"
-#include "../../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "PropTree.h"
-#include "../../../sys/win32/rc/proptree_Resource.h"
+#include "sys/win32/rc/proptree_Resource.h"
 #include "PropTreeList.h"
 
 #ifdef _DEBUG

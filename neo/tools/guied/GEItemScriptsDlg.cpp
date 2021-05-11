@@ -25,11 +25,12 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include <afxcmn.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/guied_resource.h"
+#include "sys/win32/rc/guied_resource.h"
 
 #include "GEApp.h"
 #include "GEPropertyPage.h"

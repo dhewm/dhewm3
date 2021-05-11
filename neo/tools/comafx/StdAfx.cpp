@@ -26,10 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/win_local.h"
+#include "sys/win32/win_local.h"
 
 //  source file that includes just the standard includes
 //	Radiant.pch will be the pre-compiled header

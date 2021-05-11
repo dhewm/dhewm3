@@ -26,11 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/common_resource.h"
-#include "../comafx/DialogName.h"
+#include "sys/win32/rc/common_resource.h"
+#include "tools/comafx/DialogName.h"
 
 #include "qe3.h"
 #include "DlgCamera.h"

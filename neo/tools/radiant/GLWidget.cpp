@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -194,7 +195,6 @@ void idGLWidget::OnPaint()
 	qwglSwapBuffers(dc);
 	qglFlush();
 	qwglMakeCurrent(win32.hDC, win32.hGLRC);
-
 }
 
 extern bool Sys_KeyDown(int key);

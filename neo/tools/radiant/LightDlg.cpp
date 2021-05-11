@@ -26,13 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
 #include "Radiant.h"
-#include "../../game/game.h"
-#include "../comafx/DialogColorPicker.h"
+#include "game/GameBase.h"
+#include "tools/comafx/DialogColorPicker.h"
 #include "LightDlg.h"
 
 #ifdef ID_DEBUG_MEMORY

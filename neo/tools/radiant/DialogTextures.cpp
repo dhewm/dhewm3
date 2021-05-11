@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -48,7 +49,7 @@ extern void Select_SetKeyVal(const char *key, const char *val);
 const char *CDialogTextures::TypeNames[] = {
 	"None",
 	"Textures",
-	"Materials",
+	"Materials_v1",
 	"Models",
 	"Scripts",
 	"Sounds",

@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -58,9 +59,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "InspectorDialog.h"
 #include "autocaulk.h"
 
-#include "../../sys/win32/rc/common_resource.h"
-#include "../comafx/DialogName.h"
-#include "../comafx/DialogColorPicker.h"
+#include "sys/win32/rc/common_resource.h"
+#include "tools/comafx/DialogName.h"
+#include "tools/comafx/DialogColorPicker.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -129,14 +130,14 @@ SCommandInfo	g_Commands[] = {
 
 	{ "Camera_Forward",          VK_UP, 0, ID_CAMERA_FORWARD },
 	{ "Camera_Back",             VK_DOWN, 0, ID_CAMERA_BACK },
-	{ "Camera_Left",             VK_LEFT, 0, ID_CAMERA_LEFT },
-	{ "Camera_Right",            VK_RIGHT, 0, ID_CAMERA_RIGHT },
+	{ "Camera_Left",             VK_COMMA, 0, ID_CAMERA_LEFT },
+	{ "Camera_Right",            VK_PERIOD, 0, ID_CAMERA_RIGHT },
 	{ "Camera_Up",               'D', 0, ID_CAMERA_UP },
 	{ "Camera_Down",             'C', 0, ID_CAMERA_DOWN },
 	{ "Camera_AngleUp",          'A', 0, ID_CAMERA_ANGLEUP },
 	{ "Camera_AngleDown",        'Z', 0, ID_CAMERA_ANGLEDOWN },
-	{ "Camera_StrafeRight",      VK_PERIOD, 0, ID_CAMERA_STRAFERIGHT },
-	{ "Camera_StrafeLeft",       VK_COMMA, 0, ID_CAMERA_STRAFELEFT },
+	{ "Camera_StrafeRight",      VK_RIGHT, 0, ID_CAMERA_STRAFERIGHT },
+	{ "Camera_StrafeLeft",       VK_LEFT, 0, ID_CAMERA_STRAFELEFT },
 	{ "Camera_UpFloor",          VK_PRIOR, 0, ID_VIEW_UPFLOOR },
 	{ "Camera_DownFloor",        VK_NEXT, 0, ID_VIEW_DOWNFLOOR },
 	{ "Camera_CenterView",       VK_END, 0, ID_VIEW_CENTER },
@@ -158,13 +159,19 @@ SCommandInfo	g_Commands[] = {
 	{ "Grid_Set16",              '5', 0, ID_GRID_16 },
 	{ "Grid_Set32",              '6', 0, ID_GRID_32 },
 	{ "Grid_Set64",              '7', 0, ID_GRID_64 },
-	{ "Grid_Down",               219, 0, ID_GRID_PREV },
-	{ "Grid_Up",                 221, 0, ID_GRID_NEXT },
+	{ "Grid_Down",               VK_OEM_4, 0, ID_GRID_PREV }, /* [{ in us layout */
+	{ "Grid_Up",                 VK_OEM_6, 0, ID_GRID_NEXT }, /* ]} in US layouts */
 
 	{ "Grid_Toggle",             '0', 0, ID_GRID_TOGGLE },
 	{ "Grid_ToggleSizePaint",    'Q', RAD_PRESS, ID_SELECTION_TOGGLESIZEPAINT },
 
 	{ "Grid_PrecisionCursorMode",VK_F11, 0 , ID_PRECISION_CURSOR_CYCLE},
+
+	/* Begin SS2 Changes */
+	{ "Grid_SetViewTop",         VK_NUMPAD7, 0, ID_SET_VIEW_TOP },
+	{ "Grid_SetViewSide",        VK_NUMPAD3, 0, ID_SET_VIEW_SIDE },
+	{ "Grid_SetViewFront",       VK_NUMPAD1, 0, ID_SET_VIEW_FRONT },
+	/* End SS2 Changes */
 
 	{ "Grid_NextView",           VK_TAB, RAD_CONTROL, ID_VIEW_NEXTVIEW },
 	{ "Grid_ToggleCrosshairs",   'X', RAD_SHIFT, ID_VIEW_CROSSHAIR },
@@ -214,9 +221,9 @@ SCommandInfo	g_Commands[] = {
 	{ "Clipper_SplitSelected",   VK_RETURN, RAD_SHIFT, ID_SPLIT_SELECTED },
 	{ "Clipper_FlipClip",        VK_RETURN, RAD_CONTROL, ID_FLIP_CLIP },
 
-	{ "CameraClip_ZoomOut",       219, RAD_CONTROL, ID_VIEW_CUBEOUT },
-	{ "CameraClip_ZoomIn",        221, RAD_CONTROL, ID_VIEW_CUBEIN },
-	{ "CameraClip_Toggle",        220, RAD_CONTROL, ID_VIEW_CUBICCLIPPING },
+	{ "CameraClip_ZoomOut",       VK_OEM_4, RAD_CONTROL, ID_VIEW_CUBEOUT },
+	{ "CameraClip_ZoomIn",        VK_OEM_5, RAD_CONTROL, ID_VIEW_CUBEIN },
+	{ "CameraClip_Toggle",        VK_OEM_6, RAD_CONTROL, ID_VIEW_CUBICCLIPPING },
 
 	{ "ViewTab_EntityInfo",     'N', 0, ID_VIEW_ENTITY },
 	{ "ViewTab_Console",        'O', 0, ID_VIEW_CONSOLE },
@@ -289,6 +296,9 @@ SCommandInfo	g_Commands[] = {
 int				g_nCommandCount = sizeof(g_Commands) / sizeof(SCommandInfo);
 
 SKeyInfo		g_Keys[] = {
+	/* To understand the VK_* information, please read the MSDN:
+		http://msdn.microsoft.com/en-us/library/ms927178.aspx
+	*/
 	{ "Space", VK_SPACE },
 	{ "Backspace", VK_BACK },
 	{ "Escape", VK_ESCAPE },
@@ -330,9 +340,9 @@ SKeyInfo		g_Keys[] = {
 	{ "NumPad7", VK_NUMPAD7 },
 	{ "NumPad8", VK_NUMPAD8 },
 	{ "NumPad9", VK_NUMPAD9 },
-	{ "[", 219 },
-	{ "]", 221 },
-	{ "\\", 220 }
+	{ "[", VK_OEM_4 }, /* Was 219, 0xDB */
+	{ "\\", VK_OEM_5 },  /* Was 220, 0xDC */
+	{ "]", VK_OEM_6 },  /* Was 221, 0xDD */
 };
 
 int				g_nKeyCount = sizeof(g_Keys) / sizeof(SKeyInfo);
@@ -475,6 +485,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_EDIT_MAPINFO, OnEditMapinfo)
 	ON_COMMAND(ID_EDIT_ENTITYINFO, OnEditEntityinfo)
 	ON_COMMAND(ID_VIEW_NEXTVIEW, OnViewNextview)
+	ON_COMMAND(ID_SET_VIEW_TOP, OnSetViewTop)
+	ON_COMMAND(ID_SET_VIEW_SIDE, OnSetViewSide)
+	ON_COMMAND(ID_SET_VIEW_FRONT, OnSetViewFront)
 	ON_COMMAND(ID_HELP_COMMANDLIST, OnHelpCommandlist)
 	ON_COMMAND(ID_FILE_NEWPROJECT, OnFileNewproject)
 	ON_COMMAND(ID_FLIP_CLIP, OnFlipClip)
@@ -1939,10 +1952,10 @@ void CMainFrame::OnFileSaveCopy() {
 		strPath += va("\\%s", g_PrefsDlg.m_strMaps);
 	}
 
-	/* Place the terminating null character in the szFile. */
+	// Place the terminating null character in the szFile.
 	aFile[0] = '\0';
 
-	/* Set the members of the OPENFILENAME structure. */
+	// Set the members of the OPENFILENAME structure.
 	afn.lStructSize = sizeof(OPENFILENAME);
 	afn.hwndOwner = g_pParentWnd->GetSafeHwnd();
 	afn.lpstrFilter = aFilter;
@@ -1955,7 +1968,7 @@ void CMainFrame::OnFileSaveCopy() {
 	afn.lpstrTitle = aTitle;
 	afn.Flags = OFN_SHOWHELP | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
 
-	/* Display the Open dialog box. */
+	// Display the Open dialog box.
 	if (!GetSaveFileName(&afn)) {
 		return; // canceled
 	}
@@ -2602,7 +2615,7 @@ void CMainFrame::OnMiscGamma() {
 	float	fSave = g_qeglobals.d_savedinfo.fGamma;
 	DoGamma();
 	if (fSave != g_qeglobals.d_savedinfo.fGamma) {
-		MessageBox("You must restart Q3Radiant for Gamma settings to take place");
+		MessageBox("You must restart SS2Ed for Gamma settings to take place");
 	}
 }
 
@@ -3757,7 +3770,7 @@ void CMainFrame::OnPrefs() {
 	g_PrefsDlg.LoadPrefs();
 	if (g_PrefsDlg.DoModal() == IDOK) {
 		if (g_PrefsDlg.m_bWideToolbar != bToolbar) {
-			MessageBox("You need to restart Q3Radiant for the view changes to take place.");
+			MessageBox("You need to restart SS2Ed for the view changes to take place.");
 		}
 
 		g_Inspectors->texWnd.UpdatePrefs();
@@ -3877,6 +3890,42 @@ void CMainFrame::OnViewNextview() {
 	}
 	Sys_UpdateWindows(W_XY | W_CAMERA);
 }
+
+/* Begin SS2 Changes */
+void CMainFrame::OnSetViewTop() {
+	if (m_pXYWnd->GetViewType() != XY) {
+		m_pXYWnd->SetViewType(XY);
+		m_pXYWnd->PositionView();
+		if (g_qeglobals.flatRotation) {
+			g_qeglobals.rotateAxis = 2;
+		}
+		Sys_UpdateWindows(W_XY | W_CAMERA);
+	}
+}
+
+void CMainFrame::OnSetViewSide() {
+	if (m_pXYWnd->GetViewType() != YZ) {
+		m_pXYWnd->SetViewType(YZ);
+		m_pXYWnd->PositionView();
+		if (g_qeglobals.flatRotation) {
+			g_qeglobals.rotateAxis = 0;
+		}
+		Sys_UpdateWindows(W_XY | W_CAMERA);
+	}
+}
+
+void CMainFrame::OnSetViewFront() {
+	if (m_pXYWnd->GetViewType() != XZ) {
+		m_pXYWnd->SetViewType(XZ);
+		m_pXYWnd->PositionView();
+		if (g_qeglobals.flatRotation) {
+			g_qeglobals.rotateAxis = 1;
+		}
+		Sys_UpdateWindows(W_XY | W_CAMERA);
+	}
+}
+/* End SS2 Changes */
+
 
 /*
  =======================================================================================================================

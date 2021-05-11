@@ -25,11 +25,11 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/AFEditor_resource.h"
+#include "sys/win32/rc/AFEditor_resource.h"
 
 #include "DialogAF.h"
 #include "DialogAFName.h"

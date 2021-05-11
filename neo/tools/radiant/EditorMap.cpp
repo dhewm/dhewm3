@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -689,7 +690,10 @@ bool Map_SaveFile(const char *filename, bool use_region, bool autosave) {
 	Pointfile_Clear();
 
 	temp = filename;
-	temp.BackSlashesToSlashes();
+
+// Tools are Win only.  Not sure why these are being converted to slashes.
+// KJA
+//	temp.BackSlashesToSlashes();
 
 	if ( !use_region ) {
 		idStr backup;
@@ -700,9 +704,12 @@ bool Map_SaveFile(const char *filename, bool use_region, bool autosave) {
 			g_pParentWnd->MessageBox( va("Unable to delete %s: %s", backup.c_str(), strerror(errno) ), "File Error" );
 		}
 
-		if ( rename(filename, backup) != 0 ) {
-			g_pParentWnd->MessageBox( va("Unable to rename %s to %s: %s", filename, backup.c_str(), strerror(errno) ), "File Error" );
-		}
+// Removed this check.  On the first save, it is valid that the map file does not exist because
+// it has not been written to disk yet.
+// KJA
+//		if ( rename(filename, backup) != 0 ) {
+//			g_pParentWnd->MessageBox( va("Unable to rename %s to %s: %s", filename, backup.c_str(), strerror(errno) ), "File Error" );
+//		}
 	}
 
 	common->Printf("Map_SaveFile: %s\n", filename);

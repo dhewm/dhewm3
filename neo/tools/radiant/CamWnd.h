@@ -169,6 +169,7 @@ protected:
 	int m_nCullv1[3];
 	int m_nCullv2[3];
 	bool m_bClipMode;
+	bool mMouseCaptured; // DoomRadiant improvement: new 3D view navigation
 	idVec3 saveOrg;
 	idAngles saveAng;
 	bool saveValid;

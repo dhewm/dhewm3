@@ -26,11 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/win_local.h"
-#include "../../sys/win32/rc/common_resource.h"
+#include "sys/win32/win_local.h"
+#include "sys/win32/rc/common_resource.h"
 #include "OpenFileDialog.h"
 
 char rvOpenFileDialog::mLookin[ MAX_OSPATH ];

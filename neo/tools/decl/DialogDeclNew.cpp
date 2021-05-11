@@ -26,12 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/DeclEditor_resource.h"
+#include "sys/win32/rc/DeclEditor_resource.h"
 
-#include "../comafx/CPathTreeCtrl.h"
+#include "tools/comafx/CPathTreeCtrl.h"
 #include "DialogDeclBrowser.h"
 #include "DialogDeclNew.h"
 
@@ -200,16 +201,16 @@ void DialogDeclNew::OnBnClickedFile() {
 	}
 
 	switch( type ) {
-		case DECL_TABLE:		folder = "materials";	ext = "(*.mtr)|*.mtr|(*.*)|*.*||";					break;
-		case DECL_MATERIAL:		folder = "materials";	ext = "(*.mtr)|*.mtr|(*.*)|*.*||";					break;
+		case DECL_TABLE:		folder = "materials_v1";	ext = "(*.mtr)|*.mtr|(*.*)|*.*||";					break;
+		case DECL_MATERIAL:		folder = "materials_v1";	ext = "(*.mtr)|*.mtr|(*.*)|*.*||";					break;
 		case DECL_SKIN:			folder = "skins";		ext = "(*.skin)|*.skin|(*.*)|*.*||";				break;
 		case DECL_SOUND:		folder = "sound";		ext = "(*.sndshd|*.sndshd|(*.*)|*.*||";				break;
-		case DECL_ENTITYDEF:	folder = "def";			ext = "(*.def)|*.def|(*.decl)|*.decl|(*.*)|*.*||";	break;
-		case DECL_MODELDEF:		folder = "def";			ext = "(*.def)|*.def|(*.*)|*.*||";					break;
-		case DECL_FX:			folder = "fx";			ext = "(*.fx)|*.fx|(*.*)|*.*||";					break;
+		case DECL_ENTITYDEF:	folder = "def_v1";			ext = "(*.def)|*.def|(*.decl)|*.decl|(*.*)|*.*||";	break;
+		case DECL_MODELDEF:		folder = "def_v1";			ext = "(*.def)|*.def|(*.*)|*.*||";					break;
+		case DECL_FX:			folder = "fx_v1";			ext = "(*.fx)|*.fx|(*.*)|*.*||";					break;
 		case DECL_PARTICLE:		folder = "particles";	ext = "(*.prt)|*.prt|(*.*)|*.*||";					break;
 		case DECL_AF:			folder = "af";			ext = "(*.af)|*.af|(*.*)|*.*||";					break;
-		default:				folder = "def";			ext = "(*.decl)|*.decl|(*.*)|*.*||";				break;
+		default:				folder = "def_v1";			ext = "(*.decl)|*.decl|(*.*)|*.*||";				break;
 	}
 
 	path = fileSystem->RelativePathToOSPath( folder );

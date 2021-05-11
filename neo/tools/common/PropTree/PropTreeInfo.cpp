@@ -17,11 +17,12 @@
 //	useful.
 
 //#include "stdafx.h"
-#include "../../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "PropTree.h"
-#include "../../../sys/win32/rc/proptree_Resource.h"
+#include "sys/win32/rc/proptree_Resource.h"
 #include "PropTreeInfo.h"
 
 #ifdef _DEBUG
@@ -106,5 +107,5 @@ void CPropTreeInfo::OnPaint()
 		txt.LoadString(IDS_SELFORINFO);
 
 	dc.SelectObject(m_pProp->GetNormalFont());
-	dc.DrawText(txt, &ir, DT_WORDBREAK);
+	dc.DrawText(txt, &ir, DT_WORDBREAK);	
 }

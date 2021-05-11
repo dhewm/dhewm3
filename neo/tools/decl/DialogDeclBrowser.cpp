@@ -25,15 +25,15 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/DeclEditor_resource.h"
-#include "../../sys/win32/rc/ScriptEditor_resource.h"
+#include "sys/win32/rc/DeclEditor_resource.h"
+#include "sys/win32/rc/ScriptEditor_resource.h"
 
-#include "../comafx/CPathTreeCtrl.h"
-#include "../script/DialogScriptEditor.h"
+#include "tools/comafx/CPathTreeCtrl.h"
+#include "tools/script/DialogScriptEditor.h"
 #include "DialogDeclBrowser.h"
 #include "DialogDeclEditor.h"
 #include "DialogDeclNew.h"

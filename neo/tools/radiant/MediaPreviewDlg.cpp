@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -172,8 +173,12 @@ void CMediaPreviewDlg::OnMouseMove(UINT nFlags, CPoint point)
 			sysEvent_t  ev;
 			memset( &ev, 0, sizeof( ev ) );
 			ev.evType = SE_MOUSE;
-			ev.evValue = (point.x / rct.Width()) * 640.0f;
-			ev.evValue2 = (point.y / rct.Height()) * 480.0f;
+//			ev.evValue = (point.x / rct.Width()) * 640.0f;
+//			ev.evValue2 = (point.y / rct.Height()) * 480.0f;
+// hi-def GUI patch starts
+			ev.evValue = (point.x / rct.Width()) * SCREEN_WIDTH;
+			ev.evValue2 = (point.y / rct.Height()) * SCREEN_HEIGHT;
+// hi-def GUI patch ends
 			gui->HandleEvent(&ev, 0);
 		}
 	}

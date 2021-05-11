@@ -26,12 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
 #include "io.h"
-#include "../../renderer/tr_local.h"
+#include "renderer/tr_local.h"
 
 struct evarPrefix_t {
 	int type;

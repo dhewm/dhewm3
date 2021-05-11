@@ -25,8 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -1473,7 +1473,7 @@ void CXYWnd::OnPaint() {
 	bool		bPaint = true;
 	if (!qwglMakeCurrent(dc.m_hDC, win32.hGLRC)) {
 		common->Printf("ERROR: wglMakeCurrent failed.. Error:%i\n", qglGetError());
-		common->Printf("Please restart Q3Radiant if the Map view is not working\n");
+		common->Printf("Please restart SS2Ed if the Map view is not working\n");
 		bPaint = false;
 	}
 
@@ -1620,7 +1620,7 @@ void CXYWnd::OnPaint() {
 
 		qwglSwapBuffers(dc.m_hDC);
 		TRACE("XY Paint\n");
-	}
+	}	
 }
 
 /*

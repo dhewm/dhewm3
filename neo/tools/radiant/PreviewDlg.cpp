@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -303,7 +304,7 @@ void CPreviewDlg::OnTvnSelchangedTreeMedia(NMHDR *pNMHDR, LRESULT *pResult)
 			}
 			// strip the leading "base/"
 			if (id == MATERIALS) {
-				mediaName.Strip("Materials/");
+				mediaName.Strip("Materials_v1/");
 			} else if (id == WAVES) {
 				mediaName.Strip( "Wave files/" );
 			} else if (id == PARTICLES) {
@@ -608,7 +609,7 @@ void CPreviewDlg::AddMaterials(bool rootItems) {
 			list.Append(mat->GetName());
 		}
 		list.Sort();
-		AddStrList("Materials", list, MATERIALS);
+		AddStrList("Materials_v1", list, MATERIALS);
 	}
 
 }

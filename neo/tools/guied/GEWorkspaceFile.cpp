@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "GEApp.h"
@@ -54,7 +55,8 @@ bool rvGEWorkspace::SaveFile ( const char* filename )
 	idStr ospath;
 
 	tempfile = "guis/temp.guied";
-	ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_basepath" );
+	//ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_basepath" );
+	ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_savepath" );
 
 	// Open the output file for write
 	if ( !(file = fileSystem->OpenFileWrite ( tempfile ) ) )
@@ -249,7 +251,8 @@ bool rvGEWorkspace::NewFile ( void )
 
 	// Make a temporary file with nothing in it so we can just use
 	// load to do all the work
-	ospath = fileSystem->RelativePathToOSPath ( "guis/Untitled.guiednew", "fs_basepath" );
+	//ospath = fileSystem->RelativePathToOSPath ( "guis/Untitled.guiednew", "fs_basepath" );
+	ospath = fileSystem->RelativePathToOSPath ( "guis/Untitled.guiednew", "fs_savepath" );
 	DeleteFile ( ospath );
 
 	file = fileSystem->OpenFileWrite ( "guis/Untitled.guiednew" );
@@ -258,7 +261,10 @@ bool rvGEWorkspace::NewFile ( void )
 		return false;
 	}
 
-	empty = "windowDef Desktop { rect 0,0,640,480 }";
+//	empty = "windowDef Desktop { rect 0,0,640,480 }";
+// hi-def GUI patch starts
+	sprintf(empty, "windowDef Desktop { rect 0,0,%d,%d }", SCREEN_WIDTH, SCREEN_HEIGHT);
+// hi-def GUI patch ends
 	file->Write ( empty, empty.Length() );
 	fileSystem->CloseFile ( file );
 
@@ -300,7 +306,8 @@ bool rvGEWorkspace::LoadFile ( const char* filename, idStr* error )
 	bool  result;
 
 	tempfile = "guis/temp.guied";
-	ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_basepath" );
+	//ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_basepath" );
+	ospath = fileSystem->RelativePathToOSPath ( tempfile, "fs_savepath" );
 
 	// Make sure the gui directory exists
 	idStr createDir = ospath;

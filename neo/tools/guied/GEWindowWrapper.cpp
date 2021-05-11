@@ -26,16 +26,17 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
-#include "../../sys/win32/rc/guied_resource.h"
-#include "../../renderer/tr_local.h"
-#include "../../ui/EditWindow.h"
-#include "../../ui/ListWindow.h"
-#include "../../ui/BindWindow.h"
-#include "../../ui/RenderWindow.h"
-#include "../../ui/ChoiceWindow.h"
+#include "sys/win32/rc/guied_resource.h"
+#include "renderer/tr_local.h"
+#include "ui/EditWindow.h"
+#include "ui/ListWindow.h"
+#include "ui/BindWindow.h"
+#include "ui/RenderWindow.h"
+#include "ui/ChoiceWindow.h"
 
 #include "GEApp.h"
 

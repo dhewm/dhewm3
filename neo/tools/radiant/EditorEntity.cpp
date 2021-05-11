@@ -26,12 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
-#include "../../renderer/tr_local.h"
-#include "../../renderer/model_local.h"	// for idRenderModelMD5
+#include "renderer/tr_local.h"
+#include "renderer/model_local.h"	// for idRenderModelMD5
 int g_entityId = 1;
 
 #define CURVE_TAG "curve_"

@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -36,8 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "splines.h"
 #include <GL/glu.h>
 
-#include "../../renderer/tr_local.h"
-#include "../../renderer/model_local.h"	// for idRenderModelMD5
+#include "renderer/tr_local.h"
+#include "renderer/model_local.h"	// for idRenderModelMD5
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -87,6 +88,7 @@ CCamWnd::CCamWnd() {
 	selectMode = false;
 	soundMode = false;
 	saveValid = false;
+	mMouseCaptured = false; // DoomRadiant improvement: new 3D view navigation
 	Cam_Init();
 }
 
@@ -214,7 +216,7 @@ void CCamWnd::OnPaint() {
 		Cam_Draw();
 		QE_CheckOpenGLForErrors();
 		qwglSwapBuffers(dc.m_hDC);
-	}
+	}	
 }
 
 /*
@@ -273,8 +275,12 @@ void CCamWnd::OnMouseMove(UINT nFlags, CPoint point) {
  =======================================================================================================================
  */
 void CCamWnd::OnLButtonDown(UINT nFlags, CPoint point) {
-	m_ptLastCursor = point;
-	OriginalMouseDown(nFlags, point);
+	//m_ptLastCursor = point;
+	//OriginalMouseDown(nFlags, point);
+	if( mMouseCaptured == false ) { // DoomRadiant improvement: new 3D view navigation
+		m_ptLastCursor = point;
+		OriginalMouseDown( nFlags, point );
+	}
 }
 
 /*
@@ -282,7 +288,10 @@ void CCamWnd::OnLButtonDown(UINT nFlags, CPoint point) {
  =======================================================================================================================
  */
 void CCamWnd::OnLButtonUp(UINT nFlags, CPoint point) {
-	OriginalMouseUp(nFlags, point);
+	//OriginalMouseUp(nFlags, point);
+	if(mMouseCaptured == false) { // DoomRadiant improvement: new 3D view navigation
+		OriginalMouseUp(nFlags, point);
+	}
 }
 
 /*
@@ -290,7 +299,10 @@ void CCamWnd::OnLButtonUp(UINT nFlags, CPoint point) {
  =======================================================================================================================
  */
 void CCamWnd::OnMButtonDown(UINT nFlags, CPoint point) {
-	OriginalMouseDown(nFlags, point);
+	//OriginalMouseDown(nFlags, point);
+	if(mMouseCaptured == false) { // DoomRadiant improvement: new 3D view navigation
+		OriginalMouseUp(nFlags, point);
+	}
 }
 
 /*
@@ -298,7 +310,10 @@ void CCamWnd::OnMButtonDown(UINT nFlags, CPoint point) {
  =======================================================================================================================
  */
 void CCamWnd::OnMButtonUp(UINT nFlags, CPoint point) {
-	OriginalMouseUp(nFlags, point);
+	//OriginalMouseUp(nFlags, point);
+	if(mMouseCaptured == false) { // DoomRadiant improvement: new 3D view navigation
+		OriginalMouseUp(nFlags, point);
+	}
 }
 
 /*
@@ -306,6 +321,11 @@ void CCamWnd::OnMButtonUp(UINT nFlags, CPoint point) {
  =======================================================================================================================
  */
 void CCamWnd::OnRButtonDown(UINT nFlags, CPoint point) {
+	//OriginalMouseDown(nFlags, point);
+	// DoomRadiant improvement: new 3D view navigation
+	// Do nothing For now... Action takes effect when the button is released.
+	if(mMouseCaptured)
+		return;
 	OriginalMouseDown(nFlags, point);
 }
 
@@ -314,7 +334,20 @@ void CCamWnd::OnRButtonDown(UINT nFlags, CPoint point) {
  =======================================================================================================================
  */
 void CCamWnd::OnRButtonUp(UINT nFlags, CPoint point) {
-	OriginalMouseUp(nFlags, point);
+	//OriginalMouseUp(nFlags, point);
+	if(mMouseCaptured) { // DoomRadiant improvement: new 3D view navigation
+		// Mouse was previously captured... Release it.
+		mMouseCaptured = false;
+		ReleaseCapture();
+	} else {
+		//capture mouse button.
+		CRect	r;
+		GetClientRect(r);
+		SetFocus();
+		SetCapture();
+		mMouseCaptured = true;
+	}
+	// if (!(GetAsyncKeyState(VK_MENU) & 0x8000))
 }
 
 /*
@@ -354,7 +387,10 @@ int CCamWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
 	HFONT hOldFont = (HFONT)SelectObject(hDC, hfont);
 
-	wglMakeCurrent (hDC, win32.hGLRC);
+	//qwglMakeCurrent (hDC, win32.hGLRC);
+	if( qwglMakeCurrent ( hDC, win32.hGLRC ) == FALSE ) {
+		common->Warning("wglMakeCurrent failed: %d", ::GetLastError());
+	}
 
 	if ((g_qeglobals.d_font_list = qglGenLists(256)) == 0) {
 		common->Warning( "couldn't create font dlists" );
@@ -682,6 +718,12 @@ void CCamWnd::Cam_MouseUp(int x, int y, int buttons) {
  */
 void CCamWnd::Cam_MouseMoved(int x, int y, int buttons) {
 	m_nCambuttonstate = buttons;
+	
+	if(mMouseCaptured) { // DoomRadiant improvement: new 3D view navigation				
+		Cam_MouseLook();
+		Sys_UpdateWindows(W_XY | W_CAMERA | W_Z);		
+	}
+
 	if (!buttons) {
 		return;
 	}
@@ -2062,11 +2104,12 @@ void CCamWnd::Cam_Render() {
 		return;					// not valid yet
 	}
 
-	if (!qwglMakeCurrent(dc.m_hDC, win32.hGLRC)) {
+	// Jmarshal23 recommended to disable this to fix lighting render in the Cam window
+	/* if (!qwglMakeCurrent(dc.m_hDC, win32.hGLRC)) {
 		common->Printf("ERROR: wglMakeCurrent failed..\n ");
 		common->Printf("Please restart " EDITOR_WINDOWTEXT " if the camera view is not working\n");
 		return;
-	}
+	} */  
 
 	// save the editor state
 	//qglPushAttrib( GL_ALL_ATTRIB_BITS );

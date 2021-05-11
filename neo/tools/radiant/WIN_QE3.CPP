@@ -26,7 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
+#include <afxwin.h>
+#include "idlib/precompiled.h"
 #pragma hdrstop
 
 #include "qe3.h"
@@ -260,7 +261,7 @@ void Error(char *error, ...) {
 	sprintf
 	(
 		text2,
-		"%s\nGetLastError() = %i - %i\nAn unrecoverable error has occured. Would you like to edit Preferences before exiting Q3Radiant?",
+		"%s\nGetLastError() = %i - %i\nAn unrecoverable error has occured. Would you like to edit Preferences before exiting SS2Ed?",
 		text,
 		err,
 		i
@@ -318,7 +319,7 @@ static char			szFileTitle[260];		/* file title string */
 static char			szFilter[260] =			/* filter string */
 "Map file (*.map, *.reg)\0*.map;*.reg\0";
 static char			szProjectFilter[260] =	/* filter string */
-"Q3Radiant project (*.qe4, *.prj)\0*.qe4\0*.prj\0\0";
+"SS2Ed project (*.qe4, *.prj)\0*.qe4\0*.prj\0\0";
 static char			chReplace;				/* string separator for szFilter */
 static int			i, cbString;			/* integer count variables */
 static HANDLE		hf;						/* file handle */
