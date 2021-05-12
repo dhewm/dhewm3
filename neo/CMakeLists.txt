@@ -198,7 +198,24 @@ if(MSVC)
 		message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
 		message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
 	endif()
-endif()
+
+else() # not MSVC
+
+if(NOT WIN32)
+	# libbacktrace support - TODO: might work with MinGW? we don't have a crash handler for win32 though..
+	include(CheckCSourceCompiles)
+	set(CMAKE_REQUIRED_LIBRARIES backtrace)
+	check_c_source_compiles( "#include <backtrace.h>
+	int main() { backtrace_create_state(NULL, 0, NULL, NULL); return 0; }" HAVE_LIBBACKTRACE )
+
+	if(HAVE_LIBBACKTRACE)
+		set(sys_libs ${sys_libs} backtrace)
+		add_definitions(-DD3_HAVE_LIBBACKTRACE)
+		message(STATUS "Using libbacktrace")
+	endif()
+endif() # NOT WIN32
+
+endif() # not MSVC
 
 # compiler specific flags
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")

@@ -384,9 +384,81 @@ static const int   crashSigs[]     = {  SIGILL,   SIGABRT,   SIGFPE,   SIGSEGV }
 static const char* crashSigNames[] = { "SIGILL", "SIGABRT", "SIGFPE", "SIGSEGV" };
 
 #if ( defined(__linux__) && defined(__GLIBC__) ) || defined(__FreeBSD__) || defined(__APPLE__)
-  // TODO: https://github.com/ianlancetaylor/libbacktrace looks interesting and also supports windows apparently
   #define D3_HAVE_BACKTRACE
   #include <execinfo.h>
+#endif
+
+#ifdef D3_HAVE_LIBBACKTRACE
+// non-ancient versions of GCC and clang include libbacktrace
+// for ancient versions it can be built from https://github.com/ianlancetaylor/libbacktrace
+#include <backtrace.h>
+#include <cxxabi.h> // for demangling C++ symbols
+
+static struct backtrace_state *bt_state = NULL;
+
+static void bt_error_callback( void *data, const char *msg, int errnum )
+{
+	printf("libbacktrace ERROR: %d - %s\n", errnum, msg);
+}
+
+static void bt_syminfo_callback( void *data, uintptr_t pc, const char *symname,
+								 uintptr_t symval, uintptr_t symsize )
+{
+	if (symname != NULL) {
+		int status;
+		// FIXME: sucks that __cxa_demangle() insists on using malloc().. but so does printf()
+		char* name = abi::__cxa_demangle(symname, NULL, NULL, &status);
+		if (name != NULL) {
+			symname = name;
+		}
+		printf("  %zu %s\n", pc, symname);
+		free(name);
+	} else {
+		printf("  %zu (unknown symbol)\n", pc);
+	}
+}
+
+static int bt_pcinfo_callback( void *data, uintptr_t pc, const char *filename, int lineno, const char *function )
+{
+	if (data != NULL) {
+		int* hadInfo = (int*)data;
+		*hadInfo = (function != NULL);
+	}
+
+	if (function != NULL) {
+		int status;
+		// FIXME: sucks that __cxa_demangle() insists on using malloc()..
+		char* name = abi::__cxa_demangle(function, NULL, NULL, &status);
+		if (name != NULL) {
+			function = name;
+		}
+		printf("  %zu %s:%d %s\n", pc, filename, lineno, function);
+		free(name);
+	}
+
+	return 0;
+}
+
+static void bt_error_dummy( void *data, const char *msg, int errnum )
+{
+	//printf("ERROR-DUMMY: %d - %s\n", errnum, msg);
+}
+
+static int bt_simple_callback(void *data, uintptr_t pc)
+{
+	int pcInfoWorked = 0;
+	// if this fails, the executable doesn't have debug info, that's ok (=> use bt_error_dummy())
+	backtrace_pcinfo(bt_state, pc, bt_pcinfo_callback, bt_error_dummy, &pcInfoWorked);
+	if (!pcInfoWorked) { // no debug info? use normal symbols instead
+		// yes, it would be easier to call backtrace_syminfo() in bt_pcinfo_callback() if function == NULL,
+		// but some libbacktrace versions (e.g. in Ubuntu 18.04's g++-7) don't call bt_pcinfo_callback
+		// at all if no debug info was available - which is also the reason backtrace_full() can't be used..
+		backtrace_syminfo(bt_state, pc, bt_syminfo_callback, bt_error_callback, NULL);
+	}
+
+	return 0;
+}
+
 #endif
 
 static void signalhandlerCrash(int sig)
@@ -402,7 +474,14 @@ static void signalhandlerCrash(int sig)
 	//       (could use backtrace_symbols_fd() then)
 	printf("Looks like %s crashed with signal %s (%d) - sorry!\n", ENGINE_VERSION, name, sig);
 
-#ifdef D3_HAVE_BACKTRACE
+#ifdef D3_HAVE_LIBBACKTRACE
+	if (bt_state != NULL) {
+		int skip = 1; // skip this function in backtrace
+		backtrace_simple(bt_state, skip, bt_simple_callback, bt_error_callback, NULL);
+	} else {
+		printf("(No backtrace because libbacktrace state is NULL)\n");
+	}
+#elif defined(D3_HAVE_BACKTRACE)
 	// this is partly based on Yamagi Quake II code
 	void* array[128];
 	int size = backtrace(array, sizeof(array)/sizeof(array[0]));
@@ -465,6 +544,12 @@ static void installSigHandler(int sig, int flags, void (*handler)(int))
 
 void Posix_InitSignalHandlers( void )
 {
+#ifdef D3_HAVE_LIBBACKTRACE
+	// can't use idStr here and thus can't use Sys_GetPath(PATH_EXE) => added Posix_GetExePath()
+	const char* exePath = Posix_GetExePath();
+	bt_state = backtrace_create_state(exePath[0] ? exePath : NULL, 0, bt_error_callback, NULL);
+#endif
+
 	for(int i=0; i<sizeof(crashSigs)/sizeof(crashSigs[0]); ++i)
 	{
 		installSigHandler(crashSigs[i], SA_RESTART|SA_RESETHAND, signalhandlerCrash);
