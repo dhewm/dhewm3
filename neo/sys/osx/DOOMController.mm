@@ -41,6 +41,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/posix/posix_public.h"
 
+static char exe_path[MAXPATHLEN];
+
+const char* Posix_GetExePath() {
+	return exe_path;
+}
+
 bool Sys_GetPath(sysPath_t type, idStr &path) {
 	char buf[MAXPATHLEN];
 	char *snap;
@@ -62,8 +68,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		return true;
 
 	case PATH_EXE:
-		strncpy(buf, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN);
-		path = buf;
+		path = exe_path;
 		return true;
 	}
 
@@ -179,6 +184,9 @@ int SDL_main( int argc, char *argv[] ) {
 
 	if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]])
 		Sys_Error("Could not access application resources");
+
+	// DG: set exe_path so Posix_InitSignalHandlers() can call Posix_GetExePath()
+	strncpy(exe_path, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN);
 
 	Posix_InitSignalHandlers(); // DG: added signal handlers for POSIX platforms
 

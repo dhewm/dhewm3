@@ -42,14 +42,137 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <locale.h>
 
-static char path_argv[MAX_OSPATH];
+
+
+#undef snprintf // no, I don't want to use idStr::snPrintf() here.
+
+// lots of code following to get the current executable dir, taken from Yamagi Quake II
+// and actually based on DG_Snippets.h
+
+#if defined(__linux) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#include <unistd.h> // readlink(), amongst others
+#endif
+
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+#include <sys/sysctl.h> // for sysctl() to get path to executable
+#endif
+
+#ifdef _WIN32
+#include <windows.h> // GetModuleFileNameA()
+#endif
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h> // _NSGetExecutablePath
+#endif
+
+#ifdef __HAIKU__
+#include <FindDirectory.h>
+#endif
+
+#ifndef PATH_MAX
+// this is mostly for windows. windows has a MAX_PATH = 260 #define, but allows
+// longer paths anyway.. this might not be the maximum allowed length, but is
+// hopefully good enough for realistic usecases
+#define PATH_MAX 4096
+#endif
+
+static char path_argv[PATH_MAX];
+static char path_exe[PATH_MAX];
+
+const char* Posix_GetExePath()
+{
+	return path_exe;
+}
+
+static void SetExecutablePath(char* exePath)
+{
+	// !!! this assumes that exePath can hold PATH_MAX chars !!!
+
+#ifdef _WIN32
+	WCHAR wexePath[PATH_MAX];
+	DWORD len;
+
+	GetModuleFileNameW(NULL, wexePath, PATH_MAX);
+	len = WideCharToMultiByte(CP_UTF8, 0, wexePath, -1, exePath, PATH_MAX, NULL, NULL);
+
+	if(len <= 0 || len == PATH_MAX)
+	{
+		// an error occured, clear exe path
+		exePath[0] = '\0';
+	}
+
+#elif defined(__linux)
+
+	// all the platforms that have /proc/$pid/exe or similar that symlink the
+	// real executable - basiscally Linux and the BSDs except for FreeBSD which
+	// doesn't enable proc by default and has a sysctl() for this. OpenBSD once
+	// had /proc but removed it for security reasons.
+	char buf[PATH_MAX] = {0};
+	snprintf(buf, sizeof(buf), "/proc/%d/exe", getpid());
+	// readlink() doesn't null-terminate!
+	int len = readlink(buf, exePath, PATH_MAX-1);
+	if (len <= 0)
+	{
+		// an error occured, clear exe path
+		exePath[0] = '\0';
+	}
+	else
+	{
+		exePath[len] = '\0';
+	}
+
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+
+	// the sysctl should also work when /proc/ is not mounted (which seems to
+	// be common on FreeBSD), so use it..
+#if defined(__FreeBSD__) || defined(__DragonFly__)
+	int name[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+#else
+	int name[4] = {CTL_KERN, KERN_PROC_ARGS, -1, KERN_PROC_PATHNAME};
+#endif
+	size_t len = PATH_MAX-1;
+	int ret = sysctl(name, sizeof(name)/sizeof(name[0]), exePath, &len, NULL, 0);
+	if(ret != 0)
+	{
+		// an error occured, clear exe path
+		exePath[0] = '\0';
+	}
+
+#elif defined(__APPLE__)
+
+	uint32_t bufSize = PATH_MAX;
+	if(_NSGetExecutablePath(exePath, &bufSize) != 0)
+	{
+		// WTF, PATH_MAX is not enough to hold the path?
+		// an error occured, clear exe path
+		exePath[0] = '\0';
+	}
+
+	// TODO: realpath() ?
+	// TODO: no idea what this is if the executable is in an app bundle
+#elif defined(__HAIKU__)
+	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH, NULL, exePath, PATH_MAX) != B_OK)
+	{
+		exePath[0] = '\0';
+	}
+
+#else
+
+	// Several platforms (for example OpenBSD) don't provide a
+	// reliable way to determine the executable path. Just return
+	// an empty string.
+	exePath[0] = '\0';
+
+// feel free to add implementation for your platform and send a pull request.
+#warning "SetExecutablePath() is unimplemented on this platform"
+
+#endif
+}
 
 bool Sys_GetPath(sysPath_t type, idStr &path) {
 	const char *s;
 	char buf[MAX_OSPATH];
-	char buf2[MAX_OSPATH];
 	struct stat st;
-	size_t len;
 
 	path.Clear();
 
@@ -112,20 +235,8 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		return true;
 
 	case PATH_EXE:
-		idStr::snPrintf(buf, sizeof(buf), "/proc/%d/exe", getpid());
-		len = readlink(buf, buf2, sizeof(buf2));
-		if (len != -1) {
-			if (len < MAX_OSPATH) {
-				buf2[len] = '\0';
-			} else {
-				buf2[MAX_OSPATH - 1] = '\0';
-			}
-			path = buf2;
-			return true;
-		}
-
-		if (path_argv[0] != 0) {
-			path = path_argv;
+		if (path_exe[0] != '\0') {
+			path = path_exe;
 			return true;
 		}
 
@@ -292,6 +403,11 @@ int main(int argc, char **argv) {
 			path_argv[0] = 0;
 	} else {
 		path_argv[0] = 0;
+	}
+
+	SetExecutablePath(path_exe);
+	if (path_exe[0] == '\0') {
+		memcpy(path_exe, path_argv, sizeof(path_exe));
 	}
 
 	// some ladspa-plugins (that may be indirectly loaded by doom3 if they're
