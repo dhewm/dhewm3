@@ -992,7 +992,10 @@ int main(int argc, char *argv[]) {
 
 	// Launch the script debugger
 	if ( strstr( GetCommandLine(), "+debugger" ) ) {
+
+#ifdef ID_ALLOW_TOOLS
 		DebuggerClientInit(GetCommandLine());
+#endif
 		return 0;
 	}
 

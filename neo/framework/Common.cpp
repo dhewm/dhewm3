@@ -3310,7 +3310,9 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 
 void idCommonLocal::DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer)
 {
+#ifdef ID_ALLOW_TOOLS
 	DebuggerServerCheckBreakpoint(interpreter, program, instructionPointer);
+#endif
 }
 
 idGameCallbacks gameCallbacks;
