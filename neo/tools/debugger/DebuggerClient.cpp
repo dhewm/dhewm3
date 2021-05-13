@@ -226,13 +226,8 @@ void rvDebuggerClient::HandleBreak ( idBitMsg* msg )
 	msg->ReadString ( filename, MAX_PATH );
 	mBreakFilename   = filename;
 
-#if D3_SIZEOFPTR == 4 // 32 bit
-	int ptr32b = msg->ReadInt();
-	mBreakProgram = (idProgram*)ptr32b;
-#else
 	int64_t ptr64b = msg->ReadInt64();
 	mBreakProgram = (idProgram*)ptr64b;
-#endif
 
 	// Clear the variables
 	mVariables.Clear ( );

@@ -612,11 +612,7 @@ void rvDebuggerServer::Break ( idInterpreter* interpreter, idProgram* program, i
 	msg.WriteInt ( linenumber );
 	msg.WriteString ( fileStr.c_str() );
 
-#if D3_SIZEOFPTR == 4 // 32 bit
-	msg.WriteInt( (int)mBreakProgram );
-#else
 	msg.WriteInt64( (int64_t)mBreakProgram );
-#endif
 
 	SendPacket ( msg.GetData(), msg.GetSize() );
 
