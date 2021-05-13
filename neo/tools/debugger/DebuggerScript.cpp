@@ -87,7 +87,7 @@ appropriate for the file being loaded.  If the script cant be compiled
 the loading of the script fails
 ================
 */
-bool rvDebuggerScript::Load ( const char* filename)
+bool rvDebuggerScript::Load ( const char* filename )
 {
 	void* buffer;
 	int	  size;
