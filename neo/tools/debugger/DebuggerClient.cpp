@@ -226,8 +226,8 @@ void rvDebuggerClient::HandleBreak ( idBitMsg* msg )
 	msg->ReadString ( filename, MAX_PATH );
 	mBreakFilename   = filename;
 
-	int64_t ptr64b = msg->ReadInt64();
-	mBreakProgram = (idProgram*)ptr64b;
+	//int64_t ptr64b = msg->ReadInt64();
+	//mBreakProgram = (idProgram*)ptr64b;
 
 	// Clear the variables
 	mVariables.Clear ( );

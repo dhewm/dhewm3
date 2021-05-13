@@ -112,7 +112,6 @@ protected:
 	int							mBreakID;
 	int							mBreakLineNumber;
 	idStr						mBreakFilename;
-	idProgram*					mBreakProgram;
 
 	idDict						mVariables;
 
@@ -190,17 +189,6 @@ ID_INLINE int rvDebuggerClient::GetBreakLineNumber ( void )
 {
 	return mBreakLineNumber;
 }
-
-/*
-================
-rvDebuggerClient::GetBreakProgram
-================
-*/
-ID_INLINE idProgram* rvDebuggerClient::GetBreakProgram(void)
-{
-	return mBreakProgram;
-}
-
 
 /*
 ================

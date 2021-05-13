@@ -612,7 +612,7 @@ void rvDebuggerServer::Break ( idInterpreter* interpreter, idProgram* program, i
 	msg.WriteInt ( linenumber );
 	msg.WriteString ( fileStr.c_str() );
 
-	msg.WriteInt64( (int64_t)mBreakProgram );
+	//msg.WriteInt64( (int64_t)mBreakProgram );
 
 	SendPacket ( msg.GetData(), msg.GetSize() );
 

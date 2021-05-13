@@ -1794,7 +1794,7 @@ void rvDebuggerWindow::ProcessNetMessage ( idBitMsg* msg )
 			mClient->InspectVariable ( mTooltipVar, mCurrentStackDepth );
 			UpdateWatch ( );
 			EnableWindows ( TRUE );
-			OpenScript ( mClient->GetBreakFilename(), mClient->GetBreakLineNumber() - 1, mClient->GetBreakProgram());
+			OpenScript ( mClient->GetBreakFilename(), mClient->GetBreakLineNumber() - 1 );
 			UpdateTitle ( );
 			UpdateToolbar ( );
 			SetForegroundWindow ( mWnd );
