@@ -1146,3 +1146,65 @@ void idGameEdit::MapEntityTranslate( const char *name, const idVec3 &v ) const {
 		}
 	}
 }
+
+
+/***********************************************************************
+
+  Debugger
+
+***********************************************************************/
+
+bool idGameEdit::IsLineCode(const char* filename, int linenumber) const
+{
+	static idStr fileStr = idStr(MAX_PATH);
+	idProgram* program = &gameLocal.program;
+	for (int i = 0; i < program->NumStatements(); i++)
+	{
+		fileStr = program->GetFilename(program->GetStatement(i).file);
+		fileStr.BackSlashesToSlashes();
+
+		if (strcmp(filename, fileStr.c_str()) == 0
+			&& program->GetStatement(i).linenumber == linenumber
+			)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void idGameEdit::GetLoadedScripts(idStrList** result)
+{
+	(*result)->Clear();
+	idProgram* program = &gameLocal.program;
+
+	for (int i = 0; i < program->NumFilenames(); i++)
+	{
+		(*result)->AddUnique(idStr(program->GetFilename(i)));
+	}
+}
+
+void idGameEdit::MSG_WriteScriptList(idBitMsg* msg)
+{
+	idProgram* program = &gameLocal.program;
+
+	msg->WriteInt(program->NumFilenames());
+	for (int i = 0; i < program->NumFilenames(); i++)
+	{
+		idStr file = program->GetFilename(i);
+		//fix this. it seams that scripts triggered by the runtime are stored with a wrong path
+		//the use // instead of '\'
+		file.BackSlashesToSlashes();
+		msg->WriteString(file);
+	}
+}
+
+const char* idGameEdit::GetFilenameForStatement(idProgram* program, int index) const
+{
+	return program->GetFilenameForStatement(index);
+}
+
+int idGameEdit::GetLineNumberForStatement(idProgram* program, int index) const
+{
+	return program->GetLineNumberForStatement(index);
+}
