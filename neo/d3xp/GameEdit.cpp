@@ -1154,19 +1154,16 @@ void idGameEdit::MapEntityTranslate( const char *name, const idVec3 &v ) const {
 
 ***********************************************************************/
 
-bool idGameEdit::IsLineCode(const char* filename, int linenumber) const
-{
-	static idStr fileStr = idStr(MAX_PATH);
-	idProgram* program = &gameLocal.program;
-	for (int i = 0; i < program->NumStatements(); i++)
-	{
-		fileStr = program->GetFilename(program->GetStatement(i).file);
-		fileStr.BackSlashesToSlashes();
+bool idGameEdit::IsLineCode( const char *filename, int linenumber ) const {
+	static idStr fileStr = idStr( MAX_PATH );
+	idProgram *program = &gameLocal.program;
+	for ( int i = 0; i < program->NumStatements( ); i++ ) 	{
+		fileStr = program->GetFilename( program->GetStatement( i ).file );
+		fileStr.BackSlashesToSlashes( );
 
-		if (strcmp(filename, fileStr.c_str()) == 0
-			&& program->GetStatement(i).linenumber == linenumber
-			)
-		{
+		if ( strcmp( filename, fileStr.c_str( ) ) == 0
+			&& program->GetStatement( i ).linenumber == linenumber
+			) {
 			return true;
 		}
 	}
