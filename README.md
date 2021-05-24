@@ -68,13 +68,12 @@ The build system is based on CMake: http://cmake.org/
 Required libraries are not part of the tree. These are:
 
 - zlib
-- libjpeg (v8)
-- libogg
-- libvorbis
-- libvorbisfile (may be part of libvorbis)
 - OpenAL (OpenAL Soft required, Creative's and Apple's versions are made of fail)
 - SDL v1.2 or 2.0 (2.0 recommended)
 - libcurl (optional, required for server downloads)
+- Also, if you're not building recent dhewm3 code from git (but 1.5.1 or older):
+  - libjpeg (v8)
+  - libogg, libvorbis, libvorbisfile (may be part of libvorbis)
 
 For UNIX-like systems, these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
@@ -84,6 +83,7 @@ For Windows, there are two options:
 
 - Use the provided binaries (recommended, see below)
 - Compile these libraries yourself
+- Do **not** use *vcpkg*, they patch headers [in a way that breaks your build](https://github.com/microsoft/vcpkg/issues/18098) !
 
 Create a distinct build folder outside of this source repository and issue
 the cmake command there, pointing it at the neo/ folder from this repository:
