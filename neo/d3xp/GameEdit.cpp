@@ -1155,7 +1155,7 @@ void idGameEdit::MapEntityTranslate( const char *name, const idVec3 &v ) const {
 ***********************************************************************/
 
 bool idGameEdit::IsLineCode( const char *filename, int linenumber ) const {
-	static idStr fileStr = idStr( MAX_PATH );
+	idStr fileStr;
 	idProgram *program = &gameLocal.program;
 	for ( int i = 0; i < program->NumStatements( ); i++ ) 	{
 		fileStr = program->GetFilename( program->GetStatement( i ).file );

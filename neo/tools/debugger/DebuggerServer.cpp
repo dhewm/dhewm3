@@ -26,9 +26,16 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#if defined( ID_ALLOW_TOOLS )
 #include "tools/edit_gui_common.h"
-
 #include "DebuggerApp.h"
+#else
+#include "debugger_common.h"
+// we need a lot to be able to list all threads in mars_city1
+const int MAX_MSGLEN = 8600;
+#endif
+
+
 #include "DebuggerServer.h"
 
 /*
@@ -628,11 +635,14 @@ void rvDebuggerServer::Break ( idInterpreter* interpreter, idProgram* program, i
 	// would just flash
 	Sleep ( 150 );
 
+//this should be platform specific
+#if defined( ID_ALLOW_TOOLS ) 
 	// Bring the window back to the foreground
 	SetForegroundWindow ( win32.hWnd );
 	SetActiveWindow ( win32.hWnd );
 	UpdateWindow ( win32.hWnd );
 	SetFocus ( win32.hWnd );
+#endif
 
 	// Give the mouse cursor back to the game
 	// HVG_Note : there be dragons here. somewhere.

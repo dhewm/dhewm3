@@ -98,6 +98,8 @@ idCVar com_timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "scales the ti
 idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when making a build" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
 
+idCVar com_enableDebuggerServer( "com_enableDebuggerServer", "0", CVAR_BOOL | CVAR_SYSTEM, "set to 1 on startup to enable debugging with the DHEWM3 debugger" );
+
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
 // com_speeds times
@@ -383,17 +385,15 @@ void idCommonLocal::VPrintf( const char *fmt, va_list args ) {
 	// remove any color codes
 	idStr::RemoveColors( msg );
 
-
-
-#ifdef ID_ALLOW_TOOLS
-	// print to script debugger server
-	if (com_editors & EDITOR_DEBUGGER)
-		DebuggerServerPrint(msg);
-	else
-#endif
+	if ( com_enableDebuggerServer.GetBool( ) ) 	{
+		// print to script debugger server
+		if ( com_editors & EDITOR_DEBUGGER )
+			DebuggerServerPrint( msg );
+	} else {
 		// only echo to dedicated console and early console when debugger is not running so no 
 		// deadlocks occur if engine functions called from the debuggerthread trace stuff..
-		Sys_Printf("%s", msg);
+		Sys_Printf( "%s", msg );
+	}
 #if 0	// !@#
 #if defined(_DEBUG) && defined(WIN32)
 	if ( strlen( msg ) < 512 ) {
@@ -3170,10 +3170,9 @@ void idCommonLocal::InitGame( void ) {
 	// initialize the user interfaces
 	uiManager->Init();
 
-#if defined(ID_ALLOW_TOOLS)
 	// startup the script debugger
-	DebuggerServerInit();
-#endif;
+	if ( com_enableDebuggerServer.GetBool( ) )	
+		DebuggerServerInit();
 
 	PrintLoadingMessage( common->GetLanguageDict()->GetString( "#str_04350" ) );
 
@@ -3210,10 +3209,9 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 		sw->StopAllSounds();
 	}
 
-#if defined(ID_ALLOW_TOOLS)
 	// shutdown the script debugger
-	 DebuggerServerShutdown();
-#endif
+	if ( com_enableDebuggerServer.GetBool( ) )	
+		DebuggerServerShutdown();
 
 	idAsyncNetwork::client.Shutdown();
 
@@ -3310,9 +3308,8 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 
 void idCommonLocal::DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer)
 {
-#ifdef ID_ALLOW_TOOLS
-	DebuggerServerCheckBreakpoint(interpreter, program, instructionPointer);
-#endif
+	if ( com_enableDebuggerServer.GetBool( ) )
+		DebuggerServerCheckBreakpoint(interpreter, program, instructionPointer);
 }
 
 idGameCallbacks gameCallbacks;

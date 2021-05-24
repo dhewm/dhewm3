@@ -26,17 +26,22 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#if defined( ID_ALLOW_TOOLS )
 #include "tools/edit_gui_common.h"
-
-
 #include "../../sys/win32/rc/debugger_resource.h"
 #include "DebuggerApp.h"
+#else
+#include "debugger_common.h"
+#endif
+
 #include "DebuggerServer.h"
 
 DWORD CALLBACK DebuggerThread ( LPVOID param );
 
+#if defined( ID_ALLOW_TOOLS )
 rvDebuggerApp					gDebuggerApp;
 HWND							gDebuggerWindow = NULL;
+#endif
 bool							gDebuggerSuspend = false;
 bool							gDebuggerConnnected = false;
 HANDLE							gDebuggerGameThread = NULL;
@@ -46,6 +51,7 @@ HANDLE							gDebuggerServerThread   = NULL;
 DWORD							gDebuggerServerThreadID = 0;
 bool							gDebuggerServerQuit     = false;
 
+#if defined( ID_ALLOW_TOOLS )
 /*
 ================
 DebuggerMain
@@ -113,6 +119,7 @@ void DebuggerClientLaunch ( void )
 	CloseHandle ( process.hThread );
 	CloseHandle ( process.hProcess );
 }
+#endif // #if defined( ID_ALLOW_TOOLS )
 
 /*
 ================
