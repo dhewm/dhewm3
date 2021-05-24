@@ -389,9 +389,11 @@ void idCommonLocal::VPrintf( const char *fmt, va_list args ) {
 		// print to script debugger server
 		if ( com_editors & EDITOR_DEBUGGER )
 			DebuggerServerPrint( msg );
+		else
+			// only echo to dedicated console and early console when debugger is not running so no 
+			// deadlocks occur if engine functions called from the debuggerthread trace stuff..
+			Sys_Printf( "%s", msg );
 	} else {
-		// only echo to dedicated console and early console when debugger is not running so no 
-		// deadlocks occur if engine functions called from the debuggerthread trace stuff..
 		Sys_Printf( "%s", msg );
 	}
 #if 0	// !@#
