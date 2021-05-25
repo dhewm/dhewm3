@@ -594,7 +594,7 @@ void rvDebuggerClient::SendAddBreakpoint ( rvDebuggerBreakpoint& bp, bool onceOn
 	msg.WriteBits	( onceOnly?1:0, 1 );
 	msg.WriteInt	( (unsigned long) bp.GetLineNumber ( ) );
 	msg.WriteInt	( bp.GetID ( ) );
-	msg.WriteString ( bp.GetFilename() );
+	msg.WriteString ( bp.GetFilename() ); // FIXME: this implies make7bit ?!
 
 	SendPacket ( msg.GetData(), msg.GetSize() );
 }

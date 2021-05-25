@@ -36,20 +36,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "DebuggerServer.h"
 
-DWORD CALLBACK DebuggerThread ( LPVOID param );
-
 #if defined( ID_ALLOW_TOOLS )
-rvDebuggerApp					gDebuggerApp;
-HWND							gDebuggerWindow = NULL;
+rvDebuggerApp					gDebuggerApp; // this is also used in other source files
+static HWND						gDebuggerWindow = NULL;
 #endif
-bool							gDebuggerSuspend = false;
-bool							gDebuggerConnnected = false;
-HANDLE							gDebuggerGameThread = NULL;
 
-rvDebuggerServer*				gDebuggerServer			= NULL;
-HANDLE							gDebuggerServerThread   = NULL;
-DWORD							gDebuggerServerThreadID = 0;
-bool							gDebuggerServerQuit     = false;
+static rvDebuggerServer*		gDebuggerServer			= NULL;
+static SDL_Thread*				gDebuggerServerThread   = NULL;
+static bool						gDebuggerServerQuit     = false;
 
 #if defined( ID_ALLOW_TOOLS )
 /*
@@ -128,14 +122,14 @@ DebuggerServerThread
 Thread proc for the debugger server
 ================
 */
-DWORD CALLBACK DebuggerServerThread ( LPVOID param )
+static int SDLCALL DebuggerServerThread ( void *param )
 {
 	assert ( gDebuggerServer );
 
 	while ( !gDebuggerServerQuit )
 	{
 		gDebuggerServer->ProcessMessages ( );
-		Sleep ( 1 );
+		SDL_Delay( 1 );
 	}
 
 	return 0;
@@ -172,7 +166,7 @@ bool DebuggerServerInit ( void )
 	}
 
 	// Start the debugger server thread
-	gDebuggerServerThread = CreateThread ( NULL, 0, DebuggerServerThread, 0, 0, &gDebuggerServerThreadID );
+	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, "DebuggerServer", NULL );
 
 	return true;
 }
@@ -186,23 +180,20 @@ Shuts down the debugger server
 */
 void DebuggerServerShutdown ( void )
 {
-	if ( gDebuggerServerThread )
+	if ( gDebuggerServerThread != NULL )
 	{
 		// Signal the debugger server to quit
 		gDebuggerServerQuit = true;
 
 		// Wait for the thread to finish
-		WaitForSingleObject ( gDebuggerServerThread, INFINITE );
+		SDL_WaitThread( gDebuggerServerThread, NULL );
+		gDebuggerServerThread = NULL;
 
 		// Shutdown the server now
 		gDebuggerServer->Shutdown();
 
 		delete gDebuggerServer;
 		gDebuggerServer = NULL;
-
-		// Cleanup the thread handle
-		CloseHandle ( gDebuggerServerThread );
-		gDebuggerServerThread = NULL;
 	}
 }
 

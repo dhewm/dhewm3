@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "DebuggerMessages.h"
 #include "DebuggerBreakpoint.h"
 #include "framework/Game.h"
+#include <SDL.h>
 
 
 
@@ -83,11 +84,13 @@ private:
 	netadr_t						mClientAdr;
 	idPort							mPort;
 	idList<rvDebuggerBreakpoint*>	mBreakpoints;
-	CRITICAL_SECTION				mCriticalSection;
+	SDL_mutex*						mCriticalSection;
 
-	HANDLE							mGameThread;
 
+	SDL_cond*						mGameThreadBreakCond;
+	SDL_mutex*						mGameThreadBreakLock;
 	bool							mBreak;
+
 	bool							mBreakNext;
 	bool							mBreakStepOver;
 	bool							mBreakStepInto;
