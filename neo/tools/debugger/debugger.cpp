@@ -166,7 +166,12 @@ bool DebuggerServerInit ( void )
 	}
 
 	// Start the debugger server thread
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, "DebuggerServer", NULL );
+#else // SDL 1.2
+	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, NULL );
+#endif
+
 
 	return true;
 }
