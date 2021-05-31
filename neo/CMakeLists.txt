@@ -239,6 +239,9 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
 
 	add_compile_options(-fno-strict-aliasing)
+	# dear idiot compilers, don't fuck up math code with useless FMA "optimizations"
+	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
+	add_compile_options(-ffp-contract=off)
 
 	if(NOT AROS)
 		CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)

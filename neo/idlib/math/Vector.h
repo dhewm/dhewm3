@@ -621,27 +621,6 @@ ID_INLINE bool idVec3::FixDenormals( void ) {
 	return denormal;
 }
 
-#if defined(__GNUC__) && !defined(__clang__) && defined(__OPTIMIZE__) && (defined(__FP_FAST_FMA) || defined(__FP_FAST_FMAF))
-// DG: If the x86/x86_64 FMA extension is enabled and -O2 or higher is used, GCC miscompiles the
-//     cross-product in a ways that even v.Cross(v) isn't exactly (0, 0, 0).
-//     This happens because it uses vfmsub* for the first part of a.x*b.y - (a.y*b.x)
-//     (and normal multiplication for the a.y*b.x part),  which uses an intermediate with
-//     "infinite precision" for the multiplication part, while the (a.y*b.x) part was previously
-//     stored with single precision.
-//     So if the result should be 0 we instead get the rounding error between double(?) and
-//     single-precision float results of the multiplications.
-//     This caused problems with dmap's PointInTri().
-//     The specific flag (implied by -O2) that triggers this behavior is -fexpensive-optimizations,
-//     so as a workaround disable that flag for the cross product functions.
-//     Not limiting this to x86 in case GCC does similar things with other CPUs FMA operations.
-//     Not doing it for clang because there apparently this optimization is only done
-//     with -ffast-math which we don't use. Only doing this if some kind of "fast" FMA is available
-//     because I assume that otherwise GCC won't try this optimization
-
-#pragma GCC push_options
-#pragma GCC optimize("-fno-expensive-optimizations")
-#endif
-
 ID_INLINE idVec3 idVec3::Cross( const idVec3 &a ) const {
 	return idVec3( y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x );
 }
@@ -653,11 +632,6 @@ ID_INLINE idVec3 &idVec3::Cross( const idVec3 &a, const idVec3 &b ) {
 
 	return *this;
 }
-
-#if defined(__GNUC__) && !defined(__clang__) && defined(__OPTIMIZE__) && (defined(__FP_FAST_FMA) || defined(__FP_FAST_FMAF))
-// DG: restore normal optimization settings
-#pragma GCC pop_options
-#endif
 
 ID_INLINE float idVec3::Length( void ) const {
 	return ( float )idMath::Sqrt( x * x + y * y + z * z );
