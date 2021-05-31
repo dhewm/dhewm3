@@ -65,6 +65,9 @@ void DebuggerClientInit( const char *cmdline )
 	{
 		goto DebuggerClientInitDone;
 	}
+	
+	// hide the doom window by default
+	::ShowWindow( win32.hWnd, SW_HIDE );
 
 	gDebuggerApp.Run ( );
 
