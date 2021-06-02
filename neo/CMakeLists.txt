@@ -185,7 +185,7 @@ if(CURL_FOUND)
 	set(ID_ENABLE_CURL ON)
 	include_directories(${CURL_INCLUDE_DIR})
 else()
-	message(STATUS "libcurl not found, server downloads won't be available")
+	message(WARNING "libcurl not found, server downloads won't be available (apart from that dhewm3 will work)")
 	set(ID_ENABLE_CURL OFF)
 	set(CURL_LIBRARY "")
 endif()
@@ -207,11 +207,14 @@ if(NOT WIN32)
 	set(CMAKE_REQUIRED_LIBRARIES backtrace)
 	check_c_source_compiles( "#include <backtrace.h>
 	int main() { backtrace_create_state(NULL, 0, NULL, NULL); return 0; }" HAVE_LIBBACKTRACE )
+	unset(CMAKE_REQUIRED_LIBRARIES)
 
 	if(HAVE_LIBBACKTRACE)
 		set(sys_libs ${sys_libs} backtrace)
 		add_definitions(-DD3_HAVE_LIBBACKTRACE)
 		message(STATUS "Using libbacktrace")
+	else()
+		message(WARNING "libbacktrace wasn't found. It's not required but recommended, because it provides useful backtraces if dhewm3 crashes")
 	endif()
 endif() # NOT WIN32
 
