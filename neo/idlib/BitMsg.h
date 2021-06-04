@@ -85,7 +85,6 @@ public:
 	void			WriteShort( int c );
 	void			WriteUShort( int c );
 	void			WriteInt( int c );
-	void			WriteInt64(int64_t c);
 	void			WriteFloat( float f );	
 	void			WriteFloat( float f, int exponentBits, int mantissaBits );
 	void			WriteAngle8( float f );
@@ -115,7 +114,6 @@ public:
 	int				ReadShort( void ) const;
 	int				ReadUShort( void ) const;
 	int				ReadInt( void ) const;
-	int64_t			ReadInt64( void ) const;
 	float			ReadFloat( void ) const;
 	float			ReadFloat( int exponentBits, int mantissaBits ) const;
 	float			ReadAngle8( void ) const;
@@ -302,13 +300,6 @@ ID_INLINE void idBitMsg::WriteInt( int c ) {
 	WriteBits( c, 32 );
 }
 
-ID_INLINE void idBitMsg::WriteInt64(int64_t c) {
-	uint64_t uc = c;
-
-	WriteBits(uc & 0xFFFFFFFF, 32);
-	WriteBits((uc >> 32) & 0xFFFFFFFF, 32);
-}
-
 ID_INLINE void idBitMsg::WriteFloat( float f ) {
 	WriteBits( *reinterpret_cast<int *>(&f), 32 );
 }
@@ -387,15 +378,6 @@ ID_INLINE int idBitMsg::ReadUShort( void ) const {
 
 ID_INLINE int idBitMsg::ReadInt( void ) const {
 	return ReadBits( 32 );
-}
-
-ID_INLINE int64_t idBitMsg::ReadInt64(void) const {
-	uint32_t uc1, uc2;
-
-	uc1 = ReadBits(32);
-	uc2 = ReadBits(32);
-
-	return (uint64_t)uc1 | (uint64_t)uc2 << 32;
 }
 
 ID_INLINE float idBitMsg::ReadFloat( void ) const {
