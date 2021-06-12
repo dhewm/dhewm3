@@ -262,7 +262,7 @@ evaluated interactively.
 ======================
 */
 
-void R_SetupViewFrustum( void );
+void R_SetupViewFrustum( viewDef_t* viewDef );
 void R_SetupProjection( viewDef_t * viewDef );
 
 void R_LockSurfaceScene( viewDef_t *parms ) {
@@ -277,7 +277,7 @@ void R_LockSurfaceScene( viewDef_t *parms ) {
 
 	// the four sides of the view frustum are needed
 	// for culling and portal visibility
-	R_SetupViewFrustum();
+	R_SetupViewFrustum( tr.viewDef );
 
 	// we need to set the projection matrix before doing
 	// portal-to-screen scissor box calculations

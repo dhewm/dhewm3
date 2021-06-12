@@ -675,6 +675,8 @@ Rendering a scene may require multiple views to be rendered
 to handle mirrors,
 ====================
 */
+extern void R_SetupViewFrustum( viewDef_t* viewDef );
+extern void R_SetupProjection( viewDef_t * viewDef );
 void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 #ifndef	ID_DEDICATED
 	renderView_t	copy;
@@ -758,15 +760,13 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 	if ( r_lockSurfaces.GetBool() ) {
 		tr.lockSurfacesRealViewDef = *parms;
 
-		// call this here already so idGuiModel::EmitToCurrentView() can use it
-		R_SetViewMatrix(&tr.lockSurfacesRealViewDef);
-/*
-		viewDef_t* lockedParms = &tr.lockSurfacesViewDef;
-		parms->renderView = lockedParms->renderView;
-		parms->projectionMatrix = lockedParms->projectionMatrix;
-		parms->worldSpace = lockedParms->worldSpace;
-		parms->initialViewAreaOrigin = lockedParms->initialViewAreaOrigin;
-*/
+		// usually the following are called later in R_RenderView(), but we pass
+		// the locked viewDef to that function so do these calculations here
+		// (the results are needed for some special cases like in-world GUIs and mirrors)
+		R_SetViewMatrix( &tr.lockSurfacesRealViewDef );
+		R_SetupViewFrustum( &tr.lockSurfacesRealViewDef);
+		R_SetupProjection( &tr.lockSurfacesRealViewDef );
+
 		const viewDef_t* origParms = &tr.lockSurfacesRealViewDef;
 		*parms = tr.lockSurfacesViewDef;
 		parms->renderWorld = origParms->renderWorld;
@@ -787,8 +787,6 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 	tr.primaryWorld = this;
 	tr.primaryRenderView = *renderView;
 	tr.primaryView = parms;
-
-
 
 	// rendering this view may cause other views to be rendered
 	// for mirrors / portals / shadows / environment maps

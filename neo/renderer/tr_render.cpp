@@ -850,7 +850,6 @@ void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void (*DrawInterac
 RB_DrawView
 =============
 */
-extern void R_SetupProjection( viewDef_t * viewDef );
 void RB_DrawView( const void *data ) {
 	const drawSurfsCommand_t	*cmd;
 
@@ -873,11 +872,6 @@ void RB_DrawView( const void *data ) {
 		parms->viewLights = origParms.viewLights;
 		parms->viewEntitys = origParms.viewEntitys;
 		parms->connectedAreas = origParms.connectedAreas;
-
-		// projection etc are usually set in R_RenderView(), hasn't happened for the "real" viewdef yet
-		// R_SetViewMatrix(parms); - already done in idRenderWorldLocal::RenderScene() so idGuiModel::EmitToCurrentView() can use it
-		// R_SetupViewFrustum( parms ); TODO unsure if necessary
-		R_SetupProjection( parms );
 
 		for( viewEntity_t* vModel = parms->viewEntitys ; vModel ; vModel = vModel->next ) {
 			myGlMultMatrix( vModel->modelMatrix,
