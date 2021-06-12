@@ -856,7 +856,11 @@ void RB_DrawView( const void *data ) {
 
 	cmd = (const drawSurfsCommand_t *)data;
 
-	if(r_lockSurfaces.GetBool()) {
+	// with r_lockSurfaces enabled, we set the locked render view
+	// for the primary viewDef for all the "what should be drawn" calculations.
+	// now it must be reverted to the real render view so the scene gets rendered
+	// from the actual current players point of view
+	if(r_lockSurfaces.GetBool() && tr.primaryView == cmd->viewDef) {
 		//viewDef = &tr.lockSurfacesRealViewDef;
 		//const viewDef_t origParms = *backEnd.viewDef;
 		viewDef_t* parms = cmd->viewDef;
