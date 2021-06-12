@@ -628,6 +628,18 @@ void idRenderSystemLocal::BeginFrame( int windowWidth, int windowHeight ) {
 		return;
 	}
 
+	// DG: r_lockSurfaces only works properly if r_useScissor is disabled
+	if ( r_lockSurfaces.IsModified() ) {
+		static bool origUseScissor = true;
+		r_lockSurfaces.ClearModified();
+		if ( r_lockSurfaces.GetBool() ) {
+			origUseScissor = r_useScissor.GetBool();
+			r_useScissor.SetBool( false );
+		} else {
+			r_useScissor.SetBool( origUseScissor );
+		}
+	} // DG end
+
 	// determine which back end we will use
 	SetBackEndRenderer();
 
