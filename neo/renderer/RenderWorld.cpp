@@ -758,6 +758,8 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 	if ( r_lockSurfaces.GetBool() ) {
 		tr.lockSurfacesRealViewDef = *parms;
 
+		// call this here already so idGuiModel::EmitToCurrentView() can use it
+		R_SetViewMatrix(&tr.lockSurfacesRealViewDef);
 /*
 		viewDef_t* lockedParms = &tr.lockSurfacesViewDef;
 		parms->renderView = lockedParms->renderView;

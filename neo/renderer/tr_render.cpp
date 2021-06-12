@@ -861,12 +861,10 @@ void RB_DrawView( const void *data ) {
 	// now it must be reverted to the real render view so the scene gets rendered
 	// from the actual current players point of view
 	if(r_lockSurfaces.GetBool() && tr.primaryView == cmd->viewDef) {
-		//viewDef = &tr.lockSurfacesRealViewDef;
-		//const viewDef_t origParms = *backEnd.viewDef;
 		viewDef_t* parms = cmd->viewDef;
 		const viewDef_t origParms = *parms;
 
-		*parms = tr.lockSurfacesRealViewDef; // actual current player/camera position - XXX: really? what about projection matrix?
+		*parms = tr.lockSurfacesRealViewDef; // actual current player/camera position
 		parms->renderWorld = origParms.renderWorld;
 		parms->floatTime = origParms.floatTime;
 		parms->drawSurfs = origParms.drawSurfs;
@@ -876,22 +874,16 @@ void RB_DrawView( const void *data ) {
 		parms->viewEntitys = origParms.viewEntitys;
 		parms->connectedAreas = origParms.connectedAreas;
 
-		// TODO: is this really the proper one? maybe should've been set before when origParms.projectionMatrix was set?
-		//memcpy(parms->projectionMatrix, origParms.projectionMatrix, sizeof(origParms.projectionMatrix));
-		//memcpy(parms->worldSpace.modelViewMatrix, origParms.worldSpace.modelViewMatrix, sizeof(origParms.worldSpace.modelViewMatrix));
-		R_SetupProjection(parms);
-		// TODO: R_SetupViewFrustum() ?
-		R_SetViewMatrix(parms);
+		// projection etc are usually set in R_RenderView(), hasn't happened for the "real" viewdef yet
+		// R_SetViewMatrix(parms); - already done in idRenderWorldLocal::RenderScene() so idGuiModel::EmitToCurrentView() can use it
+		// R_SetupViewFrustum( parms ); TODO unsure if necessary
+		R_SetupProjection( parms );
 
-		// implicit parms->worldSpace = origParms.worldSpace;
-
-		// update the view origin and axis, and all the entity matricies
-		for( viewEntity_t* vModel = tr.lockSurfacesCmd.viewDef->viewEntitys ; vModel ; vModel = vModel->next ) {
+		for( viewEntity_t* vModel = parms->viewEntitys ; vModel ; vModel = vModel->next ) {
 			myGlMultMatrix( vModel->modelMatrix,
 				parms->worldSpace.modelViewMatrix,
 				vModel->modelViewMatrix );
 		}
-
 	}
 
 	backEnd.viewDef = cmd->viewDef;
