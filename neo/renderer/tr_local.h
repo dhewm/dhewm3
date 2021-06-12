@@ -548,9 +548,8 @@ extern	frameData_t	*frameData;
 
 //=======================================================================
 
-void R_LockSurfaceScene( viewDef_t *parms );
 void R_ClearCommandChain( void );
-void R_AddDrawViewCmd( viewDef_t *parms, bool isMain=false );
+void R_AddDrawViewCmd( viewDef_t *parms );
 
 void R_ReloadGuis_f( const idCmdArgs &args );
 void R_ListGuis_f( const idCmdArgs &args );
@@ -1120,7 +1119,7 @@ MAIN
 ====================================================================
 */
 
-void R_RenderView( viewDef_t *parms, bool isMain = false );
+void R_RenderView( viewDef_t *parms );
 
 // performs radius cull first, then corner cull
 bool R_CullLocalBox( const idBounds &bounds, const float modelMatrix[16], int numPlanes, const idPlane *planes );

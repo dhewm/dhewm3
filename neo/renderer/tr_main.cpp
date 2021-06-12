@@ -184,9 +184,6 @@ R_ToggleSmpFrame
 ====================
 */
 void R_ToggleSmpFrame( void ) {
-	if ( r_lockSurfaces.GetBool() ) {
-		//return;
-	}
 	R_FreeDeferredTriSurfs( frameData );
 
 	// clear frame-temporary data
@@ -1095,7 +1092,7 @@ a mirror / remote location, or a 3D view on a gui surface.
 Parms will typically be allocated with R_FrameAlloc
 ================
 */
-void R_RenderView( viewDef_t *parms, bool isMain ) {
+void R_RenderView( viewDef_t *parms ) {
 	viewDef_t		*oldView;
 
 	if ( parms->renderView.width <= 0 || parms->renderView.height <= 0 ) {
@@ -1159,8 +1156,7 @@ void R_RenderView( viewDef_t *parms, bool isMain ) {
 	}
 
 	// add the rendering commands for this viewDef
-	//if(!r_lockSurfaces.GetBool() || !isMain)
-		R_AddDrawViewCmd( parms, isMain );
+	R_AddDrawViewCmd( parms );
 
 	// restore view in case we are a subview
 	tr.viewDef = oldView;

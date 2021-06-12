@@ -150,10 +150,9 @@ static void R_IssueRenderCommands( void ) {
 	// r_skipRender is usually more usefull, because it will still
 	// draw 2D graphics
 	if ( !r_skipBackEnd.GetBool() ) {
-		RB_ExecuteBackEndCommands( frameData->cmdHead ); // XXX: frameData must contain all the draw commands!
+		RB_ExecuteBackEndCommands( frameData->cmdHead );
 	}
 
-	//if ( ! r_lockSurfaces.GetBool() )
 	R_ClearCommandChain();
 }
 
@@ -214,27 +213,13 @@ This is the main 3D rendering command.  A single scene may
 have multiple views if a mirror, portal, or dynamic texture is present.
 =============
 */
-void	R_AddDrawViewCmd( viewDef_t *parms, bool isMain ) {
+void	R_AddDrawViewCmd( viewDef_t *parms ) {
 	drawSurfsCommand_t	*cmd;
 
 	cmd = (drawSurfsCommand_t *)R_GetCommandBuffer( sizeof( *cmd ) );
 	cmd->commandId = RC_DRAW_VIEW;
 
-	if(isMain && r_lockSurfaces.GetBool())
-	{
-		//parms = tr.lockSurfacesRealViewDef;
-	}
 	cmd->viewDef = parms;
-
-	//if ( parms->viewEntitys ) {
-	if ( isMain ) {
-		// save the command for r_lockSurfaces debugging
-		tr.lockSurfacesCmd = *cmd;
-		if(!r_lockSurfaces.GetBool()) {
-			//tr.lockSurfacesRenderView = parms->renderView;
-			//tr.lockSurfacesViewDef = *parms;
-		}
-	}
 
 	tr.pc.c_numViews++;
 
@@ -244,62 +229,6 @@ void	R_AddDrawViewCmd( viewDef_t *parms, bool isMain ) {
 
 //=================================================================================
 
-
-/*
-======================
-R_LockSurfaceScene
-
-r_lockSurfaces allows a developer to move around
-without changing the composition of the scene, including
-culling.  The only thing that is modified is the
-view position and axis, no front end work is done at all
-
-
-Add the stored off command again, so the new rendering will use EXACTLY
-the same surfaces, including all the culling, even though the transformation
-matricies have been changed.  This allow the culling tightness to be
-evaluated interactively.
-======================
-*/
-
-void R_SetupViewFrustum( viewDef_t* viewDef );
-void R_SetupProjection( viewDef_t * viewDef );
-
-void R_LockSurfaceScene( viewDef_t *parms ) {
-	drawSurfsCommand_t	*cmd;
-	viewEntity_t			*vModel;
-
-	viewDef_t* oldView = tr.viewDef;
-	tr.viewDef = tr.lockSurfacesCmd.viewDef;
-
-	// set the matrix for world space to eye space
-	R_SetViewMatrix( parms );
-
-	// the four sides of the view frustum are needed
-	// for culling and portal visibility
-	R_SetupViewFrustum( tr.viewDef );
-
-	// we need to set the projection matrix before doing
-	// portal-to-screen scissor box calculations
-	R_SetupProjection(tr.viewDef);
-
-	tr.lockSurfacesCmd.viewDef->worldSpace = parms->worldSpace;
-
-	// update the view origin and axis, and all
-	// the entity matricies
-	for( vModel = tr.lockSurfacesCmd.viewDef->viewEntitys ; vModel ; vModel = vModel->next ) {
-		myGlMultMatrix( vModel->modelMatrix,
-			tr.lockSurfacesCmd.viewDef->worldSpace.modelViewMatrix,
-			vModel->modelViewMatrix );
-	}
-
-	// add the stored off surface commands again
-	cmd = (drawSurfsCommand_t *)R_GetCommandBuffer( sizeof( *cmd ) );
-	*cmd = tr.lockSurfacesCmd;
-	//cmd->viewDef = parms;
-
-	tr.viewDef = oldView;
-}
 
 /*
 =============
@@ -760,8 +689,7 @@ void idRenderSystemLocal::EndFrame( int *frontEndMsec, int *backEndMsec ) {
 	R_ToggleSmpFrame();
 
 	// we can now release the vertexes used this frame
-	//if (! r_lockSurfaces.GetBool() )
-		vertexCache.EndFrame();
+	vertexCache.EndFrame();
 
 	if ( session->writeDemo ) {
 		session->writeDemo->WriteInt( DS_RENDER );

@@ -693,12 +693,6 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 		return;
 	}
 
-	const renderView_t *renderViewReal = renderView;
-
-	// if ( r_lockSurfaces.GetBool() ) {
-	// 	renderView = &tr.lockSurfacesViewDef.renderView;
-	// }
-
 	if ( renderView->fov_x <= 0 || renderView->fov_y <= 0 ) {
 		common->Error( "idRenderWorld::RenderScene: bad FOVs: %f, %f", renderView->fov_x, renderView->fov_y );
 	}
@@ -749,14 +743,6 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 		parms->isMirror = true;
 	}
 
-	/*
-	if ( r_lockSurfaces.GetBool() ) {
-		R_LockSurfaceScene( parms );
-		//frameData->cmdHead
-		return;
-	}
-	*/
-
 	if ( r_lockSurfaces.GetBool() ) {
 		tr.lockSurfacesRealViewDef = *parms;
 
@@ -779,6 +765,7 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 		parms->connectedAreas = origParms->connectedAreas;
 
 	} else {
+		// save current viewDef so it can be used if we enable r_lockSurfaces in the next frame
 		tr.lockSurfacesViewDef = *parms;
 	}
 
@@ -792,8 +779,7 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 	// for mirrors / portals / shadows / environment maps
 	// this will also cause any necessary entities and lights to be
 	// updated to the demo file
-	//if ( !r_lockSurfaces.GetBool() )
-	R_RenderView( parms, true );
+	R_RenderView( parms );
 
 	// now write delete commands for any modified-but-not-visible entities, and
 	// add the renderView command to the demo
