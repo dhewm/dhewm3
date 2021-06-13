@@ -693,11 +693,9 @@ void rvDebuggerServer::Resume ( void )
 		return;
 	}
 
-	mBreak = false;
-
 	// Start the game thread back up
 	SDL_LockMutex( mGameThreadBreakLock );
-	mBreak = true;
+	mBreak = false;
 	SDL_CondSignal( mGameThreadBreakCond);
 	SDL_UnlockMutex( mGameThreadBreakLock );
 }
