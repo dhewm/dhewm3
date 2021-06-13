@@ -185,7 +185,7 @@ bool rvDebuggerServer::ProcessMessages ( void )
 			case DBMSG_CONNECT:
 				mConnected = true;
 				SendMessage ( DBMSG_CONNECTED );
-				
+				com_editors |= EDITOR_DEBUGGER;
 				break;
 
 			case DBMSG_CONNECTED:
