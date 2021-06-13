@@ -73,7 +73,7 @@ bool rvDebuggerClient::Initialize ( void )
 	}
 
 	// Server must be running on the local host on port 28980
-	Sys_StringToNetAdr ( "localhost", &mServerAdr, true );
+	Sys_StringToNetAdr ( com_dbgServerAdr.GetString( ), &mServerAdr, true );
 	mServerAdr.port = 27980;
 
 	// Attempt to let the server know we are here.  The server may not be running so this

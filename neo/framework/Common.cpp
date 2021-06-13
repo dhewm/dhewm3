@@ -98,7 +98,9 @@ idCVar com_timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "scales the ti
 idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when making a build" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
 
-idCVar com_enableDebuggerServer( "com_enableDebuggerServer", "0", CVAR_BOOL | CVAR_SYSTEM, "set to 1 on startup to enable debugging with the DHEWM3 debugger" );
+idCVar com_enableDebuggerServer( "com_enableDebuggerServer", "0", CVAR_BOOL | CVAR_SYSTEM, "toggle debugger server and try to connect to com_dbgClientAdr" );
+idCVar com_dbgClientAdr( "com_dbgClientAdr", "localhost", CVAR_SYSTEM | CVAR_ARCHIVE, "debuggerApp client address" );
+idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARCHIVE, "debugger server address" );
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
@@ -2404,6 +2406,10 @@ void idCommonLocal::Frame( void ) {
 		// change SIMD implementation if required
 		if ( com_forceGenericSIMD.IsModified() ) {
 			InitSIMD();
+		}
+
+		if ( com_enableDebuggerServer.IsModified( ) ) {
+			com_enableDebuggerServer.GetBool( ) ? DebuggerServerInit( ) : DebuggerServerShutdown( );
 		}
 
 		eventLoop->RunEventLoop();

@@ -98,7 +98,7 @@ bool rvDebuggerServer::Initialize ( void )
 	mCriticalSection = SDL_CreateMutex();
 
 	// Server must be running on the local host on port 28980
-	Sys_StringToNetAdr ( "localhost", &mClientAdr, true );
+	Sys_StringToNetAdr ( com_dbgClientAdr.GetString( ), &mClientAdr, true );
 	mClientAdr.port = 27981;
 
 	// Attempt to let the server know we are here.  The server may not be running so this

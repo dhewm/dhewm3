@@ -53,9 +53,9 @@ public:
 
 	bool		IsConnected				( void );
 
-	void		CheckBreakpoints		( idInterpreter* interpreter, idProgram* program, int instructionPointer );
+	void		CheckBreakpoints		( idInterpreter *interpreter, idProgram *program, int instructionPointer );
 
-	void		Print					( const char* text );
+	void		Print					( const char *text );
 
 	void		OSPathToRelativePath	( const char *osPath, idStr &qpath );
 
@@ -64,20 +64,20 @@ private:
 
 	void		ClearBreakpoints		( void );
 
-	void		Break					( idInterpreter* interpreter, idProgram* program, int instructionPointer );
+	void		Break					( idInterpreter *interpreter, idProgram *program, int instructionPointer );
 	void		Resume					( void );
 
 	void		SendMessage				( EDebuggerMessage dbmsg );
 	void		SendPacket				( void* data, int datasize );
 
 	// Message handlers
-	void		HandleAddBreakpoint		( idBitMsg * msg );
-	void		HandleRemoveBreakpoint	( idBitMsg * msg );
-	void		HandleResume			( idBitMsg * msg );
-	void		HandleInspectVariable	( idBitMsg * msg );
-	void		HandleInspectCallstack	( idBitMsg * msg );
-	void		HandleInspectThreads	( idBitMsg * msg );
-	void		HandleInspectScripts	( idBitMsg * msg );
+	void		HandleAddBreakpoint		( idBitMsg *msg );
+	void		HandleRemoveBreakpoint	( idBitMsg *msg );
+	void		HandleResume			( idBitMsg *msg );
+	void		HandleInspectVariable	( idBitMsg *msg );
+	void		HandleInspectCallstack	( idBitMsg *msg );
+	void		HandleInspectThreads	( idBitMsg *msg );
+	void		HandleInspectScripts	( idBitMsg *msg );
 	////
 
 	bool							mConnected;
@@ -123,7 +123,7 @@ ID_INLINE bool rvDebuggerServer::IsConnected ( void )
 rvDebuggerServer::SendPacket
 ================
 */
-ID_INLINE void rvDebuggerServer::SendPacket ( void* data, int size )
+ID_INLINE void rvDebuggerServer::SendPacket ( void *data, int size )
 {
 	mPort.SendPacket ( mClientAdr, data, size );
 }

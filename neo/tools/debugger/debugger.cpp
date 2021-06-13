@@ -164,6 +164,8 @@ bool DebuggerServerInit ( void )
 		gDebuggerServer = NULL;
 		return false;
 	}
+	
+	com_enableDebuggerServer.ClearModified( );
 
 	// Start the debugger server thread
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -199,7 +201,11 @@ void DebuggerServerShutdown ( void )
 
 		delete gDebuggerServer;
 		gDebuggerServer = NULL;
+
+		com_editors &= ~EDITOR_DEBUGGER;
 	}
+
+	com_enableDebuggerServer.ClearModified( );
 }
 
 /*
