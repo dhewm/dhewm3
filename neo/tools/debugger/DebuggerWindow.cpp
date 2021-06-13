@@ -1126,7 +1126,7 @@ int rvDebuggerWindow::HandleCommand ( WPARAM wparam, LPARAM lparam )
 				GetCurrentDirectory ( MAX_PATH, curDir );
 
 				GetModuleFileName ( NULL, exeFile, MAX_PATH );
-				const char* s = va("%s +set fs_game %s +set fs_cdpath %s", exeFile, cvarSystem->GetCVarString( "fs_game" ), cvarSystem->GetCVarString( "fs_cdpath" ) );
+				const char* s = va("%s +set fs_game %s +set fs_cdpath %s +set com_enableDebuggerServer 1", exeFile, cvarSystem->GetCVarString( "fs_game" ), cvarSystem->GetCVarString( "fs_cdpath" ) );
 				CreateProcess ( NULL, (LPSTR)s,
 				NULL, NULL, FALSE, 0, NULL, curDir, &startup, &process );
 
