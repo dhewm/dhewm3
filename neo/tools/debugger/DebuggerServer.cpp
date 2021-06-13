@@ -171,11 +171,11 @@ bool rvDebuggerServer::ProcessMessages ( void )
 		msg.Init(buffer, sizeof(buffer));
 		msg.SetSize(msgSize);
 		msg.BeginReading();
-
-		// Only accept packets from the debugger server for security reasons
-		if ( !Sys_CompareNetAdrBase ( adrFrom, mClientAdr ) )
-		{
-			continue;
+		
+		if ( adrFrom.type != NA_LOOPBACK ) {
+			// Only accept packets from the debugger server for security reasons
+			if ( !Sys_CompareNetAdrBase( adrFrom, mClientAdr ) )
+				continue;
 		}
 
 		command = msg.ReadShort( );
