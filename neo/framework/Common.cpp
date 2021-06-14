@@ -2408,8 +2408,12 @@ void idCommonLocal::Frame( void ) {
 			InitSIMD();
 		}
 
-		if ( com_enableDebuggerServer.IsModified( ) ) {
-			com_enableDebuggerServer.GetBool( ) ? DebuggerServerInit( ) : DebuggerServerShutdown( );
+		if ( com_enableDebuggerServer.IsModified() ) {
+			if ( com_enableDebuggerServer.GetBool() ) {
+				DebuggerServerInit();
+			} else {
+				DebuggerServerShutdown();
+			}
 		}
 
 		eventLoop->RunEventLoop();

@@ -110,7 +110,7 @@ bool rvDebuggerServer::Initialize ( void )
 
 void rvDebuggerServer::OSPathToRelativePath( const char *osPath, idStr &qpath )
 {
-	if ( strchr( osPath, ':' ) )
+	if ( strchr( osPath, ':' ) ) // XXX: what about linux?
 	{
 		qpath = fileSystem->OSPathToRelativePath( osPath );
 	}

@@ -886,10 +886,20 @@ const char *idFileSystemLocal::OSPathToRelativePath( const char *OSPath ) {
 	}
 
 	if ( base ) {
-		s = strstr( base, "/" );
-		if ( !s ) {
-			s = strstr( base, "\\" );
+		// DG: on Windows base might look like "base\\pak008.pk4/script/doom_util.script"
+		//     while on Linux it'll be more like "base/pak008.pk4/script/doom_util.script"
+		//     I /think/ we want to get rid of the bla.pk4 part, at least that's what happens implicitly on Windows
+		//     (I hope these problems don't exist if the file is not from a .pk4, so that case is handled like before)
+		s = strstr( base, ".pk4/" );
+		if ( s != NULL ) {
+			s += 4; // skip ".pk4", but *not* the following '/', that'll be skipped below
+		} else {
+			s = strchr( base, '/' );
+			if ( s == NULL ) {
+				s = strchr( base, '\\' );
+			}
 		}
+
 		if ( s ) {
 			strcpy( relativePath, s + 1 );
 			if ( fs_debug.GetInteger() > 1 ) {
