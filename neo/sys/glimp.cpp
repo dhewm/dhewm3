@@ -252,13 +252,13 @@ bool GLimp_Init(glimpParms_t parms) {
 			SDL_GetGlobalMouseState(&x, &y);
 
 			int numDisplays = SDL_GetNumVideoDisplays();
-			for (i=0; i<numDisplays; ++i) {
+			for ( int j=0; j<numDisplays; ++j ) {
 				SDL_Rect rect;
-				if (SDL_GetDisplayBounds(i, &rect) == 0) {
+				if (SDL_GetDisplayBounds(j, &rect) == 0) {
 					if (   x >= rect.x && x < rect.x + rect.w
 						&& y >= rect.y && y < rect.y + rect.h )
 					{
-						displayIndex = i;
+						displayIndex = j;
 						break;
 					}
 				}
