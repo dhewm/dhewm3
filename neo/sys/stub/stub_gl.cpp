@@ -389,6 +389,7 @@ GLExtension_t GLimp_ExtensionPointer( const char *a) { return StubFunction; };
 
 bool GLimp_Init(glimpParms_t a) {return true;};
 void GLimp_SetGamma(unsigned short*a, unsigned short*b, unsigned short*c) {};
+void GLimp_ResetGamma() {}
 bool GLimp_SetScreenParms(glimpParms_t parms) { return true; };
 void GLimp_Shutdown() {};
 void GLimp_SwapBuffers() {};

@@ -540,6 +540,12 @@ void GLimp_SwapBuffers() {
 #endif
 }
 
+static bool gammaOrigError = false;
+static bool gammaOrigSet = false;
+static unsigned short gammaOrigRed[256];
+static unsigned short gammaOrigGreen[256];
+static unsigned short gammaOrigBlue[256];
+
 /*
 =================
 GLimp_SetGamma
@@ -551,6 +557,19 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 		return;
 	}
 
+	if ( !gammaOrigSet ) {
+		gammaOrigSet = true;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		if ( SDL_GetWindowGammaRamp( window, gammaOrigRed, gammaOrigGreen, gammaOrigBlue ) == -1 ) {
+#else
+		if ( SDL_GetGammaRamp( gammaOrigRed, gammaOrigGreen, gammaOrigBlue ) == -1 ) {
+#endif
+			gammaOrigError = true;
+			common->Warning( "Failed to get Gamma Ramp: %s\n", SDL_GetError() );
+		}
+	}
+
+
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	if (SDL_SetWindowGammaRamp(window, red, green, blue))
 #else
@@ -558,6 +577,30 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 #endif
 		common->Warning("Couldn't set gamma ramp: %s", SDL_GetError());
 }
+
+/*
+=================
+GLimp_ResetGamma
+
+Restore original system gamma setting
+=================
+*/
+void GLimp_ResetGamma() {
+	if( gammaOrigError ) {
+		common->Warning( "Can't reset hardware gamma because getting the Gamma Ramp at startup failed!\n" );
+		common->Warning( "You might have to restart the game for gamma/brightness in shaders to work properly.\n" );
+		return;
+	}
+
+	if( gammaOrigSet ) {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SDL_SetWindowGammaRamp( window, gammaOrigRed, gammaOrigGreen, gammaOrigBlue );
+#else
+		SDL_SetGammaRamp( gammaOrigRed, gammaOrigGreen, gammaOrigBlue );
+#endif
+	}
+}
+
 
 /*
 =================

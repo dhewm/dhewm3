@@ -577,7 +577,7 @@ RB_SetProgramEnvironment
 Sets variables that can be used by all vertex programs
 ==================
 */
-void RB_SetProgramEnvironment( void ) {
+void RB_SetProgramEnvironment( bool isPostProcess ) {
 	float	parm[4];
 	int		pot;
 
@@ -631,6 +631,20 @@ void RB_SetProgramEnvironment( void ) {
 	parm[2] = 0;
 	parm[3] = 1;
 	qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 1, parm );
+
+	// DG: brightness and gamma in shader as program.env[4]
+	if ( r_gammaInShader.GetBool() ) {
+		// program.env[4].xyz are all r_brightness, program.env[4].w is 1.0/r_gamma
+		if ( !isPostProcess ) {
+			parm[0] = parm[1] = parm[2] = r_brightness.GetFloat();
+			parm[3] = 1.0/r_gamma.GetFloat(); // 1.0/gamma so the shader doesn't have to do this calculation
+		} else {
+			// don't apply gamma/brightness in postprocess passes to avoid applying them twice
+			// (setting them to 1.0 makes them no-ops)
+			parm[0] = parm[1] = parm[2] = parm[3] = 1.0f;
+		}
+		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 4, parm );
+	}
 
 	//
 	// set eye position in global space
@@ -978,12 +992,15 @@ int RB_STD_DrawShaderPasses( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		return numDrawSurfs;
 	}
 
+	bool isPostProcess = false;
+
 	// if we are about to draw the first surface that needs
 	// the rendering in a texture, copy it over
 	if ( drawSurfs[0]->material->GetSort() >= SS_POST_PROCESS ) {
 		if ( r_skipPostProcess.GetBool() ) {
 			return 0;
 		}
+		isPostProcess = true;
 
 		// only dump if in a 3d view
 		if ( backEnd.viewDef->viewEntitys && tr.backEndRenderer == BE_ARB2 ) {
@@ -1000,7 +1017,7 @@ int RB_STD_DrawShaderPasses( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	GL_SelectTexture( 0 );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
-	RB_SetProgramEnvironment();
+	RB_SetProgramEnvironment( isPostProcess );
 
 	// we don't use RB_RenderDrawSurfListWithFunction()
 	// because we want to defer the matrix load because many

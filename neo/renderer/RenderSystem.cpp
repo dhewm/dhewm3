@@ -246,6 +246,20 @@ static void R_CheckCvars( void ) {
 		r_brightness.ClearModified();
 		R_SetColorMappings();
 	}
+
+	if ( r_gammaInShader.IsModified() ) {
+		r_gammaInShader.ClearModified();
+		// reload shaders so they either add or remove the code for setting gamma/brightness in shader
+		R_ReloadARBPrograms_f( idCmdArgs() );
+
+		if ( r_gammaInShader.GetBool() ) {
+			common->Printf( "Will apply r_gamma and r_brightness in shaders\n" );
+			GLimp_ResetGamma(); // reset hardware gamma
+		} else {
+			common->Printf( "Will apply r_gamma and r_brightness in hardware (possibly on all screens)\n" );
+			R_SetColorMappings();
+		}
+	}
 }
 
 /*
