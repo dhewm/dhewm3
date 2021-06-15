@@ -98,6 +98,15 @@ void	RB_ARB2_DrawInteraction( const drawInteraction_t *din ) {
 	qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 0, din->diffuseColor.ToFloatPtr() );
 	qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 1, din->specularColor.ToFloatPtr() );
 
+	// DG: brightness and gamma in shader as program.env[4]
+	if ( r_gammaInShader.GetBool() ) {
+		// program.env[4].xyz are all r_brightness, program.env[4].w is 1.0/r_gamma
+		float parm[4];
+		parm[0] = parm[1] = parm[2] = r_brightness.GetFloat();
+		parm[3] = 1.0/r_gamma.GetFloat(); // 1.0/gamma so the shader doesn't have to do this calculation
+		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 4, parm );
+	}
+
 	// set the textures
 
 	// texture 1 will be the per-surface bump map
@@ -344,6 +353,31 @@ static progDef_t	progs[MAX_GLPROGS] = {
 R_LoadARBProgram
 =================
 */
+
+static char* findLineThatStartsWith( char* text, const char* findMe ) {
+	char* res = strstr( text, findMe );
+	while ( res != NULL ) {
+		// skip whitespace before match, if any
+		char* cur = res;
+		if ( cur > text ) {
+			--cur;
+		}
+		while ( cur > text && ( *cur == ' ' || *cur == '\t' ) ) {
+			--cur;
+		}
+		// now we should be at a newline (or at the beginning)
+		if ( cur == text ) {
+			return cur;
+		}
+		if ( *cur == '\n' || *cur == '\r' ) {
+			return cur+1;
+		}
+		// otherwise maybe we're in commented out text or whatever, search on
+		res = strstr( res+1, findMe );
+	}
+	return NULL;
+}
+
 void R_LoadARBProgram( int progIndex ) {
 	int		ofs;
 	int		err;
@@ -408,6 +442,69 @@ void R_LoadARBProgram( int progIndex ) {
 		return;
 	}
 	end[3] = 0;
+
+	// DG: hack gamma correction into shader
+	if ( r_gammaInShader.GetBool() && progs[progIndex].target == GL_FRAGMENT_PROGRAM_ARB ) {
+
+		// note that strlen("dhewm3tmpres") == strlen("result.color")
+		const char* tmpres = "TEMP dhewm3tmpres; # injected by dhewm3 for gamma correction\n";
+
+		// Note: program.env[4].xyz = r_brightness; program.env[4].w = 1.0/r_gamma
+		// outColor.rgb = pow(dhewm3tmpres.rgb*r_brightness, vec3(1.0/r_gamma))
+		// outColor.a = dhewm3tmpres.a;
+		const char* extraLines =
+			"# gamma correction in shader, injected by dhewm3 \n"
+			"MUL dhewm3tmpres.xyz, program.env[4], dhewm3tmpres;\n" // first multiply with brightness
+			"POW result.color.x, dhewm3tmpres.x, program.env[4].w;\n" // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
+			"POW result.color.y, dhewm3tmpres.y, program.env[4].w;\n" // (apparently POW only supports scalars, not whole vectors)
+			"POW result.color.z, dhewm3tmpres.z, program.env[4].w;\n"
+			"MOV result.color.w, dhewm3tmpres.w;\n" // alpha remains unmodified
+			"\nEND\n\n"; // we add this block right at the end, replacing the original "END" string
+
+		int fullLen = strlen( start ) + strlen( tmpres ) + strlen( extraLines );
+		char* outStr = (char*)_alloca( fullLen + 1 );
+
+		// add tmpres right after OPTION line (if any)
+		char* insertPos = findLineThatStartsWith( start, "OPTION" );
+		if ( insertPos == NULL ) {
+			// no OPTION? then just put it after the first line (usually sth like "!!ARBfp1.0\n")
+			insertPos = start;
+		}
+		// but we want the position *after* that line
+		while( *insertPos != '\0' && *insertPos != '\n' && *insertPos != '\r' ) {
+			++insertPos;
+		}
+		// skip  the newline character(s) as well
+		while( *insertPos == '\n' || *insertPos == '\r' ) {
+			++insertPos;
+		}
+
+		// copy text up to insertPos
+		int curLen = insertPos-start;
+		memcpy( outStr, start, curLen );
+		// copy tmpres ("TEMP dhewm3tmpres; # ..")
+		memcpy( outStr+curLen, tmpres, strlen( tmpres ) );
+		curLen += strlen( tmpres );
+		// copy remaining original shader up to (excluding) "END"
+		int remLen = end - insertPos;
+		memcpy( outStr+curLen, insertPos, remLen );
+		curLen += remLen;
+
+		outStr[curLen] = '\0'; // make sure it's NULL-terminated so normal string functions work
+
+		// replace all existing occurrences of "result.color" with "dhewm3tmpres"
+		for( char* resCol = strstr( outStr, "result.color" );
+		     resCol != NULL; resCol = strstr( resCol+13, "result.color" ) ) {
+			memcpy( resCol, "dhewm3tmpres", 12 ); // both strings have the same length.
+		}
+
+		assert( curLen + strlen( extraLines ) <= fullLen );
+
+		// now add extraLines that calculate and set a gamma-corrected result.color
+		// strcat() should be safe because fullLen was calculated taking all parts into account
+		strcat( outStr, extraLines );
+		start = outStr;
+	}
 
 	qglBindProgramARB( progs[progIndex].target, progs[progIndex].ident );
 	qglGetError();
