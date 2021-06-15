@@ -554,23 +554,26 @@ to actually render the visible surfaces for this view
 =================
 */
 void RB_BeginDrawingView (void) {
+
+	const viewDef_t* viewDef = backEnd.viewDef;
+
 	// set the modelview matrix for the viewer
 	qglMatrixMode(GL_PROJECTION);
-	qglLoadMatrixf( backEnd.viewDef->projectionMatrix );
+	qglLoadMatrixf( viewDef->projectionMatrix );
 	qglMatrixMode(GL_MODELVIEW);
 
 	// set the window clipping
-	qglViewport( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
-		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
-		backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1,
-		backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1 );
+	qglViewport( tr.viewportOffset[0] + viewDef->viewport.x1,
+		tr.viewportOffset[1] + viewDef->viewport.y1,
+		viewDef->viewport.x2 + 1 - viewDef->viewport.x1,
+		viewDef->viewport.y2 + 1 - viewDef->viewport.y1 );
 
 	// the scissor may be smaller than the viewport for subviews
-	qglScissor( tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
-		tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
-		backEnd.viewDef->scissor.x2 + 1 - backEnd.viewDef->scissor.x1,
-		backEnd.viewDef->scissor.y2 + 1 - backEnd.viewDef->scissor.y1 );
-	backEnd.currentScissor = backEnd.viewDef->scissor;
+	qglScissor( tr.viewportOffset[0] + viewDef->viewport.x1 + viewDef->scissor.x1,
+		tr.viewportOffset[1] + viewDef->viewport.y1 + viewDef->scissor.y1,
+		viewDef->scissor.x2 + 1 - viewDef->scissor.x1,
+		viewDef->scissor.y2 + 1 - viewDef->scissor.y1 );
+	backEnd.currentScissor = viewDef->scissor;
 
 	// ensures that depth writes are enabled for the depth clear
 	GL_State( GLS_DEFAULT );
@@ -851,6 +854,31 @@ void RB_DrawView( const void *data ) {
 	const drawSurfsCommand_t	*cmd;
 
 	cmd = (const drawSurfsCommand_t *)data;
+
+	// with r_lockSurfaces enabled, we set the locked render view
+	// for the primary viewDef for all the "what should be drawn" calculations.
+	// now it must be reverted to the real render view so the scene gets rendered
+	// from the actual current players point of view
+	if(r_lockSurfaces.GetBool() && tr.primaryView == cmd->viewDef) {
+		viewDef_t* parms = cmd->viewDef;
+		const viewDef_t origParms = *parms;
+
+		*parms = tr.lockSurfacesRealViewDef; // actual current player/camera position
+		parms->renderWorld = origParms.renderWorld;
+		parms->floatTime = origParms.floatTime;
+		parms->drawSurfs = origParms.drawSurfs;
+		parms->numDrawSurfs = origParms.numDrawSurfs;
+		parms->maxDrawSurfs = origParms.maxDrawSurfs;
+		parms->viewLights = origParms.viewLights;
+		parms->viewEntitys = origParms.viewEntitys;
+		parms->connectedAreas = origParms.connectedAreas;
+
+		for( viewEntity_t* vModel = parms->viewEntitys ; vModel ; vModel = vModel->next ) {
+			myGlMultMatrix( vModel->modelMatrix,
+				parms->worldSpace.modelViewMatrix,
+				vModel->modelViewMatrix );
+		}
+	}
 
 	backEnd.viewDef = cmd->viewDef;
 

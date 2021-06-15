@@ -548,7 +548,6 @@ extern	frameData_t	*frameData;
 
 //=======================================================================
 
-void R_LockSurfaceScene( viewDef_t *parms );
 void R_ClearCommandChain( void );
 void R_AddDrawViewCmd( viewDef_t *parms );
 
@@ -785,6 +784,9 @@ public:
 	performanceCounters_t	pc;					// performance counters
 
 	drawSurfsCommand_t		lockSurfacesCmd;	// use this when r_lockSurfaces = 1
+	//renderView_t			lockSurfacesRenderView;
+	viewDef_t				lockSurfacesViewDef; // of locked position/view
+	viewDef_t				lockSurfacesRealViewDef; // of actual player position
 
 	viewEntity_t			identitySpace;		// can use if we don't know viewDef->worldSpace is valid
 	int						stencilIncr, stencilDecr;	// GL_INCR / INCR_WRAP_EXT, GL_DECR / GL_DECR_EXT

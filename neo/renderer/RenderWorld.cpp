@@ -675,6 +675,8 @@ Rendering a scene may require multiple views to be rendered
 to handle mirrors,
 ====================
 */
+extern void R_SetupViewFrustum( viewDef_t* viewDef );
+extern void R_SetupProjection( viewDef_t * viewDef );
 void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 #ifndef	ID_DEDICATED
 	renderView_t	copy;
@@ -742,9 +744,31 @@ void idRenderWorldLocal::RenderScene( const renderView_t *renderView ) {
 	}
 
 	if ( r_lockSurfaces.GetBool() ) {
-		R_LockSurfaceScene( parms );
-		return;
+		tr.lockSurfacesRealViewDef = *parms;
+
+		// usually the following are called later in R_RenderView(), but we pass
+		// the locked viewDef to that function so do these calculations here
+		// (the results are needed for some special cases like in-world GUIs and mirrors)
+		R_SetViewMatrix( &tr.lockSurfacesRealViewDef );
+		R_SetupViewFrustum( &tr.lockSurfacesRealViewDef);
+		R_SetupProjection( &tr.lockSurfacesRealViewDef );
+
+		const viewDef_t* origParms = &tr.lockSurfacesRealViewDef;
+		*parms = tr.lockSurfacesViewDef;
+		parms->renderWorld = origParms->renderWorld;
+		parms->floatTime = origParms->floatTime;
+		parms->drawSurfs = origParms->drawSurfs; // should be NULL I think
+		parms->numDrawSurfs = origParms->numDrawSurfs;
+		parms->maxDrawSurfs = origParms->maxDrawSurfs;
+		parms->viewLights = origParms->viewLights;
+		parms->viewEntitys = origParms->viewEntitys;
+		parms->connectedAreas = origParms->connectedAreas;
+
+	} else {
+		// save current viewDef so it can be used if we enable r_lockSurfaces in the next frame
+		tr.lockSurfacesViewDef = *parms;
 	}
+
 
 	// save this world for use by some console commands
 	tr.primaryWorld = this;

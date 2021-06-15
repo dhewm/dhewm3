@@ -490,6 +490,39 @@ bool	R_GenerateSurfaceSubview( drawSurf_t *drawSurf ) {
 		return false;
 	}
 
+	// DG: r_lockSurfaces needs special treatment
+	if ( r_lockSurfaces.GetBool() && tr.viewDef == tr.primaryView ) {
+		// we need the scissor for the "real" viewDef (actual camera position etc)
+		// so mirrors don't "float around" when looking around with r_lockSurfaces enabled
+		// So do the same calculation as before, but with real viewDef (but don't replace
+		// calculation above, so the whole mirror or whatever is skipped if not visible in
+		// locked view!)
+		viewDef_t* origViewDef = tr.viewDef;
+		tr.viewDef = &tr.lockSurfacesRealViewDef;
+		R_PreciseCullSurface( drawSurf, ndcBounds );
+
+		idScreenRect origScissor = scissor;
+
+		idScreenRect	*v2 = &tr.viewDef->viewport;
+		scissor.x1 = v2->x1 + (int)( (v2->x2 - v2->x1 + 1 ) * 0.5f * ( ndcBounds[0][0] + 1.0f ));
+		scissor.y1 = v2->y1 + (int)( (v2->y2 - v2->y1 + 1 ) * 0.5f * ( ndcBounds[0][1] + 1.0f ));
+		scissor.x2 = v2->x1 + (int)( (v2->x2 - v2->x1 + 1 ) * 0.5f * ( ndcBounds[1][0] + 1.0f ));
+		scissor.y2 = v2->y1 + (int)( (v2->y2 - v2->y1 + 1 ) * 0.5f * ( ndcBounds[1][1] + 1.0f ));
+
+		// nudge a bit for safety
+		scissor.Expand();
+
+		scissor.Intersect( tr.viewDef->scissor );
+
+		// TBH I'm not 100% happy with how this is handled - you won't get reliable information
+		// on what's rendered in a mirror this way. Intersecting with the orig. scissor looks "best".
+		// For handling this "properly" we'd need the whole "locked viewDef vs real viewDef" thing
+		// for every subview (instead of just once for the primaryView) which would be a lot of
+		// work for a corner case...
+		scissor.Intersect( origScissor );
+		tr.viewDef = origViewDef;
+	} // DG end
+
 	// see what kind of subview we are making
 	if ( shader->GetSort() != SS_SUBVIEW ) {
 		for ( int i = 0 ; i < shader->GetNumStages() ; i++ ) {
