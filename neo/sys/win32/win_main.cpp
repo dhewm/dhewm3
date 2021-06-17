@@ -113,6 +113,9 @@ PWGLSWAPLAYERBUFFERS		qwglSwapLayerBuffers;
 
 #endif /* End stuff required for tools */
 
+static bool hadError = false;
+static char errorText[4096];
+
 /*
 =============
 Sys_Error
@@ -125,11 +128,28 @@ void Sys_Error( const char *error, ... ) {
 	char		text[4096];
 	MSG        msg;
 
+	if ( !Sys_IsMainThread() ) {
+		// to avoid deadlocks we mustn't call Conbuf_AppendText() etc if not in main thread!
+		va_start(argptr, error);
+		vsprintf(errorText, error, argptr);
+		va_end(argptr);
+
+		printf("%s", errorText);
+		OutputDebugString( errorText );
+
+		hadError = true;
+		return;
+	}
+
 	va_start( argptr, error );
 	vsprintf( text, error, argptr );
 	va_end( argptr);
 
-	printf("%s", text);
+	if ( !hadError ) {
+		// if we had an error in another thread, printf() and OutputDebugString() has already been called for this
+		printf( "%s", text );
+		OutputDebugString( text );
+	}
 
 	Conbuf_AppendText( text );
 	Conbuf_AppendText( "\n" );
@@ -183,13 +203,22 @@ void Sys_Quit( void ) {
 Sys_Printf
 ==============
 */
-#define MAXPRINTMSG 4096
+
+enum {
+	MAXPRINTMSG = 4096,
+	MAXNUMBUFFEREDLINES = 16
+};
+
+static char bufferedPrintfLines[MAXNUMBUFFEREDLINES][MAXPRINTMSG];
+static int curNumBufferedPrintfLines = 0;
+static CRITICAL_SECTION printfCritSect;
+
 void Sys_Printf( const char *fmt, ... ) {
 	char		msg[MAXPRINTMSG];
 
 	va_list argptr;
 	va_start(argptr, fmt);
-	idStr::vsnPrintf( msg, MAXPRINTMSG-1, fmt, argptr );
+	int len = idStr::vsnPrintf( msg, MAXPRINTMSG-1, fmt, argptr );
 	va_end(argptr);
 	msg[sizeof(msg)-1] = '\0';
 
@@ -199,7 +228,18 @@ void Sys_Printf( const char *fmt, ... ) {
 		OutputDebugString( msg );
 	}
 	if ( win32.win_outputEditString.GetBool() ) {
-		Conbuf_AppendText( msg );
+		if ( Sys_IsMainThread() ) {
+			Conbuf_AppendText( msg );
+		} else {
+			EnterCriticalSection( &printfCritSect );
+			int idx = curNumBufferedPrintfLines++;
+			if ( idx < MAXNUMBUFFEREDLINES ) {
+				if ( len >= MAXPRINTMSG )
+					len = MAXPRINTMSG - 1;
+				memcpy( bufferedPrintfLines[idx], msg, len + 1 );
+			}
+			LeaveCriticalSection( &printfCritSect );
+		}
 	}
 }
 
@@ -747,6 +787,22 @@ void Win_Frame( void ) {
 		}
 		win32.win_viewlog.ClearModified();
 	}
+
+	if ( curNumBufferedPrintfLines > 0 ) {
+		// if Sys_Printf() had been called in another thread, add those lines to the windows console now
+		EnterCriticalSection( &printfCritSect );
+		int n = Min( curNumBufferedPrintfLines, (int)MAXNUMBUFFEREDLINES );
+		for ( int i = 0; i < n; ++i ) {
+			Conbuf_AppendText( bufferedPrintfLines[i] );
+		}
+		curNumBufferedPrintfLines = 0;
+		LeaveCriticalSection( &printfCritSect );
+	}
+
+	if ( hadError ) {
+		// if Sys_Error() had been called in another thread, handle it now
+		Sys_Error( "%s", errorText );
+	}
 }
 
 // the MFC tools use Win_GetWindowScalingFactor() for High-DPI support
@@ -920,6 +976,8 @@ WinMain
 */
 int main(int argc, char *argv[]) {
 	const HCURSOR hcurSave = ::SetCursor( LoadCursor( 0, IDC_WAIT ) );
+
+	InitializeCriticalSection( &printfCritSect );
 
 #ifdef ID_DEDICATED
 	MSG msg;
