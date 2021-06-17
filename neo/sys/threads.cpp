@@ -44,6 +44,9 @@ static bool			waiting[MAX_TRIGGER_EVENTS] = { };
 static xthreadInfo	*thread[MAX_THREADS] = { };
 static size_t		thread_count = 0;
 
+static bool mainThreadIDset = false;
+static SDL_threadID mainThreadID = -1;
+
 /*
 ==============
 Sys_Sleep
@@ -68,6 +71,9 @@ Sys_InitThreads
 ==================
 */
 void Sys_InitThreads() {
+	mainThreadID = SDL_ThreadID();
+	mainThreadIDset = true;
+
 	// critical sections
 	for (int i = 0; i < MAX_CRITICAL_SECTIONS; i++) {
 		mutex[i] = SDL_CreateMutex();
@@ -313,4 +319,19 @@ const char *Sys_GetThreadName(int *index) {
 	Sys_LeaveCriticalSection();
 
 	return "main";
+}
+
+
+/*
+==================
+Sys_IsMainThread
+returns true if the current thread is the main thread
+==================
+*/
+bool Sys_IsMainThread() {
+	if ( mainThreadIDset )
+		return SDL_ThreadID() == mainThreadID;
+	// if this is called before mainThreadID is set, we haven't created
+	// any threads yet so it should be the main thread
+	return true;
 }

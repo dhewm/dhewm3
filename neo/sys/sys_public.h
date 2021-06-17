@@ -308,6 +308,8 @@ const char *		Sys_GetThreadName( int *index = 0 );
 extern void Sys_InitThreads();
 extern void Sys_ShutdownThreads();
 
+bool Sys_IsMainThread();
+
 const int MAX_CRITICAL_SECTIONS		= 5;
 
 enum {
