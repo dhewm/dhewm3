@@ -241,7 +241,7 @@ int idWaveFile::ReadOGG( byte* pBuffer, int dwSizeToRead, int *pdwSizeRead ) {
 		}
 		if ( ret < 0 ) {
 			int stbverr = stb_vorbis_get_error( ov );
-			common->Warning( "idWaveFile::ReadOGG() stb_vorbis_get_samples_short_interleaved() failed: %s\n", my_stbv_strerror(stbverr) );
+			common->Warning( "idWaveFile::ReadOGG() stb_vorbis_get_samples_short_interleaved() %d shorts failed: %s\n", numShorts, my_stbv_strerror(stbverr) );
 			return -1;
 		}
 		// for some reason, stb_vorbis_get_samples_short_interleaved() takes the absolute
@@ -585,10 +585,18 @@ int idSampleDecoderLocal::DecodeOGG( idSoundSample *sample, int sampleOffset44k,
 		int ret = stb_vorbis_get_samples_float( stbv, sample->objectInfo.nChannels, samples, reqSamples );
 		if ( ret == 0 ) {
 			int stbVorbErr = stb_vorbis_get_error( stbv );
-			common->Warning( "idSampleDecoderLocal::DecodeOGG() stb_vorbis_get_samples_float() for %s failed: %s\n",
-			                 sample->name.c_str(), my_stbv_strerror( stbVorbErr ) );
-			failed = true;
-			break;
+			if ( stbVorbErr == VORBIS__no_error && reqSamples < 5 ) {
+				// DG: it sometimes happens that 0 is returned when reqSamples was 1 and there is no error.
+				// don't really know why; I'll just (arbitrarily) accept up to 5 "dropped" samples
+				ret = reqSamples; // pretend decoding went ok
+				common->DPrintf( "idSampleDecoderLocal::DecodeOGG() IGNORING stb_vorbis_get_samples_float() dropping %d (%d) samples\n  for %s\n",
+					reqSamples, totalSamples, sample->name.c_str() );
+			} else {
+				common->Warning( "idSampleDecoderLocal::DecodeOGG() stb_vorbis_get_samples_float() %d (%d) samples\n  for %s failed: %s\n",
+					reqSamples, totalSamples, sample->name.c_str(), my_stbv_strerror( stbVorbErr ) );
+				failed = true;
+				break;
+			}
 		}
 		if ( ret < 0 ) {
 			failed = true;
