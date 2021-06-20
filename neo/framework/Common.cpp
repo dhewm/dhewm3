@@ -2896,6 +2896,17 @@ void idCommonLocal::Init( int argc, char **argv ) {
 
 	Sys_InitThreads();
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	/* Force the window to minimize when focus is lost. This was the
+	 * default behavior until SDL 2.0.12 and changed with 2.0.14.
+	 * The windows staying maximized has some odd implications for
+	 * window ordering under Windows and some X11 window managers
+	 * like kwin. See:
+	 *  * https://github.com/libsdl-org/SDL/issues/4039
+	 *  * https://github.com/libsdl-org/SDL/issues/3656 */
+	SDL_SetHint( SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1" );
+#endif
+
 	try {
 
 		// set interface pointers used by idLib
