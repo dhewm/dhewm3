@@ -344,7 +344,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		return ret;
 	}
 
-	if ( event->evType == SE_MOUSE ) {
+	if ( event->evType == SE_MOUSE || event->evType == SE_MOUSE_ABS ) {
 		if ( !desktop || (desktop->GetFlags() & WIN_MENUGUI) ) {
 			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
 			//     by 640/w, because the GUI pretends that everything is 640x480
@@ -374,8 +374,20 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 				}
 			}
 
-			cursorX += event->evValue * (float(VIRTUAL_WIDTH)/w);
-			cursorY += event->evValue2 * (float(VIRTUAL_HEIGHT)/h);
+			if( event->evType == SE_MOUSE ) {
+				cursorX += event->evValue * (float(VIRTUAL_WIDTH)/w);
+				cursorY += event->evValue2 * (float(VIRTUAL_HEIGHT)/h);
+			} else { // SE_MOUSE_ABS
+				// Note: In case of scaling to 4:3, w and h are already scaled down
+				//       to the 4:3 size that fits into the real resolution.
+				//       Otherwise xOffset/yOffset will just be 0
+				float xOffset = (renderSystem->GetScreenWidth()  - w) * 0.5f;
+				float yOffset = (renderSystem->GetScreenHeight() - h) * 0.5f;
+				// offset the mouse coordinates into 4:3 area and scale down to 640x480
+				// yes, result could be negative, doesn't matter, code below checks that anyway
+				cursorX = (event->evValue  - xOffset) * (float(VIRTUAL_WIDTH)/w);
+				cursorY = (event->evValue2 - yOffset) * (float(VIRTUAL_HEIGHT)/h);
+			}
 		} else {
 			// not a fullscreen GUI but some ingame thing - no scaling needed
 			cursorX += event->evValue;

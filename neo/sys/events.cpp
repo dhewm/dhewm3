@@ -32,8 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/containers/List.h"
 #include "idlib/Heap.h"
 #include "framework/Common.h"
+#include "framework/Console.h"
 #include "framework/KeyInput.h"
-#include "framework/Session.h"
+#include "framework/Session_local.h"
 #include "renderer/RenderSystem.h"
 #include "renderer/tr_local.h"
 
@@ -72,8 +73,14 @@ static idCVar in_kbd("in_kbd", _in_kbdNames[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVA
 static idCVar in_ignoreConsoleKey("in_ignoreConsoleKey", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"Console only opens with Shift+Esc, not ` or ^ etc");
 
+static idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
 static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
+
+// set in handleMouseGrab(), used in Sys_GetEvent() to decide what kind of internal mouse event to generate
+static bool in_relativeMouseMode = true;
+// set in Sys_GetEvent() on window focus gained/lost events
+static bool in_hasFocus = true;
 
 struct kbd_poll_t {
 	int key;
@@ -648,15 +655,13 @@ unsigned char Sys_MapCharForKey(int key) {
 /*
 ===============
 Sys_GrabMouseCursor
+Note: Usually grabbing is handled in idCommonLocal::Frame() -> Sys_GenerateEvents() -> handleMouseGrab()
+      This function should only be used to release the mouse before long operations where
+      common->Frame() won't be called for a while
 ===============
 */
 void Sys_GrabMouseCursor(bool grabIt) {
-	int flags;
-
-	if (grabIt)
-		flags = GRAB_ENABLE | GRAB_HIDECURSOR | GRAB_SETSTATE;
-	else
-		flags = GRAB_SETSTATE;
+	int flags = grabIt ? (GRAB_GRABMOUSE | GRAB_HIDECURSOR | GRAB_RELATIVEMOUSE) : 0;
 
 	GLimp_GrabInput(flags);
 }
@@ -722,15 +727,14 @@ sysEvent_t Sys_GetEvent() {
 					} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
 
 					
-					common->ActivateTool( false );
-					GLimp_GrabInput(GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR); // FIXME: not sure this is still needed after the ActivateTool()-call
+					in_hasFocus = true;
 
 					// start playing the game sound world again (when coming from editor)
 					session->SetPlayingSoundWorld();
 
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
-					GLimp_GrabInput(0);
+					in_hasFocus = false;
 					break;
 			}
 
@@ -738,10 +742,8 @@ sysEvent_t Sys_GetEvent() {
 #else
 		case SDL_ACTIVEEVENT:
 			{
-				int flags = 0;
-
 				if (ev.active.gain) {
-					flags = GRAB_ENABLE | GRAB_REENABLE | GRAB_HIDECURSOR;
+					in_hasFocus = true;
 
 					// unset modifier, in case alt-tab was used to leave window and ALT is still set
 					// as that can cause fullscreen-toggling when pressing enter...
@@ -751,9 +753,9 @@ sysEvent_t Sys_GetEvent() {
 						newmod |= KMOD_CAPS;
 
 					SDL_SetModState((SDLMod)newmod);
+				} else {
+					in_hasFocus = false;
 				}
-
-				GLimp_GrabInput(flags);
 			}
 
 			continue; // handle next event
@@ -876,12 +878,18 @@ sysEvent_t Sys_GetEvent() {
 #endif
 
 		case SDL_MOUSEMOTION:
-			res.evType = SE_MOUSE;
-			res.evValue = ev.motion.xrel;
-			res.evValue2 = ev.motion.yrel;
+			if ( in_relativeMouseMode ) {
+				res.evType = SE_MOUSE;
+				res.evValue = ev.motion.xrel;
+				res.evValue2 = ev.motion.yrel;
 
-			mouse_polls.Append(mouse_poll_t(M_DELTAX, ev.motion.xrel));
-			mouse_polls.Append(mouse_poll_t(M_DELTAY, ev.motion.yrel));
+				mouse_polls.Append(mouse_poll_t(M_DELTAX, ev.motion.xrel));
+				mouse_polls.Append(mouse_poll_t(M_DELTAY, ev.motion.yrel));
+			} else {
+				res.evType = SE_MOUSE_ABS;
+				res.evValue = ev.motion.x;
+				res.evValue2 = ev.motion.y;
+			}
 
 			return res;
 
@@ -892,7 +900,7 @@ sysEvent_t Sys_GetEvent() {
 			if (ev.wheel.y > 0) {
 				res.evValue = K_MWHEELUP;
 				mouse_polls.Append(mouse_poll_t(M_DELTAZ, 1));
-			} else {
+			} else if (ev.wheel.y < 0) {
 				res.evValue = K_MWHEELDOWN;
 				mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 			}
@@ -990,12 +998,67 @@ void Sys_ClearEvents() {
 	mouse_polls.SetNum(0, false);
 }
 
+static void handleMouseGrab() {
+
+	// these are the defaults for when the window does *not* have focus
+	// (don't grab in any way)
+	bool showCursor = true;
+	bool grabMouse = false;
+	bool relativeMouse = false;
+
+	// if com_editorActive, release everything, just like when we have no focus
+	if ( in_hasFocus && !com_editorActive ) {
+		// Note: this generally handles fullscreen menus, but not the PDA, because the PDA
+		//       is an ugly hack in gamecode that doesn't go through sessLocal.guiActive.
+		//       It goes through weapon input code or sth? That's also the reason only
+		//       leftclick (fire) works there (no mousewheel..)
+		//       So the PDA will continue to use relative mouse events to set its cursor position.
+		const bool menuActive = ( sessLocal.GetActiveMenu() != NULL );
+
+		if ( menuActive ) {
+			showCursor = false;
+			relativeMouse = false;
+			grabMouse = false; // TODO: or still grab to window? (maybe only if in exclusive fullscreen mode?)
+		} else if ( console->Active() ) {
+			showCursor = true;
+			relativeMouse = grabMouse = false;
+		} else { // in game
+			showCursor = false;
+			grabMouse = relativeMouse = true;
+		}
+
+		in_relativeMouseMode = relativeMouse;
+
+		// if in_nograb is set, in_relativeMouseMode and relativeMouse can disagree
+		// (=> don't enable relative mouse mode in SDL, but still use relative mouse events
+		//  in the game, unless we'd use absolute mousemode anyway)
+		if ( in_nograb.GetBool() ) {
+			grabMouse = relativeMouse = false;
+		}
+	} else {
+		in_relativeMouseMode = false;
+	}
+
+	int flags = 0;
+	if ( !showCursor )
+		flags |= GRAB_HIDECURSOR;
+	if ( grabMouse )
+		flags |= GRAB_GRABMOUSE;
+	if ( relativeMouse )
+		flags |= GRAB_RELATIVEMOUSE;
+
+	GLimp_GrabInput( flags );
+}
+
 /*
 ================
 Sys_GenerateEvents
 ================
 */
 void Sys_GenerateEvents() {
+
+	handleMouseGrab();
+
 	char *s = Sys_ConsoleInput();
 
 	if (s)

@@ -172,10 +172,8 @@ idAsyncNetwork::RunFrame
 */
 void idAsyncNetwork::RunFrame( void ) {
 	if ( console->Active() ) {
-		Sys_GrabMouseCursor( false );
 		usercmdGen->InhibitUsercmd( INHIBIT_ASYNC, true );
 	} else {
-		Sys_GrabMouseCursor( true );
 		usercmdGen->InhibitUsercmd( INHIBIT_ASYNC, false );
 	}
 	client.RunFrame();

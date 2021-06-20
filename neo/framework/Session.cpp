@@ -2644,6 +2644,7 @@ void idSessionLocal::Frame() {
 		return;
 	}
 
+#if 0 // handled via Sys_GenerateEvents() -> handleMouseGrab()
 	// if the console is down, we don't need to hold
 	// the mouse cursor
 	if ( console->Active() || com_editorActive ) {
@@ -2651,6 +2652,7 @@ void idSessionLocal::Frame() {
 	} else {
 		Sys_GrabMouseCursor( true );
 	}
+#endif
 
 	// save the screenshot and audio from the last draw if needed
 	if ( aviCaptureMode ) {

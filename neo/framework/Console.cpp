@@ -826,7 +826,6 @@ bool	idConsoleLocal::ProcessEvent( const sysEvent_t *event, bool forceAccept ) {
 		// a down event will toggle the destination lines
 		if ( keyCatching ) {
 			Close();
-			Sys_GrabMouseCursor( true );
 			cvarSystem->SetCVarBool( "ui_chat", false );
 		} else {
 			consoleField.Clear();

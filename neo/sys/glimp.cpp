@@ -97,10 +97,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif // _WIN32 and ID_ALLOW_TOOLS
 
-idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
 idCVar r_waylandcompat("r_waylandcompat", "0", CVAR_SYSTEM | CVAR_NOCHEAT | CVAR_ARCHIVE, "wayland compatible framebuffer");
-
-static bool grabbed = false;
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 static SDL_Window *window = NULL;
@@ -644,28 +641,19 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 }
 
 void GLimp_GrabInput(int flags) {
-	bool grab = flags & GRAB_ENABLE;
-
-	if (grab && (flags & GRAB_REENABLE))
-		grab = false;
-
-	if (flags & GRAB_SETSTATE)
-		grabbed = grab;
-
-	if (in_nograb.GetBool())
-		grab = false;
-
 	if (!window) {
 		common->Warning("GLimp_GrabInput called without window");
 		return;
 	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
-	SDL_SetRelativeMouseMode((grab && (flags & GRAB_HIDECURSOR)) ? SDL_TRUE : SDL_FALSE);
-	SDL_SetWindowGrab(window, grab ? SDL_TRUE : SDL_FALSE);
+	SDL_ShowCursor( (flags & GRAB_HIDECURSOR) ? SDL_DISABLE : SDL_ENABLE );
+	SDL_SetRelativeMouseMode( (flags & GRAB_RELATIVEMOUSE) ? SDL_TRUE : SDL_FALSE );
+	SDL_SetWindowGrab( window, (flags & GRAB_GRABMOUSE) ? SDL_TRUE : SDL_FALSE );
 #else
-	SDL_ShowCursor(flags & GRAB_HIDECURSOR ? SDL_DISABLE : SDL_ENABLE);
-	SDL_WM_GrabInput(grab ? SDL_GRAB_ON : SDL_GRAB_OFF);
+	SDL_ShowCursor( (flags & GRAB_HIDECURSOR) ? SDL_DISABLE : SDL_ENABLE );
+	// ignore GRAB_GRABMOUSE, SDL1.2 doesn't support grabbing without relative mode
+	// so only grab if we want relative mode
+	SDL_WM_GrabInput( (flags & GRAB_RELATIVEMOUSE) ? SDL_GRAB_ON : SDL_GRAB_OFF );
 #endif
 }

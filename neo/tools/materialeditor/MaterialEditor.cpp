@@ -51,7 +51,6 @@ void MaterialEditorInit( void ) {
 
 	com_editors = EDITOR_MATERIAL;
 
-	Sys_GrabMouseCursor( false );
 
 	InitAfx();
 

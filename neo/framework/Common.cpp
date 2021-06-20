@@ -996,7 +996,6 @@ Activates or Deactivates a tool
 */
 void idCommonLocal::ActivateTool( bool active ) {
 	com_editorActive = active;
-	Sys_GrabMouseCursor( !active );
 }
 
 /*
