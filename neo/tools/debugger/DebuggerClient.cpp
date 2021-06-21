@@ -661,3 +661,25 @@ void rvDebuggerClient::ClearThreads ( void )
 
 	mThreads.Clear ( );
 }
+/*
+================
+rvDebuggerClient::SendCommand
+================
+*/
+void rvDebuggerClient::SendCommand( const char *cmdStr )
+{
+	idBitMsg msg;
+	byte	 buffer[MAX_MSGLEN];
+
+	if ( !mConnected ) 	{
+		return;
+	}
+
+	msg.Init( buffer, sizeof( buffer ) );
+	msg.BeginWriting( );
+	msg.WriteShort( ( short ) DBMSG_EXECCOMMAND );
+	msg.WriteString( cmdStr ); // FIXME: this implies make7bit ?!
+
+	SendPacket( msg.GetData( ), msg.GetSize( ) );
+}
+

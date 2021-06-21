@@ -78,6 +78,7 @@ private:
 	void		HandleInspectCallstack	( idBitMsg *msg );
 	void		HandleInspectThreads	( idBitMsg *msg );
 	void		HandleInspectScripts	( idBitMsg *msg );
+	void		HandleExecCommand		( idBitMsg *msg );
 	////
 
 	bool							mConnected;

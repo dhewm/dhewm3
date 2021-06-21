@@ -251,6 +251,10 @@ bool rvDebuggerServer::ProcessMessages ( void )
 			case DBMSG_INSPECTSCRIPTS:
 				HandleInspectScripts( &msg );
 				break;
+
+			case DBMSG_EXECCOMMAND:
+				HandleExecCommand( &msg );
+				break;
 		}
 	}
 
@@ -423,6 +427,22 @@ void rvDebuggerServer::HandleInspectThreads ( idBitMsg* msg )
 	// Send off the inspect threads packet to the debugger client
 	SendPacket (msgOut.GetData(), msgOut.GetSize() );
 }
+
+/*
+================
+rvDebuggerServer::HandleExecCommand
+
+Send the list of the current loaded scripts in the interpreter back to the debugger client
+================
+*/
+void rvDebuggerServer::HandleExecCommand( idBitMsg *msg ) {
+	char cmdStr[2048]; // HvG: randomly chose this size
+
+	msg->ReadString( cmdStr, sizeof( cmdStr ) );
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, cmdStr );	// valid command
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "\n" );
+}
+
 
 /*
 ================

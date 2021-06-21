@@ -88,6 +88,8 @@ public:
 	void						StepInto				( void );
 	void						StepOver				( void );
 
+	void						SendCommand				( const char* cmdStr );
+
 	// Breakpoints
 	int							AddBreakpoint			( const char* filename, int lineNumber, bool onceOnly = false );
 	bool						RemoveBreakpoint		( int bpID );

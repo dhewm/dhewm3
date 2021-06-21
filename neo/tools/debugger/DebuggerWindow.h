@@ -110,6 +110,7 @@ private:
 	HWND							mWndTabs;
 	HWND							mWndBorder;
 	HWND							mWndConsole;
+	HWND							mWndConsoleInput;
 	HWND							mWndCallstack;
 	HWND							mWndScriptList;
 	HWND							mWndWatch;

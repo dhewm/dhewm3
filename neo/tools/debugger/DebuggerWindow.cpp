@@ -50,6 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #define IDC_DBG_THREADS			31008
 #define IDC_DBG_TOOLBAR			31009
 #define IDC_DBG_SCRIPTLIST		31010
+#define IDC_DBG_CONSOLEINPUT	31011
 
 #define ID_DBG_FILE_MRU1		10000
 
@@ -765,7 +766,7 @@ int rvDebuggerWindow::HandleInitMenu ( WPARAM wParam, LPARAM lParam )
 			case ID_DBG_DEBUG_STEPOVER:
 			case ID_DBG_DEBUG_STEPINTO:
 			case ID_DBG_DEBUG_SHOWNEXTSTATEMENT:
-//			case ID_DBG_DEBUG_QUICKWATCH:
+			case ID_DBG_DEBUG_QUICKWATCH:
 				if ( !mClient->IsConnected() || !mClient->IsStopped() )
 				{
 					EnableMenuItem ( hmenu, nPos, MF_GRAYED|MF_BYPOSITION );
@@ -867,6 +868,12 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	SendMessage ( mWndConsole, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
 	SendMessage ( mWndConsole, EM_SETMARGINS, EC_LEFTMARGIN|EC_RIGHTMARGIN, MAKELONG(18,10) );
 	SendMessage ( mWndConsole, EM_SETBKGNDCOLOR, 0, GetSysColor ( COLOR_3DFACE ) );
+
+	mWndConsoleInput = CreateWindow( "RichEdit20A", "", WS_CHILD | ES_WANTRETURN | ES_AUTOVSCROLL |  WS_VSCROLL | WS_BORDER, 0, 0, 100, 18, mWnd, ( HMENU ) IDC_DBG_CONSOLEINPUT, mInstance, 0 );
+	lf.lfHeight = -MulDiv( 8, GetDeviceCaps( dc, LOGPIXELSY ), 72 );
+	strcpy( lf.lfFaceName, "Arial" );
+	SendMessage( mWndConsoleInput, WM_SETFONT, ( WPARAM ) CreateFontIndirect( &lf ), 0 );
+	SendMessage( mWndConsoleInput, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG( 18, 10 ) );
 
 	mWndMargin = CreateWindow ( "STATIC", "", WS_VISIBLE|WS_CHILD, 0, 0, 0, 0, mWndScript, (HMENU)IDC_DBG_SPLITTER, mInstance, NULL );
 	SetWindowLongPtr ( mWndMargin, GWLP_USERDATA, (LONG_PTR)this );
@@ -1058,6 +1065,36 @@ int rvDebuggerWindow::HandleCommand ( WPARAM wparam, LPARAM lparam )
 
 	switch ( id )
 	{
+		case ID_DBG_SEND_COMMAND:
+		{
+			if ( mClient->IsConnected( ) && GetFocus( ) == mWndConsoleInput ) {
+				GETTEXTLENGTHEX textLen;
+				int				chars;
+				textLen.flags = GTL_DEFAULT | GTL_USECRLF;
+				textLen.codepage = CP_ACP;
+				chars = SendMessage( mWndConsoleInput, EM_GETTEXTLENGTHEX, ( WPARAM ) &textLen, 0 );
+
+				char *text = new char[chars + 1];
+
+				GETTEXTEX getText;
+				getText.cb = chars + 1;
+				getText.codepage = CP_ACP;
+				getText.flags = GT_DEFAULT | GT_USECRLF;
+				getText.lpDefaultChar = NULL;
+				getText.lpUsedDefChar = NULL;
+				SendMessage( mWndConsoleInput, EM_GETTEXTEX, ( WPARAM ) &getText, ( LPARAM ) text );
+				idStr parse = text;
+				delete[] text;
+
+				mClient->SendCommand( parse.c_str() );
+
+				SendMessage( mWndConsoleInput, EM_SETSEL, 0, -1 );
+				SendMessage( mWndConsoleInput, EM_REPLACESEL, FALSE, ( LPARAM ) "" );
+				UpdateWindow( mWndConsoleInput );
+			}
+			break;
+		}
+
 		case ID_DBG_EDIT_FINDSELECTED:
 		{
 			idStr text;
@@ -1325,7 +1362,8 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			MoveWindow ( window->mWndBorder, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			InflateRect ( &rect, -1, -1 );
 			MoveWindow ( window->mWndOutput, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
-			MoveWindow ( window->mWndConsole, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
+			MoveWindow ( window->mWndConsole, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top - s18, TRUE );
+			MoveWindow ( window->mWndConsoleInput, rect.left, rect.bottom-s18, rect.right - rect.left, s18, TRUE );
 			MoveWindow ( window->mWndCallstack, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndWatch, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndThreads, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
@@ -1335,6 +1373,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			SendMessage(window->mWndCallstack, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
 			SendMessage(window->mWndOutput, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
 			SendMessage(window->mWndConsole, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
+			SendMessage( window->mWndConsoleInput, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG( s18, s10 ) );
 
 			break;
 		}
@@ -1562,7 +1601,6 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 						}
 					}
 					break;
-
 				case IDC_DBG_CALLSTACK:
 					if ( hdr->code == NM_DBLCLK )
 					{
@@ -1607,6 +1645,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 					{
 						ShowWindow ( window->mWndOutput, SW_HIDE );
 						ShowWindow ( window->mWndConsole, SW_HIDE );
+						ShowWindow ( window->mWndConsoleInput, SW_HIDE );
 						ShowWindow ( window->mWndCallstack, SW_HIDE );
 						ShowWindow ( window->mWndWatch, SW_HIDE );
 						ShowWindow ( window->mWndThreads, SW_HIDE );
@@ -1619,6 +1658,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 
 							case 1:
 								ShowWindow ( window->mWndConsole, SW_SHOW );
+								ShowWindow( window->mWndConsoleInput, SW_SHOW );
 								break;
 
 							case 2:
@@ -1645,7 +1685,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 		case WM_CLOSE:
 			if ( window->mClient->IsConnected ( ) )
 			{
-				if ( IDNO == MessageBox ( wnd, "The debugger is currently connected to a running version of the game.  Are you sure you want to close now?", "Quake 4 Script Debugger", MB_YESNO|MB_ICONQUESTION ) )
+				if ( IDNO == MessageBox ( wnd, "The debugger is currently connected to a running version of the game.  Are you sure you want to close now?", "Dhewm3 Script Debugger", MB_YESNO|MB_ICONQUESTION ) )
 				{
 					return 0;
 				}
