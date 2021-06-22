@@ -57,6 +57,8 @@ option(ONATIVE		"Optimize for the host CPU" OFF)
 option(SDL2			"Use SDL2 instead of SDL1.2" ON)
 option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
+option(HARDLINK_GAME "Compile gamecode into executable (no game DLLs)" OFF)
+
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
 endif()
@@ -245,6 +247,11 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	# dear idiot compilers, don't fuck up math code with useless FMA "optimizations"
 	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 	add_compile_options(-ffp-contract=off)
+	
+	# uncomment/edit for ASan/UBsan or similar
+	#add_compile_options(-fsanitize=undefined -fsanitize=address)
+	#set(sys_libs ${sys_libs} -fsanitize=undefined -fsanitize=address)
+
 
 	if(NOT AROS)
 		CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
@@ -1009,6 +1016,20 @@ endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
 
+if(HARDLINK_GAME)
+	if(BASE)
+		set(src_core ${src_core} ${src_game})
+		set(game_includes "${CMAKE_SOURCE_DIR}/game")
+		if(D3XP)
+			message(WARNING "hardlinking the base game, d3xp will not be supported (disable BASE for D3XP support with HARDLINK_GAME)")
+		endif()
+		
+	elseif(D3XP)
+		set(src_core ${src_core} ${src_d3xp})
+		set(game_includes "${CMAKE_SOURCE_DIR}/d3xp")
+	endif()
+endif()# HARDLINK_GAME
+
 if(CORE)
 	add_executable(${DHEWM3BINARY} WIN32 MACOSX_BUNDLE
 		${src_core}
@@ -1024,7 +1045,12 @@ if(CORE)
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
+if(HARDLINK_GAME)
+	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "${TOOLS_DEFINES}")
+	target_include_directories(${DHEWM3BINARY} PRIVATE ${game_includes})
+else()
 	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;${TOOLS_DEFINES}")
+endif()
 	set_target_properties(${DHEWM3BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(${DHEWM3BINARY} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 
@@ -1056,7 +1082,12 @@ if(DEDICATED)
 	
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl})
 
+if(HARDLINK_GAME)
+	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED")
+	target_include_directories(${DHEWM3BINARY}ded PRIVATE ${game_includes})
+else()
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
+endif()
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(${DHEWM3BINARY}ded
 		idlib
@@ -1075,7 +1106,7 @@ if(DEDICATED)
 	endif()
 endif()
 
-if(BASE)
+if(BASE AND NOT HARDLINK_GAME)
 	if (AROS)
 		add_executable(base sys/aros/dll/dllglue.c ${src_game})
 		set_target_properties(base PROPERTIES OUTPUT_NAME "base.aros-${AROS_ARCH}")
@@ -1105,7 +1136,7 @@ if(BASE)
 	endif()
 endif()
 
-if(D3XP)
+if(D3XP AND NOT HARDLINK_GAME)
 	if (AROS)
 		add_executable(d3xp sys/aros/dll/dllglue.c ${src_d3xp})
 		set_target_properties(d3xp PROPERTIES OUTPUT_NAME "d3xp.aros-${AROS_ARCH}")
