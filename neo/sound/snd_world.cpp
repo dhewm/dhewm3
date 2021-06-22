@@ -1383,6 +1383,11 @@ void idSoundWorldLocal::ReadFromSaveGame( idFile *savefile ) {
 			// make sure we start up the hardware voice if needed
 			chan->triggered = chan->triggerState;
 			chan->openalStreamingOffset = currentSoundTime - chan->trigger44kHzTime;
+			// DG: round up openalStreamingOffset to multiple of 8, so it still has an even number
+			//  if we calculate "how many 11kHz stereo samples do we need to decode" and don't
+			//  run into a "I need one more sample apparently, so decode 0 stereo samples"
+			//  situation that could cause an endless loop.. (44kHz/11kHz = 4; *2 for stereo => 8)
+			chan->openalStreamingOffset = (chan->openalStreamingOffset+7) & ~7;
 
 			// adjust the hardware fade time
 			if ( chan->channelFade.fadeStart44kHz != 0 ) {

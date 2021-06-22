@@ -583,6 +583,16 @@ int idSampleDecoderLocal::DecodeOGG( idSoundSample *sample, int sampleOffset44k,
 		float* samples[2] = { samplesBuf[0], samplesBuf[1] };
 		int reqSamples = Min( MIXBUFFER_SAMPLES, totalSamples / sample->objectInfo.nChannels );
 		int ret = stb_vorbis_get_samples_float( stbv, sample->objectInfo.nChannels, samples, reqSamples );
+		if ( reqSamples == 0 ) {
+			// DG: it happened that sampleCount was an odd number in a *stereo* sound file
+			//  and eventually totalSamples was 1 and thus reqSamples = totalSamples/2 was 0
+			//  so this turned into an endless loop.. it shouldn't happen anymore due to changes
+			//  in idSoundWorldLocal::ReadFromSaveGame(), but better safe than sorry..
+			common->DPrintf( "idSampleDecoderLocal::DecodeOGG() reqSamples == 0\n  for %s ?!\n", sample->name.c_str() );
+			readSamples += totalSamples;
+			totalSamples = 0;
+			break;
+		}
 		if ( ret == 0 ) {
 			int stbVorbErr = stb_vorbis_get_error( stbv );
 			if ( stbVorbErr == VORBIS__no_error && reqSamples < 5 ) {
