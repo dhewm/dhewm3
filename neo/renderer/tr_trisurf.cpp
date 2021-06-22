@@ -813,8 +813,12 @@ void R_CreateDupVerts( srfTriangles_t *tri ) {
 		}
 	}
 
-	tri->dupVerts = triDupVertAllocator.Alloc( tri->numDupVerts * 2 );
-	memcpy( tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof( tri->dupVerts[0] ) );
+	if(tri->numDupVerts > 0) {
+		tri->dupVerts = triDupVertAllocator.Alloc( tri->numDupVerts * 2 );
+		memcpy( tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof( tri->dupVerts[0] ) ); // runtime error: null pointer passed as argument 1, which is declared to never be null
+	} else {
+		tri->dupVerts = NULL;
+	}
 }
 
 /*
@@ -1112,8 +1116,12 @@ void R_IdentifySilEdges( srfTriangles_t *tri, bool omitCoplanarEdges ) {
 	}
 
 	tri->numSilEdges = numSilEdges;
-	tri->silEdges = triSilEdgeAllocator.Alloc( numSilEdges );
-	memcpy( tri->silEdges, silEdges, numSilEdges * sizeof( tri->silEdges[0] ) );
+	if(numSilEdges > 0) {
+		tri->silEdges = triSilEdgeAllocator.Alloc( numSilEdges );
+		memcpy( tri->silEdges, silEdges, numSilEdges * sizeof( tri->silEdges[0] ) );
+	} else {
+		tri->silEdges = NULL;
+	}
 }
 
 /*

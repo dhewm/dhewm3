@@ -207,7 +207,7 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 		int		finalParticleTime = stage->cycleMsec * stage->spawnBunching;
 		int		deltaMsec = gameLocal.time - systemStartTime;
 
-		int		nowCount, prevCount;
+		int		nowCount=0, prevCount=0;
 		if ( finalParticleTime == 0 ) {
 			// if spawnBunching is 0, they will all come out at once
 			if ( gameLocal.time == systemStartTime ) {
