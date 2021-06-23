@@ -493,7 +493,7 @@ static void signalhandlerCrash(int sig)
 		printf("  %s\n", strings[i]);
 	}
 
-	printf("\n");
+	printf("\n(Sorry it's not overly useful, build with libbacktrace support to get function names)\n");
 
 	free(strings);
 

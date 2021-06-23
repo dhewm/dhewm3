@@ -33,7 +33,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "idlib/Str.h"
 
-#if !defined( ID_REDIRECT_NEWDELETE ) && !defined( MACOS_X )
+// DG: idDynamicBlockAlloc isn't thread-safe and idStr is used both in the main thread
+//     and the async thread! For some reason this seems to cause lots of problems on
+//     newer Linux distros if dhewm3 is built with GCC9 or newer (see #391).
+//     No idea why it apparently didn't cause that (noticeable) issues before..
+#if 0 // !defined( ID_REDIRECT_NEWDELETE ) && !defined( MACOS_X )
 	#define USE_STRING_DATA_ALLOCATOR
 #endif
 
@@ -100,23 +104,30 @@ void idStr::ReAllocate( int amount, bool keepold ) {
 
 #ifdef USE_STRING_DATA_ALLOCATOR
 	newbuffer = stringDataAllocator.Alloc( alloced );
-#else
-	newbuffer = new char[ alloced ];
-#endif
 	if ( keepold && data ) {
 		data[ len ] = '\0';
 		strcpy( newbuffer, data );
 	}
 
 	if ( data && data != baseBuffer ) {
-#ifdef USE_STRING_DATA_ALLOCATOR
 		stringDataAllocator.Free( data );
-#else
-		delete [] data;
-#endif
 	}
 
 	data = newbuffer;
+#else
+	if ( data && data != baseBuffer ) {
+		data = (char *)realloc( data, newsize );
+	} else {
+		newbuffer = (char *)malloc( newsize );
+		if ( data && keepold ) {
+			memcpy( newbuffer, data, len );
+			newbuffer[ len ] = '\0';
+		} else {
+			newbuffer[ 0 ] = '\0';
+		}
+		data = newbuffer;
+	}
+#endif
 }
 
 /*
@@ -129,7 +140,7 @@ void idStr::FreeData( void ) {
 #ifdef USE_STRING_DATA_ALLOCATOR
 		stringDataAllocator.Free( data );
 #else
-		delete[] data;
+		free( data );
 #endif
 		data = baseBuffer;
 	}
