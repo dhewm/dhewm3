@@ -793,7 +793,19 @@ int idSoundSystemLocal::AsyncUpdateWrite( int inTime ) {
 		return 0;
 	}
 
-	int sampleTime = inTime * 44.1f;
+	// inTime is in milliseconds and if running for long enough that overflows,
+	// when multiplying with 44.1 it overflows even sooner, so use int64 at first
+	// (and double because float doesn't have good precision at bigger numbers)
+	// and then manually truncate to regular int afterwards - this should at least
+	// prevent sampleTime becoming negative (as long as inTime is not)
+	long long int sampleTime64 = double( inTime ) * 44.1;
+
+	// furthermore, sampleTime should be divisible by 8
+	// (at least by 4 for handling 11kHz samples) so round to nearest multiple of 8
+	sampleTime64 = (sampleTime64 + 4) & ~(long long int)7;
+
+	const int sampleTime = sampleTime64 & INT_MAX;
+
 	int numSpeakers = s_numberOfSpeakers.GetInteger();
 
 	// enable audio hardware caching
