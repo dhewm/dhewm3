@@ -734,7 +734,13 @@ void R_InitOpenGL( void ) {
 	R_InitFrameData();
 
 	// Reset our gamma
-	R_SetColorMappings();
+	r_gammaInShader.ClearModified();
+	if ( r_gammaInShader.GetBool() ) {
+		common->Printf( "Will apply r_gamma and r_brightness in shaders (r_gammaInShader 1)\n" );
+	} else {
+		common->Printf( "Will apply r_gamma and r_brightness in hardware (possibly on all screens; r_gammaInShader 0)\n" );
+		R_SetColorMappings();
+	}
 
 #ifdef _WIN32
 	static bool glCheck = false;
