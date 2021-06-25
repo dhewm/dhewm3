@@ -101,6 +101,7 @@ void			Sys_Quit( void );
 
 // note that this isn't journaled...
 char *			Sys_GetClipboardData( void );
+void			Sys_FreeClipboardData( char* data );
 void			Sys_SetClipboardData( const char *string );
 
 // will go to the various text consoles

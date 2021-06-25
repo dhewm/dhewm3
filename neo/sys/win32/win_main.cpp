@@ -570,6 +570,10 @@ char *Sys_GetClipboardData( void ) {
 	return data;
 }
 
+void Sys_FreeClipboardData( char* data ) {
+	Mem_Free( data );
+}
+
 /*
 ================
 Sys_SetClipboardData
