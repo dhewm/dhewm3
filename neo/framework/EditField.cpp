@@ -504,7 +504,7 @@ void idEditField::Paste( void ) {
 		CharEvent( cbd[i] );
 	}
 
-	Mem_Free( cbd );
+	Sys_FreeClipboardData( cbd );
 }
 
 /*

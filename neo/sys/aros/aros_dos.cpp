@@ -238,6 +238,10 @@ char *Sys_GetClipboardData(void) {
     return NULL;
 }
 
+void Sys_FreeClipboardData( char* data ) {
+	// as Sys_GetClipboardData() returns a static buffer, there's nothing to free
+}
+
 void Sys_SetClipboardData( const char *string ) {
     struct	IFFHandle	*IFFHandle;
     BOOL	written = FALSE;
