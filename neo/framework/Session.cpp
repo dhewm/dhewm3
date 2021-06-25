@@ -58,6 +58,9 @@ idCVar	idSessionLocal::com_aviDemoTics( "com_aviDemoTics", "2", CVAR_SYSTEM | CV
 idCVar	idSessionLocal::com_wipeSeconds( "com_wipeSeconds", "1", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_guid( "com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "" );
 
+idCVar	idSessionLocal::com_numQuicksaves( "com_numQuicksaves", "4", CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_INTEGER,
+                                           "number of quicksaves to keep before overwriting the oldest", 1, 99 );
+
 idSessionLocal		sessLocal;
 idSession			*session = &sessLocal;
 
@@ -1753,8 +1756,7 @@ LoadGame_f
 void LoadGame_f( const idCmdArgs &args ) {
 	console->Close();
 	if ( args.Argc() < 2 || idStr::Icmp(args.Argv(1), "quick" ) == 0 ) {
-		idStr saveName = common->GetLanguageDict()->GetString( "#str_07178" );
-		sessLocal.LoadGame( saveName );
+		sessLocal.QuickLoad();
 	} else {
 		sessLocal.LoadGame( args.Argv(1) );
 	}
@@ -1767,10 +1769,7 @@ SaveGame_f
 */
 void SaveGame_f( const idCmdArgs &args ) {
 	if ( args.Argc() < 2 || idStr::Icmp( args.Argv(1), "quick" ) == 0 ) {
-		idStr saveName = common->GetLanguageDict()->GetString( "#str_07178" );
-		if ( sessLocal.SaveGame( saveName ) ) {
-			common->Printf( "%s\n", saveName.c_str() );
-		}
+		sessLocal.QuickSave();
 	} else {
 		if ( sessLocal.SaveGame( args.Argv(1) ) ) {
 			common->Printf( "Saved %s\n", args.Argv(1) );
@@ -2159,6 +2158,104 @@ bool idSessionLocal::LoadGame( const char *saveName ) {
 
 	return true;
 #endif
+}
+
+bool idSessionLocal::QuickSave()
+{
+	idStr saveName = common->GetLanguageDict()->GetString( "#str_07178" );
+
+	idStr saveFilePathBase = saveName;
+	ScrubSaveGameFileName( saveFilePathBase );
+	saveFilePathBase = "savegames/" + saveFilePathBase;
+
+	const char* game = cvarSystem->GetCVarString( "fs_game" );
+	if ( game != NULL && game[0] == '\0' ) {
+		game = NULL;
+	}
+
+	const int maxNum = com_numQuicksaves.GetInteger();
+	int indexToUse = 1;
+	ID_TIME_T oldestTime = 0;
+	for( int i = 1; i <= maxNum; ++i ) {
+		idStr saveFilePath = saveFilePathBase;
+		if ( i > 1 ) {
+			// the first one is just called "QuickSave" without a number, like before.
+			// the others are called "QuickSave2" "QuickSave3" etc
+			saveFilePath += i;
+		}
+		saveFilePath.SetFileExtension( ".save" );
+
+		idFile *f = fileSystem->OpenFileRead( saveFilePath, true, game );
+		if ( f == NULL ) {
+			// this savegame doesn't exist yet => we can use this index for the name
+			indexToUse = i;
+			break;
+		} else {
+			ID_TIME_T ts = f->Timestamp();
+			assert( ts != 0 );
+			if ( ts < oldestTime || oldestTime == 0 ) {
+				// this is the oldest quicksave we found so far => a candidate to be overwritten
+				indexToUse = i;
+				oldestTime = ts;
+			}
+			delete f;
+		}
+	}
+
+	if ( indexToUse > 1 ) {
+		saveName += indexToUse;
+	}
+
+	if ( SaveGame( saveName ) ) {
+		common->Printf( "%s\n", saveName.c_str() );
+		return true;
+	}
+	return false;
+}
+
+bool idSessionLocal::QuickLoad()
+{
+	idStr saveName = common->GetLanguageDict()->GetString( "#str_07178" );
+
+	idStr saveFilePathBase = saveName;
+	ScrubSaveGameFileName( saveFilePathBase );
+	saveFilePathBase = "savegames/" + saveFilePathBase;
+
+	const char* game = cvarSystem->GetCVarString( "fs_game" );
+	if ( game != NULL && game[0] == '\0' ) {
+		game = NULL;
+	}
+
+	// find the newest QuickSave (or QuickSave2, QuickSave3, ...)
+	const int maxNum = com_numQuicksaves.GetInteger();
+	int indexToUse = 1;
+	ID_TIME_T newestTime = 0;
+	for( int i = 1; i <= maxNum; ++i ) {
+		idStr saveFilePath = saveFilePathBase;
+		if ( i > 1 ) {
+			// the first one is just called "QuickSave" without a number, like before.
+			// the others are called "QuickSave2" "QuickSave3" etc
+			saveFilePath += i;
+		}
+		saveFilePath.SetFileExtension( ".save" );
+
+		idFile *f = fileSystem->OpenFileRead( saveFilePath, true, game );
+		if ( f != NULL ) {
+			ID_TIME_T ts = f->Timestamp();
+			assert( ts != 0 );
+			if ( ts > newestTime ) {
+				indexToUse = i;
+				newestTime = ts;
+			}
+			delete f;
+		}
+	}
+
+	if ( indexToUse > 1 ) {
+		saveName += indexToUse;
+	}
+
+	return sessLocal.LoadGame( saveName );
 }
 
 /*

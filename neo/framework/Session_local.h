@@ -166,6 +166,9 @@ public:
 	// DG: added saveFileName so we can set a sensible filename for autosaves (see comment in MoveToNewMap())
 	bool				SaveGame(const char *saveName, bool autosave = false, const char* saveFileName = NULL);
 
+	bool				QuickSave();
+	bool				QuickLoad();
+
 	const char			*GetAuthMsg( void );
 
 	//=====================================
@@ -182,6 +185,7 @@ public:
 	static idCVar		com_aviDemoTics;
 	static idCVar		com_wipeSeconds;
 	static idCVar		com_guid;
+	static idCVar		com_numQuicksaves;
 
 	static idCVar		gui_configServerRate;
 
