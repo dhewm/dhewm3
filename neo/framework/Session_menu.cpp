@@ -388,6 +388,8 @@ bool idSessionLocal::HandleSaveGameMenuCommand( idCmdArgs &args, int &icmd ) {
 
 			sessLocal.SaveGame( saveGameName );
 			SetSaveGameGuiVars( );
+			// DG: select item 0 => select savegame just created (should be on top as it's newest)
+			guiActive->SetStateInt( "loadgame_sel_0", 0 );
 			guiActive->StateChanged( com_frameTime );
 		}
 		return true;
