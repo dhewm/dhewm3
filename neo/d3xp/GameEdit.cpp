@@ -670,7 +670,7 @@ void idEditEntities::DisplayEntities( void ) {
 ===============================================================================
 */
 
-idGameEdit			gameEditLocal;
+idGameEditExt		gameEditLocal;
 idGameEdit *		gameEdit = &gameEditLocal;
 
 
@@ -1154,7 +1154,7 @@ void idGameEdit::MapEntityTranslate( const char *name, const idVec3 &v ) const {
 
 ***********************************************************************/
 
-bool idGameEdit::IsLineCode( const char *filename, int linenumber ) const {
+bool idGameEditExt::IsLineCode( const char *filename, int linenumber ) const {
 	idStr fileStr;
 	idProgram *program = &gameLocal.program;
 	for ( int i = 0; i < program->NumStatements( ); i++ ) 	{
@@ -1170,7 +1170,7 @@ bool idGameEdit::IsLineCode( const char *filename, int linenumber ) const {
 	return false;
 }
 
-void idGameEdit::GetLoadedScripts(idStrList** result)
+void idGameEditExt::GetLoadedScripts(idStrList** result)
 {
 	(*result)->Clear();
 	idProgram* program = &gameLocal.program;
@@ -1181,7 +1181,7 @@ void idGameEdit::GetLoadedScripts(idStrList** result)
 	}
 }
 
-void idGameEdit::MSG_WriteScriptList(idBitMsg* msg)
+void idGameEditExt::MSG_WriteScriptList(idBitMsg* msg)
 {
 	idProgram* program = &gameLocal.program;
 
@@ -1196,12 +1196,12 @@ void idGameEdit::MSG_WriteScriptList(idBitMsg* msg)
 	}
 }
 
-const char* idGameEdit::GetFilenameForStatement(idProgram* program, int index) const
+const char* idGameEditExt::GetFilenameForStatement(idProgram* program, int index) const
 {
 	return program->GetFilenameForStatement(index);
 }
 
-int idGameEdit::GetLineNumberForStatement(idProgram* program, int index) const
+int idGameEditExt::GetLineNumberForStatement(idProgram* program, int index) const
 {
 	return program->GetLineNumberForStatement(index);
 }

@@ -146,7 +146,6 @@ public:
 	virtual void				ActivateTool( bool active );
 	virtual void				WriteConfigToFile( const char *filename );
 	virtual void				WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd );
-	virtual void				DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer);
 	virtual void				BeginRedirect( char *buffer, int buffersize, void (*flush)( const char * ) );
 	virtual void				EndRedirect( void );
 	virtual void				SetRefreshOnPrint( bool set );
@@ -3222,7 +3221,7 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 	}
 
 	// shutdown the script debugger
-	if ( com_enableDebuggerServer.GetBool( ) )	
+	if ( com_enableDebuggerServer.GetBool() )	
 		DebuggerServerShutdown();
 
 	idAsyncNetwork::client.Shutdown();
@@ -3286,9 +3285,21 @@ bool idCommonLocal::SetCallback(idCommon::CallbackType cbt, idCommon::FunctionPo
 	}
 }
 
-static bool isDemo(void)
+static bool isDemo( void )
 {
 	return sessLocal.IsDemoVersion();
+}
+
+static DebuggerArgs_t userDebuggerArgs;
+
+static bool checkForDebuggerBreakPoint( void ) 
+{
+	if (com_editors & EDITOR_DEBUGGER) 
+	{
+		DebuggerServerCheckBreakpoint( userDebuggerArgs.interpreter, userDebuggerArgs.program, userDebuggerArgs.instructionPointer );
+		return true;
+	}
+	return false;
 }
 
 // returns true if that function is available in this version of dhewm3
@@ -3311,6 +3322,12 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 			// don't set *out_userArg, this function takes no arguments
 			return true;
 
+		case idCommon::FT_CheckDebuggerBreakpoint:
+			*out_fnptr = (idCommon::FunctionPointer)checkForDebuggerBreakPoint;
+			if (out_userArg  != NULL )
+				*out_userArg = &userDebuggerArgs;
+			return true;
+
 		default:
 			*out_fnptr = NULL;
 			Warning("Called idCommon::SetCallback() with unknown FunctionType %d!\n", ft);
@@ -3318,20 +3335,17 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 	}
 }
 
-void idCommonLocal::DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer)
-{
-	if ( com_enableDebuggerServer.GetBool( ) )
-		DebuggerServerCheckBreakpoint(interpreter, program, instructionPointer);
-}
-
 idGameCallbacks gameCallbacks;
 
 idGameCallbacks::idGameCallbacks()
 : reloadImagesCB(NULL), reloadImagesUserArg(NULL)
+, checkBreakPointCB(NULL), checkBreakPointUserArg(NULL)
 {}
 
 void idGameCallbacks::Reset()
 {
 	reloadImagesCB = NULL;
 	reloadImagesUserArg = NULL;
+	checkBreakPointCB = NULL;
+	checkBreakPointUserArg = NULL;
 }

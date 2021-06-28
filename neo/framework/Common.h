@@ -117,6 +117,12 @@ class idLangDict;
 class idInterpreter;
 class idProgram;
 
+struct DebuggerArgs_t {
+	idInterpreter *interpreter;
+	idProgram *program;
+	int instructionPointer;
+};
+
 class idCommon {
 public:
 	virtual						~idCommon( void ) {}
@@ -163,8 +169,6 @@ public:
 								// Writes cvars with the given flags to a file.
 	virtual void				WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd ) = 0;
 
-								// Debbugger hook to check if a breakpoint has been hit
-	virtual void				DebuggerCheckBreakpoint(idInterpreter* interpreter, idProgram* program, int instructionPointer) = 0;
 
 								// Begins redirection of console output to the given buffer.
 	virtual void				BeginRedirect( char *buffer, int buffersize, void (*flush)( const char * ) ) = 0;
@@ -273,6 +277,7 @@ public:
 		// it returns true if we're currently running the doom3 demo
 		// not relevant for mods, only for game/ aka base.dll/base.so/...
 		FT_IsDemo = 1,
+		FT_CheckDebuggerBreakpoint,
 	};
 
 	// returns true if that function is available in this version of dhewm3

@@ -40,9 +40,12 @@ If you have questions concerning this license or the applicable additional terms
 struct idGameCallbacks {
 
 	typedef void (*ReloadImagesCallback)(void* userArg, const idCmdArgs &args);
-	ReloadImagesCallback reloadImagesCB;
-	void*                reloadImagesUserArg;
+	ReloadImagesCallback	reloadImagesCB;
+	void*					reloadImagesUserArg;
 
+	typedef void ( *CheckBreakpointCallback )( void *userArg, idInterpreter *interpreter, idProgram *program, int instructionPointer );
+	CheckBreakpointCallback		checkBreakPointCB;
+	void*						checkBreakPointUserArg;
 
 	idGameCallbacks();
 

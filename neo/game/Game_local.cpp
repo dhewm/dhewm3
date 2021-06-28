@@ -270,6 +270,21 @@ bool IsDoom3DemoVersion()
 	return ret;
 }
 
+static DebuggerArgs_t * userDebuggerArgs;
+static bool ( *checkDebuggerBreakpointFnPtr )( void ) = NULL;
+bool IsGameDebuggerActive( idInterpreter *interpreter, idProgram *program, int instructionPointer ) 
+{
+	bool ret = false;
+
+	if (interpreter != nullptr && program != nullptr )
+	{
+		userDebuggerArgs->interpreter = interpreter;
+		userDebuggerArgs->program = program;
+		userDebuggerArgs->instructionPointer = instructionPointer;
+		ret = checkDebuggerBreakpointFnPtr ? checkDebuggerBreakpointFnPtr( ) : false;
+	}
+	return ret;
+}
 
 
 /*
@@ -352,6 +367,9 @@ void idGameLocal::Init( void ) {
 
 	// DG: hack to support the Demo version of Doom3
 	common->GetAdditionalFunction(idCommon::FT_IsDemo, (idCommon::FunctionPointer*)&isDemoFnPtr, NULL);
+	//debugger support
+	common->GetAdditionalFunction( idCommon::FT_CheckDebuggerBreakpoint,
+		( idCommon::FunctionPointer * ) &checkDebuggerBreakpointFnPtr, (void**)&userDebuggerArgs );
 }
 
 /*
@@ -1192,7 +1210,7 @@ void idGameLocal::MapPopulate( void ) {
 idGameLocal::InitFromNewMap
 ===================
 */
-void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed, int activeEditors) {
+void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed) {
 
 	this->isServer = isServer;
 	this->isClient = isClient;
@@ -1204,8 +1222,6 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 
 	Printf( "----- Game Map Init -----\n" );
 
-	//exposing editor flag so debugger does not miss any script calls during load/startup
-	editors = activeEditors;
 	gamestate = GAMESTATE_STARTUP;
 
 	gameRenderWorld = renderWorld;
@@ -1232,7 +1248,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 idGameLocal::InitFromSaveGame
 =================
 */
-bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, idFile *saveGameFile, int activeEditors ) {
+bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, idFile *saveGameFile ) {
 	int i;
 	int num;
 	idEntity *ent;
@@ -1244,8 +1260,6 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	Printf( "----- Game Map Init SaveGame -----\n" );
 
-	//exposing editor flag so debugger does not miss any script calls during load/startup
-	editors = activeEditors;
 	gamestate = GAMESTATE_STARTUP;
 
 	gameRenderWorld = renderWorld;
@@ -2219,7 +2233,7 @@ void idGameLocal::SortActiveEntityList( void ) {
 idGameLocal::RunFrame
 ================
 */
-gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int activeEditors ) {
+gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 	idEntity *			ent;
 	int					num;
 	float				ms;
@@ -2227,9 +2241,6 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int activeEdito
 	gameReturn_t		ret;
 	idPlayer			*player;
 	const renderView_t	*view;
-	
-	//exposing editor flag so debugger does not miss any script calls during load/startup
-	editors = activeEditors;
 
 #ifdef _DEBUG
 	if ( isMultiplayer ) {

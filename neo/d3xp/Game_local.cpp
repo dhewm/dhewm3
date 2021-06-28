@@ -302,6 +302,21 @@ void idGameLocal::Clear( void ) {
 #endif
 }
 
+static DebuggerArgs_t * userDebuggerArgs;
+static bool ( *checkDebuggerBreakpointFnPtr )( void ) = NULL;
+bool IsGameDebuggerActive( idInterpreter *interpreter, idProgram *program, int instructionPointer ) {
+	bool ret = false;
+
+	if ( interpreter != nullptr && program != nullptr ) 	{
+		userDebuggerArgs->interpreter = interpreter;
+		userDebuggerArgs->program = program;
+		userDebuggerArgs->instructionPointer = instructionPointer;
+		ret = checkDebuggerBreakpointFnPtr ? checkDebuggerBreakpointFnPtr( ) : false;
+	}
+	return ret;
+}
+
+
 /*
 ===========
 idGameLocal::Init
@@ -410,6 +425,11 @@ void idGameLocal::Init( void ) {
 	gamestate = GAMESTATE_NOMAP;
 
 	Printf( "...%d aas types\n", aasList.Num() );
+
+	//debugger support
+	common->GetAdditionalFunction( idCommon::FT_CheckDebuggerBreakpoint,
+		( idCommon::FunctionPointer * ) &checkDebuggerBreakpointFnPtr, ( void ** ) &userDebuggerArgs );
+
 }
 
 /*
@@ -1312,7 +1332,7 @@ void idGameLocal::MapPopulate( void ) {
 idGameLocal::InitFromNewMap
 ===================
 */
-void idGameLocal::InitFromNewMap(const char* mapName, idRenderWorld* renderWorld, idSoundWorld* soundWorld, bool isServer, bool isClient, int randseed, int activeEditors) {
+void idGameLocal::InitFromNewMap(const char* mapName, idRenderWorld* renderWorld, idSoundWorld* soundWorld, bool isServer, bool isClient, int randseed) {
 
 	this->isServer = isServer;
 	this->isClient = isClient;
@@ -1323,9 +1343,6 @@ void idGameLocal::InitFromNewMap(const char* mapName, idRenderWorld* renderWorld
 	}
 
 	Printf( "----- Game Map Init -----\n" );
-	
-	//exposing editor flag so debugger does not miss any script calls during load/startup
-	editors = activeEditors;
 
 	gamestate = GAMESTATE_STARTUP;
 
@@ -2439,7 +2456,7 @@ void idGameLocal::RunTimeGroup2() {
 idGameLocal::RunFrame
 ================
 */
-gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds, int activeEditors) {
+gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
 	idEntity* ent;
 	int					num;
 	float				ms;
@@ -2447,9 +2464,6 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds, int activeEditor
 	gameReturn_t		ret;
 	idPlayer* player;
 	const renderView_t* view;
-
-	//exposing editor flag so debugger does not miss any script calls during load/startup
-	editors = activeEditors;
 
 #ifdef _DEBUG
 	if ( isMultiplayer ) {
