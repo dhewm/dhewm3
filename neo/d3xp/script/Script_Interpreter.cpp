@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/FileSystem.h"
 
 // HvG: Debugger support
-extern bool IsGameDebuggerActive( idInterpreter *interpreter, idProgram *program, int instructionPointer );
+extern bool updateGameDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer );
 
 /*
 ================
@@ -181,102 +181,106 @@ void idInterpreter::Reset( void ) {
 	doneProcessing	= true;
 }
 
-bool idInterpreter::GetRegisterValue(const char* name, idStr& out, int scopeDepth) {
+/*
+================
+idInterpreter::GetRegisterValue
+
+Returns a string representation of the value of the register.  This is
+used primarily for the debugger and debugging
+
+================
+*/
+bool idInterpreter::GetRegisterValue( const char *name, idStr &out, int scopeDepth ) {
 	varEval_t		reg;
-	idVarDef* d;
-	char			funcObject[1024];
-	char* funcName;
-	const idVarDef* scope = NULL;
-	const idVarDef* scopeObj;
-	const idTypeDef* field;
-	const function_t* func;
+	idVarDef		*d;
+	char			funcObject[ 1024 ];
+	char			*funcName;
+	const idVarDef	*scope = NULL;
+	const idVarDef	*scopeObj;
+	const idTypeDef	*field;
+	const function_t *func;
 
 	out.Empty();
-
-	if (scopeDepth == -1) {
+	
+	if ( scopeDepth == -1 ) {
 		scopeDepth = callStackDepth;
-	}
-
-	if (scopeDepth == callStackDepth) {
+	}	
+	
+	if ( scopeDepth == callStackDepth ) {
 		func = currentFunction;
+	} else {
+		func = callStack[ scopeDepth ].f;
 	}
-	else {
-		func = callStack[scopeDepth].f;
-	}
-	if (!func) {
+	if ( !func ) {
 		return false;
 	}
 
-	idStr::Copynz(funcObject, func->Name(), sizeof(funcObject));
-	funcName = strstr(funcObject, "::");
-	if (funcName) {
+	idStr::Copynz( funcObject, func->Name(), sizeof( funcObject ) );
+	funcName = strstr( funcObject, "::" );
+	if ( funcName ) {
 		*funcName = '\0';
-		scopeObj = gameLocal.program.GetDef(NULL, funcObject, &def_namespace);
-		funcName += 2;
-		if (scopeObj)
+		scopeObj = gameLocal.program.GetDef( NULL, funcObject, &def_namespace );
+		funcName += 2;				
+		if ( scopeObj )
 		{
-			scope = gameLocal.program.GetDef(NULL, funcName, scopeObj);
+			scope = gameLocal.program.GetDef( NULL, funcName, scopeObj );
 		}
-	}
-	else {
+	} else {
 		funcName = funcObject;
-		scope = gameLocal.program.GetDef(NULL, func->Name(), &def_namespace);
+		scope = gameLocal.program.GetDef( NULL, func->Name(), &def_namespace );
 		scopeObj = NULL;
 	}
 
-	if (!scope)
+	if ( !scope )
 	{
 		return false;
 	}
 
-	d = gameLocal.program.GetDef(NULL, name, scope);
-
+	d = gameLocal.program.GetDef( NULL, name, scope );
+	
 	// Check the objects for it if it wasnt local to the function
-	if (!d)
+	if ( !d )
 	{
-		for (; scopeObj && scopeObj->TypeDef()->SuperClass(); scopeObj = scopeObj->TypeDef()->SuperClass()->def)
+		for ( ; scopeObj && scopeObj->TypeDef()->SuperClass(); scopeObj = scopeObj->TypeDef()->SuperClass()->def )
 		{
-			d = gameLocal.program.GetDef(NULL, name, scopeObj);
-			if (d)
+			d = gameLocal.program.GetDef( NULL, name, scopeObj );
+			if ( d )
 			{
 				break;
 			}
 		}
-	}
+	}	
 
-	if (!d)
+	if ( !d )
 	{
 		out = "???";
 		return false;
 	}
-
-	reg = GetVariable(d);
-	switch (d->Type()) {
+	
+	reg = GetVariable( d );
+	switch( d->Type() ) {
 	case ev_float:
-		if (reg.floatPtr) {
-			out = va("%g", *reg.floatPtr);
-		}
-		else {
+		if ( reg.floatPtr ) {
+			out = va("%g", *reg.floatPtr );
+		} else {
 			out = "0";
 		}
 		return true;
 		break;
 
 	case ev_vector:
-		if (reg.vectorPtr) {
-			out = va("%g,%g,%g", reg.vectorPtr->x, reg.vectorPtr->y, reg.vectorPtr->z);
-		}
-		else {
+		if ( reg.vectorPtr ) {				
+			out = va( "%g,%g,%g", reg.vectorPtr->x, reg.vectorPtr->y, reg.vectorPtr->z );
+		} else {
 			out = "0,0,0";
 		}
 		return true;
 		break;
 
 	case ev_boolean:
-		if (reg.intPtr) {
-			out = va("%d", *reg.intPtr);
-		}
-		else {
+		if ( reg.intPtr ) {
+			out = va( "%d", *reg.intPtr );
+		} else {
 			out = "0";
 		}
 		return true;
@@ -284,63 +288,61 @@ bool idInterpreter::GetRegisterValue(const char* name, idStr& out, int scopeDept
 
 	case ev_field:
 	{
-		idEntity* entity;
-		idScriptObject* obj;
-
-		if (scope == &def_namespace) {
+		idEntity*		entity;			
+		idScriptObject*	obj;
+		
+		if ( scope == &def_namespace ) {
 			// should never happen, but handle it safely anyway
 			return false;
 		}
 
-		field = d->TypeDef()->FieldType();
-		entity = GetEntity(*((int*)&localstack[localstackBase]));
-		if (!entity || !field)
+		field  = d->TypeDef()->FieldType();
+		entity = GetEntity ( *((int*)&localstack[ localstackBase ]) );
+		if ( !entity || !field )
 		{
 			return false;
 		}
 
 		obj = &entity->scriptObject;
-		if (!obj) {
+		if ( !obj ) {
 			return false;
 		}
+		
+		switch ( field->Type() ) {
+			case ev_boolean:
+				out = va( "%d", *( reinterpret_cast<int *>( &obj->data[ reg.ptrOffset ] ) ) );
+				return true;
 
-		switch (field->Type()) {
-		case ev_boolean:
-			out = va("%d", *(reinterpret_cast<int*>(&obj->data[reg.ptrOffset])));
-			return true;
-
-		case ev_float:
-			out = va("%g", *(reinterpret_cast<float*>(&obj->data[reg.ptrOffset])));
-			return true;
-
-		case ev_string: {
-			const char* str;
-			str = reinterpret_cast<const char*>(&obj->data[reg.ptrOffset]);
-			if (!str) {
-				out = "\"\"";
+			case ev_float:
+				out = va( "%g", *( reinterpret_cast<float *>( &obj->data[ reg.ptrOffset ] ) ) );
+				return true;
+				
+			case ev_string:	{
+				const char* str;
+				str = reinterpret_cast<const char*>( &obj->data[ reg.ptrOffset ] );
+				if ( !str ) {
+					out = "\"\"";
+				} else {
+					out  = "\"";
+					out += str;			
+					out += "\"";
+				}
+				return true;
 			}
-			else {
-				out = "\"";
-				out += str;
-				out += "\"";
-			}
-			return true;
-		}
 
-		default:
-			return false;
+			default:
+				return false;
 		}
-
+		
 		break;
 	}
 
 	case ev_string:
-		if (reg.stringPtr) {
+		if ( reg.stringPtr ) {
 			out = "\"";
 			out += reg.stringPtr;
 			out += "\"";
-		}
-		else {
+		} else {
 			out = "\"\"";
 		}
 		return true;
@@ -1004,7 +1006,7 @@ bool idInterpreter::Execute( void ) {
 		// next statement
 		st = &gameLocal.program.GetStatement( instructionPointer );
 
-		if ( !IsGameDebuggerActive( this, &gameLocal.program, instructionPointer )
+		if ( !updateGameDebugger( this, &gameLocal.program, instructionPointer )
 			&& g_debugScript.GetBool( ) ) 
 		{
 			static int lastLineNumber = -1;

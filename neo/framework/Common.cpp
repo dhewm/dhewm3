@@ -3290,13 +3290,11 @@ static bool isDemo( void )
 	return sessLocal.IsDemoVersion();
 }
 
-static DebuggerArgs_t userDebuggerArgs;
-
-static bool checkForDebuggerBreakPoint( void ) 
+static bool updateDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer )
 {
 	if (com_editors & EDITOR_DEBUGGER) 
 	{
-		DebuggerServerCheckBreakpoint( userDebuggerArgs.interpreter, userDebuggerArgs.program, userDebuggerArgs.instructionPointer );
+		DebuggerServerCheckBreakpoint( interpreter, program, instructionPointer );
 		return true;
 	}
 	return false;
@@ -3323,9 +3321,8 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 			return true;
 
 		case idCommon::FT_CheckDebuggerBreakpoint:
-			*out_fnptr = (idCommon::FunctionPointer)checkForDebuggerBreakPoint;
-			if (out_userArg  != NULL )
-				*out_userArg = &userDebuggerArgs;
+			*out_fnptr = (idCommon::FunctionPointer)updateDebugger;
+
 			return true;
 
 		default:
@@ -3339,13 +3336,10 @@ idGameCallbacks gameCallbacks;
 
 idGameCallbacks::idGameCallbacks()
 : reloadImagesCB(NULL), reloadImagesUserArg(NULL)
-, checkBreakPointCB(NULL), checkBreakPointUserArg(NULL)
 {}
 
 void idGameCallbacks::Reset()
 {
 	reloadImagesCB = NULL;
 	reloadImagesUserArg = NULL;
-	checkBreakPointCB = NULL;
-	checkBreakPointUserArg = NULL;
 }

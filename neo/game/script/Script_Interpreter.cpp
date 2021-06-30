@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/FileSystem.h"
 
 // HvG: Debugger support
-extern bool IsGameDebuggerActive( idInterpreter *interpreter, idProgram *program, int instructionPointer );
+extern bool updateGameDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer );
 
 /*
 ================
@@ -1007,7 +1007,7 @@ bool idInterpreter::Execute( void ) {
 		// next statement
 		st = &gameLocal.program.GetStatement( instructionPointer );
 
-		if ( !IsGameDebuggerActive( this, &gameLocal.program, instructionPointer )
+		if ( !updateGameDebugger( this, &gameLocal.program, instructionPointer )
 			&& g_debugScript.GetBool( ) ) 
 		{
 			static int lastLineNumber = -1;

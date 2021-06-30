@@ -43,10 +43,6 @@ struct idGameCallbacks {
 	ReloadImagesCallback	reloadImagesCB;
 	void*					reloadImagesUserArg;
 
-	typedef void ( *CheckBreakpointCallback )( void *userArg, idInterpreter *interpreter, idProgram *program, int instructionPointer );
-	CheckBreakpointCallback		checkBreakPointCB;
-	void*						checkBreakPointUserArg;
-
 	idGameCallbacks();
 
 	// called when Game DLL is unloaded (=> the registered callbacks become invalid)

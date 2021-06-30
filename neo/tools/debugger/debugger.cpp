@@ -147,8 +147,11 @@ Starts up the debugger server
 */
 bool DebuggerServerInit ( void )
 {
+	com_enableDebuggerServer.ClearModified( );
+
 	// Dont do this if we are in the debugger already
-	if ( com_editors & EDITOR_DEBUGGER )
+	if ( gDebuggerServer != NULL 
+		|| ( com_editors & EDITOR_DEBUGGER ) )
 	{
 		return false;
 	}
@@ -168,15 +171,12 @@ bool DebuggerServerInit ( void )
 		return false;
 	}
 	
-	com_enableDebuggerServer.ClearModified( );
-
 	// Start the debugger server thread
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, "DebuggerServer", NULL );
 #else // SDL 1.2
 	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, NULL );
 #endif
-
 
 	return true;
 }

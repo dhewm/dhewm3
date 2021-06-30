@@ -270,18 +270,11 @@ bool IsDoom3DemoVersion()
 	return ret;
 }
 
-static DebuggerArgs_t * userDebuggerArgs;
-static bool ( *checkDebuggerBreakpointFnPtr )( void ) = NULL;
-bool IsGameDebuggerActive( idInterpreter *interpreter, idProgram *program, int instructionPointer ) 
-{
+static bool ( *updateDebuggerFnPtr )( idInterpreter *interpreter, idProgram *program, int instructionPointer ) = NULL;
+bool updateGameDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer ) {
 	bool ret = false;
-
-	if (interpreter != nullptr && program != nullptr )
-	{
-		userDebuggerArgs->interpreter = interpreter;
-		userDebuggerArgs->program = program;
-		userDebuggerArgs->instructionPointer = instructionPointer;
-		ret = checkDebuggerBreakpointFnPtr ? checkDebuggerBreakpointFnPtr( ) : false;
+	if ( interpreter != nullptr && program != nullptr ) {
+		ret = updateDebuggerFnPtr ? updateDebuggerFnPtr( interpreter, program, instructionPointer ) : false;
 	}
 	return ret;
 }
@@ -368,8 +361,7 @@ void idGameLocal::Init( void ) {
 	// DG: hack to support the Demo version of Doom3
 	common->GetAdditionalFunction(idCommon::FT_IsDemo, (idCommon::FunctionPointer*)&isDemoFnPtr, NULL);
 	//debugger support
-	common->GetAdditionalFunction( idCommon::FT_CheckDebuggerBreakpoint,
-		( idCommon::FunctionPointer * ) &checkDebuggerBreakpointFnPtr, (void**)&userDebuggerArgs );
+	common->GetAdditionalFunction(idCommon::FT_CheckDebuggerBreakpoint,(idCommon::FunctionPointer*) &updateDebuggerFnPtr,NULL);
 }
 
 /*

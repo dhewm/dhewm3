@@ -302,16 +302,11 @@ void idGameLocal::Clear( void ) {
 #endif
 }
 
-static DebuggerArgs_t * userDebuggerArgs;
-static bool ( *checkDebuggerBreakpointFnPtr )( void ) = NULL;
-bool IsGameDebuggerActive( idInterpreter *interpreter, idProgram *program, int instructionPointer ) {
+static bool ( *updateDebuggerFnPtr )( idInterpreter *interpreter, idProgram *program, int instructionPointer ) = NULL;
+bool updateGameDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer ) {
 	bool ret = false;
-
 	if ( interpreter != nullptr && program != nullptr ) 	{
-		userDebuggerArgs->interpreter = interpreter;
-		userDebuggerArgs->program = program;
-		userDebuggerArgs->instructionPointer = instructionPointer;
-		ret = checkDebuggerBreakpointFnPtr ? checkDebuggerBreakpointFnPtr( ) : false;
+		ret = updateDebuggerFnPtr ? updateDebuggerFnPtr( interpreter , program, instructionPointer ) : false;
 	}
 	return ret;
 }
@@ -427,8 +422,7 @@ void idGameLocal::Init( void ) {
 	Printf( "...%d aas types\n", aasList.Num() );
 
 	//debugger support
-	common->GetAdditionalFunction( idCommon::FT_CheckDebuggerBreakpoint,
-		( idCommon::FunctionPointer * ) &checkDebuggerBreakpointFnPtr, ( void ** ) &userDebuggerArgs );
+	common->GetAdditionalFunction( idCommon::FT_CheckDebuggerBreakpoint,( idCommon::FunctionPointer * ) &updateDebuggerFnPtr,NULL);
 
 }
 
@@ -1370,7 +1364,7 @@ void idGameLocal::InitFromNewMap(const char* mapName, idRenderWorld* renderWorld
 idGameLocal::InitFromSaveGame
 =================
 */
-bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, idFile *saveGameFile, int activeEditors) {
+bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, idFile *saveGameFile ) {
 	int i;
 	int num;
 	idEntity *ent;

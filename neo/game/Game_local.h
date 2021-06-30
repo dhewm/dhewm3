@@ -293,7 +293,7 @@ public:
 
 	idEntityPtr<idEntity>	lastGUIEnt;				// last entity with a GUI, used by Cmd_NextGUI_f
 	int						lastGUI;				// last GUI on the lastGUIEnt
-	int						editors;				// Mirrored editors flags from common to determine which editors are running
+
 	// ---------------------- Public idGame Interface -------------------
 
 							idGameLocal();
