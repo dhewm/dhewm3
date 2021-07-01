@@ -422,7 +422,7 @@ void idGameLocal::Init( void ) {
 	Printf( "...%d aas types\n", aasList.Num() );
 
 	//debugger support
-	common->GetAdditionalFunction( idCommon::FT_CheckDebuggerBreakpoint,( idCommon::FunctionPointer * ) &updateDebuggerFnPtr,NULL);
+	common->GetAdditionalFunction( idCommon::FT_UpdateDebugger,( idCommon::FunctionPointer * ) &updateDebuggerFnPtr,NULL);
 
 }
 

@@ -361,7 +361,7 @@ void idGameLocal::Init( void ) {
 	// DG: hack to support the Demo version of Doom3
 	common->GetAdditionalFunction(idCommon::FT_IsDemo, (idCommon::FunctionPointer*)&isDemoFnPtr, NULL);
 	//debugger support
-	common->GetAdditionalFunction(idCommon::FT_CheckDebuggerBreakpoint,(idCommon::FunctionPointer*) &updateDebuggerFnPtr,NULL);
+	common->GetAdditionalFunction(idCommon::FT_UpdateDebugger,(idCommon::FunctionPointer*) &updateDebuggerFnPtr,NULL);
 }
 
 /*

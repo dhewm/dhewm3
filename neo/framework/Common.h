@@ -279,7 +279,7 @@ public:
 		// idInterpreter *interpreter, idProgram *program, int instructionPointer
 		// it returns true if the game debugger is active.
 		// relevant for mods.
-		FT_CheckDebuggerBreakpoint,
+		FT_UpdateDebugger,
 	};
 
 	// returns true if that function is available in this version of dhewm3

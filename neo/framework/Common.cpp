@@ -3320,7 +3320,7 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 			// don't set *out_userArg, this function takes no arguments
 			return true;
 
-		case idCommon::FT_CheckDebuggerBreakpoint:
+		case idCommon::FT_UpdateDebugger:
 			*out_fnptr = (idCommon::FunctionPointer)updateDebugger;
 
 			return true;
