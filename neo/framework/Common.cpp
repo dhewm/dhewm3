@@ -116,7 +116,7 @@ volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
 bool			com_editorActive;		//  true if an editor has focus
 
-bool			com_debuggerSupported = false;	// only set to true when the updateDebugger function is set. see GetAdditionalFunction()
+bool			com_debuggerSupported;	// only set to true when the updateDebugger function is set. see GetAdditionalFunction()
 
 #ifdef _WIN32
 HWND			com_hwndMsg = NULL;
@@ -251,6 +251,7 @@ idCommonLocal::idCommonLocal( void ) {
 	com_fullyInitialized = false;
 	com_refreshOnPrint = false;
 	com_errorEntered = 0;
+	com_debuggerSupported = false;
 
 	strcpy( errorMessage, "" );
 
