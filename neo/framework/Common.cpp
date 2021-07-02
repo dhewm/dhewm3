@@ -2728,6 +2728,7 @@ void idCommonLocal::UnloadGameDLL( void ) {
 
 #endif
 
+	com_debuggerSupported = false; // HvG: Reset debugger availability.
 	gameCallbacks.Reset(); // DG: these callbacks are invalid now because DLL has been unloaded
 }
 
