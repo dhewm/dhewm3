@@ -149,6 +149,12 @@ bool DebuggerServerInit ( void )
 {
 	com_enableDebuggerServer.ClearModified( );
 
+	if ( !com_debuggerSupported )
+	{
+		common->Warning( "Called DebuggerServerInit() without the gameDLL supporting it!\n" );
+		return false;
+	}
+
 	// Dont do this if we are in the debugger already
 	if ( gDebuggerServer != NULL 
 		|| ( com_editors & EDITOR_DEBUGGER ) )

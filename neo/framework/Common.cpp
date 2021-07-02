@@ -116,6 +116,8 @@ volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
 bool			com_editorActive;		//  true if an editor has focus
 
+bool			com_debuggerSupported = false;	// only set to true when the updateDebugger function is set. see GetAdditionalFunction()
+
 #ifdef _WIN32
 HWND			com_hwndMsg = NULL;
 bool			com_outputMsg = false;
@@ -3181,14 +3183,14 @@ void idCommonLocal::InitGame( void ) {
 	// initialize the user interfaces
 	uiManager->Init();
 
-	// startup the script debugger
-	if ( com_enableDebuggerServer.GetBool( ) )	
-		DebuggerServerInit();
-
 	PrintLoadingMessage( common->GetLanguageDict()->GetString( "#str_04350" ) );
 
 	// load the game dll
 	LoadGameDLL();
+
+	// startup the script debugger
+	if ( com_enableDebuggerServer.GetBool( ) )
+		DebuggerServerInit( );
 
 	PrintLoadingMessage( common->GetLanguageDict()->GetString( "#str_04351" ) );
 
@@ -3313,6 +3315,7 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 		Warning("Called idCommon::GetAdditionalFunction() with out_fnptr == NULL!\n");
 		return false;
 	}
+
 	switch(ft)
 	{
 		case idCommon::FT_IsDemo:
@@ -3322,7 +3325,7 @@ bool idCommonLocal::GetAdditionalFunction(idCommon::FunctionType ft, idCommon::F
 
 		case idCommon::FT_UpdateDebugger:
 			*out_fnptr = (idCommon::FunctionPointer)updateDebugger;
-
+			com_debuggerSupported = true;
 			return true;
 
 		default:
