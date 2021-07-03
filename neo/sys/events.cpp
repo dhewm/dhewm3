@@ -59,11 +59,14 @@ If you have questions concerning this license or the applicable additional terms
 #define SDLK_PRINTSCREEN SDLK_PRINT
 #endif
 
-const char *kbdNames[] = {
+static const char *kbdNames[] = {
 	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", "brazilian", NULL
 };
 
-idCVar in_kbd("in_kbd", "english", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
+static idCVar in_kbd("in_kbd", "english", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
+
+static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
+		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
 
 struct kbd_poll_t {
 	int key;
@@ -448,6 +451,17 @@ void Sys_InitInput() {
 #endif
 
 	in_kbd.SetModified();
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	const char* grabKeyboardEnv = SDL_getenv(SDL_HINT_GRAB_KEYBOARD);
+	if ( grabKeyboardEnv ) {
+		common->Printf( "The SDL_GRAB_KEYBOARD environment variable is set, setting the in_grabKeyboard CVar to the same value (%s)\n", grabKeyboardEnv );
+		in_grabKeyboard.SetString( grabKeyboardEnv );
+	} else {
+		in_grabKeyboard.SetModified();
+	}
+#else // SDL1.2 doesn't support this
+	in_grabKeyboard.ClearModified();
+#endif
 }
 
 /*
@@ -864,6 +878,22 @@ void Sys_GenerateEvents() {
 
 	if (s)
 		PushConsoleEvent(s);
+
+#ifndef ID_DEDICATED // doesn't make sense on dedicated server
+	if ( in_grabKeyboard.IsModified() ) {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SDL_SetHint( SDL_HINT_GRAB_KEYBOARD, in_grabKeyboard.GetString() );
+		if ( in_grabKeyboard.GetBool() ) {
+			common->Printf( "in_grabKeyboard: Will grab the keyboard if mouse is grabbed, so global keyboard-shortcuts (like Alt-Tab or the Windows key) will *not* work\n" );
+		} else {
+			common->Printf( "in_grabKeyboard: Will *not* grab the keyboard if mouse is grabbed, so global keyboard-shortcuts (like Alt-Tab) will still work\n" );
+		}
+#else
+		common->Printf( "Note: SDL1.2 doesn't support in_grabKeyboard (it's always grabbed if mouse is grabbed)\n" );
+#endif
+		in_grabKeyboard.ClearModified();
+	}
+#endif
 
 	SDL_PumpEvents();
 }
