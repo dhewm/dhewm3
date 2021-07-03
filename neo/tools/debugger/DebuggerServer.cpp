@@ -294,13 +294,11 @@ data supplied in the message.
 */
 void rvDebuggerServer::HandleAddBreakpoint ( idBitMsg* msg )
 {
-	bool onceOnly = false;
 	long lineNumber;
 	long id;
 	char filename[2048]; // DG: randomly chose this size
 
 	// Read the breakpoint info
-	onceOnly   = msg->ReadBits ( 1 ) ? true : false;
 	lineNumber = msg->ReadInt ( );
 	id		   = msg->ReadInt ( );
 

@@ -495,7 +495,7 @@ rvDebuggerClient::AddBreakpoint
 Adds a breakpoint to the client and server with the give nfilename and linenumber
 ================
 */
-int rvDebuggerClient::AddBreakpoint ( const char* filename, int lineNumber, bool onceOnly )
+int rvDebuggerClient::AddBreakpoint ( const char* filename, int lineNumber )
 {
 	int index = mBreakpoints.Append ( new rvDebuggerBreakpoint ( filename, lineNumber ) );
 
@@ -578,7 +578,7 @@ rvDebuggerClient::SendAddBreakpoint
 Send an individual breakpoint over to the debugger server
 ================
 */
-void rvDebuggerClient::SendAddBreakpoint ( rvDebuggerBreakpoint& bp, bool onceOnly )
+void rvDebuggerClient::SendAddBreakpoint ( rvDebuggerBreakpoint& bp )
 {
 	idBitMsg msg;
 	byte	 buffer[MAX_MSGLEN];
@@ -591,7 +591,6 @@ void rvDebuggerClient::SendAddBreakpoint ( rvDebuggerBreakpoint& bp, bool onceOn
 	msg.Init( buffer, sizeof( buffer ) );
 	msg.BeginWriting();
 	msg.WriteShort	( (short)DBMSG_ADDBREAKPOINT );
-	msg.WriteBits	( onceOnly?1:0, 1 );
 	msg.WriteInt	( (unsigned long) bp.GetLineNumber ( ) );
 	msg.WriteInt	( bp.GetID ( ) );
 	msg.WriteString ( bp.GetFilename() ); // FIXME: this implies make7bit ?!

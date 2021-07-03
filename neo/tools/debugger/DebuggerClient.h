@@ -91,7 +91,7 @@ public:
 	void						SendCommand				( const char* cmdStr );
 
 	// Breakpoints
-	int							AddBreakpoint			( const char* filename, int lineNumber, bool onceOnly = false );
+	int							AddBreakpoint			( const char* filename, int lineNumber );
 	bool						RemoveBreakpoint		( int bpID );
 	void						ClearBreakpoints		( void );
 	int							GetBreakpointCount		( void );
@@ -102,7 +102,7 @@ protected:
 
 	void						SendMessage				( EDebuggerMessage dbmsg );
 	void						SendBreakpoints			( void );
-	void						SendAddBreakpoint		( rvDebuggerBreakpoint& bp, bool onceOnly = false );
+	void						SendAddBreakpoint		( rvDebuggerBreakpoint& bp );
 	void						SendRemoveBreakpoint	( rvDebuggerBreakpoint& bp );
 	void						SendPacket				( void* data, int datasize );
 
