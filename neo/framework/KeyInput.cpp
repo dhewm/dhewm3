@@ -63,7 +63,7 @@ static const keyname_t keynames[] =
 	{"RIGHTARROW",		K_RIGHTARROW,		"#str_07026"},
 
 	{"ALT",				K_ALT,				"#str_07027"},
-	{"RIGHTALT",		K_RIGHT_ALT,		"#str_07027"},
+	//{"RIGHTALT",		K_RIGHT_ALT,		"#str_07027"}, // DG: renamed this, see below
 	{"CTRL",			K_CTRL,				"#str_07028"},
 	{"SHIFT",			K_SHIFT,			"#str_07029"},
 
@@ -182,7 +182,13 @@ static const keyname_t keynames[] =
 
 	{"SEMICOLON",		';',				"#str_07129"},	// because a raw semicolon separates commands
 	{"APOSTROPHE",		'\'',				"#str_07130"},	// because a raw apostrophe messes with parsing
-	{"QUOTE",			'"',				""}, // raw quote can't be good either
+	{"QUOTE",			'"',				""}, // DG: raw quote can't be good either
+
+	{"R_ALT",			K_RIGHT_ALT,		""}, // DG: renamed this from RIGHTALT so it's shorter (but discernible) in the menu
+	{"R_CTRL",			K_RIGHT_CTRL, 		""}, // DG: added this one
+	{"R_SHIFT",			K_RIGHT_SHIFT,		""}, // DG: added this one
+
+	// TODO: controller stuff
 
 	{NULL,				0,					NULL}
 };
@@ -284,6 +290,15 @@ idKeyInput::IsDown
 bool idKeyInput::IsDown( int keynum ) {
 	if ( keynum == -1 ) {
 		return false;
+	}
+
+	// DG: K_RIGHT_CTRL/SHIFT should be handled as different keys for bindings
+	//     but the same for keyboard shortcuts in the console and such
+	//     (this function is used for the latter)
+	if ( keynum == K_CTRL ) {
+		return keys[K_CTRL].down || keys[K_RIGHT_CTRL].down;
+	} else if ( keynum == K_SHIFT ) {
+		return keys[K_SHIFT].down || keys[K_RIGHT_SHIFT].down;
 	}
 
 	return keys[keynum].down;
