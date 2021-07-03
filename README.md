@@ -35,6 +35,8 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 - A portable build system based on CMake
 - (Cross-)compilation with MinGW-w64
 
+See [Changelog.md](./Changelog.md) for a more complete changelog.
+
 
 # GENERAL NOTES
 
