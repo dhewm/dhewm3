@@ -166,6 +166,17 @@ unsigned char	Sys_GetConsoleKey( bool shifted );
 // does nothing on win32, as SE_KEY == SE_CHAR there
 // on other OSes, consider the keyboard mapping
 unsigned char	Sys_MapCharForKey( int key );
+// for keynums between K_FIRST_SCANCODE and K_LAST_SCANCODE
+// returns e.g. "SC_A" for K_SC_A
+const char* Sys_GetScancodeName( int key );
+// returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
+// regarding the current keyboard layout - if that name is in ASCII or corresponds
+// to a "High-ASCII" char supported by Doom3.
+// Otherwise return same name as Sys_GetScancodeName()
+// !! Returned string is only valid until next call to this function !!
+const char* Sys_GetLocalizedScancodeName( int key );
+// returns keyNum_t (K_SC_* constant) for given scancode name (like "SC_A")
+int Sys_GetKeynumForScancodeName( const char* name );
 
 // keyboard input polling
 int				Sys_PollKeyboardInputEvents( void );
