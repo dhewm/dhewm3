@@ -283,12 +283,15 @@ static byte mapkey(SDL_Keycode key) {
 		return K_MENU;
 
 	case SDLK_LALT:
-	case SDLK_RALT:
 		return K_ALT;
+	case SDLK_RALT:
+		return K_RIGHT_ALT;
 	case SDLK_RCTRL:
+		return K_RIGHT_CTRL;
 	case SDLK_LCTRL:
 		return K_CTRL;
 	case SDLK_RSHIFT:
+		return K_RIGHT_SHIFT;
 	case SDLK_LSHIFT:
 		return K_SHIFT;
 	case SDLK_INSERT:
@@ -403,6 +406,7 @@ static byte mapkey(SDL_Keycode key) {
 	case SDLK_PRINTSCREEN:
 		return K_PRINT_SCR;
 	case SDLK_MODE:
+		// FIXME: is this really right alt? (also mapping SDLK_RALT to K_RIGHT_ALT)
 		return K_RIGHT_ALT;
 	}
 

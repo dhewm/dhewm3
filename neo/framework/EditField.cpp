@@ -478,7 +478,8 @@ void idEditField::KeyDownEvent( int key ) {
 	}
 
 	// clear autocompletion buffer on normal key input
-	if ( key != K_CAPSLOCK && key != K_ALT && key != K_CTRL && key != K_SHIFT ) {
+	if ( key != K_CAPSLOCK && key != K_ALT && key != K_CTRL && key != K_SHIFT
+	     && key != K_RIGHT_CTRL && key != K_RIGHT_SHIFT ) { // TODO: K_RIGHT_ALT ?
 		ClearAutoComplete();
 	}
 }
