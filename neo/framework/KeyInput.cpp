@@ -182,13 +182,12 @@ static const keyname_t keynames[] =
 
 	{"SEMICOLON",		';',				"#str_07129"},	// because a raw semicolon separates commands
 	{"APOSTROPHE",		'\'',				"#str_07130"},	// because a raw apostrophe messes with parsing
+	{"QUOTE",			'"',				""}, // raw quote can't be good either
 
 	{NULL,				0,					NULL}
 };
 
-
-
-static const int	MAX_KEYS = 256;
+static const int	MAX_KEYS = K_LAST_KEY+1; // DG: was 256, made it more flexible
 
 class idKey {
 public:
@@ -249,6 +248,13 @@ void idKeyInput::ArgCompletion_KeyName( const idCmdArgs &args, void(*callback)( 
 
 	for ( kn = keynames; kn->name; kn++ ) {
 		callback( va( "%s %s", args.Argv( 0 ), kn->name ) );
+	}
+
+	for( int scKey = K_FIRST_SCANCODE; scKey <= K_LAST_SCANCODE; ++scKey ) {
+		const char* scName = Sys_GetScancodeName( scKey );
+		if ( scName != NULL ) {
+			callback( va( "%s %s", args.Argv( 0 ), scName ) );
+		}
 	}
 }
 
@@ -330,6 +336,11 @@ int idKeyInput::StringToKeyNum( const char *str ) {
 		return n1 * 16 + n2;
 	}
 
+	// DG: scancode names start with "SC_"
+	if ( idStr::Icmpn( str, "SC_", 3 ) == 0 ) {
+		return Sys_GetKeynumForScancodeName( str );
+	}
+
 	// scan for a text match
 	for ( kn = keynames; kn->name; kn++ ) {
 		if ( !idStr::Icmp( str, kn->name ) ) {
@@ -346,6 +357,9 @@ idKeyInput::KeyNumToString
 
 Returns a string (either a single ascii char, a K_* name, or a 0x11 hex string) for the
 given keynum.
+
+NOTE: with localized = true, the returned string is only valid until the next call (at least for K_SC_*)!
+      (currently this is no problem)
 ===================
 */
 const char *idKeyInput::KeyNumToString( int keynum, bool localized ) {
@@ -357,7 +371,7 @@ const char *idKeyInput::KeyNumToString( int keynum, bool localized ) {
 		return "<KEY NOT FOUND>";
 	}
 
-	if ( keynum < 0 || keynum > 255 ) {
+	if ( keynum < 0 || keynum >= MAX_KEYS ) {
 		return "<OUT OF RANGE>";
 	}
 
@@ -366,6 +380,18 @@ const char *idKeyInput::KeyNumToString( int keynum, bool localized ) {
 		tinystr[0] = Sys_MapCharForKey( keynum );
 		tinystr[1] = 0;
 		return tinystr;
+	}
+
+	if ( keynum >= K_FIRST_SCANCODE && keynum <= K_LAST_SCANCODE ) {
+		const char* scName = NULL;
+		if ( localized ) {
+			scName = Sys_GetLocalizedScancodeName( keynum );
+		} else {
+			scName = Sys_GetScancodeName( keynum );
+		}
+		if ( scName != NULL ) {
+			return scName;
+		}
 	}
 
 	// check for a key string
@@ -709,7 +735,7 @@ void idKeyInput::PreliminaryKeyEvent( int keynum, bool down ) {
 	keys[keynum].down = down;
 
 #ifdef ID_DOOM_LEGACY
-	if ( down ) {
+	if ( down && keynum < 127 ) { // DG: only ASCII keys are of interest here
 		lastKeys[ 0 + ( lastKeyIndex & 15 )] = keynum;
 		lastKeys[16 + ( lastKeyIndex & 15 )] = keynum;
 		lastKeyIndex = ( lastKeyIndex + 1 ) & 15;

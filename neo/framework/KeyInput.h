@@ -197,9 +197,79 @@ typedef enum {
 
 	K_PRINT_SCR	= 252,	// SysRq / PrintScr
 	K_RIGHT_ALT = 253,	// used by some languages as "Alt-Gr"
-	K_LAST_KEY  = 254	// this better be < 256!
+
+	// DG: map all relevant scancodes from SDL to K_SC_* (taken from Yamagi Quake II)
+	// (relevant are ones that are likely to be keyboardlayout-dependent,
+	//  i.e. printable characters of sorts, *not* Ctrl, Alt, F1, Del, ...)
+	K_FIRST_SCANCODE = 256,
+
+	// !!! NOTE: if you add a scancode here, make sure to also add it to   !!!
+	// !!!       scancodemappings[] in sys/events.cpp (and preserve order) !!!
+	K_SC_A = K_FIRST_SCANCODE,
+	K_SC_B,
+	K_SC_C,
+	K_SC_D,
+	K_SC_E,
+	K_SC_F,
+	K_SC_G,
+	K_SC_H,
+	K_SC_I,
+	K_SC_J,
+	K_SC_K,
+	K_SC_L,
+	K_SC_M,
+	K_SC_N,
+	K_SC_O,
+	K_SC_P,
+	K_SC_Q,
+	K_SC_R,
+	K_SC_S,
+	K_SC_T,
+	K_SC_U,
+	K_SC_V,
+	K_SC_W,
+	K_SC_X,
+	K_SC_Y,
+	K_SC_Z,
+	// leaving out SDL_SCANCODE_1 ... _0, we handle them separately already
+	// also return, escape, backspace, tab, space, already handled as keycodes
+	K_SC_MINUS,
+	K_SC_EQUALS,
+	K_SC_LEFTBRACKET,
+	K_SC_RIGHTBRACKET,
+	K_SC_BACKSLASH,
+	K_SC_NONUSHASH,
+	K_SC_SEMICOLON,
+	K_SC_APOSTROPHE,
+	K_SC_GRAVE,
+	K_SC_COMMA,
+	K_SC_PERIOD,
+	K_SC_SLASH,
+	// leaving out lots of keys incl. from keypad, we already handle them as normal keys
+	K_SC_NONUSBACKSLASH,
+	K_SC_INTERNATIONAL1, /**< used on Asian keyboards, see footnotes in USB doc */
+	K_SC_INTERNATIONAL2,
+	K_SC_INTERNATIONAL3, /**< Yen */
+	K_SC_INTERNATIONAL4,
+	K_SC_INTERNATIONAL5,
+	K_SC_INTERNATIONAL6,
+	K_SC_INTERNATIONAL7,
+	K_SC_INTERNATIONAL8,
+	K_SC_INTERNATIONAL9,
+	K_SC_THOUSANDSSEPARATOR,
+	K_SC_DECIMALSEPARATOR,
+	K_SC_CURRENCYUNIT,
+	K_SC_CURRENCYSUBUNIT,
+
+	K_LAST_SCANCODE = K_SC_CURRENCYSUBUNIT, // TODO: keep up to date!
+
+
+	// FIXME: maybe move everything joystick related here
+
+	K_LAST_KEY // DG: this said "this better be < 256!"; I hope I fixed all places in code assuming this..
 } keyNum_t;
 
+enum { K_NUM_SCANCODES = K_LAST_SCANCODE - K_FIRST_SCANCODE + 1 };
 
 class idKeyInput {
 public:

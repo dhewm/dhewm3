@@ -94,6 +94,157 @@ struct mouse_poll_t {
 static idList<kbd_poll_t> kbd_polls;
 static idList<mouse_poll_t> mouse_polls;
 
+struct scancodename_t {
+	int sdlScancode;
+	const char* name;
+};
+
+// scancodenames[keynum - K_FIRST_SCANCODE] belongs to keynum
+static scancodename_t scancodemappings[] = {
+	// NOTE: must be kept in sync with the K_SC_* section of keyNum_t in framework/KeyInput.h !
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	#define D3_SC_MAPPING(X) { SDL_SCANCODE_ ## X , "SC_" #X }
+#else // SDL1.2 doesn't have scancodes
+	#define D3_SC_MAPPING(X) { 0 , "SC_" #X }
+#endif
+
+	D3_SC_MAPPING(A), // { SDL_SCANCODE_A, "SC_A" },
+	D3_SC_MAPPING(B),
+	D3_SC_MAPPING(C),
+	D3_SC_MAPPING(D),
+	D3_SC_MAPPING(E),
+	D3_SC_MAPPING(F),
+	D3_SC_MAPPING(G),
+	D3_SC_MAPPING(H),
+	D3_SC_MAPPING(I),
+	D3_SC_MAPPING(J),
+	D3_SC_MAPPING(K),
+	D3_SC_MAPPING(L),
+	D3_SC_MAPPING(M),
+	D3_SC_MAPPING(N),
+	D3_SC_MAPPING(O),
+	D3_SC_MAPPING(P),
+	D3_SC_MAPPING(Q),
+	D3_SC_MAPPING(R),
+	D3_SC_MAPPING(S),
+	D3_SC_MAPPING(T),
+	D3_SC_MAPPING(U),
+	D3_SC_MAPPING(V),
+	D3_SC_MAPPING(W),
+	D3_SC_MAPPING(X),
+	D3_SC_MAPPING(Y),
+	D3_SC_MAPPING(Z),
+	// leaving out SDL_SCANCODE_1 ... _0, we handle them separately already
+	// also return, escape, backspace, tab, space, already handled as keycodes
+	D3_SC_MAPPING(MINUS),
+	D3_SC_MAPPING(EQUALS),
+	D3_SC_MAPPING(LEFTBRACKET),
+	D3_SC_MAPPING(RIGHTBRACKET),
+	D3_SC_MAPPING(BACKSLASH),
+	D3_SC_MAPPING(NONUSHASH),
+	D3_SC_MAPPING(SEMICOLON),
+	D3_SC_MAPPING(APOSTROPHE),
+	D3_SC_MAPPING(GRAVE),
+	D3_SC_MAPPING(COMMA),
+	D3_SC_MAPPING(PERIOD),
+	D3_SC_MAPPING(SLASH),
+	// leaving out lots of key incl. from keypad, we already handle them as normal keys
+	D3_SC_MAPPING(NONUSBACKSLASH),
+	D3_SC_MAPPING(INTERNATIONAL1), /**< used on Asian keyboards, see footnotes in USB doc */
+	D3_SC_MAPPING(INTERNATIONAL2),
+	D3_SC_MAPPING(INTERNATIONAL3), /**< Yen */
+	D3_SC_MAPPING(INTERNATIONAL4),
+	D3_SC_MAPPING(INTERNATIONAL5),
+	D3_SC_MAPPING(INTERNATIONAL6),
+	D3_SC_MAPPING(INTERNATIONAL7),
+	D3_SC_MAPPING(INTERNATIONAL8),
+	D3_SC_MAPPING(INTERNATIONAL9),
+	D3_SC_MAPPING(THOUSANDSSEPARATOR),
+	D3_SC_MAPPING(DECIMALSEPARATOR),
+	D3_SC_MAPPING(CURRENCYUNIT),
+	D3_SC_MAPPING(CURRENCYSUBUNIT)
+
+#undef D3_SC_MAPPING
+};
+
+// for keynums between K_FIRST_SCANCODE and K_LAST_SCANCODE
+// returns e.g. "SC_A" for K_SC_A
+const char* Sys_GetScancodeName( int key ) {
+	if ( key >= K_FIRST_SCANCODE && key <= K_LAST_SCANCODE ) {
+		int scIdx = key - K_FIRST_SCANCODE;
+		return scancodemappings[scIdx].name;
+	}
+	return NULL;
+}
+
+static bool isAscii( const char* str_ ) {
+	const unsigned char* str = (const unsigned char*)str_;
+	while(*str != '\0') {
+		if(*str > 127) {
+			return false;
+		}
+		++str;
+	}
+	return true;
+}
+
+// returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
+// regarding the current keyboard layout - if that name is in ASCII or corresponds
+// to a "High-ASCII" char supported by Doom3.
+// Otherwise return same name as Sys_GetScancodeName()
+// !! Returned string is only valid until next call to this function !!
+const char* Sys_GetLocalizedScancodeName( int key ) {
+	if ( key >= K_FIRST_SCANCODE && key <= K_LAST_SCANCODE ) {
+		int scIdx = key - K_FIRST_SCANCODE;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SDL_Scancode sc = ( SDL_Scancode ) scancodemappings[scIdx].sdlScancode;
+		SDL_Keycode k = SDL_GetKeyFromScancode( sc );
+		if ( k >= 0xA1 && k <= 0xFF ) {
+			// luckily, the "High-ASCII" (ISO-8559-1) chars supported by Doom3
+			// have the same values as the corresponding SDL_Keycodes.
+			static char oneCharStr[2] = {0, 0};
+			oneCharStr[0] = (unsigned char)k;
+			return oneCharStr;
+		} else if ( k != SDLK_UNKNOWN ) {
+			const char *ret = SDL_GetKeyName( k );
+			// the keyname from SDL2 is in UTF-8, which Doom3 can't print,
+			// so only return the name if it's ASCII, otherwise fall back to "SC_bla"
+			if ( ret && *ret != '\0' && isAscii( ret ) ) {
+				return ret;
+			}
+		}
+#endif  // SDL1.2 doesn't support this, use unlocalized name (also as fallback if we couldn't get a keyname)
+		return scancodemappings[scIdx].name;
+
+	}
+	return NULL;
+}
+
+// returns keyNum_t (K_SC_* constant) for given scancode name (like "SC_A")
+// only makes sense to call it if name starts with "SC_" (or "sc_")
+// returns -1 if not found
+int Sys_GetKeynumForScancodeName( const char* name ) {
+	for( int scIdx = 0; scIdx < K_NUM_SCANCODES; ++scIdx ) {
+		if ( idStr::Icmp( name, scancodemappings[scIdx].name ) == 0 ) {
+			return scIdx + K_FIRST_SCANCODE;
+		}
+	}
+	return -1;
+}
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+static int getKeynumForSDLscancode( SDL_Scancode scancode ) {
+	int sc = scancode;
+	for ( int scIdx=0; scIdx < K_NUM_SCANCODES; ++scIdx ) {
+		if ( scancodemappings[scIdx].sdlScancode == sc ) {
+			return scIdx + K_FIRST_SCANCODE;
+		}
+	}
+	return 0;
+}
+#endif
+
 static byte mapkey(SDL_Keycode key) {
 	switch (key) {
 	case SDLK_BACKSPACE:
@@ -285,6 +436,8 @@ void Sys_InitInput() {
 	kbd_polls.SetGranularity(64);
 	mouse_polls.SetGranularity(64);
 
+	assert(sizeof(scancodemappings)/sizeof(scancodemappings[0]) == K_NUM_SCANCODES && "scancodemappings incomplete?");
+
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -389,7 +542,7 @@ Sys_GetEvent
 sysEvent_t Sys_GetEvent() {
 	SDL_Event ev;
 	sysEvent_t res = { };
-	byte key;
+	int key;
 
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
 
@@ -532,10 +685,14 @@ sysEvent_t Sys_GetEvent() {
 				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) { // TODO: always do this check?
 					key = Sys_GetConsoleKey(true);
 				} else {
-					if (ev.type == SDL_KEYDOWN) {
-						common->Warning("unmapped SDL key %d", ev.key.keysym.sym);
+					// if the key couldn't be mapped so far, try to map the scancode to K_SC_*
+					key = getKeynumForSDLscancode(sc);
+					if(!key) {
+						if (ev.type == SDL_KEYDOWN) {
+							common->Warning("unmapped SDL key %d (scancode %d)", ev.key.keysym.sym, (int)sc);
+						}
+						continue; // handle next event
 					}
-					continue; // handle next event
 				}
 			}
 		}
