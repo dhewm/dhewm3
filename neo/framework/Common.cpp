@@ -1146,7 +1146,14 @@ Com_ScriptDebugger_f
 static void Com_ScriptDebugger_f( const idCmdArgs &args ) {
 	// Make sure it wasnt on the command line
 	if ( !( com_editors & EDITOR_DEBUGGER ) ) {
-		 DebuggerClientLaunch();
+		
+		//start debugger server if needed
+		if ( !com_enableDebuggerServer.GetBool() )
+			com_enableDebuggerServer.SetBool( true );
+
+		//start debugger client.
+		DebuggerClientLaunch();
+
 	}
 }
 
