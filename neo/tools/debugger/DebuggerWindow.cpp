@@ -1821,10 +1821,17 @@ void rvDebuggerWindow::ProcessNetMessage ( idBitMsg* msg )
 			break;
 
 		case DBMSG_PRINT:
+		{
+			HWND prevFocus = GetFocus();
+			SetFocus ( mWndConsole );
 			SendMessage ( mWndConsole, EM_SETSEL, -1, -1 );
 			SendMessage ( mWndConsole, EM_REPLACESEL, 0, (LPARAM)(const char*)(msg->GetData()) + msg->GetReadCount() );
+			SendMessage( mWndConsole, EM_SETSEL, -1, -1 );
 			SendMessage ( mWndConsole, EM_SCROLLCARET, 0, 0 );
+			UpdateWindow( mWndConsole );
+			SetFocus( prevFocus );
 			break;
+		}
 
 		case DBMSG_BREAK:
 		{
