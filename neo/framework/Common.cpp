@@ -97,6 +97,9 @@ idCVar com_timestampPrints( "com_timestampPrints", "0", CVAR_SYSTEM, "print time
 idCVar com_timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "scales the time", 0.1f, 10.0f );
 idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when making a build" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
+idCVar com_asyncClient ( "com_asyncClient", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_ARCHIVE, "run client and renderer asynchronous" );
+idCVar com_renderFPS( "com_renderFPS", "300", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "frames per second to render" );
+idCVar com_clientFPS( "com_clientFPS", "60", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "times per second the game is called" );
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
@@ -2385,52 +2388,112 @@ idCommonLocal::Frame
 =================
 */
 void idCommonLocal::Frame( void ) {
-	try {
+	// Slow things a little bit down.
+	unsigned long long spintime = Sys_Microseconds();
 
-		// pump all the events
-		Sys_GenerateEvents();
+	while ( 1 ) {
+#if defined (__GNUC__) && (__i386 || __x86_64__)
+				asm("pause");
+#elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
+				asm("yield");
+#endif
 
-		// write config file if anything changed
-		WriteConfiguration();
+		if ( Sys_Microseconds() >= ( spintime - 5 ) ) {
+			break;
+		}
+	}
 
-		// change SIMD implementation if required
-		if ( com_forceGenericSIMD.IsModified() ) {
-			InitSIMD();
+	// Calculate timings.
+	static unsigned long long oldframetime;
+	unsigned long long newframetime = Sys_Microseconds();
+	unsigned long long frametime = newframetime - oldframetime;
+	oldframetime = newframetime;
+
+	static int clientdelta = 1000000;
+	static int renderdelta = 1000000;
+
+	bool clientframe = true;
+	bool renderframe = true;
+
+	if ( cvarSystem->GetCVarBool( "com_asyncClient" ) == true ) {
+		clientdelta += frametime;
+		renderdelta += frametime;
+
+		if ( clientdelta < ( 1000000 / cvarSystem->GetCVarInteger( "com_clientFPS" ) ) ) {
+			clientframe = false;
+		} else {
+			clientdelta = 0;
 		}
 
-		eventLoop->RunEventLoop();
+		if ( renderdelta < ( 1000000 / cvarSystem->GetCVarInteger( "com_renderFPS" ) ) ) {
+			renderframe = false;
+		} else {
+			renderdelta = 0;
+		}
+	}
 
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+	// Early return if no work has to be done.
+	if ( !clientframe && !renderframe ) {
+		return;
+	}
 
-		idAsyncNetwork::RunFrame();
+    // Rund the game.
+	try {
+		if ( clientframe ) {
+			// Pump the events.
+			Sys_GenerateEvents();
+
+			// Write config file (if anything changed).
+			WriteConfiguration();
+
+			// Change SIMD implementation if required.
+			if ( com_forceGenericSIMD.IsModified() ) {
+				InitSIMD();
+			}
+
+			eventLoop->RunEventLoop();
+			com_frameTime = com_ticNumber * USERCMD_MSEC;
+			idAsyncNetwork::RunFrame();
+		}
 
 		if ( idAsyncNetwork::IsActive() ) {
 			if ( idAsyncNetwork::serverDedicated.GetInteger() != 1 ) {
-				session->GuiFrameEvents();
-				session->UpdateScreen( false );
+				if ( clientframe ) {
+					session->GuiFrameEvents();
+				}
+
+				if ( renderframe ) {
+					session->UpdateScreen( false );
+				}
 			}
 		} else {
-			session->Frame();
+			if ( clientframe ) {
+				session->Frame();
+			}
 
-			// normal, in-sequence screen update
-			session->UpdateScreen( false );
+			if ( renderframe ) {
+				// normal, in-sequence screen update
+				session->UpdateScreen( false );
+			}
 		}
 
-		// report timing information
-		if ( com_speeds.GetBool() ) {
-			static int	lastTime;
-			int		nowTime = Sys_Milliseconds();
-			int		com_frameMsec = nowTime - lastTime;
-			lastTime = nowTime;
-			Printf( "frame:%i all:%3i gfr:%3i rf:%3i bk:%3i\n", com_frameNumber, com_frameMsec, time_gameFrame, time_frontend, time_backend );
-			time_gameFrame = 0;
-			time_gameDraw = 0;
+		if ( clientframe ) {
+			// report timing information
+			if ( com_speeds.GetBool() ) {
+				static int	lastTime;
+				int		nowTime = Sys_Milliseconds();
+				int		com_frameMsec = nowTime - lastTime;
+				lastTime = nowTime;
+				Printf( "frame:%i all:%3i gfr:%3i rf:%3i bk:%3i\n", com_frameNumber, com_frameMsec, time_gameFrame, time_frontend, time_backend );
+				time_gameFrame = 0;
+				time_gameDraw = 0;
+			}
+
+			com_frameNumber++;
+
+			// set idLib frame number for frame based memory dumps
+			idLib::frameNumber = com_frameNumber;
 		}
-
-		com_frameNumber++;
-
-		// set idLib frame number for frame based memory dumps
-		idLib::frameNumber = com_frameNumber;
 	}
 
 	catch( idException & ) {

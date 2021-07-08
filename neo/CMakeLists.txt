@@ -930,6 +930,7 @@ elseif(APPLE)
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_main.cpp
+		sys/posix/posix_shared.cpp
 	)
 
 	set(src_sys_core
@@ -982,6 +983,7 @@ else()
 		sys/sys_local.cpp
 		sys/posix/posix_net.cpp
 		sys/posix/posix_main.cpp
+		sys/posix/posix_shared.cpp
 		sys/linux/main.cpp
 	)
 

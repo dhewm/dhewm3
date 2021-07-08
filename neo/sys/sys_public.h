@@ -116,9 +116,11 @@ void			Sys_DebugVPrintf( const char *fmt, va_list arg );
 // NOTE: due to SDL_TIMESLICE this is very bad portability karma, and should be completely removed
 void			Sys_Sleep( int msec );
 
-// Sys_Milliseconds should only be used for profiling purposes,
-// any game related timing information should come from event timestamps
-unsigned int	Sys_Milliseconds( void );
+// Sys_Milliseconds and Sys_Microseconds are used in the main loop and fpr
+// profiling purposes. any game related timing information should come from
+// event timestamps
+unsigned long long	Sys_Microseconds( void );
+unsigned int		Sys_Milliseconds( void );
 
 // returns a selection of the CPUID_* flags
 int				Sys_GetProcessorId( void );
