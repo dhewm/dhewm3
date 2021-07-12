@@ -210,7 +210,7 @@ const char *idEditWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 	int len = text.Length();
 
 	if ( event->evType == SE_CHAR ) {
-		if ( event->evValue == Sys_GetConsoleKey( false ) || event->evValue == Sys_GetConsoleKey( true ) ) {
+		if ( event->evValue == Sys_GetConsoleKey( idKeyInput::IsDown( K_SHIFT ) ) ) {
 			return "";
 		}
 
