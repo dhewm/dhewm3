@@ -60,10 +60,16 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 static const char *kbdNames[] = {
+#if SDL_VERSION_ATLEAST(2, 0, 0) // auto-detection is only available for SDL2
+	"auto",
+#endif
 	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", "brazilian", NULL
 };
 
-static idCVar in_kbd("in_kbd", "english", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
+static idCVar in_kbd("in_kbd", kbdNames[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
+// TODO: I'd really like to make in_ignoreConsoleKey default to 1, but I guess there would be too much confusion :-/
+static idCVar in_ignoreConsoleKey("in_ignoreConsoleKey", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
+		"Console only opens with Shift+Esc, not ` or ^ etc");
 
 static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
@@ -451,6 +457,7 @@ void Sys_InitInput() {
 #endif
 
 	in_kbd.SetModified();
+	Sys_GetConsoleKey(false); // initialize consoleKeymappingIdx from in_kbd
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	const char* grabKeyboardEnv = SDL_getenv(SDL_HINT_GRAB_KEYBOARD);
 	if ( grabKeyboardEnv ) {
@@ -485,46 +492,89 @@ void Sys_InitScanTable() {
 }
 #endif
 
+
+struct ConsoleKeyMapping {
+	const char* langName;
+	unsigned char key;
+	unsigned char keyShifted;
+};
+
+static ConsoleKeyMapping consoleKeyMappings[] = {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	{ "auto",   	 0 ,	0   }, // special case: set current keycode for SDL_SCANCODE_GRAVE (no shifted keycode, though)
+#endif
+	{ "english",	'`',	'~' },
+	{ "french", 	'<',	'>' },
+	{ "german", 	'^',	176 }, // °
+	{ "italian",	'\\',	'|' },
+	{ "spanish",	186,	170 }, // º ª
+	{ "turkish",	'"',	233 }, // é
+	{ "norwegian",	124,	167 }, // | §
+	{ "brazilian",	'\'',	'"' },
+};
+static int consoleKeyMappingIdx = 0;
+
+static void initConsoleKeyMapping() {
+	const int numMappings = sizeof(consoleKeyMappings)/sizeof(consoleKeyMappings[0]);
+
+	idStr lang = in_kbd.GetString();
+	consoleKeyMappingIdx = 0;
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	consoleKeyMappings[0].key = 0;
+	if ( lang.Length() == 0 || lang.Icmp( "auto") == 0 ) {
+		// auto-detection (SDL2-only)
+		int keycode = SDL_GetKeyFromScancode( SDL_SCANCODE_GRAVE );
+		if ( keycode > 0 && keycode <= 0xFF ) {
+			// the SDL keycode and dhewm3 keycode should be identical for the mappings,
+			// as it's ISO-8859-1 ("High ASCII") chars
+			for( int i=1; i<numMappings; ++i ) {
+				if ( consoleKeyMappings[i].key == keycode ) {
+					consoleKeyMappingIdx = i;
+					common->Printf( "Detected keyboard layout as \"%s\"\n", consoleKeyMappings[i].langName );
+					break;
+				}
+			}
+			if ( consoleKeyMappingIdx == 0 ) { // not found in known mappings
+				consoleKeyMappings[0].key = keycode;
+			}
+		}
+	} else
+#endif
+	{
+		for( int i=1; i<numMappings; ++i ) {
+			if( lang.Icmp( consoleKeyMappings[i].langName ) == 0 ) {
+				consoleKeyMappingIdx = i;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+				int keycode = SDL_GetKeyFromScancode( SDL_SCANCODE_GRAVE );
+				if ( keycode && keycode != consoleKeyMappings[i].key ) {
+					common->Warning( "in_kbd is set to \"%s\", but the actual keycode of the 'console key' is %c (%d), not %c (%d), so this might not work that well..\n",
+							lang.c_str(), (unsigned char)keycode, keycode, consoleKeyMappings[i].key, consoleKeyMappings[i].key );
+				}
+#endif
+				break;
+			}
+		}
+	}
+}
+
 /*
 ===============
 Sys_GetConsoleKey
 ===============
 */
-unsigned char Sys_GetConsoleKey(bool shifted) {
-	static unsigned char keys[2] = { '`', '~' };
+unsigned char Sys_GetConsoleKey( bool shifted ) {
 
-	if (in_kbd.IsModified()) {
-		idStr lang = in_kbd.GetString();
+	if ( in_ignoreConsoleKey.GetBool() ) {
+		return 0;
+	}
 
-		if (lang.Length()) {
-			if (!lang.Icmp("french")) {
-				keys[0] = '<';
-				keys[1] = '>';
-			} else if (!lang.Icmp("german")) {
-				keys[0] = '^';
-				keys[1] = 176; // °
-			} else if (!lang.Icmp("italian")) {
-				keys[0] = '\\';
-				keys[1] = '|';
-			} else if (!lang.Icmp("spanish")) {
-				keys[0] = 186; // º
-				keys[1] = 170; // ª
-			} else if (!lang.Icmp("turkish")) {
-				keys[0] = '"';
-				keys[1] = 233; // é
-			} else if (!lang.Icmp("norwegian")) {
-				keys[0] = 124; // |
-				keys[1] = 167; // §
-			} else if (!lang.Icmp("brazilian")) {
-				keys[0] = '\'';
-				keys[1] = '"';
-			}
-		}
-
+	if ( in_kbd.IsModified() ) {
+		initConsoleKeyMapping();
 		in_kbd.ClearModified();
 	}
 
-	return shifted ? keys[1] : keys[0];
+	return shifted ? consoleKeyMappings[consoleKeyMappingIdx].keyShifted : consoleKeyMappings[consoleKeyMappingIdx].key;
 }
 
 /*
@@ -665,15 +715,17 @@ sysEvent_t Sys_GetEvent() {
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 			key = mapkey(ev.key.keysym.sym);
 			if (!key) {
-				unsigned char c;
-				// check if its an unmapped console key
-				if (ev.key.keysym.unicode == (c = Sys_GetConsoleKey(false))) {
-					key = c;
-				} else if (ev.key.keysym.unicode == (c = Sys_GetConsoleKey(true))) {
-					key = c;
-				} else {
+				if ( !in_ignoreConsoleKey.GetBool() ) {
+					// check if its an unmapped console key
+					int c = Sys_GetConsoleKey( (ev.key.keysym.mod & KMOD_SHIFT) != 0 );
+					if (ev.key.keysym.unicode == c) {
+						key = c;
+					}
+				}
+				if (!key) {
 					if (ev.type == SDL_KEYDOWN)
-						common->Warning("unmapped SDL key %d (0x%x)", ev.key.keysym.sym, ev.key.keysym.unicode);
+						common->Warning( "unmapped SDL key %d (0x%x) - if possible use SDL2 for better keyboard support",
+						                 ev.key.keysym.sym, ev.key.keysym.unicode );
 					continue; // handle next event
 				}
 			}
@@ -699,18 +751,19 @@ sysEvent_t Sys_GetEvent() {
 				key = mapkey(ev.key.keysym.sym);
 			}
 
-			if(!key) {
-				if (ev.key.keysym.scancode == SDL_SCANCODE_GRAVE) { // TODO: always do this check?
-					key = Sys_GetConsoleKey(true);
-				} else {
-					// if the key couldn't be mapped so far, try to map the scancode to K_SC_*
-					key = getKeynumForSDLscancode(sc);
-					if(!key) {
-						if (ev.type == SDL_KEYDOWN) {
-							common->Warning("unmapped SDL key %d (scancode %d)", ev.key.keysym.sym, (int)sc);
-						}
-						continue; // handle next event
+			if ( !in_ignoreConsoleKey.GetBool() && ev.key.keysym.scancode == SDL_SCANCODE_GRAVE ) {
+				// that key between Esc, Tab and 1 is the console key
+				key = K_CONSOLE;
+			}
+
+			if ( !key ) {
+				// if the key couldn't be mapped so far, try to map the scancode to K_SC_*
+				key = getKeynumForSDLscancode(sc);
+				if(!key) {
+					if (ev.type == SDL_KEYDOWN) {
+						common->Warning("unmapped SDL key %d (scancode %d)", ev.key.keysym.sym, (int)sc);
 					}
+					continue; // handle next event
 				}
 			}
 		}
@@ -737,6 +790,8 @@ sysEvent_t Sys_GetEvent() {
 			if (ev.text.text[0]) {
 				res.evType = SE_CHAR;
 				res.evValue = ev.text.text[0];
+
+				// TODO: translate to "ISO-8859-1" with SDL_iconv() ?
 
 				if (ev.text.text[1] != '\0')
 				{

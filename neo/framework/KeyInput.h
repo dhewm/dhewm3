@@ -267,6 +267,7 @@ typedef enum {
 
 	K_LAST_SCANCODE = K_SC_CURRENCYSUBUNIT, // TODO: keep up to date!
 
+	K_CONSOLE, // special keycode used for the "console key" and only to open/close the console (not bindable)
 
 	// FIXME: maybe move everything joystick related here
 
