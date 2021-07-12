@@ -32,6 +32,11 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
       (can be bound to different actions than their left counterparts)
     - Added `in_grabKeyboard` CVar to make sure dhewm3 gets *all* keyboard input  
       Prevents the Windows-key or Alt-Tab or whatever from taking focus from the game
+    - Added `in_ignoreConsoleKey` - if set to `1`, the console is only opened with
+      Shift+Esc, and the "console key" (that key between Esc, 1 and Tab) can be freely
+      bound to an action (and its char can be typed in the console without closing it).
+    - Added (SDL2-only) "auto" option for `in_kbd`: When not disabling the console key,
+      dhewm3 will try to automatically detect it if `in_kbd` is set to "auto" (now default)
 * `s_alReverbGain` CVar to reduce EFX reverb effect intensity (#365)
 * Pause (looped) sounds when entering menu (#330)
 * Fixes for looped sounds (#390)
