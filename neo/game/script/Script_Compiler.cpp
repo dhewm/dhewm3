@@ -28,6 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/platform.h"
 #include "idlib/Timer.h"
+#include "framework/FileSystem.h"
 
 #include "script/Script_Thread.h"
 #include "Game_local.h"
@@ -2620,6 +2621,8 @@ void idCompiler::CompileFile( const char *text, const char *filename, bool toCon
 
 	compile_time.Start();
 
+	idStr origFileName = filename; // DG: filename pointer might become invalid when calling NextToken() below
+
 	scope				= &def_namespace;
 	basetype			= NULL;
 	callthread			= false;
@@ -2687,6 +2690,11 @@ void idCompiler::CompileFile( const char *text, const char *filename, bool toCon
 
 	compile_time.Stop();
 	if ( !toConsole ) {
-		gameLocal.Printf( "Compiled '%s': %u ms\n", filename, compile_time.Milliseconds() );
+		// DG: filename can be overwritten by NextToken() (via gameLocal.program.GetFilenum()), so
+		//     use a copy, origFileName, that's still valid here. Furthermore, the path is nonsense,
+		//     as idProgram::CompileText() called fileSystem->RelativePathToOSPath() on it
+		//     which does not return the *actual* full path of that file but invents one,
+		//     so revert that to the relative filename which at least isn't misleading
+		gameLocal.Printf( "Compiled '%s': %u ms\n", fileSystem->OSPathToRelativePath(origFileName), compile_time.Milliseconds() );
 	}
 }
