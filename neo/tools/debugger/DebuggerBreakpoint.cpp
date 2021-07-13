@@ -36,11 +36,12 @@ If you have questions concerning this license or the applicable additional terms
 
 int rvDebuggerBreakpoint::mNextID = 1;
 
-rvDebuggerBreakpoint::rvDebuggerBreakpoint ( const char* filename, int linenumber, int id )
+rvDebuggerBreakpoint::rvDebuggerBreakpoint ( const char* filename, int linenumber, int id, bool onceOnly )
 {
 	mFilename = filename;
 	mLineNumber = linenumber;
 	mEnabled = true;
+	mOnceOnly = onceOnly;
 
 	if ( id == -1 )
 	{

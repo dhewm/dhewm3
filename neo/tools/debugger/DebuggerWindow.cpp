@@ -1202,6 +1202,7 @@ int rvDebuggerWindow::HandleCommand ( WPARAM wparam, LPARAM lparam )
 			break;
 		}
 
+		case 111: // DG: Debugger.rc has 'MENUITEM "Toggle &Breakpoint\tF9", 111' for the context menu no idea why 111 but this works
 		case ID_DBG_DEBUG_TOGGLEBREAKPOINT:
 			ToggleBreakpoint ( );
 			break;
@@ -1277,6 +1278,23 @@ int rvDebuggerWindow::HandleCommand ( WPARAM wparam, LPARAM lparam )
 			UpdateScript ( );
 			break;
 		}
+
+		// DG: support "Run To Cursor" from context menu
+		case ID_DBG_DEBUG_RUNTOCURSOR:
+		{
+			// Find the currently selected line
+			DWORD sel;
+			SendMessage( mWndScript, EM_GETSEL, (WPARAM)&sel, 0 );
+			int lineNumber = SendMessage( mWndScript, EM_LINEFROMCHAR, sel, 0 ) + 1;
+
+			const char* filename = mScripts[mActiveScript]->GetFilename();
+			mClient->AddBreakpoint( filename, lineNumber, true );
+			mClient->Resume();
+			break;
+		}
+
+		// TODO: case ID_DBG_DEBUG_SHOWNEXTSTATEMENT:
+		//       whatever this is supposed to do (also from context menu)
 	}
 
 	return 0;
@@ -2102,6 +2120,8 @@ void rvDebuggerWindow::CreateToolbar ( void )
 	SendMessage( mWndToolbar, TB_ADDBITMAP, (WPARAM)4, (LPARAM) &tbab );
 
 	// Add the buttons to the toolbar
+	// FIXME:  warning C4838: conversion from 'int' to 'BYTE' requires a narrowing conversion
+	// most probably because TBBUTTON has 4 more bytes in bReserved for alignment on _WIN64
 	TBBUTTON tbb[] = { { 0, 0,					TBSTATE_ENABLED, BTNS_SEP,    0, 0, -1 },
 					   { 8, ID_DBG_FILE_OPEN,	TBSTATE_ENABLED, BTNS_BUTTON, 0, 0, -1 },
 					   { 0, 0,					TBSTATE_ENABLED, BTNS_SEP,    0, 0, -1 },

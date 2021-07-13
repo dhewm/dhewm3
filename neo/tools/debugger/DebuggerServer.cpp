@@ -321,7 +321,7 @@ void rvDebuggerServer::HandleAddBreakpoint ( idBitMsg* msg )
 
 
 	SDL_LockMutex( mCriticalSection );
-	mBreakpoints.Append ( new rvDebuggerBreakpoint ( filename, lineNumber, id ) );
+	mBreakpoints.Append ( new rvDebuggerBreakpoint ( filename, lineNumber, id, onceOnly ) );
 	SDL_UnlockMutex( mCriticalSection );
 }
 
@@ -598,6 +598,25 @@ void rvDebuggerServer::CheckBreakpoints	( idInterpreter* interpreter, idProgram*
 		{
 			continue;
 		}
+
+		// DG: onceOnly support
+		if ( bp->GetOnceOnly() ) {
+			// we'll do the one Break() a few lines below; remove it here while mBreakpoints is unmodified
+			// (it can be modifed from the client while in Break() below)
+			mBreakpoints.RemoveIndex( i );
+			delete bp;
+
+			// also tell client to remove the breakpoint
+			idBitMsg	msgOut;
+			byte		buffer[MAX_MSGLEN];
+			msgOut.Init( buffer, sizeof( buffer ) );
+			msgOut.BeginWriting();
+			msgOut.WriteShort( (short)DBMSG_REMOVEBREAKPOINT );
+			msgOut.WriteInt( linenumber );
+			msgOut.WriteString( qpath.c_str() );
+			SendPacket( msgOut.GetData(), msgOut.GetSize() );
+		}
+		// DG end
 
 		// Pop out of the critical section so we dont get stuck
 		SDL_UnlockMutex( mCriticalSection );

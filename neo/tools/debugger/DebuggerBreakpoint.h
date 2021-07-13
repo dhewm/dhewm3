@@ -34,17 +34,19 @@ class rvDebuggerBreakpoint
 {
 public:
 
-	rvDebuggerBreakpoint ( const char* filename, int linenumber, int id = -1 );
+	rvDebuggerBreakpoint ( const char* filename, int linenumber, int id = -1, bool onceOnly = false );
 	rvDebuggerBreakpoint ( rvDebuggerBreakpoint& bp );
 	~rvDebuggerBreakpoint ( void );
 
 	const char*		GetFilename		( void );
 	int				GetLineNumber	( void );
 	int				GetID			( void );
+	bool			GetOnceOnly     ( void );
 
 protected:
 
 	bool	mEnabled;
+	bool	mOnceOnly;
 	int		mID;
 	int		mLineNumber;
 	idStr	mFilename;
@@ -66,6 +68,11 @@ ID_INLINE int rvDebuggerBreakpoint::GetLineNumber ( void )
 ID_INLINE int rvDebuggerBreakpoint::GetID ( void )
 {
 	return mID;
+}
+
+ID_INLINE bool rvDebuggerBreakpoint::GetOnceOnly( void )
+{
+	return mOnceOnly;
 }
 
 #endif // DEBUGGERBREAKPOINT_H_
