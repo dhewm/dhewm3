@@ -187,11 +187,13 @@ bool rvDebuggerServer::ProcessMessages ( void )
 			case DBMSG_CONNECT:
 				mConnected = true;
 				SendMessage ( DBMSG_CONNECTED );
+				HandleInspectScripts ( nullptr );
 				com_editors |= EDITOR_DEBUGGER;
 				break;
 
 			case DBMSG_CONNECTED:
 				mConnected = true;
+				HandleInspectScripts( nullptr );
 				com_editors |= EDITOR_DEBUGGER;
 				break;
 
@@ -294,11 +296,13 @@ data supplied in the message.
 */
 void rvDebuggerServer::HandleAddBreakpoint ( idBitMsg* msg )
 {
+	bool onceOnly = false;
 	long lineNumber;
 	long id;
 	char filename[2048]; // DG: randomly chose this size
 
 	// Read the breakpoint info
+	onceOnly = msg->ReadBits( 1 ) ? true : false;
 	lineNumber = msg->ReadInt ( );
 	id		   = msg->ReadInt ( );
 

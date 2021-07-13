@@ -149,17 +149,17 @@ END
 // Dialog
 //
 
-IDD_DBG_ABOUT DIALOGEX 0, 0, 250, 80
+IDD_DBG_ABOUT DIALOGEX 0, 0, 250, 90
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "About Script Debugger"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Script Debugger",IDC_STATIC,35,7,81,8
-    LTEXT           "Version 1.0",IDC_STATIC,35,17,41,8
+    LTEXT           "Version 1.1",IDC_STATIC,35,17,41,8
     LTEXT           "Original version by Raven", IDC_STATIC, 35,28, 134, 8
-    LTEXT           "Dhewm3 version by Harrie van Ginneken", IDC_STATIC, 35, 38, 134, 8
-    DEFPUSHBUTTON   "OK",IDOK,165,60,50,14
+    LTEXT           "Dhewm3 version by Harrie van Ginneken \n\t\t\t\tand\n\t\t\t Daniel Gibson", IDC_STATIC, 35, 38, 134, 32
+    DEFPUSHBUTTON   "OK",IDOK,100,68,50,14
     ICON            5098,IDC_STATIC,7,7,20,20
 END
 

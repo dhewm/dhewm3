@@ -170,7 +170,7 @@ bool rvDebuggerWindow::Create ( HINSTANCE instance )
 
 	UpdateTitle ( );
 
-	Printf ( "Dhewm3 Script Debugger v1.0\n\n" );
+	Printf ( "Dhewm3 Script Debugger v1.1\n\n" );
 
 	ShowWindow ( mWnd, SW_SHOW );
 	UpdateWindow ( mWnd );

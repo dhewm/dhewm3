@@ -91,7 +91,7 @@ public:
 	void						SendCommand				( const char* cmdStr );
 
 	// Breakpoints
-	int							AddBreakpoint			( const char* filename, int lineNumber );
+	int							AddBreakpoint			( const char* filename, int lineNumber, bool onceOnly = false);
 	bool						RemoveBreakpoint		( int bpID );
 	void						ClearBreakpoints		( void );
 	int							GetBreakpointCount		( void );
