@@ -917,7 +917,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	col.cx = 20;
 	col.pszText = "";
 	ListView_InsertColumn ( mWndScriptList, 0, &col);
-	col.cx = 150;
+	col.cx = 350;
 	col.pszText = "Filename";
 	ListView_InsertColumn ( mWndScriptList, 1, &col );
 
@@ -927,10 +927,10 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	col.cx = 150;
 	col.pszText = "Function";
 	ListView_InsertColumn ( mWndCallstack, 1, &col );
-	col.cx = 150;
+	col.cx = 50;
 	col.pszText = "Line";
 	ListView_InsertColumn ( mWndCallstack, 2, &col );
-	col.cx = 150;
+	col.cx = 350;
 	col.pszText = "Filename";
 	ListView_InsertColumn ( mWndCallstack, 3, &col );
 
