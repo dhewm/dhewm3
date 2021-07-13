@@ -88,6 +88,7 @@ private:
 	bool							FindPrev			( const char* text = NULL );
 	bool							FindNext			( const char* text = NULL );
 
+	void							UpdateBreakpointList( void );
 	void							UpdateScriptList	( void );
 	void							UpdateWatch			( void );
 	void							UpdateWindowMenu	( void );
@@ -113,6 +114,7 @@ private:
 	HWND							mWndConsoleInput;
 	HWND							mWndCallstack;
 	HWND							mWndScriptList;
+	HWND							mWndBreakList; // list of breakpoints
 	HWND							mWndWatch;
 	HWND							mWndThreads;
 	HWND							mWndToolTips;

@@ -51,6 +51,7 @@ If you have questions concerning this license or the applicable additional terms
 #define IDC_DBG_TOOLBAR			31009
 #define IDC_DBG_SCRIPTLIST		31010
 #define IDC_DBG_CONSOLEINPUT	31011
+#define IDC_DBG_BREAKLIST		31012
 
 #define ID_DBG_FILE_MRU1		10000
 
@@ -644,6 +645,29 @@ void rvDebuggerWindow::UpdateScriptList(void)
 	}
 }
 
+
+void rvDebuggerWindow::UpdateBreakpointList( void )
+{
+	LVITEM item;
+	ListView_DeleteAllItems( mWndBreakList );
+	ZeroMemory( &item, sizeof( item ) );
+	item.mask = LVIF_TEXT | LVIF_IMAGE;
+
+	int numBreakPoints = mClient->GetBreakpointCount();
+	for ( int i = 0; i < numBreakPoints; i++ )
+	{
+		rvDebuggerBreakpoint* bp = mClient->GetBreakpoint( i );
+		item.iItem = ListView_GetItemCount( mWndBreakList );
+		item.pszText = "";
+		item.iImage = 2; // breakpoint
+		ListView_InsertItem( mWndBreakList, &item );
+		// (Function |) Line | Filename
+		idStr lineStr( bp->GetLineNumber() );
+		ListView_SetItemText( mWndBreakList, item.iItem, 1, (LPSTR)bp->GetFilename() );
+		ListView_SetItemText( mWndBreakList, item.iItem, 2, (LPSTR)lineStr.c_str() );
+	}
+}
+
 /*
 ================
 rvDebuggerWindow::UpdateWatch
@@ -905,14 +929,32 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	TabCtrl_InsertItem ( mWndTabs, 4, &item );
 	item.pszText = "Scripts";
 	TabCtrl_InsertItem ( mWndTabs, 5, &item );
+	item.pszText = "Breakpoints";
+	TabCtrl_InsertItem ( mWndTabs, 6, &item );
 
 	mWndCallstack = CreateWindow ( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_CALLSTACK, mInstance, NULL );
 	mWndWatch     = CreateWindow ( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_EDITLABELS|LVS_OWNERDRAWFIXED, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_WATCH, mInstance, NULL );
 	mWndThreads   = CreateWindow ( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_THREADS, mInstance, NULL );
 	mWndScriptList = CreateWindow( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_SCRIPTLIST, mInstance, NULL );
+	mWndBreakList =  CreateWindow( WC_LISTVIEW, "", LVS_REPORT|WS_CHILD|LVS_SHAREIMAGELISTS, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_BREAKLIST, mInstance, NULL );
 
 	LVCOLUMN col;
 	col.mask = LVCF_WIDTH|LVCF_TEXT;
+
+	col.cx = 20;
+	col.pszText = "";
+	ListView_InsertColumn( mWndBreakList, 0, &col );
+#if 0 // TODO: figure out how to get the function name in UpdateBreakpointList()
+	col.cx = 150;
+	col.pszText = "Function";
+	ListView_InsertColumn( mWndBreakList, 1, &col );
+#endif
+	col.cx = 350;
+	col.pszText = "Filename";
+	ListView_InsertColumn( mWndBreakList, 1, &col );
+	col.cx = 50;
+	col.pszText = "Line";
+	ListView_InsertColumn( mWndBreakList, 2, &col );
 
 	col.cx = 20;
 	col.pszText = "";
@@ -967,6 +1009,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	ListView_SetImageList ( mWndScriptList, mTmpImageList, LVSIL_SMALL );
 	ListView_SetImageList ( mWndThreads, mImageList, LVSIL_SMALL );
 	ListView_SetImageList ( mWndCallstack, mImageList, LVSIL_SMALL );
+	ListView_SetImageList ( mWndBreakList, mImageList, LVSIL_SMALL );
 
 	EnableWindows ( FALSE );
 	EnableWindow ( mWndScriptList, true );
@@ -974,6 +1017,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	ListView_SetExtendedListViewStyle ( mWndCallstack, LVS_EX_FULLROWSELECT );
 	ListView_SetExtendedListViewStyle ( mWndThreads, LVS_EX_FULLROWSELECT );
 	ListView_SetExtendedListViewStyle ( mWndScriptList, LVS_EX_FULLROWSELECT );
+	ListView_SetExtendedListViewStyle ( mWndBreakList, LVS_EX_FULLROWSELECT );
 
 	gDebuggerApp.GetOptions().GetColumnWidths ( "cw_callstack", mWndCallstack );
 	gDebuggerApp.GetOptions().GetColumnWidths ( "cw_threads", mWndThreads );
@@ -1386,6 +1430,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			MoveWindow ( window->mWndWatch, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndThreads, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndScriptList, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
+			MoveWindow ( window->mWndBreakList, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 
 			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
 			SendMessage(window->mWndCallstack, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
@@ -1658,6 +1703,38 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 						}
 					}
 					break;
+
+				case IDC_DBG_BREAKLIST:
+					if ( hdr->code == NM_DBLCLK || hdr->code == NM_CLICK ) {
+						LPNMITEMACTIVATE ia = (LPNMITEMACTIVATE)lparam;
+						int sel = ia->iItem;
+						if ( sel != -1 ) {
+							rvDebuggerBreakpoint* bp = window->mClient->GetBreakpoint( sel );
+							if ( bp != NULL ) {
+								if ( hdr->code == NM_DBLCLK ) {
+									// double clicked breakpoint => show it in its file
+									window->OpenScript( bp->GetFilename(), bp->GetLineNumber() - 1 );
+								} else if( ia->iSubItem == 0 ) {
+									// clicked breakpoint symbol => delete breakpoint
+									window->mClient->RemoveBreakpoint( bp->GetID() );
+									window->UpdateBreakpointList();
+								}
+							}
+						}
+					} else if ( hdr->code == LVN_KEYDOWN ) {
+						// when user selects a breakpoints and presses the Del key, remove the breakpoint
+						int sel = ListView_GetNextItem( hdr->hwndFrom, -1, LVNI_SELECTED );
+						if ( sel != -1 ) {
+							LPNMLVKEYDOWN kd = (LPNMLVKEYDOWN)lparam;
+							rvDebuggerBreakpoint* bp = window->mClient->GetBreakpoint( sel );
+							if ( kd->wVKey == VK_DELETE && bp != NULL ) {
+								window->mClient->RemoveBreakpoint( bp->GetID() );
+								window->UpdateBreakpointList();
+							}
+						}
+					}
+					break;
+
 				case IDC_DBG_TABS:
 					if ( hdr->code == TCN_SELCHANGE )
 					{
@@ -1668,6 +1745,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 						ShowWindow ( window->mWndWatch, SW_HIDE );
 						ShowWindow ( window->mWndThreads, SW_HIDE );
 						ShowWindow ( window->mWndScriptList, SW_HIDE );
+						ShowWindow ( window->mWndBreakList, SW_HIDE );
 						switch ( TabCtrl_GetCurSel ( hdr->hwndFrom ) )
 						{
 							case 0:
@@ -1690,8 +1768,13 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 							case 4:
 								ShowWindow ( window->mWndThreads, SW_SHOW );
 								break;
+
 							case 5:
 								ShowWindow(window->mWndScriptList, SW_SHOW);
+								break;
+
+							case 6:
+								ShowWindow( window->mWndBreakList, SW_SHOW );
 								break;
 						}
 					}
@@ -1756,6 +1839,7 @@ void rvDebuggerWindow::ProcessNetMessage ( idBitMsg* msg )
 		case DBMSG_REMOVEBREAKPOINT:
 			MessageBeep(MB_ICONEXCLAMATION);
 			InvalidateRect(mWndScript, NULL, FALSE);
+			UpdateBreakpointList();
 			break;
 
 		case DBMSG_RESUMED:
@@ -1858,6 +1942,7 @@ void rvDebuggerWindow::ProcessNetMessage ( idBitMsg* msg )
 			mCurrentStackDepth = 0;
 			mClient->InspectVariable ( mTooltipVar, mCurrentStackDepth );
 			UpdateWatch ( );
+			UpdateBreakpointList();
 			EnableWindows ( TRUE );
 			OpenScript ( mClient->GetBreakFilename(), mClient->GetBreakLineNumber() - 1 );
 			UpdateTitle ( );
@@ -2068,6 +2153,8 @@ void rvDebuggerWindow::ToggleBreakpoint ( void )
 
 	// Force a repaint of the script window
 	InvalidateRect ( mWndScript, NULL, FALSE );
+
+	UpdateBreakpointList();
 }
 
 /*
@@ -2240,6 +2327,7 @@ int rvDebuggerWindow::HandleActivate ( WPARAM wparam, LPARAM lparam )
 			}
 		}
 	}
+	UpdateBreakpointList();
 
 	return 1;
 }
