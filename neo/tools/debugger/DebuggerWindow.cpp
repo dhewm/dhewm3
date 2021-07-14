@@ -416,17 +416,19 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 			FillRect( dc, &rect, GetSysColorBrush( COLOR_3DSHADOW ) );
 
 			//draw line nrs
-			int iMaxNumberOfLines = ( (rect.bottom - rect.top ) ) + 1;
+			int iMaxNumberOfLines = ( (rect.bottom - rect.top ) / height ) + height;
 			int iFirstVisibleLine = SendMessage( window->mWndScript, EM_GETFIRSTVISIBLELINE, 0, 0 );
 			HFONT hf = CreateFont( height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New" );
 			HFONT hfOld = ( HFONT ) SelectObject( dc, hf );
 			SetBkMode( dc, OPAQUE );
 			SetBkColor(dc, GetSysColor( COLOR_3DFACE ));
 			SetTextColor( dc, RGB( 0, 0, 255 ) );
+			
 			RECT lnrRect = rect;
 			lnrRect.left += rect.right - rect.left;
 			lnrRect.right += rect.right - rect.left;
 			FillRect( dc, &lnrRect, GetSysColorBrush( COLOR_3DFACE ) );
+
 			for (int i = 0; i < iMaxNumberOfLines; ++i )
 			{
 				int		c;
@@ -461,6 +463,7 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 						c = SendMessage ( window->mWndScript, EM_LINEINDEX, bp->GetLineNumber ( ) - 1, 0 );
 						SendMessage ( window->mWndScript, EM_POSFROMCHAR, (WPARAM)&pos, c );
 						ImageList_DrawEx ( window->mTmpImageList, 2, dc, rect.left, pos.y, width, height, CLR_NONE, CLR_NONE, ILD_NORMAL );
+
 					}
 				}
 
