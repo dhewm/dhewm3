@@ -361,7 +361,10 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc ( HWND wnd, UINT msg, WPARAM wp
 
 			GetWindowRect(window->mWndToolbar, &rect);
 			MoveWindow(window->mWndMargin, 0, 0, window->mMarginSize, window->mSplitterRect.top - (rect.bottom - rect.top), TRUE);
-			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18*2.25, s10));
+			// FIXME: was *2.25, increased for line numbers up to 9999; but neither works particularly well
+			//        if DPI scaling is involved, because script code text and linenumbers aren't DPI scaled
+			int lmargin = s18 * 3.5;
+			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(lmargin, s10));
 
 		}
 	}
@@ -404,7 +407,6 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 			float scaling_factor = Win_GetWindowScalingFactor(wnd);
 			int s2 = int(2 * scaling_factor);
 			int s4 = int(4 * scaling_factor);
-			int s22 = int(22 * scaling_factor);
 			int width,height;
 
 			window->ResizeImageList(width,height);
@@ -421,13 +423,19 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 			HFONT hf = CreateFont( height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New" );
 			HFONT hfOld = ( HFONT ) SelectObject( dc, hf );
 			SetBkMode( dc, OPAQUE );
-			SetBkColor(dc, GetSysColor( COLOR_3DFACE ));
+			// I think it looks nicer when the  line number background is white
+			SetBkColor( dc, RGB( 255, 255, 255 ) );
 			SetTextColor( dc, RGB( 0, 0, 255 ) );
 			
+			int lnrWidth = 8;
+			GetCharWidth32( dc, '9', '9', &lnrWidth );
+			lnrWidth *= 4; // we want enough width for 4 chars ("9999"), not just one
+			lnrWidth += 2 * s4; // we want some space around the line number
+
 			RECT lnrRect = rect;
-			lnrRect.left += rect.right - rect.left;
-			lnrRect.right += rect.right - rect.left;
-			FillRect( dc, &lnrRect, GetSysColorBrush( COLOR_3DFACE ) );
+			lnrRect.left = rect.right;
+			lnrRect.right = lnrRect.left + lnrWidth;
+			FillRect( dc, &lnrRect, WHITE_BRUSH );
 
 			for (int i = 0; i < iMaxNumberOfLines; ++i )
 			{
@@ -436,11 +444,10 @@ LRESULT CALLBACK rvDebuggerWindow::MarginWndProc ( HWND wnd, UINT msg, WPARAM wp
 				c = SendMessage( window->mWndScript, EM_LINEINDEX, iFirstVisibleLine + i , 0 );
 				SendMessage( window->mWndScript, EM_POSFROMCHAR, ( WPARAM ) &pos, c );
 
-				RECT t = rect;
-				t.bottom += pos.y - t.top;
+				RECT t = lnrRect;
 				t.top = pos.y;
-				t.left += rect.right - rect.left;
-				t.right += rect.right - rect.left;
+				t.bottom = t.top + height;
+				t.right -= s4; // a little space between text and "border" to code part of window
 				
 				idStr lntxt( iFirstVisibleLine + i + 1);
 				DrawText( dc, lntxt, lntxt.Length(), &t, DT_RIGHT );
@@ -694,7 +701,7 @@ void rvDebuggerWindow::UpdateBreakpointList( void )
 		item.pszText = "";
 		item.iImage = 2; // breakpoint
 		ListView_InsertItem( mWndBreakList, &item );
-		// (Function |) Line | Filename
+		
 		idStr lineStr( bp->GetLineNumber() );
 		ListView_SetItemText( mWndBreakList, item.iItem, 1, (LPSTR)bp->GetFilename() );
 		ListView_SetItemText( mWndBreakList, item.iItem, 2, (LPSTR)lineStr.c_str() );
@@ -1465,7 +1472,10 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 			MoveWindow ( window->mWndScriptList, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 			MoveWindow ( window->mWndBreakList, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE );
 
-			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18*2.25, s10));
+			// FIXME: was *2.25, increased for line numbers up to 9999; but neither works particularly well
+			//        if DPI scaling is involved, because script code text and linenumbers aren't DPI scaled
+			int lmargin = s18 * 3.5;
+			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(lmargin, s10));
 			SendMessage(window->mWndCallstack, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
 			SendMessage(window->mWndOutput, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
 			SendMessage(window->mWndConsole, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
