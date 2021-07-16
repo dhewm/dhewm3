@@ -868,7 +868,8 @@ void rvDebuggerWindow::ResizeImageList(int& widthOut, int& heightOut)
 
 	GetTextMetrics(dc, &tm);
 	int height = mZoomScaleDem ? (tm.tmHeight * (float)mZoomScaleNum / (float)mZoomScaleDem)  : 16;
-	int width = mZoomScaleDem ? (s16 * (float)mZoomScaleNum / (float)mZoomScaleDem) : 16;
+	height *= scaling_factor;
+	int width = mZoomScaleDem ? (s16 * (float)mZoomScaleNum / (float)mZoomScaleDem) : s16;
 
 	ImageList_Destroy(mTmpImageList);
 	mTmpImageList = ImageList_Create(width, height, ILC_COLOR | ILC_MASK , 0, 2);
@@ -915,7 +916,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	dc = GetDC ( mWndScript );
 	GetTextMetrics ( dc, &tm );
 	ZeroMemory ( &lf, sizeof(lf) );
-	lf.lfHeight = tm.tmHeight;
+	lf.lfHeight = tm.tmHeight * Win_GetWindowScalingFactor( mWndScript );
 	strcpy ( lf.lfFaceName, "Courier New" );
 
 	SendMessage ( mWndScript, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
