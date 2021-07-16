@@ -54,13 +54,7 @@ http://store.steampowered.com/app/9050/
 
 http://store.steampowered.com/app/9070/
 
-You can also buy Steam keys at the Humble Store:
-
-https://www.humblebundle.com/store/p/doom3_storefront
-
-https://www.humblebundle.com/store/p/doom3_resofevil_storefront
-
-Note that neither Steam nor the Humble Store offer the *Resurrection of Evil* addon
+Note that Steam does not offer the *Resurrection of Evil* addon
 for German customers (or at least people with German IP adresses).
 
 ## Compiling

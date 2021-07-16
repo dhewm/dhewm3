@@ -10,7 +10,16 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Gamma and Brightness are now applied in the shaders instead of by setting hardware gamma.  
   Can be disabled (so hardware gamma is used again) with `r_gammaInShaders 0`
 * Improvements for (Windows-only) MFC-based tools:
-    - Support 64bit (thanks *raynorpat*!)
+    - Added the script debugger! (thanks *HarrievG*!)  
+      Original Doom3 didn't have it (Quake4 did), but the Doom3 GPL source contained
+      most of it. *HarrievG* implemented the missing parts and we added some new
+      features. It can even be used over the network and while the client part
+      (the debugger GUI) is Windows-only, the server can even run on all supported
+      platforms, so you can even debug a game running on Linux or macOS, for example.  
+      Relevant CVars for network debugging are:
+      `com_enableDebuggerServer` and `com_dbgClientAdr` and `com_dbgServerAdr`.  
+      To debug the running game on the same PC, just enter `debugger` in the console.
+    - All tools can now be built in 64bit (thanks *raynorpat*!)
     - HighDPI support (thanks *HarrievG*!)
     - PDAEditor works now
     - Additional bugfixes
