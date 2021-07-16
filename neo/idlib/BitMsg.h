@@ -85,7 +85,7 @@ public:
 	void			WriteShort( int c );
 	void			WriteUShort( int c );
 	void			WriteInt( int c );
-	void			WriteFloat( float f );
+	void			WriteFloat( float f );	
 	void			WriteFloat( float f, int exponentBits, int mantissaBits );
 	void			WriteAngle8( float f );
 	void			WriteAngle16( float f );

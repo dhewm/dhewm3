@@ -2169,6 +2169,8 @@ idRenderSystemLocal::Shutdown
 void idRenderSystemLocal::Shutdown( void ) {
 	common->Printf( "idRenderSystem::Shutdown()\n" );
 
+	common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
+
 	R_DoneFreeType( );
 
 	if ( glConfig.isInitialized ) {

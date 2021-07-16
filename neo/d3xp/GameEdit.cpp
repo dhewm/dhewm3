@@ -670,7 +670,7 @@ void idEditEntities::DisplayEntities( void ) {
 ===============================================================================
 */
 
-idGameEdit			gameEditLocal;
+idGameEditExt		gameEditLocal;
 idGameEdit *		gameEdit = &gameEditLocal;
 
 
@@ -1145,4 +1145,63 @@ void idGameEdit::MapEntityTranslate( const char *name, const idVec3 &v ) const {
 			mapent->epairs.SetVector( "origin", origin );
 		}
 	}
+}
+
+
+/***********************************************************************
+
+  Debugger
+
+***********************************************************************/
+
+bool idGameEditExt::IsLineCode( const char *filename, int linenumber ) const {
+	idStr fileStr;
+	idProgram *program = &gameLocal.program;
+	for ( int i = 0; i < program->NumStatements( ); i++ ) 	{
+		fileStr = program->GetFilename( program->GetStatement( i ).file );
+		fileStr.BackSlashesToSlashes( );
+
+		if ( strcmp( filename, fileStr.c_str( ) ) == 0
+			&& program->GetStatement( i ).linenumber == linenumber
+			) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void idGameEditExt::GetLoadedScripts(idStrList** result)
+{
+	(*result)->Clear();
+	idProgram* program = &gameLocal.program;
+
+	for (int i = 0; i < program->NumFilenames(); i++)
+	{
+		(*result)->AddUnique(idStr(program->GetFilename(i)));
+	}
+}
+
+void idGameEditExt::MSG_WriteScriptList(idBitMsg* msg)
+{
+	idProgram* program = &gameLocal.program;
+
+	msg->WriteInt(program->NumFilenames());
+	for (int i = 0; i < program->NumFilenames(); i++)
+	{
+		idStr file = program->GetFilename(i);
+		//fix this. it seams that scripts triggered by the runtime are stored with a wrong path
+		//the use // instead of '\'
+		file.BackSlashesToSlashes();
+		msg->WriteString(file);
+	}
+}
+
+const char* idGameEditExt::GetFilenameForStatement(idProgram* program, int index) const
+{
+	return program->GetFilenameForStatement(index);
+}
+
+int idGameEditExt::GetLineNumberForStatement(idProgram* program, int index) const
+{
+	return program->GetLineNumberForStatement(index);
 }

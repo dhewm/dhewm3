@@ -28,6 +28,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERCLIENT_H_
 #define DEBUGGERCLIENT_H_
 
+#include "DebuggerBreakpoint.h"
+#include "idlib/containers/StrList.h"
+
 class rvDebuggerCallstack
 {
 public:
@@ -49,9 +52,6 @@ public:
 	bool	mDoneProcessing;
 };
 
-#ifndef DEBUGGERBREAKPOINT_H_
-#include "DebuggerBreakpoint.h"
-#endif
 
 typedef idList<rvDebuggerCallstack*>	rvDebuggerCallstackList;
 typedef idList<rvDebuggerThread*>		rvDebuggerThreadList;
@@ -75,19 +75,23 @@ public:
 	int							GetActiveBreakpointID	( void );
 	const char*					GetBreakFilename		( void );
 	int							GetBreakLineNumber		( void );
+	idProgram*					GetBreakProgram			( void );
 	rvDebuggerCallstackList&	GetCallstack			( void );
 	rvDebuggerThreadList&		GetThreads				( void );
 	const char*					GetVariableValue		( const char* name, int stackDepth );
+	idStrList&					GetServerScripts		( void );
 
 	void						InspectVariable			( const char* name, int callstackDepth );
-
+	void						InspectScripts			( void );
 	void						Break					( void );
 	void						Resume					( void );
 	void						StepInto				( void );
 	void						StepOver				( void );
 
+	void						SendCommand				( const char* cmdStr );
+
 	// Breakpoints
-	int							AddBreakpoint			( const char* filename, int lineNumber, bool onceOnly = false );
+	int							AddBreakpoint			( const char* filename, int lineNumber, bool onceOnly = false);
 	bool						RemoveBreakpoint		( int bpID );
 	void						ClearBreakpoints		( void );
 	int							GetBreakpointCount		( void );
@@ -98,7 +102,7 @@ protected:
 
 	void						SendMessage				( EDebuggerMessage dbmsg );
 	void						SendBreakpoints			( void );
-	void						SendAddBreakpoint		( rvDebuggerBreakpoint& bp, bool onceOnly = false );
+	void						SendAddBreakpoint		( rvDebuggerBreakpoint& bp );
 	void						SendRemoveBreakpoint	( rvDebuggerBreakpoint& bp );
 	void						SendPacket				( void* data, int datasize );
 
@@ -119,6 +123,8 @@ protected:
 
 	EDebuggerMessage			mWaitFor;
 
+	idStrList					mServerScripts;
+
 private:
 
 	void		ClearCallstack				( void );
@@ -127,10 +133,13 @@ private:
 	void		UpdateWatches				( void );
 
 	// Network message handlers
-	void		HandleBreak					( msg_t* msg );
-	void		HandleInspectCallstack		( msg_t* msg );
-	void		HandleInspectThreads		( msg_t* msg );
-	void		HandleInspectVariable		( msg_t* msg );
+	void		HandleBreak					( idBitMsg* msg );
+	void		HandleInspectScripts		( idBitMsg* msg );
+	void		HandleInspectCallstack		( idBitMsg* msg );
+	void		HandleInspectThreads		( idBitMsg* msg );
+	void		HandleInspectVariable		( idBitMsg* msg );
+	void		HandleGameDLLHandle			( idBitMsg* msg );
+	void		HandleRemoveBreakpoint		( idBitMsg* msg );
 };
 
 /*
@@ -286,4 +295,14 @@ ID_INLINE void rvDebuggerClient::SendPacket ( void* data, int size )
 	mPort.SendPacket ( mServerAdr, data, size );
 }
 
+
+/*
+================
+rvDebuggerClient::GetServerScripts
+================
+*/
+ID_INLINE idStrList& rvDebuggerClient::GetServerScripts( void )
+{
+	return mServerScripts;
+}
 #endif // DEBUGGERCLIENT_H_

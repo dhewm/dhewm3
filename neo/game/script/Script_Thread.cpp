@@ -28,11 +28,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/platform.h"
 
-#include "gamesys/SysCvar.h"
-#include "Player.h"
-#include "Camera.h"
+#include "game/gamesys/SysCvar.h"
+#include "game/Player.h"
+#include "game/Camera.h"
 
-#include "script/Script_Thread.h"
+#include "Script_Thread.h"
 
 const idEventDef EV_Thread_Execute( "<execute>", NULL );
 const idEventDef EV_Thread_SetCallback( "<script_setcallback>", NULL );
@@ -1840,4 +1840,50 @@ void idThread::Event_InfluenceActive( void ) {
 	} else {
 		idThread::ReturnInt( false );
 	}
+}
+
+int idGameEditExt::ThreadGetNum(const idThread* thread) const
+{
+	return const_cast<idThread*>(thread)->GetThreadNum();
+}
+
+const char*idGameEditExt::ThreadGetName(const idThread* thread) const
+{
+	return const_cast<idThread*>(thread)->GetThreadName();
+}
+
+int	idGameEditExt::GetTotalScriptThreads() const
+{
+	return idThread::GetThreads().Num();
+}
+
+const idThread*idGameEditExt::GetThreadByIndex(int index) const
+{
+	return idThread::GetThreads()[index];
+}
+
+bool idGameEditExt::ThreadIsDoneProcessing(const idThread* thread) const
+{
+	return const_cast<idThread*>(thread)->IsDoneProcessing();
+}
+
+bool idGameEditExt::ThreadIsWaiting(const idThread* thread) const
+{
+	return const_cast<idThread*>(thread)->IsWaiting();
+}
+
+bool idGameEditExt::ThreadIsDying(const idThread* thread) const
+{
+	return const_cast<idThread*>(thread)->IsDying();
+}
+
+void idGameEditExt::MSG_WriteThreadInfo(idBitMsg* msg, const idThread* thread, const idInterpreter* interpreter)
+{
+	msg->WriteString(const_cast<idThread*>(thread)->GetThreadName());
+	msg->WriteInt(const_cast<idThread*>(thread)->GetThreadNum());
+
+	msg->WriteBits((int)(thread == interpreter->GetThread()), 1);
+	msg->WriteBits((int)const_cast<idThread*>(thread)->IsDoneProcessing(), 1);
+	msg->WriteBits((int)const_cast<idThread*>(thread)->IsWaiting(), 1);
+	msg->WriteBits((int)const_cast<idThread*>(thread)->IsDying(), 1);
 }

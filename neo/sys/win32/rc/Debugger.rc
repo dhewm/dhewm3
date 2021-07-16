@@ -126,21 +126,21 @@ IDI_DBG_EMPTY           ICON                    "res\\dbg_empty.ico"
 
 IDR_DBG_ACCELERATORS ACCELERATORS 
 BEGIN
-    VK_F9,          ID_DBG_DEBUG_QUICKWATCH, VIRTKEY, SHIFT, NOINVERT
-    VK_F5,          ID_DBG_DEBUG_RUN,       VIRTKEY, NOINVERT
-    VK_F11,         ID_DBG_DEBUG_STEPINTO,  VIRTKEY, NOINVERT
-    VK_F10,         ID_DBG_DEBUG_STEPOVER,  VIRTKEY, NOINVERT
-    VK_F9,          ID_DBG_DEBUG_TOGGLEBREAKPOINT, VIRTKEY, NOINVERT
-    VK_F3,          ID_DBG_EDIT_FINDNEXT,   VIRTKEY, NOINVERT
-    VK_F3,          ID_DBG_EDIT_FINDPREV,   VIRTKEY, SHIFT, NOINVERT
-    VK_F3,          ID_DBG_EDIT_FINDSELECTED, VIRTKEY, CONTROL, NOINVERT
-    VK_F3,          ID_DBG_EDIT_FINDSELECTED, VIRTKEY, CONTROL, NOINVERT
-    VK_F3,          ID_DBG_EDIT_FINDSELECTEDPREV, VIRTKEY, SHIFT, CONTROL, 
-                                                    NOINVERT
-    VK_F4,          ID_DBG_FILE_CLOSE,      VIRTKEY, CONTROL, NOINVERT
-    VK_TAB,         ID_DBG_FILE_NEXT,       VIRTKEY, CONTROL, NOINVERT
-    "O",            ID_DBG_FILE_OPEN,       VIRTKEY, CONTROL, NOINVERT
-    "F",            ID_DBG_EDIT_FIND,       VIRTKEY, CONTROL, NOINVERT
+    VK_F9,          ID_DBG_DEBUG_QUICKWATCH,            VIRTKEY, SHIFT, NOINVERT
+    VK_F5,          ID_DBG_DEBUG_RUN,                   VIRTKEY, NOINVERT
+    VK_F11,         ID_DBG_DEBUG_STEPINTO,              VIRTKEY, NOINVERT
+    VK_F10,         ID_DBG_DEBUG_STEPOVER,              VIRTKEY, NOINVERT
+    VK_F9,          ID_DBG_DEBUG_TOGGLEBREAKPOINT,      VIRTKEY, NOINVERT
+    VK_F3,          ID_DBG_EDIT_FINDNEXT,               VIRTKEY, NOINVERT
+    VK_F3,          ID_DBG_EDIT_FINDPREV,               VIRTKEY, SHIFT, NOINVERT
+    VK_F3,          ID_DBG_EDIT_FINDSELECTED,           VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_DBG_EDIT_FINDSELECTEDPREV,       VIRTKEY, SHIFT, CONTROL,NOINVERT
+    VK_F4,          ID_DBG_FILE_CLOSE,                  VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_DBG_FILE_NEXT,                   VIRTKEY, CONTROL, NOINVERT
+    VK_RETURN,      ID_DBG_SEND_COMMAND,                VIRTKEY, NOINVERT
+    "O",            ID_DBG_FILE_OPEN,                   VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_DBG_EDIT_FIND,                   VIRTKEY, CONTROL, NOINVERT
+    
 END
 
 
@@ -149,17 +149,17 @@ END
 // Dialog
 //
 
-IDD_DBG_ABOUT DIALOGEX 0, 0, 222, 71
+IDD_DBG_ABOUT DIALOGEX 0, 0, 250, 90
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "About Script Debugger"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Script Debugger",IDC_STATIC,35,7,81,8
-    LTEXT           "Version 0.01",IDC_STATIC,35,17,41,8
-    LTEXT           "Original version by Raven",IDC_STATIC,35,
-                    28,134,8
-    DEFPUSHBUTTON   "OK",IDOK,165,50,50,14
+    LTEXT           "Version 1.1",IDC_STATIC,35,17,41,8
+    LTEXT           "Original version by Raven", IDC_STATIC, 35,28, 134, 8
+    LTEXT           "Dhewm3 version by Harrie van Ginneken \n\t\t\t\tand\n\t\t\t Daniel Gibson", IDC_STATIC, 35, 38, 134, 32
+    DEFPUSHBUTTON   "OK",IDOK,100,68,50,14
     ICON            5098,IDC_STATIC,7,7,20,20
 END
 

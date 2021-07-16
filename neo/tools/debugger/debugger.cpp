@@ -26,26 +26,26 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#if defined( ID_ALLOW_TOOLS )
 #include "tools/edit_gui_common.h"
-
-
 #include "../../sys/win32/rc/debugger_resource.h"
 #include "DebuggerApp.h"
+#else
+#include "debugger_common.h"
+#endif
+
 #include "DebuggerServer.h"
 
-DWORD CALLBACK DebuggerThread ( LPVOID param );
+#if defined( ID_ALLOW_TOOLS )
+rvDebuggerApp					gDebuggerApp; // this is also used in other source files
+static HWND						gDebuggerWindow = NULL;
+#endif
 
-rvDebuggerApp					gDebuggerApp;
-HWND							gDebuggerWindow = NULL;
-bool							gDebuggerSuspend = false;
-bool							gDebuggerConnnected = false;
-HANDLE							gDebuggerGameThread = NULL;
+static rvDebuggerServer*		gDebuggerServer			= NULL;
+static SDL_Thread*				gDebuggerServerThread   = NULL;
+static bool						gDebuggerServerQuit     = false;
 
-rvDebuggerServer*				gDebuggerServer			= NULL;
-HANDLE							gDebuggerServerThread   = NULL;
-DWORD							gDebuggerServerThreadID = 0;
-bool							gDebuggerServerQuit     = false;
-
+#if defined( ID_ALLOW_TOOLS )
 /*
 ================
 DebuggerMain
@@ -65,6 +65,9 @@ void DebuggerClientInit( const char *cmdline )
 	{
 		goto DebuggerClientInitDone;
 	}
+	
+	// hide the doom window by default
+	::ShowWindow( win32.hWnd, SW_HIDE );
 
 	gDebuggerApp.Run ( );
 
@@ -113,6 +116,7 @@ void DebuggerClientLaunch ( void )
 	CloseHandle ( process.hThread );
 	CloseHandle ( process.hProcess );
 }
+#endif // #if defined( ID_ALLOW_TOOLS )
 
 /*
 ================
@@ -121,14 +125,14 @@ DebuggerServerThread
 Thread proc for the debugger server
 ================
 */
-DWORD CALLBACK DebuggerServerThread ( LPVOID param )
+static int SDLCALL DebuggerServerThread ( void *param )
 {
 	assert ( gDebuggerServer );
 
 	while ( !gDebuggerServerQuit )
 	{
 		gDebuggerServer->ProcessMessages ( );
-		Sleep ( 1 );
+		SDL_Delay( 1 );
 	}
 
 	return 0;
@@ -143,8 +147,17 @@ Starts up the debugger server
 */
 bool DebuggerServerInit ( void )
 {
+	com_enableDebuggerServer.ClearModified( );
+
+	if ( !com_debuggerSupported )
+	{
+		common->Warning( "Called DebuggerServerInit() without the gameDLL supporting it!\n" );
+		return false;
+	}
+
 	// Dont do this if we are in the debugger already
-	if ( com_editors & EDITOR_DEBUGGER )
+	if ( gDebuggerServer != NULL 
+		|| ( com_editors & EDITOR_DEBUGGER ) )
 	{
 		return false;
 	}
@@ -163,9 +176,13 @@ bool DebuggerServerInit ( void )
 		gDebuggerServer = NULL;
 		return false;
 	}
-
+	
 	// Start the debugger server thread
-	gDebuggerServerThread = CreateThread ( NULL, 0, DebuggerServerThread, 0, 0, &gDebuggerServerThreadID );
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, "DebuggerServer", NULL );
+#else // SDL 1.2
+	gDebuggerServerThread = SDL_CreateThread( DebuggerServerThread, NULL );
+#endif
 
 	return true;
 }
@@ -179,13 +196,14 @@ Shuts down the debugger server
 */
 void DebuggerServerShutdown ( void )
 {
-	if ( gDebuggerServerThread )
+	if ( gDebuggerServerThread != NULL )
 	{
 		// Signal the debugger server to quit
 		gDebuggerServerQuit = true;
 
 		// Wait for the thread to finish
-		WaitForSingleObject ( gDebuggerServerThread, INFINITE );
+		SDL_WaitThread( gDebuggerServerThread, NULL );
+		gDebuggerServerThread = NULL;
 
 		// Shutdown the server now
 		gDebuggerServer->Shutdown();
@@ -193,10 +211,10 @@ void DebuggerServerShutdown ( void )
 		delete gDebuggerServer;
 		gDebuggerServer = NULL;
 
-		// Cleanup the thread handle
-		CloseHandle ( gDebuggerServerThread );
-		gDebuggerServerThread = NULL;
+		com_editors &= ~EDITOR_DEBUGGER;
 	}
+
+	com_enableDebuggerServer.ClearModified( );
 }
 
 /*

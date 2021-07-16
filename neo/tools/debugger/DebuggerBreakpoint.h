@@ -28,25 +28,28 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERBREAKPOINT_H_
 #define DEBUGGERBREAKPOINT_H_
 
+class idProgram;
+
 class rvDebuggerBreakpoint
 {
 public:
 
-	rvDebuggerBreakpoint ( const char* filename, int linenumber, int id = -1 );
+	rvDebuggerBreakpoint ( const char* filename, int linenumber, int id = -1, bool onceOnly = false );
 	rvDebuggerBreakpoint ( rvDebuggerBreakpoint& bp );
 	~rvDebuggerBreakpoint ( void );
 
 	const char*		GetFilename		( void );
 	int				GetLineNumber	( void );
 	int				GetID			( void );
+	bool			GetOnceOnly     ( void );
 
 protected:
 
 	bool	mEnabled;
+	bool	mOnceOnly;
 	int		mID;
 	int		mLineNumber;
 	idStr	mFilename;
-
 private:
 
 	static int	mNextID;
@@ -65,6 +68,11 @@ ID_INLINE int rvDebuggerBreakpoint::GetLineNumber ( void )
 ID_INLINE int rvDebuggerBreakpoint::GetID ( void )
 {
 	return mID;
+}
+
+ID_INLINE bool rvDebuggerBreakpoint::GetOnceOnly( void )
+{
+	return mOnceOnly;
 }
 
 #endif // DEBUGGERBREAKPOINT_H_

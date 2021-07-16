@@ -801,6 +801,17 @@ set(src_d3xp
 
 add_globbed_headers(src_d3xp "d3xp")
 
+set(src_debuggerServer
+	tools/debugger/DebuggerBreakpoint.h
+	tools/debugger/DebuggerBreakpoint.cpp
+	tools/debugger/DebuggerServer.h
+	tools/debugger/DebuggerServer.cpp
+	tools/debugger/DebuggerScript.h
+	tools/debugger/DebuggerScript.cpp
+	tools/debugger/DebuggerMessages.h
+	tools/debugger/debugger.cpp
+)
+
 set(src_core
 	${src_renderer}
 	${src_framework}
@@ -862,6 +873,23 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 	# Script editor
 	file(GLOB src_script_editor "tools/script/*.cpp")
 	add_globbed_headers(src_script_editor "tools/script")
+	# Script Debugger
+	set(src_debuggerClient
+		tools/debugger/DebuggerClient.h
+		tools/debugger/DebuggerClient.cpp
+		tools/debugger/DebuggerApp.h
+		tools/debugger/DebuggerApp.cpp
+		tools/debugger/DebuggerQuickWatchDlg.h
+		tools/debugger/DebuggerQuickWatchDlg.cpp
+		tools/debugger/DebuggerWindow.h
+		tools/debugger/DebuggerWindow.cpp
+		tools/debugger/DebuggerFindDlg.h
+		tools/debugger/DebuggerFindDlg.cpp
+	)
+	set(src_script_debugger
+		${src_debuggerServer}
+		${src_debuggerClient}
+	)
 	# sound editor?
 	file(GLOB src_sound_editor "tools/sound/*.cpp")
 	add_globbed_headers(src_sound_editor "tools/sound")
@@ -881,13 +909,17 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 		${src_map_editor}
 		${src_script_editor}
 		${src_sound_editor}
+		${src_script_debugger}
 		"tools/edit_public.h"
 		"tools/edit_gui_common.h"
 		)
 	SET(CMAKE_MFC_FLAG 2)
 	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;_AFXDLL")
 else()
-	set(src_editor_tools "tools/edit_stub.cpp" "tools/edit_public.h")
+	set(src_editor_tools "tools/edit_stub.cpp" "tools/edit_public.h" "tools/debugger/debugger_common.h")
+	list(APPEND src_editor_tools
+		${src_debuggerServer}
+	)
 endif()
 
 
@@ -1052,9 +1084,10 @@ if(DEDICATED)
 		${src_stub_openal}
 		${src_stub_gl}
 		${src_sys_base}
+		${src_debuggerServer}
 	)
 	
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl} ${src_debuggerServer})
 
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")

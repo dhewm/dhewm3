@@ -40,9 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 struct idGameCallbacks {
 
 	typedef void (*ReloadImagesCallback)(void* userArg, const idCmdArgs &args);
-	ReloadImagesCallback reloadImagesCB;
-	void*                reloadImagesUserArg;
-
+	ReloadImagesCallback	reloadImagesCB;
+	void*					reloadImagesUserArg;
 
 	idGameCallbacks();
 

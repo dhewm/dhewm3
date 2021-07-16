@@ -270,6 +270,14 @@ bool IsDoom3DemoVersion()
 	return ret;
 }
 
+static bool ( *updateDebuggerFnPtr )( idInterpreter *interpreter, idProgram *program, int instructionPointer ) = NULL;
+bool updateGameDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer ) {
+	bool ret = false;
+	if ( interpreter != nullptr && program != nullptr ) {
+		ret = updateDebuggerFnPtr ? updateDebuggerFnPtr( interpreter, program, instructionPointer ) : false;
+	}
+	return ret;
+}
 
 
 /*
@@ -352,6 +360,8 @@ void idGameLocal::Init( void ) {
 
 	// DG: hack to support the Demo version of Doom3
 	common->GetAdditionalFunction(idCommon::FT_IsDemo, (idCommon::FunctionPointer*)&isDemoFnPtr, NULL);
+	//debugger support
+	common->GetAdditionalFunction(idCommon::FT_UpdateDebugger,(idCommon::FunctionPointer*) &updateDebuggerFnPtr,NULL);
 }
 
 /*
@@ -1192,7 +1202,7 @@ void idGameLocal::MapPopulate( void ) {
 idGameLocal::InitFromNewMap
 ===================
 */
-void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed ) {
+void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed) {
 
 	this->isServer = isServer;
 	this->isClient = isClient;
@@ -2216,13 +2226,13 @@ idGameLocal::RunFrame
 ================
 */
 gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
-	idEntity *	ent;
-	int			num;
-	float		ms;
-	idTimer		timer_think, timer_events, timer_singlethink;
-	gameReturn_t ret;
-	idPlayer	*player;
-	const renderView_t *view;
+	idEntity *			ent;
+	int					num;
+	float				ms;
+	idTimer				timer_think, timer_events, timer_singlethink;
+	gameReturn_t		ret;
+	idPlayer			*player;
+	const renderView_t	*view;
 
 #ifdef _DEBUG
 	if ( isMultiplayer ) {

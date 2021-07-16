@@ -302,6 +302,16 @@ void idGameLocal::Clear( void ) {
 #endif
 }
 
+static bool ( *updateDebuggerFnPtr )( idInterpreter *interpreter, idProgram *program, int instructionPointer ) = NULL;
+bool updateGameDebugger( idInterpreter *interpreter, idProgram *program, int instructionPointer ) {
+	bool ret = false;
+	if ( interpreter != nullptr && program != nullptr ) 	{
+		ret = updateDebuggerFnPtr ? updateDebuggerFnPtr( interpreter , program, instructionPointer ) : false;
+	}
+	return ret;
+}
+
+
 /*
 ===========
 idGameLocal::Init
@@ -410,6 +420,10 @@ void idGameLocal::Init( void ) {
 	gamestate = GAMESTATE_NOMAP;
 
 	Printf( "...%d aas types\n", aasList.Num() );
+
+	//debugger support
+	common->GetAdditionalFunction( idCommon::FT_UpdateDebugger,( idCommon::FunctionPointer * ) &updateDebuggerFnPtr,NULL);
+
 }
 
 /*
@@ -1312,7 +1326,7 @@ void idGameLocal::MapPopulate( void ) {
 idGameLocal::InitFromNewMap
 ===================
 */
-void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed ) {
+void idGameLocal::InitFromNewMap(const char* mapName, idRenderWorld* renderWorld, idSoundWorld* soundWorld, bool isServer, bool isClient, int randseed) {
 
 	this->isServer = isServer;
 	this->isClient = isClient;
@@ -2436,14 +2450,14 @@ void idGameLocal::RunTimeGroup2() {
 idGameLocal::RunFrame
 ================
 */
-gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
-	idEntity *	ent;
-	int			num;
-	float		ms;
-	idTimer		timer_think, timer_events, timer_singlethink;
-	gameReturn_t ret;
-	idPlayer	*player;
-	const renderView_t *view;
+gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
+	idEntity* ent;
+	int					num;
+	float				ms;
+	idTimer				timer_think, timer_events, timer_singlethink;
+	gameReturn_t		ret;
+	idPlayer* player;
+	const renderView_t* view;
 
 #ifdef _DEBUG
 	if ( isMultiplayer ) {
