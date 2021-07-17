@@ -187,13 +187,13 @@ bool rvDebuggerServer::ProcessMessages ( void )
 			case DBMSG_CONNECT:
 				mConnected = true;
 				SendMessage ( DBMSG_CONNECTED );
-				HandleInspectScripts ( nullptr );
+				HandleInspectScripts ( NULL );
 				com_editors |= EDITOR_DEBUGGER;
 				break;
 
 			case DBMSG_CONNECTED:
 				mConnected = true;
-				HandleInspectScripts( nullptr );
+				HandleInspectScripts( NULL );
 				com_editors |= EDITOR_DEBUGGER;
 				break;
 
@@ -555,7 +555,7 @@ void rvDebuggerServer::CheckBreakpoints	( idInterpreter* interpreter, idProgram*
 	// See if we are supposed to break on the next script line
 	if ( mBreakNext )
 	{
-		HandleInspectScripts(nullptr);
+		HandleInspectScripts(NULL);
 		Break ( interpreter, program, instructionPointer );
 		return;
 	}
@@ -574,7 +574,7 @@ void rvDebuggerServer::CheckBreakpoints	( idInterpreter* interpreter, idProgram*
 	// See if we are supposed to break on the next line
 	if ( mBreakStepInto )
 	{
-		HandleInspectScripts(nullptr);
+		HandleInspectScripts(NULL);
 		// Break
 		Break ( interpreter, program, instructionPointer );
 		return;
@@ -625,7 +625,7 @@ void rvDebuggerServer::CheckBreakpoints	( idInterpreter* interpreter, idProgram*
 		// Pop out of the critical section so we dont get stuck
 		SDL_UnlockMutex( mCriticalSection );
 
-		HandleInspectScripts(nullptr);
+		HandleInspectScripts(NULL);
 		// We hit a breakpoint, so break
 		Break ( interpreter, program, instructionPointer );
 

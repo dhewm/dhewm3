@@ -59,7 +59,8 @@ If you have questions concerning this license or the applicable additional terms
 #define SDLK_PRINTSCREEN SDLK_PRINT
 #endif
 
-static const char *kbdNames[] = {
+// NOTE: g++-4.7 doesn't like when this is static (for idCmdSystem::ArgCompletion_String<kbdNames>)
+const char *kbdNames[] = {
 #if SDL_VERSION_ATLEAST(2, 0, 0) // auto-detection is only available for SDL2
 	"auto",
 #endif
