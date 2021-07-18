@@ -60,14 +60,14 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // NOTE: g++-4.7 doesn't like when this is static (for idCmdSystem::ArgCompletion_String<kbdNames>)
-const char *kbdNames[] = {
+const char *_in_kbdNames[] = {
 #if SDL_VERSION_ATLEAST(2, 0, 0) // auto-detection is only available for SDL2
 	"auto",
 #endif
 	"english", "french", "german", "italian", "spanish", "turkish", "norwegian", "brazilian", NULL
 };
 
-static idCVar in_kbd("in_kbd", kbdNames[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", kbdNames, idCmdSystem::ArgCompletion_String<kbdNames> );
+static idCVar in_kbd("in_kbd", _in_kbdNames[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "keyboard layout", _in_kbdNames, idCmdSystem::ArgCompletion_String<_in_kbdNames> );
 // TODO: I'd really like to make in_ignoreConsoleKey default to 1, but I guess there would be too much confusion :-/
 static idCVar in_ignoreConsoleKey("in_ignoreConsoleKey", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"Console only opens with Shift+Esc, not ` or ^ etc");
@@ -103,6 +103,11 @@ struct mouse_poll_t {
 
 static idList<kbd_poll_t> kbd_polls;
 static idList<mouse_poll_t> mouse_polls;
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+// for utf8ToISO8859_1() - used for non-ascii text input and Sys_GetLocalizedScancodeName()
+static SDL_iconv_t iconvDesc = (SDL_iconv_t)-1;
+#endif
 
 struct scancodename_t {
 	int sdlScancode;
@@ -188,6 +193,7 @@ const char* Sys_GetScancodeName( int key ) {
 	return NULL;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 static bool isAscii( const char* str_ ) {
 	const unsigned char* str = (const unsigned char*)str_;
 	while(*str != '\0') {
@@ -198,6 +204,40 @@ static bool isAscii( const char* str_ ) {
 	}
 	return true;
 }
+
+// convert inbuf (which is expected to be in UTF-8) to outbuf (in ISO-8859-1)
+static bool utf8ToISO8859_1(const char* inbuf, char* outbuf, size_t outsize) {
+	if ( iconvDesc == (SDL_iconv_t)-1 ) {
+		return false;
+	}
+
+	size_t outbytesleft = outsize;
+	size_t inbytesleft = strlen( inbuf ) + 1; // + terminating \0
+	size_t ret = SDL_iconv( iconvDesc, &inbuf, &inbytesleft, &outbuf, &outbytesleft );
+
+	while(inbytesleft > 0) {
+		switch ( ret ) {
+			case SDL_ICONV_E2BIG:
+				outbuf[outbytesleft-1] = '\0'; // whatever, just cut it off..
+				common->DPrintf( "Cutting off UTF-8 to ISO-8859-1 conversion to '%s' because destination is too small for '%s'\n", outbuf, inbuf );
+				SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
+				return true;
+			case SDL_ICONV_EILSEQ:
+				// try skipping invalid input data
+				++inbuf;
+				--inbytesleft;
+				break;
+			case SDL_ICONV_EINVAL:
+			case SDL_ICONV_ERROR:
+				// we can't recover from this
+				SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
+				return false;
+		}
+	}
+	SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
+	return outbytesleft < outsize; // return false if no char was written
+}
+#endif // SDL2
 
 // returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
 // regarding the current keyboard layout - if that name is in ASCII or corresponds
@@ -220,8 +260,15 @@ const char* Sys_GetLocalizedScancodeName( int key ) {
 			const char *ret = SDL_GetKeyName( k );
 			// the keyname from SDL2 is in UTF-8, which Doom3 can't print,
 			// so only return the name if it's ASCII, otherwise fall back to "SC_bla"
-			if ( ret && *ret != '\0' && isAscii( ret ) ) {
-				return ret;
+			if ( ret && *ret != '\0' ) {
+				if( isAscii( ret ) ) {
+					return ret;
+				}
+				static char isoName[32];
+				// try to convert name to ISO8859-1 (Doom3's supported "High ASCII")
+				if ( utf8ToISO8859_1( ret, isoName, sizeof(isoName) ) && isoName[0] != '\0' ) {
+					return isoName;
+				}
 			}
 		}
 #endif  // SDL1.2 doesn't support this, use unlocalized name (also as fallback if we couldn't get a keyname)
@@ -455,6 +502,13 @@ void Sys_InitInput() {
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+
+#else // SDL2 - for utf8ToISO8859_1() (non-ascii text input and key naming)
+	assert(iconvDesc == (SDL_iconv_t)-1);
+	iconvDesc = SDL_iconv_open( "ISO-8859-1", "UTF-8" );
+	if( iconvDesc == (SDL_iconv_t)-1 ) {
+		common->Warning( "Sys_SetInput(): iconv_open( \"ISO-8859-1\", \"UTF-8\" ) failed! Can't translate non-ascii input!\n" );
+	}
 #endif
 
 	in_kbd.SetModified();
@@ -480,6 +534,9 @@ Sys_ShutdownInput
 void Sys_ShutdownInput() {
 	kbd_polls.Clear();
 	mouse_polls.Clear();
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	SDL_iconv_close( iconvDesc ); // used by utf8ToISO8859_1()
+#endif
 }
 
 /*
@@ -621,7 +678,7 @@ sysEvent_t Sys_GetEvent() {
 
 	if (s[0] != '\0') {
 		res.evType = SE_CHAR;
-		res.evValue = s[s_pos];
+		res.evValue = (unsigned char)s[s_pos];
 
 		++s_pos;
 
@@ -790,16 +847,24 @@ sysEvent_t Sys_GetEvent() {
 		case SDL_TEXTINPUT:
 			if (ev.text.text[0]) {
 				res.evType = SE_CHAR;
-				res.evValue = ev.text.text[0];
 
-				// TODO: translate to "ISO-8859-1" with SDL_iconv() ?
-
-				if (ev.text.text[1] != '\0')
-				{
-					memcpy(s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE);
-					s_pos = 1; // pos 0 is returned
+				if ( isAscii(ev.text.text) ) {
+					res.evValue = ev.text.text[0];
+					if ( ev.text.text[1] != '\0' ) {
+						memcpy( s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE );
+						s_pos = 1; // pos 0 is returned
+					}
+					return res;
+				} else if( utf8ToISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
+					res.evValue = (unsigned char)s[0];
+					if ( s[1] == '\0' ) {
+						s_pos = 0;
+						s[0] = '\0';
+					} else {
+						s_pos = 1; // pos 0 is returned
+					}
+					return res;
 				}
-				return res;
 			}
 
 			continue; // handle next event
