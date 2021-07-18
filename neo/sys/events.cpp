@@ -536,6 +536,7 @@ void Sys_ShutdownInput() {
 	mouse_polls.Clear();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_iconv_close( iconvDesc ); // used by utf8ToISO8859_1()
+	iconvDesc = ( SDL_iconv_t ) -1; 
 #endif
 }
 
