@@ -363,7 +363,7 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc ( HWND wnd, UINT msg, WPARAM wp
 			MoveWindow(window->mWndMargin, 0, 0, window->mMarginSize, window->mSplitterRect.top - (rect.bottom - rect.top), TRUE);
 			// FIXME: was *2.25, increased for line numbers up to 9999; but neither works particularly well
 			//        if DPI scaling is involved, because script code text and linenumbers aren't DPI scaled
-			int lmargin = s18 * 3.5;
+			int lmargin = window->GetMarginWidth();
 			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(lmargin, s10));
 
 		}
@@ -867,9 +867,10 @@ void rvDebuggerWindow::ResizeImageList(int& widthOut, int& heightOut)
 	dc = GetDC(mWndScript);
 
 	GetTextMetrics(dc, &tm);
-	int height = mZoomScaleDem ? (tm.tmHeight * (float)mZoomScaleNum / (float)mZoomScaleDem)  : 16;
+	int height = mZoomScaleDem ? (tm.tmHeight * (float)mZoomScaleNum / (float)mZoomScaleDem)  : tm.tmHeight ;
 	height *= scaling_factor;
-	int width = mZoomScaleDem ? (s16 * (float)mZoomScaleNum / (float)mZoomScaleDem) : s16;
+	int width = mZoomScaleDem ? ( tm.tmMaxCharWidth * (float)mZoomScaleNum / (float)mZoomScaleDem) : tm.tmMaxCharWidth;
+	width *= scaling_factor;
 
 	ImageList_Destroy(mTmpImageList);
 	mTmpImageList = ImageList_Create(width, height, ILC_COLOR | ILC_MASK , 0, 2);
@@ -882,6 +883,18 @@ void rvDebuggerWindow::ResizeImageList(int& widthOut, int& heightOut)
 	heightOut = height;
 }
 
+float rvDebuggerWindow::GetMarginWidth ( void )
+{
+	TEXTMETRIC	tm;
+	HDC			dc;
+
+	dc = GetDC( mWndScript );
+	GetTextMetrics( dc, &tm );
+
+	float scaling_factor = Win_GetWindowScalingFactor( mWndScript );
+
+	return scaling_factor * (4 * tm.tmMaxCharWidth + tm.tmMaxCharWidth);
+}
 /*
 ================
 rvDebuggerWindow::HandleCreate
@@ -920,7 +933,7 @@ int rvDebuggerWindow::HandleCreate ( WPARAM wparam, LPARAM lparam )
 	strcpy ( lf.lfFaceName, "Courier New" );
 
 	SendMessage ( mWndScript, WM_SETFONT, (WPARAM)CreateFontIndirect ( &lf ), 0 );
-	SendMessage ( mWndScript, EM_SETMARGINS, EC_LEFTMARGIN|EC_RIGHTMARGIN, MAKELONG(18,10) );
+	SendMessage ( mWndScript, EM_SETMARGINS, EC_LEFTMARGIN|EC_RIGHTMARGIN, MAKELONG( GetMarginWidth(),10) );
 	SendMessage ( mWndScript, EM_SETBKGNDCOLOR, 0, GetSysColor ( COLOR_3DFACE ) );
 
 	mWndOutput = CreateWindow ( "RichEdit20A", "", WS_CHILD|ES_READONLY|ES_MULTILINE|ES_WANTRETURN|ES_AUTOVSCROLL|ES_AUTOHSCROLL|WS_VSCROLL|WS_HSCROLL|WS_VISIBLE, 0, 0, 100, 100, mWnd, (HMENU) IDC_DBG_OUTPUT, mInstance, 0 );
@@ -1475,7 +1488,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc ( HWND wnd, UINT msg, WPARAM wparam, 
 
 			// FIXME: was *2.25, increased for line numbers up to 9999; but neither works particularly well
 			//        if DPI scaling is involved, because script code text and linenumbers aren't DPI scaled
-			int lmargin = s18 * 3.5;
+			int lmargin = window->GetMarginWidth();
 			SendMessage(window->mWndScript, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(lmargin, s10));
 			SendMessage(window->mWndCallstack, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));
 			SendMessage(window->mWndOutput, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(s18, s10));

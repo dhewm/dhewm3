@@ -103,7 +103,7 @@ private:
 	int								GetSelectedText		( idStr& text );
 
 	void							ToggleBreakpoint	( void );
-
+	float							GetMarginWidth      ( void );
 	HWND							mWnd;
 	HWND							mWndScript;
 	HWND							mWndOutput;
