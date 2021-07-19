@@ -378,6 +378,16 @@ static char* findLineThatStartsWith( char* text, const char* findMe ) {
 	return NULL;
 }
 
+static ID_INLINE bool isARBidentifierChar( int c ) {
+	// according to chapter 3.11.2 in ARB_fragment_program.txt identifiers can only
+	// contain these chars (first char mustn't be a number, but hat doesn't matter here)
+	// NOTE: isalnum() or isalpha() apparently doesn't work, as it also matches spaces (?!)
+	return  c == '$' || c == '_'
+	      || (c >= '0' && c <= '9')
+	      || (c >= 'A' && c <= 'Z')
+	      || (c >= 'a' && c <= 'z');
+}
+
 void R_LoadARBProgram( int progIndex ) {
 	int		ofs;
 	int		err;
@@ -496,6 +506,52 @@ void R_LoadARBProgram( int progIndex ) {
 		for( char* resCol = strstr( outStr, "result.color" );
 		     resCol != NULL; resCol = strstr( resCol+13, "result.color" ) ) {
 			memcpy( resCol, "dhewm3tmpres", 12 ); // both strings have the same length.
+
+			// if this was part of "OUTPUT bla = result.color;", replace
+			// "OUTPUT bla" with "ALIAS  bla" (so it becomes "ALIAS  bla = dhewm3tmpres;")
+			{
+				char* s = resCol - 1;
+				// first skip whitespace before "result.color"
+				while( s > outStr && (*s == ' ' || *s == '\t') ) {
+					--s;
+				}
+				// if there's no '=' before result.color, this line can't be affected
+				if ( *s != '=' || s <= outStr + 8 ) {
+					continue; // go on with next "result.color" in the for-loop
+				}
+				--s; // we were on '=', so go to the char before and it's time to skip whitespace again
+				while( s > outStr && ( *s == ' ' || *s == '\t' ) ) {
+					--s;
+				}
+				// now we should be at the end of "bla" (or however the variable/alias is called)
+				if ( s <= outStr+7 || !isARBidentifierChar( *s ) ) {
+					continue;
+				}
+				--s;
+				// skip all the remaining chars that are legal in identifiers
+				while( s > outStr && isARBidentifierChar( *s ) ) {
+					--s;
+				}
+				// there should be at least one space/tab between "OUTPUT" and "bla"
+				if ( s <= outStr + 6 || ( *s != ' ' && *s != '\t' ) ) {
+					continue;
+				}
+				--s;
+				// skip remaining whitespace (if any)
+				while( s > outStr && ( *s == ' ' || *s == '\t' ) ) {
+					--s;
+				}
+				// now we should be at "OUTPUT" (specifically at its last 'T'),
+				// if this is indeed such a case
+				if ( s <= outStr + 5 || *s != 'T' ) {
+					continue;
+				}
+				s -= 5; // skip to start of "OUTPUT", if this is indeed "OUTPUT"
+				if ( idStr::Cmpn( s, "OUTPUT", 6 ) == 0 ) {
+					// it really is "OUTPUT" => replace "OUTPUT" with "ALIAS "
+					memcpy(s, "ALIAS ", 6);
+				}
+			}
 		}
 
 		assert( curLen + strlen( extraLines ) <= fullLen );
@@ -522,7 +578,8 @@ void R_LoadARBProgram( int progIndex ) {
 		} else if ( ofs >= (int)strlen( start ) ) {
 			common->Printf( "error at end of program\n" );
 		} else {
-			common->Printf( "error at %i:\n%s", ofs, start + ofs );
+			int printOfs = Max( ofs - 20, 0 ); // DG: print some more context
+			common->Printf( "error at %i:\n%s", ofs, start + printOfs );
 		}
 		return;
 	}
