@@ -31,9 +31,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   when setting `r_locksurfaces 1`. Originally it was supposed to render exactly
   the surfaces that *were* visible then, but I couldn't get that to work.  
   This is pretty similar, but there may be differences with opened doors and such.
-* Keyboard input improvements:
+* Keyboard input improvements (mostly SDL2-only):
     - Support (hopefully) all keyboard keys on all kinds of keyboard layouts
       by using scancodes for otherwise unknown keys
+    - Support typing in non-ASCII characters, if supported by Doom3 (it supports ISO-8859-1)
     - Support the clipboard also on non-Windows platforms  
       You can paste code from the clipboard into the console or other edit fields
       with `Shift+Insert`
@@ -172,7 +173,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 1.4.0 (2015-10-09)
 ------------------------------------------------------------------------
 
-The first dhewm3 release. Changes compared to the open sourced Doom3 1.3.1 on 2011-11-22:
+The first dhewm3 release. Changes compared to Doom3 1.3.1 as open sourced
+on 2011-11-22 (most work done by *dhewg*):
 
 * Use CMake as build system instead of Visual Studio and XCode solutions and SCons etc
 * Replaced lots of platform-specific code with libSDL

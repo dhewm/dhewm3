@@ -380,7 +380,7 @@ static char* findLineThatStartsWith( char* text, const char* findMe ) {
 
 static ID_INLINE bool isARBidentifierChar( int c ) {
 	// according to chapter 3.11.2 in ARB_fragment_program.txt identifiers can only
-	// contain these chars (first char mustn't be a number, but hat doesn't matter here)
+	// contain these chars (first char mustn't be a number, but that doesn't matter here)
 	// NOTE: isalnum() or isalpha() apparently doesn't work, as it also matches spaces (?!)
 	return  c == '$' || c == '_'
 	      || (c >= '0' && c <= '9')
