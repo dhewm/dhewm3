@@ -208,6 +208,7 @@ if(NOT WIN32)
 
 	if(Backtrace_FOUND)
 		set(sys_libs ${sys_libs} Backtrace_LIBRARIES)
+		include_directories(${Backtrace_INCLUDE_DIRS})
 		add_definitions(-DD3_HAVE_LIBBACKTRACE)
 		message(STATUS "Using libbacktrace")
 	else()
