@@ -204,14 +204,10 @@ else() # not MSVC
 
 if(NOT WIN32)
 	# libbacktrace support - TODO: might work with MinGW? we don't have a crash handler for win32 though..
-	include(CheckCSourceCompiles)
-	set(CMAKE_REQUIRED_LIBRARIES backtrace)
-	check_c_source_compiles( "#include <backtrace.h>
-	int main() { backtrace_create_state(NULL, 0, NULL, NULL); return 0; }" HAVE_LIBBACKTRACE )
-	unset(CMAKE_REQUIRED_LIBRARIES)
+	include(FindBacktrace)
 
-	if(HAVE_LIBBACKTRACE)
-		set(sys_libs ${sys_libs} backtrace)
+	if(Backtrace_FOUND)
+		set(sys_libs ${sys_libs} Backtrace_LIBRARIES)
 		add_definitions(-DD3_HAVE_LIBBACKTRACE)
 		message(STATUS "Using libbacktrace")
 	else()
