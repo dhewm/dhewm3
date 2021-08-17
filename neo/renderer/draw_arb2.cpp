@@ -464,7 +464,11 @@ void R_LoadARBProgram( int progIndex ) {
 		// outColor.a = dhewm3tmpres.a;
 		const char* extraLines =
 			"# gamma correction in shader, injected by dhewm3 \n"
-			"MUL dhewm3tmpres.xyz, program.env[4], dhewm3tmpres;\n" // first multiply with brightness
+			// MUL_SAT clamps the result to [0, 1] - it must not be negative because
+			// POW might not work with a negative base (it looks wrong with intel's Linux driver)
+			// and clamping values >1 to 1 is ok because when writing to result.color
+			// it's clamped anyway and pow(base, exp) is always >= 1 for base >= 1
+			"MUL_SAT dhewm3tmpres.xyz, program.env[4], dhewm3tmpres;\n" // first multiply with brightness
 			"POW result.color.x, dhewm3tmpres.x, program.env[4].w;\n" // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
 			"POW result.color.y, dhewm3tmpres.y, program.env[4].w;\n" // (apparently POW only supports scalars, not whole vectors)
 			"POW result.color.z, dhewm3tmpres.z, program.env[4].w;\n"
