@@ -67,7 +67,7 @@ idLib::Init
 */
 void idLib::Init( void ) {
 
-	assert( sizeof( bool ) == 1 );
+	assert( sizeof( char ) == 1 );
 
 	// assumptions from the scripting compiler/interpreter
 	assert( sizeof( float ) == sizeof( int ) );
