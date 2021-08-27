@@ -249,7 +249,11 @@ bool GLimp_Init(glimpParms_t parms) {
 		// try to put the window on the display the mousecursor currently is on
 		{
 			int x, y;
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 			SDL_GetGlobalMouseState(&x, &y);
+#else
+			x = y = 0;
+#endif
 
 			int numDisplays = SDL_GetNumVideoDisplays();
 			for ( int j=0; j<numDisplays; ++j ) {
