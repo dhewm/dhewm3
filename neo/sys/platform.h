@@ -200,6 +200,10 @@ If you have questions concerning this license or the applicable additional terms
 #undef FindText								// stupid namespace poluting Microsoft monkeys
 #endif
 
+#ifdef __APPLE__
+#include <Availability.h>
+#endif
+
 #define ID_TIME_T time_t
 
 typedef unsigned char			byte;		// 8 bits
