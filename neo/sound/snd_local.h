@@ -762,7 +762,13 @@ public:
 	static int				EFXAvailable;
 
 	// DG: for CheckDeviceAndRecoverIfNeeded()
+	// SE: openal-soft 1.15.1 appears to be the newest version that builds for OS X 10.4
+#if (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 1050)
 	LPALCRESETDEVICESOFT	alcResetDeviceSOFT; // needs ALC_SOFT_HRTF extension
+#else
+	int						alcResetDeviceSOFT;
+#endif
+
 	int						resetRetryCount;
 	unsigned int			lastCheckTime;
 
