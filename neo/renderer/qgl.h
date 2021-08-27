@@ -96,6 +96,10 @@ extern	void ( APIENTRY *qglColorTableEXT)( int, int, int, int, int, const void *
 extern	PFNGLACTIVESTENCILFACEEXTPROC	qglActiveStencilFaceEXT;
 
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
+// SE: work around missing function definition on legacy Mac OS X versions
+#if defined(OSX_TIGER) || defined(OSX_LEOPARD)
+typedef void (APIENTRYP PFNGLSTENCILOPSEPARATEPROC) (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
+#endif
 extern PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
 
 // ARB_texture_compression

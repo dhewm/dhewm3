@@ -246,6 +246,7 @@ bool GLimp_Init(glimpParms_t parms) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		int displayIndex = 0;
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 		// try to put the window on the display the mousecursor currently is on
 		{
 			int x, y;
@@ -264,6 +265,7 @@ bool GLimp_Init(glimpParms_t parms) {
 				}
 			}
 		}
+#endif
 
 		window = SDL_CreateWindow(ENGINE_VERSION,
 									SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
