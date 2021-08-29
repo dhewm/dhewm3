@@ -409,10 +409,7 @@ void idSoundSystemLocal::Init() {
 		bool hasAlcSoftHrtf = alcIsExtensionPresent( openalDevice, "ALC_SOFT_HRTF" ) != AL_FALSE;
 		if ( hasAlcExtDisconnect && hasAlcSoftHrtf ) {
 			common->Printf( "OpenAL: found extensions for resetting disconnected devices\n" );
-		// SE: fix build error due to openal-soft 1.15.1 on Mac OS X 10.4 not implementing ALC_SOFT_HRTF
-#if (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 1050)
 			alcResetDeviceSOFT = (LPALCRESETDEVICESOFT)alcGetProcAddress( openalDevice, "alcResetDeviceSOFT" );
-#endif
 		}
 
 		// try to obtain EFX extensions
@@ -646,13 +643,11 @@ bool idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded()
 			return false;
 		}
 
-#if (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 1050)
 		if ( alcResetDeviceSOFT( openalDevice, NULL ) ) {
 			common->Printf( "OpenAL: resetting device succeeded!\n" );
 			resetRetryCount = 0;
 			return true;
 		}
-#endif
 
 		++resetRetryCount;
 		return false;
