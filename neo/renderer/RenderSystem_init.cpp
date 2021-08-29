@@ -279,7 +279,7 @@ PFNGLDEPTHBOUNDSEXTPROC                 qglDepthBoundsEXT;
 
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
 // SE: only the ATI implementation is provided on Mac OS X 10.4 and 10.5
-#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED <= 1050)
+#if OSX_TIGER || OSX_LEOPARD
 PFNGLSTENCILOPSEPARATEATIPROC qglStencilOpSeparate;
 #else
 PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
@@ -403,12 +403,12 @@ static void R_CheckPortableExtensions( void ) {
 	if ( glConfig.twoSidedStencilAvailable )
 		qglActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)GLimp_ExtensionPointer( "glActiveStencilFaceEXT" );
 
-#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED <= 1050)
+#if OSX_TIGER || OSX_LEOPARD
 	if( glConfig.glVersion >= 2.0) {
-		common->Printf( "... got GL2.0+ glStencilOpSeparate()\n" );
+		common->Printf( "... got GL2.0+ glStencilOpSeparateATI()\n" );
 		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEATIPROC)GLimp_ExtensionPointer( "glStencilOpSeparateATI" );
 	} else {
-		common->Printf( "... don't have GL2.0+ glStencilOpSeparate()\n" );
+		common->Printf( "... don't have GL2.0+ glStencilOpSeparateATI()\n" );
 		qglStencilOpSeparate = NULL;
 	}
 #else

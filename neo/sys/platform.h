@@ -202,6 +202,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef __APPLE__
 #include <Availability.h>
+#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
+#if __MAC_OS_X_VERSION_MIN_REQUIRED == 1040
+#define OSX_TIGER 1
+#elif __MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+#define OSX_LEOPARD 1
+#endif
+#endif
 #endif
 
 #define ID_TIME_T time_t

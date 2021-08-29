@@ -97,7 +97,7 @@ extern	PFNGLACTIVESTENCILFACEEXTPROC	qglActiveStencilFaceEXT;
 
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
 // SE: only the ATI implementation is provided on Mac OS X 10.4 and 10.5
-#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED <= 1050)
+#if OSX_TIGER || OSX_LEOPARD
 extern PFNGLSTENCILOPSEPARATEATIPROC qglStencilOpSeparate;
 #else
 extern PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
