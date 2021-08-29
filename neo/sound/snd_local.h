@@ -766,7 +766,7 @@ public:
 #if (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 1050)
 	LPALCRESETDEVICESOFT	alcResetDeviceSOFT; // needs ALC_SOFT_HRTF extension
 #else
-	int	*					alcResetDeviceSOFT;
+	int						alcResetDeviceSOFT;
 #endif
 
 	int						resetRetryCount;
