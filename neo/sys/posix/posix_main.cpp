@@ -401,7 +401,7 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 static const int   crashSigs[]     = {  SIGILL,   SIGABRT,   SIGFPE,   SIGSEGV };
 static const char* crashSigNames[] = { "SIGILL", "SIGABRT", "SIGFPE", "SIGSEGV" };
 
-#if ( defined(__linux__) && defined(__GLIBC__) ) || defined(__FreeBSD__) || (defined(__APPLE__) && !OSX_TIGER)
+#if ( defined(__linux__) && defined(__GLIBC__) ) || defined(__FreeBSD__) || (defined(__APPLE__) && !defined(OSX_TIGER))
   #define D3_HAVE_BACKTRACE
   #include <execinfo.h>
 #endif
