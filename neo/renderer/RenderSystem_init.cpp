@@ -278,12 +278,7 @@ PFNGLPROGRAMLOCALPARAMETER4FVARBPROC	qglProgramLocalParameter4fvARB;
 PFNGLDEPTHBOUNDSEXTPROC                 qglDepthBoundsEXT;
 
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
-// SE: only the ATI implementation is provided on Mac OS X 10.4 and 10.5
-#if OSX_TIGER || OSX_LEOPARD
-PFNGLSTENCILOPSEPARATEATIPROC qglStencilOpSeparate;
-#else
 PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
-#endif
 
 /*
 =================
@@ -403,15 +398,6 @@ static void R_CheckPortableExtensions( void ) {
 	if ( glConfig.twoSidedStencilAvailable )
 		qglActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)GLimp_ExtensionPointer( "glActiveStencilFaceEXT" );
 
-#if OSX_TIGER || OSX_LEOPARD
-	if( glConfig.glVersion >= 2.0) {
-		common->Printf( "... got GL2.0+ glStencilOpSeparateATI()\n" );
-		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEATIPROC)GLimp_ExtensionPointer( "glStencilOpSeparateATI" );
-	} else {
-		common->Printf( "... don't have GL2.0+ glStencilOpSeparateATI()\n" );
-		qglStencilOpSeparate = NULL;
-	}
-#else
 	if( glConfig.glVersion >= 2.0) {
 		common->Printf( "... got GL2.0+ glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparate" );
@@ -420,7 +406,6 @@ static void R_CheckPortableExtensions( void ) {
 		common->Printf( "... don't have GL2.0+ glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = NULL;
 	}
-#endif
 
 	// ARB_vertex_buffer_object
 	glConfig.ARBVertexBufferObjectAvailable = R_CheckExtension( "GL_ARB_vertex_buffer_object" );
