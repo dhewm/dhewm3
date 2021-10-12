@@ -401,9 +401,13 @@ static void R_CheckPortableExtensions( void ) {
 	if( glConfig.glVersion >= 2.0) {
 		common->Printf( "... got GL2.0+ glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparate" );
+	} else if( R_CheckExtension( "GL_ATI_separate_stencil" ) ) {
+		common->Printf( "... got glStencilOpSeparateATI() (GL_ATI_separate_stencil)\n" );
+		// the ATI version of glStencilOpSeparate() has the same signature and should also
+		// behave identical to the GL2 version (in Mesa3D it's just an alias)
+		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparateATI" );
 	} else {
-		// TODO: there was an extension by ATI providing glStencilOpSeparateATI - do we care?
-		common->Printf( "... don't have GL2.0+ glStencilOpSeparate()\n" );
+		common->Printf( "... don't have glStencilOpSeparateATI() or (GL2.0+) glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = NULL;
 	}
 
