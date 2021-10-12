@@ -95,12 +95,13 @@ else() # not MSVC and not cross-compiling, assume GCC or clang (-compatible), se
 	                RESULT_VARIABLE cc_dumpmachine_res
 	                OUTPUT_VARIABLE cc_dumpmachine_out)
 	if(cc_dumpmachine_res EQUAL 0)
-		message(STATUS "${CMAKE_C_COMPILER} -dumpmachine says ${cc_dumpmachine_out}")
+		string(STRIP ${cc_dumpmachine_out} cc_dumpmachine_out) # get rid of trailing newline
+		message(STATUS "`${CMAKE_C_COMPILER} -dumpmachine` says: \"${cc_dumpmachine_out}\"")
 		# gcc -dumpmachine and clang -dumpmachine seem to print something like "x86_64-linux-gnu" (gcc)
 		# or "x64_64-pc-linux-gnu" (clang) or "i686-w64-mingw32" (32bit mingw-w64) i.e. starting with the CPU,
 		# then "-" and then OS or whatever - so use everything up to first "-"
 		string(REGEX MATCH "^[^-]+" cpu ${cc_dumpmachine_out})
-		message(STATUS "  => CPU extracted from that: ${cpu}")
+		message(STATUS "  => CPU architecture extracted from that: \"${cpu}\"")
 	else()
 		message(WARNING "${CMAKE_C_COMPILER} -dumpmachine failed with error (code) ${cc_dumpmachine_res}")
 		message(WARNING "will use the (sometimes incorrect) CMAKE_SYSTEM_PROCESSOR (${cpu}) to determine D3_ARCH")
