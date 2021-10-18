@@ -5,12 +5,17 @@
     Feel free to customize this file to suit your needs
 */
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "SDL.h"
 #include "SDLMain.h"
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
-/* For some reaon, Apple removed setAppleMenu from the headers in 10.4,
+/* For some reason, Apple removed setAppleMenu from the headers in 10.4,
  but the method still is there and works. To avoid warnings, we declare
  it ourselves here. */
 @interface NSApplication(SDL_Missing_Methods)
@@ -221,7 +226,7 @@ static void CustomApplicationMain (int argc, char **argv)
 
     /* Create SDLMain and make it the app delegate */
     sdlMain = [[SDLMain alloc] init];
-    [NSApp setDelegate:sdlMain];
+    [NSApp setDelegate:(id<NSApplicationDelegate>)sdlMain];
 
     /* Start the main event loop */
     [NSApp run];
@@ -378,3 +383,7 @@ int main (int argc, char **argv)
 #endif
     return 0;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
