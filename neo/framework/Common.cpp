@@ -2974,6 +2974,10 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		Printf( "%s using SDL v%u.%u.%u\n",
 				version.string, sdlv.major, sdlv.minor, sdlv.patch );
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		Printf( "SDL video driver: %s\n", SDL_GetCurrentVideoDriver() );
+#endif
+
 		// initialize key input/binding, done early so bind command exists
 		idKeyInput::Init();
 
