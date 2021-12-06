@@ -396,6 +396,15 @@ main
 ===============
 */
 int main(int argc, char **argv) {
+	// Prevent running Doom 3 as root
+	// Borrowed from Yamagi Quake II
+	if (getuid() == 0) {
+		printf("Doom 3 shouldn't be run as root! Backing out to save your ass. If\n");
+		printf("you really know what you're doing, edit neo/sys/linux/main.cpp and remove\n");
+		printf("this check. But don't complain if an imp kills your bunny afterwards!:)\n");
+
+		return 1;
+	}
 	// fallback path to the binary for systems without /proc
 	// while not 100% reliable, its good enough
 	if (argc > 0) {
