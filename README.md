@@ -79,11 +79,12 @@ For UNIX-like systems, these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
 your OS (apt, dnf, portage, BSD ports, [Homebrew for macOS](http://brew.sh), ...).
 
-For Windows, there are two options:
+For Windows, there are three options:
 
 - Use the provided binaries (recommended, see below)
 - Compile these libraries yourself
-- Do **not** use *vcpkg*, they patch headers [in a way that breaks your build](https://github.com/microsoft/vcpkg/issues/18098) !
+- Use [vcpkg](https://vcpkg.io/) to install the dependencies
+    - Remember to set `CMAKE_TOOLCHAIN_FILE` as described in their [Getting Started Guide](https://vcpkg.io/en/getting-started.html)
 
 Create a distinct build folder outside of this source repository and issue
 the cmake command there, pointing it at the neo/ folder from this repository:
@@ -93,6 +94,10 @@ the cmake command there, pointing it at the neo/ folder from this repository:
 macOS users need to point CMake at OpenAL Soft (better solutions welcome):
 
 `cmake -DOPENAL_LIBRARY=/usr/local/opt/openal-soft/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/opt/openal-soft/include /path/to/repository/neo`
+
+Newer versions of Homebrew install openal-soft to another directory, so use this instead:
+
+`cmake -DOPENAL_LIBRARY="/opt/homebrew/opt/openal-soft/lib/libopenal.dylib" -DOPENAL_INCLUDE_DIR="/opt/homebrew/opt/openal-soft/include" /path/to/repo/neo`
 
 ## Using the provided Windows binaries
 
