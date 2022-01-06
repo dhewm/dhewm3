@@ -1275,7 +1275,7 @@ const char *Mem_CleanupFileName( const char *fileName ) {
 		newFileName = newFileName.Left( i2 - 1 ) + newFileName.Right( newFileName.Length() - ( i1 + 4 ) );
 	}
 	index = ( index + 1 ) & 3;
-	strncpy( newFileNames[index], newFileName.c_str(), sizeof( newFileNames[index] ) );
+	idStr::Copynz( newFileNames[index], newFileName.c_str(), sizeof( newFileNames[index] ) );
 	return newFileNames[index];
 }
 

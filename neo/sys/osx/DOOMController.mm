@@ -57,7 +57,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 	switch(type) {
 	case PATH_BASE:
-		strncpy(buf, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
+		SDL_strlcpy(buf, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
 		snap = strrchr(buf, '/');
 		if (snap)
 			*snap = '\0';
@@ -196,7 +196,7 @@ int SDL_main( int argc, char *argv[] ) {
 		Sys_Error("Could not access application resources");
 
 	// DG: set exe_path so Posix_InitSignalHandlers() can call Posix_GetExePath()
-	strncpy(exe_path, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN);
+	SDL_strlcpy(exe_path, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN);
 
 	Posix_InitSignalHandlers(); // DG: added signal handlers for POSIX platforms
 

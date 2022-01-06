@@ -117,8 +117,7 @@ ExtractPort
 */
 static bool ExtractPort( const char *src, char *buf, int bufsize, int *port ) {
 	char *p;
-	strncpy( buf, src, bufsize );
-	p = buf; p += Min( bufsize - 1, (int)strlen( src ) ); *p = '\0';
+	idStr::Copynz( buf, src, bufsize );
 	p = strchr( buf, ':' );
 	if ( !p ) {
 		return false;

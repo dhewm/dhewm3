@@ -1178,6 +1178,7 @@ void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
 	si.cb = sizeof(si);
 
 	strncpy( szPathOrig, exePath, _MAX_PATH );
+	szPathOrig[_MAX_PATH-1] = 0;
 
 	if( !CreateProcess( NULL, szPathOrig, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi ) ) {
 		common->Error( "Could not start process: '%s' ", szPathOrig );

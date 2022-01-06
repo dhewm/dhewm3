@@ -170,5 +170,5 @@ Sys_SetFatalError
 ==================
 */
 void Sys_SetFatalError( const char *error ) {
-	strncpy( fatalError, error, sizeof( fatalError ) );
+	idStr::Copynz( fatalError, error, sizeof( fatalError ) );
 }

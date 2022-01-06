@@ -630,7 +630,7 @@ int R_FindARBProgram( GLenum target, const char *program ) {
 	// add it to the list and load it
 	progs[i].ident = (program_t)0;	// will be gen'd by R_LoadARBProgram
 	progs[i].target = target;
-	strncpy( progs[i].name, program, sizeof( progs[i].name ) - 1 );
+	idStr::Copynz( progs[i].name, program, sizeof( progs[i].name ) );
 
 	R_LoadARBProgram( i );
 
