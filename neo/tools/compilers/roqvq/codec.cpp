@@ -225,7 +225,8 @@ void codec::Segment( int *alist, float *flist, int numElements, float rmse)
 				fy = RMULT*(float)(codebook2[onf][numc+0]) +
 						GMULT*(float)(codebook2[onf][numc+1]) +
 							BMULT*(float)(codebook2[onf][numc+2]) + 0.5f;
-				 if (fy<0) fy = 0; if (fy>255) fy = 255;
+				if (fy<0) fy = 0;
+				if (fy>255) fy = 255;
 
 				fcr += RIEMULT*(float)(codebook2[onf][numc+0]);
 				fcr += GIEMULT*(float)(codebook2[onf][numc+1]);
@@ -1319,7 +1320,9 @@ byte *idataA, *idataB;
 		j = 0;
 		for( i=0; i<numQuadCels; i++ ) {
 			if (qStatus[i].size == 8 && qStatus[i].status) {
-				if (qStatus[i].status < DEAD) num[qStatus[i].status]++; j++;
+				if (qStatus[i].status < DEAD)
+					num[qStatus[i].status]++;
+				j++;
 			}
 		}
 		common->Printf("sparseEncode: for 08x08 CCC = %d, FCC = %d, MOT = %d, SLD = %d, PAT = %d\n", num[CCC], num[FCC], num[MOT], num[SLD], num[PAT]);
@@ -1327,7 +1330,9 @@ byte *idataA, *idataB;
 		for(i=0;i<DEAD;i++) num[i] = 0;
 		for( i=0; i<numQuadCels; i++ ) {
 			if (qStatus[i].size == 4 && qStatus[i].status) {
-				if (qStatus[i].status < DEAD) num[qStatus[i].status]++; j++;
+				if (qStatus[i].status < DEAD)
+					num[qStatus[i].status]++;
+				j++;
 			}
 		}
 		common->Printf("sparseEncode: for 04x04 CCC = %d, FCC = %d, MOT = %d, SLD = %d, PAT = %d\n", num[CCC], num[FCC], num[MOT], num[SLD], num[PAT]);
@@ -1420,7 +1425,9 @@ byte *idataA, *idataB;
 		j = 0;
 		for( i=0; i<numQuadCels; i++ ) {
 			if (qStatus[i].size == 8 && qStatus[i].status) {
-				if (qStatus[i].status < DEAD) num[qStatus[i].status]++; j++;
+				if (qStatus[i].status < DEAD)
+					num[qStatus[i].status]++;
+				j++;
 			}
 		}
 		common->Printf("sparseEncode: for 08x08 CCC = %d, FCC = %d, MOT = %d, SLD = %d, PAT = %d\n", num[CCC], num[FCC], num[MOT], num[SLD], num[PAT]);
@@ -1428,7 +1435,9 @@ byte *idataA, *idataB;
 		for(i=0;i<DEAD;i++) num[i] = 0;
 		for( i=0; i<numQuadCels; i++ ) {
 			if (qStatus[i].size == 4 && qStatus[i].status) {
-				if (qStatus[i].status < DEAD) num[qStatus[i].status]++; j++;
+				if (qStatus[i].status < DEAD)
+					num[qStatus[i].status]++;
+				j++;
 			}
 		}
 		common->Printf("sparseEncode: for 04x04 CCC = %d, FCC = %d, MOT = %d, SLD = %d, PAT = %d\n", num[CCC], num[FCC], num[MOT], num[SLD], num[PAT]);
