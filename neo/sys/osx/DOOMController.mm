@@ -36,6 +36,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <SDL_main.h>
 
 #include "sys/platform.h"
+
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
 #include "idlib/Str.h"
 #include "framework/Common.h"
 
@@ -91,10 +95,16 @@ returns in megabytes
 ================
 */
 int Sys_GetSystemRam( void ) {
-	SInt32 ramSize;
-
-	if ( Gestalt( gestaltPhysicalRAMSize, &ramSize ) == noErr ) {
-		return ramSize / (1024*1024);
+	// from https://discussions.apple.com/thread/1775836?answerId=8396559022#8396559022
+	// should work (at least) from the Mac OSX 10.2.8 SDK on
+	int mib[2];
+	uint64_t memsize;
+	size_t len;
+	mib[0] = CTL_HW;
+	mib[1] = HW_MEMSIZE; /* uint64_t: physical ram size */
+	len = sizeof(memsize);
+	if(sysctl(mib, 2, &memsize, &len, NULL, 0) == 0) {
+		return (int)(memsize / (1024*1024));
 	}
 	else
 		return 1024;
