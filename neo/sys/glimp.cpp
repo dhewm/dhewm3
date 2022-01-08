@@ -253,17 +253,23 @@ bool GLimp_Init(glimpParms_t parms) {
 			SDL_GetGlobalMouseState(&x, &y);
 
 			int numDisplays = SDL_GetNumVideoDisplays();
+			common->Printf("SDL detected %d displays: \n", numDisplays);
+			bool found = false;
 			for ( int j=0; j<numDisplays; ++j ) {
 				SDL_Rect rect;
 				if (SDL_GetDisplayBounds(j, &rect) == 0) {
-					if (   x >= rect.x && x < rect.x + rect.w
+					common->Printf(" %d: %dx%d at (%d, %d) to (%d, %d)\n", j, rect.w, rect.h,
+					               rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
+					if ( !found && x >= rect.x && x < rect.x + rect.w
 						&& y >= rect.y && y < rect.y + rect.h )
 					{
 						displayIndex = j;
-						break;
+						found = true;
 					}
 				}
 			}
+			common->Printf("Will use display %d because mouse cursor is at (%d, %d).\n",
+			               displayIndex, x, y);
 		}
 #endif
 
@@ -296,6 +302,10 @@ bool GLimp_Init(glimpParms_t parms) {
 			{
 				common->Warning("Current display mode isn't requested display mode\n");
 				common->Warning("Likely SDL bug #4700, trying to work around it..\n");
+				int dIdx = SDL_GetWindowDisplayIndex(window);
+				if(dIdx != displayIndex) {
+					common->Warning("Window's display index is %d, but we wanted %d!\n", dIdx, displayIndex);
+				}
 
 				/* Mkay, try to hack around that. */
 				SDL_DisplayMode wanted_mode = {};
