@@ -677,7 +677,7 @@ void *Sys_DLL_GetProcAddress( uintptr_t dllHandle, const char *procName ) {
 	if (!adr)
 	{
 		DWORD e = GetLastError();
-		LPVOID msgBuf = nullptr;
+		LPVOID msgBuf = NULL;
 
 		FormatMessage(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |

@@ -97,7 +97,7 @@ private:
 	void							UpdateTitle			( void );
 	void							UpdateCallstack		( void );
 	void							UpdateRecentFiles	( void );
-	bool							OpenScript			( const char* filename, int lineNumber = -1, idProgram* program = nullptr );
+	bool							OpenScript			( const char* filename, int lineNumber = -1, idProgram* program = NULL );
 	void							EnableWindows		( bool state );
 
 	int								GetSelectedText		( idStr& text );

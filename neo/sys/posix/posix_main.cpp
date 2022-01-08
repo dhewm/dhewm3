@@ -450,6 +450,11 @@ static int bt_pcinfo_callback( void *data, uintptr_t pc, const char *filename, i
 		if (name != NULL) {
 			function = name;
 		}
+
+		const char* fileNameNeo = strstr(filename, "/neo/");
+		if (fileNameNeo != NULL) {
+			filename = fileNameNeo+1; // I want "neo/bla/blub.cpp:42"
+		}
 		printf("  %zu %s:%d %s\n", pc, filename, lineno, function);
 		free(name);
 	}
