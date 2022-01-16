@@ -2592,7 +2592,7 @@ void idCommonLocal::Async( void ) {
 =================
 idCommonLocal::LoadGameDLLbyName
 
-Helper for LoadGameDLL() to make it less painfull to try different dll names.
+Helper for LoadGameDLL() to make it less painful to try different dll names.
 =================
 */
 void idCommonLocal::LoadGameDLLbyName( const char *dll, idStr& s ) {

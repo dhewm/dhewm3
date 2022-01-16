@@ -61,7 +61,10 @@ If you have questions concerning this license or the applicable additional terms
 //            => change it (to -1?) or does that break anything?
 static const ID_TIME_T	FILE_NOT_FOUND_TIMESTAMP	= 0xFFFFFFFF;
 static const int		MAX_PURE_PAKS				= 128;
-static const int		MAX_OSPATH					= FILENAME_MAX;
+// DG: https://www.gnu.org/software/libc/manual/html_node/Limits-for-Files.html says
+//     that FILENAME_MAX can be *really* big on some systems and thus is not suitable
+//     for buffer lengths. So limit it to prevent stack overflow/out of memory issues
+static const int		MAX_OSPATH					= (FILENAME_MAX < 32000) ? FILENAME_MAX : 32000;
 
 // modes for OpenFileByMode. used as bit mask internally
 typedef enum {
