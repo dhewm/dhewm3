@@ -377,7 +377,7 @@ static int WPath2A(char *dst, size_t size, const WCHAR *src) {
 /*
 ==============
 Returns "My Documents"/My Games/dhewm3 directory (or equivalent - "CSIDL_PERSONAL").
-To be used with Sys_DefaultSavePath(), so savegames, screenshots etc will be
+To be used with Sys_GetPath(PATH_SAVE), so savegames, screenshots etc will be
 saved to the users files instead of systemwide.
 
 Based on (with kind permission) Yamagi Quake II's Sys_GetHomeDir()
@@ -386,7 +386,7 @@ Returns the number of characters written to dst
 ==============
  */
 extern "C" { // DG: I need this in SDL_win32_main.c
-	int Sys_GetHomeDir(char *dst, size_t size)
+	int Win_GetHomeDir(char *dst, size_t size)
 	{
 		int len;
 		WCHAR profile[MAX_OSPATH];
@@ -481,7 +481,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 	case PATH_CONFIG:
 	case PATH_SAVE:
-		if (Sys_GetHomeDir(buf, sizeof(buf)) < 1) {
+		if (Win_GetHomeDir(buf, sizeof(buf)) < 1) {
 			Sys_Error("ERROR: Couldn't get dir to home path");
 			return false;
 		}
@@ -748,6 +748,11 @@ void Sys_Init( void ) {
 #if 0
 	cmdSystem->AddCommand( "setAsyncSound", Sys_SetAsyncSound_f, CMD_FL_SYSTEM, "set the async sound option" );
 #endif
+	{
+		idStr savepath;
+		Sys_GetPath( PATH_SAVE, savepath );
+		common->Printf( "Logging console output to %s/dhewm3log.txt\n", savepath.c_str() );
+	}
 
 	//
 	// Windows version
@@ -1002,6 +1007,16 @@ WinMain
 ==================
 */
 int main(int argc, char *argv[]) {
+	// SDL_win32_main.c creates the dhewm3log.txt and redirects stdout into it
+	// so here we can log its (approx.) creation time before anything else is logged:
+	{
+		time_t tt = time(NULL);
+		const struct tm* tms = localtime(&tt);
+		char timeStr[64] = {};
+		strftime(timeStr, sizeof(timeStr), "%F %H:%M:%S", tms);
+		printf("Opened this log at %s\n", timeStr);
+	}
+
 	const HCURSOR hcurSave = ::SetCursor( LoadCursor( 0, IDC_WAIT ) );
 
 	InitializeCriticalSection( &printfCritSect );
