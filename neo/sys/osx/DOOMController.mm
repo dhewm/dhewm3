@@ -45,30 +45,28 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/posix/posix_public.h"
 
+static char base_path[MAXPATHLEN];
 static char exe_path[MAXPATHLEN];
+static char save_path[MAXPATHLEN];
+
 
 const char* Posix_GetExePath() {
 	return exe_path;
 }
 
-bool Sys_GetPath(sysPath_t type, idStr &path) {
-	char buf[MAXPATHLEN];
-	char *snap;
+const char* Posix_GetSavePath() {
+	return save_path;
+}
 
+bool Sys_GetPath(sysPath_t type, idStr &path) {
 	switch(type) {
 	case PATH_BASE:
-		SDL_strlcpy(buf, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN );
-		snap = strrchr(buf, '/');
-		if (snap)
-			*snap = '\0';
-
-		path = buf;
+		path = base_path;
 		return true;
 
 	case PATH_CONFIG:
 	case PATH_SAVE:
-		sprintf(buf, "%s/Library/Application Support/dhewm3", [NSHomeDirectory() cString]);
-		path = buf;
+		path = save_path;
 		return true;
 
 	case PATH_EXE:
@@ -196,7 +194,17 @@ int SDL_main( int argc, char *argv[] ) {
 		Sys_Error("Could not access application resources");
 
 	// DG: set exe_path so Posix_InitSignalHandlers() can call Posix_GetExePath()
-	SDL_strlcpy(exe_path, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], MAXPATHLEN);
+	SDL_strlcpy(exe_path, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], sizeof(exe_path));
+	// same for save_path for Posix_GetSavePath()
+	snprintf(save_path, sizeof(save_path), "%s/Library/Application Support/dhewm3", [NSHomeDirectory() cString]);
+	// and preinitializing basepath is easy enough so do that as well
+	{
+		char* snap;
+		SDL_strlcpy(base_path, exe_path, sizeof(base_path));
+		snap = strrchr(base_path, '/');
+		if (snap)
+			*snap = '\0';
+	}
 
 	Posix_InitSignalHandlers(); // DG: added signal handlers for POSIX platforms
 

@@ -78,6 +78,21 @@ If you have questions concerning this license or the applicable additional terms
 
 static char path_argv[PATH_MAX];
 static char path_exe[PATH_MAX];
+static char save_path[PATH_MAX];
+
+const char* Posix_GetSavePath()
+{
+	return save_path;
+}
+
+static void SetSavePath()
+{
+	const char* s = getenv("XDG_DATA_HOME");
+	if (s)
+		D3_snprintfC99(save_path, sizeof(save_path), "%s/dhewm3", s);
+	else
+		D3_snprintfC99(save_path, sizeof(save_path), "%s/.local/share/dhewm3", getenv("HOME"));
+}
 
 const char* Posix_GetExePath()
 {
@@ -225,14 +240,11 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		return true;
 
 	case PATH_SAVE:
-		s = getenv("XDG_DATA_HOME");
-		if (s)
-			idStr::snPrintf(buf, sizeof(buf), "%s/dhewm3", s);
-		else
-			idStr::snPrintf(buf, sizeof(buf), "%s/.local/share/dhewm3", getenv("HOME"));
-
-		path = buf;
-		return true;
+		if(save_path[0] != '\0') {
+			path = save_path;
+			return true;
+		}
+		return false;
 
 	case PATH_EXE:
 		if (path_exe[0] != '\0') {
@@ -418,6 +430,8 @@ int main(int argc, char **argv) {
 	if (path_exe[0] == '\0') {
 		memcpy(path_exe, path_argv, sizeof(path_exe));
 	}
+
+	SetSavePath();
 
 	// some ladspa-plugins (that may be indirectly loaded by doom3 if they're
 	// used by alsa) call setlocale(LC_ALL, ""); This sets LC_ALL to $LANG or
