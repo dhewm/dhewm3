@@ -79,17 +79,21 @@ if(NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR))
 	# special case: cross-compiling, here CMAKE_SYSTEM_PROCESSOR should be correct, hopefully
 	# (just leave cpu at ${CMAKE_SYSTEM_PROCESSOR})
 elseif(MSVC)
-	# TODO: use CMAKE_GENERATOR_PLATFORM ? not sure if that works when building with MSVC compiler + ninja
-	#       or only when generating VS solutions (currently CMAKE_GENERATOR_PLATFORM can be "Win32" "x64" "ARM" or "ARM64")
-	if(cpu MATCHES ".*[aA][rR][mM].*")
-		# no idea how to detect windows for ARM(64), I don't own such hardware
-		message(FATAL_ERROR "please fix this code to work for Windows on ARM and send a pull request")
-	endif()
-	if(CMAKE_CL_64)
-		set(cpu "x86_64")
-	else()
+	message(STATUS "CMAKE_GENERATOR_PLATFORM: ${CMAKE_GENERATOR_PLATFORM}")
+	if(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
 		set(cpu "x86")
+	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+		set(cpu "x64_64")
+	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM")
+		# at least on RPi 32bit, gcc -dumpmachine outputs "arm-linux-gnueabihf",
+		#  so we'll use "arm" there => use the same for 32bit ARM on MSVC
+		set(cpu "arm")
+	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+		set(cpu "arm64")
+	else()
+		message(FATAL_ERROR "Unknown Target CPU/platform ${CMAKE_GENERATOR_PLATFORM}")
 	endif()
+	message(STATUS "  => CPU architecture extracted from that: \"${cpu}\"")
 else() # not MSVC and not cross-compiling, assume GCC or clang (-compatible), seems to work for MinGW as well
 	execute_process(COMMAND ${CMAKE_C_COMPILER} "-dumpmachine"
 	                RESULT_VARIABLE cc_dumpmachine_res
@@ -110,10 +114,21 @@ endif()
 
 if(cpu STREQUAL "powerpc")
 	set(cpu "ppc")
+elseif(cpu STREQUAL "aarch64")
+	# "arm64" is more obvious, and some operating systems (like macOS) use it instead of "aarch64"
+	set(cpu "arm64")
 elseif(cpu MATCHES "i.86")
 	set(cpu "x86")
 elseif(cpu MATCHES "[aA][mM][dD]64" OR cpu MATCHES "[xX]64")
 	set(cpu "x86_64")
+elseif(cpu MATCHES "[aA][rR][mM].*") # some kind of arm..
+	# On 32bit Raspbian gcc -dumpmachine returns sth starting with "arm-",
+	# while clang -dumpmachine says "arm6k-..." - try to unify that to "arm"
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8) # sizeof(void*) == 8 => must be arm64
+		set(cpu "arm64")
+	else() # should be 32bit arm then (probably "armv7l" "armv6k" or sth like that)
+		set(cpu "arm")
+	endif()
 endif()
 
 add_definitions(-DD3_ARCH="${cpu}" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
