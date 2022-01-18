@@ -1732,7 +1732,7 @@ idModList *idFileSystemLocal::ListMods( void ) {
 
 		dirs.Remove( "." );
 		dirs.Remove( ".." );
-		dirs.Remove( "base" );
+		dirs.Remove( BASE_GAMEDIR );
 		dirs.Remove( "pb" );
 
 		// see if there are any pk4 files in each directory
