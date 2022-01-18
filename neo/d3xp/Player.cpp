@@ -5023,7 +5023,9 @@ void idPlayer::UpdateWeapon( void ) {
 		if ( idealWeapon != -1 ) {
 			animPrefix = spawnArgs.GetString( va( "def_weapon%d", idealWeapon ) );
 			weapon.GetEntity()->GetWeaponDef( animPrefix, inventory.clip[ idealWeapon ] );
-			assert( weapon.GetEntity()->IsLinked() );
+			if ( ! weapon.GetEntity()->IsLinked() ) {
+				return;
+			}
 		} else {
 			return;
 		}
