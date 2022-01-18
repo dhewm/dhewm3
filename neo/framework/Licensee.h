@@ -55,7 +55,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // paths
-#define	BASE_GAMEDIR					"base"
+#define	BASE_GAMEDIR					"sabase"
 
 // filenames
 #ifndef CONFIG_FILE
