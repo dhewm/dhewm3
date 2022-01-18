@@ -2112,9 +2112,9 @@ ammo_t idWeapon::GetAmmoNumForName( const char *ammoname ) {
 
 	assert( ammoname );
 
-	ammoDict = gameLocal.FindEntityDefDict( "ammo_types", false );
+	ammoDict = gameLocal.FindEntityDefDict( "ammo_types", true );
 	if ( !ammoDict ) {
-		gameLocal.Error( "Could not find entity definition for 'ammo_types'\n" );
+		gameLocal.Warning( "Could not find entity definition for 'ammo_types'\n" );
 	}
 
 	if ( !ammoname[ 0 ] ) {
@@ -2144,9 +2144,9 @@ const char *idWeapon::GetAmmoNameForNum( ammo_t ammonum ) {
 	const idKeyValue *kv;
 	char text[ 32 ];
 
-	ammoDict = gameLocal.FindEntityDefDict( "ammo_types", false );
+	ammoDict = gameLocal.FindEntityDefDict( "ammo_types", true );
 	if ( !ammoDict ) {
-		gameLocal.Error( "Could not find entity definition for 'ammo_types'\n" );
+		gameLocal.Warning( "Could not find entity definition for 'ammo_types'\n" );
 	}
 
 	sprintf( text, "%d", ammonum );
