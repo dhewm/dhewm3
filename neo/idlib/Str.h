@@ -1068,4 +1068,15 @@ ID_INLINE int idStr::DynamicMemoryUsed() const {
 	return ( data == baseBuffer ) ? 0 : alloced;
 }
 
+// behaves like C99's snprintf() by returning the amount of bytes that
+// *would* have been written into a big enough buffer, even if that's > size
+// unlike idStr::snPrintf() which returns the written bytes in that case
+// and also calls common->Warning() in case of overflows
+int D3_snprintfC99(char *dst, size_t size, const char *format, ...) id_attribute((format(printf,3,4)));
+
+// behaves like C99's vsnprintf() by returning the amount of bytes that
+// *would* have been written into a big enough buffer, even if that's > size
+// unlike idStr::vsnPrintf() which returns -1 in that case
+int D3_vsnprintfC99(char *dst, size_t size, const char *format, va_list ap);
+
 #endif /* !__STR_H__ */

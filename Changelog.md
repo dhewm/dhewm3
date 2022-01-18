@@ -50,14 +50,24 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * `s_alReverbGain` CVar to reduce EFX reverb effect intensity (#365)
 * Pause (looped) sounds when entering menu (#330)
 * Fixes for looped sounds (#390)
-* (Optionally) use libbacktrace on non-Windows platforms for more useful
-  backtraces in case of crashes (usually linked statically)
 * Replace libjpeg with stb_image and libogg/libvorbis(file) with stb_vorbis
     - Now the only required external dependencies should be OpenAL, SDL, zlib
       and optionally libCURL (and of course the C and C++ runtimes)
+* (Optionally) use libbacktrace on non-Windows platforms for more useful
+  backtraces in case of crashes (usually linked statically)
 * Fixed a deadlock (freeze) on Windows when printing messages from another thread
 * Fixed some warnings and uninitialized variables (thanks *turol*!)
 * Work around dmap bug caused by GCC using FMA "optimizations" (#147)
+* Prevent dhewm3 from being run as root on Unix-like systems to improve security
+* Replaced most usages of `strncpy()` with something safer to prevent buffer overflows
+  (remaining cases should be safe).
+    - Just a precaution, I don't know if any of them could actually be exploited,
+      but there were some compiler warnings in newer GCC versions.
+* Console output is now logged to `dhewm3log.txt` (last log is renamed to `dhewm3log-old.txt`)
+    - On Windows it's in `My Documents/My Games/dhewm3/`
+    - On Mac it's in `$HOME/Library/Application Support/dhewm3/`
+    - On other Unix-like systems like Linux it's in `$XDG_DATA_HOME/dhewm3/`
+      (usually `$HOME/.local/share/dhewm3/`)
 
 
 1.5.1 (2021-03-14)

@@ -92,6 +92,8 @@ idCVar in_tty( "in_tty", "1", CVAR_BOOL | CVAR_INIT | CVAR_SYSTEM, "terminal tab
 static bool				tty_enabled = false;
 static struct termios	tty_tc;
 
+static FILE* consoleLog = NULL;
+
 // pid - useful when you attach to gdb..
 idCVar com_pid( "com_pid", "0", CVAR_INTEGER | CVAR_INIT | CVAR_SYSTEM, "process id" );
 
@@ -118,6 +120,11 @@ void AROS_Exit(int ret) {
     }
     // at this point, too late to catch signals
     AROS_ClearSigs();
+
+    if( consoleLog != NULL ) {
+        fclose(consoleLog);
+        consoleLog = NULL;
+    }
 
     // process spawning. it's best when it happens after everything has shut down
     if ( exit_spawn[0] ) {
@@ -309,6 +316,35 @@ void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
     common->DPrintf( "TODO: Sys_SetPhysicalWorkMemory\n" );
 }
 
+extern bool AROS_GetSavePath(char buf[1024]);
+
+static void initLog()
+{
+	char logPath[1024];
+	if(!AROS_GetSavePath(logPath))
+		return;
+
+	// TODO: create savePath directory if it doesn't exist..
+
+	char logBkPath[1024];
+	strcpy(logBkPath, logPath);
+	idStr::Append(logBkPath, sizeof(logBkPath), PATHSEPERATOR_STR "dhewm3log-old.txt");
+	idStr::Append(logPath, sizeof(logPath), PATHSEPERATOR_STR "dhewm3log.txt");
+
+	rename(logPath, logBkPath); // I hope AROS supports this, but it's standard C89 so it should
+
+	consoleLog = fopen(logPath, "w");
+	if(consoleLog == NULL) {
+		printf("WARNING: Couldn't open/create '%s', error was: %d (%s)\n", logPath, errno, strerror(errno));
+	} else {
+		time_t tt = time(NULL);
+		const struct tm* tms = localtime(&tt);
+		char timeStr[64] = {};
+		strftime(timeStr, sizeof(timeStr), "%F %H:%M:%S", tms);
+		fprintf(consoleLog, "Opened this log at %s\n", timeStr);
+	}
+}
+
 /*
 ===============
 AROS_EarlyInit
@@ -317,9 +353,13 @@ AROS_EarlyInit
 void AROS_EarlyInit( void ) {
     bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
 
+    initLog();
+
     exit_spawn[0] = '\0';
     AROS_InitLibs();
     AROS_InitSigs();
+
+    // TODO: logfile
 }
 
 /*
@@ -736,19 +776,36 @@ low level output
 ===============
 */
 
+void Sys_VPrintf(const char *msg, va_list arg) {
+	// gonna use arg twice, so copy it
+	va_list arg2;
+	va_copy(arg2, arg);
+
+	// first print to stdout()
+	vprintf(msg, arg2);
+
+	va_end(arg2); // arg2 is not needed anymore
+
+	// then print to the log, if any
+	if(consoleLog != NULL)
+	{
+		vfprintf(consoleLog, msg, arg);
+	}
+}
+
 void Sys_DebugPrintf( const char *fmt, ... ) {
     va_list argptr;
 
     tty_Hide();
     va_start( argptr, fmt );
-    vprintf( fmt, argptr );
+    Sys_VPrintf( fmt, argptr );
     va_end( argptr );
     tty_Show();
 }
 
 void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
     tty_Hide();
-    vprintf( fmt, arg );
+    Sys_VPrintf( fmt, arg );
     tty_Show();
 }
 
@@ -757,14 +814,8 @@ void Sys_Printf(const char *msg, ...) {
 
     tty_Hide();
     va_start( argptr, msg );
-    vprintf( msg, argptr );
+    Sys_VPrintf( msg, argptr );
     va_end( argptr );
-    tty_Show();
-}
-
-void Sys_VPrintf(const char *msg, va_list arg) {
-    tty_Hide();
-    vprintf(msg, arg);
     tty_Show();
 }
 

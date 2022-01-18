@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-// Win32
+// AROS
 #if defined(__AROS__)
 
 #define _alloca						alloca

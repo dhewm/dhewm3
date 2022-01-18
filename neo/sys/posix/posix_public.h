@@ -36,12 +36,13 @@ If you have questions concerning this license or the applicable additional terms
 const char*	Posix_Cwd( void );
 
 const char* Posix_GetExePath();
+const char* Posix_GetSavePath();
 
 void		Posix_Exit( int ret );
 void		Posix_SetExit(int ret); // override the exit code
 void		Posix_SetExitSpawn( const char *exeName ); // set the process to be spawned when we quit
 
-void		Posix_InitSignalHandlers( void );
+void		Posix_InitSignalHandlers( void ); // also opens/creates dhewm3.log
 void		Posix_InitConsoleInput( void );
 void		Posix_Shutdown( void );
 

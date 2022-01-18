@@ -78,6 +78,15 @@ idCVar com_pid( "com_pid", "0", CVAR_INTEGER | CVAR_INIT | CVAR_SYSTEM, "process
 static int set_exit = 0;
 static char exit_spawn[ 1024 ] = { 0 };
 
+static FILE* consoleLog = NULL;
+void Sys_VPrintf(const char *msg, va_list arg);
+
+#ifdef snprintf
+  // I actually wanna use real snprintf here, not idStr:snPrintf(),
+  // so get rid of the use_idStr_snPrintf #define
+  #undef snprintf
+#endif
+
 /*
 ================
 Posix_Exit
@@ -95,6 +104,12 @@ void Posix_Exit(int ret) {
 	if ( exit_spawn[0] ) {
 		Sys_DoStartProcess( exit_spawn, false );
 	}
+
+	if(consoleLog != NULL) {
+		fclose(consoleLog);
+		consoleLog = NULL;
+	}
+
 	// in case of signal, handler tries a common->Quit
 	// we use set_exit to maintain a correct exit code
 	if ( set_exit ) {
@@ -246,6 +261,9 @@ Sys_Init
 =================
 */
 void Sys_Init( void ) {
+	if(consoleLog != NULL)
+		common->Printf("Logging console output to %s/dhewm3log.txt\n", Posix_GetSavePath());
+
 	Posix_InitConsoleInput();
 	com_pid.SetInteger( getpid() );
 	common->Printf( "pid: %d\n", com_pid.GetInteger() );
@@ -406,6 +424,17 @@ static const char* crashSigNames[] = { "SIGILL", "SIGABRT", "SIGFPE", "SIGSEGV" 
   #include <execinfo.h>
 #endif
 
+// unlike Sys_Printf() this doesn't call tty_Hide(); and tty_Show();
+// to minimize interaction with broken dhewm3 state
+// (but unlike regular printf() it'll also write to dhewm3log.txt)
+static void CrashPrintf(const char* msg, ...)
+{
+	va_list argptr;
+	va_start( argptr, msg );
+	Sys_VPrintf( msg, argptr );
+	va_end( argptr );
+}
+
 #ifdef D3_HAVE_LIBBACKTRACE
 // non-ancient versions of GCC and clang include libbacktrace
 // for ancient versions it can be built from https://github.com/ianlancetaylor/libbacktrace
@@ -416,7 +445,7 @@ static struct backtrace_state *bt_state = NULL;
 
 static void bt_error_callback( void *data, const char *msg, int errnum )
 {
-	printf("libbacktrace ERROR: %d - %s\n", errnum, msg);
+	CrashPrintf("libbacktrace ERROR: %d - %s\n", errnum, msg);
 }
 
 static void bt_syminfo_callback( void *data, uintptr_t pc, const char *symname,
@@ -429,10 +458,10 @@ static void bt_syminfo_callback( void *data, uintptr_t pc, const char *symname,
 		if (name != NULL) {
 			symname = name;
 		}
-		printf("  %zu %s\n", pc, symname);
+		CrashPrintf("  %zu %s\n", pc, symname);
 		free(name);
 	} else {
-		printf("  %zu (unknown symbol)\n", pc);
+		CrashPrintf("  %zu (unknown symbol)\n", pc);
 	}
 }
 
@@ -455,7 +484,7 @@ static int bt_pcinfo_callback( void *data, uintptr_t pc, const char *filename, i
 		if (fileNameNeo != NULL) {
 			filename = fileNameNeo+1; // I want "neo/bla/blub.cpp:42"
 		}
-		printf("  %zu %s:%d %s\n", pc, filename, lineno, function);
+		CrashPrintf("  %zu %s:%d %s\n", pc, filename, lineno, function);
 		free(name);
 	}
 
@@ -464,7 +493,7 @@ static int bt_pcinfo_callback( void *data, uintptr_t pc, const char *filename, i
 
 static void bt_error_dummy( void *data, const char *msg, int errnum )
 {
-	//printf("ERROR-DUMMY: %d - %s\n", errnum, msg);
+	//CrashPrintf("ERROR-DUMMY: %d - %s\n", errnum, msg);
 }
 
 static int bt_simple_callback(void *data, uintptr_t pc)
@@ -495,14 +524,14 @@ static void signalhandlerCrash(int sig)
 	// TODO: should probably use a custom print function around write(STDERR_FILENO, ...)
 	//       because printf() could allocate which is not good if processes state is fscked
 	//       (could use backtrace_symbols_fd() then)
-	printf("Looks like %s crashed with signal %s (%d) - sorry!\n", ENGINE_VERSION, name, sig);
+	CrashPrintf("\n\nLooks like %s crashed with signal %s (%d) - sorry!\n", ENGINE_VERSION, name, sig);
 
 #ifdef D3_HAVE_LIBBACKTRACE
 	if (bt_state != NULL) {
 		int skip = 1; // skip this function in backtrace
 		backtrace_simple(bt_state, skip, bt_simple_callback, bt_error_callback, NULL);
 	} else {
-		printf("(No backtrace because libbacktrace state is NULL)\n");
+		CrashPrintf("(No backtrace because libbacktrace state is NULL)\n");
 	}
 #elif defined(D3_HAVE_BACKTRACE)
 	// this is partly based on Yamagi Quake II code
@@ -510,21 +539,26 @@ static void signalhandlerCrash(int sig)
 	int size = backtrace(array, sizeof(array)/sizeof(array[0]));
 	char** strings = backtrace_symbols(array, size);
 
-	printf("\nBacktrace:\n");
+	CrashPrintf("\nBacktrace:\n");
 
 	for(int i = 0; i < size; i++) {
-		printf("  %s\n", strings[i]);
+		CrashPrintf("  %s\n", strings[i]);
 	}
 
-	printf("\n(Sorry it's not overly useful, build with libbacktrace support to get function names)\n");
+	CrashPrintf("\n(Sorry it's not overly useful, build with libbacktrace support to get function names)\n");
 
 	free(strings);
 
 #else
-	printf("(No Backtrace on this platform)\n");
+	CrashPrintf("(No Backtrace on this platform)\n");
 #endif
 
 	fflush(stdout);
+	if(consoleLog != NULL) {
+		fflush(consoleLog);
+		// TODO: fclose(consoleLog); ?
+		//       consoleLog = NULL;
+	}
 
 	raise(sig); // pass it on to system
 }
@@ -565,6 +599,33 @@ static void installSigHandler(int sig, int flags, void (*handler)(int))
 	sigaction(sig, &sigact, NULL);
 }
 
+static bool dirExists(const char* dirPath)
+{
+	struct stat buf = {};
+	if(stat(dirPath, &buf) == 0) {
+		return (buf.st_mode & S_IFMT) == S_IFDIR;
+	}
+	return false;
+}
+
+static bool createPathRecursive(char* path)
+{
+	if(!dirExists(path)) {
+		char* lastDirSep = strrchr(path, '/');
+		if(lastDirSep != NULL) {
+			*lastDirSep = '\0'; // cut off last part of the path and try first with parent directory
+			bool ok = createPathRecursive(path);
+			*lastDirSep = '/'; // restore path
+			// if parent dir was successfully created (or already existed), create this dir
+			if(ok && mkdir(path, 0755) == 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	return true;
+}
+
 void Posix_InitSignalHandlers( void )
 {
 #ifdef D3_HAVE_LIBBACKTRACE
@@ -580,6 +641,53 @@ void Posix_InitSignalHandlers( void )
 
 	installSigHandler(SIGTTIN, 0, signalhandlerConsoleStuff);
 	installSigHandler(SIGTTOU, 0, signalhandlerConsoleStuff);
+
+	// this is also a good place to open dhewm3log.txt for Sys_VPrintf()
+
+	const char* savePath = Posix_GetSavePath();
+	size_t savePathLen = strlen(savePath);
+	if(savePathLen > 0 && savePathLen < PATH_MAX) {
+		char logPath[PATH_MAX] = {};
+		if(savePath[savePathLen-1] == '/') {
+			--savePathLen;
+		}
+		memcpy(logPath, savePath, savePathLen);
+		logPath[savePathLen] = '\0';
+		if(!createPathRecursive(logPath)) {
+			printf("WARNING: Couldn't create save path '%s'!\n", logPath);
+			return;
+		}
+		char logFileName[PATH_MAX] = {};
+		int fullLogLen = snprintf(logFileName, sizeof(logFileName), "%s/dhewm3log.txt", logPath);
+		// cast to size_t which is unsigned and would get really big if fullLogLen < 0 (=> error in snprintf())
+		if((size_t)fullLogLen >= sizeof(logFileName)) {
+			printf("WARNING: Couldn't create dhewm3log.txt at '%s' because its length would be '%d' which is > PATH_MAX (%zd) or < 0!\n",
+			       logPath, fullLogLen, (size_t)PATH_MAX);
+			return;
+		}
+		struct stat buf;
+		if(stat(logFileName, &buf) == 0) {
+			// logfile exists, rename to dhewm3log-old.txt
+			char oldLogFileName[PATH_MAX] = {};
+			if((size_t)snprintf(oldLogFileName, sizeof(oldLogFileName), "%s/dhewm3log-old.txt", logPath) < sizeof(logFileName))
+			{
+				rename(logFileName, oldLogFileName);
+			}
+		}
+		consoleLog = fopen(logFileName, "w");
+		if(consoleLog == NULL) {
+			printf("WARNING: Couldn't open/create '%s', error was: %d (%s)\n", logFileName, errno, strerror(errno));
+		} else {
+			time_t tt = time(NULL);
+			const struct tm* tms = localtime(&tt);
+			char timeStr[64] = {};
+			strftime(timeStr, sizeof(timeStr), "%F %H:%M:%S", tms);
+			fprintf(consoleLog, "Opened this log at %s\n", timeStr);
+		}
+
+	} else {
+		printf("WARNING: Posix_GetSavePath() returned path with invalid length '%zd'!\n", savePathLen);
+	}
 }
 
 // ----------- signal handling stuff done ------------
@@ -1005,35 +1113,45 @@ low level output
 ===============
 */
 
+void Sys_VPrintf( const char *msg, va_list arg ) {
+	// gonna use arg twice, so copy it
+	va_list arg2;
+	va_copy(arg2, arg);
+
+	// first print to stdout()
+	vprintf(msg, arg2);
+
+	va_end(arg2); // arg2 is not needed anymore
+
+	// then print to the log, if any
+	if(consoleLog != NULL)
+	{
+		vfprintf(consoleLog, msg, arg);
+	}
+}
+
 void Sys_DebugPrintf( const char *fmt, ... ) {
 	va_list argptr;
 
 	tty_Hide();
 	va_start( argptr, fmt );
-	vprintf( fmt, argptr );
+	Sys_VPrintf( fmt, argptr );
 	va_end( argptr );
 	tty_Show();
 }
 
 void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
 	tty_Hide();
-	vprintf( fmt, arg );
+	Sys_VPrintf( fmt, arg );
 	tty_Show();
 }
 
 void Sys_Printf(const char *msg, ...) {
 	va_list argptr;
-
 	tty_Hide();
 	va_start( argptr, msg );
-	vprintf( msg, argptr );
+	Sys_VPrintf( msg, argptr );
 	va_end( argptr );
-	tty_Show();
-}
-
-void Sys_VPrintf(const char *msg, va_list arg) {
-	tty_Hide();
-	vprintf(msg, arg);
 	tty_Show();
 }
 

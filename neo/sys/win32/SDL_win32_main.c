@@ -37,7 +37,7 @@
 #endif /* main */
 
 /* The standard output files */
-#define STDOUT_FILE	TEXT("stdout.txt")
+#define STDOUT_FILE	TEXT("dhewm3log.txt") /* DG: renamed this */
 #define STDERR_FILE	TEXT("stderr.txt")
 
 /* Set a variable to tell if the stdio redirect has been enabled. */
@@ -197,7 +197,7 @@ static void cleanup_output(void) {
 	}
 }
 
-extern int Sys_GetHomeDir(char *dst, size_t size);
+extern int Win_GetHomeDir(char *dst, size_t size);
 
 /* Redirect the output (stdout and stderr) to a file */
 static void redirect_output(void)
@@ -209,31 +209,32 @@ static void redirect_output(void)
 	char path[MAX_PATH];
 	struct _stat st;
 
-	// DG: use "My Documents/My Games/dhewm3" to write stdout.txt and stderr.txt
-	//     instead of the binary, which might not be writable
-	Sys_GetHomeDir(path, sizeof(path));
+	/* DG: use "My Documents/My Games/dhewm3" to write stdout.txt and stderr.txt
+	 *     instead of the binary, which might not be writable */
+	Win_GetHomeDir(path, sizeof(path));
 
 	if (_stat(path, &st) == -1) {
-		// oops, "My Documents/My Games/dhewm3" doesn't exist - does My Games/ at least exist?
+		/* oops, "My Documents/My Games/dhewm3" doesn't exist - does My Games/ at least exist? */
 		char myGamesPath[MAX_PATH];
+		char* lastslash;
 		memcpy(myGamesPath, path, MAX_PATH);
-		char* lastslash = strrchr(myGamesPath, '/');
+		lastslash = strrchr(myGamesPath, '/');
 		if (lastslash != NULL) {
 			*lastslash = '\0';
 		}
 		if (_stat(myGamesPath, &st) == -1) {
-			// if My Documents/My Games/ doesn't exist, create it
+			/* if My Documents/My Games/ doesn't exist, create it */
 			_mkdir(myGamesPath);
 		}
 		
-		_mkdir(path); // create My Documents/My Games/dhewm3/
+		_mkdir(path); /* create My Documents/My Games/dhewm3/ */
 	}
 	
 
 #endif
 	FILE *newfp;
 
-#if 0 // DG: don't do this anymore.
+#if 0 /* DG: don't do this anymore. */
 	DWORD pathlen;
 	pathlen = GetModuleFileName(NULL, path, SDL_arraysize(path));
 	while ( pathlen > 0 && path[pathlen] != '\\' ) {
@@ -249,6 +250,20 @@ static void redirect_output(void)
 	SDL_strlcpy( stdoutPath, path, SDL_arraysize(stdoutPath) );
 	SDL_strlcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE, SDL_arraysize(stdoutPath) );
 #endif
+
+	{ /* DG: rename old stdout log */
+#ifdef _WIN32_WCE
+		wchar_t stdoutPathBK[MAX_PATH];
+		wcsncpy( stdoutPathBK, path, SDL_arraysize(stdoutPath) );
+		wcsncat( stdoutPathBK, DIR_SEPERATOR TEXT("dhewm3log-old.txt"), SDL_arraysize(stdoutPath) );
+		_wrename( stdoutPath, stdoutpathBK );
+#else
+		char stdoutPathBK[MAX_PATH];
+		SDL_strlcpy( stdoutPathBK, path, SDL_arraysize(stdoutPath) );
+		SDL_strlcat( stdoutPathBK, DIR_SEPERATOR TEXT("dhewm3log-old.txt"), SDL_arraysize(stdoutPath) );
+		rename( stdoutPath, stdoutPathBK );
+#endif
+	} /* DG end */
 
 	/* Redirect standard input and standard output */
 	newfp = freopen(stdoutPath, TEXT("w"), stdout);

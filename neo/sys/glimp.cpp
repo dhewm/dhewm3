@@ -241,8 +241,16 @@ bool GLimp_Init(glimpParms_t parms) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, parms.multiSamples);
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		int displayIndex = 0;
 
+		const char* windowMode = "";
+		if(r_fullscreen.GetBool()) {
+			windowMode = r_fullscreenDesktop.GetBool() ? "desktop-fullscreen-" : "fullscreen-";
+		}
+
+		common->Printf("Will create a %swindow with resolution %dx%d (r_mode = %d)\n",
+		               windowMode, parms.width, parms.height, r_mode.GetInteger());
+
+		int displayIndex = 0;
 #if SDL_VERSION_ATLEAST(2, 0, 4)
 		// try to put the window on the display the mousecursor currently is on
 		{
