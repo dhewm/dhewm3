@@ -75,15 +75,8 @@ If you have questions concerning this license or the applicable additional terms
 	#define	ID_ALLOW_TOOLS
 #endif
 
+//disable cd key check
 #define ID_ENFORCE_KEY 0
-
-#ifndef ID_ENFORCE_KEY
-#	if !defined( ID_DEDICATED )
-#		define ID_ENFORCE_KEY 1
-#	else
-#		define ID_ENFORCE_KEY 0
-#	endif
-#endif
 
 #ifndef ID_ENFORCE_KEY_CLIENT
 #	if ID_ENFORCE_KEY
