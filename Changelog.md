@@ -56,6 +56,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * (Optionally) use libbacktrace on non-Windows platforms for more useful
   backtraces in case of crashes (usually linked statically)
 * Fixed a deadlock (freeze) on Windows when printing messages from another thread
+* Fixed endless loop (game locking up at startup) if graphics settings couldn't be applied (#386)
 * Fixed some warnings and uninitialized variables (thanks *turol*!)
 * Work around dmap bug caused by GCC using FMA "optimizations" (#147)
 * Prevent dhewm3 from being run as root on Unix-like systems to improve security
