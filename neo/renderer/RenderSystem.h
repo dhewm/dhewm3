@@ -88,6 +88,10 @@ typedef struct glconfig_s {
 	bool				allowARB2Path;
 
 	bool				isInitialized;
+
+	// DG: current video backend is known to need opaque default framebuffer
+	//     used if r_fillWindowAlphaChan == -1
+	bool				shouldFillWindowAlpha;
 } glconfig_t;
 
 

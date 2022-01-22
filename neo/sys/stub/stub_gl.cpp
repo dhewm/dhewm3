@@ -44,6 +44,7 @@ void APIENTRY glBegin(GLenum mode){};
 void APIENTRY glBindTexture(GLenum target, GLuint texture){};
 void APIENTRY glBitmap(GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte *bitmap){};
 void APIENTRY glBlendFunc(GLenum sfactor, GLenum dfactor){};
+void APIENTRY glBlendEquation(GLenum mode){};
 void APIENTRY glCallList(GLuint list){};
 void APIENTRY glCallLists(GLsizei n, GLenum type, const GLvoid *lists){};
 void APIENTRY glClear(GLbitfield mask){};
