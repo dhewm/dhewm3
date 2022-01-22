@@ -529,6 +529,31 @@ const void	RB_SwapBuffers( const void *data ) {
 		RB_ShowImages();
 	}
 
+#if 01 // set alpha chan to 1.0:
+	bool blendEnabled = qglIsEnabled( GL_BLEND );
+	//if ( !blendEnabled )
+		qglEnable( GL_BLEND );
+	qglBlendEquation( GL_FUNC_ADD );
+	qglBlendFunc( GL_ONE, GL_ONE );
+
+	// draw screen-sized quad with color (0.0, 0.0, 0.0, 1.0)
+	int w = glConfig.vidWidth, h = glConfig.vidHeight;
+	int x = 0, y = 0;
+	qglColor4f( 0.5f, 0.0f, 0.0f, 1.0f );
+	qglBegin( GL_QUADS );
+		qglVertex2f( x, y );
+		qglVertex2f( x + w, y );
+		qglVertex2f( x + w, y + h );
+		qglVertex2f( x, y + h );
+	qglEnd();
+
+	// restore default or previous states
+	qglBlendEquation( GL_FUNC_ADD );
+	if ( !blendEnabled )
+		qglDisable( GL_BLEND );
+	// TODO: theoretically I should restore the glColor value, but I'm sure it'll be set before it's needed anyway
+#endif
+
 	// force a gl sync if requested
 	if ( r_finish.GetBool() ) {
 		qglFinish();
