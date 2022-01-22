@@ -531,26 +531,65 @@ const void	RB_SwapBuffers( const void *data ) {
 
 #if 01 // set alpha chan to 1.0:
 	bool blendEnabled = qglIsEnabled( GL_BLEND );
-	//if ( !blendEnabled )
+	if ( !blendEnabled )
 		qglEnable( GL_BLEND );
+
+	// TODO: GL_DEPTH_TEST ? (should be disabled, if it needs changing at all)
+
+	bool scissorEnabled = qglIsEnabled( GL_SCISSOR_TEST );
+	if( scissorEnabled )
+		qglDisable( GL_SCISSOR_TEST );
+
+	bool tex2Denabled = qglIsEnabled( GL_TEXTURE_2D );
+	if( tex2Denabled )
+		qglDisable( GL_TEXTURE_2D );
+
+	qglDisable( GL_VERTEX_PROGRAM_ARB );
+	qglDisable( GL_FRAGMENT_PROGRAM_ARB );
+
 	qglBlendEquation( GL_FUNC_ADD );
+	//qglBlendEquation(GL_MAX);
+
 	qglBlendFunc( GL_ONE, GL_ONE );
 
+	// setup transform matrices so we can easily/reliably draw a fullscreen quad
+	qglMatrixMode( GL_MODELVIEW );
+	qglPushMatrix();
+	qglLoadIdentity();
+
+	qglMatrixMode( GL_PROJECTION );
+	qglPushMatrix();
+	qglLoadIdentity();
+	qglOrtho( 0, 1, 0, 1, -1, 1 );
+
 	// draw screen-sized quad with color (0.0, 0.0, 0.0, 1.0)
-	int w = glConfig.vidWidth, h = glConfig.vidHeight;
-	int x = 0, y = 0;
-	qglColor4f( 0.5f, 0.0f, 0.0f, 1.0f );
+	float x=0, y=0, w=1, h=1;
+	qglColor4f( 0.0f, 0.0f, 0.0f, 1.0f );
+	// debug values:
+	//float x = 0.1, y = 0.1, w = 0.8, h = 0.8;
+	//qglColor4f( 0.0f, 0.0f, 0.5f, 1.0f );
+	
 	qglBegin( GL_QUADS );
-		qglVertex2f( x, y );
-		qglVertex2f( x + w, y );
-		qglVertex2f( x + w, y + h );
-		qglVertex2f( x, y + h );
+		qglVertex2f( x,   y   ); // ( 0,0 );
+		qglVertex2f( x,   y+h ); // ( 0,1 );
+		qglVertex2f( x+w, y+h ); // ( 1,1 );
+		qglVertex2f( x+w, y   ); // ( 1,0 );
 	qglEnd();
+
+	// restore previous transform matrix states
+	qglPopMatrix(); // for projection
+	qglMatrixMode( GL_MODELVIEW );
+	qglPopMatrix(); // for modelview
 
 	// restore default or previous states
 	qglBlendEquation( GL_FUNC_ADD );
 	if ( !blendEnabled )
 		qglDisable( GL_BLEND );
+	if( tex2Denabled )
+		qglEnable( GL_TEXTURE_2D );
+	if( scissorEnabled )
+		qglEnable( GL_SCISSOR_TEST );
+
 	// TODO: theoretically I should restore the glColor value, but I'm sure it'll be set before it's needed anyway
 #endif
 
