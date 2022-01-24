@@ -168,6 +168,9 @@ bool GLimp_Init(glimpParms_t parms) {
 	int stencilbits = 8;
 
 	for (int i = 0; i < 16; i++) {
+
+		int multisamples = parms.multiSamples;
+
 		// 0 - default
 		// 1 - minus colorbits
 		// 2 - minus depthbits
@@ -226,6 +229,8 @@ bool GLimp_Init(glimpParms_t parms) {
 
 		int talphabits = r_waylandcompat.GetBool() ? 0 : channelcolorbits;
 
+try_again:
+
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, channelcolorbits);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, channelcolorbits);
@@ -237,8 +242,8 @@ bool GLimp_Init(glimpParms_t parms) {
 
 		SDL_GL_SetAttribute(SDL_GL_STEREO, parms.stereo ? 1 : 0);
 
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, parms.multiSamples ? 1 : 0);
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, parms.multiSamples);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, (multisamples > 1) ? 1 : 0);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
@@ -284,9 +289,23 @@ bool GLimp_Init(glimpParms_t parms) {
 									parms.width, parms.height, flags);
 
 		if (!window) {
-			common->DPrintf("Couldn't set GL mode %d/%d/%d: %s",
-							channelcolorbits, tdepthbits, tstencilbits, SDL_GetError());
+			common->Warning("Couldn't set GL mode %d/%d/%d with %dx MSAA: %s",
+							channelcolorbits, tdepthbits, tstencilbits, parms.multiSamples, SDL_GetError());
+
+			// before trying to reduce color channel size or whatever, first try reducing MSAA, if possible
+			if(multisamples > 1) {
+				multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
+
+				// using goto because enhancing that logic which reduces attributes
+				// based on i (so it'd first try reducing MSAA) would be too painful
+				goto try_again;
+			}
+
 			continue;
+		} else {
+			// creating the window succeeded, so adjust r_multiSamples to the value that was actually used
+			parms.multiSamples = multisamples;
+			r_multiSamples.SetInteger(multisamples);
 		}
 
 		/* Check if we're really in the requested display mode. There is
@@ -380,7 +399,21 @@ bool GLimp_Init(glimpParms_t parms) {
 		if (!window) {
 			common->DPrintf("Couldn't set GL mode %d/%d/%d: %s",
 							channelcolorbits, tdepthbits, tstencilbits, SDL_GetError());
+
+			// before trying to reduce color channel size or whatever, first try reducing MSAA, if possible
+			if(multisamples > 1) {
+				multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
+
+				// using goto because enhancing that logic which reduces attributes
+				// based on i (so it'd first try reducing MSAA) would be too painful
+				goto try_again;
+			}
+
 			continue;
+		} else {
+			// creating the window succeeded, so adjust r_multiSamples to the value that was actually used
+			parms.multiSamples = multisamples;
+			r_multiSamples.SetInteger(multisamples);
 		}
 
 		glConfig.vidWidth = window->w;
