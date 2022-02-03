@@ -1493,13 +1493,6 @@ void idPlayer::Init( void ) {
 	weapon_soulcube			= SlotForWeapon( "weapon_soulcube" );
 	weapon_pda				= SlotForWeapon( "weapon_pda" );
 	weapon_fists			= SlotForWeapon( "weapon_fists" );
-#ifdef _D3XP
-	weapon_bloodstone		= SlotForWeapon( "weapon_bloodstone_passive" );
-	weapon_bloodstone_active1 = SlotForWeapon( "weapon_bloodstone_active1" );
-	weapon_bloodstone_active2 = SlotForWeapon( "weapon_bloodstone_active2" );
-	weapon_bloodstone_active3 = SlotForWeapon( "weapon_bloodstone_active3" );
-	harvest_lock			= false;
-#endif
 	showWeaponViewModel		= GetUserInfo()->GetBool( "ui_showGun" );
 
 
@@ -3037,28 +3030,14 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 	_hud->SetStateBool( "player_clip_empty", ( weapon.GetEntity()->ClipSize() ? inclip == 0 : false ) );
 	_hud->SetStateBool( "player_clip_low", ( weapon.GetEntity()->ClipSize() ? inclip <= weapon.GetEntity()->LowAmmo() : false ) );
 
-#ifdef _D3XP
-	//Hack to stop the bloodstone ammo to display when it is being activated
-	if(currentWeapon == weapon_bloodstone) {
-		_hud->SetStateBool( "player_ammo_empty", false );
-		_hud->SetStateBool( "player_clip_empty", false );
-		_hud->SetStateBool( "player_clip_low", false );
-	}
-#endif
+
 
 #ifdef _D3XP
 	//Let the HUD know the total amount of ammo regardless of the ammo required value
 	_hud->SetStateString( "player_ammo_count", va("%i", weapon.GetEntity()->AmmoCount()));
 #endif
 
-#ifdef _D3XP
-	//Make sure the hud always knows how many bloodstone charges there are
-	int ammoRequired;
-	ammo_t ammo_i = inventory.AmmoIndexForWeaponClass( "weapon_bloodstone_passive", &ammoRequired );
-	int bloodstoneAmmo = inventory.HasAmmo( ammo_i, ammoRequired );
-	_hud->SetStateString("player_bloodstone_ammo", va("%i", bloodstoneAmmo));
-	_hud->HandleNamedEvent( "bloodstoneAmmoUpdate" );
-#endif
+
 
 	_hud->HandleNamedEvent( "updateAmmo" );
 }
