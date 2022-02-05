@@ -97,7 +97,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif // _WIN32 and ID_ALLOW_TOOLS
 
-idCVar r_waylandcompat("r_waylandcompat", "0", CVAR_SYSTEM | CVAR_NOCHEAT | CVAR_ARCHIVE, "wayland compatible framebuffer");
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 static SDL_Window *window = NULL;
@@ -163,6 +162,30 @@ bool GLimp_Init(glimpParms_t parms) {
 			flags |= SDL_WINDOW_FULLSCREEN;
 	}
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	/* Doom3 has the nasty habit of modifying the default framebuffer's alpha channel and then
+	 * relying on those modifications in blending operations (using GL_DST_(ONE_MINUS_)ALPHA).
+	 * So far that hasn't been much of a problem, because Windows, macOS, X11 etc
+	 * just ignore the alpha chan (unless maybe you explicitly tell a window it should be transparent).
+	 * Unfortunately, Wayland by default *does* use the alpha channel, which often leads to
+	 * rendering bugs (the window is partly transparent or very white in areas with low alpha).
+	 * Mesa introduced an EGL extension that's supposed to fix that (EGL_EXT_present_opaque)
+	 * and newer SDL2 versions use it by default (in the Wayland backend).
+	 * Unfortunately, the implementation of that extension is (currently?) broken (at least
+	 * in Mesa), seems like they just give you a visual without any alpha chan - which doesn't
+	 * work for Doom3, as it needs a functioning alpha chan for blending operations, see above.
+	 * See also: https://gitlab.freedesktop.org/mesa/mesa/-/issues/5886
+	 *
+	 * So to make sure dhewm3 (finally) works as expected on Wayland, we tell SDL2 to
+	 * allow transparency and then fill the alpha-chan ourselves in RB_SwapBuffers()
+	 * (unless the user disables that with r_fillWindowAlphaChan 0) */
+  #ifdef SDL_HINT_VIDEO_EGL_ALLOW_TRANSPARENCY
+	SDL_SetHint(SDL_HINT_VIDEO_EGL_ALLOW_TRANSPARENCY, "1");
+  #else // little hack so this works if the SDL2 version used for building is older than runtime version
+	SDL_SetHint("SDL_VIDEO_EGL_ALLOW_TRANSPARENCY", "1");
+  #endif
+#endif
+
 	int colorbits = 24;
 	int depthbits = 24;
 	int stencilbits = 8;
@@ -227,7 +250,7 @@ bool GLimp_Init(glimpParms_t parms) {
 		if (tcolorbits == 24)
 			channelcolorbits = 8;
 
-		int talphabits = r_waylandcompat.GetBool() ? 0 : channelcolorbits;
+		int talphabits = channelcolorbits;
 
 try_again:
 
@@ -534,6 +557,15 @@ try_again:
 		}
 
 		glConfig.displayFrequency = 0;
+
+		// for r_fillWindowAlphaChan -1, see also the big comment above
+		glConfig.shouldFillWindowAlpha = false;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		const char* videoDriver = SDL_GetCurrentVideoDriver();
+		if (idStr::Icmp(videoDriver, "wayland") == 0) {
+			glConfig.shouldFillWindowAlpha = true;
+		}
+#endif
 
 		break;
 	}
