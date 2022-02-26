@@ -83,7 +83,7 @@ elseif(MSVC)
 	if(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
 		set(cpu "x86")
 	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
-		set(cpu "x64_64")
+		set(cpu "x86_64")
 	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM")
 		# at least on RPi 32bit, gcc -dumpmachine outputs "arm-linux-gnueabihf",
 		#  so we'll use "arm" there => use the same for 32bit ARM on MSVC
