@@ -965,14 +965,6 @@ idClip::TestHugeTranslation
 */
 ID_INLINE bool TestHugeTranslation( trace_t &results, const idClipModel *mdl, const idVec3 &start, const idVec3 &end, const idMat3 &trmAxis ) {
 	if ( mdl != NULL && ( end - start ).LengthSqr() > Square( CM_MAX_TRACE_DIST ) ) {
-#ifndef CTF
-		// May be important: This occurs in CTF when a player connects and spawns
-		// in the PVS of a player that has a flag that is spawning the idMoveableItem
-		// "nuggets".  The error seems benign and the assert was getting in the way
-		// of testing.
-		assert( 0 );
-#endif
-
 		results.fraction = 0.0f;
 		results.endpos = start;
 		results.endAxis = trmAxis;
@@ -984,6 +976,15 @@ ID_INLINE bool TestHugeTranslation( trace_t &results, const idClipModel *mdl, co
 		} else {
 			gameLocal.Printf( "huge translation for clip model %d\n", mdl->GetId() );
 		}
+		gameLocal.Printf( "  from (%.2f %.2f %.2f) to (%.2f %.2f %.2f)\n", start.x, start.y, start.z, end.x, end.y, end.z);
+
+#ifndef CTF
+		// May be important: This occurs in CTF when a player connects and spawns
+		// in the PVS of a player that has a flag that is spawning the idMoveableItem
+		// "nuggets".  The error seems benign and the assert was getting in the way
+		// of testing.
+		assert( 0 );
+#endif
 		return true;
 	}
 	return false;

@@ -69,7 +69,9 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
     - On Mac it's in `$HOME/Library/Application Support/dhewm3/`
     - On other Unix-like systems like Linux it's in `$XDG_DATA_HOME/dhewm3/`
       (usually `$HOME/.local/share/dhewm3/`)
-
+* Improved compatibility with Wayland (#426)
+* Work around assertion in AlphaLabs4 due to "ride_of_death" yeeting
+  the dead "monster_zsec_shotgun_12" into the void (#409)
 
 1.5.1 (2021-03-14)
 ------------------------------------------------------------------------

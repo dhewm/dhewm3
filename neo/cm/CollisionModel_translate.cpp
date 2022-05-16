@@ -887,7 +887,8 @@ void idCollisionModelManagerLocal::Translation( trace_t *results, const idVec3 &
 		if ( session->rw ) {
 			session->rw->DebugArrow( colorRed, start, end, 1 );
 		}
-		common->Printf( "idCollisionModelManagerLocal::Translation: huge translation\n" );
+		common->Printf( "idCollisionModelManagerLocal::Translation: huge translation from (%.2f %.2f %.2f) to (%.2f %.2f %.2f)\n",
+				start.x, start.y, start.z, end.x, end.y, end.z);
 		return;
 	}
 
