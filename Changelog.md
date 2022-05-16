@@ -14,8 +14,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
       Original Doom3 didn't have it (Quake4 did), but the Doom3 GPL source contained
       most of it. *HarrievG* implemented the missing parts and we added some new
       features. It can even be used over the network and while the client part
-      (the debugger GUI) is Windows-only, the server can even run on all supported
-      platforms, so you can even debug a game running on Linux or macOS, for example.  
+      (the debugger GUI) is Windows-only, the server can run on all supported
+      platforms, so you can debug a game running on Linux or macOS, for example.  
       Relevant CVars for network debugging are:
       `com_enableDebuggerServer` and `com_dbgClientAdr` and `com_dbgServerAdr`.  
       To debug the running game on the same PC, just enter `debugger` in the console.
@@ -93,7 +93,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   and [The Lost Mission](https://www.moddb.com/mods/the-lost-mission).  
   See https://dhewm3.org/mods.html for more details.
 * dhewm3 now supports the **Doom3 Demo** gamedata
-    - See [below](#using-the-doom3-demo-gamedata) for installation instructions
+    - See [here](https://dhewm3.org/#using-the-doom3-demo-gamedata) for installation instructions
     - This is based on *Gabriel Cuvillier's* code for [D3Wasm](http://www.continuation-labs.com/projects/d3wasm/),
       which ports dhewm3 to web browsers, thanks!
 * Create the game window on the display the cursor is currently on (when using more than one display)
