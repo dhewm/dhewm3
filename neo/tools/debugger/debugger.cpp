@@ -109,7 +109,7 @@ void DebuggerClientLaunch ( void )
 	GetCurrentDirectory ( MAX_PATH, curDir );
 
 	GetModuleFileName ( NULL, exeFile, MAX_PATH );
-	const char* s = va("%s +set fs_game %s +set fs_cdpath %s +debugger", exeFile, cvarSystem->GetCVarString( "fs_game" ), cvarSystem->GetCVarString( "fs_cdpath" ) );
+	const char* s = va("%s +set fs_game %s +set fs_basepath %s +debugger", exeFile, cvarSystem->GetCVarString( "fs_game" ), cvarSystem->GetCVarString( "fs_basepath" ) );
 	CreateProcess ( NULL, (LPSTR)s,
 					NULL, NULL, FALSE, 0, NULL, curDir, &startup, &process );
 
