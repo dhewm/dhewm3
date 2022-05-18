@@ -6370,7 +6370,9 @@ void CMainFrame::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized) {
 		soundSystem->SetPlayingSoundWorld( g_qeglobals.sw );
 	}
 	else {
-		 //com_editorActive = false;
+		// DG: if the Radiant loses focus, tell the engine about it
+		//     so the game window can get mouse focus (if it's running)
+		common->ActivateTool( false );
 	}
 }
 
