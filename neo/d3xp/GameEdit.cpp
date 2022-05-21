@@ -1205,3 +1205,4 @@ int idGameEditExt::GetLineNumberForStatement(idProgram* program, int index) cons
 {
 	return program->GetLineNumberForStatement(index);
 }
+

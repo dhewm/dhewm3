@@ -36,7 +36,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
       by using scancodes for otherwise unknown keys
     - Support typing in non-ASCII characters, if supported by Doom3 (it supports ISO-8859-1)
     - Support the clipboard also on non-Windows platforms  
-      You can paste code from the clipboard into the console or other edit fields
+      You can paste text from the clipboard into the console or other edit fields
       with `Shift+Insert`
     - Explicit support for Right Ctrl, Alt and Shift keys  
       (can be bound to different actions than their left counterparts)

@@ -1967,3 +1967,4 @@ void idGameEditExt::MSG_WriteThreadInfo(idBitMsg* msg, const idThread* thread, c
 	msg->WriteBits((int)const_cast<idThread*>(thread)->IsWaiting(), 1);
 	msg->WriteBits((int)const_cast<idThread*>(thread)->IsDying(), 1);
 }
+

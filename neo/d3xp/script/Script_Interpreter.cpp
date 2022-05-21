@@ -351,6 +351,7 @@ bool idInterpreter::GetRegisterValue( const char *name, idStr &out, int scopeDep
 		return false;
 	}
 }
+
 /*
 ================
 idInterpreter::GetCallstackDepth
@@ -1979,3 +1980,4 @@ const function_t* idGameEditExt::GetInterpreterCallStackFunction(const idInterpr
 {
 	return interpreter->GetCallstack()[stackDepth > -1 ? stackDepth : interpreter->GetCallstackDepth()].f;
 }
+
