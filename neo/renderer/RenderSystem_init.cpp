@@ -579,6 +579,8 @@ static void initSortedVidModes()
 	}
 
 	qsort(sortedVidModes, s_numVidModes, sizeof(vidModePtr), vidModeCmp);
+
+	common->Printf("XX initSortedVidModes() sorted %d video modes\n", s_numVidModes);
 }
 
 // DG: the following two functions are part of a horrible hack in ChoiceWindow.cpp
@@ -599,6 +601,9 @@ idStr R_GetVidModeListString(bool addCustom)
 			ret += modeStr;
 		}
 	}
+
+	common->Printf("XX R_GetVidModeListString() returning \"%s\"\n", ret.c_str());
+
 	return ret;
 }
 
@@ -615,6 +620,9 @@ idStr R_GetVidModeValsString(bool addCustom)
 			ret += sortedVidModes[i].modeIndex;
 		}
 	}
+
+	common->Printf("XX R_GetVidModeValsString() returning \"%s\"\n", ret.c_str());
+
 	return ret;
 }
 // DG end
