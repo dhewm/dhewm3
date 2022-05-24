@@ -2255,9 +2255,16 @@ idRenderSystemLocal::ShutdownOpenGL
 ========================
 */
 void idRenderSystemLocal::ShutdownOpenGL( void ) {
-	// free the context and close the window
+
 	R_ShutdownFrameData();
+
+	// as the input is tied to the window, it should be shut down when the window
+	// is destroyed (relevant when starting a mod which also recreates window)
+	Sys_ShutdownInput();
+
+	// free the context and close the window
 	GLimp_Shutdown();
+
 	glConfig.isInitialized = false;
 }
 
