@@ -553,14 +553,16 @@ void idSessionLocal::UpdateMPLevelShot( void ) {
 }
 
 // helper function to load a mod (from mods menu)
-static void loadMod(const idStr& modName)
-{
+static void loadMod ( const idStr& modName ) {
 	// add special case for mods known to need fs_game_base d3xp
 	static const char* d3xpMods[] = {
 		// TODO: if there are more mods that need d3xp as base
 		// (and that are supported by dhewm3), add them here
 		"d3le", // The Lost Mission
-		"librecoopd3xp"
+		"librecoopd3xp",
+		// Doom 3: Phobos (they haven't released source yet, so it won't work yet,
+		//                 but ain't I ever the optimist..)
+		"tfphobos"
 	};
 	const char* baseMod = "";
 	for ( int i=0; i < sizeof(d3xpMods)/sizeof(d3xpMods[0]); ++i ) {
