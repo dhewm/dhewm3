@@ -552,6 +552,30 @@ void idSessionLocal::UpdateMPLevelShot( void ) {
 	guiMainMenu->SetStateString( "current_levelshot", screenshot );
 }
 
+// helper function to load a mod (from mods menu)
+static void loadMod(const idStr& modName)
+{
+	// add special case for mods known to need fs_game_base d3xp
+	static const char* d3xpMods[] = {
+		// TODO: if there are more mods that need d3xp as base
+		// (and that are supported by dhewm3), add them here
+		"d3le", // The Lost Mission
+		"librecoopd3xp"
+	};
+	const char* baseMod = "";
+	for ( int i=0; i < sizeof(d3xpMods)/sizeof(d3xpMods[0]); ++i ) {
+		if ( modName.Icmp( d3xpMods[i] ) == 0 ) {
+			baseMod = "d3xp";
+			break;
+		}
+	}
+
+	cvarSystem->SetCVarString( "fs_game", modName );
+	cvarSystem->SetCVarString( "fs_game_base", baseMod );
+
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "reloadEngine menu\n" );
+}
+
 /*
 ==============
 idSessionLocal::HandleMainMenuCommands
@@ -605,8 +629,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 		if ( !idStr::Icmp( cmd, "loadMod" ) ) {
 			int choice = guiActive->State().GetInt( "modsList_sel_0" );
 			if ( choice >= 0 && choice < modsList.Num() ) {
-				cvarSystem->SetCVarString( "fs_game", modsList[ choice ] );
-				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "reloadEngine menu\n" );
+				loadMod( modsList[ choice ] );
 			}
 		}
 
