@@ -47,6 +47,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
       bound to an action (and its char can be typed in the console without closing it).
     - Added (SDL2-only) "auto" option for `in_kbd`: When not disabling the console key,
       dhewm3 will try to automatically detect it if `in_kbd` is set to "auto" (now default)
+* Reworked mouse-input and -grabbing code, using absolute mouse mode in fullscreen GUIs
+  (except for the PDA, because it's implemented weirdly).  
+  This made releasing the mouse in the main menu possible, as now the ingame cursor
+  is at the same position as the system cursor.
 * `s_alReverbGain` CVar to reduce EFX reverb effect intensity (#365)
 * Pause (looped) sounds when entering menu (#330)
 * Fixes for looped sounds (#390)

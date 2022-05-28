@@ -35,18 +35,18 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #if defined(__AROS__)
-#define GAME_NAME						"ADoom3"		// appears on window titles and errors
+#define GAME_NAME						"ADoom3"		// appears in errors
 #define CONFIG_FILE						"adoom3.cfg"
 #else
-#define GAME_NAME						"dhewm 3"		// appears on window titles and errors
+#define GAME_NAME						"dhewm 3"		// appears in errors
 #endif
 
-#define ENGINE_VERSION					"dhewm3 1.5.2rc1"	// printed in console
+#define ENGINE_VERSION					"dhewm3 1.5.2rc2"	// printed in console, used for window title
 
 #ifdef ID_REPRODUCIBLE_BUILD
 	// for reproducible builds we hardcode values that would otherwise come from __DATE__ and __TIME__
 	// NOTE: remember to update esp. the date for (pre-) releases and RCs and the like
-	#define ID__DATE__  "Mai 16 2022"
+	#define ID__DATE__  "Mai 26 2022"
 	#define ID__TIME__  "13:37:42"
 
 #else // not reproducible build, use __DATE__ and __TIME__ macros

@@ -4405,6 +4405,8 @@ void idEntity::Event_RestorePosition( void ) {
 		angles[ 2 ] = 0;
 	}
 
+	idVec3 oldOrg = physics->GetOrigin();
+
 	Teleport( org, angles, NULL );
 
 	for ( part = teamChain; part != NULL; part = part->teamChain ) {
@@ -4414,6 +4416,7 @@ void idEntity::Event_RestorePosition( void ) {
 		if ( part->GetPhysics()->IsType( idPhysics_Parametric::Type ) ) {
 			if ( static_cast<idPhysics_Parametric *>(part->GetPhysics())->IsPusher() ) {
 				gameLocal.Warning( "teleported '%s' which has the pushing mover '%s' bound to it\n", GetName(), part->GetName() );
+				gameLocal.Warning( "  from (%.2f %.2f %.2f) to (%.2f %.2f %.2f)\n", oldOrg.x, oldOrg.y, oldOrg.z, org.x, org.y, org.z);
 			}
 		} else if ( part->GetPhysics()->IsType( idPhysics_AF::Type ) ) {
 			gameLocal.Warning( "teleported '%s' which has the articulated figure '%s' bound to it\n", GetName(), part->GetName() );
