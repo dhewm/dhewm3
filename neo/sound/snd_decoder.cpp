@@ -492,7 +492,9 @@ int idSampleDecoderLocal::DecodePCM( idSoundSample *sample, int sampleOffset44k,
 	int sampleCount = sampleCount44k >> shift;
 
 	if ( sample->nonCacheData == NULL ) {
-		assert( false );	// this should never happen ( note: I've seen that happen with the main thread down in idGameLocal::MapClear clearing entities - TTimo )
+		//assert( false );	// this should never happen ( note: I've seen that happen with the main thread down in idGameLocal::MapClear clearing entities - TTimo )
+		// DG: see comment in DecodeOGG()
+		common->Warning( "Called idSampleDecoderLocal::DecodePCM() on idSoundSample '%s' without nonCacheData\n", sample->name.c_str() );
 		failed = true;
 		return 0;
 	}
@@ -533,7 +535,18 @@ int idSampleDecoderLocal::DecodeOGG( idSoundSample *sample, int sampleOffset44k,
 			return 0;
 		}
 		if ( sample->nonCacheData == NULL ) {
-			assert( false );	// this should never happen
+			//assert( false );	// this should never happen
+			/* DG: turned this assertion into a warning, because this can happen, at least with
+			 * the Classic Doom3 mod (when starting a new game). There idSoundCache::EndLevelLoad()
+			 * purges (with idSoundSample::PurgeSoundSample()) sound/music/cdoomtheme.ogg
+			 * (the music running in the main menu), which free()s nonCacheData.
+			 * But afterwards (still during loading) idSoundSystemLocal::currentSoundWorld
+			 * is set back to menuSoundWorld, which still tries to play that sample,
+			 * which brings us here. Shortly afterwards the sound world is set to
+			 * the game soundworld (sw) and that sample is not referenced anymore
+			 * (until opening the menu again, when that sample is apparently properly reloaded)
+			 * see also https://github.com/dhewm/dhewm3/issues/461 */
+			common->Warning( "Called idSampleDecoderLocal::DecodeOGG() on idSoundSample '%s' without nonCacheData\n", sample->name.c_str() );
 			failed = true;
 			return 0;
 		}

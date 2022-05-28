@@ -74,6 +74,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   the dead "monster_zsec_shotgun_12" into the void (#409)
 * Support loading some mods known to need `fs_game_base d3xp` via Mods menu
   (currently, *The Lost Mission* and *LibreCoop d3xp* are supported)
+* Disable assertion in idSampleDecoderLocal::DecodeOGG() that triggered
+  when starting a new Classic Doom3 game (#461)
 
 1.5.1 (2021-03-14)
 ------------------------------------------------------------------------
