@@ -40,6 +40,11 @@ If you have questions concerning this license or the applicable additional terms
 #define DEBUG_NEW new
 #endif
 
+// returns true if light editor has been opened in D3Radiant,
+// false if it has been opened from within a running game
+static bool InRadiant() {
+	return (com_editors & EDITOR_RADIANT) != 0;
+}
 
 void CLightInfo::Defaults() {
 	pointLight = true;
@@ -327,7 +332,7 @@ void CLightDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CLightDlg)
-	if ( com_editorActive ) {
+	if ( InRadiant() ) {
 		DDX_Control(pDX, IDC_LIGHTPREVIEW, m_wndPreview);
 	}
 	DDX_Control(pDX, IDC_COMBO_TEXTURE, m_wndLights);
@@ -571,7 +576,7 @@ void CLightDlg::UpdateLightInfoFromDialog( void ) {
 
 void CLightDlg::SaveLightInfo( const idDict *differences ) {
 
-	if ( com_editorActive ) {
+	if ( InRadiant() ) {
 
 		// used from Radiant
 		for ( brush_t *b = selected_brushes.next; b && b != &selected_brushes; b = b->next ) {
@@ -654,7 +659,7 @@ BOOL CLightDlg::OnInitDialog()
 
 	LoadLightTextures();
 
-	if ( com_editorActive ) {
+	if ( InRadiant() ) {
 		m_wndPreview.setDrawable(m_drawMaterial);
 	}
 
@@ -729,7 +734,7 @@ void CLightDlg::UpdateDialog( bool updateChecks )
 	lightInfo.Defaults();
 	lightInfoOriginal.Defaults ();
 
-	if ( com_editorActive ) {
+	if ( InRadiant() ) {
 		// used from Radiant
 		entity_t *e = SingleLightSelected();
 		if ( e ) {
@@ -902,7 +907,7 @@ void CLightDlg::OnSelchangeComboTexture()
 	if (sel >= 0) {
 		m_wndLights.GetLBText(sel, str);
 		m_drawMaterial->setMedia(str);
-		if ( com_editorActive ) {
+		if ( InRadiant() ) {
 			m_wndPreview.RedrawWindow();
 		}
 	}
