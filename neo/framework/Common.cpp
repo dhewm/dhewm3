@@ -2657,7 +2657,8 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// there was no gamelib for this mod, use default one from base game
 	if (!gameDLL) {
-		common->Warning( "couldn't load mod-specific %s, defaulting to base game's library!", dll );
+		common->Printf( "\n" );
+		common->Warning( "couldn't load mod-specific %s, defaulting to base game's library!\n", dll );
 		sys->DLL_GetFileName(BASE_GAMEDIR, dll, sizeof(dll));
 		LoadGameDLLbyName(dll, s);
 	}
