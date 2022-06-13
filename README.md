@@ -67,13 +67,10 @@ Required libraries are not part of the tree. These are:
 - OpenAL (OpenAL Soft required, Creative's and Apple's versions are made of fail)
 - SDL v1.2 or 2.0 (2.0 recommended)
 - libcurl (optional, required for server downloads)
-- Optionally, on non-Windows: libbacktrace
+- Optionally, on non-Windows: libbacktrace (usually linked statically)
   - sometimes (e.g. on debian-based distros like Ubuntu) it's part of libgcc (=> always available),
     sometimes (e.g. Arch Linux, openSUSE) it's in a separate package
   - If this is available, dhewm3 prints more useful backtraces if it crashes
-- Also, if you're not building recent dhewm3 code from git (but 1.5.1 or older):
-  - libjpeg (v8)
-  - libogg, libvorbis, libvorbisfile (may be part of libvorbis)
 
 For UNIX-like systems, these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of

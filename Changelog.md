@@ -4,7 +4,7 @@ dhewm3 Changelog
 Note: Numbers starting with a "#" like #330 refer to the bugreport with that number
       at https://github.com/dhewm/dhewm3/issues/
 
-1.5.2 (WIP)
+1.5.2 (2022-06-13)
 ------------------------------------------------------------------------
 
 * Gamma and Brightness are now applied in the shaders instead of by setting hardware gamma.  
