@@ -194,7 +194,7 @@ int SDL_main( int argc, char *argv[] ) {
 		Sys_Error("Could not access application resources");
 
 	// DG: set exe_path so Posix_InitSignalHandlers() can call Posix_GetExePath()
-	SDL_strlcpy(exe_path, [ [ [ NSBundle mainBundle ] bundlePath ] cString ], sizeof(exe_path));
+	SDL_strlcpy(exe_path, [ [ [ NSBundle mainBundle ] executablePath ] cString ], sizeof(exe_path));
 	// same for save_path for Posix_GetSavePath()
 	D3_snprintfC99(save_path, sizeof(save_path), "%s/Library/Application Support/dhewm3", [NSHomeDirectory() cString]);
 	// and preinitializing basepath is easy enough so do that as well
