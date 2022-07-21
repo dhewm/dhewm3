@@ -55,7 +55,7 @@ http://store.steampowered.com/app/9050/
 http://store.steampowered.com/app/9070/
 
 Note that Steam does not offer the *Resurrection of Evil* addon
-for German customers (or at least people with German IP adresses).
+for German customers (or at least people with German IP addresses).
 
 ## Compiling
 
@@ -247,7 +247,7 @@ freely, subject to the following restrictions:
    claim that you wrote the original software. If you use this software
    in a product, an acknowledgment in the product documentation would be
    appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
+2. Altered source versions must be marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
@@ -321,7 +321,7 @@ are met:
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
 3. The name of the author may not be used to endorse or promote products
-   derived from this software withough specific prior written permission
+   derived from this software without specific prior written permission
 
 THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
