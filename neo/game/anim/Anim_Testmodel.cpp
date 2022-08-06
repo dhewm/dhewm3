@@ -809,7 +809,7 @@ void idTestModel::ArgCompletion_TestModel( const idCmdArgs &args, void(*callback
 	for ( i = 0; i < num; i++ ) {
 		callback( idStr( args.Argv( 0 ) ) + " " + declManager->DeclByIndex( DECL_MODELDEF, i , false )->GetName() );
 	}
-	cmdSystem->ArgCompletion_FolderExtension( args, callback, "models/", false, ".lwo", ".ase", ".md5mesh", ".ma", ".mb", NULL );
+	cmdSystem->ArgCompletion_FolderExtension( args, callback, false, "models/", ".lwo", ".ase", ".md5mesh", ".ma", ".mb", NULL );
 }
 
 /*

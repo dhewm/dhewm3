@@ -2269,7 +2269,7 @@ void Cmd_NextGUI_f( const idCmdArgs &args ) {
 }
 
 static void ArgCompletion_DefFile( const idCmdArgs &args, void(*callback)( const char *s ) ) {
-	cmdSystem->ArgCompletion_FolderExtension( args, callback, "def/", true, ".def", NULL );
+	cmdSystem->ArgCompletion_FolderExtension( args, callback, true, "def/", ".def", NULL );
 }
 
 /*
