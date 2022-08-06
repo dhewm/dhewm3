@@ -751,7 +751,7 @@ void codec::IRGBtab(void)
 float codec::Snr( byte *old, byte *bnew, int size ) {
 int i, j;
 float fsnr;
-register int ind;
+int ind;
 
 	ind = 0;
 
