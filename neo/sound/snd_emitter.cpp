@@ -1147,9 +1147,8 @@ idSlowChannel::Reset
 ===================
 */
 void idSlowChannel::Reset() {
-	memset( this, 0, sizeof( *this ) );
-
-	this->chan = chan;
+	active = false;
+	chan = nullptr;
 
 	curPosition.Set( 0 );
 	newPosition.Set( 0 );
@@ -1157,6 +1156,7 @@ void idSlowChannel::Reset() {
 	curSampleOffset = -10000;
 	newSampleOffset = -10000;
 
+	playbackState = 0;
 	triggerOffset = 0;
 }
 
