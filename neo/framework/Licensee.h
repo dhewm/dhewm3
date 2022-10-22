@@ -41,12 +41,12 @@ If you have questions concerning this license or the applicable additional terms
 #define GAME_NAME						"dhewm 3"		// appears in errors
 #endif
 
-#define ENGINE_VERSION					"dhewm3 1.5.2"	// printed in console, used for window title
+#define ENGINE_VERSION					"dhewm3 1.5.3pre"	// printed in console, used for window title
 
 #ifdef ID_REPRODUCIBLE_BUILD
 	// for reproducible builds we hardcode values that would otherwise come from __DATE__ and __TIME__
 	// NOTE: remember to update esp. the date for (pre-) releases and RCs and the like
-	#define ID__DATE__  "Jun 13 2022"
+	#define ID__DATE__  "Oct 22 2022"
 	#define ID__TIME__  "13:37:42"
 
 #else // not reproducible build, use __DATE__ and __TIME__ macros
