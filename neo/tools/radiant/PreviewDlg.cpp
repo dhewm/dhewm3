@@ -123,9 +123,9 @@ void CPreviewDlg::BuildTree() {
 		fileSystem->FreeFileList( files );
 #if USE_COLLADA
 		files = fileSystem->ListFilesTree("models", ".dae");
-#endif
 		AddStrList("base", files->GetList(), MODELS);
 		fileSystem->FreeFileList(files);
+#endif
 	} else if ( currentMode == SOUNDS ) {
 		AddSounds( true );
 	} else if ( currentMode == MATERIALS ) {
