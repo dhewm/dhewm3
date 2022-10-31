@@ -4062,6 +4062,14 @@ idEntity::Event_StartSoundShader
 ================
 */
 void idEntity::Event_StartSoundShader( const char *soundName, int channel ) {
+	// DG: at least some map scripts in d3xp seem to use $ent.startSoundShader( "", SND_CHANNEL_whatever );
+	//     to stop a playing sound. special-casing this to avoid playing beep sound (if s_playDefaultSound 1)
+	if ( soundName == NULL || soundName[0] == '\0' ) {
+		StopSound( (s_channelType)channel, false );
+		idThread::ReturnFloat( 0.0f );
+		return;
+	}
+
 	int length;
 
 	StartSoundShader( declManager->FindSound( soundName ), (s_channelType)channel, 0, false, &length );
