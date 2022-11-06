@@ -157,6 +157,11 @@ void idProjectile::Restore( idRestoreGame *savefile ) {
 
 	savefile->ReadRenderLight( renderLight );
 	savefile->ReadInt( (int &)lightDefHandle );
+	// DG: enforce getting fresh handle, else this may be tied to an unrelated light!
+	if ( lightDefHandle != -1 ) {
+		lightDefHandle = gameRenderWorld->AddLightDef( &renderLight );
+	}
+
 	savefile->ReadVec3( lightOffset );
 	savefile->ReadInt( lightStartTime );
 	savefile->ReadInt( lightEndTime );
