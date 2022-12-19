@@ -691,7 +691,7 @@ Cmd_AddChatLine_f
 ==================
 */
 static void Cmd_AddChatLine_f( const idCmdArgs &args ) {
-	gameLocal.mpGame.AddChatLine( args.Argv( 1 ) );
+	gameLocal.mpGame.AddChatLine( "%s", args.Argv( 1 ) );
 }
 
 /*
@@ -1294,7 +1294,7 @@ static void PrintFloat( float f ) {
 		buf[i] = ' ';
 	}
 	buf[i] = '\0';
-	gameLocal.Printf( buf );
+	gameLocal.Printf( "%s", buf );
 }
 
 /*
