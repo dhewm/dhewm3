@@ -2512,7 +2512,7 @@ void idAsyncServer::RunFrame( void ) {
 
 			idStr msg;
 			GetAsyncStatsAvgMsg( msg );
-			common->Printf( "%s", msg.c_str() );
+			common->Printf( "%s\n", msg.c_str() );
 
 			nextAsyncStatsTime = serverTime + 1000;
 		}
