@@ -213,7 +213,7 @@ PrintClocks
 void PrintClocks( const char *string, int dataCount, int clocks, int otherClocks = 0 ) {
 	int i;
 
-	idLib::common->Printf( string );
+	idLib::common->Printf( "%s", string );
 	for ( i = idStr::LengthWithoutColors(string); i < 48; i++ ) {
 		idLib::common->Printf(" ");
 	}
