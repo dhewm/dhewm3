@@ -691,7 +691,7 @@ Cmd_AddChatLine_f
 ==================
 */
 static void Cmd_AddChatLine_f( const idCmdArgs &args ) {
-	gameLocal.mpGame.AddChatLine( "%s", args.Argv( 1 ) );
+	gameLocal.mpGame.AddChatLine( args.Argv( 1 ) );
 }
 
 /*
