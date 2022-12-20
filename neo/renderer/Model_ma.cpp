@@ -702,9 +702,11 @@ void MA_ParseMesh(idParser& parser) {
 		pMesh->vertexes[idx] +=  pMesh->vertTransforms[i].ToVec3();
 	}
 
-	common->Printf("MESH %s - parent %s\n", header.name, header.parent);
-	common->Printf("\tverts:%d\n",maGlobal.currentObject->mesh.numVertexes);
-	common->Printf("\tfaces:%d\n",maGlobal.currentObject->mesh.numFaces);
+	if (maGlobal.verbose) {
+		common->Printf("MESH %s - parent %s\n", header.name, header.parent);
+		common->Printf("\tverts:%d\n",maGlobal.currentObject->mesh.numVertexes);
+		common->Printf("\tfaces:%d\n",maGlobal.currentObject->mesh.numFaces);
+	}
 }
 
 void MA_ParseFileNode(idParser& parser) {
