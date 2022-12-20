@@ -2920,7 +2920,7 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 					AddChatLine( common->GetLanguageDict()->GetString( "#str_11121" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// enemy
 				}
 			} else {
-				AddChatLine( common->GetLanguageDict()->GetString( "#str_11105" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );                       
+				AddChatLine( common->GetLanguageDict()->GetString( "#str_11105" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );
 			}
 			break;
 
