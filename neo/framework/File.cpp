@@ -74,40 +74,40 @@ int FS_WriteFloatString( char *buf, const char *fmt, va_list argPtr ) {
 							index += sprintf( buf+index, "%s", tmp.c_str() );
 						}
 						else {
-							index += sprintf( buf+index, "%s", format.c_str(), f );
+							index += sprintf( buf+index, format.c_str(), f );
 						}
 						break;
 					case 'd':
 					case 'i':
 						i = va_arg( argPtr, int );
-						index += sprintf( buf+index, "%s", format.c_str(), i );
+						index += sprintf( buf+index, format.c_str(), i );
 						break;
 					case 'u':
 						u = va_arg( argPtr, unsigned int );
-						index += sprintf( buf+index, "%s", format.c_str(), u );
+						index += sprintf( buf+index, format.c_str(), u );
 						break;
 					case 'o':
 						u = va_arg( argPtr, unsigned int );
-						index += sprintf( buf+index, "%s", format.c_str(), u );
+						index += sprintf( buf+index, format.c_str(), u );
 						break;
 					case 'x':
 						u = va_arg( argPtr, unsigned int );
-						index += sprintf( buf+index, "%s", format.c_str(), u );
+						index += sprintf( buf+index, format.c_str(), u );
 						break;
 					case 'X':
 						u = va_arg( argPtr, unsigned int );
-						index += sprintf( buf+index, "%s", format.c_str(), u );
+						index += sprintf( buf+index, format.c_str(), u );
 						break;
 					case 'c':
 						i = va_arg( argPtr, int );
-						index += sprintf( buf+index, "%s", format.c_str(), (char) i );
+						index += sprintf( buf+index, format.c_str(), (char) i );
 						break;
 					case 's':
 						str = va_arg( argPtr, char * );
-						index += sprintf( buf+index, "%s", format.c_str(), str );
+						index += sprintf( buf+index, format.c_str(), str );
 						break;
 					case '%':
-						index += sprintf( buf+index, "%s", format.c_str() );
+						index += sprintf( buf+index, format.c_str() );
 						break;
 					default:
 						common->Error( "FS_WriteFloatString: invalid format %s", format.c_str() );
