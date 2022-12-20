@@ -2934,17 +2934,10 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 			if ( gameLocal.GetLocalPlayer()->team != parm1 ) {
 				AddChatLine( common->GetLanguageDict()->GetString( "#str_11122" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// your team
 			} else {
-<<<<<<< HEAD:neo/d3xp/MultiplayerGame.cpp
-				AddChatLine( "%s", common->GetLanguageDict()->GetString( "#str_11123" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// enemy
+				AddChatLine( common->GetLanguageDict()->GetString( "#str_11123" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// enemy
 			}
 
-//			AddChatLine( "%s", common->GetLanguageDict()->GetString( "#str_11106" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );
-=======
-				AddChatLine( common->GetLanguageDict()->GetString( "#str_11123" ), gameLocal.userInfo[ parm2 ].GetString( "ui_name" ) );	// enemy
-			}	
-			
 //			AddChatLine( common->GetLanguageDict()->GetString( "#str_11106" ), parm1 ? common->GetLanguageDict()->GetString( "#str_11110" ) : common->GetLanguageDict()->GetString( "#str_11111" ) );
->>>>>>> 8a0f7bb (Partial revert: in cases where a printf-like function is invoked with multiple arguments (or the result of a 'va' function call as an argument), undo the introduction of an explicit '%s' format string argument):d3xp/MultiplayerGame.cpp
 			break;
 
 		case MSG_SCOREUPDATE:
