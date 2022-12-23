@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #define	MAX_PRINT_MSG		4096
 
 #pragma GCC diagnostic push
+// FS_WriteFloatString generates format strings programmatically; temporarily disable GCC's format-security
+// warning, if enabled, across the extent of the function definition
 #pragma GCC diagnostic ignored "-Wformat-security"
 
 /*
