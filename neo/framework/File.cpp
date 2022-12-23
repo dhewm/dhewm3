@@ -34,10 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #define	MAX_PRINT_MSG		4096
 
-#if defined(__GNUC__) && ((__GNUC__ >= 5) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
-#endif
 
 /*
 =================
@@ -151,9 +149,7 @@ int FS_WriteFloatString( char *buf, const char *fmt, va_list argPtr ) {
 	return index;
 }
 
-#if defined(__GNUC__) && ((__GNUC__ >= 5) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 #pragma GCC diagnostic pop
-#endif
 
 /*
 =================================================================================
