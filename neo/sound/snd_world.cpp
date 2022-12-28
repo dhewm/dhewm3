@@ -1734,16 +1734,7 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 		volume = soundSystemLocal.dB2Scale( parms->volume );
 	}
 
-	// global volume scale
-	volume *= soundSystemLocal.dB2Scale( idSoundSystemLocal::s_volume.GetFloat() );
-
-	// DG: scaling the volume of *everything* down a bit to prevent some sounds
-	//     (like shotgun shot) being "drowned" when lots of other loud sounds
-	//     (like shotgun impacts on metal) are played at the same time
-	//     I guess this happens because the loud sounds mixed together are too loud so
-	//     OpenAL just makes *everything* quiter or sth like that.
-	//     See also https://github.com/dhewm/dhewm3/issues/179
-	volume *= 0.333f; // (0.333 worked fine, 0.5 didn't)
+	// DG: moved global volume scale down to after clamping to 1.0
 
 	// volume fading
 	float	fadeDb = chan->channelFade.FadeDbAt44kHz( current44kHz );
@@ -1801,6 +1792,28 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 			volume = 0;
 		}
 	}
+
+	// DG: scaling the volume of *everything* down a bit to prevent some sounds
+	//     (like shotgun shot) being "drowned" when lots of other loud sounds
+	//     (like shotgun impacts on metal) are played at the same time
+	//     I guess this happens because the loud sounds mixed together are too loud so
+	//     OpenAL just makes *everything* quiter or sth like that.
+	//     See also https://github.com/dhewm/dhewm3/issues/179
+
+	// First clamp it to 1.0 - that's done anyway when setting AL_GAIN below,
+	// for consistency it must be done before scaling, because many player-weapon
+	// sounds have a too high volume defined and only sound right (relative to
+	// other weapons) when clamped
+	// see https://github.com/dhewm/dhewm3/issues/326#issuecomment-1366833004
+	if(volume > 1.0f) {
+		volume = 1.0f;
+	}
+
+	volume *= 0.333f; // (0.333 worked fine, 0.5 didn't)
+
+	// global volume scale - DG: now done after clamping to 1.0, so reducing the
+	// global volume doesn't cause the different weapon volume issues described above
+	volume *= soundSystemLocal.dB2Scale( idSoundSystemLocal::s_volume.GetFloat() );
 
 	//
 	// do we have anything to add?
