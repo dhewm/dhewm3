@@ -1737,14 +1737,6 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 	// global volume scale
 	volume *= soundSystemLocal.dB2Scale( idSoundSystemLocal::s_volume.GetFloat() );
 
-	// DG: scaling the volume of *everything* down a bit to prevent some sounds
-	//     (like shotgun shot) being "drowned" when lots of other loud sounds
-	//     (like shotgun impacts on metal) are played at the same time
-	//     I guess this happens because the loud sounds mixed together are too loud so
-	//     OpenAL just makes *everything* quiter or sth like that.
-	//     See also https://github.com/dhewm/dhewm3/issues/179
-	volume *= 0.333f; // (0.333 worked fine, 0.5 didn't)
-
 	// volume fading
 	float	fadeDb = chan->channelFade.FadeDbAt44kHz( current44kHz );
 	volume *= soundSystemLocal.dB2Scale( fadeDb );
@@ -1802,6 +1794,21 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 		}
 	}
 
+	// DG: scaling the volume of *everything* down a bit to prevent some sounds
+	//     (like shotgun shot) being "drowned" when lots of other loud sounds
+	//     (like shotgun impacts on metal) are played at the same time
+	//     I guess this happens because the loud sounds mixed together are too loud so
+	//     OpenAL just makes *everything* quiter or sth like that.
+	//     See also https://github.com/dhewm/dhewm3/issues/179
+
+	// First clamp it to 1.0 - that's done anyway when setting AL_GAIN below,
+	// for consistency it must be done before scaling, see
+	// https://github.com/dhewm/dhewm3/issues/326#issuecomment-1366833004
+	if(volume > 1.0f) {
+		volume = 1.0f;
+	}
+
+	volume *= 0.333f; // (0.333 worked fine, 0.5 didn't)
 	//
 	// do we have anything to add?
 	//
