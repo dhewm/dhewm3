@@ -463,7 +463,7 @@ void idWeapon::Restore( idRestoreGame *savefile ) {
 	}
 	savefile->ReadInt( muzzleFlashHandle );
 	savefile->ReadRenderLight( muzzleFlash );
-	if ( muzzleFlashHandle = -1 ) { // DG: enforce getting fresh handle
+	if ( muzzleFlashHandle != -1 ) { // DG: enforce getting fresh handle
 		muzzleFlashHandle = gameRenderWorld->AddLightDef( &muzzleFlash );
 	}
 
