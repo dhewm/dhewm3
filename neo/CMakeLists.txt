@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.6...3.22 FATAL_ERROR)
 project(dhewm3)
 
 # TODO
@@ -59,6 +59,17 @@ option(SDL2			"Use SDL2 instead of SDL1.2" ON)
 option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
 option(HARDLINK_GAME "Compile gamecode into executable (no game DLLs)" OFF)
+
+if(NOT MSVC) # GCC/clang or compatible, hopefully
+	option(FORCE_COLORED_OUTPUT "Always produce ANSI-colored compiler warnings/errors (GCC/Clang only; esp. useful with ninja)." OFF)
+	option(ASAN		"Enable GCC/Clang Adress Sanitizer (ASan)" OFF) # TODO: MSVC might also support this, somehow?
+	option(UBSAN	"Enable GCC/Clang Undefined Behavior Sanitizer (UBSan), implies HARDLINK_GAME" OFF)
+
+	if(UBSAN AND NOT HARDLINK_GAME)
+		message(STATUS "UBSAN requires linking the gamecode into the executable, will enable HARDLINK_GAME")
+		set(HARDLINK_GAME ON)
+	endif()
+endif()
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "No target CPU architecture set")
@@ -266,6 +277,14 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		add_compile_options(-march=pentium3)
 	endif()
 
+	if(FORCE_COLORED_OUTPUT)
+		if(CMAKE_COMPILER_IS_GNUCC)
+		   add_compile_options (-fdiagnostics-color=always)
+		elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		   add_compile_options (-fcolor-diagnostics)
+		endif ()
+	endif ()
+
 	set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0")
 	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
 	set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
@@ -281,10 +300,16 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 	add_compile_options(-ffp-contract=off)
 	
-	# uncomment/edit for ASan/UBsan or similar
-	#add_compile_options(-fsanitize=undefined -fsanitize=address)
-	#set(sys_libs ${sys_libs} -fsanitize=undefined -fsanitize=address)
-
+	if(ASAN)
+		# if this doesn't work, ASan might not be available on your platform, don't set ASAN then..
+		add_compile_options(-fsanitize=address)
+		set(sys_libs ${sys_libs} -fsanitize=address)
+	endif()
+	if(UBSAN)
+		# if this doesn't work, UBSan might not be available on your platform, don't set UBSAN then..
+		add_compile_options(-fsanitize=undefined)
+		set(sys_libs ${sys_libs} -fsanitize=undefined)
+	endif()
 
 	if(NOT AROS)
 		CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
