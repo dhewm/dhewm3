@@ -879,7 +879,7 @@ void idSessionLocal::StopPlayingRenderDemo() {
 		float	demoFPS = numDemoFrames / demoSeconds;
 		idStr	message = va( "%i frames rendered in %3.1f seconds = %3.1f fps\n", numDemoFrames, demoSeconds, demoFPS );
 
-		common->Printf( message );
+		common->Printf( "%s", message.c_str() );
 		if ( timeDemo == TD_YES_THEN_QUIT ) {
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 		} else {

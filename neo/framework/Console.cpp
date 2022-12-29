@@ -282,7 +282,7 @@ float SCR_DrawAsyncStats( float y ) {
 
 		idStr msg;
 		idAsyncNetwork::server.GetAsyncStatsAvgMsg( msg );
-		SCR_DrawTextRightAlign( y, msg.c_str() );
+		SCR_DrawTextRightAlign( y, "%s", msg.c_str() );
 
 	} else if ( idAsyncNetwork::client.IsActive() ) {
 

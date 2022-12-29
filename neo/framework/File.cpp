@@ -107,7 +107,7 @@ int FS_WriteFloatString( char *buf, const char *fmt, va_list argPtr ) {
 						index += sprintf( buf+index, format.c_str(), str );
 						break;
 					case '%':
-						index += sprintf( buf+index, format.c_str() );
+						index += sprintf( buf+index, "%s", format.c_str() );
 						break;
 					default:
 						common->Error( "FS_WriteFloatString: invalid format %s", format.c_str() );

@@ -43,7 +43,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#define MA_VERBOSE( x ) { if ( maGlobal.verbose ) { common->Printf x ; } }
 
 // working variables used during parsing
 typedef struct {
@@ -704,9 +703,11 @@ void MA_ParseMesh(idParser& parser) {
 		pMesh->vertexes[idx] +=  pMesh->vertTransforms[i].ToVec3();
 	}
 
-	MA_VERBOSE((va("MESH %s - parent %s\n", header.name, header.parent)));
-	MA_VERBOSE((va("\tverts:%d\n",maGlobal.currentObject->mesh.numVertexes)));
-	MA_VERBOSE((va("\tfaces:%d\n",maGlobal.currentObject->mesh.numFaces)));
+	if(maGlobal.verbose) {
+		common->Printf("MESH %s - parent %s\n", header.name, header.parent);
+		common->Printf("\tverts:%d\n",maGlobal.currentObject->mesh.numVertexes);
+		common->Printf("\tfaces:%d\n",maGlobal.currentObject->mesh.numFaces);
+	}
 }
 
 void MA_ParseFileNode(idParser& parser) {

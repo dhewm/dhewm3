@@ -76,7 +76,7 @@ int idListGUILocal::GetSelection( char *s, int size, int _sel ) const {
 		return -1;
 	}
 	if ( s ) {
-		idStr::snPrintf( s, size, m_pGUI->State().GetString( va( "%s_item_%i", m_name.c_str(), sel ), "" ) );
+		idStr::snPrintf( s, size, "%s", m_pGUI->State().GetString( va( "%s_item_%i", m_name.c_str(), sel ), "" ) );
 	}
 	// don't let overflow
 	if ( sel >= m_ids.Num() ) {

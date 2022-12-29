@@ -1426,7 +1426,7 @@ bool idAsyncClient::ValidatePureServerChecksums( const netadr_t from, const idBi
 					message += va( common->GetLanguageDict()->GetString( "#str_06751" ), numMissingChecksums, checksums.c_str() );
 				}
 
-				common->Printf( message );
+				common->Printf( "%s", message.c_str() );
 				cmdSystem->BufferCommandText( CMD_EXEC_NOW, "disconnect" );
 				session->MessageBox( MSG_OK, message, common->GetLanguageDict()->GetString( "#str_06735" ), true );
 			} else {

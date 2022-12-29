@@ -141,7 +141,7 @@ const char *idCollisionModelManagerLocal::StringFromContents( const int contents
 			if ( length != 0 ) {
 				length += idStr::snPrintf( contentsString + length, sizeof( contentsString ) - length, "," );
 			}
-			length += idStr::snPrintf( contentsString + length, sizeof( contentsString ) - length, cm_contentsNameByIndex[i] );
+			length += idStr::snPrintf( contentsString + length, sizeof( contentsString ) - length, "%s", cm_contentsNameByIndex[i] );
 		}
 	}
 

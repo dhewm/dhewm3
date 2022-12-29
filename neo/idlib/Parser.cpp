@@ -326,7 +326,7 @@ void idParser::Error( const char *str, ... ) const {
 	vsprintf(text, str, ap);
 	va_end(ap);
 	if ( idParser::scriptstack ) {
-		idParser::scriptstack->Error( text );
+		idParser::scriptstack->Error( "%s", text );
 	}
 }
 
@@ -343,7 +343,7 @@ void idParser::Warning( const char *str, ... ) const {
 	vsprintf(text, str, ap);
 	va_end(ap);
 	if ( idParser::scriptstack ) {
-		idParser::scriptstack->Warning( text );
+		idParser::scriptstack->Warning( "%s", text );
 	}
 }
 

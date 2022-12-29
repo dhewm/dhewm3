@@ -316,7 +316,6 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	# TODO fix these warnings
 	add_compile_options(-Wno-sign-compare)
 	add_compile_options(-Wno-switch)
-	add_compile_options(-Wno-format-security)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 	if(cxx_has_Woverload_virtual)

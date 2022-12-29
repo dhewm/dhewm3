@@ -720,7 +720,7 @@ void idGameLocal::NetworkEventWarning( const entityNetEvent_t *event, const char
 	va_end( argptr );
 	idStr::Append( buf, sizeof(buf), "\n" );
 
-	common->DWarning( buf );
+	common->DWarning( "%s", buf );
 }
 
 /*
