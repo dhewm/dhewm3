@@ -57,6 +57,8 @@ http://store.steampowered.com/app/9070/
 Note that Steam does not offer the *Resurrection of Evil* addon
 for German customers (or at least people with German IP adresses).
 
+See https://dhewm3.org/#how-to-install for game data installation instructions.
+
 ## Compiling
 
 The build system is based on CMake: http://cmake.org/
@@ -72,11 +74,11 @@ Required libraries are not part of the tree. These are:
     sometimes (e.g. Arch Linux, openSUSE) it's in a separate package
   - If this is available, dhewm3 prints more useful backtraces if it crashes
 
-For UNIX-like systems, these libraries need to be installed (including the
+For **UNIX-like systems**, these libraries need to be installed (including the
 developer files). It is recommended to use the software management tools of
 your OS (apt, dnf, portage, BSD ports, [Homebrew for macOS](http://brew.sh), ...).
 
-For Windows, there are three options:
+For **Windows**, there are three options:
 
 - Use the provided binaries (recommended, see below)
 - Compile these libraries yourself
@@ -88,7 +90,7 @@ the cmake command there, pointing it at the neo/ folder from this repository:
 
 `cmake /path/to/repository/neo`
 
-macOS users need to point CMake at OpenAL Soft (better solutions welcome):
+**macOS** users need to point CMake at OpenAL Soft (better solutions welcome):
 
 `cmake -DOPENAL_LIBRARY=/usr/local/opt/openal-soft/lib/libopenal.dylib -DOPENAL_INCLUDE_DIR=/usr/local/opt/openal-soft/include /path/to/repository/neo`
 
@@ -96,7 +98,41 @@ Newer versions of Homebrew install openal-soft to another directory, so use this
 
 `cmake -DOPENAL_LIBRARY="/opt/homebrew/opt/openal-soft/lib/libopenal.dylib" -DOPENAL_INCLUDE_DIR="/opt/homebrew/opt/openal-soft/include" /path/to/repo/neo`
 
-## Using the provided Windows binaries
+### Compiling example using Ubuntu
+
+Should be the same for Debian and other Debian-derivatives, but apart from the first step (installing
+build dependecies) it should be the same on other Linux distros and even other UNIX-likes in general.
+
+Open a terminal and follow these steps:
+
+* Install build dependencies:  
+  `sudo apt install git cmake build-essential libsdl2-dev libopenal-dev zlib1g-dev libcurl4-openssl-dev`  
+    - The build-essential package on Debian/Ubuntu/... installs some basics for compiling code
+      like GCC (incl. g++), GNU Make and the glibc development package
+    - Instead of libcurl4-openssl-dev, other libcurl*-dev packages should also work - or none at all, curl is optional.
+    - Not strictly necessary, but I recommend making libbacktrace available. On distributions not
+      based on Debian, you may have to manually install some kind of libbacktrace development package.
+* Use git to get the code from Github (alternatively you can also download the code as an archive and extract that):  
+  `git clone https://github.com/dhewm/dhewm3.git`
+* Change into the dhewm3 directory, create a directory to build in and change into the build directory:  
+  `cd dhewm3` then `mkdir build` then `cd build`
+* Create a Makefile with CMake: `cmake ../neo/`
+    - You can set different options for CMake with arguments like `-DDEDICATED=ON` (to enable the dedicated server).
+      You can show a list of supported options by running `cmake -LH ../neo/`. You can run CMake again
+      with another `-DFOO=BAR` option to change that option (previously set options are remembered,
+      unless you remove all contents of the build/ dir).
+    - You could also install the **cmake-qt-gui** package and run `cmake-gui ../neo/`, which will let
+      you configure the build in a GUI instead of using `-D` commandline-arguments.
+* Compile dhewm3: `make -j8`
+    - `-j8` specifies the number of compiler processes to run in parallel (8 in this example),
+      it makes sense to use the number of CPU threads (or cores) in your system.
+
+When all steps are done and no errors occurred, you should be able to run dhewm3 right there, like:  
+`./dhewm3 +set fs_basepath /path/to/your/doom3/`  
+*Replace `/path/to/your/doom3/` with the path to your Doom3 installation (that contains `base/` with
+`pak000.pk4` to `pak008.pk4`)*
+
+### Using the provided Windows binaries
 
 Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
 
@@ -113,7 +149,7 @@ Issue the appropriate command from the build folder, for example:
 
 The binaries are compatible with MinGW-w64 and all MSVC versions.
 
-## Cross-compiling
+### Cross-compiling
 
 For cross-compiling, a CMake Toolchain file is required.
 
@@ -334,7 +370,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-$FreeBSD: src/usr.bin/brandelf/brandelf.c,v 1.16 2000/07/02 03:34:08 imp Exp $
+`$FreeBSD: src/usr.bin/brandelf/brandelf.c,v 1.16 2000/07/02 03:34:08 imp Exp $`
 
 ## makeself - Make self-extractable archives on Unix
 
