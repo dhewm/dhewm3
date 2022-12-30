@@ -93,21 +93,9 @@ if(NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR))
 	# special case: cross-compiling, here CMAKE_SYSTEM_PROCESSOR should be correct, hopefully
 	# (just leave cpu at ${CMAKE_SYSTEM_PROCESSOR})
 elseif(MSVC)
-	message(STATUS "CMAKE_GENERATOR_PLATFORM: ${CMAKE_GENERATOR_PLATFORM}")
-	if(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
-		set(cpu "x86")
-	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
-		set(cpu "x86_64")
-	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM")
-		# at least on RPi 32bit, gcc -dumpmachine outputs "arm-linux-gnueabihf",
-		#  so we'll use "arm" there => use the same for 32bit ARM on MSVC
-		set(cpu "arm")
-	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
-		set(cpu "arm64")
-	else()
-		message(FATAL_ERROR "Unknown Target CPU/platform ${CMAKE_GENERATOR_PLATFORM}")
-	endif()
-	message(STATUS "  => CPU architecture extracted from that: \"${cpu}\"")
+	# because all this wasn't ugly enough, it turned out that, unlike standalone CMake, Visual Studio's
+	# integrated CMake doesn't set CMAKE_GENERATOR_PLATFORM, so I gave up on guessing the CPU arch here
+	# and moved the CPU detection to MSVC-specific code in neo/sys/platform.h
 else() # not MSVC and not cross-compiling, assume GCC or clang (-compatible), seems to work for MinGW as well
 	execute_process(COMMAND ${CMAKE_C_COMPILER} "-dumpmachine"
 	                RESULT_VARIABLE cc_dumpmachine_res
@@ -145,8 +133,6 @@ elseif(cpu MATCHES "[aA][rR][mM].*") # some kind of arm..
 	endif()
 endif()
 
-add_definitions(-DD3_ARCH="${cpu}" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
-
 # target os
 if(APPLE)
 	set(os "macosx")
@@ -154,14 +140,22 @@ else()
 	string(TOLOWER "${CMAKE_SYSTEM_NAME}" os)
 endif()
 
-add_definitions(-DD3_OSTYPE="${os}")
+add_definitions(-DD3_OSTYPE="${os}" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 
-message(STATUS "Setting -DD3_ARCH=\"${cpu}\" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P} -DD3_OSTYPE=\"${os}\" ")
+if(MSVC)
+	# for MSVC D3_ARCH is set in code (in neo/sys/platform.h)
+	message(STATUS "Setting -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P} -DD3_OSTYPE=\"${os}\" - NOT setting D3_ARCH, because we're targeting MSVC (VisualC++)")
+	# make sure ${cpu} isn't (cant't be) used by CMake when building with MSVC
+	unset(cpu)
+else()
+	add_definitions(-DD3_ARCH="${cpu}")
+	message(STATUS "Setting -DD3_ARCH=\"${cpu}\" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P} -DD3_OSTYPE=\"${os}\" ")
 
-if(cpu MATCHES ".*64.*" AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-	# tough luck if some CPU architecture has "64" in its name but uses 32bit pointers
-	message(SEND_ERROR "CMake thinks sizeof(void*) == 4, but the target CPU looks like a 64bit CPU!")
-	message(FATAL_ERROR "If you're building in a 32bit chroot on a 64bit host, switch to it with 'linux32 chroot' or at least call cmake with linux32 (or your OSs equivalent)!")
+	if(cpu MATCHES ".*64.*" AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+		# tough luck if some CPU architecture has "64" in its name but uses 32bit pointers
+		message(SEND_ERROR "CMake thinks sizeof(void*) == 4, but the target CPU ${cpu} looks like a 64bit CPU!")
+		message(FATAL_ERROR "If you're building in a 32bit chroot on a 64bit host, switch to it with 'linux32 chroot' or at least call cmake with linux32 (or your OSs equivalent)!")
+	endif()
 endif()
 
 # build type
@@ -453,7 +447,9 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/config.h"
 )
 
+if(NOT MSVC)
 message(STATUS "Building ${CMAKE_BUILD_TYPE} for ${os}-${cpu}")
+endif()
 
 if(NOT APPLE AND NOT WIN32)
 	message(STATUS "The install target will use the following directories:")
