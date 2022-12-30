@@ -105,6 +105,35 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
+// Setting D3_ARCH for VisualC++ from CMake doesn't work when using VS integrated CMake
+// so set it in code instead
+#ifdef _MSC_VER
+
+#ifdef D3_ARCH
+  #undef D3_ARCH
+#endif // D3_ARCH
+
+#ifdef _M_X64
+  // this matches AMD64 and ARM64EC (but not regular ARM64), but they're supposed to be binary-compatible somehow, so whatever
+  #define D3_ARCH "x86_64"
+#elif defined(_M_ARM64)
+  #define D3_ARCH "arm64"
+#elif defined(_M_ARM)
+  #define D3_ARCH "arm"
+#elif defined(_M_IX86)
+  #define D3_ARCH "x86"
+#else
+  // if you're not targeting one of the aforementioned architectures,
+  // check https://learn.microsoft.com/en-us/cpp/preprocessor/predefined-macros
+  // to find out how to detect yours and add it here - and please send a patch :)
+  #error "Unknown CPU architecture!"
+  // (for a quick and dirty solution, comment out the previous line, but keep in mind
+  //  that savegames may not be compatible with other builds of dhewm3)
+  #define D3_ARCH "UNKNOWN"
+#endif // _M_X64 etc
+
+#endif // _MSC_VER
+
 
 // Mac OSX
 #if defined(MACOS_X) || defined(__APPLE__)
