@@ -1062,12 +1062,6 @@ R_IssueEntityDefCallback
 */
 bool R_IssueEntityDefCallback( idRenderEntityLocal *def ) {
 	bool update;
-	idBounds	oldBounds;
-	const bool checkBounds = r_checkBounds.GetBool();
-
-	if ( checkBounds ) {
-		oldBounds = def->referenceBounds;
-	}
 
 	def->archived = false;		// will need to be written to the demo file
 	tr.pc.c_entityDefCallbacks++;
@@ -1082,7 +1076,10 @@ bool R_IssueEntityDefCallback( idRenderEntityLocal *def ) {
 		return false;
 	}
 
-	if ( checkBounds ) {
+	// DG: moved some code down here so all the boundchecking stuff is in the same if (because why not)
+	//     (also works around yet another GCC maybe-uninitialized false positive)
+	if ( r_checkBounds.GetBool() ) {
+		idBounds oldBounds = def->referenceBounds;
 		if (	oldBounds[0][0] > def->referenceBounds[0][0] + CHECK_BOUNDS_EPSILON ||
 				oldBounds[0][1] > def->referenceBounds[0][1] + CHECK_BOUNDS_EPSILON ||
 				oldBounds[0][2] > def->referenceBounds[0][2] + CHECK_BOUNDS_EPSILON ||
