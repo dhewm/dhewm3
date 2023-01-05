@@ -224,6 +224,7 @@ idSurface_Patch::LerpVert
 ============
 */
 void idSurface_Patch::LerpVert( const idDrawVert &a, const idDrawVert &b, idDrawVert &out ) const {
+	// DG: TODO: what about out.tangent and out.color ?
 	out.xyz[0] = 0.5f * ( a.xyz[0] + b.xyz[0] );
 	out.xyz[1] = 0.5f * ( a.xyz[1] + b.xyz[1] );
 	out.xyz[2] = 0.5f * ( a.xyz[2] + b.xyz[2] );
@@ -554,7 +555,11 @@ idSurface_Patch::Subdivide
 */
 void idSurface_Patch::Subdivide( float maxHorizontalError, float maxVerticalError, float maxLength, bool genNormals ) {
 	int			i, j, k, l;
-	idDrawVert	prev, next, mid;
+	// DG: to shut up GCC (maybe-)uninitialized warnings, initialize prev, next and mid
+	//     (maybe the warnings were at least partly correct, because .tangent and .color aren't set by idSurface_Patch::LerpVert())
+	idDrawVert	prev;
+	prev.Clear();
+	idDrawVert next = prev, mid = prev;
 	idVec3		prevxyz, nextxyz, midxyz;
 	idVec3		delta;
 	float		maxHorizontalErrorSqr, maxVerticalErrorSqr, maxLengthSqr;

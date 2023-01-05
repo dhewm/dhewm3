@@ -92,6 +92,12 @@ void idWinding2D::ExpandForAxialBox( const idVec2 bounds[2] ) {
 		assert( numPlanes < MAX_POINTS_ON_WINDING_2D );
 		planes[numPlanes++] = plane;
 	}
+
+	// DG: make sure planes[] isn't used uninitialized and with index -1 below
+	if ( numPlanes == 0 ) {
+		return;
+	}
+
 	if ( GetAxialBevel( planes[numPlanes-1], planes[0], p[0], bevel ) ) {
 		planes[numPlanes++] = bevel;
 	}
@@ -258,6 +264,11 @@ bool idWinding2D::ClipInPlace( const idVec3 &plane, const float epsilon, const b
 	int sides[MAX_POINTS_ON_WINDING_2D+1], counts[3];
 	float dot, dists[MAX_POINTS_ON_WINDING_2D+1];
 	idVec2 *p1, *p2, mid, newPoints[MAX_POINTS_ON_WINDING_2D+4];
+
+	// DG: avoid all kinds of unitialized usages below
+	if ( numPoints == 0 ) {
+		return false;
+	}
 
 	counts[SIDE_FRONT] = counts[SIDE_BACK] = counts[SIDE_ON] = 0;
 

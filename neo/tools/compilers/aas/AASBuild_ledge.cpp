@@ -68,6 +68,7 @@ idLedge::idLedge( const idVec3 &v1, const idVec3 &v2, const idVec3 &gravityDir, 
 	planes[3].SetNormal( v2 - v1 );
 	planes[3].Normalize();
 	planes[3].FitThroughPoint( v2 );
+	numExpandedPlanes = numSplitPlanes = 0; // DG: make sure those are initialized
 }
 
 /*

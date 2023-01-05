@@ -4642,7 +4642,9 @@ static uint32 vorbis_find_page(stb_vorbis *f, uint32 *end, uint32 *last)
 
 static int get_seek_page_info(stb_vorbis *f, ProbedPage *z)
 {
-   uint8 header[27], lacing[255];
+   // DG: zero out the header, it could be uninitialized if getn() fails
+   //     and then the check for "OggS" is unreliable
+   uint8 header[27] = {0}, lacing[255];
    int i,len;
 
    // record where the page starts

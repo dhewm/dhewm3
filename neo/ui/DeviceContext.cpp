@@ -60,15 +60,15 @@ int idDeviceContext::FindFont( const char *name ) {
 	idStr fileName = name;
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()) );
 
-	fontInfoEx_t fontInfo;
-		int index = fonts.Append( fontInfo );
-		if ( renderSystem->RegisterFont( fileName, fonts[index] ) ){
+	fontInfoEx_t fontInfo = {}; // DG: initialize this
+	int index = fonts.Append( fontInfo );
+	if ( renderSystem->RegisterFont( fileName, fonts[index] ) ){
 		idStr::Copynz( fonts[index].name, name, sizeof( fonts[index].name ) );
 		return index;
-		} else {
+	} else {
 		common->Printf( "Could not register font %s [%s]\n", name, fileName.c_str() );
 		return -1;
-}
+	}
 }
 
 void idDeviceContext::SetupFonts() {
