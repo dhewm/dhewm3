@@ -669,6 +669,31 @@ define_t *idParser::CopyFirstDefine( void ) {
 	return NULL;
 }
 
+// simple abstraction around localtime()/localtime_r() or whatever
+static bool my_localtime(const time_t* t, struct tm* ts)
+{
+	// TODO: does any non-windows platform not support localtime_r()?
+	//       then add them here (or handle them specially with their own #elif)
+#ifdef _WIN32
+	// localtime() is C89 so it should be available everywhere, but it *may* not be threadsafe.
+	// It *is* threadsafe on Windows though (there it returns a thread-local variable).
+	// (yes, Windows has localtime_s(), but it's unclear if MinGW supports that
+	//  or localtime_r() and in the end, *on Windows* localtime() is safe so use it)
+
+	struct tm* tmp = localtime(t);
+	if(tmp != NULL) {
+		*ts = *tmp;
+		return true;
+	}
+#else // localtime_r() assumed available, use it (all Unix-likes incl. macOS support it, AROS as well)
+	if(localtime_r(t, ts) != NULL)
+		return true;
+#endif
+	// if we get here, the localtime() (or localtime_r() or whatever) call failed
+	memset(ts, 0, sizeof(*ts)); // make sure ts has deterministic content
+	return false;
+}
+
 /*
 ================
 idParser::ExpandBuiltinDefine
@@ -677,7 +702,6 @@ idParser::ExpandBuiltinDefine
 int idParser::ExpandBuiltinDefine( idToken *deftoken, define_t *define, idToken **firsttoken, idToken **lasttoken ) {
 	idToken *token;
 	ID_TIME_T t;
-	char *curtime;
 	char buf[MAX_STRING_CHARS];
 
 	token = new idToken(deftoken);
@@ -709,14 +733,15 @@ int idParser::ExpandBuiltinDefine( idToken *deftoken, define_t *define, idToken 
 		}
 		case BUILTIN_DATE: {
 			t = time(NULL);
-			curtime = ctime(&t);
-			(*token) = "\"";
-			token->Append( curtime+4 );
-			token[7] = NULL;
-			token->Append( curtime+20 );
-			token[10] = NULL;
-			token->Append( "\"" );
-			free(curtime);
+			// DG: apparently this was supposed to extract the date part of "Wed Jun 30 21:49:08 1993\n"
+			// (like "Jun 30 1993") - it was both ugly and broken before I changed it, though
+			// Originally it copied stuff out of ctime(), which is ugly but ok, but also
+			// free'd the returned value (wrong) and tried to modify token in ways that should've crashed
+			// (like token[7] = NULL; which should've been (*token)[7] = '\0';)
+			struct tm ts;
+			my_localtime(&t, &ts);
+			strftime(buf, sizeof(buf), "\"%b %d %Y\"", &ts);
+			(*token) = buf;
 			token->type = TT_STRING;
 			token->subtype = token->Length();
 			token->line = deftoken->line;
@@ -728,12 +753,13 @@ int idParser::ExpandBuiltinDefine( idToken *deftoken, define_t *define, idToken 
 		}
 		case BUILTIN_TIME: {
 			t = time(NULL);
-			curtime = ctime(&t);
-			(*token) = "\"";
-			token->Append( curtime+11 );
-			token[8] = NULL;
-			token->Append( "\"" );
-			free(curtime);
+			// DG: apparently this was supposed to extract the time part of "Wed Jun 30 21:49:08 1993\n"
+			// (like "21:49:08") - it was both ugly and broken before I changed it, though
+			// (had basicaly the same problems as BUILTIN_DATE)
+			struct tm ts;
+			my_localtime(&t, &ts);
+			strftime(buf, sizeof(buf), "\"%H:%M:%S\"", &ts);
+			(*token) = buf;
 			token->type = TT_STRING;
 			token->subtype = token->Length();
 			token->line = deftoken->line;
@@ -745,11 +771,13 @@ int idParser::ExpandBuiltinDefine( idToken *deftoken, define_t *define, idToken 
 		}
 		case BUILTIN_STDC: {
 			idParser::Warning( "__STDC__ not supported\n" );
+			delete token; // DG: we probably shouldn't leak it, right?
 			*firsttoken = NULL;
 			*lasttoken = NULL;
 			break;
 		}
 		default: {
+			delete token; // DG: we probably shouldn't leak it, right?
 			*firsttoken = NULL;
 			*lasttoken = NULL;
 			break;
