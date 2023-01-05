@@ -3479,6 +3479,11 @@ idCollisionModelManagerLocal::GetModelPolygon
 ===================
 */
 bool idCollisionModelManagerLocal::GetModelPolygon( cmHandle_t model, int polygonNum, idFixedWinding &winding ) const {
+
+	assert(0 && "if this is ever called, it must be fixed first!"); // DG: see below
+	return false;
+
+#if 0
 	int i, edgeNum;
 	cm_polygon_t *poly;
 
@@ -3487,6 +3492,9 @@ bool idCollisionModelManagerLocal::GetModelPolygon( cmHandle_t model, int polygo
 		return false;
 	}
 
+	// FIXME: DG: WTF is this, casting an int to a pointer?! we're lucky this is unused..
+	//   (it's called by idClip::GetModelContactFeature() which is called by
+	//    idClip()::DrawModelContactFeatuer(), but that is never called)
 	poly = *reinterpret_cast<cm_polygon_t **>(&polygonNum);
 	winding.Clear();
 	for ( i = 0; i < poly->numEdges; i++ ) {
@@ -3495,6 +3503,7 @@ bool idCollisionModelManagerLocal::GetModelPolygon( cmHandle_t model, int polygo
 	}
 
 	return true;
+#endif // 0
 }
 
 /*

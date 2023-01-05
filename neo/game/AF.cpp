@@ -892,6 +892,11 @@ bool idAF::Load( idEntity *ent, const char *fileName ) {
 	for ( i = 0; i < physicsObj.GetNumConstraints(); i++ ) {
 		idAFConstraint *constraint = physicsObj.GetConstraint( i );
 		for ( j = 0; j < file->constraints.Num(); j++ ) {
+			// DG: FIXME: GCC rightfully complains that file->constraints[j]->type and constraint->GetType()
+			//  are of different enum types, and their values are different in some cases:
+			//  CONSTRAINT_HINGESTEERING has no DECLAF_CONSTRAINT_ equivalent,
+			//  and thus DECLAF_CONSTRAINT_SLIDER != CONSTRAINT_SLIDER (5 != 6)
+			//  and DECLAF_CONSTRAINT_SPRING != CONSTRAINT_SPRING (6 != 10)
 			if ( file->constraints[j]->name.Icmp( constraint->GetName() ) == 0 &&
 					file->constraints[j]->type == constraint->GetType() ) {
 				break;
