@@ -2228,7 +2228,7 @@ void idImageManager::PrintMemInfo( MemInfo_t *mi ) {
 		f->Printf( "%s %3i %s\n", idStr::FormatNumber( size ).c_str(), im->refCount, im->imgName.c_str() );
 	}
 
-	delete sortIndex;
+	delete[] sortIndex;
 	mi->imageAssetsTotal = total;
 
 	f->Printf( "\nTotal image bytes allocated: %s\n", idStr::FormatNumber( total ).c_str() );

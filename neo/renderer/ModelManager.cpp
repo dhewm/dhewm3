@@ -615,7 +615,7 @@ void idRenderModelManagerLocal::PrintMemInfo( MemInfo_t *mi ) {
 		f->Printf( "%s %s\n", idStr::FormatNumber( mem ).c_str(), model->Name() );
 	}
 
-	delete sortIndex;
+	delete[] sortIndex;
 	mi->modelAssetsTotal = totalMem;
 
 	f->Printf( "\nTotal model bytes allocated: %s\n", idStr::FormatNumber( totalMem ).c_str() );
