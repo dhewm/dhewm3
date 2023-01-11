@@ -1357,7 +1357,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,136,24,42,14
     LTEXT           "This creates a set of stairs using the selected brush as a template. You may optionally specify a rotation angle to be applied to each new step",
                     IDC_STATIC,7,7,120,37
-    LTEXT           "After pressing OK, left click to select a ""height"" point for the stairs. Enough stairs will be created to consume the hieght (Z) between the selected brush and the point you specify",
+    LTEXT           "After pressing OK, left click to select a ""height"" point for the stairs. Enough stairs will be created to consume the height (Z) between the selected brush and the point you specify",
                     IDC_STATIC,7,46,116,53
     LTEXT           "Rotation per step:",IDC_STATIC,7,104,57,8
     EDITTEXT        IDC_EDIT_ROTATION,69,102,40,12,ES_AUTOHSCROLL

@@ -1339,7 +1339,7 @@ static int Ballistics( const idVec3 &start, const idVec3 &end, float speed, floa
 =====================
 HeightForTrajectory
 
-Returns the maximum hieght of a given trajectory
+Returns the maximum height of a given trajectory
 =====================
 */
 #if 0
