@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "DebuggerServer.h"
+
 #if defined( ID_ALLOW_TOOLS )
 #include "tools/edit_gui_common.h"
 #include "../../sys/win32/rc/debugger_resource.h"
@@ -33,8 +35,6 @@ If you have questions concerning this license or the applicable additional terms
 #else
 #include "debugger_common.h"
 #endif
-
-#include "DebuggerServer.h"
 
 #if defined( ID_ALLOW_TOOLS )
 rvDebuggerApp					gDebuggerApp; // this is also used in other source files

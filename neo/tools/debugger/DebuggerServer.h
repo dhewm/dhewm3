@@ -28,13 +28,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERSERVER_H_
 #define DEBUGGERSERVER_H_
 
-
+#include <SDL.h>
+#include "sys/platform.h"
+#include "idlib/Str.h"
 #include "DebuggerMessages.h"
 #include "DebuggerBreakpoint.h"
 #include "framework/Game.h"
-#include <SDL.h>
-
-
 
 class function_t;
 typedef struct prstack_s prstack_t;
