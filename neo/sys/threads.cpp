@@ -36,6 +36,18 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_public.h"
 
+#if SDL_MAJOR_VERSION < 2
+  // SDL1.2 doesn't have SDL_threadID but uses Uint32.
+  // this typedef helps using the same code for SDL1.2 and SDL2
+  typedef Uint32 SDL_threadID;
+#endif
+
+#if __cplusplus >= 201103
+  // xthreadinfo::threadId doesn't use SDL_threadID directly so we don't drag SDL headers into sys_public.h
+  // but we should still make sure that the type fits (in SDL1.2 it's Uint32, in SDL2 it's unsigned long)
+  static_assert( sizeof(SDL_threadID) <= sizeof(xthreadInfo::threadId), "xthreadInfo::threadId has unsuitable type!" );
+#endif
+
 static SDL_mutex	*mutex[MAX_CRITICAL_SECTIONS] = { };
 static SDL_cond		*cond[MAX_TRIGGER_EVENTS] = { };
 static bool			signaled[MAX_TRIGGER_EVENTS] = { };
@@ -298,7 +310,7 @@ const char *Sys_GetThreadName(int *index) {
 
 	Sys_EnterCriticalSection();
 
-	unsigned int id = SDL_ThreadID();
+	SDL_threadID id = SDL_ThreadID();
 
 	for (int i = 0; i < thread_count; i++) {
 		if (id == thread[i]->threadId) {

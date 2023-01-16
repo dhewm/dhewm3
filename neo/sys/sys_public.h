@@ -308,7 +308,7 @@ typedef int (*xthread_t)( void * );
 typedef struct {
 	const char		*name;
 	SDL_Thread		*threadHandle;
-	unsigned int	threadId;
+	unsigned long	threadId;
 } xthreadInfo;
 
 void				Sys_CreateThread( xthread_t function, void *parms, xthreadInfo &info, const char *name );
