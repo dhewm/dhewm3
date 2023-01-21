@@ -32,6 +32,16 @@ If you have questions concerning this license or the applicable additional terms
 #include "config.h"
 #include "framework/BuildDefines.h"
 
+#ifdef _WIN32
+#include <malloc.h> // _alloca()
+#endif
+
+// NOTE: By default Win32 uses a 1MB stack. Doom3 1.3.1 uses 4MB (probably set after compiling with EDITBIN /STACK
+// dhewm3 now uses a 8MB stack, set with a linker flag in CMakeLists.txt (/STACK:8388608 for MSVC, -Wl,--stack,8388608 for mingw)
+// Linux has a 8MB stack by default, and so does macOS, at least for the main thread
+// anyway, a 2MB limit alloca should be safe even when using it multiple times in the same function
+#define ID_MAX_ALLOCA_SIZE 2097152 // 2MB
+
 /*
 ===============================================================================
 
@@ -71,7 +81,14 @@ If you have questions concerning this license or the applicable additional terms
 // Win32
 #if defined(WIN32) || defined(_WIN32)
 
-#define _alloca16( x )				((void *)((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15))
+#ifdef __MINGW32__
+  #undef _alloca // in mingw _alloca is a #define
+  #define _alloca16( x )			( (assert((x)<ID_MAX_ALLOCA_SIZE)), __builtin_alloca_with_align( (x), 16*8 ) )
+  #define _alloca( x )				( (assert((x)<ID_MAX_ALLOCA_SIZE)), __builtin_alloca( (x) ) )
+#else
+  #define _alloca16( x )			( (void *) ( (assert((x)<ID_MAX_ALLOCA_SIZE)), ((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15) ) )
+  #define _alloca( x )				( (void *) ( (assert((x)<ID_MAX_ALLOCA_SIZE)), _alloca( (x) ) ) )
+#endif
 
 #define PATHSEPERATOR_STR			"\\"
 #define PATHSEPERATOR_CHAR			'\\'
@@ -168,8 +185,8 @@ If you have questions concerning this license or the applicable additional terms
 // Unix
 #ifdef __unix__
 
-#define _alloca( x )				(({assert( (x)<600000 );}), alloca( (x) ))
-#define _alloca16( x )				(({assert( (x)<600000 );}),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
+#define _alloca( x )				(({assert( (x)<ID_MAX_ALLOCA_SIZE );}), alloca( (x) ))
+#define _alloca16( x )				(({assert( (x)<ID_MAX_ALLOCA_SIZE );}),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
 
 #ifdef GAME_DLL
 #define ID_GAME_API					__attribute__((visibility ("default")))
@@ -207,9 +224,6 @@ If you have questions concerning this license or the applicable additional terms
 #if !defined(_MSC_VER)
 	// MSVC does not provide this C99 header
 	#include <inttypes.h>
-#endif
-#if defined(__MINGW32__)
-	#include <malloc.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
