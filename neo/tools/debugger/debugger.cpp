@@ -26,13 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "DebuggerServer.h"
+
 
 #if defined( ID_ALLOW_TOOLS )
 #include "tools/edit_gui_common.h"
+#include "DebuggerServer.h"
 #include "../../sys/win32/rc/debugger_resource.h"
 #include "DebuggerApp.h"
 #else
+#include "DebuggerServer.h"
 #include "debugger_common.h"
 #endif
 
