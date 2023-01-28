@@ -164,7 +164,9 @@ void R_CreateVertexProgramShadowCache( srfTriangles_t *tri ) {
 		return;
 	}
 
-	shadowCache_t *temp = (shadowCache_t *)_alloca16( tri->numVerts * 2 * sizeof( shadowCache_t ) );
+	// DG: use Mem_MallocA() instead of _alloca16() to avoid stack overflows with big models
+	bool tempOnStack;
+	shadowCache_t *temp = (shadowCache_t *)Mem_MallocA( tri->numVerts * 2 * sizeof( shadowCache_t ), tempOnStack );
 
 #if 1
 
@@ -189,6 +191,7 @@ void R_CreateVertexProgramShadowCache( srfTriangles_t *tri ) {
 #endif
 
 	vertexCache.Alloc( temp, tri->numVerts * 2 * sizeof( shadowCache_t ), &tri->shadowCache );
+	Mem_FreeA( temp, tempOnStack );
 }
 
 /*
