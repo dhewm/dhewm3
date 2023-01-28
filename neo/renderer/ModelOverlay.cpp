@@ -117,8 +117,16 @@ void idRenderModelOverlay::CreateOverlay( const idRenderModel *model, const idPl
 	}
 
 	// make temporary buffers for the building process
-	overlayVertex_t	*overlayVerts = (overlayVertex_t *)_alloca( maxVerts * sizeof( *overlayVerts ) );
-	glIndex_t *overlayIndexes = (glIndex_t *)_alloca16( maxIndexes * sizeof( *overlayIndexes ) );
+	// DG: using Mem_MallocA() instead of alloca() to avoid stack overflows with large models
+	size_t vertSize = maxVerts * sizeof( overlayVertex_t );
+	bool vertsOnStack;
+	overlayVertex_t	*overlayVerts = (overlayVertex_t *)Mem_MallocA( vertSize, vertsOnStack );
+
+	// Note: here we have two Mem_MallocA() calls, this relies on the stack being
+	//       big enough for two alloca(ID_MAX_ALLOCA_SIZE) calls!
+	size_t idxSize = maxIndexes * sizeof( glIndex_t );
+	bool idxOnStack;
+	glIndex_t *overlayIndexes = (glIndex_t *)Mem_MallocA( idxSize, idxOnStack );
 
 	// pull out the triangles we need from the base surfaces
 	for ( surfNum = 0; surfNum < model->NumBaseSurfaces(); surfNum++ ) {
@@ -224,6 +232,9 @@ void idRenderModelOverlay::CreateOverlay( const idRenderModel *model, const idPl
 			materials[i]->surfaces.RemoveIndex( 0 );
 		}
 	}
+
+	Mem_FreeA(overlayVerts, vertsOnStack);
+	Mem_FreeA(overlayIndexes, idxOnStack);
 }
 
 /*
