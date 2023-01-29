@@ -172,7 +172,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 			const idMaterial *sh = declManager->FindMaterial( shader->name );
 			// DG: md3Shadder_t must use an index to the material instead of a pointer,
 			//     otherwise the sizes are wrong on 64bit and we get data corruption
-			shader->shaderIndex = shaders.AddUnique( sh );
+			shader->shaderIndex = (sh != NULL) ? shaders.AddUnique( sh ) : -1;
 		}
 
 		// swap all the triangles

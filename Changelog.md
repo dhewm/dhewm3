@@ -4,6 +4,22 @@ dhewm3 Changelog
 Note: Numbers starting with a "#" like #330 refer to the bugreport with that number
       at https://github.com/dhewm/dhewm3/issues/
 
+1.5.3 (WIP)
+------------------------------------------------------------------------
+
+* Fixed problems with lights after loading a savegame (#495)
+* Fix volume of some weapon sounds, like chaingun being too quit (#326)
+* Increase stack size on Windows to 8MB (instead default of 1MB) to make loading huge models work
+* Fixed crash in Radiant Model Preview Dialog (#496)
+* Fix MD3 model support
+* Several new CMake options:
+    - To enable Clang/GCC Address Sanitizer and Undefined Behavior Sanitizer
+    - Hardlink the game code into the executable (instead of using game DLLs,
+      only supports base *or* d3xp then; needed for Undefined Behavior Sanitizer)
+    - Force colored diagnostic output from GCC or Clang (esp. useful when building with ninja)
+* Fix several compiler warnings
+* Added build instructions for Linux (and similar systems) to README.md
+
 1.5.2 (2022-06-13)
 ------------------------------------------------------------------------
 
