@@ -141,11 +141,15 @@ There are two subfolders:
 - 32-bit binaries are located in `i686-w64-mingw32`
 - 64-bit binaries are located in `x86_64-w64-mingw32`
 
-Issue the appropriate command from the build folder, for example:
+Issue the appropriate command from the build folder, for example (for VS2019 and 32bit):
 
-`cmake -G "Visual Studio 10" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+`cmake -G "Visual Studio 16 2019" -A Win32 -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
-`cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/x86_64-w64-mingw32 /path/to/repository/neo`
+For 64bit dhewm3 binaries, use `-A x64` and `/path/to/dhewm3-libs/x86_64-w64-mingw32` instead (note that the official dhewm3 binaries for Windows are 32bit).  
+For Visual Studio 2022 it's `"Visual Studio 17 2022"`.
+
+For 32bit MinGW use:
+`cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
 The binaries are compatible with MinGW-w64 and all MSVC versions.
 
