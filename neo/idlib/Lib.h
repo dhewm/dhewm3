@@ -125,7 +125,8 @@ int		IntForSixtets( byte *in );
 #ifdef _DEBUG
 void AssertFailed( const char *file, int line, const char *expression );
 #undef assert
-#define assert( X )		if ( X ) { } else AssertFailed( __FILE__, __LINE__, #X )
+// DG: change assert to use ?: so I can use it in _alloca()/_alloca16() (MSVC didn't like if() in there)
+#define assert( X )			(X) ? 1 : (AssertFailed( __FILE__, __LINE__, #X ), 0)
 #endif
 
 class idException {
