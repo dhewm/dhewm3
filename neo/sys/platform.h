@@ -185,8 +185,13 @@ If you have questions concerning this license or the applicable additional terms
 // Unix
 #ifdef __unix__
 
-#define _alloca( x )				(({assert( (x)<ID_MAX_ALLOCA_SIZE );}), alloca( (x) ))
-#define _alloca16( x )				(({assert( (x)<ID_MAX_ALLOCA_SIZE );}),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
+#ifdef	__GNUC__
+  #define _alloca16( x )			( ({assert((x)<ID_MAX_ALLOCA_SIZE);}), __builtin_alloca_with_align( (x), 16*8 ) )
+  #define _alloca( x )				( ({assert((x)<ID_MAX_ALLOCA_SIZE);}), __builtin_alloca( (x) ) )
+#else
+  #define _alloca( x )				(({assert( (x)<ID_MAX_ALLOCA_SIZE );}), alloca( (x) ))
+  #define _alloca16( x )			(({assert( (x)<ID_MAX_ALLOCA_SIZE );}),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
+#endif
 
 #ifdef GAME_DLL
 #define ID_GAME_API					__attribute__((visibility ("default")))
