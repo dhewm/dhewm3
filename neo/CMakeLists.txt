@@ -230,6 +230,9 @@ else()
 	set(CURL_LIBRARY "")
 endif()
 
+set(D3_COMPILER_IS_CLANG FALSE)
+set(D3_COMPILER_IS_GCC_OR_CLANG FALSE)
+
 if(MSVC)
 	# This is required for tools on windows.
 	find_package(MFC)
@@ -258,10 +261,22 @@ if(NOT WIN32)
 	endif()
 endif() # NOT WIN32
 
+# check if this is some kind of clang (Clang, AppleClang, whatever)
+# (convert compiler ID to lowercase so we match Clang, clang, AppleClang etc, regardless of case)
+string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id_lower)
+if(compiler_id_lower MATCHES ".*clang.*")
+	message(STATUS "Compiler \"${CMAKE_CXX_COMPILER_ID}\" detected as some kind of clang")
+	set(D3_COMPILER_IS_CLANG TRUE)
+	set(D3_COMPILER_IS_GCC_OR_CLANG TRUE)
+elseif(CMAKE_COMPILER_IS_GNUCC)
+	set(D3_COMPILER_IS_GCC_OR_CLANG TRUE)
+endif()
+unset(compiler_id_lower)
+
 endif() # not MSVC
 
 # compiler specific flags
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+if(D3_COMPILER_IS_GCC_OR_CLANG)
 	add_compile_options(-pipe)
 	add_compile_options(-Wall)
 
@@ -274,7 +289,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	if(FORCE_COLORED_OUTPUT)
 		if(CMAKE_COMPILER_IS_GNUCC)
 		   add_compile_options (-fdiagnostics-color=always)
-		elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		elseif (D3_COMPILER_IS_CLANG)
 		   add_compile_options (-fcolor-diagnostics)
 		endif ()
 	endif ()
@@ -1096,7 +1111,7 @@ if (AROS)
 		set(AROS_ARCH ${CMAKE_SYSTEM_PROCESSOR})
 	endif()
 else()
-	if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
+	if(D3_COMPILER_IS_GCC_OR_CLANG AND NOT MINGW)
 		set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
 endif()
