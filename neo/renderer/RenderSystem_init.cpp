@@ -1279,7 +1279,7 @@ Downsample is the number of steps to mipmap the image before saving it
 If ref == NULL, session->updateScreen will be used
 ==================
 */
-void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref ) {
+void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref, int overrideFormat ) {
 	byte		*buffer, *flippedBuffer;
 	int			i, j, k;
 
@@ -1334,8 +1334,12 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 		f = fileSystem->OpenFileWrite( fileName );
 	}
 
-	switch (cvarSystem->GetCVarInteger( "r_screenshotFormat" ))
-	{
+	// If no specific format is requested, default to using the CVar value.
+	if (overrideFormat == -1) {
+		overrideFormat = cvarSystem->GetCVarInteger( "r_screenshotFormat" );
+	}
+
+	switch (overrideFormat) {
 		default:
 			stbi_write_tga_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer );
 			break;
@@ -1609,7 +1613,7 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 		ref.height = glConfig.vidHeight;
 		ref.viewaxis = axis[i];
 		sprintf( fullname, "env/%s%s", baseName, extensions[i] );
-		tr.TakeScreenshot( size, size, fullname, blends, &ref );
+		tr.TakeScreenshot( size, size, fullname, blends, &ref, 0 );
 	}
 
 	common->Printf( "Wrote %s, etc\n", fullname.c_str() );

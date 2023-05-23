@@ -721,7 +721,7 @@ public:
 	virtual void			DrawDemoPics();
 	virtual void			BeginFrame( int windowWidth, int windowHeight );
 	virtual void			EndFrame( int *frontEndMsec, int *backEndMsec );
-	virtual void			TakeScreenshot( int width, int height, const char *fileName, int downSample, renderView_t *ref );
+	virtual void			TakeScreenshot( int width, int height, const char *fileName, int downSample, renderView_t *ref, int overrideFormat = -1 );
 	virtual void			CropRenderSize( int width, int height, bool makePowerOfTwo = false, bool forceDimensions = false );
 	virtual void			CaptureRenderToImage( const char *imageName );
 	virtual void			CaptureRenderToFile( const char *fileName, bool fixAlpha );
