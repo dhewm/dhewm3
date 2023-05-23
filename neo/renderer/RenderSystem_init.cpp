@@ -235,6 +235,7 @@ idCVar r_useCarmacksReverse( "r_useCarmacksReverse", "1", CVAR_RENDERER | CVAR_A
 idCVar r_useStencilOpSeparate( "r_useStencilOpSeparate", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use glStencilOpSeparate() (if available) when rendering shadows" );
 idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG");
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)");
+idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)");
 
 // define qgl functions
 #define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
@@ -1342,10 +1343,11 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 			stbi_write_bmp_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer );
 			break;
 		case 2:
+			stbi_write_png_compression_level = idMath::ClampInt(0, 9, cvarSystem->GetCVarInteger("r_screenshotPngCompression"));
 			stbi_write_png_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer, 3 * width );
 			break;
 		case 3:
-			stbi_write_jpg_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer, idMath::ClampInt(0, 100, cvarSystem->GetCVarInteger("r_screenshotJpgQuality")) );
+			stbi_write_jpg_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer, idMath::ClampInt(1, 100, cvarSystem->GetCVarInteger("r_screenshotJpgQuality")) );
 			break;
 	}
 
