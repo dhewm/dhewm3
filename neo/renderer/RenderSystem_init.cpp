@@ -49,7 +49,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <zlib.h>
 
-unsigned char* compress_for_stbiw(unsigned char* data, int data_len, int* out_len, int quality)
+static unsigned char* compress_for_stbiw(unsigned char* data, int data_len, int* out_len, int quality)
 {
 	uLongf bufSize = compressBound(data_len);
 	// note that buf will be free'd by stb_image_write.h
