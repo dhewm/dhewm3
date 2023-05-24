@@ -1300,15 +1300,16 @@ If ref == NULL, session->updateScreen will be used
 ==================
 */
 void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref, int overrideFormat ) {
-	byte		*buffer, *flippedBuffer;
+	byte		*buffer, *swapBuffer;
 	int			i, j, k;
 
 	takingScreenshot = true;
 
 	int	pix = width * height;
+	int lineSize = width * 3;
 
 	buffer = (byte *)R_StaticAlloc(pix*3);
-	flippedBuffer = (byte*)R_StaticAlloc(pix*3);
+	swapBuffer = (byte*)R_StaticAlloc(lineSize);
 
 	if ( blends <= 1 ) {
 		R_ReadTiledPixels( width, height, buffer, ref );
@@ -1337,14 +1338,13 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 	}
 
 	// The buffer is upside down, we need to flip it the right way.
-	for (i = 0; i < width; i++) {
-		for (j = 0; j < height; j++) {
-			for (k = 0; k < 3; k++) {
-				flippedBuffer[(i + j * width) * 3 + k] = buffer[(i + (height - 1 - j) * width) * 3 + k];
-			}
-		}
+	for (i = 0; i < height / 2; ++i) {
+		byte* line1 = &buffer[i * lineSize];
+		byte* line2 = &buffer[(height - i - 1) * lineSize];
+		memcpy(swapBuffer, line1, lineSize);
+		memcpy(line1, line2, lineSize);
+		memcpy(line2, swapBuffer, lineSize);
 	}
-
 	
 	idFile* f;
 	if (strstr(fileName, "viewnote")) {
@@ -1361,24 +1361,24 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 
 	switch (overrideFormat) {
 		default:
-			stbi_write_tga_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer );
+			stbi_write_tga_to_func( WriteScreenshot, f, width, height, 3, buffer );
 			break;
 		case 1:
-			stbi_write_bmp_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer );
+			stbi_write_bmp_to_func( WriteScreenshot, f, width, height, 3, buffer);
 			break;
 		case 2:
 			stbi_write_png_compression_level = idMath::ClampInt(0, 9, cvarSystem->GetCVarInteger("r_screenshotPngCompression"));
-			stbi_write_png_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer, 3 * width );
+			stbi_write_png_to_func( WriteScreenshot, f, width, height, 3, buffer, 3 * width );
 			break;
 		case 3:
-			stbi_write_jpg_to_func( WriteScreenshot, f, width, height, 3, flippedBuffer, idMath::ClampInt(1, 100, cvarSystem->GetCVarInteger("r_screenshotJpgQuality")) );
+			stbi_write_jpg_to_func( WriteScreenshot, f, width, height, 3, buffer, idMath::ClampInt(1, 100, cvarSystem->GetCVarInteger("r_screenshotJpgQuality")) );
 			break;
 	}
 
 	fileSystem->CloseFile(f);
 
 	R_StaticFree( buffer );
-	R_StaticFree( flippedBuffer );
+	R_StaticFree( swapBuffer );
 
 	takingScreenshot = false;
 
