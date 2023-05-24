@@ -306,6 +306,9 @@ PFNGLDEPTHBOUNDSEXTPROC                 qglDepthBoundsEXT;
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
 PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
 
+// eez: This is a slight hack for letting us select the desired screenshot format in other functions
+int g_screenshotFormat = -1;
+
 /*
 =================
 R_CheckExtension
@@ -1299,9 +1302,9 @@ Downsample is the number of steps to mipmap the image before saving it
 If ref == NULL, session->updateScreen will be used
 ==================
 */
-void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref, int overrideFormat ) {
+void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref ) {
 	byte		*buffer, *swapBuffer;
-	int			i, j, k;
+	int			i, j;
 
 	takingScreenshot = true;
 
@@ -1355,11 +1358,11 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 	}
 
 	// If no specific format is requested, default to using the CVar value.
-	if (overrideFormat == -1) {
-		overrideFormat = cvarSystem->GetCVarInteger( "r_screenshotFormat" );
+	if (g_screenshotFormat == -1) {
+		g_screenshotFormat = cvarSystem->GetCVarInteger( "r_screenshotFormat" );
 	}
 
-	switch (overrideFormat) {
+	switch (g_screenshotFormat) {
 		default:
 			stbi_write_tga_to_func( WriteScreenshot, f, width, height, 3, buffer );
 			break;
@@ -1374,6 +1377,8 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 			stbi_write_jpg_to_func( WriteScreenshot, f, width, height, 3, buffer, idMath::ClampInt(1, 100, cvarSystem->GetCVarInteger("r_screenshotJpgQuality")) );
 			break;
 	}
+
+	g_screenshotFormat = -1;
 
 	fileSystem->CloseFile(f);
 
@@ -1633,7 +1638,8 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 		ref.height = glConfig.vidHeight;
 		ref.viewaxis = axis[i];
 		sprintf( fullname, "env/%s%s", baseName, extensions[i] );
-		tr.TakeScreenshot( size, size, fullname, blends, &ref, 0 );
+		g_screenshotFormat = 0;
+		tr.TakeScreenshot( size, size, fullname, blends, &ref );
 	}
 
 	common->Printf( "Wrote %s, etc\n", fullname.c_str() );
