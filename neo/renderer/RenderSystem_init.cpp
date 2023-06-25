@@ -47,6 +47,29 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/win32/win_local.h"
 #endif
 
+#include <zlib.h>
+
+static unsigned char* compress_for_stbiw(unsigned char* data, int data_len, int* out_len, int quality)
+{
+	uLongf bufSize = compressBound(data_len);
+	// note that buf will be free'd by stb_image_write.h
+	// with STBIW_FREE() (plain free() by default)
+	unsigned char* buf = (unsigned char*)malloc(bufSize);
+	if (buf == NULL)  return NULL;
+	if (compress2(buf, &bufSize, data, data_len, quality) != Z_OK)
+	{
+		free(buf);
+		return NULL;
+	}
+	*out_len = bufSize;
+
+	return buf;
+}
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBIW_ZLIB_COMPRESS compress_for_stbiw
+#include "stb_image_write.h"
+
 // functions that are not called every frame
 
 glconfig_t	glConfig;
@@ -230,6 +253,9 @@ idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "1", CVAR_RENDERER | CVAR_ARCHIVE |
 // DG: the fscking patent has finally expired
 idCVar r_useCarmacksReverse( "r_useCarmacksReverse", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use Z-Fail (Carmack's Reverse) when rendering shadows" );
 idCVar r_useStencilOpSeparate( "r_useStencilOpSeparate", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use glStencilOpSeparate() (if available) when rendering shadows" );
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG");
+idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)");
+idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)");
 
 // define qgl functions
 #define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
@@ -279,6 +305,14 @@ PFNGLDEPTHBOUNDSEXTPROC                 qglDepthBoundsEXT;
 
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
 PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
+
+// eez: This is a slight hack for letting us select the desired screenshot format in other functions
+//  This is a hack to avoid adding another function parameter to idRenderSystem::TakeScreenshot(),
+//  which would break the API of the dhewm3 SDK for mods.
+//  Note that this is reset to -1 (which means: use value of r_screenshotFormat) at the end of
+//  idRenderSystemLocal::TakeScreenshot(), so if your code wants to enforce a specific format,
+//  it must set g_screenshotFormat accordingly before each call to TakeScreenshot().
+int g_screenshotFormat = -1;
 
 /*
 =================
@@ -1249,6 +1283,18 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 	glConfig.vidHeight = oldHeight;
 }
 
+/*
+==================
+WriteScreenshotForSTBIW
+
+Callback to each stbi_write_* function
+==================
+*/
+static void WriteScreenshotForSTBIW(void* context, void* data, int size)
+{
+	idFile* f = (idFile*)context;
+	f->Write(data, size);
+}
 
 /*
 ==================
@@ -1262,66 +1308,87 @@ If ref == NULL, session->updateScreen will be used
 ==================
 */
 void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref ) {
-	byte		*buffer;
-	int			i, j, c, temp;
+	byte		*buffer, *swapBuffer;
+	int			i, j;
 
 	takingScreenshot = true;
 
 	int	pix = width * height;
+	int lineSize = width * 3;
 
-	buffer = (byte *)R_StaticAlloc(pix*3 + 18);
-	memset (buffer, 0, 18);
+	buffer = (byte *)R_StaticAlloc(pix*3);
+	swapBuffer = (byte*)R_StaticAlloc(lineSize);
 
 	if ( blends <= 1 ) {
-		R_ReadTiledPixels( width, height, buffer + 18, ref );
+		R_ReadTiledPixels( width, height, buffer, ref );
 	} else {
 		unsigned short *shortBuffer = (unsigned short *)R_StaticAlloc(pix*2*3);
-		memset (shortBuffer, 0, pix*2*3);
+		memset( shortBuffer, 0, pix*2*3 );
 
 		// enable anti-aliasing jitter
 		r_jitter.SetBool( true );
 
 		for ( i = 0 ; i < blends ; i++ ) {
-			R_ReadTiledPixels( width, height, buffer + 18, ref );
+			R_ReadTiledPixels( width, height, buffer, ref );
 
 			for ( j = 0 ; j < pix*3 ; j++ ) {
-				shortBuffer[j] += buffer[18+j];
+				shortBuffer[j] += buffer[j];
 			}
 		}
 
 		// divide back to bytes
 		for ( i = 0 ; i < pix*3 ; i++ ) {
-			buffer[18+i] = shortBuffer[i] / blends;
+			buffer[i] = shortBuffer[i] / blends;
 		}
 
 		R_StaticFree( shortBuffer );
 		r_jitter.SetBool( false );
 	}
 
-	// fill in the header (this is vertically flipped, which qglReadPixels emits)
-	buffer[2] = 2;		// uncompressed type
-	buffer[12] = width & 255;
-	buffer[13] = width >> 8;
-	buffer[14] = height & 255;
-	buffer[15] = height >> 8;
-	buffer[16] = 24;	// pixel size
-
-	// swap rgb to bgr
-	c = 18 + width * height * 3;
-	for (i=18 ; i<c ; i+=3) {
-		temp = buffer[i];
-		buffer[i] = buffer[i+2];
-		buffer[i+2] = temp;
+	// The buffer is upside down, we need to flip it the right way.
+	for (i = 0; i < height / 2; ++i) {
+		byte* line1 = &buffer[i * lineSize];
+		byte* line2 = &buffer[(height - i - 1) * lineSize];
+		memcpy(swapBuffer, line1, lineSize);
+		memcpy(line1, line2, lineSize);
+		memcpy(line2, swapBuffer, lineSize);
+	}
+	
+	idFile* f;
+	if (strstr(fileName, "viewnote")) {
+		f = fileSystem->OpenFileWrite( fileName, "fs_cdpath" );
+	}
+	else {
+		f = fileSystem->OpenFileWrite( fileName );
 	}
 
-	// _D3XP adds viewnote screenie save to cdpath
-	if ( strstr( fileName, "viewnote" ) ) {
-		fileSystem->WriteFile( fileName, buffer, c, "fs_cdpath" );
-	} else {
-		fileSystem->WriteFile( fileName, buffer, c );
+	// If no specific format is requested, default to using the CVar value.
+	if (g_screenshotFormat == -1) {
+		g_screenshotFormat = cvarSystem->GetCVarInteger( "r_screenshotFormat" );
 	}
+
+	switch (g_screenshotFormat) {
+		default:
+			stbi_write_tga_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer );
+			break;
+		case 1:
+			stbi_write_bmp_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer);
+			break;
+		case 2:
+			stbi_write_png_compression_level = idMath::ClampInt(0, 9, cvarSystem->GetCVarInteger("r_screenshotPngCompression"));
+			stbi_write_png_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer, 3 * width );
+			break;
+		case 3:
+			stbi_write_jpg_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer, idMath::ClampInt(1, 100, cvarSystem->GetCVarInteger("r_screenshotJpgQuality")) );
+			break;
+	}
+
+	g_screenshotFormat = -1;
+
+	fileSystem->CloseFile(f);
 
 	R_StaticFree( buffer );
+	R_StaticFree( swapBuffer );
 
 	takingScreenshot = false;
 
@@ -1344,6 +1411,8 @@ void R_ScreenshotFilename( int &lastNumber, const char *base, idStr &fileName ) 
 	bool fsrestrict = cvarSystem->GetCVarBool( "fs_restrict" );
 	cvarSystem->SetCVarBool( "fs_restrict", false );
 
+	int format = cvarSystem->GetCVarInteger("r_screenshotFormat");
+
 	lastNumber++;
 	if ( lastNumber > 99999 ) {
 		lastNumber = 99999;
@@ -1361,7 +1430,21 @@ void R_ScreenshotFilename( int &lastNumber, const char *base, idStr &fileName ) 
 		frac -= d*10;
 		e = frac;
 
-		sprintf( fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e );
+		switch (format) {
+			default:
+				sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
+				break;
+			case 1:
+				sprintf(fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e);
+				break;
+			case 2:
+				sprintf(fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e);
+				break;
+			case 3:
+				sprintf(fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e);
+				break;
+		}
+		
 		if ( lastNumber == 99999 ) {
 			break;
 		}
@@ -1560,6 +1643,7 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 		ref.height = glConfig.vidHeight;
 		ref.viewaxis = axis[i];
 		sprintf( fullname, "env/%s%s", baseName, extensions[i] );
+		g_screenshotFormat = 0;
 		tr.TakeScreenshot( size, size, fullname, blends, &ref );
 	}
 
