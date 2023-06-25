@@ -48,14 +48,10 @@ covered by the original EULA and must be obeyed as usual.
 You must patch the game to the latest version (1.3.1). See the FAQ for details, including
 how to get the game data from Steam on Linux or OSX.
 
-Note that _Doom 3_ and _Doom 3: Resurrection of Evil_ are available from the Steam Store at
+Note that the original _Doom 3_ and _Doom 3: Resurrection of Evil_ (together with
+_DOOM 3: BFG Edition_, which is *not* supported by dhewm3) are available from the Steam Store at
 
-http://store.steampowered.com/app/9050/
-
-http://store.steampowered.com/app/9070/
-
-Note that Steam does not offer the *Resurrection of Evil* addon
-for German customers (or at least people with German IP adresses).
+https://store.steampowered.com/app/208200/DOOM_3/
 
 See https://dhewm3.org/#how-to-install for game data installation instructions.
 

@@ -379,6 +379,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 
 		set(sys_libs ${sys_libs} "-framework Carbon -framework Cocoa -framework IOKit")
 	elseif(WIN32)
+		# use 8MB stack instead of 1MB, so big models don't overflow it with _alloca()
 		set(ldflags "${ldflags} -static-libgcc -static-libstdc++ -Wl,--stack,8388608")
 	elseif(os STREQUAL "linux")
 		set(sys_libs ${sys_libs} dl)
