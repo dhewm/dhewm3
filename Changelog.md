@@ -19,6 +19,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
     - Force colored diagnostic output from GCC or Clang (esp. useful when building with ninja)
 * Fix several compiler warnings
 * Added build instructions for Linux (and similar systems) to README.md
+* Support different file formats for screenshots by setting the `r_screenshotFormat` CVar
+  (0 = TGA, still the default, 1 = BMP, 2 = PNG, 3 = JPG). `r_screenshotJpgQuality` and
+  `r_screenshotPngCompression` allow configuring how JPG/PNG are compressed.
+  Thanks *eezstreet (Nick Whitlock)*!
 
 1.5.2 (2022-06-13)
 ------------------------------------------------------------------------
