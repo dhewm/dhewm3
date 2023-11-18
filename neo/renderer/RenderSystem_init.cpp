@@ -544,6 +544,17 @@ vidmode_t r_vidModes[] = {
 	{ "Mode 21: 4096x2304",		4096,   2304 },
 	{ "Mode 22: 2880x1800",		2880,   1800 },
 	{ "Mode 23: 2560x1440",		2560,   1440 },
+	{ "Mode 24: 1440x1080",		1440,   1080 },
+	{ "Mode 25: 1280x800",		1280,	800 },
+	// 21:9 resolutions
+	{ "Mode 26: 2560x1080",		2560,   1080 },
+	{ "Mode 27: 3440x1440",		3440,   1440 },
+	{ "Mode 28: 3840x1600",		3840,   1600 },
+	{ "Mode 29: 5120x2160",		5120,   2160 },
+	// 32:9 resolutions
+	{ "Mode 30: 3840x1080",		3840,   1080 },
+	{ "Mode 31: 5120x1440",		5120,   1440 },
+	{ "Mode 32: 7680x2160",		7680,   2160 },
 };
 // DG: made this an enum so even stupid compilers accept it as array length below
 enum {	s_numVidModes = sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) };
