@@ -108,8 +108,26 @@ struct mouse_poll_t {
 	}
 };
 
+struct joystick_poll_t {
+	int action;
+	int value;
+
+	joystick_poll_t() : action(0), value(0) {} // TODO: or -1?
+
+	joystick_poll_t(int a, int v) {
+		action = a;
+		value = v;
+	}
+};
+
 static idList<kbd_poll_t> kbd_polls;
 static idList<mouse_poll_t> mouse_polls;
+static idList<joystick_poll_t> joystick_polls;
+
+static bool buttonStates[K_LAST_KEY];
+static int  joyAxis[MAX_JOYSTICK_AXIS];
+
+static idList<sysEvent_t> event_overflow;
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 // for utf8ToISO8859_1() - used for non-ascii text input and Sys_GetLocalizedScancodeName()
@@ -477,6 +495,73 @@ static byte mapkey(SDL_Keycode key) {
 	return 0;
 }
 
+static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
+
+	switch (button)
+	{
+	case SDL_CONTROLLER_BUTTON_A:
+		return J_ACTION1;
+	case SDL_CONTROLLER_BUTTON_B:
+		return J_ACTION2;
+	case SDL_CONTROLLER_BUTTON_X:
+		return J_ACTION3;
+	case SDL_CONTROLLER_BUTTON_Y:
+		return J_ACTION4;
+	case SDL_CONTROLLER_BUTTON_BACK:
+		return J_ACTION10;
+	case SDL_CONTROLLER_BUTTON_GUIDE:
+		// TODO:
+		break;
+	case SDL_CONTROLLER_BUTTON_START:
+		return J_ACTION9;
+	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+		return J_ACTION7;
+	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+		return J_ACTION8;
+	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+		return J_ACTION5;
+	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+		return J_ACTION6;
+	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+		return J_DPAD_UP;
+	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		return J_DPAD_DOWN;
+	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		return J_DPAD_LEFT;
+	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+		return J_DPAD_RIGHT;
+	default:
+		common->Warning("unknown game controller button %u", button);
+		break;
+	}
+
+	return MAX_JOY_EVENT;
+}
+
+static sys_jEvents mapjoyaxis(SDL_GameControllerAxis axis) {
+
+	switch (axis)
+	{
+	case SDL_CONTROLLER_AXIS_LEFTX:
+		return J_AXIS_LEFT_X;
+	case SDL_CONTROLLER_AXIS_LEFTY:
+		return J_AXIS_LEFT_Y;
+	case SDL_CONTROLLER_AXIS_RIGHTX:
+		return J_AXIS_RIGHT_X;
+	case SDL_CONTROLLER_AXIS_RIGHTY:
+		return J_AXIS_RIGHT_Y;
+	case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+		return J_AXIS_LEFT_TRIG;
+	case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+		return J_AXIS_RIGHT_TRIG;
+	default:
+		common->Warning("unknown game controller axis %u", axis);
+		break;
+	}
+
+	return J_AXIS_MAX;
+}
+
 static void PushConsoleEvent(const char *s) {
 	char *b;
 	size_t len;
@@ -531,6 +616,19 @@ void Sys_InitInput() {
 #else // SDL1.2 doesn't support this
 	in_grabKeyboard.ClearModified();
 #endif
+
+	joystick_polls.SetGranularity(64);
+	event_overflow.SetGranularity(64);
+
+	memset( buttonStates, 0, sizeof( buttonStates ) );
+	memset( joyAxis, 0, sizeof( joyAxis ) );
+
+	const int NumJoysticks = SDL_NumJoysticks();
+	printf("XXX found %d joysticks\n", NumJoysticks);
+	for( int i = 0; i < NumJoysticks; ++i )
+	{
+		SDL_GameController* gc = SDL_GameControllerOpen( i );
+	}
 }
 
 /*
@@ -541,6 +639,8 @@ Sys_ShutdownInput
 void Sys_ShutdownInput() {
 	kbd_polls.Clear();
 	mouse_polls.Clear();
+	joystick_polls.Clear();
+	event_overflow.Clear();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_iconv_close( iconvDesc ); // used by utf8ToISO8859_1()
 	iconvDesc = ( SDL_iconv_t ) -1; 
@@ -666,6 +766,18 @@ void Sys_GrabMouseCursor(bool grabIt) {
 	GLimp_GrabInput(flags);
 }
 
+
+static void PushButton( int key, bool value ) {
+	// So we don't keep sending the same SE_KEY message over and over again
+	if ( buttonStates[key] != value ) {
+		buttonStates[key] = value;
+		sysEvent_t res = { SE_KEY, key, value ? 1 : 0, 0, NULL };
+		// this is done to generate two events per controller axis event
+		// one SE_JOYSTICK and one SE_KEY
+		event_overflow.Append(res);
+	}
+}
+
 /*
 ================
 Sys_GetEvent
@@ -677,6 +789,14 @@ sysEvent_t Sys_GetEvent() {
 	int key;
 
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
+
+	// process any overflow.
+	if (event_overflow.Num() > 0)
+	{
+		res = event_overflow[0];
+		event_overflow.RemoveIndex(0);
+		return res;
+	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	static char s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
@@ -958,6 +1078,76 @@ sysEvent_t Sys_GetEvent() {
 
 			return res;
 
+		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_CONTROLLERBUTTONUP:
+		{
+			sys_jEvents jEvent =  mapjoybutton( (SDL_GameControllerButton)ev.cbutton.button);
+			joystick_polls.Append(joystick_poll_t(jEvent, ev.cbutton.state == SDL_PRESSED ? 1 : 0) );
+
+			res.evType = SE_KEY;
+			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
+			if ( ( jEvent >= J_ACTION1 ) && ( jEvent <= J_ACTION_MAX ) ) {
+				res.evValue = K_JOY1 + ( jEvent - J_ACTION1 );
+				return res;
+			} else if ( ( jEvent >= J_DPAD_UP ) && ( jEvent <= J_DPAD_RIGHT ) ) {
+				res.evValue = K_JOY_DPAD_UP + ( jEvent - J_DPAD_UP );
+				return res;
+			}
+
+			continue; // try to get a decent event.
+		}
+
+		case SDL_CONTROLLERAXISMOTION:
+		{
+			const int range = 16384;
+
+			sys_jEvents jEvent = mapjoyaxis( (SDL_GameControllerAxis)ev.caxis.axis);
+			joystick_polls.Append(joystick_poll_t(	jEvent, ev.caxis.value) );
+
+			if ( jEvent == J_AXIS_LEFT_X ) {
+				PushButton( K_JOY_STICK1_LEFT, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK1_RIGHT, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_LEFT_Y ) {
+				PushButton( K_JOY_STICK1_UP, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK1_DOWN, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_RIGHT_X ) {
+				PushButton( K_JOY_STICK2_LEFT, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK2_RIGHT, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_RIGHT_Y ) {
+				PushButton( K_JOY_STICK2_UP, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK2_DOWN, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_LEFT_TRIG ) {
+				PushButton( K_JOY_TRIGGER1, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_RIGHT_TRIG ) {
+				PushButton( K_JOY_TRIGGER2, ( ev.caxis.value > range ) );
+			}
+			if ( jEvent >= J_AXIS_MIN && jEvent <= J_AXIS_MAX ) {
+				int axis = jEvent - J_AXIS_MIN;
+				int percent = ( ev.caxis.value * 16 ) / range;
+				if ( joyAxis[axis] != percent ) {
+					joyAxis[axis] = percent;
+					res.evType = SE_JOYSTICK;
+					res.evValue = axis;
+					res.evValue2 = percent;
+					return res;
+				}
+			}
+
+			continue; // try to get a decent event.
+		}
+		break;
+
+		case SDL_JOYDEVICEADDED:
+			SDL_GameControllerOpen( ev.jdevice.which );
+			// TODO: hot swapping maybe.
+			//lbOnControllerPlugIn(event.jdevice.which);
+			break;
+
+		case SDL_JOYDEVICEREMOVED:
+			// TODO: hot swapping maybe.
+			//lbOnControllerUnPlug(event.jdevice.which);
+			break;
+
 		case SDL_QUIT:
 			PushConsoleEvent("quit");
 			return res_none;
@@ -996,6 +1186,12 @@ void Sys_ClearEvents() {
 
 	kbd_polls.SetNum(0, false);
 	mouse_polls.SetNum(0, false);
+	joystick_polls.SetNum(0, false);
+
+	memset( buttonStates, 0, sizeof( buttonStates ) );
+	memset( joyAxis, 0, sizeof( joyAxis ) );
+
+	event_overflow.SetNum(0, false);
 }
 
 static void handleMouseGrab() {
@@ -1146,3 +1342,35 @@ Sys_EndMouseInputEvents
 void Sys_EndMouseInputEvents() {
 	mouse_polls.SetNum(0, false);
 }
+
+/*
+================
+Joystick Input Methods
+================
+*/
+void Sys_SetRumble( int device, int low, int hi ) {
+	// TODO: support multiple controllers.
+	assert(device == 0);
+	// TODO: support rumble maybe.
+	assert(0);
+}
+
+int	Sys_PollJoystickInputEvents( int deviceNum ) {
+	// TODO: support multiple controllers.
+	assert(deviceNum == 0);
+	return joystick_polls.Num();
+}
+
+int	Sys_ReturnJoystickInputEvent( const int n, int &action, int &value ) {
+	if (n >= joystick_polls.Num())
+		return 0;
+
+	action = joystick_polls[n].action;
+	value = joystick_polls[n].value;
+	return 1;
+}
+
+void Sys_EndJoystickInputEvents() {
+	joystick_polls.SetNum(0, false);
+}
+

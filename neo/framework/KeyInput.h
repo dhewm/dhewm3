@@ -138,6 +138,10 @@ typedef enum {
 	K_MWHEELDOWN = 195,
 	K_MWHEELUP,
 
+	//------------------------
+	// K_JOY codes must be contiguous, too
+	//------------------------
+
 	K_JOY1 = 197,
 	K_JOY2,
 	K_JOY3,
@@ -154,23 +158,26 @@ typedef enum {
 	K_JOY14,
 	K_JOY15,
 	K_JOY16,
-	K_JOY17,
-	K_JOY18,
-	K_JOY19,
-	K_JOY20,
-	K_JOY21,
-	K_JOY22,
-	K_JOY23,
-	K_JOY24,
-	K_JOY25,
-	K_JOY26,
-	K_JOY27,
-	K_GRAVE_A = 224,	// lowercase a with grave accent
-	K_JOY28,
-	K_JOY29,
-	K_JOY30,
-	K_JOY31,
-	K_JOY32,
+
+	K_JOY_STICK1_UP,
+	K_JOY_STICK1_DOWN,
+	K_JOY_STICK1_LEFT,
+	K_JOY_STICK1_RIGHT,
+
+	K_JOY_STICK2_UP,
+	K_JOY_STICK2_DOWN,
+	K_JOY_STICK2_LEFT,
+	K_JOY_STICK2_RIGHT,
+
+	K_JOY_TRIGGER1,
+	K_JOY_TRIGGER2,
+
+	K_JOY_DPAD_UP,
+	K_JOY_DPAD_DOWN,
+	K_JOY_DPAD_LEFT,
+	K_JOY_DPAD_RIGHT,
+
+	K_GRAVE_A = 229,	// lowercase a with grave accent FIXME: used to be 224; this probably isn't used anyway
 
 	K_AUX1 = 230,
 	K_CEDILLA_C = 231,	// lowercase c with Cedilla

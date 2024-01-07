@@ -350,6 +350,8 @@ private:
 	bool			Inhibited( void );
 	void			AdjustAngles( void );
 	void			KeyMove( void );
+	void			CircleToSquare( float & axis_x, float & axis_y ) const;
+	void			HandleJoystickAxis( int keyNum, float unclampedValue, float threshold, bool positive );
 	void			JoystickMove( void );
 	void			MouseMove( void );
 	void			CmdButtons( void );
@@ -384,7 +386,14 @@ private:
 	bool			mouseDown;
 
 	int				mouseDx, mouseDy;	// added to by mouse events
-	int				joystickAxis[MAX_JOYSTICK_AXIS];	// set by joystick events
+	float			joystickAxis[MAX_JOYSTICK_AXIS];	// set by joystick events
+
+	int				pollTime;
+	int				lastPollTime;
+	float			lastLookValuePitch;
+	float			lastLookValueYaw;
+
+	bool			heldJump; // TODO: ???
 
 	static idCVar	in_yawSpeed;
 	static idCVar	in_pitchSpeed;
@@ -418,6 +427,24 @@ idCVar idUsercmdGenLocal::m_strafeScale( "m_strafeScale", "6.25", CVAR_SYSTEM | 
 idCVar idUsercmdGenLocal::m_smooth( "m_smooth", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "number of samples blended for mouse viewing", 1, 8, idCmdSystem::ArgCompletion_Integer<1,8> );
 idCVar idUsercmdGenLocal::m_strafeSmooth( "m_strafeSmooth", "4", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "number of samples blended for mouse moving", 1, 8, idCmdSystem::ArgCompletion_Integer<1,8> );
 idCVar idUsercmdGenLocal::m_showMouseRate( "m_showMouseRate", "0", CVAR_SYSTEM | CVAR_BOOL, "shows mouse movement" );
+
+idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
+idCVar joy_newCode( "joy_newCode", "0", CVAR_BOOL | CVAR_ARCHIVE, "Use the new codepath" );
+idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
+idCVar joy_deadZone( "joy_deadZone", "0.4", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
+idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
+idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement" );
+idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
+idCVar joy_pitchSpeed( "joy_pitchSpeed", "130",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing up or down on the joystick", 60, 600 );
+idCVar joy_yawSpeed( "joy_yawSpeed", "240",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing left or right on the joystick", 60, 600 );
+
+// these were a bad idea!
+idCVar joy_dampenLook( "joy_dampenLook", "1", CVAR_BOOL | CVAR_ARCHIVE, "Do not allow full acceleration on look" );
+idCVar joy_deltaPerMSLook( "joy_deltaPerMSLook", "0.003", CVAR_FLOAT | CVAR_ARCHIVE, "Max amount to be added on look per MS" );
+
+idCVar in_useJoystick( "in_useJoystick", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
+idCVar in_invertLook( "in_invertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
+idCVar in_mouseInvertLook( "in_mouseInvertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 
 static idUsercmdGenLocal localUsercmdGen;
 idUsercmdGen	*usercmdGen = &localUsercmdGen;
@@ -573,9 +600,17 @@ void idUsercmdGenLocal::KeyMove( void ) {
 	forward += KEY_MOVESPEED * ButtonState( UB_FORWARD );
 	forward -= KEY_MOVESPEED * ButtonState( UB_BACK );
 
-	cmd.forwardmove = idMath::ClampChar( forward );
-	cmd.rightmove = idMath::ClampChar( side );
-	cmd.upmove = idMath::ClampChar( up );
+	// only set each movement variable if its unset at this point.
+	// NOTE: joystick input happens before this.
+	if (cmd.forwardmove == 0) {
+		cmd.forwardmove = idMath::ClampChar( forward );
+	}
+	if (cmd.rightmove == 0) {
+		cmd.rightmove = idMath::ClampChar( side );
+	}
+	if (cmd.upmove == 0) {
+		cmd.upmove = idMath::ClampChar( up );
+	}
 }
 
 /*
@@ -673,28 +708,198 @@ void idUsercmdGenLocal::MouseMove( void ) {
 }
 
 /*
+========================
+idUsercmdGenLocal::CircleToSquare
+========================
+*/
+void idUsercmdGenLocal::CircleToSquare( float & axis_x, float & axis_y ) const {
+	// bring everything in the first quadrant
+	bool flip_x = false;
+	if ( axis_x < 0.0f ) {
+		flip_x = true;
+		axis_x *= -1.0f;
+	}
+	bool flip_y = false;
+	if ( axis_y < 0.0f ) {
+		flip_y = true;
+		axis_y *= -1.0f;
+	}
+
+	// swap the two axes so we project against the vertical line X = 1
+	bool swap = false;
+	if ( axis_y > axis_x ) {
+		float tmp = axis_x;
+		axis_x = axis_y;
+		axis_y = tmp;
+		swap = true;
+	}
+
+	if ( axis_x < 0.001f ) {
+		// on one of the axes where no correction is needed
+		return;
+	}
+
+	// length (max 1.0f at the unit circle)
+	float len = idMath::Sqrt( axis_x * axis_x + axis_y * axis_y );
+	if ( len > 1.0f ) {
+		len = 1.0f;
+	}
+	// thales
+	float axis_y_us = axis_y / axis_x;
+
+	// use a power curve to shift the correction to happen closer to the unit circle
+	float correctionRatio = Square( len );
+	axis_x += correctionRatio * ( len - axis_x );
+	axis_y += correctionRatio * ( axis_y_us - axis_y );
+
+	// go back through the symmetries
+	if ( swap ) {
+		float tmp = axis_x;
+		axis_x = axis_y;
+		axis_y = tmp;
+	}
+	if ( flip_x ) {
+		axis_x *= -1.0f;
+	}
+	if ( flip_y ) {
+		axis_y *= -1.0f;
+	}
+}
+
+/*
+========================
+idUsercmdGenLocal::HandleJoystickAxis
+========================
+*/
+void idUsercmdGenLocal::HandleJoystickAxis( int keyNum, float unclampedValue, float threshold, bool positive ) {
+	if ( ( unclampedValue > 0.0f ) && !positive ) {
+		return;
+	}
+	if ( ( unclampedValue < 0.0f ) && positive ) {
+		return;
+	}
+	float value = 0.0f;
+	bool pressed = false;
+	if ( unclampedValue > threshold ) {
+		value = idMath::Fabs( ( unclampedValue - threshold ) / ( 1.0f - threshold ) );
+		pressed = true;
+	} else if ( unclampedValue < -threshold ) {
+		value = idMath::Fabs( ( unclampedValue + threshold ) / ( 1.0f - threshold ) );
+		pressed = true;
+	}
+
+	int action = idKeyInput::GetUsercmdAction( keyNum );
+	if ( action >= UB_ATTACK ) {
+		Key( keyNum, pressed );
+		return;
+	}
+	if ( !pressed ) {
+		return;
+	}
+
+	float lookValue = 0.0f;
+	if ( joy_gammaLook.GetBool() ) {
+		lookValue = idMath::Pow( 1.04712854805f, value * 100.0f ) * 0.01f;
+	} else {
+		lookValue = idMath::Pow( value, joy_powerScale.GetFloat() );
+	}
+
+#if 0 // TODO: aim assist maybe.
+	idGame * game = common->Game();
+	if ( game != NULL ) {
+		lookValue *= game->GetAimAssistSensitivity();
+	}
+#endif
+
+	switch ( action ) {
+		case UB_FORWARD: {
+			float move = (float)cmd.forwardmove + ( KEY_MOVESPEED * value );
+			cmd.forwardmove = idMath::ClampChar( idMath::Ftoi( move ) );
+			break;
+		}
+		case UB_BACK: {
+			float move = (float)cmd.forwardmove - ( KEY_MOVESPEED * value );
+			cmd.forwardmove = idMath::ClampChar( idMath::Ftoi( move ) );
+			break;
+		}
+		case UB_MOVELEFT: {
+			float move = (float)cmd.rightmove - ( KEY_MOVESPEED * value );
+			cmd.rightmove = idMath::ClampChar( idMath::Ftoi( move ) );
+			break;
+		}
+		case UB_MOVERIGHT: {
+			float move = (float)cmd.rightmove + ( KEY_MOVESPEED * value );
+			cmd.rightmove = idMath::ClampChar( idMath::Ftoi( move ) );
+			break;
+		}
+		case UB_LOOKUP: {
+			if ( joy_dampenLook.GetBool() ) {
+				lookValue = Min( lookValue, ( pollTime - lastPollTime ) * joy_deltaPerMSLook.GetFloat() + lastLookValuePitch );
+				lastLookValuePitch = lookValue;
+			}
+
+			float invertPitch = in_invertLook.GetBool() ? -1.0f : 1.0f;
+			viewangles[PITCH] -= MS2SEC( pollTime - lastPollTime ) * lookValue * joy_pitchSpeed.GetFloat() * invertPitch;
+			break;
+		}
+		case UB_LOOKDOWN: {
+			if ( joy_dampenLook.GetBool() ) {
+				lookValue = Min( lookValue, ( pollTime - lastPollTime ) * joy_deltaPerMSLook.GetFloat() + lastLookValuePitch );
+				lastLookValuePitch = lookValue;
+			}
+
+			float invertPitch = in_invertLook.GetBool() ? -1.0f : 1.0f;
+			viewangles[PITCH] += MS2SEC( pollTime - lastPollTime ) * lookValue * joy_pitchSpeed.GetFloat() * invertPitch;
+			break;
+		}
+		case UB_LEFT: {
+			if ( joy_dampenLook.GetBool() ) {
+				lookValue = Min( lookValue, ( pollTime - lastPollTime ) * joy_deltaPerMSLook.GetFloat() + lastLookValueYaw );
+				lastLookValueYaw = lookValue;
+			}
+			viewangles[YAW] += MS2SEC( pollTime - lastPollTime ) * lookValue * joy_yawSpeed.GetFloat();
+			break;
+		}
+		case UB_RIGHT: {
+			if ( joy_dampenLook.GetBool() ) {
+				lookValue = Min( lookValue, ( pollTime - lastPollTime ) * joy_deltaPerMSLook.GetFloat() + lastLookValueYaw );
+				lastLookValueYaw = lookValue;
+			}
+			viewangles[YAW] -= MS2SEC( pollTime - lastPollTime ) * lookValue * joy_yawSpeed.GetFloat();
+			break;
+		}
+	}
+}
+
+/*
 =================
 idUsercmdGenLocal::JoystickMove
 =================
 */
-void idUsercmdGenLocal::JoystickMove( void ) {
-	float	anglespeed;
+void idUsercmdGenLocal::JoystickMove() {
+	float threshold = joy_deadZone.GetFloat();
+	float triggerThreshold = joy_triggerThreshold.GetFloat();
 
-	if ( toggled_run.on ^ ( in_alwaysRun.GetBool() && idAsyncNetwork::IsActive() ) ) {
-		anglespeed = idMath::M_MS2SEC * USERCMD_MSEC * in_angleSpeedKey.GetFloat();
-	} else {
-		anglespeed = idMath::M_MS2SEC * USERCMD_MSEC;
-	}
+	float axis_y = joystickAxis[ AXIS_LEFT_Y ];
+	float axis_x = joystickAxis[ AXIS_LEFT_X ];
+	CircleToSquare( axis_x, axis_y );
 
-	if ( !ButtonState( UB_STRAFE ) ) {
-		viewangles[YAW] += anglespeed * in_yawSpeed.GetFloat() * joystickAxis[AXIS_SIDE];
-		viewangles[PITCH] += anglespeed * in_pitchSpeed.GetFloat() * joystickAxis[AXIS_FORWARD];
-	} else {
-		cmd.rightmove = idMath::ClampChar( cmd.rightmove + joystickAxis[AXIS_SIDE] );
-		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + joystickAxis[AXIS_FORWARD] );
-	}
+	HandleJoystickAxis( K_JOY_STICK1_UP, axis_y, threshold, false );
+	HandleJoystickAxis( K_JOY_STICK1_DOWN, axis_y, threshold, true );
+	HandleJoystickAxis( K_JOY_STICK1_LEFT, axis_x, threshold, false );
+	HandleJoystickAxis( K_JOY_STICK1_RIGHT, axis_x, threshold, true );
 
-	cmd.upmove = idMath::ClampChar( cmd.upmove + joystickAxis[AXIS_UP] );
+	axis_y = joystickAxis[ AXIS_RIGHT_Y ];
+	axis_x = joystickAxis[ AXIS_RIGHT_X ];
+	CircleToSquare( axis_x, axis_y );
+
+	HandleJoystickAxis( K_JOY_STICK2_UP, axis_y, threshold, false );
+	HandleJoystickAxis( K_JOY_STICK2_DOWN, axis_y, threshold, true );
+	HandleJoystickAxis( K_JOY_STICK2_LEFT, axis_x, threshold, false );
+	HandleJoystickAxis( K_JOY_STICK2_RIGHT, axis_x, threshold, true );
+
+	HandleJoystickAxis( K_JOY_TRIGGER1, joystickAxis[ AXIS_LEFT_TRIG ], triggerThreshold, true );
+	HandleJoystickAxis( K_JOY_TRIGGER2, joystickAxis[ AXIS_RIGHT_TRIG ], triggerThreshold, true );
 }
 
 /*
@@ -778,6 +983,9 @@ void idUsercmdGenLocal::MakeCurrent( void ) {
 		// keyboard angle adjustment
 		AdjustAngles();
 
+		// get basic movement from joystick
+		JoystickMove();
+
 		// set button bits
 		CmdButtons();
 
@@ -786,9 +994,6 @@ void idUsercmdGenLocal::MakeCurrent( void ) {
 
 		// get basic movement from mouse
 		MouseMove();
-
-		// get basic movement from joystick
-		JoystickMove();
 
 		// check to make sure the angles haven't wrapped
 		if ( viewangles[PITCH] - oldAngles[PITCH] > 90 ) {
@@ -877,6 +1082,7 @@ void idUsercmdGenLocal::Clear( void ) {
 	// clears all key states
 	memset( buttonState, 0, sizeof( buttonState ) );
 	memset( keyState, false, sizeof( keyState ) );
+	memset( joystickAxis, 0, sizeof( joystickAxis ) );
 
 	inhibitCommands = false;
 
@@ -938,6 +1144,8 @@ void idUsercmdGenLocal::Key( int keyNum, bool down ) {
 	keyState[ keyNum ] = down;
 
 	int action = idKeyInput::GetUsercmdAction( keyNum );
+
+	// TODO: if action == 0 return ?
 
 	if ( down ) {
 
@@ -1039,7 +1247,28 @@ idUsercmdGenLocal::Joystick
 ===============
 */
 void idUsercmdGenLocal::Joystick( void ) {
-	memset( joystickAxis, 0, sizeof( joystickAxis ) );
+	int numEvents = Sys_PollJoystickInputEvents( 0 );
+
+	// Study each of the buffer elements and process them.
+	for ( int i = 0; i < numEvents; i++ ) {
+		int action;
+		int value;
+		if ( Sys_ReturnJoystickInputEvent( i, action, value ) ) {
+			if ( action >= J_ACTION1 && action <= J_ACTION_MAX ) {
+				int joyButton = K_JOY1 + ( action - J_ACTION1 );
+				Key( joyButton, ( value != 0 ) );
+			} else if ( ( action >= J_AXIS_MIN ) && ( action <= J_AXIS_MAX ) ) {
+				joystickAxis[ action - J_AXIS_MIN ] = static_cast<float>( value ) / 32767.0f;
+			} else if ( action >= J_DPAD_UP && action <= J_DPAD_RIGHT ) {
+				int joyButton = K_JOY_DPAD_UP + ( action - J_DPAD_UP );
+				Key( joyButton, ( value != 0 ) );
+			} else {
+				//assert( !"Unknown joystick event" );
+			}
+		}
+	}
+
+	Sys_EndJoystickInputEvents();
 }
 
 /*
@@ -1065,7 +1294,9 @@ void idUsercmdGenLocal::UsercmdInterrupt( void ) {
 	Keyboard();
 
 	// process the system joystick events
-	Joystick();
+	if ( in_useJoystick.GetBool() ) {
+		Joystick();
+	}
 
 	// create the usercmd for com_ticNumber+1
 	MakeCurrent();
@@ -1095,6 +1326,11 @@ idUsercmdGenLocal::GetDirectUsercmd
 */
 usercmd_t idUsercmdGenLocal::GetDirectUsercmd( void ) {
 
+	pollTime = Sys_Milliseconds();
+	if ( pollTime - lastPollTime > 100 ) {
+		lastPollTime = pollTime - 100;
+	}
+
 	// initialize current usercmd
 	InitCurrent();
 
@@ -1105,12 +1341,15 @@ usercmd_t idUsercmdGenLocal::GetDirectUsercmd( void ) {
 	Keyboard();
 
 	// process the system joystick events
-	Joystick();
-
+	if ( in_useJoystick.GetBool() ) {
+		Joystick();
+	}
 	// create the usercmd
 	MakeCurrent();
 
 	cmd.duplicateCount = 0;
+
+	lastPollTime = pollTime;
 
 	return cmd;
 }

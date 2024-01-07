@@ -44,12 +44,12 @@ typedef enum {
 } cpuidSimd_t;
 
 typedef enum {
-	AXIS_SIDE,
-	AXIS_FORWARD,
-	AXIS_UP,
-	AXIS_ROLL,
-	AXIS_YAW,
-	AXIS_PITCH,
+	AXIS_LEFT_X,
+	AXIS_LEFT_Y,
+	AXIS_RIGHT_X,
+	AXIS_RIGHT_Y,
+	AXIS_LEFT_TRIG,
+	AXIS_RIGHT_TRIG,
 	MAX_JOYSTICK_AXIS
 } joystickAxis_t;
 
@@ -59,7 +59,7 @@ typedef enum {
 	SE_CHAR,				// evValue is an ascii char
 	SE_MOUSE,				// evValue and evValue2 are relative signed x / y moves
 	SE_MOUSE_ABS,			// evValue and evValue2 are absolute x / y coordinates in the window
-	SE_JOYSTICK_AXIS,		// evValue is an axis number and evValue2 is the current state (-127 to 127)
+	SE_JOYSTICK,			// evValue is an axis number and evValue2 is the current state (-127 to 127)
 	SE_CONSOLE				// evPtr is a char*, from typing something at a non-game console
 } sysEventType_t;
 
@@ -76,6 +76,59 @@ typedef enum {
 	M_DELTAY,
 	M_DELTAZ
 } sys_mEvents;
+
+typedef enum {
+	J_ACTION1,
+	J_ACTION2,
+	J_ACTION3,
+	J_ACTION4,
+	J_ACTION5,
+	J_ACTION6,
+	J_ACTION7,
+	J_ACTION8,
+	J_ACTION9,
+	J_ACTION10,
+	J_ACTION11,
+	J_ACTION12,
+	J_ACTION13,
+	J_ACTION14,
+	J_ACTION15,
+	J_ACTION16,
+	J_ACTION17,
+	J_ACTION18,
+	J_ACTION19,
+	J_ACTION20,
+	J_ACTION21,
+	J_ACTION22,
+	J_ACTION23,
+	J_ACTION24,
+	J_ACTION25,
+	J_ACTION26,
+	J_ACTION27,
+	J_ACTION28,
+	J_ACTION29,
+	J_ACTION30,
+	J_ACTION31,
+	J_ACTION32,
+	J_ACTION_MAX = J_ACTION32,
+
+	J_AXIS_MIN,
+	J_AXIS_LEFT_X = J_AXIS_MIN + AXIS_LEFT_X,
+	J_AXIS_LEFT_Y = J_AXIS_MIN + AXIS_LEFT_Y,
+	J_AXIS_RIGHT_X = J_AXIS_MIN + AXIS_RIGHT_X,
+	J_AXIS_RIGHT_Y = J_AXIS_MIN + AXIS_RIGHT_Y,
+	J_AXIS_LEFT_TRIG = J_AXIS_MIN + AXIS_LEFT_TRIG,
+	J_AXIS_RIGHT_TRIG = J_AXIS_MIN + AXIS_RIGHT_TRIG,
+
+	J_AXIS_MAX = J_AXIS_MIN + MAX_JOYSTICK_AXIS - 1,
+
+	J_DPAD_UP,
+	J_DPAD_DOWN,
+	J_DPAD_LEFT,
+	J_DPAD_RIGHT,
+
+	MAX_JOY_EVENT
+} sys_jEvents;
 
 struct sysEvent_t {
 	sysEventType_t	evType;
@@ -188,6 +241,12 @@ void			Sys_EndKeyboardInputEvents( void );
 int				Sys_PollMouseInputEvents( void );
 int				Sys_ReturnMouseInputEvent( const int n, int &action, int &value );
 void			Sys_EndMouseInputEvents( void );
+
+// joystick input polling
+void			Sys_SetRumble( int device, int low, int hi );
+int				Sys_PollJoystickInputEvents( int deviceNum );
+int				Sys_ReturnJoystickInputEvent( const int n, int &action, int &value );
+void			Sys_EndJoystickInputEvents();
 
 // when the console is down, or the game is about to perform a lengthy
 // operation like map loading, the system can release the mouse cursor
