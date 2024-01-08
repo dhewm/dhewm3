@@ -109,39 +109,42 @@ static const keyname_t keynames[] =
 	{"MWHEELUP",		K_MWHEELUP,			"#str_07131"},
 	{"MWHEELDOWN",		K_MWHEELDOWN,		"#str_07132"},
 
-	{"JOY1",			K_JOY1,				"#str_07062"},
-	{"JOY2",			K_JOY2,				"#str_07063"},
-	{"JOY3",			K_JOY3,				"#str_07064"},
-	{"JOY4",			K_JOY4,				"#str_07065"},
-	{"JOY5",			K_JOY5,				"#str_07066"},
-	{"JOY6",			K_JOY6,				"#str_07067"},
-	{"JOY7",			K_JOY7,				"#str_07068"},
-	{"JOY8",			K_JOY8,				"#str_07069"},
-	{"JOY9",			K_JOY9,				"#str_07070"},
-	{"JOY10",			K_JOY10,			"#str_07071"},
-	{"JOY11",			K_JOY11,			"#str_07072"},
-	{"JOY12",			K_JOY12,			"#str_07073"},
-	{"JOY13",			K_JOY13,			"#str_07074"},
-	{"JOY14",			K_JOY14,			"#str_07075"},
-	{"JOY15",			K_JOY15,			"#str_07076"},
+	// Note: for localized gamepad key names, we use Sys_GetLocalizedJoyKeyName()
+	//       so the last column is just NULL
+	{"JOY_BTN_SOUTH",		K_JOY_BTN_SOUTH,		NULL},
+	{"JOY_BTN_EAST",		K_JOY_BTN_EAST,			NULL},
+	{"JOY_BTN_WEST",		K_JOY_BTN_WEST,			NULL},
+	{"JOY_BTN_NORTH",		K_JOY_BTN_NORTH,		NULL},
+	{"JOY_BTN_BACK",		K_JOY_BTN_BACK,			NULL},
+	// leaving out K_JOY_BTN_GUIDE, as I think it shouldn't be used (might open Steam or similar)
+	{"JOY_BTN_START",		K_JOY_BTN_START,		NULL},
+	{"JOY_BTN_LSTICK",		K_JOY_BTN_LSTICK,		NULL},
+	{"JOY_BTN_RSTICK",		K_JOY_BTN_RSTICK,		NULL},
+	{"JOY_BTN_LSHOULDER",	K_JOY_BTN_LSHOULDER,	NULL},
+	{"JOY_BTN_RSHOULDER",	K_JOY_BTN_RSHOULDER,	NULL},
+	{"JOY_BTN_MISC1",		K_JOY_BTN_MISC1,		NULL},
+	{"JOY_BTN_RPADDLE1",	K_JOY_BTN_RPADDLE1,		NULL},
+	{"JOY_BTN_LPADDLE1",	K_JOY_BTN_LPADDLE1,		NULL},
+	{"JOY_BTN_RPADDLE2",	K_JOY_BTN_RPADDLE2,		NULL},
+	{"JOY_BTN_LPADDLE2",	K_JOY_BTN_LPADDLE2,		NULL},
 
-	{"JOY_STICK1_UP", 		K_JOY_STICK1_UP, 		"JOY_STICK1_UP"},
-	{"JOY_STICK1_DOWN", 	K_JOY_STICK1_DOWN, 		"JOY_STICK1_DOWN"},
-	{"JOY_STICK1_LEFT", 	K_JOY_STICK1_LEFT, 		"JOY_STICK1_LEFT"},
-	{"JOY_STICK1_RIGHT", 	K_JOY_STICK1_RIGHT, 	"JOY_STICK1_RIGHT"},
+	{"JOY_STICK1_UP", 		K_JOY_STICK1_UP, 		NULL},
+	{"JOY_STICK1_DOWN", 	K_JOY_STICK1_DOWN, 		NULL},
+	{"JOY_STICK1_LEFT", 	K_JOY_STICK1_LEFT, 		NULL},
+	{"JOY_STICK1_RIGHT", 	K_JOY_STICK1_RIGHT, 	NULL},
 
-	{"JOY_STICK2_UP", 		K_JOY_STICK2_UP, 		"JOY_STICK2_UP"},
-	{"JOY_STICK2_DOWN", 	K_JOY_STICK2_DOWN, 		"JOY_STICK2_DOWN"},
-	{"JOY_STICK2_LEFT", 	K_JOY_STICK2_LEFT, 		"JOY_STICK2_LEFT"},
-	{"JOY_STICK2_RIGHT", 	K_JOY_STICK2_RIGHT, 	"JOY_STICK2_RIGHT"},
+	{"JOY_STICK2_UP", 		K_JOY_STICK2_UP, 		NULL},
+	{"JOY_STICK2_DOWN", 	K_JOY_STICK2_DOWN, 		NULL},
+	{"JOY_STICK2_LEFT", 	K_JOY_STICK2_LEFT, 		NULL},
+	{"JOY_STICK2_RIGHT", 	K_JOY_STICK2_RIGHT, 	NULL},
 
-	{"JOY_TRIGGER1", 		K_JOY_TRIGGER1, 		"JOY_TRIGGER1"},
-	{"JOY_TRIGGER2", 		K_JOY_TRIGGER2, 		"JOY_TRIGGER2"},
+	{"JOY_TRIGGER1", 		K_JOY_TRIGGER1, 		NULL},
+	{"JOY_TRIGGER2", 		K_JOY_TRIGGER2, 		NULL},
 
-	{"JOY_DPAD_UP", 		K_JOY_DPAD_UP, 			"JOY_DPAD_UP"},
-	{"JOY_DPAD_DOWN", 		K_JOY_DPAD_DOWN, 		"JOY_DPAD_DOWN"},
-	{"JOY_DPAD_LEFT", 		K_JOY_DPAD_LEFT, 		"JOY_DPAD_LEFT"},
-	{"JOY_DPAD_RIGHT", 		K_JOY_DPAD_RIGHT, 		"JOY_DPAD_RIGHT"},
+	{"JOY_DPAD_UP", 		K_JOY_DPAD_UP, 			NULL},
+	{"JOY_DPAD_DOWN", 		K_JOY_DPAD_DOWN, 		NULL},
+	{"JOY_DPAD_LEFT", 		K_JOY_DPAD_LEFT, 		NULL},
+	{"JOY_DPAD_RIGHT", 		K_JOY_DPAD_RIGHT, 		NULL},
 
 	{"AUX1",			K_AUX1,				"#str_07094"},
 	{"AUX2",			K_AUX2,				"#str_07095"},
@@ -408,6 +411,12 @@ const char *idKeyInput::KeyNumToString( int keynum, bool localized ) {
 		if ( scName != NULL ) {
 			return scName;
 		}
+	}
+
+	if ( localized && keynum >= K_FIRST_JOY && keynum <= K_LAST_JOY ) {
+		const char* jname = Sys_GetLocalizedJoyKeyName(keynum);
+		if(jname != NULL)
+			return jname;
 	}
 
 	// check for a key string

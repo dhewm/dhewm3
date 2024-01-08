@@ -189,7 +189,7 @@ static scancodename_t scancodemappings[] = {
 	D3_SC_MAPPING(COMMA),
 	D3_SC_MAPPING(PERIOD),
 	D3_SC_MAPPING(SLASH),
-	// leaving out lots of key incl. from keypad, we already handle them as normal keys
+	// leaving out lots of keys incl. from keypad, we already handle them as normal keys
 	D3_SC_MAPPING(NONUSBACKSLASH),
 	D3_SC_MAPPING(INTERNATIONAL1), /**< used on Asian keyboards, see footnotes in USB doc */
 	D3_SC_MAPPING(INTERNATIONAL2),
@@ -263,6 +263,121 @@ static bool utf8ToISO8859_1(const char* inbuf, char* outbuf, size_t outsize) {
 	return outbytesleft < outsize; // return false if no char was written
 }
 #endif // SDL2
+
+const char* Sys_GetLocalizedJoyKeyName( int key ) {
+	// Note: trying to keep the returned names short, because the Doom3 binding window doesn't have much space for names..
+
+#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
+	if (key >= K_FIRST_JOY && key <= K_LAST_JOY) {
+
+		if (key <= K_JOY_BTN_NORTH) {
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+
+			SDL_GamepadButton gpbtn = SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_NORTH);
+			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabeForTypel(TODO, gpbtn);
+			switch(label) {
+				case SDL_GAMEPAD_BUTTON_LABEL_A:
+					return "Pad A";
+				case SDL_GAMEPAD_BUTTON_LABEL_B:
+					return "Pad B";
+				case SDL_GAMEPAD_BUTTON_LABEL_X:
+					return "Pad X";
+				case SDL_GAMEPAD_BUTTON_LABEL_Y:
+					return "Pad Y";
+				case SDL_GAMEPAD_BUTTON_LABEL_CROSS:
+					return "Pad Cross";
+				case SDL_GAMEPAD_BUTTON_LABEL_CIRCLE:
+					return "Pad Circle";
+				case SDL_GAMEPAD_BUTTON_LABEL_SQUARE:
+					return "Pad Square";
+				case SDL_GAMEPAD_BUTTON_LABEL_TRIANGLE:
+					return "Pad Triangle";
+			}
+
+#else // SDL2
+			// using xbox-style names, like SDL2 does (SDL can't tell us if this is a xbox or PS or nintendo or whatever-style gamepad)
+			switch(key) {
+				case K_JOY_BTN_SOUTH:
+					return "Pad A";
+				case K_JOY_BTN_EAST:
+					return "Pad B";
+				case K_JOY_BTN_WEST:
+					return "Pad X";
+				case K_JOY_BTN_NORTH:
+					return "Pad Y";
+			}
+#endif // face button names for SDL2
+		}
+
+		// the labels for the remaining keys are the same for SDL2 and SDL3 (and all controllers)
+		// Note: Would be nicer with "Pad " at the beginning, but then it's too long for the keybinding window :-/
+		switch(key) {
+			case K_JOY_BTN_BACK:
+				return "Pad Back";
+
+			case K_JOY_BTN_GUIDE:
+				return NULL; // ???
+
+			case K_JOY_BTN_START:
+				return "Pad Start";
+			case K_JOY_BTN_LSTICK:
+				return "Pad LStick";
+			case K_JOY_BTN_RSTICK:
+				return "Pad RStick";
+			case K_JOY_BTN_LSHOULDER:
+				return "Pad LShoulder";
+			case K_JOY_BTN_RSHOULDER:
+				return "Pad RShoulder";
+			// NOTE: in SDL3, the 4 DPAD buttons would be following, we have those later
+			case K_JOY_BTN_MISC1:
+				return "Pad Misc";
+			case K_JOY_BTN_RPADDLE1:
+				return "Pad P1";
+			case K_JOY_BTN_LPADDLE1:
+				return "Pad P3";
+			case K_JOY_BTN_RPADDLE2:
+				return "Pad P2";
+			case K_JOY_BTN_LPADDLE2:
+				return "Pad P4";
+
+			case K_JOY_STICK1_UP:
+				return "Stick1 Up";
+			case K_JOY_STICK1_DOWN:
+				return "Stick1 Down";
+			case K_JOY_STICK1_LEFT:
+				return "Stick1 Left";
+			case K_JOY_STICK1_RIGHT:
+				return "Stick1 Right";
+
+			case K_JOY_STICK2_UP:
+				return "Stick2 Up";
+			case K_JOY_STICK2_DOWN:
+				return "Stick2 Down";
+			case K_JOY_STICK2_LEFT:
+				return "Stick2 Left";
+			case K_JOY_STICK2_RIGHT:
+				return "Stick2 Right";
+
+			case K_JOY_TRIGGER1:
+				return "Trigger 1";
+			case K_JOY_TRIGGER2:
+				return "Trigger 2";
+
+			case K_JOY_DPAD_UP:
+				return "DPad Up";
+			case K_JOY_DPAD_DOWN:
+				return "DPad Down";
+			case K_JOY_DPAD_LEFT:
+				return "DPad Left";
+			case K_JOY_DPAD_RIGHT:
+				return "DPad Right";
+			default:
+				assert(0 && "missing a case in Sys_GetLocalizedJoyKeyName() for axes or dpad!");
+		}
+	}
+#endif // SDL2+
+	return NULL;
+}
 
 // returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
 // regarding the current keyboard layout - if that name is in ASCII or corresponds
@@ -495,33 +610,35 @@ static byte mapkey(SDL_Keycode key) {
 	return 0;
 }
 
-static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 
+static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
 	switch (button)
 	{
 	case SDL_CONTROLLER_BUTTON_A:
-		return J_ACTION1;
+		return J_BTN_SOUTH;
 	case SDL_CONTROLLER_BUTTON_B:
-		return J_ACTION2;
+		return J_BTN_EAST;
 	case SDL_CONTROLLER_BUTTON_X:
-		return J_ACTION3;
+		return J_BTN_WEST;
 	case SDL_CONTROLLER_BUTTON_Y:
-		return J_ACTION4;
+		return J_BTN_NORTH;
 	case SDL_CONTROLLER_BUTTON_BACK:
-		return J_ACTION10;
+		return J_BTN_BACK;
 	case SDL_CONTROLLER_BUTTON_GUIDE:
-		// TODO:
+		// TODO: this one should probably not be bindable?
+		//return J_BTN_GUIDE;
 		break;
 	case SDL_CONTROLLER_BUTTON_START:
-		return J_ACTION9;
+		return J_BTN_START;
 	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
-		return J_ACTION7;
+		return J_BTN_LSTICK;
 	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
-		return J_ACTION8;
+		return J_BTN_RSTICK;
 	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-		return J_ACTION5;
+		return J_BTN_LSHOULDER;
 	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-		return J_ACTION6;
+		return J_BTN_RSHOULDER;
 	case SDL_CONTROLLER_BUTTON_DPAD_UP:
 		return J_DPAD_UP;
 	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
@@ -530,16 +647,26 @@ static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
 		return J_DPAD_LEFT;
 	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
 		return J_DPAD_RIGHT;
+	// TODO: have the following always been supported in SDL2?
+	case SDL_CONTROLLER_BUTTON_MISC1:
+		return J_BTN_MISC1;
+	case SDL_CONTROLLER_BUTTON_PADDLE1:
+		return J_BTN_RPADDLE1;
+	case SDL_CONTROLLER_BUTTON_PADDLE2:
+		return J_BTN_RPADDLE2;
+	case SDL_CONTROLLER_BUTTON_PADDLE3:
+		return J_BTN_LPADDLE1;
+	case SDL_CONTROLLER_BUTTON_PADDLE4:
+		return J_BTN_LPADDLE2;
+
 	default:
 		common->Warning("unknown game controller button %u", button);
 		break;
 	}
-
 	return MAX_JOY_EVENT;
 }
 
 static sys_jEvents mapjoyaxis(SDL_GameControllerAxis axis) {
-
 	switch (axis)
 	{
 	case SDL_CONTROLLER_AXIS_LEFTX:
@@ -558,9 +685,9 @@ static sys_jEvents mapjoyaxis(SDL_GameControllerAxis axis) {
 		common->Warning("unknown game controller axis %u", axis);
 		break;
 	}
-
 	return J_AXIS_MAX;
 }
+#endif // SDL2+ gamecontroller code
 
 static void PushConsoleEvent(const char *s) {
 	char *b;
@@ -623,12 +750,13 @@ void Sys_InitInput() {
 	memset( buttonStates, 0, sizeof( buttonStates ) );
 	memset( joyAxis, 0, sizeof( joyAxis ) );
 
+#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
 	const int NumJoysticks = SDL_NumJoysticks();
-	printf("XXX found %d joysticks\n", NumJoysticks);
 	for( int i = 0; i < NumJoysticks; ++i )
 	{
 		SDL_GameController* gc = SDL_GameControllerOpen( i );
 	}
+#endif
 }
 
 /*
@@ -1078,6 +1206,7 @@ sysEvent_t Sys_GetEvent() {
 
 			return res;
 
+#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
 		case SDL_CONTROLLERBUTTONDOWN:
 		case SDL_CONTROLLERBUTTONUP:
 		{
@@ -1086,8 +1215,8 @@ sysEvent_t Sys_GetEvent() {
 
 			res.evType = SE_KEY;
 			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
-			if ( ( jEvent >= J_ACTION1 ) && ( jEvent <= J_ACTION_MAX ) ) {
-				res.evValue = K_JOY1 + ( jEvent - J_ACTION1 );
+			if ( ( jEvent >= J_BTN_SOUTH ) && ( jEvent <= J_ACTION_MAX ) ) {
+				res.evValue = K_JOY_BTN_SOUTH + ( jEvent - J_BTN_SOUTH );
 				return res;
 			} else if ( ( jEvent >= J_DPAD_UP ) && ( jEvent <= J_DPAD_RIGHT ) ) {
 				res.evValue = K_JOY_DPAD_UP + ( jEvent - J_DPAD_UP );
@@ -1147,6 +1276,7 @@ sysEvent_t Sys_GetEvent() {
 			// TODO: hot swapping maybe.
 			//lbOnControllerUnPlug(event.jdevice.which);
 			break;
+#endif // SDL2+
 
 		case SDL_QUIT:
 			PushConsoleEvent("quit");

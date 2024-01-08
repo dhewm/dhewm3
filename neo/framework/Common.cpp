@@ -2919,8 +2919,14 @@ void idCommonLocal::Init( int argc, char **argv ) {
 #endif
 #endif
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER)) // init joystick to work around SDL 2.0.9 bug #4391
+#else
+	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO)) // no gamecontroller support in SDL1
+#endif
+	{
 		Sys_Error("Error while initializing SDL: %s", SDL_GetError());
+	}
 
 	Sys_InitThreads();
 

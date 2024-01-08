@@ -78,41 +78,30 @@ typedef enum {
 } sys_mEvents;
 
 typedef enum {
-	J_ACTION1,
-	J_ACTION2,
-	J_ACTION3,
-	J_ACTION4,
-	J_ACTION5,
-	J_ACTION6,
-	J_ACTION7,
-	J_ACTION8,
-	J_ACTION9,
-	J_ACTION10,
-	J_ACTION11,
-	J_ACTION12,
-	J_ACTION13,
-	J_ACTION14,
-	J_ACTION15,
-	J_ACTION16,
-	J_ACTION17,
-	J_ACTION18,
-	J_ACTION19,
-	J_ACTION20,
-	J_ACTION21,
-	J_ACTION22,
-	J_ACTION23,
-	J_ACTION24,
-	J_ACTION25,
-	J_ACTION26,
-	J_ACTION27,
-	J_ACTION28,
-	J_ACTION29,
-	J_ACTION30,
-	J_ACTION31,
-	J_ACTION32,
-	J_ACTION_MAX = J_ACTION32,
+	J_ACTION_FIRST,
+	// these names are similar to the SDL3 SDL_GamepadButton names
+	J_BTN_SOUTH = J_ACTION_FIRST, // bottom face button, like Xbox A
+	J_BTN_EAST,  // right face button, like Xbox B
+	J_BTN_WEST,  // left face button, like Xbox X
+	J_BTN_NORTH, // top face button, like Xbox Y
+	J_BTN_BACK,
+	J_BTN_GUIDE, // Note: this one should probably not be used?
+	J_BTN_START,
+	J_BTN_LSTICK, // press left stick
+	J_BTN_RSTICK, // press right stick
+	J_BTN_LSHOULDER,
+	J_BTN_RSHOULDER,
+	// NOTE: in SDL3, the 4 DPAD buttons would be following, we have those at the end
+	J_BTN_MISC1, // Additional button (e.g. Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button)
+	J_BTN_RPADDLE1, // Upper or primary paddle, under your right hand (e.g. Xbox Elite paddle P1)
+	J_BTN_LPADDLE1, // Upper or primary paddle, under your left hand (e.g. Xbox Elite paddle P3)
+	J_BTN_RPADDLE2, // Lower or secondary paddle, under your right hand (e.g. Xbox Elite paddle P2)
+	J_BTN_LPADDLE2, //  Lower or secondary paddle, under your left hand (e.g. Xbox Elite paddle P4)
 
-	J_AXIS_MIN,
+	J_ACTION_MAX = J_BTN_LPADDLE2,
+	// leaving some space here for about 16 additional J_ACTIONs, if needed
+
+	J_AXIS_MIN = 32,
 	J_AXIS_LEFT_X = J_AXIS_MIN + AXIS_LEFT_X,
 	J_AXIS_LEFT_Y = J_AXIS_MIN + AXIS_LEFT_Y,
 	J_AXIS_RIGHT_X = J_AXIS_MIN + AXIS_RIGHT_X,
@@ -231,6 +220,12 @@ const char* Sys_GetScancodeName( int key );
 const char* Sys_GetLocalizedScancodeName( int key );
 // returns keyNum_t (K_SC_* constant) for given scancode name (like "SC_A")
 int Sys_GetKeynumForScancodeName( const char* name );
+
+// returns display name of the key (between K_FIRST_JOY and K_LAST_JOY)
+// With SDL2 it'll return the name in the SDL_GameController standard layout
+// (which is based on XBox/XInput => on Nintendo gamepads, A/B and X/Y will be flipped),
+// with SDL3 it will return the "real" button name
+const char* Sys_GetLocalizedJoyKeyName( int key );
 
 // keyboard input polling
 int				Sys_PollKeyboardInputEvents( void );

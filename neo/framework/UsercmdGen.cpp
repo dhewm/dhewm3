@@ -1254,8 +1254,8 @@ void idUsercmdGenLocal::Joystick( void ) {
 		int action;
 		int value;
 		if ( Sys_ReturnJoystickInputEvent( i, action, value ) ) {
-			if ( action >= J_ACTION1 && action <= J_ACTION_MAX ) {
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
+			if ( action >= J_ACTION_FIRST && action <= J_ACTION_MAX ) {
+				int joyButton = K_FIRST_JOY + ( action - J_ACTION_FIRST );
 				Key( joyButton, ( value != 0 ) );
 			} else if ( ( action >= J_AXIS_MIN ) && ( action <= J_AXIS_MAX ) ) {
 				joystickAxis[ action - J_AXIS_MIN ] = static_cast<float>( value ) / 32767.0f;

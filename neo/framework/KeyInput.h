@@ -139,25 +139,27 @@ typedef enum {
 	K_MWHEELUP,
 
 	//------------------------
-	// K_JOY codes must be contiguous, too
+	// K_JOY codes must be contiguous, too, and K_JOY_BTN_* should be kept in sync with J_BTN_* of sys_jEvents
 	//------------------------
 
-	K_JOY1 = 197,
-	K_JOY2,
-	K_JOY3,
-	K_JOY4,
-	K_JOY5,
-	K_JOY6,
-	K_JOY7,
-	K_JOY8,
-	K_JOY9,
-	K_JOY10,
-	K_JOY11,
-	K_JOY12,
-	K_JOY13,
-	K_JOY14,
-	K_JOY15,
-	K_JOY16,
+	K_FIRST_JOY = 197,
+	K_JOY_BTN_SOUTH = K_FIRST_JOY, // bottom face button, like Xbox A
+	K_JOY_BTN_EAST,  // right face button, like Xbox B
+	K_JOY_BTN_WEST,  // left face button, like Xbox X
+	K_JOY_BTN_NORTH, // top face button, like Xbox Y
+	K_JOY_BTN_BACK,
+	K_JOY_BTN_GUIDE, // Note: this one should probably not be used?
+	K_JOY_BTN_START,
+	K_JOY_BTN_LSTICK, // press left stick
+	K_JOY_BTN_RSTICK, // press right stick
+	K_JOY_BTN_LSHOULDER,
+	K_JOY_BTN_RSHOULDER,
+	// NOTE: in SDL3, the 4 DPAD buttons would be following, we have those later
+	K_JOY_BTN_MISC1, // Additional button (e.g. Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button)
+	K_JOY_BTN_RPADDLE1, // Upper or primary paddle, under your right hand (e.g. Xbox Elite paddle P1)
+	K_JOY_BTN_LPADDLE1, // Upper or primary paddle, under your left hand (e.g. Xbox Elite paddle P3)
+	K_JOY_BTN_RPADDLE2, // Lower or secondary paddle, under your right hand (e.g. Xbox Elite paddle P2)
+	K_JOY_BTN_LPADDLE2, //  Lower or secondary paddle, under your left hand (e.g. Xbox Elite paddle P4)
 
 	K_JOY_STICK1_UP,
 	K_JOY_STICK1_DOWN,
@@ -176,6 +178,7 @@ typedef enum {
 	K_JOY_DPAD_DOWN,
 	K_JOY_DPAD_LEFT,
 	K_JOY_DPAD_RIGHT,
+	K_LAST_JOY = K_JOY_DPAD_RIGHT,
 
 	K_GRAVE_A = 229,	// lowercase a with grave accent FIXME: used to be 224; this probably isn't used anyway
 
