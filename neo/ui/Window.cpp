@@ -736,7 +736,7 @@ const char *idWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals) 
 				*updateVisuals = true;
 			}
 
-			if (event->evValue == K_MOUSE1 || event->evValue == K_JOY2) {
+			if (event->evValue == K_MOUSE1 || event->evValue == K_JOY_BTN_EAST) {
 
 				if (!event->evValue2 && GetCaptureChild()) {
 					GetCaptureChild()->LoseCapture();
@@ -785,7 +785,7 @@ const char *idWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals) 
 				} else if (!actionUpRun) {
 					actionUpRun = RunScript( ON_ACTIONRELEASE );
 				}
-			} else if (event->evValue == K_MOUSE2 || event->evValue == K_JOY1) {
+			} else if (event->evValue == K_MOUSE2 || event->evValue == K_JOY_BTN_SOUTH) {
 
 				if (!event->evValue2 && GetCaptureChild()) {
 					GetCaptureChild()->LoseCapture();
