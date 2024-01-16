@@ -60,6 +60,8 @@ If you have questions concerning this license or the applicable additional terms
 #define SDLK_PRINTSCREEN SDLK_PRINT
 #endif
 
+extern idCVar in_useGamepad; // from UsercmdGen.cpp
+
 // NOTE: g++-4.7 doesn't like when this is static (for idCmdSystem::ArgCompletion_String<kbdNames>)
 const char *_in_kbdNames[] = {
 #if SDL_VERSION_ATLEAST(2, 0, 0) // auto-detection is only available for SDL2
@@ -125,7 +127,7 @@ static idList<mouse_poll_t> mouse_polls;
 static idList<joystick_poll_t> joystick_polls;
 
 static bool buttonStates[K_LAST_KEY];
-static int  joyAxis[MAX_JOYSTICK_AXIS];
+static float joyAxis[MAX_JOYSTICK_AXIS];
 
 static idList<sysEvent_t> event_overflow;
 
@@ -273,7 +275,7 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 		if (key <= K_JOY_BTN_NORTH) {
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 
-			SDL_GamepadButton gpbtn = SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_NORTH);
+			SDL_GamepadButton gpbtn = SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_SOUTH);
 			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabeForTypel(TODO, gpbtn);
 			switch(label) {
 				case SDL_GAMEPAD_BUTTON_LABEL_A:
@@ -310,7 +312,6 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 		}
 
 		// the labels for the remaining keys are the same for SDL2 and SDL3 (and all controllers)
-		// Note: Would be nicer with "Pad " at the beginning, but then it's too long for the keybinding window :-/
 		switch(key) {
 			case K_JOY_BTN_BACK:
 				return "Pad Back";
@@ -328,7 +329,16 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 				return "Pad LShoulder";
 			case K_JOY_BTN_RSHOULDER:
 				return "Pad RShoulder";
-			// NOTE: in SDL3, the 4 DPAD buttons would be following, we have those later
+
+			case K_JOY_DPAD_UP:
+				return "DPad Up";
+			case K_JOY_DPAD_DOWN:
+				return "DPad Down";
+			case K_JOY_DPAD_LEFT:
+				return "DPad Left";
+			case K_JOY_DPAD_RIGHT:
+				return "DPad Right";
+
 			case K_JOY_BTN_MISC1:
 				return "Pad Misc";
 			case K_JOY_BTN_RPADDLE1:
@@ -340,6 +350,8 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 			case K_JOY_BTN_LPADDLE2:
 				return "Pad P4";
 
+			// Note: Would be nicer with "Pad " (or even "Gamepad ") at the beginning,
+			//       but then it's too long for the keybinding window :-/
 			case K_JOY_STICK1_UP:
 				return "Stick1 Up";
 			case K_JOY_STICK1_DOWN:
@@ -363,16 +375,8 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 			case K_JOY_TRIGGER2:
 				return "Trigger 2";
 
-			case K_JOY_DPAD_UP:
-				return "DPad Up";
-			case K_JOY_DPAD_DOWN:
-				return "DPad Down";
-			case K_JOY_DPAD_LEFT:
-				return "DPad Left";
-			case K_JOY_DPAD_RIGHT:
-				return "DPad Right";
 			default:
-				assert(0 && "missing a case in Sys_GetLocalizedJoyKeyName() for axes or dpad!");
+				assert(0 && "missing a case in Sys_GetLocalizedJoyKeyName()!");
 		}
 	}
 #endif // SDL2+
@@ -1210,16 +1214,26 @@ sysEvent_t Sys_GetEvent() {
 		case SDL_CONTROLLERBUTTONDOWN:
 		case SDL_CONTROLLERBUTTONUP:
 		{
+			if ( !in_useGamepad.GetBool() ) {
+				common->Warning( "Gamepad support is disabled! Set the in_useGamepad CVar to 1 to enable it!\n" );
+				continue;
+			}
+			// special case: always treat the start button as escape so it opens/closes the menu
+			// (also makes that button non-bindable)
+			if ( ev.cbutton.button == SDL_CONTROLLER_BUTTON_START ) {
+				res.evType = SE_KEY;
+				res.evValue = K_ESCAPE;
+				res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
+				return res;
+			}
+
 			sys_jEvents jEvent =  mapjoybutton( (SDL_GameControllerButton)ev.cbutton.button);
 			joystick_polls.Append(joystick_poll_t(jEvent, ev.cbutton.state == SDL_PRESSED ? 1 : 0) );
 
 			res.evType = SE_KEY;
 			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
-			if ( ( jEvent >= J_BTN_SOUTH ) && ( jEvent <= J_ACTION_MAX ) ) {
-				res.evValue = K_JOY_BTN_SOUTH + ( jEvent - J_BTN_SOUTH );
-				return res;
-			} else if ( ( jEvent >= J_DPAD_UP ) && ( jEvent <= J_DPAD_RIGHT ) ) {
-				res.evValue = K_JOY_DPAD_UP + ( jEvent - J_DPAD_UP );
+			if ( ( jEvent >= J_ACTION_FIRST ) && ( jEvent <= J_ACTION_MAX ) ) {
+				res.evValue = K_FIRST_JOY + ( jEvent - J_ACTION_FIRST );
 				return res;
 			}
 
@@ -1229,6 +1243,12 @@ sysEvent_t Sys_GetEvent() {
 		case SDL_CONTROLLERAXISMOTION:
 		{
 			const int range = 16384;
+
+			if ( !in_useGamepad.GetBool() ) {
+				// not printing a message here, I guess we get lots of spurious axis events..
+				// TODO: or print a message if value is big enough?
+				continue;
+			}
 
 			sys_jEvents jEvent = mapjoyaxis( (SDL_GameControllerAxis)ev.caxis.axis);
 			joystick_polls.Append(joystick_poll_t(	jEvent, ev.caxis.value) );
@@ -1251,15 +1271,18 @@ sysEvent_t Sys_GetEvent() {
 				PushButton( K_JOY_TRIGGER2, ( ev.caxis.value > range ) );
 			}
 			if ( jEvent >= J_AXIS_MIN && jEvent <= J_AXIS_MAX ) {
+				// NOTE: the stuff set here is only used to move the cursor in menus
+				//       ingame movement is done via joystick_polls
 				int axis = jEvent - J_AXIS_MIN;
-				int percent = ( ev.caxis.value * 16 ) / range;
-				if ( joyAxis[axis] != percent ) {
-					joyAxis[axis] = percent;
-					res.evType = SE_JOYSTICK;
-					res.evValue = axis;
-					res.evValue2 = percent;
-					return res;
+				float val = ev.caxis.value * (1.25f / 32767.0f);
+				// 25% deadzone
+				if( val < 0.0f ) {
+					val = fminf(val + 0.25f, 0.0f);
+				} else {
+					val = fmaxf(val - 0.25f, 0.0f);
 				}
+
+				joyAxis[axis] = val;
 			}
 
 			continue; // try to get a decent event.
@@ -1298,6 +1321,28 @@ sysEvent_t Sys_GetEvent() {
 			// common->Warning("unknown SDL event 0x%x", ev.type);
 			continue; // handle next event
 		}
+	}
+
+	// first return joyaxis events, if gamepad is enabled and, and 16ms are over
+	// (or we haven't returned the values for all axis yet)
+	if ( in_useGamepad.GetBool() ) {
+		static unsigned int lastMS = 0;
+		static int joyAxisToSend = 0;
+		unsigned int nowMS = Sys_Milliseconds();
+		if ( nowMS - lastMS >= 16 ) {
+			int val = joyAxis[joyAxisToSend] * 100; // float to percent
+			res.evType = SE_JOYSTICK;
+			res.evValue = joyAxisToSend;
+			res.evValue2 = val;
+			++joyAxisToSend;
+			if(joyAxisToSend == MAX_JOYSTICK_AXIS) {
+				// we're done for this frame, so update lastMS and reset joyAxisToSend
+				joyAxisToSend = 0;
+				lastMS = nowMS;
+			}
+			return res;
+		}
+
 	}
 
 	return res_none;

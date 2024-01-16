@@ -91,7 +91,12 @@ typedef enum {
 	J_BTN_RSTICK, // press right stick
 	J_BTN_LSHOULDER,
 	J_BTN_RSHOULDER,
-	// NOTE: in SDL3, the 4 DPAD buttons would be following, we have those at the end
+
+	J_DPAD_UP,
+	J_DPAD_DOWN,
+	J_DPAD_LEFT,
+	J_DPAD_RIGHT,
+
 	J_BTN_MISC1, // Additional button (e.g. Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button)
 	J_BTN_RPADDLE1, // Upper or primary paddle, under your right hand (e.g. Xbox Elite paddle P1)
 	J_BTN_LPADDLE1, // Upper or primary paddle, under your left hand (e.g. Xbox Elite paddle P3)
@@ -111,18 +116,13 @@ typedef enum {
 
 	J_AXIS_MAX = J_AXIS_MIN + MAX_JOYSTICK_AXIS - 1,
 
-	J_DPAD_UP,
-	J_DPAD_DOWN,
-	J_DPAD_LEFT,
-	J_DPAD_RIGHT,
-
 	MAX_JOY_EVENT
 } sys_jEvents;
 
 struct sysEvent_t {
 	sysEventType_t	evType;
-	int				evValue;
-	int				evValue2;
+	int				evValue;	// for keys: K_* or ASCII code; for joystick: axis; for mouse: mouseX
+	int				evValue2;	// for keys: 0/1 for up/down; for axis: value; for mouse: mouseY
 	int				evPtrLength;		// bytes of data pointed to by evPtr, for journaling
 	void *			evPtr;				// this must be manually freed if not NULL
 };

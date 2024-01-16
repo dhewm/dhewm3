@@ -428,8 +428,6 @@ idCVar idUsercmdGenLocal::m_smooth( "m_smooth", "1", CVAR_SYSTEM | CVAR_ARCHIVE 
 idCVar idUsercmdGenLocal::m_strafeSmooth( "m_strafeSmooth", "4", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "number of samples blended for mouse moving", 1, 8, idCmdSystem::ArgCompletion_Integer<1,8> );
 idCVar idUsercmdGenLocal::m_showMouseRate( "m_showMouseRate", "0", CVAR_SYSTEM | CVAR_BOOL, "shows mouse movement" );
 
-idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
-idCVar joy_newCode( "joy_newCode", "0", CVAR_BOOL | CVAR_ARCHIVE, "Use the new codepath" );
 idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
 idCVar joy_deadZone( "joy_deadZone", "0.4", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
 idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
@@ -437,14 +435,15 @@ idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a 
 idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
 idCVar joy_pitchSpeed( "joy_pitchSpeed", "130",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing up or down on the joystick", 60, 600 );
 idCVar joy_yawSpeed( "joy_yawSpeed", "240",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing left or right on the joystick", 60, 600 );
+idCVar joy_invertLook( "joy_invertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 
 // these were a bad idea!
 idCVar joy_dampenLook( "joy_dampenLook", "1", CVAR_BOOL | CVAR_ARCHIVE, "Do not allow full acceleration on look" );
 idCVar joy_deltaPerMSLook( "joy_deltaPerMSLook", "0.003", CVAR_FLOAT | CVAR_ARCHIVE, "Max amount to be added on look per MS" );
 
-idCVar in_useJoystick( "in_useJoystick", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
-idCVar in_invertLook( "in_invertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
-idCVar in_mouseInvertLook( "in_mouseInvertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
+idCVar in_useGamepad( "in_useGamepad", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
+
+// TODO idCVar in_mouseInvertLook( "in_mouseInvertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 
 static idUsercmdGenLocal localUsercmdGen;
 idUsercmdGen	*usercmdGen = &localUsercmdGen;
@@ -838,7 +837,7 @@ void idUsercmdGenLocal::HandleJoystickAxis( int keyNum, float unclampedValue, fl
 				lastLookValuePitch = lookValue;
 			}
 
-			float invertPitch = in_invertLook.GetBool() ? -1.0f : 1.0f;
+			float invertPitch = joy_invertLook.GetBool() ? -1.0f : 1.0f;
 			viewangles[PITCH] -= MS2SEC( pollTime - lastPollTime ) * lookValue * joy_pitchSpeed.GetFloat() * invertPitch;
 			break;
 		}
@@ -848,7 +847,7 @@ void idUsercmdGenLocal::HandleJoystickAxis( int keyNum, float unclampedValue, fl
 				lastLookValuePitch = lookValue;
 			}
 
-			float invertPitch = in_invertLook.GetBool() ? -1.0f : 1.0f;
+			float invertPitch = joy_invertLook.GetBool() ? -1.0f : 1.0f;
 			viewangles[PITCH] += MS2SEC( pollTime - lastPollTime ) * lookValue * joy_pitchSpeed.GetFloat() * invertPitch;
 			break;
 		}
@@ -1259,9 +1258,6 @@ void idUsercmdGenLocal::Joystick( void ) {
 				Key( joyButton, ( value != 0 ) );
 			} else if ( ( action >= J_AXIS_MIN ) && ( action <= J_AXIS_MAX ) ) {
 				joystickAxis[ action - J_AXIS_MIN ] = static_cast<float>( value ) / 32767.0f;
-			} else if ( action >= J_DPAD_UP && action <= J_DPAD_RIGHT ) {
-				int joyButton = K_JOY_DPAD_UP + ( action - J_DPAD_UP );
-				Key( joyButton, ( value != 0 ) );
 			} else {
 				//assert( !"Unknown joystick event" );
 			}
@@ -1294,7 +1290,7 @@ void idUsercmdGenLocal::UsercmdInterrupt( void ) {
 	Keyboard();
 
 	// process the system joystick events
-	if ( in_useJoystick.GetBool() ) {
+	if ( in_useGamepad.GetBool() ) {
 		Joystick();
 	}
 
@@ -1341,7 +1337,7 @@ usercmd_t idUsercmdGenLocal::GetDirectUsercmd( void ) {
 	Keyboard();
 
 	// process the system joystick events
-	if ( in_useJoystick.GetBool() ) {
+	if ( in_useGamepad.GetBool() ) {
 		Joystick();
 	}
 	// create the usercmd

@@ -147,6 +147,7 @@ typedef enum {
 	K_JOY_BTN_EAST,  // right face button, like Xbox B
 	K_JOY_BTN_WEST,  // left face button, like Xbox X
 	K_JOY_BTN_NORTH, // top face button, like Xbox Y
+
 	K_JOY_BTN_BACK,
 	K_JOY_BTN_GUIDE, // Note: this one should probably not be used?
 	K_JOY_BTN_START,
@@ -154,7 +155,12 @@ typedef enum {
 	K_JOY_BTN_RSTICK, // press right stick
 	K_JOY_BTN_LSHOULDER,
 	K_JOY_BTN_RSHOULDER,
-	// NOTE: in SDL3, the 4 DPAD buttons would be following, we have those later
+
+	K_JOY_DPAD_UP,
+	K_JOY_DPAD_DOWN,
+	K_JOY_DPAD_LEFT,
+	K_JOY_DPAD_RIGHT,
+
 	K_JOY_BTN_MISC1, // Additional button (e.g. Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button)
 	K_JOY_BTN_RPADDLE1, // Upper or primary paddle, under your right hand (e.g. Xbox Elite paddle P1)
 	K_JOY_BTN_LPADDLE1, // Upper or primary paddle, under your left hand (e.g. Xbox Elite paddle P3)
@@ -174,11 +180,7 @@ typedef enum {
 	K_JOY_TRIGGER1,
 	K_JOY_TRIGGER2,
 
-	K_JOY_DPAD_UP,
-	K_JOY_DPAD_DOWN,
-	K_JOY_DPAD_LEFT,
-	K_JOY_DPAD_RIGHT,
-	K_LAST_JOY = K_JOY_DPAD_RIGHT,
+	K_LAST_JOY = K_JOY_TRIGGER2,
 
 	K_GRAVE_A = 229,	// lowercase a with grave accent FIXME: used to be 224; this probably isn't used anyway
 

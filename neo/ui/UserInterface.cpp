@@ -344,6 +344,9 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		return ret;
 	}
 
+	// DG: used to turn gamepad A into left mouse click
+	sysEvent_t fakedEvent = {};
+
 	if ( event->evType == SE_MOUSE || event->evType == SE_MOUSE_ABS ) {
 		if ( !desktop || (desktop->GetFlags() & WIN_MENUGUI) ) {
 			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
@@ -400,6 +403,34 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		if (cursorY < 0) {
 			cursorY = 0;
 		}
+	}
+	else if ( event->evType == SE_JOYSTICK && event->evValue2 != 0 )
+	{
+		// evValue:  axis = jEvent - J_AXIS_MIN;
+		// evValue2: percent (-100 to 100)
+
+		// currently uses both sticks for cursor movement
+		// TODO could use one stick for scrolling (maybe by generating K_UPARROW/DOWNARROW events?)
+		float addVal = event->evValue2 * 0.1f;
+		if( event->evValue == 0 || event->evValue == 2 ) {
+			cursorX += addVal;
+		} else if( event->evValue == 1 || event->evValue == 3 ) {
+			cursorY += addVal;
+		}
+
+		if (cursorX < 0) {
+			cursorX = 0;
+		}
+		if (cursorY < 0) {
+			cursorY = 0;
+		}
+	}
+	else if( event->evType == SE_KEY && (event->evValue == K_JOY_BTN_SOUTH || event->evValue == K_JOY_BTN_EAST) )
+	{
+		// map gamepad buttons south/east (A/B on xbox controller) to mouse1/2
+		fakedEvent = *event;
+		fakedEvent.evValue = (event->evValue == K_JOY_BTN_SOUTH) ? K_MOUSE1 : K_MOUSE2;
+		event = &fakedEvent;
 	}
 
 	if ( desktop ) {
