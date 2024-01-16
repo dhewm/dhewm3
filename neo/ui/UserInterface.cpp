@@ -344,7 +344,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		return ret;
 	}
 
-	// DG: used to turn gamepad A into left mouse click
+	// DG: used to translate gamepad input into events the UI system is familiar with
 	sysEvent_t fakedEvent = {};
 
 	if ( event->evType == SE_MOUSE || event->evType == SE_MOUSE_ABS ) {
@@ -404,14 +404,17 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 			cursorY = 0;
 		}
 	}
-	else if ( event->evType == SE_JOYSTICK && event->evValue2 != 0 )
+	else if ( event->evType == SE_JOYSTICK && event->evValue2 != 0 && event->evValue < 4 )
 	{
 		// evValue:  axis = jEvent - J_AXIS_MIN;
 		// evValue2: percent (-100 to 100)
 
 		// currently uses both sticks for cursor movement
 		// TODO could use one stick for scrolling (maybe by generating K_UPARROW/DOWNARROW events?)
-		float addVal = event->evValue2 * 0.1f;
+		float addVal = expf( fabsf(event->evValue2 * 0.03f) ) * 0.5f;
+		if(event->evValue2 < 0)
+			addVal = -addVal;
+
 		if( event->evValue == 0 || event->evValue == 2 ) {
 			cursorX += addVal;
 		} else if( event->evValue == 1 || event->evValue == 3 ) {
@@ -424,13 +427,54 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		if (cursorY < 0) {
 			cursorY = 0;
 		}
-	}
-	else if( event->evType == SE_KEY && (event->evValue == K_JOY_BTN_SOUTH || event->evValue == K_JOY_BTN_EAST) )
-	{
-		// map gamepad buttons south/east (A/B on xbox controller) to mouse1/2
-		fakedEvent = *event;
-		fakedEvent.evValue = (event->evValue == K_JOY_BTN_SOUTH) ? K_MOUSE1 : K_MOUSE2;
+
+		// some things like highlighting hovered UI elements need a mouse event,
+		// so create a fake mouse event
+		fakedEvent.evType = SE_MOUSE;
+		// the coordinates (evValue/evValue2) aren't used, but keeping them at 0
+		// (as default-initialized above) shouldn't hurt either way
 		event = &fakedEvent;
+	}
+	else if ( event->evType == SE_KEY && event->evValue >= K_FIRST_JOY && event->evValue <= K_LAST_JOY )
+	{
+		// map some gamepad buttons to SE_KEY events that the UI already knows how to use
+		int key = 0;
+		switch(event->evValue) {
+			// emulate mouse buttons
+			case K_JOY_TRIGGER2:
+				// the right trigger is often used for shooting, so for ingame UIs
+				// it'll behave like mouseclick - do the same in menus
+				// fall-through
+			case K_JOY_BTN_SOUTH: // A on xbox controller
+				key = K_MOUSE1;
+				break;
+			case K_JOY_BTN_EAST: // B on xbox controller
+				key = K_MOUSE2;
+				break;
+			// emulate cursor keys (sometimes used for scrolling or selecting in a list)
+			case K_JOY_DPAD_UP:
+				key = K_UPARROW;
+				break;
+			case K_JOY_DPAD_DOWN:
+				key = K_DOWNARROW;
+				break;
+			case K_JOY_DPAD_LEFT:
+				key = K_LEFTARROW;
+				break;
+			case K_JOY_DPAD_RIGHT:
+				key = K_RIGHTARROW;
+				break;
+			// enter is useful after selecting something with cursor keys (or dpad)
+			// in a list, like selecting a savegame - I guess left trigger is suitable for that?
+			case K_JOY_TRIGGER1:
+				key = K_ENTER;
+				break;
+		}
+		if (key != 0) {
+			fakedEvent = *event;
+			fakedEvent.evValue = key;
+			event = &fakedEvent;
+		}
 	}
 
 	if ( desktop ) {
