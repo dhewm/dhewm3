@@ -353,6 +353,7 @@ private:
 	void			CircleToSquare( float & axis_x, float & axis_y ) const;
 	void			HandleJoystickAxis( int keyNum, float unclampedValue, float threshold, bool positive );
 	void			JoystickMove( void );
+	void			JoystickFakeMouse(float axis_x, float axis_y, float deadzone);
 	void			MouseMove( void );
 	void			CmdButtons( void );
 
@@ -429,7 +430,7 @@ idCVar idUsercmdGenLocal::m_strafeSmooth( "m_strafeSmooth", "4", CVAR_SYSTEM | C
 idCVar idUsercmdGenLocal::m_showMouseRate( "m_showMouseRate", "0", CVAR_SYSTEM | CVAR_BOOL, "shows mouse movement" );
 
 idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
-idCVar joy_deadZone( "joy_deadZone", "0.4", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
+idCVar joy_deadZone( "joy_deadZone", "0.25", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
 idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
 idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement" );
 idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
@@ -870,6 +871,33 @@ void idUsercmdGenLocal::HandleJoystickAxis( int keyNum, float unclampedValue, fl
 	}
 }
 
+static float joyAxisToMouseDelta(float axis, float deadzone)
+{
+	float ret = 0.0f;
+	float val = fabsf(axis); // calculations below require a positive value
+	if(val > deadzone) {
+		// from deadzone .. 1 to 0 .. 1-deadzone
+		val -= deadzone;
+		// and then to 0..1
+		val = val * (1.0f / (1.0f - deadzone));
+
+		// make it exponential curve - exp(val*3) should return sth between 1 and 20;
+		// then turning that into 0.5 .. 10
+		ret = expf( val * 3.0f ) * 0.5f;
+		if(axis < 0.0f) // restore sign
+			ret = -ret;
+	}
+	return ret;
+}
+
+void idUsercmdGenLocal::JoystickFakeMouse(float axis_x, float axis_y, float deadzone)
+{
+	float x = joyAxisToMouseDelta(axis_x, deadzone);
+	float y = joyAxisToMouseDelta(axis_y, deadzone);
+	continuousMouseX += x;
+	continuousMouseY += y;
+}
+
 /*
 =================
 idUsercmdGenLocal::JoystickMove
@@ -888,6 +916,8 @@ void idUsercmdGenLocal::JoystickMove() {
 	HandleJoystickAxis( K_JOY_STICK1_LEFT, axis_x, threshold, false );
 	HandleJoystickAxis( K_JOY_STICK1_RIGHT, axis_x, threshold, true );
 
+	JoystickFakeMouse( axis_x, axis_y, threshold );
+
 	axis_y = joystickAxis[ AXIS_RIGHT_Y ];
 	axis_x = joystickAxis[ AXIS_RIGHT_X ];
 	CircleToSquare( axis_x, axis_y );
@@ -896,6 +926,8 @@ void idUsercmdGenLocal::JoystickMove() {
 	HandleJoystickAxis( K_JOY_STICK2_DOWN, axis_y, threshold, true );
 	HandleJoystickAxis( K_JOY_STICK2_LEFT, axis_x, threshold, false );
 	HandleJoystickAxis( K_JOY_STICK2_RIGHT, axis_x, threshold, true );
+
+	JoystickFakeMouse( axis_x, axis_y, threshold );
 
 	HandleJoystickAxis( K_JOY_TRIGGER1, joystickAxis[ AXIS_LEFT_TRIG ], triggerThreshold, true );
 	HandleJoystickAxis( K_JOY_TRIGGER2, joystickAxis[ AXIS_RIGHT_TRIG ], triggerThreshold, true );

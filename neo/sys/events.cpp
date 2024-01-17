@@ -61,6 +61,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 extern idCVar in_useGamepad; // from UsercmdGen.cpp
+extern idCVar joy_deadZone;  // ditto
 
 // NOTE: g++-4.7 doesn't like when this is static (for idCmdSystem::ArgCompletion_String<kbdNames>)
 const char *_in_kbdNames[] = {
@@ -898,6 +899,25 @@ void Sys_GrabMouseCursor(bool grabIt) {
 	GLimp_GrabInput(flags);
 }
 
+static bool interactiveGuiActive = false;
+/*
+===============
+Sys_SetInteractiveIngameGuiActive
+Tell the input system that currently an interactive *ingame* UI has focus,
+so there is an active cursor.
+Used for an ungodly hack to make gamepad button south (A) behave like
+left mouse button in that case, so "clicking" with gamepad in the PDA
+(and ingame GUIs) works as expected.
+Not set for proper menus like main menu etc - the gamepad hacks for that
+are in idUserInterfaceLocal::HandleEvent().
+I hope this won't explode in my face :-p
+===============
+ */
+void Sys_SetInteractiveIngameGuiActive(bool active)
+{
+	interactiveGuiActive = active;
+}
+
 
 static void PushButton( int key, bool value ) {
 	// So we don't keep sending the same SE_KEY message over and over again
@@ -1218,20 +1238,27 @@ sysEvent_t Sys_GetEvent() {
 				common->Warning( "Gamepad support is disabled! Set the in_useGamepad CVar to 1 to enable it!\n" );
 				continue;
 			}
+
+			res.evType = SE_KEY;
+			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
+
 			// special case: always treat the start button as escape so it opens/closes the menu
 			// (also makes that button non-bindable)
 			if ( ev.cbutton.button == SDL_CONTROLLER_BUTTON_START ) {
-				res.evType = SE_KEY;
 				res.evValue = K_ESCAPE;
-				res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
+				return res;
+			} else if( ev.cbutton.button == SDL_CONTROLLER_BUTTON_A && interactiveGuiActive && sessLocal.GetActiveMenu() == NULL ) {
+				// ugly hack: currently an interactive ingame GUI (with a cursor) is active/focused
+				// so pretend that the gamepads A (south) button is the left mouse button
+				// so it can be used for "clicking"..
+				mouse_polls.Append( mouse_poll_t(M_ACTION1, res.evValue2) );
+				res.evValue = K_MOUSE1;
 				return res;
 			}
 
 			sys_jEvents jEvent =  mapjoybutton( (SDL_GameControllerButton)ev.cbutton.button);
 			joystick_polls.Append(joystick_poll_t(jEvent, ev.cbutton.state == SDL_PRESSED ? 1 : 0) );
 
-			res.evType = SE_KEY;
-			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
 			if ( ( jEvent >= J_ACTION_FIRST ) && ( jEvent <= J_ACTION_MAX ) ) {
 				res.evValue = K_FIRST_JOY + ( jEvent - J_ACTION_FIRST );
 				return res;
@@ -1274,18 +1301,28 @@ sysEvent_t Sys_GetEvent() {
 				// NOTE: the stuff set here is only used to move the cursor in menus
 				//       ingame movement is done via joystick_polls
 				int axis = jEvent - J_AXIS_MIN;
-				float val = ev.caxis.value * (1.25f / 32767.0f);
-				// 25% deadzone
-				if( val < 0.0f ) {
-					val = fminf(val + 0.25f, 0.0f);
+				float dz = joy_deadZone.GetFloat();
+
+				float val = fabsf(ev.caxis.value * (1.0f / 32767.0f));
+				if(val < dz) {
+					val = 0.0f;
 				} else {
-					val = fmaxf(val - 0.25f, 0.0f);
+					// from deadzone .. 1 to 0 .. 1-deadzone
+					val -= dz;
+					// and then to 0..1
+					val = val * (1.0f / (1.0f - dz));
+
+					if( ev.caxis.value < 0 ) {
+						val = -val;
+					}
 				}
 
 				joyAxis[axis] = val;
 			}
 
-			continue; // try to get a decent event.
+			// handle next event; joy axis events are generated below,
+			// when there are no further SDL events
+			continue;
 		}
 		break;
 

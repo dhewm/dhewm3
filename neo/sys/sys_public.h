@@ -248,6 +248,11 @@ void			Sys_EndJoystickInputEvents();
 // when in windowed mode
 void			Sys_GrabMouseCursor( bool grabIt );
 
+// DG: added this for an ungodly hack for gamepad support
+// active = true means "currently a GUI with a cursor is active/focused"
+// active = false means "that GUI is not active anymore"
+void			Sys_SetInteractiveIngameGuiActive(bool active);
+
 void			Sys_ShowWindow( bool show );
 bool			Sys_IsWindowVisible( void );
 void			Sys_ShowConsole( int visLevel, bool quitOnClose );

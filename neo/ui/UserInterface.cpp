@@ -582,6 +582,11 @@ const char *idUserInterfaceLocal::Activate(bool activate, int _time) {
 	time = _time;
 	active = activate;
 	if ( desktop ) {
+		// FIXME: this works ok, mostly, except in multiplayer, where this function
+		//   is called twice with activate=true, and the first time GetActiveMenu() returns NULL, the second time not
+		if(interactive && sessLocal.GetActiveMenu() == NULL) {
+			Sys_SetInteractiveIngameGuiActive(activate);
+		}
 		activateStr = "";
 		desktop->Activate( activate, activateStr );
 		return activateStr;
