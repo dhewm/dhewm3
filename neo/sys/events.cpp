@@ -80,6 +80,9 @@ static idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents 
 static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
 
+idCVar joy_gamepadLayout("joy_gamepadLayout", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_INTEGER,
+		"Button layout of gamepad - 0: XBox-style, 1: Nintendo-style, 2: Playstation-style", idCmdSystem::ArgCompletion_Integer<0, 2> );
+
 // set in handleMouseGrab(), used in Sys_GetEvent() to decide what kind of internal mouse event to generate
 static bool in_relativeMouseMode = true;
 // set in Sys_GetEvent() on window focus gained/lost events
@@ -275,9 +278,9 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 
 		if (key <= K_JOY_BTN_NORTH) {
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-
+			// TODO: or use the SDL2 code and just set joy_gamepadLayout automatically based on SDL_GetGamepadType() ?
 			SDL_GamepadButton gpbtn = SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_SOUTH);
-			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabeForTypel(TODO, gpbtn);
+			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabelForType(TODO, gpbtn);
 			switch(label) {
 				case SDL_GAMEPAD_BUTTON_LABEL_A:
 					return "Pad A";
@@ -298,16 +301,22 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 			}
 
 #else // SDL2
-			// using xbox-style names, like SDL2 does (SDL can't tell us if this is a xbox or PS or nintendo or whatever-style gamepad)
-			switch(key) {
-				case K_JOY_BTN_SOUTH:
-					return "Pad A";
-				case K_JOY_BTN_EAST:
-					return "Pad B";
-				case K_JOY_BTN_WEST:
-					return "Pad X";
-				case K_JOY_BTN_NORTH:
-					return "Pad Y";
+			//                                          South,   East,       West,         North
+			static const char* xboxBtnNames[4]     = { "Pad A", "Pad B",    "Pad X",      "Pad Y" };
+			static const char* nintendoBtnNames[4] = { "Pad B", "Pad A",    "Pad X",      "Pad Y" };
+			static const char* psBtnNames[4] = { "Pad Cross", "Pad Circle", "Pad Square", "Pad Triangle" };
+
+			unsigned btnIdx = key - K_JOY_BTN_SOUTH;
+			assert(btnIdx < 4);
+			switch( joy_gamepadLayout.GetInteger() ) {
+				default:
+					common->Warning( "joy_gamepadLayout has invalid value %d !\n", joy_gamepadLayout.GetInteger() );
+				case 0:
+					return xboxBtnNames[btnIdx];
+				case 1:
+					return nintendoBtnNames[btnIdx];
+				case 2:
+					return psBtnNames[btnIdx];
 			}
 #endif // face button names for SDL2
 		}
