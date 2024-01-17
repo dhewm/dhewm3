@@ -251,7 +251,8 @@ void			Sys_GrabMouseCursor( bool grabIt );
 // DG: added this for an ungodly hack for gamepad support
 // active = true means "currently a GUI with a cursor is active/focused"
 // active = false means "that GUI is not active anymore"
-void			Sys_SetInteractiveIngameGuiActive(bool active);
+class idUserInterface;
+void			Sys_SetInteractiveIngameGuiActive( bool active, idUserInterface* ui );
 
 void			Sys_ShowWindow( bool show );
 bool			Sys_IsWindowVisible( void );

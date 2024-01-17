@@ -899,7 +899,7 @@ void Sys_GrabMouseCursor(bool grabIt) {
 	GLimp_GrabInput(flags);
 }
 
-static bool interactiveGuiActive = false;
+
 /*
 ===============
 Sys_SetInteractiveIngameGuiActive
@@ -910,12 +910,42 @@ left mouse button in that case, so "clicking" with gamepad in the PDA
 (and ingame GUIs) works as expected.
 Not set for proper menus like main menu etc - the gamepad hacks for that
 are in idUserInterfaceLocal::HandleEvent().
+Call with ui = NULL to clear the state.
 I hope this won't explode in my face :-p
 ===============
- */
-void Sys_SetInteractiveIngameGuiActive(bool active)
+*/
+bool D3_IN_interactiveIngameGuiActive = false;
+void Sys_SetInteractiveIngameGuiActive( bool active, idUserInterface* ui )
 {
-	interactiveGuiActive = active;
+	static idList<idUserInterface*> lastuis;
+	if ( ui == NULL ) {
+		// special case for clearing
+		D3_IN_interactiveIngameGuiActive = false;
+		lastuis.Clear();
+		return;
+	}
+	int idx = lastuis.FindIndex( ui );
+
+	if ( sessLocal.GetActiveMenu() == NULL && active ) {
+		// add ui to lastuis, if it has been activated and no proper menu
+		// (like main menu) is currently open
+		lastuis.Append( ui );
+	} else if ( idx != -1 ) {
+		// if the UI is in lastuis and has been deactivated, or there
+		// is a proper menu opened, remove it from the list.
+		// this both handles the regular deactivate case and also works around
+		// main-menu-in-multiplayer weirdness: that menu calls idUserInterface::Activate()
+		// with activate = true twice, but on first call sessLocal.GetActiveMenu() is NULL
+		// so we want to remove it once we realize that it really is a "proper" menu after all.
+		// And because it's possible that we have an ingame UI focussed while opening
+		// the multiplayer-main-menu, we keep a list of lastuis, instead of just one,
+		// so D3_IN_interactiveIngameGuiActive remains true in that case
+		// (the ingame UI is still in the list)
+
+		lastuis.RemoveIndex( idx );
+	}
+
+	D3_IN_interactiveIngameGuiActive = lastuis.Num() != 0;
 }
 
 
@@ -1247,7 +1277,7 @@ sysEvent_t Sys_GetEvent() {
 			if ( ev.cbutton.button == SDL_CONTROLLER_BUTTON_START ) {
 				res.evValue = K_ESCAPE;
 				return res;
-			} else if( ev.cbutton.button == SDL_CONTROLLER_BUTTON_A && interactiveGuiActive && sessLocal.GetActiveMenu() == NULL ) {
+			} else if( ev.cbutton.button == SDL_CONTROLLER_BUTTON_A && D3_IN_interactiveIngameGuiActive && sessLocal.GetActiveMenu() == NULL ) {
 				// ugly hack: currently an interactive ingame GUI (with a cursor) is active/focused
 				// so pretend that the gamepads A (south) button is the left mouse button
 				// so it can be used for "clicking"..

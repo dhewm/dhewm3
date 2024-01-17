@@ -118,6 +118,9 @@ void idUserInterfaceManagerLocal::EndLevelLoad() {
 			}
 		}
 	}
+
+	// DG: this should probably be reset at this point
+	Sys_SetInteractiveIngameGuiActive( false, NULL );
 }
 
 void idUserInterfaceManagerLocal::Reload( bool all ) {
@@ -582,11 +585,10 @@ const char *idUserInterfaceLocal::Activate(bool activate, int _time) {
 	time = _time;
 	active = activate;
 	if ( desktop ) {
-		// FIXME: this works ok, mostly, except in multiplayer, where this function
-		//   is called twice with activate=true, and the first time GetActiveMenu() returns NULL, the second time not
-		if(interactive && sessLocal.GetActiveMenu() == NULL) {
-			Sys_SetInteractiveIngameGuiActive(activate);
-		}
+		// DG: added this hack for gamepad input
+		if ( interactive ) {
+			Sys_SetInteractiveIngameGuiActive( activate, this );
+		} // DG end
 		activateStr = "";
 		desktop->Activate( activate, activateStr );
 		return activateStr;
