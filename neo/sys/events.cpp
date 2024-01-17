@@ -80,13 +80,19 @@ static idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents 
 static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
 
-idCVar joy_gamepadLayout("joy_gamepadLayout", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_INTEGER,
-		"Button layout of gamepad - 0: XBox-style, 1: Nintendo-style, 2: Playstation-style", idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar joy_gamepadLayout("joy_gamepadLayout", "-1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_INTEGER,
+		"Button layout of gamepad - -1: auto (needs SDL 2.0.12 or newer), 0: XBox-style, 1: Nintendo-style, 2: Playstation-style", idCmdSystem::ArgCompletion_Integer<-1, 2> );
 
 // set in handleMouseGrab(), used in Sys_GetEvent() to decide what kind of internal mouse event to generate
 static bool in_relativeMouseMode = true;
 // set in Sys_GetEvent() on window focus gained/lost events
 static bool in_hasFocus = true;
+
+static enum D3_Gamepad_Type {
+	D3_GAMEPAD_XINPUT,     // XBox/XInput standard, the default
+	D3_GAMEPAD_NINTENDO,   // nintendo-like (A/B and X/Y are switched)
+	D3_GAMEPAD_PLAYSTATION // PS-like (geometric symbols instead of A/B/X/Y)
+} gamepadType = D3_GAMEPAD_XINPUT;
 
 struct kbd_poll_t {
 	int key;
@@ -306,16 +312,23 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 			static const char* nintendoBtnNames[4] = { "Pad B", "Pad A",    "Pad X",      "Pad Y" };
 			static const char* psBtnNames[4] = { "Pad Cross", "Pad Circle", "Pad Square", "Pad Triangle" };
 
+			int layout = joy_gamepadLayout.GetInteger();
+			if ( layout == -1 ) {
+				layout = gamepadType;
+			}
+
 			unsigned btnIdx = key - K_JOY_BTN_SOUTH;
 			assert(btnIdx < 4);
-			switch( joy_gamepadLayout.GetInteger() ) {
+
+			switch( layout ) {
 				default:
 					common->Warning( "joy_gamepadLayout has invalid value %d !\n", joy_gamepadLayout.GetInteger() );
-				case 0:
+					// fall-through
+				case D3_GAMEPAD_XINPUT:
 					return xboxBtnNames[btnIdx];
-				case 1:
+				case D3_GAMEPAD_NINTENDO:
 					return nintendoBtnNames[btnIdx];
-				case 2:
+				case D3_GAMEPAD_PLAYSTATION:
 					return psBtnNames[btnIdx];
 			}
 #endif // face button names for SDL2
@@ -626,6 +639,19 @@ static byte mapkey(SDL_Keycode key) {
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
+#if ! SDL_VERSION_ATLEAST(2, 0, 14)
+// Hack: to support newer SDL2 runtime versions than the one built against,
+//       define these controller buttons if needed
+enum {
+	SDL_CONTROLLER_BUTTON_MISC1 = 15, /* Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button */
+	SDL_CONTROLLER_BUTTON_PADDLE1,  /* Xbox Elite paddle P1 */
+	SDL_CONTROLLER_BUTTON_PADDLE2,  /* Xbox Elite paddle P3 */
+	SDL_CONTROLLER_BUTTON_PADDLE3,  /* Xbox Elite paddle P2 */
+	SDL_CONTROLLER_BUTTON_PADDLE4,  /* Xbox Elite paddle P4 */
+	SDL_CONTROLLER_BUTTON_TOUCHPAD, /* PS4/PS5 touchpad button */
+};
+#endif // ! SDL_VERSION_ATLEAST(2, 0, 14)
+
 static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
 	switch (button)
 	{
@@ -661,7 +687,7 @@ static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
 		return J_DPAD_LEFT;
 	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
 		return J_DPAD_RIGHT;
-	// TODO: have the following always been supported in SDL2?
+
 	case SDL_CONTROLLER_BUTTON_MISC1:
 		return J_BTN_MISC1;
 	case SDL_CONTROLLER_BUTTON_PADDLE1:
@@ -672,7 +698,6 @@ static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
 		return J_BTN_LPADDLE1;
 	case SDL_CONTROLLER_BUTTON_PADDLE4:
 		return J_BTN_LPADDLE2;
-
 	default:
 		common->Warning("unknown game controller button %u", button);
 		break;
@@ -701,6 +726,52 @@ static sys_jEvents mapjoyaxis(SDL_GameControllerAxis axis) {
 	}
 	return J_AXIS_MAX;
 }
+
+#if ! SDL_VERSION_ATLEAST(2, 24, 0)
+// Hack: to support newer SDL2 runtime versions than the one compiled against,
+// define some controller types that were added after 2.0.12
+enum {
+#if ! SDL_VERSION_ATLEAST(2, 0, 14)
+	SDL_CONTROLLER_TYPE_PS5 = 7,
+#endif
+
+	// leaving out luna and stadia (from 2.0.16)
+	// and nvidia shield (from 2.24), they're similar enough to XBox/XInput
+
+	// the following were added in 2.24
+	SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT = 11,
+	SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT,
+	SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR
+};
+#endif // ! SDL_VERSION_ATLEAST(2, 24, 0)
+
+static void setGamepadType( SDL_GameController* gc )
+{
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	switch( SDL_GameControllerGetType( gc ) ) {
+		default: // the other controller like luna, stadia, whatever, have a very similar layout
+		case SDL_CONTROLLER_TYPE_UNKNOWN:
+		case SDL_CONTROLLER_TYPE_XBOX360:
+		case SDL_CONTROLLER_TYPE_XBOXONE:
+			gamepadType = D3_GAMEPAD_XINPUT;
+			break;
+
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT:
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:
+			gamepadType = D3_GAMEPAD_NINTENDO;
+			break;
+
+		case SDL_CONTROLLER_TYPE_PS3:
+		case SDL_CONTROLLER_TYPE_PS4:
+		case SDL_CONTROLLER_TYPE_PS5:
+			gamepadType = D3_GAMEPAD_PLAYSTATION;
+			break;
+	}
+#endif // SDL_VERSION_ATLEAST(2, 0, 12)
+}
+
 #endif // SDL2+ gamecontroller code
 
 static void PushConsoleEvent(const char *s) {
@@ -769,6 +840,9 @@ void Sys_InitInput() {
 	for( int i = 0; i < NumJoysticks; ++i )
 	{
 		SDL_GameController* gc = SDL_GameControllerOpen( i );
+		if ( gc != NULL ) {
+			setGamepadType( gc );
+		}
 	}
 #endif
 }
@@ -1286,7 +1360,9 @@ sysEvent_t Sys_GetEvent() {
 			if ( ev.cbutton.button == SDL_CONTROLLER_BUTTON_START ) {
 				res.evValue = K_ESCAPE;
 				return res;
-			} else if( ev.cbutton.button == SDL_CONTROLLER_BUTTON_A && D3_IN_interactiveIngameGuiActive && sessLocal.GetActiveMenu() == NULL ) {
+			} else if( ev.cbutton.button == SDL_CONTROLLER_BUTTON_A
+					   && D3_IN_interactiveIngameGuiActive && sessLocal.GetActiveMenu() == NULL )
+			{
 				// ugly hack: currently an interactive ingame GUI (with a cursor) is active/focused
 				// so pretend that the gamepads A (south) button is the left mouse button
 				// so it can be used for "clicking"..
@@ -1366,11 +1442,15 @@ sysEvent_t Sys_GetEvent() {
 		break;
 
 		case SDL_JOYDEVICEADDED:
-			SDL_GameControllerOpen( ev.jdevice.which );
+		{
+			SDL_GameController* gc = SDL_GameControllerOpen( ev.jdevice.which );
+			if ( gc != NULL ) {
+				setGamepadType( gc );
+			}
 			// TODO: hot swapping maybe.
 			//lbOnControllerPlugIn(event.jdevice.which);
 			break;
-
+		}
 		case SDL_JOYDEVICEREMOVED:
 			// TODO: hot swapping maybe.
 			//lbOnControllerUnPlug(event.jdevice.which);
