@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/FileSystem.h"
 #include "framework/DemoFile.h"
 #include "framework/KeyInput.h"
+#include "framework/Session_local.h"
 #include "ui/ListGUILocal.h"
 #include "ui/DeviceContext.h"
 #include "ui/Window.h"
