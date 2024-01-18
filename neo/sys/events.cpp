@@ -309,7 +309,7 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 #else // SDL2
 			//                                          South,   East,       West,         North
 			static const char* xboxBtnNames[4]     = { "Pad A", "Pad B",    "Pad X",      "Pad Y" };
-			static const char* nintendoBtnNames[4] = { "Pad B", "Pad A",    "Pad X",      "Pad Y" };
+			static const char* nintendoBtnNames[4] = { "Pad B", "Pad A",    "Pad Y",      "Pad X" };
 			static const char* psBtnNames[4] = { "Pad Cross", "Pad Circle", "Pad Square", "Pad Triangle" };
 
 			int layout = joy_gamepadLayout.GetInteger();
