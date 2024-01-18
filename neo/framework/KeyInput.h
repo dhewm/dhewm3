@@ -150,7 +150,7 @@ typedef enum {
 
 	K_JOY_BTN_BACK,
 	K_JOY_BTN_GUIDE, // Note: this one should probably not be used?
-	K_JOY_BTN_START,
+	K_JOY_BTN_START, // hardcoded to generate Esc to open/close menu
 	K_JOY_BTN_LSTICK, // press left stick
 	K_JOY_BTN_RSTICK, // press right stick
 	K_JOY_BTN_LSHOULDER,

@@ -104,7 +104,7 @@ typedef enum {
 	J_BTN_LPADDLE2, //  Lower or secondary paddle, under your left hand (e.g. Xbox Elite paddle P4)
 
 	J_ACTION_MAX = J_BTN_LPADDLE2,
-	// leaving some space here for about 16 additional J_ACTIONs, if needed
+	// leaving some space here for about 12 additional J_ACTIONs, if needed
 
 	J_AXIS_MIN = 32,
 	J_AXIS_LEFT_X = J_AXIS_MIN + AXIS_LEFT_X,
