@@ -442,36 +442,38 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 	{
 		// map some gamepad buttons to SE_KEY events that the UI already knows how to use
 		int key = 0;
-		switch(event->evValue) {
-			// emulate mouse buttons
-			case K_JOY_TRIGGER2:
-				// the right trigger is often used for shooting, so for ingame UIs
-				// it'll behave like mouseclick - do the same in menus
-				// fall-through
-			case K_JOY_BTN_SOUTH: // A on xbox controller
-				key = K_MOUSE1;
-				break;
-			case K_JOY_BTN_EAST: // B on xbox controller
-				key = K_MOUSE2;
-				break;
-			// emulate cursor keys (sometimes used for scrolling or selecting in a list)
-			case K_JOY_DPAD_UP:
-				key = K_UPARROW;
-				break;
-			case K_JOY_DPAD_DOWN:
-				key = K_DOWNARROW;
-				break;
-			case K_JOY_DPAD_LEFT:
-				key = K_LEFTARROW;
-				break;
-			case K_JOY_DPAD_RIGHT:
-				key = K_RIGHTARROW;
-				break;
-			// enter is useful after selecting something with cursor keys (or dpad)
-			// in a list, like selecting a savegame - I guess left trigger is suitable for that?
-			case K_JOY_TRIGGER1:
-				key = K_ENTER;
-				break;
+		if( idKeyInput::GetUsercmdAction( event->evValue ) ==  20 /* UB_ATTACK*/ ) {
+			// if this button is bound to _attack (fire), treat it as left mouse button
+			key = K_MOUSE1;
+		} else {
+			switch(event->evValue) {
+				// emulate mouse buttons
+				case K_JOY_BTN_SOUTH: // A on xbox controller
+					key = K_MOUSE1;
+					break;
+				case K_JOY_BTN_EAST: // B on xbox controller
+					key = K_MOUSE2;
+					break;
+				// emulate cursor keys (sometimes used for scrolling or selecting in a list)
+				case K_JOY_DPAD_UP:
+					key = K_UPARROW;
+					break;
+				case K_JOY_DPAD_DOWN:
+					key = K_DOWNARROW;
+					break;
+				case K_JOY_DPAD_LEFT:
+					key = K_LEFTARROW;
+					break;
+				case K_JOY_DPAD_RIGHT:
+					key = K_RIGHTARROW;
+					break;
+				// enter is useful after selecting something with cursor keys (or dpad)
+				// in a list, like selecting a savegame - I guess left trigger is suitable for that?
+				// (right trigger is often used for shooting, which we use as K_MOUSE1 here)
+				case K_JOY_TRIGGER1:
+					key = K_ENTER;
+					break;
+			}
 		}
 		if (key != 0) {
 			fakedEvent = *event;

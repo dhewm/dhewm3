@@ -93,7 +93,7 @@ typedef enum {
 	UB_BUTTON6,
 	UB_BUTTON7,
 
-	UB_ATTACK,
+	UB_ATTACK, // NOTE: this value (20) is hardcoded in idUserInterfaceLocal::HandleEvent() !
 	UB_SPEED,
 	UB_ZOOM,
 	UB_SHOWSCORES,

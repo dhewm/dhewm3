@@ -81,7 +81,7 @@ static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
 
 idCVar joy_gamepadLayout("joy_gamepadLayout", "-1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_INTEGER,
-		"Button layout of gamepad - -1: auto (needs SDL 2.0.12 or newer), 0: XBox-style, 1: Nintendo-style, 2: Playstation-style", idCmdSystem::ArgCompletion_Integer<-1, 2> );
+		"Button layout of gamepad. -1: auto (needs SDL 2.0.12 or newer), 0: XBox-style, 1: Nintendo-style, 2: PS4/5-style, 3: PS2/3-style", idCmdSystem::ArgCompletion_Integer<-1, 3> );
 
 // set in handleMouseGrab(), used in Sys_GetEvent() to decide what kind of internal mouse event to generate
 static bool in_relativeMouseMode = true;
@@ -91,7 +91,8 @@ static bool in_hasFocus = true;
 static enum D3_Gamepad_Type {
 	D3_GAMEPAD_XINPUT,     // XBox/XInput standard, the default
 	D3_GAMEPAD_NINTENDO,   // nintendo-like (A/B and X/Y are switched)
-	D3_GAMEPAD_PLAYSTATION // PS-like (geometric symbols instead of A/B/X/Y)
+	D3_GAMEPAD_PLAYSTATION, // PS-like (geometric symbols instead of A/B/X/Y)
+	D3_GAMEPAD_PLAYSTATION_OLD // PS2/PS3-like: the back button is called "select" instead of "share"
 } gamepadType = D3_GAMEPAD_XINPUT;
 
 struct kbd_poll_t {
@@ -310,8 +311,7 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 			//                                          South,   East,       West,         North        Back
 			static const char* xboxBtnNames[5]     = { "Pad A", "Pad B",    "Pad X",      "Pad Y",   "Pad Back" };
 			static const char* nintendoBtnNames[5] = { "Pad B", "Pad A",    "Pad Y",      "Pad X",   "Pad -" };
-			// TODO: on PS3 and older, back is "Select"; on PS4+ back it might be "share"?
-			static const char* psBtnNames[5] = { "Pad Cross", "Pad Circle", "Pad Square", "Pad Triangle", "Pad Select" };
+			static const char* psBtnNames[5] = { "Pad Cross", "Pad Circle", "Pad Square", "Pad Triangle", "Pad Share" };
 
 			int layout = joy_gamepadLayout.GetInteger();
 			if ( layout == -1 ) {
@@ -329,6 +329,11 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 					return xboxBtnNames[btnIdx];
 				case D3_GAMEPAD_NINTENDO:
 					return nintendoBtnNames[btnIdx];
+				case D3_GAMEPAD_PLAYSTATION_OLD:
+					if ( key == K_JOY_BTN_BACK )
+						return "Pad Select";
+					// the other button names are identical for PS2/3 and PS4/5
+					// fall-through
 				case D3_GAMEPAD_PLAYSTATION:
 					return psBtnNames[btnIdx];
 			}
@@ -764,6 +769,9 @@ static void setGamepadType( SDL_GameController* gc )
 			break;
 
 		case SDL_CONTROLLER_TYPE_PS3:
+			gamepadType = D3_GAMEPAD_PLAYSTATION_OLD;
+			typestr = "Playstation2/3-like";
+			break;
 		case SDL_CONTROLLER_TYPE_PS4:
 		case SDL_CONTROLLER_TYPE_PS5:
 			gamepadType = D3_GAMEPAD_PLAYSTATION;
@@ -772,6 +780,15 @@ static void setGamepadType( SDL_GameController* gc )
 	}
 
 	common->Printf( "Detected Gamepad %s as type %s\n", SDL_GameControllerName( gc ), typestr );
+	SDL_Joystick* joy = SDL_GameControllerGetJoystick( gc );
+	SDL_JoystickGUID guid = SDL_JoystickGetGUID( joy );
+	char guidstr[34] = {};
+	SDL_JoystickGetGUIDString( guid, guidstr, sizeof(guidstr) );
+	Uint16 vendor = SDL_GameControllerGetVendor( gc );
+	Uint16 product = SDL_GameControllerGetProduct( gc );
+	const char* joyname = SDL_JoystickName( joy );
+
+	common->Printf( "  USB IDs: %.4hx:%.4hx Joystick Name: \"%s\" GUID: %s\n", vendor, product, joyname, guidstr );
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 }
