@@ -431,7 +431,6 @@ idCVar idUsercmdGenLocal::m_showMouseRate( "m_showMouseRate", "0", CVAR_SYSTEM |
 
 idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
 idCVar joy_deadZone( "joy_deadZone", "0.25", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
-idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
 idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement" );
 idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
 idCVar joy_pitchSpeed( "joy_pitchSpeed", "130",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing up or down on the joystick", 60, 600 );
@@ -465,6 +464,8 @@ idUsercmdGenLocal::idUsercmdGenLocal( void ) {
 	toggled_run.Clear();
 	toggled_zoom.Clear();
 	toggled_run.on = in_alwaysRun.GetBool();
+
+	lastLookValuePitch = lastLookValueYaw = 0.0f;
 
 	ClearAngles();
 	Clear();

@@ -1386,12 +1386,12 @@ sysEvent_t Sys_GetEvent() {
 			if ( ev.cbutton.button == SDL_CONTROLLER_BUTTON_START ) {
 				res.evValue = K_ESCAPE;
 				return res;
-			} else if( ev.cbutton.button == SDL_CONTROLLER_BUTTON_A
+			} else if( (ev.cbutton.button == SDL_CONTROLLER_BUTTON_A || ev.cbutton.button == SDL_CONTROLLER_BUTTON_Y)
 					   && D3_IN_interactiveIngameGuiActive && sessLocal.GetActiveMenu() == NULL )
 			{
 				// ugly hack: currently an interactive ingame GUI (with a cursor) is active/focused
-				// so pretend that the gamepads A (south) button is the left mouse button
-				// so it can be used for "clicking"..
+				// so pretend that the gamepads A (south) or Y (north, used by D3BFG to click ingame GUIs) button
+				// is the left mouse button so it can be used for "clicking"..
 				mouse_polls.Append( mouse_poll_t(M_ACTION1, res.evValue2) );
 				res.evValue = K_MOUSE1;
 				return res;
