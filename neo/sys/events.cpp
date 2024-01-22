@@ -60,6 +60,9 @@ If you have questions concerning this license or the applicable additional terms
 #define SDLK_PRINTSCREEN SDLK_PRINT
 #endif
 
+extern idCVar in_useGamepad; // from UsercmdGen.cpp
+extern idCVar joy_deadZone;  // ditto
+
 // NOTE: g++-4.7 doesn't like when this is static (for idCmdSystem::ArgCompletion_String<kbdNames>)
 const char *_in_kbdNames[] = {
 #if SDL_VERSION_ATLEAST(2, 0, 0) // auto-detection is only available for SDL2
@@ -77,10 +80,20 @@ static idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents 
 static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
 
+idCVar joy_gamepadLayout("joy_gamepadLayout", "-1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_INTEGER,
+		"Button layout of gamepad. -1: auto (needs SDL 2.0.12 or newer), 0: XBox-style, 1: Nintendo-style, 2: PS4/5-style, 3: PS2/3-style", idCmdSystem::ArgCompletion_Integer<-1, 3> );
+
 // set in handleMouseGrab(), used in Sys_GetEvent() to decide what kind of internal mouse event to generate
 static bool in_relativeMouseMode = true;
 // set in Sys_GetEvent() on window focus gained/lost events
 static bool in_hasFocus = true;
+
+static enum D3_Gamepad_Type {
+	D3_GAMEPAD_XINPUT,     // XBox/XInput standard, the default
+	D3_GAMEPAD_NINTENDO,   // nintendo-like (A/B and X/Y are switched)
+	D3_GAMEPAD_PLAYSTATION, // PS-like (geometric symbols instead of A/B/X/Y)
+	D3_GAMEPAD_PLAYSTATION_OLD // PS2/PS3-like: the back button is called "select" instead of "share"
+} gamepadType = D3_GAMEPAD_XINPUT;
 
 struct kbd_poll_t {
 	int key;
@@ -108,8 +121,26 @@ struct mouse_poll_t {
 	}
 };
 
+struct joystick_poll_t {
+	int action;
+	int value;
+
+	joystick_poll_t() : action(0), value(0) {} // TODO: or -1?
+
+	joystick_poll_t(int a, int v) {
+		action = a;
+		value = v;
+	}
+};
+
 static idList<kbd_poll_t> kbd_polls;
 static idList<mouse_poll_t> mouse_polls;
+static idList<joystick_poll_t> joystick_polls;
+
+static bool buttonStates[K_LAST_KEY];
+static float joyAxis[MAX_JOYSTICK_AXIS];
+
+static idList<sysEvent_t> event_overflow;
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 // for utf8ToISO8859_1() - used for non-ascii text input and Sys_GetLocalizedScancodeName()
@@ -171,7 +202,7 @@ static scancodename_t scancodemappings[] = {
 	D3_SC_MAPPING(COMMA),
 	D3_SC_MAPPING(PERIOD),
 	D3_SC_MAPPING(SLASH),
-	// leaving out lots of key incl. from keypad, we already handle them as normal keys
+	// leaving out lots of keys incl. from keypad, we already handle them as normal keys
 	D3_SC_MAPPING(NONUSBACKSLASH),
 	D3_SC_MAPPING(INTERNATIONAL1), /**< used on Asian keyboards, see footnotes in USB doc */
 	D3_SC_MAPPING(INTERNATIONAL2),
@@ -245,6 +276,137 @@ static bool utf8ToISO8859_1(const char* inbuf, char* outbuf, size_t outsize) {
 	return outbytesleft < outsize; // return false if no char was written
 }
 #endif // SDL2
+
+const char* Sys_GetLocalizedJoyKeyName( int key ) {
+	// Note: trying to keep the returned names short, because the Doom3 binding window doesn't have much space for names..
+
+#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
+	if (key >= K_FIRST_JOY && key <= K_LAST_JOY) {
+
+		if (key <= K_JOY_BTN_BACK) {
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+			// TODO: or use the SDL2 code and just set joy_gamepadLayout automatically based on SDL_GetGamepadType() ?
+			SDL_GamepadButton gpbtn = SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_SOUTH);
+			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabelForType(TODO, gpbtn);
+			switch(label) {
+				case SDL_GAMEPAD_BUTTON_LABEL_A:
+					return "Pad A";
+				case SDL_GAMEPAD_BUTTON_LABEL_B:
+					return "Pad B";
+				case SDL_GAMEPAD_BUTTON_LABEL_X:
+					return "Pad X";
+				case SDL_GAMEPAD_BUTTON_LABEL_Y:
+					return "Pad Y";
+				case SDL_GAMEPAD_BUTTON_LABEL_CROSS:
+					return "Pad Cross";
+				case SDL_GAMEPAD_BUTTON_LABEL_CIRCLE:
+					return "Pad Circle";
+				case SDL_GAMEPAD_BUTTON_LABEL_SQUARE:
+					return "Pad Square";
+				case SDL_GAMEPAD_BUTTON_LABEL_TRIANGLE:
+					return "Pad Triangle";
+			}
+
+#else // SDL2
+			//                                          South,   East,       West,         North        Back
+			static const char* xboxBtnNames[5]     = { "Pad A", "Pad B",    "Pad X",      "Pad Y",   "Pad Back" };
+			static const char* nintendoBtnNames[5] = { "Pad B", "Pad A",    "Pad Y",      "Pad X",   "Pad -" };
+			static const char* psBtnNames[5] = { "Pad Cross", "Pad Circle", "Pad Square", "Pad Triangle", "Pad Share" };
+
+			int layout = joy_gamepadLayout.GetInteger();
+			if ( layout == -1 ) {
+				layout = gamepadType;
+			}
+
+			unsigned btnIdx = key - K_JOY_BTN_SOUTH;
+			assert(btnIdx < 5);
+
+			switch( layout ) {
+				default:
+					common->Warning( "joy_gamepadLayout has invalid value %d !\n", joy_gamepadLayout.GetInteger() );
+					// fall-through
+				case D3_GAMEPAD_XINPUT:
+					return xboxBtnNames[btnIdx];
+				case D3_GAMEPAD_NINTENDO:
+					return nintendoBtnNames[btnIdx];
+				case D3_GAMEPAD_PLAYSTATION_OLD:
+					if ( key == K_JOY_BTN_BACK )
+						return "Pad Select";
+					// the other button names are identical for PS2/3 and PS4/5
+					// fall-through
+				case D3_GAMEPAD_PLAYSTATION:
+					return psBtnNames[btnIdx];
+			}
+#endif // face button names for SDL2
+		}
+
+		// the labels for the remaining keys are the same for SDL2 and SDL3 (and all controllers)
+		switch(key) {
+			case K_JOY_BTN_GUIDE: // can't be used in dhewm3, because it opens steam on some systems
+			case K_JOY_BTN_START: // can't be used for bindings, because it's hardcoded to generate Esc
+				return NULL;
+
+			case K_JOY_BTN_LSTICK:
+				return "Pad LStick";
+			case K_JOY_BTN_RSTICK:
+				return "Pad RStick";
+			case K_JOY_BTN_LSHOULDER:
+				return "Pad LShoulder";
+			case K_JOY_BTN_RSHOULDER:
+				return "Pad RShoulder";
+
+			case K_JOY_DPAD_UP:
+				return "DPad Up";
+			case K_JOY_DPAD_DOWN:
+				return "DPad Down";
+			case K_JOY_DPAD_LEFT:
+				return "DPad Left";
+			case K_JOY_DPAD_RIGHT:
+				return "DPad Right";
+
+			case K_JOY_BTN_MISC1:
+				return "Pad Misc";
+			case K_JOY_BTN_RPADDLE1:
+				return "Pad P1";
+			case K_JOY_BTN_LPADDLE1:
+				return "Pad P3";
+			case K_JOY_BTN_RPADDLE2:
+				return "Pad P2";
+			case K_JOY_BTN_LPADDLE2:
+				return "Pad P4";
+
+			// Note: Would be nicer with "Pad " (or even "Gamepad ") at the beginning,
+			//       but then it's too long for the keybinding window :-/
+			case K_JOY_STICK1_UP:
+				return "Stick1 Up";
+			case K_JOY_STICK1_DOWN:
+				return "Stick1 Down";
+			case K_JOY_STICK1_LEFT:
+				return "Stick1 Left";
+			case K_JOY_STICK1_RIGHT:
+				return "Stick1 Right";
+
+			case K_JOY_STICK2_UP:
+				return "Stick2 Up";
+			case K_JOY_STICK2_DOWN:
+				return "Stick2 Down";
+			case K_JOY_STICK2_LEFT:
+				return "Stick2 Left";
+			case K_JOY_STICK2_RIGHT:
+				return "Stick2 Right";
+
+			case K_JOY_TRIGGER1:
+				return "Trigger 1";
+			case K_JOY_TRIGGER2:
+				return "Trigger 2";
+
+			default:
+				assert(0 && "missing a case in Sys_GetLocalizedJoyKeyName()!");
+		}
+	}
+#endif // SDL2+
+	return NULL;
+}
 
 // returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
 // regarding the current keyboard layout - if that name is in ASCII or corresponds
@@ -477,6 +639,162 @@ static byte mapkey(SDL_Keycode key) {
 	return 0;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+
+#if ! SDL_VERSION_ATLEAST(2, 0, 14)
+// Hack: to support newer SDL2 runtime versions than the one built against,
+//       define these controller buttons if needed
+enum {
+	SDL_CONTROLLER_BUTTON_MISC1 = 15, /* Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button */
+	SDL_CONTROLLER_BUTTON_PADDLE1,  /* Xbox Elite paddle P1 */
+	SDL_CONTROLLER_BUTTON_PADDLE2,  /* Xbox Elite paddle P3 */
+	SDL_CONTROLLER_BUTTON_PADDLE3,  /* Xbox Elite paddle P2 */
+	SDL_CONTROLLER_BUTTON_PADDLE4,  /* Xbox Elite paddle P4 */
+	SDL_CONTROLLER_BUTTON_TOUCHPAD, /* PS4/PS5 touchpad button */
+};
+#endif // ! SDL_VERSION_ATLEAST(2, 0, 14)
+
+static sys_jEvents mapjoybutton(SDL_GameControllerButton button) {
+	switch (button)
+	{
+	case SDL_CONTROLLER_BUTTON_A:
+		return J_BTN_SOUTH;
+	case SDL_CONTROLLER_BUTTON_B:
+		return J_BTN_EAST;
+	case SDL_CONTROLLER_BUTTON_X:
+		return J_BTN_WEST;
+	case SDL_CONTROLLER_BUTTON_Y:
+		return J_BTN_NORTH;
+	case SDL_CONTROLLER_BUTTON_BACK:
+		return J_BTN_BACK;
+	case SDL_CONTROLLER_BUTTON_GUIDE:
+		// TODO: this one should probably not be bindable?
+		//return J_BTN_GUIDE;
+		break;
+	case SDL_CONTROLLER_BUTTON_START:
+		return J_BTN_START;
+	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+		return J_BTN_LSTICK;
+	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+		return J_BTN_RSTICK;
+	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+		return J_BTN_LSHOULDER;
+	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+		return J_BTN_RSHOULDER;
+	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+		return J_DPAD_UP;
+	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		return J_DPAD_DOWN;
+	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		return J_DPAD_LEFT;
+	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+		return J_DPAD_RIGHT;
+
+	case SDL_CONTROLLER_BUTTON_MISC1:
+		return J_BTN_MISC1;
+	case SDL_CONTROLLER_BUTTON_PADDLE1:
+		return J_BTN_RPADDLE1;
+	case SDL_CONTROLLER_BUTTON_PADDLE2:
+		return J_BTN_RPADDLE2;
+	case SDL_CONTROLLER_BUTTON_PADDLE3:
+		return J_BTN_LPADDLE1;
+	case SDL_CONTROLLER_BUTTON_PADDLE4:
+		return J_BTN_LPADDLE2;
+	default:
+		common->Warning("unknown game controller button %u", button);
+		break;
+	}
+	return MAX_JOY_EVENT;
+}
+
+static sys_jEvents mapjoyaxis(SDL_GameControllerAxis axis) {
+	switch (axis)
+	{
+	case SDL_CONTROLLER_AXIS_LEFTX:
+		return J_AXIS_LEFT_X;
+	case SDL_CONTROLLER_AXIS_LEFTY:
+		return J_AXIS_LEFT_Y;
+	case SDL_CONTROLLER_AXIS_RIGHTX:
+		return J_AXIS_RIGHT_X;
+	case SDL_CONTROLLER_AXIS_RIGHTY:
+		return J_AXIS_RIGHT_Y;
+	case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+		return J_AXIS_LEFT_TRIG;
+	case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+		return J_AXIS_RIGHT_TRIG;
+	default:
+		common->Warning("unknown game controller axis %u", axis);
+		break;
+	}
+	return J_AXIS_MAX;
+}
+
+#if ! SDL_VERSION_ATLEAST(2, 24, 0)
+// Hack: to support newer SDL2 runtime versions than the one compiled against,
+// define some controller types that were added after 2.0.12
+enum {
+#if ! SDL_VERSION_ATLEAST(2, 0, 14)
+	SDL_CONTROLLER_TYPE_PS5 = 7,
+#endif
+
+	// leaving out luna and stadia (from 2.0.16)
+	// and nvidia shield (from 2.24), they're similar enough to XBox/XInput
+
+	// the following were added in 2.24
+	SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT = 11,
+	SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT,
+	SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR
+};
+#endif // ! SDL_VERSION_ATLEAST(2, 24, 0)
+
+static void setGamepadType( SDL_GameController* gc )
+{
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	const char* typestr = NULL;
+	switch( SDL_GameControllerGetType( gc ) ) {
+		default: // the other controller like luna, stadia, whatever, have a very similar layout
+		case SDL_CONTROLLER_TYPE_UNKNOWN:
+		case SDL_CONTROLLER_TYPE_XBOX360:
+		case SDL_CONTROLLER_TYPE_XBOXONE:
+			gamepadType = D3_GAMEPAD_XINPUT;
+			typestr = "XBox-like";
+			break;
+
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT:
+		case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:
+			gamepadType = D3_GAMEPAD_NINTENDO;
+			typestr = "Nintendo-like";
+			break;
+
+		case SDL_CONTROLLER_TYPE_PS3:
+			gamepadType = D3_GAMEPAD_PLAYSTATION_OLD;
+			typestr = "Playstation2/3-like";
+			break;
+		case SDL_CONTROLLER_TYPE_PS4:
+		case SDL_CONTROLLER_TYPE_PS5:
+			gamepadType = D3_GAMEPAD_PLAYSTATION;
+			typestr = "Playstation-like";
+			break;
+	}
+
+	common->Printf( "Detected Gamepad %s as type %s\n", SDL_GameControllerName( gc ), typestr );
+	SDL_Joystick* joy = SDL_GameControllerGetJoystick( gc );
+	SDL_JoystickGUID guid = SDL_JoystickGetGUID( joy );
+	char guidstr[34] = {};
+	SDL_JoystickGetGUIDString( guid, guidstr, sizeof(guidstr) );
+	Uint16 vendor = SDL_GameControllerGetVendor( gc );
+	Uint16 product = SDL_GameControllerGetProduct( gc );
+	const char* joyname = SDL_JoystickName( joy );
+
+	common->Printf( "  USB IDs: %.4hx:%.4hx Joystick Name: \"%s\" GUID: %s\n", vendor, product, joyname, guidstr );
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 12)
+}
+
+#endif // SDL2+ gamecontroller code
+
 static void PushConsoleEvent(const char *s) {
 	char *b;
 	size_t len;
@@ -531,6 +849,28 @@ void Sys_InitInput() {
 #else // SDL1.2 doesn't support this
 	in_grabKeyboard.ClearModified();
 #endif
+
+	joystick_polls.SetGranularity(64);
+	event_overflow.SetGranularity(64);
+
+	memset( buttonStates, 0, sizeof( buttonStates ) );
+	memset( joyAxis, 0, sizeof( joyAxis ) );
+
+#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
+	// use button positions instead of button labels,
+	// Sys_GetLocalizedJoyKeyName() will do the translation
+	// (I think this also was the default before 2.0.12?)
+	SDL_SetHint("SDL_GAMECONTROLLER_USE_BUTTON_LABELS", "0");
+
+	const int NumJoysticks = SDL_NumJoysticks();
+	for( int i = 0; i < NumJoysticks; ++i )
+	{
+		SDL_GameController* gc = SDL_GameControllerOpen( i );
+		if ( gc != NULL ) {
+			setGamepadType( gc );
+		}
+	}
+#endif
 }
 
 /*
@@ -541,6 +881,8 @@ Sys_ShutdownInput
 void Sys_ShutdownInput() {
 	kbd_polls.Clear();
 	mouse_polls.Clear();
+	joystick_polls.Clear();
+	event_overflow.Clear();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_iconv_close( iconvDesc ); // used by utf8ToISO8859_1()
 	iconvDesc = ( SDL_iconv_t ) -1; 
@@ -666,6 +1008,67 @@ void Sys_GrabMouseCursor(bool grabIt) {
 	GLimp_GrabInput(flags);
 }
 
+
+/*
+===============
+Sys_SetInteractiveIngameGuiActive
+Tell the input system that currently an interactive *ingame* UI has focus,
+so there is an active cursor.
+Used for an ungodly hack to make gamepad button south (A) behave like
+left mouse button in that case, so "clicking" with gamepad in the PDA
+(and ingame GUIs) works as expected.
+Not set for proper menus like main menu etc - the gamepad hacks for that
+are in idUserInterfaceLocal::HandleEvent().
+Call with ui = NULL to clear the state.
+I hope this won't explode in my face :-p
+===============
+*/
+bool D3_IN_interactiveIngameGuiActive = false;
+void Sys_SetInteractiveIngameGuiActive( bool active, idUserInterface* ui )
+{
+	static idList<idUserInterface*> lastuis;
+	if ( ui == NULL ) {
+		// special case for clearing
+		D3_IN_interactiveIngameGuiActive = false;
+		lastuis.Clear();
+		return;
+	}
+	int idx = lastuis.FindIndex( ui );
+
+	if ( sessLocal.GetActiveMenu() == NULL && active ) {
+		// add ui to lastuis, if it has been activated and no proper menu
+		// (like main menu) is currently open
+		lastuis.Append( ui );
+	} else if ( idx != -1 ) {
+		// if the UI is in lastuis and has been deactivated, or there
+		// is a proper menu opened, remove it from the list.
+		// this both handles the regular deactivate case and also works around
+		// main-menu-in-multiplayer weirdness: that menu calls idUserInterface::Activate()
+		// with activate = true twice, but on first call sessLocal.GetActiveMenu() is NULL
+		// so we want to remove it once we realize that it really is a "proper" menu after all.
+		// And because it's possible that we have an ingame UI focussed while opening
+		// the multiplayer-main-menu, we keep a list of lastuis, instead of just one,
+		// so D3_IN_interactiveIngameGuiActive remains true in that case
+		// (the ingame UI is still in the list)
+
+		lastuis.RemoveIndex( idx );
+	}
+
+	D3_IN_interactiveIngameGuiActive = lastuis.Num() != 0;
+}
+
+
+static void PushButton( int key, bool value ) {
+	// So we don't keep sending the same SE_KEY message over and over again
+	if ( buttonStates[key] != value ) {
+		buttonStates[key] = value;
+		sysEvent_t res = { SE_KEY, key, value ? 1 : 0, 0, NULL };
+		// this is done to generate two events per controller axis event
+		// one SE_JOYSTICK and one SE_KEY
+		event_overflow.Append(res);
+	}
+}
+
 /*
 ================
 Sys_GetEvent
@@ -677,6 +1080,14 @@ sysEvent_t Sys_GetEvent() {
 	int key;
 
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
+
+	// process any overflow.
+	if (event_overflow.Num() > 0)
+	{
+		res = event_overflow[0];
+		event_overflow.RemoveIndex(0);
+		return res;
+	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	static char s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
@@ -958,6 +1369,120 @@ sysEvent_t Sys_GetEvent() {
 
 			return res;
 
+#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
+		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_CONTROLLERBUTTONUP:
+		{
+			if ( !in_useGamepad.GetBool() ) {
+				common->Warning( "Gamepad support is disabled! Set the in_useGamepad CVar to 1 to enable it!\n" );
+				continue;
+			}
+
+			res.evType = SE_KEY;
+			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
+
+			// special case: always treat the start button as escape so it opens/closes the menu
+			// (also makes that button non-bindable)
+			if ( ev.cbutton.button == SDL_CONTROLLER_BUTTON_START ) {
+				res.evValue = K_ESCAPE;
+				return res;
+			} else if( (ev.cbutton.button == SDL_CONTROLLER_BUTTON_A || ev.cbutton.button == SDL_CONTROLLER_BUTTON_Y)
+					   && D3_IN_interactiveIngameGuiActive && sessLocal.GetActiveMenu() == NULL )
+			{
+				// ugly hack: currently an interactive ingame GUI (with a cursor) is active/focused
+				// so pretend that the gamepads A (south) or Y (north, used by D3BFG to click ingame GUIs) button
+				// is the left mouse button so it can be used for "clicking"..
+				mouse_polls.Append( mouse_poll_t(M_ACTION1, res.evValue2) );
+				res.evValue = K_MOUSE1;
+				return res;
+			}
+
+			sys_jEvents jEvent =  mapjoybutton( (SDL_GameControllerButton)ev.cbutton.button );
+			joystick_polls.Append( joystick_poll_t(jEvent, ev.cbutton.state == SDL_PRESSED ? 1 : 0) );
+
+			if ( ( jEvent >= J_ACTION_FIRST ) && ( jEvent <= J_ACTION_MAX ) ) {
+				res.evValue = K_FIRST_JOY + ( jEvent - J_ACTION_FIRST );
+				return res;
+			}
+
+			continue; // try to get a decent event.
+		}
+
+		case SDL_CONTROLLERAXISMOTION:
+		{
+			const int range = 16384;
+
+			if ( !in_useGamepad.GetBool() ) {
+				// not printing a message here, I guess we get lots of spurious axis events..
+				// TODO: or print a message if value is big enough?
+				continue;
+			}
+
+			sys_jEvents jEvent = mapjoyaxis( (SDL_GameControllerAxis)ev.caxis.axis);
+			joystick_polls.Append(joystick_poll_t(	jEvent, ev.caxis.value) );
+
+			if ( jEvent == J_AXIS_LEFT_X ) {
+				PushButton( K_JOY_STICK1_LEFT, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK1_RIGHT, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_LEFT_Y ) {
+				PushButton( K_JOY_STICK1_UP, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK1_DOWN, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_RIGHT_X ) {
+				PushButton( K_JOY_STICK2_LEFT, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK2_RIGHT, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_RIGHT_Y ) {
+				PushButton( K_JOY_STICK2_UP, ( ev.caxis.value < -range ) );
+				PushButton( K_JOY_STICK2_DOWN, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_LEFT_TRIG ) {
+				PushButton( K_JOY_TRIGGER1, ( ev.caxis.value > range ) );
+			} else if ( jEvent == J_AXIS_RIGHT_TRIG ) {
+				PushButton( K_JOY_TRIGGER2, ( ev.caxis.value > range ) );
+			}
+			if ( jEvent >= J_AXIS_MIN && jEvent <= J_AXIS_MAX ) {
+				// NOTE: the stuff set here is only used to move the cursor in menus
+				//       ingame movement is done via joystick_polls
+				int axis = jEvent - J_AXIS_MIN;
+				float dz = joy_deadZone.GetFloat();
+
+				float val = fabsf(ev.caxis.value * (1.0f / 32767.0f));
+				if(val < dz) {
+					val = 0.0f;
+				} else {
+					// from deadzone .. 1 to 0 .. 1-deadzone
+					val -= dz;
+					// and then to 0..1
+					val = val * (1.0f / (1.0f - dz));
+
+					if( ev.caxis.value < 0 ) {
+						val = -val;
+					}
+				}
+
+				joyAxis[axis] = val;
+			}
+
+			// handle next event; joy axis events are generated below,
+			// when there are no further SDL events
+			continue;
+		}
+		break;
+
+		case SDL_JOYDEVICEADDED:
+		{
+			SDL_GameController* gc = SDL_GameControllerOpen( ev.jdevice.which );
+			if ( gc != NULL ) {
+				setGamepadType( gc );
+			}
+			// TODO: hot swapping maybe.
+			//lbOnControllerPlugIn(event.jdevice.which);
+			break;
+		}
+		case SDL_JOYDEVICEREMOVED:
+			// TODO: hot swapping maybe.
+			//lbOnControllerUnPlug(event.jdevice.which);
+			break;
+#endif // SDL2+
+
 		case SDL_QUIT:
 			PushConsoleEvent("quit");
 			return res_none;
@@ -980,6 +1505,29 @@ sysEvent_t Sys_GetEvent() {
 		}
 	}
 
+	// before returning res_none for "these were all events for now",
+	// first return joyaxis events, if gamepad is enabled and 16ms are over
+	// (or we haven't returned the values for all axis yet)
+	if ( in_useGamepad.GetBool() ) {
+		static unsigned int lastMS = 0;
+		static int joyAxisToSend = 0;
+		unsigned int nowMS = Sys_Milliseconds();
+		if ( nowMS - lastMS >= 16 ) {
+			int val = joyAxis[joyAxisToSend] * 100; // float to percent
+			res.evType = SE_JOYSTICK;
+			res.evValue = joyAxisToSend;
+			res.evValue2 = val;
+			++joyAxisToSend;
+			if(joyAxisToSend == MAX_JOYSTICK_AXIS) {
+				// we're done for this frame, so update lastMS and reset joyAxisToSend
+				joyAxisToSend = 0;
+				lastMS = nowMS;
+			}
+			return res;
+		}
+
+	}
+
 	return res_none;
 }
 
@@ -996,6 +1544,12 @@ void Sys_ClearEvents() {
 
 	kbd_polls.SetNum(0, false);
 	mouse_polls.SetNum(0, false);
+	joystick_polls.SetNum(0, false);
+
+	memset( buttonStates, 0, sizeof( buttonStates ) );
+	memset( joyAxis, 0, sizeof( joyAxis ) );
+
+	event_overflow.SetNum(0, false);
 }
 
 static void handleMouseGrab() {
@@ -1146,3 +1700,35 @@ Sys_EndMouseInputEvents
 void Sys_EndMouseInputEvents() {
 	mouse_polls.SetNum(0, false);
 }
+
+/*
+================
+Joystick Input Methods
+================
+*/
+void Sys_SetRumble( int device, int low, int hi ) {
+	// TODO: support multiple controllers.
+	assert(device == 0);
+	// TODO: support rumble maybe.
+	assert(0);
+}
+
+int	Sys_PollJoystickInputEvents( int deviceNum ) {
+	// TODO: support multiple controllers.
+	assert(deviceNum == 0);
+	return joystick_polls.Num();
+}
+
+int	Sys_ReturnJoystickInputEvent( const int n, int &action, int &value ) {
+	if (n >= joystick_polls.Num())
+		return 0;
+
+	action = joystick_polls[n].action;
+	value = joystick_polls[n].value;
+	return 1;
+}
+
+void Sys_EndJoystickInputEvents() {
+	joystick_polls.SetNum(0, false);
+}
+

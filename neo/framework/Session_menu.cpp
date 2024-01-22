@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar	idSessionLocal::gui_configServerRate( "gui_configServerRate", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_ROM | CVAR_INTEGER, "" );
 
+extern idCVar joy_gamepadLayout; // DG: used here to update bindings window when cvar is changed
+
 // implements the setup for, and commands from, the main menu
 
 /*
@@ -1208,6 +1210,14 @@ void idSessionLocal::GuiFrameEvents() {
 	const char	*cmd;
 	sysEvent_t  ev;
 	idUserInterface	*gui;
+
+	// DG: if joy_gamepadLayout changes, the binding names in the main/controls menu must be updated
+	if ( joy_gamepadLayout.IsModified() ) {
+		if ( guiMainMenu != NULL ) {
+			guiMainMenu->SetKeyBindingNames();
+		}
+		joy_gamepadLayout.ClearModified();
+	}
 
 	// stop generating move and button commands when a local console or menu is active
 	// running here so SP, async networking and no game all go through it

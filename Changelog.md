@@ -23,6 +23,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   (0 = TGA, still the default, 1 = BMP, 2 = PNG, 3 = JPG). `r_screenshotJpgQuality` and
   `r_screenshotPngCompression` allow configuring how JPG/PNG are compressed.
   Thanks *eezstreet (Nick Whitlock)*!
+* Support for gamepads (based on code from [Quadrilateral Cowboy](https://github.com/blendogames/quadrilateralcowboy),
+  but heavily expanded). See [Configuration.md](./Configuration.md#using-gamepads) for more information.
 
 1.5.2 (2022-06-13)
 ------------------------------------------------------------------------

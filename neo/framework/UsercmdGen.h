@@ -96,8 +96,8 @@ public:
 	signed char	rightmove;						// left/right movement
 	signed char	upmove;							// up/down movement
 	short		angles[3];						// view angles
-	short		mx;								// mouse delta x
-	short		my;								// mouse delta y
+	short		mx;								// mouse delta x - DG: not really delta, but from continuousMouseX which accumulates
+	short		my;								// mouse delta y - DG: same but from continuousMouseY
 	signed char impulse;						// impulse command
 	byte		flags;							// additional flags
 	int			sequence;						// just for debugging

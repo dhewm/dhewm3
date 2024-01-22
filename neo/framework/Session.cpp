@@ -1447,6 +1447,9 @@ void idSessionLocal::UnloadMap() {
 	}
 
 	mapSpawned = false;
+
+	// DG: that state needs to be reset now
+	Sys_SetInteractiveIngameGuiActive( false, NULL );
 }
 
 /*

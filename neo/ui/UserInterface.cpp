@@ -118,6 +118,9 @@ void idUserInterfaceManagerLocal::EndLevelLoad() {
 			}
 		}
 	}
+
+	// DG: this should probably be reset at this point
+	Sys_SetInteractiveIngameGuiActive( false, NULL );
 }
 
 void idUserInterfaceManagerLocal::Reload( bool all ) {
@@ -344,6 +347,9 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		return ret;
 	}
 
+	// DG: used to translate gamepad input into events the UI system is familiar with
+	sysEvent_t fakedEvent = {};
+
 	if ( event->evType == SE_MOUSE || event->evType == SE_MOUSE_ABS ) {
 		if ( !desktop || (desktop->GetFlags() & WIN_MENUGUI) ) {
 			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
@@ -399,6 +405,80 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 		}
 		if (cursorY < 0) {
 			cursorY = 0;
+		}
+	}
+	else if ( event->evType == SE_JOYSTICK && event->evValue2 != 0 && event->evValue < 4 )
+	{
+		// evValue:  axis = jEvent - J_AXIS_MIN;
+		// evValue2: percent (-100 to 100)
+
+		// currently uses both sticks for cursor movement
+		// TODO could use one stick for scrolling (maybe by generating K_UPARROW/DOWNARROW events?)
+		float addVal = expf( fabsf(event->evValue2 * 0.03f) ) * 0.5f;
+		if(event->evValue2 < 0)
+			addVal = -addVal;
+
+		if( event->evValue == 0 || event->evValue == 2 ) {
+			cursorX += addVal;
+		} else if( event->evValue == 1 || event->evValue == 3 ) {
+			cursorY += addVal;
+		}
+
+		if (cursorX < 0) {
+			cursorX = 0;
+		}
+		if (cursorY < 0) {
+			cursorY = 0;
+		}
+
+		// some things like highlighting hovered UI elements need a mouse event,
+		// so create a fake mouse event
+		fakedEvent.evType = SE_MOUSE;
+		// the coordinates (evValue/evValue2) aren't used, but keeping them at 0
+		// (as default-initialized above) shouldn't hurt either way
+		event = &fakedEvent;
+	}
+	else if ( event->evType == SE_KEY && event->evValue >= K_FIRST_JOY && event->evValue <= K_LAST_JOY )
+	{
+		// map some gamepad buttons to SE_KEY events that the UI already knows how to use
+		int key = 0;
+		if( idKeyInput::GetUsercmdAction( event->evValue ) ==  20 /* UB_ATTACK*/ ) {
+			// if this button is bound to _attack (fire), treat it as left mouse button
+			key = K_MOUSE1;
+		} else {
+			switch(event->evValue) {
+				// emulate mouse buttons
+				case K_JOY_BTN_SOUTH: // A on xbox controller
+					key = K_MOUSE1;
+					break;
+				case K_JOY_BTN_EAST: // B on xbox controller
+					key = K_MOUSE2;
+					break;
+				// emulate cursor keys (sometimes used for scrolling or selecting in a list)
+				case K_JOY_DPAD_UP:
+					key = K_UPARROW;
+					break;
+				case K_JOY_DPAD_DOWN:
+					key = K_DOWNARROW;
+					break;
+				case K_JOY_DPAD_LEFT:
+					key = K_LEFTARROW;
+					break;
+				case K_JOY_DPAD_RIGHT:
+					key = K_RIGHTARROW;
+					break;
+				// enter is useful after selecting something with cursor keys (or dpad)
+				// in a list, like selecting a savegame - I guess left trigger is suitable for that?
+				// (right trigger is often used for shooting, which we use as K_MOUSE1 here)
+				case K_JOY_TRIGGER1:
+					key = K_ENTER;
+					break;
+			}
+		}
+		if (key != 0) {
+			fakedEvent = *event;
+			fakedEvent.evValue = key;
+			event = &fakedEvent;
 		}
 	}
 
@@ -507,6 +587,10 @@ const char *idUserInterfaceLocal::Activate(bool activate, int _time) {
 	time = _time;
 	active = activate;
 	if ( desktop ) {
+		// DG: added this hack for gamepad input
+		if ( interactive ) {
+			Sys_SetInteractiveIngameGuiActive( activate, this );
+		} // DG end
 		activateStr = "";
 		desktop->Activate( activate, activateStr );
 		return activateStr;
