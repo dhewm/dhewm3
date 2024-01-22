@@ -31,6 +31,7 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 - SDL for low-level OS support, OpenGL and input handling
 - OpenAL for audio output, all OS-specific audio backends are gone
 - OpenAL EFX for EAX reverb effects (read: EAX-like sound effects on all platforms/hardware)
+- Gamepad support
 - Better support for widescreen (and arbitrary display resolutions)
 - A portable build system based on CMake
 - (Cross-)compilation with MinGW-w64
@@ -54,6 +55,11 @@ _DOOM 3: BFG Edition_, which is *not* supported by dhewm3) are available from th
 https://store.steampowered.com/app/208200/DOOM_3/
 
 See https://dhewm3.org/#how-to-install for game data installation instructions.
+
+## Configuration
+
+See [Configuration.md](./Configuration.md) for dhewm3-specific configuration, especially for 
+using gamepads.
 
 ## Compiling
 
