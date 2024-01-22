@@ -77,39 +77,60 @@ of Doom3 BFG, see gamepad.cfg and gamepad-d3xp.cfg in the [base/ directory](./ba
 Put them in your base/ folder, open the console and enter `exec gamepad.cfg` for the base game,
 or `exec gamepad-d3xp.cfg` for Resurrection of Evil (probably also works for Doom3: Lost Mission).
 
+<details><summary>Click to see what button/stick/trigger does what in gamepad.cfg</summary>
+
+* `Left Stick`: Move (Forward, Backpedal, Move Left, Move Right)
+  - `Press Left Stick`: Sprint
+* `Right Stick`: Look around (Turn Left, Turn Right, Look Up, Look Down)
+  - `Press Right Stick`: Crouch
+* `A`: Jump (on Nintendo controllers this is `B`, on Playstation controllers it's `Cross`)
+* `X`: Reload (Nintendo: `Y`, Playstation: `Square`)
+* `Right Trigger`: Attack
+* `Left Trigger`: Flashlight
+* `Left Shoulder Button`: Previous Weapon
+* `Right Shoulder Button`: Next Weapon
+* `DPad Up`: Grenade
+* `DPad Down`: BFG
+* `DPad Left`: Soulcube
+* `DPad Right`: Fists/Grabber
+* `Back`: PDA (Nintendo: `-`, Playstation: `Select`/`Share`)
+* `Start`: Open/Close Menu (just like the Escape key; Nintendo: `+`, Playstation 4/5: `Options`)
+
+</details>
+
 **_Note_** that in *configs* (or `bind` commands in the console), the following names are used for
 gamepad buttons, sticks and triggers:
 
 <details><summary>Click to see the list of gamepad button/stick/trigger names</summary>
 
-* "JOY_BTN_SOUTH" - `A` button on XBox-style gamepads, `B` on Nintendo-style gamepads or `Cross` on Playstation-style gamepads 
-* "JOY_BTN_EAST" - `B` (XBox), `A` (Nintendo), `Circle` (Playstation)
-* "JOY_BTN_WEST" - `X` (XBox), `Y` (Nintendo), `Square` (Playstation)
-* "JOY_BTN_NORTH" - `Y` (XBox), `X` (Nintendo), `Triangle` (Playstation)
-* "JOY_BTN_BACK" - The `Back` button, aka `-` (Nintendo) or `Select`/`Share` (Playstation)
-* "JOY_BTN_LSTICK" - Pressing the Left Stick down
-* "JOY_BTN_RSTICK" - Pressing the Right Stick down
-* "JOY_BTN_LSHOULDER" - Left Shoulder Button
-* "JOY_BTN_RSHOULDER" - Right Shoulder button
-* "JOY_DPAD_UP" - DPad Up
-* "JOY_DPAD_DOWN" - DPad Down
-* "JOY_DPAD_LEFT" - DPad Left
-* "JOY_DPAD_RIGHT" - DPad Right
-* "JOY_BTN_MISC1" - misc. additional button, like Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button
-* "JOY_BTN_RPADDLE1" - Upper or primary paddle, under your right hand (e.g. Xbox Elite paddle P1)
-* "JOY_BTN_LPADDLE1" - Upper or primary paddle, under your left hand (e.g. Xbox Elite paddle P3)
-* "JOY_BTN_RPADDLE2" - Lower or secondary paddle, under your right hand (e.g. Xbox Elite paddle P2)
-* "JOY_BTN_LPADDLE2" - Lower or secondary paddle, under your left hand (e.g. Xbox Elite paddle P4
-* "JOY_STICK1_UP" - Moving Left Stick up
-* "JOY_STICK1_DOWN" - Moving Left Stick down
-* "JOY_STICK1_LEFT" - Moving Left Stick to the left
-* "JOY_STICK1_RIGHT" - Moving Left Stick to the right
-* "JOY_STICK2_UP" - Moving Right Stick up
-* "JOY_STICK2_DOWN" - Moving Right Stick down
-* "JOY_STICK2_LEFT" - Moving Right Stick to the left
-* "JOY_STICK2_RIGHT" - Moving Right Stick to the right
-* "JOY_TRIGGER1" - Pressing the Left Trigger
-* "JOY_TRIGGER2" - Pressing the Right Trigger
+* `"JOY_BTN_SOUTH"` - `A` button on XBox-style gamepads, `B` on Nintendo-style gamepads or `Cross` on Playstation-style gamepads 
+* `"JOY_BTN_EAST"` - `B` (XBox), `A` (Nintendo), `Circle` (Playstation)
+* `"JOY_BTN_WEST"` - `X` (XBox), `Y` (Nintendo), `Square` (Playstation)
+* `"JOY_BTN_NORTH"` - `Y` (XBox), `X` (Nintendo), `Triangle` (Playstation)
+* `"JOY_BTN_BACK"` - The `Back` button, aka `-` (Nintendo) or `Select`/`Share` (Playstation)
+* `"JOY_BTN_LSTICK"` - Pressing the Left Stick down
+* `"JOY_BTN_RSTICK"` - Pressing the Right Stick down
+* `"JOY_BTN_LSHOULDER"` - Left Shoulder Button
+* `"JOY_BTN_RSHOULDER"` - Right Shoulder button
+* `"JOY_DPAD_UP"` - DPad Up
+* `"JOY_DPAD_DOWN"` - DPad Down
+* `"JOY_DPAD_LEFT"` - DPad Left
+* `"JOY_DPAD_RIGHT"` - DPad Right
+* `"JOY_BTN_MISC1"` - misc. additional button, like Xbox Series X share button, PS5 microphone button, Nintendo Switch Pro capture button, Amazon Luna microphone button
+* `"JOY_BTN_RPADDLE1"` - Upper or primary paddle, under your right hand (e.g. Xbox Elite paddle P1)
+* `"JOY_BTN_LPADDLE1"` - Upper or primary paddle, under your left hand (e.g. Xbox Elite paddle P3)
+* `"JOY_BTN_RPADDLE2"` - Lower or secondary paddle, under your right hand (e.g. Xbox Elite paddle P2)
+* `"JOY_BTN_LPADDLE2"` - Lower or secondary paddle, under your left hand (e.g. Xbox Elite paddle P4
+* `"JOY_STICK1_UP"` - Moving Left Stick up
+* `"JOY_STICK1_DOWN"` - Moving Left Stick down
+* `"JOY_STICK1_LEFT"` - Moving Left Stick to the left
+* `"JOY_STICK1_RIGHT"` - Moving Left Stick to the right
+* `"JOY_STICK2_UP"` - Moving Right Stick up
+* `"JOY_STICK2_DOWN"` - Moving Right Stick down
+* `"JOY_STICK2_LEFT"` - Moving Right Stick to the left
+* `"JOY_STICK2_RIGHT"` - Moving Right Stick to the right
+* `"JOY_TRIGGER1"` - Pressing the Left Trigger
+* `"JOY_TRIGGER2"` - Pressing the Right Trigger
 
 </details>
 
