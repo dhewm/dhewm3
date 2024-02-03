@@ -41,13 +41,14 @@ Some notes:
       directions of one stick to use it to look around or aim.
     - Similarly, you need to bind *Forward*, *Backpedal*, *Move Left* and *Move Right* to the
       corresponding directions of a stick to use it for player movement.
-* The "Start" button ("+" on Nintendo gamepads, "Options" on Playstation 4/5 controllers) acts
+    - However, see below for configs with default bindings that you can load.
+* The `Start` button (`+` on Nintendo gamepads, `Options` on Playstation 4/5 controllers) acts
   like the Escape key, so it will **open/close the menu** and can not be bound.  
   The other buttons, axes and triggers can be bound to arbitrary actions in the Controls menu,
   except for the Home button, which can't be used by dhewm3 at all (because it opens Steam when that is running).
 * In **menus**, either stick will move the cursor, and the button you assign to *attack* (fire) acts
-  like the left mouse button, and so does the lower face button (A on XBox controllers, B on Nintendo
-  controllers, Cross on PS controllers) and the upper face button (Y on XBox, X on Nintendo, Triangle on PS).
+  like the left mouse button, and so does the lower face button (`A` on XBox controllers, `B` on Nintendo
+  controllers, `Cross` on PS controllers) and the upper face button (`Y` on XBox, `X` on Nintendo, `Triangle` on PS).
 * The layout of the controller (XBox-like, Nintendo-like, Playstation-like) should be automatically
   detected and is used to display the button names according to the layout. If yours isn't detected
   correctly, you can overwrite it with the `joy_gamepadLayout` CVar.

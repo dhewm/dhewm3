@@ -975,7 +975,14 @@ int idRenderWorldLocal::BoundsInAreas( const idBounds &bounds, int *areas, int m
 	int numAreas = 0;
 
 	assert( areas );
-	assert( bounds[0][0] <= bounds[1][0] && bounds[0][1] <= bounds[1][1] && bounds[0][2] <= bounds[1][2] );
+	//assert( bounds[0][0] <= bounds[1][0] && bounds[0][1] <= bounds[1][1] && bounds[0][2] <= bounds[1][2] );
+	// DG: apparently this happens sometimes.. handle it more gracefully than an assertion.
+	if ( bounds[0][0] > bounds[1][0] || bounds[0][1] > bounds[1][1] || bounds[0][2] > bounds[1][2] ) {
+		common->Warning( "idRenderWorld::BoundsInAreas() called with invalid bounds: { { %f %f %f }, { %f %f %f } } !",
+		                 bounds[0][0], bounds[0][1], bounds[0][2], bounds[1][0], bounds[1][1], bounds[1][2] );
+		return numAreas;
+	}
+
 	assert( bounds[1][0] - bounds[0][0] < 1e4f && bounds[1][1] - bounds[0][1] < 1e4f && bounds[1][2] - bounds[0][2] < 1e4f );
 
 	if ( !areaNodes ) {
