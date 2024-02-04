@@ -7,6 +7,12 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 1.5.3 (WIP)
 ------------------------------------------------------------------------
 
+* Support for gamepads (based on code from [Quadrilateral Cowboy](https://github.com/blendogames/quadrilateralcowboy),
+  but heavily expanded). See [Configuration.md](./Configuration.md#using-gamepads) for more information.
+* Support different file formats for screenshots by setting the `r_screenshotFormat` CVar
+  (0 = TGA, still the default, 1 = BMP, 2 = PNG, 3 = JPG). `r_screenshotJpgQuality` and
+  `r_screenshotPngCompression` allow configuring how JPG/PNG are compressed.
+  Thanks *eezstreet (Nick Whitlock)*!
 * Fixed problems with lights after loading a savegame (#495)
 * Fix volume of some weapon sounds, like chaingun being too quit (#326)
 * Increase stack size on Windows to 8MB (instead default of 1MB) to make loading huge models work
@@ -19,12 +25,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
     - Force colored diagnostic output from GCC or Clang (esp. useful when building with ninja)
 * Fix several compiler warnings
 * Added build instructions for Linux (and similar systems) to README.md
-* Support different file formats for screenshots by setting the `r_screenshotFormat` CVar
-  (0 = TGA, still the default, 1 = BMP, 2 = PNG, 3 = JPG). `r_screenshotJpgQuality` and
-  `r_screenshotPngCompression` allow configuring how JPG/PNG are compressed.
-  Thanks *eezstreet (Nick Whitlock)*!
-* Support for gamepads (based on code from [Quadrilateral Cowboy](https://github.com/blendogames/quadrilateralcowboy),
-  but heavily expanded). See [Configuration.md](./Configuration.md#using-gamepads) for more information.
+* Updated stb_image and stb_vorbis
+
 
 1.5.2 (2022-06-13)
 ------------------------------------------------------------------------
