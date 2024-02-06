@@ -28,8 +28,7 @@ most keyboard layouts. However you can disable that, so you can bind that key li
 
 ## Using Gamepads
 
-Starting with 1.5.3 (or the git commits preceding the one adding this document), dhewm3 supports
-using gamepads, as long as they're supported by SDL2.  
+Starting with 1.5.3, dhewm3 supports using gamepads, as long as they're supported by SDL2.  
 This includes XBox Controllers (and compatible ones), Playstation 3-5 controllers,
 Nintendo Switch Pro Controllers, many thirdparty controllers for those consoles, and lots of other
 gamepads for PC.
@@ -77,6 +76,9 @@ I created gamepad configs for the base game and d3xp (Resurrection of Evil), bas
 of Doom3 BFG, see gamepad.cfg and gamepad-d3xp.cfg in the [base/ directory](./base/).  
 Put them in your base/ folder, open the console and enter `exec gamepad.cfg` for the base game,
 or `exec gamepad-d3xp.cfg` for Resurrection of Evil (probably also works for Doom3: Lost Mission).
+
+**Alternative gamepad configs** based on the layout of the Doom3 port for the original XBox
+are available [**here**](https://github.com/dhewm/dhewm3/issues/536#issuecomment-1928710201).
 
 <details><summary>Click to see what button/stick/trigger does what in gamepad.cfg</summary>
 
@@ -146,20 +148,27 @@ This can be configured with the following CVars:
 - `r_screenshotJpgQuality` Quality when using JPG screenshots (`0` - `100`)
 - `r_screenshotPngCompression` Compression level when using PNG screenshots (`0` - `9`)
 
-## CVars added in dhewm3 that I'm currently too lazy to document more thoroughly
+## Other CVars added in dhewm3
 
-- g_hitEffect
+- `g_hitEffect` if set to `1` (the default), mess up player camera when taking damage.
+   Set to `0` if you don't like that effect.
 
-- in_nograb
-- in_grabKeyboard
+- `in_nograb` if set to `1`, the mouse isn't grabbed when ingame. Not overly useful for normal playing
+  (unless maybe you play with a gamepad), but very useful for debugging. Default is `0`.
+- `in_grabKeyboard` if enabled (`1`), grabs all keyboard input if mouse is grabbed, so keyboard shortcuts
+  from the OS like Alt-Tab or Windows Key won't work and thus not accidentally interrupt your playing.
+  Defaults to `0`.
 
-- in_tty
-- in_kbd
+- `in_kbd` allows you to set your keyboard layout so the console key works better. Mostly useful with SDL1.2
+- `in_tty` tab completion and history for input from the **terminal** (on Unix-likes, like Linux, macOS, BSD, ...)
 
-- r_fullscreenDesktop
-- r_fillWindowAlphaChan
+- `r_fullscreenDesktop` `0`: "real"/"exclusive" fullscreen mode, might switch screen resolution  
+  `1`: "desktop" fullscreen mode, which keeps desktop resolution and is more like a borderless fullscreen window
+- `r_fillWindowAlphaChan` Make sure alpha channel of windows default framebuffer is completely opaque
+  at the end of each frame. Needed at least when using Wayland.  
+  `1`: do this, `0`: don't do it, `-1`: let dhewm3 decide (default)
 
-- r_useCarmacksReverse
-- r_useStencilOpSeparate
+- `r_useCarmacksReverse` Use Z-Fail ("Carmack's Reverse") when rendering shadows (default `1`)
+- `r_useStencilOpSeparate` Use glStencilOpSeparate() (if available) when rendering shadow (default `1`)
 
-- s_alReverbGain
+- `s_alReverbGain` reduce strength of OpenAL (EAX-like) EFX reverb effects, `0.0` - `1.0` (default `0.5`)
