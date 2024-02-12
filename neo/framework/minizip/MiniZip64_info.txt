@@ -1,11 +1,14 @@
 NOTE from Daniel Gibson:
 
-These are parts of MiniZip (the unzip-parts), taken from zlib-1.2.7/contrib/minizip/
-and adjusted for doom3 by making small adjustments foor doom3 (doom3-specific allocator)
+These are parts of MiniZip (the unzip-parts), taken from zlib's contrib/minizip/,
+the now-current development branch (commit f56ad0aafa868303ce324ae8d45675570c66b050
+"Note termination of returned strings in contrib/minizip/unzip.h." from 2024-01-23)
+and adjusted for doom3 by making small adjustments for doom3 (doom3-specific allocator,
+which included reintroducing the TRYFREE macro that was removed upstream)
 and adding a function (unzReOpen()) from the original Doom3 GPL release by id Software 
 that used MiniZip 0.15beta. It was adjusted by Daniel Gibson for MiniZip 1.1
  Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
- Copyright (C) 2012 Daniel Gibson
+ Copyright (C) 2012,2024 Daniel Gibson
 
 
 ########### Original Content of this File below #############
