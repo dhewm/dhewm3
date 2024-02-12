@@ -105,6 +105,9 @@
 #ifndef ALLOC
 # define ALLOC(size) (malloc(size))
 #endif
+#ifndef TRYFREE
+# define TRYFREE(p) { free(p);}
+#endif
 
 #define SIZECENTRALDIRITEM (0x2e)
 #define SIZEZIPLOCALHEADER (0x1e)
@@ -371,7 +374,7 @@ local ZPOS64_T unz64local_SearchCentralDir(const zlib_filefunc64_32_def* pzlib_f
         if (uPosFound!=CENTRALDIRINVALID)
             break;
     }
-    free(buf);
+    TRYFREE(buf);
     return uPosFound;
 }
 
@@ -434,7 +437,7 @@ local ZPOS64_T unz64local_SearchCentralDir64(const zlib_filefunc64_32_def* pzlib
         if (uPosFound!=CENTRALDIRINVALID)
             break;
     }
-    free(buf);
+    TRYFREE(buf);
     if (uPosFound == CENTRALDIRINVALID)
         return CENTRALDIRINVALID;
 
@@ -714,7 +717,7 @@ extern int ZEXPORT unzClose(unzFile file) {
         unzCloseCurrentFile(file);
 
     ZCLOSE64(s->z_filefunc, s->filestream);
-    free(s);
+    TRYFREE(s);
     return UNZ_OK;
 }
 
@@ -1375,7 +1378,7 @@ extern int ZEXPORT unzOpenCurrentFile3(unzFile file, int* method,
 
     if (pfile_in_zip_read_info->read_buffer==NULL)
     {
-        free(pfile_in_zip_read_info);
+        TRYFREE(pfile_in_zip_read_info);
         return UNZ_INTERNALERROR;
     }
 
@@ -1432,8 +1435,8 @@ extern int ZEXPORT unzOpenCurrentFile3(unzFile file, int* method,
         pfile_in_zip_read_info->stream_initialised=Z_BZIP2ED;
       else
       {
-        free(pfile_in_zip_read_info->read_buffer);
-        free(pfile_in_zip_read_info);
+        TRYFREE(pfile_in_zip_read_info->read_buffer);
+        TRYFREE(pfile_in_zip_read_info);
         return err;
       }
 #else
@@ -1453,8 +1456,8 @@ extern int ZEXPORT unzOpenCurrentFile3(unzFile file, int* method,
         pfile_in_zip_read_info->stream_initialised=Z_DEFLATED;
       else
       {
-        free(pfile_in_zip_read_info->read_buffer);
-        free(pfile_in_zip_read_info);
+        TRYFREE(pfile_in_zip_read_info->read_buffer);
+        TRYFREE(pfile_in_zip_read_info);
         return err;
       }
         /* windowBits is passed < 0 to tell that there is no zlib header.
@@ -1885,7 +1888,7 @@ extern int ZEXPORT unzCloseCurrentFile(unzFile file) {
     }
 
 
-    free(pfile_in_zip_read_info->read_buffer);
+    TRYFREE(pfile_in_zip_read_info->read_buffer);
     pfile_in_zip_read_info->read_buffer = NULL;
     if (pfile_in_zip_read_info->stream_initialised == Z_DEFLATED)
         inflateEnd(&pfile_in_zip_read_info->stream);
@@ -1896,7 +1899,7 @@ extern int ZEXPORT unzCloseCurrentFile(unzFile file) {
 
 
     pfile_in_zip_read_info->stream_initialised = 0;
-    free(pfile_in_zip_read_info);
+    TRYFREE(pfile_in_zip_read_info);
 
     s->pfile_in_zip_read=NULL;
 
