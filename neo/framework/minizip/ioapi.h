@@ -21,6 +21,12 @@
 #ifndef _ZLIBIOAPI64_H
 #define _ZLIBIOAPI64_H
 
+// fixes Gentoo zlib problems, see
+// https://bugs.gentoo.org/show_bug.cgi?id=383179
+#ifndef OF
+#define OF(x) x
+#endif
+
 #if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
 
   // Linux needs this to support file operation on files larger then 4+GB
@@ -43,7 +49,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "zlib.h"
+#include <zlib.h>
 
 #if defined(USE_FILE32API)
 #define fopen64 fopen

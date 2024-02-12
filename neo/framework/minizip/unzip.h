@@ -48,12 +48,12 @@ extern "C" {
 #endif
 
 #ifndef _ZLIB_H
-#include "zlib.h"
+#include <zlib.h>
 #endif
 
-#ifndef  _ZLIBIOAPI_H
+// TODO #ifndef  _ZLIBIOAPI_H
 #include "ioapi.h"
-#endif
+// TODO #endif
 
 #ifdef HAVE_BZIP2
 #include "bzlib.h"
@@ -433,6 +433,22 @@ extern int ZEXPORT unzSetOffset64 (unzFile file, ZPOS64_T pos);
 extern int ZEXPORT unzSetOffset (unzFile file, uLong pos);
 
 
+// ####################################################################
+
+// the following function was added for doom3 by id Software
+
+extern unzFile unzReOpen( const char* path, unzFile file );
+
+/*
+  Re-Open a Zip file, i.e. clone an existing one and give it a new file descriptor.
+  path contain the full pathname (by example,
+     on a Windows NT computer "c:\\zlib\\zlib111.zip" or on an Unix computer
+	 "zlib/zlib111.zip".
+	 If the zipfile cannot be opened (file don't exist or in not valid), the
+	   return value is NULL.
+     Else, the return value is a unzFile Handle, usable with other function
+	   of this unzip package.
+*/
 
 #ifdef __cplusplus
 }

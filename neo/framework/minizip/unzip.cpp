@@ -61,9 +61,18 @@
 
   Copyright (C) 1998 - 2010 Gilles Vollant, Even Rouault, Mathias Svensson
 
+        ####################################################################################
+
+unzReOpen() was added by id Software (originally in framework/Unzip.cpp) for doom3
+and adjusted for MiniZip 1.1 by Daniel Gibson
+The file was renamed from unzip.c to unzip.cpp so we can use C++ functions from doom3
+
+ Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
+ Copyright (C) 2012 Daniel Gibson
+
 */
 
-
+#if 0 // we don't really want system includes here
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -79,6 +88,18 @@
 #else
 #   include <errno.h>
 #endif
+
+#else // 0
+// use doom3 headers
+#include "sys/platform.h"
+#include "idlib/Heap.h"
+#include "idlib/Lib.h"
+
+// we don't need crypt support
+#define NOUNCRYPT 1
+
+#include "unzip.h"
+#endif // 0
 
 
 #ifndef local
@@ -102,12 +123,17 @@
 #define UNZ_MAXFILENAMEINZIP (256)
 #endif
 
+#if 0 // don't use system malloc but doom3's allocator
 #ifndef ALLOC
 # define ALLOC(size) (malloc(size))
 #endif
 #ifndef TRYFREE
 # define TRYFREE(p) { free(p);}
 #endif
+#else // 0
+#define ALLOC(size) (Mem_Alloc(size))
+#define TRYFREE(p) {Mem_Free(p);} // Mem_Free - as well as free() - check for NULL themselves, no need to do it here
+#endif // 0
 
 #define SIZECENTRALDIRITEM (0x2e)
 #define SIZEZIPLOCALHEADER (0x1e)
@@ -1593,6 +1619,9 @@ extern int ZEXPORT unzReadCurrentFile(unzFile file, voidp buf, unsigned len) {
                 uReadThis = (uInt)pfile_in_zip_read_info->rest_read_compressed;
             if (uReadThis == 0)
                 return UNZ_EOF;
+            // TODO: the following line was added by id Software to the original src - seems to work without it,
+            // but if problems occur look here..
+            // if(s->cur_file_info.compressed_size == pfile_in_zip_read_info->rest_read_compressed)
             if (ZSEEK64(pfile_in_zip_read_info->z_filefunc,
                       pfile_in_zip_read_info->filestream,
                       pfile_in_zip_read_info->pos_in_zipfile +
@@ -1981,4 +2010,43 @@ extern int ZEXPORT unzSetOffset64(unzFile file, ZPOS64_T pos) {
 
 extern int ZEXPORT unzSetOffset (unzFile file, uLong pos) {
     return unzSetOffset64(file,pos);
+}
+
+
+// ####################################################################
+// the following function was added for doom3 by id Software and
+// adjusted for MiniZip 1.1 by Daniel Gibson
+
+
+extern unzFile unzReOpen (const char* path, unzFile file)
+{
+	unz64_s* s;
+	unz64_s* zFile = (unz64_s*)file;
+
+	if(zFile == NULL)
+		return NULL;
+
+	// create unz64_s* "s" as clone of "file"
+	s=(unz64_s*)ALLOC(sizeof(unz64_s));
+	if(s == NULL)
+		return NULL;
+
+	memcpy(s, zFile, sizeof(unz64_s));
+
+	// create new filestream for path
+	voidp fin = ZOPEN64(s->z_filefunc,
+	                    path,
+	                    ZLIB_FILEFUNC_MODE_READ | ZLIB_FILEFUNC_MODE_EXISTING);
+
+	if( fin == NULL ) {
+		TRYFREE(s);
+		return NULL;
+	}
+
+	// set that filestream in s
+	s->filestream = fin;
+
+	unzOpenCurrentFile( s );
+
+	return (unzFile)s;
 }
