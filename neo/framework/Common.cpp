@@ -2639,6 +2639,7 @@ idCommonLocal::LoadGameDLL
 void idCommonLocal::LoadGameDLL( void ) {
 #ifdef __DOOM_DLL__
 	const char		*fs_game;
+	const char		*fs_base;
 	char			dll[MAX_OSPATH];
 	idStr			s;
 
@@ -2650,6 +2651,10 @@ void idCommonLocal::LoadGameDLL( void ) {
 	if (!fs_game || !fs_game[0])
 		fs_game = BASE_GAMEDIR;
 
+	fs_base = cvarSystem->GetCVarString("fs_game_base");
+	if (!fs_base || !fs_base[0])
+		fs_base = BASE_GAMEDIR;
+
 	gameDLL = 0;
 
 	sys->DLL_GetFileName(fs_game, dll, sizeof(dll));
@@ -2659,7 +2664,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 	if (!gameDLL) {
 		common->Printf( "\n" );
 		common->Warning( "couldn't load mod-specific %s, defaulting to base game's library!\n", dll );
-		sys->DLL_GetFileName(BASE_GAMEDIR, dll, sizeof(dll));
+		sys->DLL_GetFileName(fs_base, dll, sizeof(dll));
 		LoadGameDLLbyName(dll, s);
 	}
 
