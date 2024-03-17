@@ -4559,6 +4559,11 @@ void idPlayer::UpdateFocus( void ) {
 
 	if ( focusGUIent && focusUI ) {
 		if ( !oldFocus || oldFocus != focusGUIent ) {
+			// DG: tell the old UI it isn't focused anymore
+			if ( oldFocus != NULL && oldUI != NULL ) {
+				command = oldUI->Activate( false, gameLocal.time );
+				// TODO: HandleGuiCommands( oldFocus, command ); ?
+			} // DG end
 			command = focusUI->Activate( true, gameLocal.time );
 			HandleGuiCommands( focusGUIent, command );
 			StartSound( "snd_guienter", SND_CHANNEL_ANY, 0, false, NULL );

@@ -1038,7 +1038,9 @@ void Sys_SetInteractiveIngameGuiActive( bool active, idUserInterface* ui )
 	if ( sessLocal.GetActiveMenu() == NULL && active ) {
 		// add ui to lastuis, if it has been activated and no proper menu
 		// (like main menu) is currently open
-		lastuis.Append( ui );
+		if ( idx == -1 ) {
+			lastuis.Append( ui );
+		}
 	} else if ( idx != -1 ) {
 		// if the UI is in lastuis and has been deactivated, or there
 		// is a proper menu opened, remove it from the list.
@@ -1049,7 +1051,8 @@ void Sys_SetInteractiveIngameGuiActive( bool active, idUserInterface* ui )
 		// And because it's possible that we have an ingame UI focussed while opening
 		// the multiplayer-main-menu, we keep a list of lastuis, instead of just one,
 		// so D3_IN_interactiveIngameGuiActive remains true in that case
-		// (the ingame UI is still in the list)
+		// (the ingame UI is still in the list); the lastuis list is also needed
+		// for the case of opening the PDA while an ingame GUI is focused
 
 		lastuis.RemoveIndex( idx );
 	}
