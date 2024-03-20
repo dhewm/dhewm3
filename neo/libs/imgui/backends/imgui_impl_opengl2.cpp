@@ -51,6 +51,9 @@
 #pragma clang diagnostic ignored "-Wnonportable-system-include-path"
 #endif
 
+// DG: use qgl instead of GL/gl.h for dhewm3 (where D3_OSTYPE is always defined by CMake)
+#ifndef D3_OSTYPE
+
 // Include OpenGL header (without an OpenGL loader) requires a bit of fiddling
 #if defined(_WIN32) && !defined(APIENTRY)
 #define APIENTRY __stdcall                  // It is customary to use APIENTRY for OpenGL function pointer declarations on all platforms.  Additionally, the Windows OpenGL header needs APIENTRY.
@@ -64,6 +67,44 @@
 #else
 #include <GL/gl.h>
 #endif
+
+#else // DG: use qgl
+
+#include "renderer/qgl.h"
+
+// creating some #defines for the used gl functions instead of adapting the code below
+// will make updating to new imgui versions easier
+#define glBindTexture         qglBindTexture
+#define glBlendFunc           qglBlendFunc
+#define glColorPointer        qglColorPointer
+#define glDeleteTextures      qglDeleteTextures
+#define glDisableClientState  qglDisableClientState
+#define glDisable             qglDisable
+#define glDrawElements        qglDrawElements
+#define glEnableClientState   qglEnableClientState
+#define glEnable              qglEnable
+#define glGenTextures         qglGenTextures
+#define glGetIntegerv         qglGetIntegerv
+#define glGetTexEnviv         qglGetTexEnviv
+#define glLoadIdentity        qglLoadIdentity
+#define glMatrixMode          qglMatrixMode
+#define glOrtho               qglOrtho
+#define glPixelStorei         qglPixelStorei
+#define glPolygonMode         qglPolygonMode
+#define glPopAttrib           qglPopAttrib
+#define glPopMatrix           qglPopMatrix
+#define glPushAttrib          qglPushAttrib
+#define glPushMatrix          qglPushMatrix
+#define glScissor             qglScissor
+#define glShadeModel          qglShadeModel
+#define glTexCoordPointer     qglTexCoordPointer
+#define glTexEnvi             qglTexEnvi
+#define glTexImage2D          qglTexImage2D
+#define glTexParameteri       qglTexParameteri
+#define glVertexPointer       qglVertexPointer
+#define glViewport            qglViewport
+
+#endif // DG: use qgl
 
 struct ImGui_ImplOpenGL2_Data
 {

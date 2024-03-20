@@ -739,6 +739,20 @@ set(src_idlib
 
 add_globbed_headers(src_idlib "idlib")
 
+set(src_imgui
+	libs/imgui/backends/imgui_impl_sdl2.cpp
+	libs/imgui/backends/imgui_impl_opengl2.cpp
+	
+	libs/imgui/imgui.cpp
+	libs/imgui/imgui_draw.cpp
+	libs/imgui/imgui_tables.cpp
+	libs/imgui/imgui_widgets.cpp
+	
+	libs/imgui/imgui_demo.cpp
+)
+
+add_globbed_headers(src_imgui "libs/imgui")
+
 set(src_game
 	game/AF.cpp
 	game/AFEntity.cpp
@@ -1148,6 +1162,7 @@ if(CORE)
 		${src_core}
 		${src_sys_base}
 		${src_sys_core}
+		${src_imgui}
 		${src_editor_tools}
 	)
 	
@@ -1156,7 +1171,9 @@ if(CORE)
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DHEWM3BINARY})
 	endif()
 
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_imgui} ${src_editor_tools})
+
+	target_include_directories(${DHEWM3BINARY} PRIVATE "${CMAKE_SOURCE_DIR}/libs/imgui")
 
 if(HARDLINK_GAME)
 	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "${TOOLS_DEFINES}")
@@ -1197,10 +1214,10 @@ if(DEDICATED)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl} ${src_debuggerServer})
 
 if(HARDLINK_GAME)
-	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED")
+	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "IMGUI_DISABLE;ID_DEDICATED")
 	target_include_directories(${DHEWM3BINARY}ded PRIVATE ${game_includes})
 else()
-	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
+	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "IMGUI_DISABLE;ID_DEDICATED;__DOOM_DLL__")
 endif()
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(${DHEWM3BINARY}ded
