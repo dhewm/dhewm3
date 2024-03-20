@@ -587,8 +587,10 @@ const char *idUserInterfaceLocal::Activate(bool activate, int _time) {
 	time = _time;
 	active = activate;
 	if ( desktop ) {
-		// DG: added this hack for gamepad input
-		if ( interactive ) {
+		// DG: added this hack for gamepad input - Note that it can happen that
+		//     a UI has been made non-interactive before Activate(false, ..) is called
+		//     and it still needs to be unregistered with Sys_SetInteractiveIngameGuiActive()!
+		if ( interactive || !activate ) {
 			Sys_SetInteractiveIngameGuiActive( activate, this );
 		} // DG end
 		activateStr = "";
