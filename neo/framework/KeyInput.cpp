@@ -196,6 +196,8 @@ static const keyname_t keynames[] =
 	{NULL,				0,					NULL}
 };
 
+idCVar in_namePressed( "in_namePressed", "0", CVAR_BOOL|CVAR_SYSTEM, "print the name of the key/button pressed" );
+
 static const int	MAX_KEYS = K_LAST_KEY+1; // DG: was 256, made it more flexible
 
 class idKey {
@@ -758,6 +760,10 @@ Called by the system for both key up and key down events
 void idKeyInput::PreliminaryKeyEvent( int keynum, bool down ) {
 	keys[keynum].down = down;
 
+	if(  cvarSystem->GetCVarBool( "in_namePressed") ) {
+	    KeyReveal( keynum );
+	}
+
 #ifdef ID_DOOM_LEGACY
 	if ( down && keynum < 127 ) { // DG: only ASCII keys are of interest here
 		lastKeys[ 0 + ( lastKeyIndex & 15 )] = keynum;
@@ -773,6 +779,18 @@ void idKeyInput::PreliminaryKeyEvent( int keynum, bool down ) {
 		}
 	}
 #endif
+}
+
+/*
+===================
+idKeyInput::KeyReveal
+
+simple print in the console the name of the key pressed
+===================
+*/
+void idKeyInput::KeyReveal( int keyNum ) {
+    const char* keyName = KeyNumToString( keyNum, false );
+    common->Printf( "pressed the \"%s\"key.\n", keyName );
 }
 
 /*

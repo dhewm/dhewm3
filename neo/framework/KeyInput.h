@@ -312,6 +312,7 @@ public:
 	static const char *	BindingFromKey( const char *key );
 	static bool			KeyIsBoundTo( int keyNum, const char *binding );
 	static void			WriteBindings( idFile *f );
+        static void                     KeyReveal( int keyNum );
 };
 
 #endif /* !__KEYINPUT_H__ */
