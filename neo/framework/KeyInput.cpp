@@ -790,7 +790,7 @@ simple print in the console the name of the key pressed
 */
 void idKeyInput::KeyReveal( int keyNum ) {
     const char* keyName = KeyNumToString( keyNum, false );
-    common->Printf( "pressed the \"%s\"key.\n", keyName );
+    common->Printf( "pressed the \"%s\" lkey.\n", keyName );
 }
 
 /*
