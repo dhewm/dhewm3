@@ -159,6 +159,9 @@ This can be configured with the following CVars:
   from the OS like Alt-Tab or Windows Key won't work and thus not accidentally interrupt your playing.
   Defaults to `0`.
 
+- `in_namePressed` if set to `1`, the currently pressed key/button (on keyboard/mouse/gamepad)
+  is printed to the console - useful when setting key-bindings in the console or a config. Default is `0`.
+
 - `in_kbd` allows you to set your keyboard layout so the console key works better. Mostly useful with SDL1.2
 - `in_tty` tab completion and history for input from the **terminal** (on Unix-likes, like Linux, macOS, BSD, ...)
 

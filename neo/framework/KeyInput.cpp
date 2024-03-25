@@ -760,8 +760,8 @@ Called by the system for both key up and key down events
 void idKeyInput::PreliminaryKeyEvent( int keynum, bool down ) {
 	keys[keynum].down = down;
 
-	if(  cvarSystem->GetCVarBool( "in_namePressed") ) {
-	    KeyReveal( keynum );
+	if( down && in_namePressed.GetBool() ) {
+		KeyReveal( keynum );
 	}
 
 #ifdef ID_DOOM_LEGACY
@@ -789,8 +789,8 @@ simple print in the console the name of the key pressed
 ===================
 */
 void idKeyInput::KeyReveal( int keyNum ) {
-    const char* keyName = KeyNumToString( keyNum, false );
-    common->Printf( "pressed the \"%s\" key.\n", keyName );
+	const char* keyName = KeyNumToString( keyNum, false );
+	common->Printf( "pressed the \"%s\" key.\n", keyName );
 }
 
 /*
