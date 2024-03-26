@@ -15,6 +15,8 @@
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
+#include <Availability.h>
+
 /* For some reason, Apple removed setAppleMenu from the headers in 10.4,
  but the method still is there and works. To avoid warnings, we declare
  it ourselves here. */
@@ -226,7 +228,13 @@ static void CustomApplicationMain (int argc, char **argv)
 
     /* Create SDLMain and make it the app delegate */
     sdlMain = [[SDLMain alloc] init];
+
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < 1060 /* before 10.6 */
+    [NSApp setDelegate:sdlMain];
+#else /* 10.6 introduced NSApplicationDelegate, according to
+         https://developer.apple.com/documentation/appkit/nsapplicationdelegate?language=objc */
     [NSApp setDelegate:(id<NSApplicationDelegate>)sdlMain];
+#endif
 
     /* Start the main event loop */
     [NSApp run];

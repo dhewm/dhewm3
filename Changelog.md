@@ -27,6 +27,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Added build instructions for Linux (and similar systems) to README.md
 * Updated stb_image and stb_vorbis
 * Updated minizip (from zlib/contrib) to latest upstream code
+* Added `in_namePressed` CVar to print currently pressed key/button (useful for binding keys
+  in the console or configs). Thanks *Biel Bestué de Luna*!
 
 
 1.5.2 (2022-06-13)

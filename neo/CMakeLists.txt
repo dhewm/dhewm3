@@ -307,7 +307,10 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	add_compile_options(-fno-strict-aliasing)
 	# dear idiot compilers, don't fuck up math code with useless FMA "optimizations"
 	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
-	add_compile_options(-ffp-contract=off)
+	CHECK_CXX_COMPILER_FLAG("-ffp-contract=off" cxx_has_fp-contract)
+	if(cxx_has_fp-contract)
+		add_compile_options(-ffp-contract=off)
+	endif()
 	
 	if(ASAN)
 		# if this doesn't work, ASan might not be available on your platform, don't set ASAN then..

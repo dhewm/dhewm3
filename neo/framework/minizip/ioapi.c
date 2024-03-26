@@ -187,7 +187,13 @@ static long ZCALLBACK fseek64_file_func(voidpf opaque, voidpf stream, ZPOS64_T o
     }
     ret = 0;
 
+    // DG: compat with older zlib versions
+#if defined(ZLIB_VERNUM) && ZLIB_VERNUM >= 0x1243 // orig. code:
     if(FSEEKO_FUNC((FILE *)stream, (z_off64_t)offset, fseek_origin) != 0)
+#else // zlib before 1.2.4.3 didn't have z_off64_t
+    // DG: just remove the z_off64_t cast
+    if(FSEEKO_FUNC((FILE *)stream, offset, fseek_origin) != 0)
+#endif
                         ret = -1;
 
     return ret;

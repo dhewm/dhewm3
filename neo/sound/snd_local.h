@@ -40,6 +40,12 @@ If you have questions concerning this license or the applicable additional terms
 #include <AL/alc.h>
 #include <AL/alext.h>
 
+// DG: make this code build with older OpenAL headers that don't know about ALC_SOFT_HRTF
+//     which provides LPALCRESETDEVICESOFT for idSoundSystemLocal::alcResetDeviceSOFT()
+#ifndef ALC_SOFT_HRTF
+  typedef ALCboolean (ALC_APIENTRY*LPALCRESETDEVICESOFT)(ALCdevice *device, const ALCint *attribs);
+#endif
+
 #include "framework/UsercmdGen.h"
 #include "sound/efxlib.h"
 #include "sound/sound.h"
