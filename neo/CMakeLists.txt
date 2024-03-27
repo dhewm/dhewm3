@@ -743,15 +743,18 @@ set(src_imgui
 	libs/imgui/backends/imgui_impl_sdl2.cpp
 	libs/imgui/backends/imgui_impl_opengl2.cpp
 	
+	libs/imgui/imgui.h
 	libs/imgui/imgui.cpp
 	libs/imgui/imgui_draw.cpp
 	libs/imgui/imgui_tables.cpp
 	libs/imgui/imgui_widgets.cpp
 	
 	libs/imgui/imgui_demo.cpp
+	
+	sys/sys_imgui.h
+	sys/sys_imgui.cpp
 )
 
-add_globbed_headers(src_imgui "libs/imgui")
 
 set(src_game
 	game/AF.cpp

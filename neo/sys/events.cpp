@@ -39,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 
 #include "sys/sys_public.h"
+#include "sys/sys_imgui.h"
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDL_Keycode SDLKey
@@ -1124,6 +1125,8 @@ sysEvent_t Sys_GetEvent() {
 
 	// loop until there is an event we care about (will return then) or no more events
 	while(SDL_PollEvent(&ev)) {
+		D3::ImGuiHooks::ProcessEvent(&ev);
+
 		switch (ev.type) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_WINDOWEVENT:
