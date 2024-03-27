@@ -346,6 +346,13 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 		add_compile_options(-Wno-class-memaccess)
 	endif()
 
+	# ignore warnings about variables named "requires" for now (in C++20 it's a keyword,
+	#  but currently we don't even use C++11 features)
+	CHECK_CXX_COMPILER_FLAG("-Wno-c++20-compat" cxx_has_Wno-cpp20-compat)
+	if(cxx_has_Wno-cpp20-compat)
+		add_compile_options(-Wno-c++20-compat)
+	endif()
+
 	if(AROS)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX ".aros-${cpu}")
 		add_definitions(-DIOAPI_NO_64)
