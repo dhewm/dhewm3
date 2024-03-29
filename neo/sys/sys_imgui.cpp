@@ -10,6 +10,7 @@
 
 #include "framework/Common.h"
 #include "renderer/qgl.h"
+#include "renderer/tr_local.h" // glconfig
 
 
 namespace D3 {
@@ -21,18 +22,13 @@ static bool haveNewFrame = false;
 // using void* instead of SDL_Window and SDL_GLContext to avoid dragging SDL headers into sys_imgui.h
 bool Init(void* sdlWindow, void* sdlGlContext)
 {
-	SDL_Window* win = (SDL_Window*)sdlWindow;
-	SDL_GL_MakeCurrent(win, (SDL_GLContext)sdlGlContext); // XXX: really?
-	//SDL_GLContext glctx = (SDL_GLContext)sdlGlContext;
-	SDL_GL_SetSwapInterval(1); // XXX: really?
-
 	common->Printf( "Initializing ImGui\n" );
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	imguiCtx = ImGui::CreateContext();
-	if (imguiCtx == NULL) {
-		common->Warning("Failed to create ImGui Context!\n");
+	if ( imguiCtx == NULL ) {
+		common->Warning( "Failed to create ImGui Context!\n" );
 		return false;
 	}
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -42,20 +38,33 @@ bool Init(void* sdlWindow, void* sdlGlContext)
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsLight();
+	//ImGui::StyleColorsClassic();
+
+	// make it a bit prettier with rounded edges
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowRounding = 2.0f;
+	style.FrameRounding = 3.0f;
+	//style.ChildRounding = 6.0f;
+	style.ScrollbarRounding = 8.0f;
+	style.GrabRounding = 1.0f;
+	style.PopupRounding = 2.0f;
+
+	ImVec4* colors = style.Colors;
+	colors[ImGuiCol_TitleBg]                = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
 
 	// Setup Platform/Renderer backends
-	if (!ImGui_ImplSDL2_InitForOpenGL(win, sdlGlContext)) {
-		ImGui::DestroyContext(imguiCtx);
+	if ( ! ImGui_ImplSDL2_InitForOpenGL( (SDL_Window*)sdlWindow, sdlGlContext ) ) {
+		ImGui::DestroyContext( imguiCtx );
 		imguiCtx = NULL;
-		common->Warning("Failed to initialize ImGui SDL platform backend!\n");
+		common->Warning( "Failed to initialize ImGui SDL platform backend!\n" );
 		return false;
 	}
 
-	if (!ImGui_ImplOpenGL2_Init()) {
+	if ( ! ImGui_ImplOpenGL2_Init() ) {
 		ImGui_ImplSDL2_Shutdown();
-		ImGui::DestroyContext(imguiCtx);
+		ImGui::DestroyContext( imguiCtx );
 		imguiCtx = NULL;
-		common->Warning("Failed to initialize ImGui OpenGL renderer backend!\n");
+		common->Warning( "Failed to initialize ImGui OpenGL renderer backend!\n" );
 		return false;
 	}
 
@@ -84,7 +93,7 @@ void Shutdown()
 
 	ImGui_ImplOpenGL2_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
-	ImGui::DestroyContext(imguiCtx);
+	ImGui::DestroyContext( imguiCtx );
 }
 
 void NewFrame()
@@ -127,7 +136,7 @@ void NewFrame()
 		ImGui::End();
 	}
 
-	if(show_another_window) {
+	if ( show_another_window ) {
 		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		ImGui::Text("Hello from another window!");
 		if (ImGui::Button("Close Me"))
@@ -136,44 +145,80 @@ void NewFrame()
 	}
 }
 
+// returns true if ImGui has handled the event and it shouldn't be passed to the game
 bool ProcessEvent(const void* sdlEvent)
 {
-	return ImGui_ImplSDL2_ProcessEvent( (const SDL_Event*)sdlEvent );
+	const SDL_Event* ev = (const SDL_Event*)sdlEvent;
+	// ImGui_ImplSDL2_ProcessEvent() doc says:
+	//   You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+	//   - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+	//   - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+	//   Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+	if( ImGui_ImplSDL2_ProcessEvent( ev ) ) {
+		ImGuiIO& io = ImGui::GetIO();
+		if ( io.WantCaptureMouse ) {
+			switch( ev->type ) {
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEWHEEL:
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONUP:
+					return true;
+			}
+		}
+
+		if ( io.WantCaptureKeyboard ) {
+			switch( ev->type ) {
+				case SDL_TEXTINPUT:
+				case SDL_KEYDOWN:
+				case SDL_KEYUP:
+					return true;
+			}
+		}
+	}
+	return false;
 }
 
 void EndFrame()
 {
 	// I think this can happen if we're not coming from idCommon::Frame() but screenshot or sth
-	if (!haveNewFrame) {
+	if ( !haveNewFrame ) {
 		NewFrame();
 	}
 	haveNewFrame = false;
 	ImGui::Render();
-	ImGuiIO& io = ImGui::GetIO();
-	//qglViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-	//ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	//qglClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-	//qglClear(GL_COLOR_BUFFER_BIT);
 
+	// Doom3 uses the OpenGL ARB shader extensions, for most things it renders.
+	// disable those shaders, the OpenGL classic integration of ImGui doesn't use shaders
 	qglDisable( GL_VERTEX_PROGRAM_ARB );
 	qglDisable( GL_FRAGMENT_PROGRAM_ARB );
 
-	GLint curArrayBuffer = 0, curElemBuffer = 0;
-	qglGetIntegerv( GL_ARRAY_BUFFER_BINDING_ARB, &curArrayBuffer );
-	qglGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING_ARB, &curElemBuffer );
-
-	qglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
-	qglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
-
-
-	ImDrawData* drawData = ImGui::GetDrawData();
-	ImGui_ImplOpenGL2_RenderDrawData( drawData );
-
-	if( curArrayBuffer != 0 ) {
-		qglBindBufferARB( GL_ARRAY_BUFFER_ARB, curArrayBuffer );
+	// Doom3 uses OpenGL's ARB_vertex_buffer_object extension to use VBOs on the GPU
+	// as buffers for glDrawElements() (instead of passing userspace buffers to that function)
+	// ImGui however uses userspace buffers, so remember the currently bound VBO
+	// and unbind it (after drawing, bind it again)
+	GLint curArrayBuffer = 0;
+	if ( glConfig.ARBVertexBufferObjectAvailable ) {
+		qglGetIntegerv( GL_ARRAY_BUFFER_BINDING_ARB, &curArrayBuffer );
+		qglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	}
-	if( curElemBuffer != 0 ) {
-		qglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, curElemBuffer );
+
+	// disable all texture units, ImGui_ImplOpenGL2_RenderDrawData() will enable texture 0
+	// and bind its own textures to it as needed
+	for ( int i = glConfig.maxTextureUnits - 1 ; i >= 0 ; i-- ) {
+		GL_SelectTexture( i );
+		qglDisable( GL_TEXTURE_2D );
+		if ( glConfig.texture3DAvailable ) {
+			qglDisable( GL_TEXTURE_3D );
+		}
+		if ( glConfig.cubeMapAvailable ) {
+			qglDisable( GL_TEXTURE_CUBE_MAP_EXT );
+		}
+	}
+
+	ImGui_ImplOpenGL2_RenderDrawData( ImGui::GetDrawData() );
+
+	if ( curArrayBuffer != 0 ) {
+		qglBindBufferARB( GL_ARRAY_BUFFER_ARB, curArrayBuffer );
 	}
 }
 

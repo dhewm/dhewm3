@@ -1125,7 +1125,10 @@ sysEvent_t Sys_GetEvent() {
 
 	// loop until there is an event we care about (will return then) or no more events
 	while(SDL_PollEvent(&ev)) {
-		D3::ImGuiHooks::ProcessEvent(&ev);
+		if(D3::ImGuiHooks::ProcessEvent(&ev)) {
+			// ImGui has used the event, so it shouldn't also be handled by the game
+			continue;
+		}
 
 		switch (ev.type) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
