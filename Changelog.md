@@ -4,7 +4,7 @@ dhewm3 Changelog
 Note: Numbers starting with a "#" like #330 refer to the bugreport with that number
       at https://github.com/dhewm/dhewm3/issues/
 
-1.5.3 (WIP)
+1.5.3 (2024-03-29)
 ------------------------------------------------------------------------
 
 * Support for gamepads (based on code from [Quadrilateral Cowboy](https://github.com/blendogames/quadrilateralcowboy),
