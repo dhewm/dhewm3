@@ -12,12 +12,15 @@
 #include "renderer/qgl.h"
 #include "renderer/tr_local.h" // glconfig
 
+extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
 
 namespace D3 {
 namespace ImGuiHooks {
 
 ImGuiContext* imguiCtx = NULL;
 static bool haveNewFrame = false;
+
+static int openImguiWindows = 0; // or-ed enum D3ImGuiWindow values
 
 // using void* instead of SDL_Window and SDL_GLContext to avoid dragging SDL headers into sys_imgui.h
 bool Init(void* sdlWindow, void* sdlGlContext)
@@ -51,6 +54,17 @@ bool Init(void* sdlWindow, void* sdlGlContext)
 
 	ImVec4* colors = style.Colors;
 	colors[ImGuiCol_TitleBg]                = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
+	colors[ImGuiCol_TabHovered]             = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
+	colors[ImGuiCol_TabActive]              = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
+
+	int winIdx = SDL_GetWindowDisplayIndex( (SDL_Window*)sdlWindow );
+	if (winIdx >= 0) {
+		float ddpi = 0, hdpi = 0, vdpi = 0;
+		SDL_GetDisplayDPI(winIdx, &ddpi, &hdpi, &vdpi);
+		printf("XXX ddpi = %f, hdpi = %f, vdpi = %f\n", ddpi, hdpi, vdpi);
+		// TODO: does this work good enough for high DPI support?
+		io.FontGlobalScale = vdpi / 96.0f;
+	}
 
 	// Setup Platform/Renderer backends
 	if ( ! ImGui_ImplSDL2_InitForOpenGL( (SDL_Window*)sdlWindow, sdlGlContext ) ) {
@@ -96,58 +110,38 @@ void Shutdown()
 	ImGui::DestroyContext( imguiCtx );
 }
 
+// NewFrame() is called once per D3 frame, after all events have been gotten
+// => ProcessEvent() has already been called (probably multiple times)
 void NewFrame()
 {
+	if (openImguiWindows == 0)
+		return;
+
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL2_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 	haveNewFrame = true;
 
-	// XXX hack for testing:
-	static bool show_another_window = false;
-	static bool show_demo_window = true;
-
-	if(show_demo_window)
-		ImGui::ShowDemoWindow(&show_demo_window);
-
-
-	{
-		static float f = 0.0f;
-		static int counter = 0;
-
-		ImGuiIO& io = ImGui::GetIO();
-
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		//ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-		ImGui::End();
+	if (openImguiWindows & D3_ImGuiWin_Settings) {
+		Com_DrawDhewm3SettingsMenu();
 	}
 
-	if ( show_another_window ) {
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
-		ImGui::End();
+	if (openImguiWindows & D3_ImGuiWin_Demo) {
+		bool show_demo_window = true;
+		ImGui::ShowDemoWindow(&show_demo_window);
+		if(!show_demo_window)
+			CloseWindow(D3_ImGuiWin_Demo);
 	}
 }
 
-// returns true if ImGui has handled the event and it shouldn't be passed to the game
+// called with every SDL event by Sys_GetEvent()
+// returns true if ImGui has handled the event (so it shouldn't be handled by D3)
 bool ProcessEvent(const void* sdlEvent)
 {
+	if (openImguiWindows == 0)
+			return false;
+
 	const SDL_Event* ev = (const SDL_Event*)sdlEvent;
 	// ImGui_ImplSDL2_ProcessEvent() doc says:
 	//   You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -180,6 +174,9 @@ bool ProcessEvent(const void* sdlEvent)
 
 void EndFrame()
 {
+	if (openImguiWindows == 0 && !haveNewFrame)
+		return;
+
 	// I think this can happen if we're not coming from idCommon::Frame() but screenshot or sth
 	if ( !haveNewFrame ) {
 		NewFrame();
@@ -220,6 +217,17 @@ void EndFrame()
 	if ( curArrayBuffer != 0 ) {
 		qglBindBufferARB( GL_ARRAY_BUFFER_ARB, curArrayBuffer );
 	}
+}
+
+
+void OpenWindow( D3ImGuiWindow win )
+{
+	openImguiWindows |= win;
+}
+
+void CloseWindow( D3ImGuiWindow win )
+{
+	openImguiWindows &= ~win;
 }
 
 }} //namespace D3::ImGuiHooks

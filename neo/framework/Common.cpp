@@ -60,6 +60,9 @@ If you have questions concerning this license or the applicable additional terms
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
 
+// DG: implemented in Dhewm3SettingsMenu.cpp (the only Com_*_f() function not implemented in this file)
+extern void Com_Dhewm3Settings_f( const idCmdArgs &args );
+
 typedef enum {
 	ERP_NONE,
 	ERP_FATAL,						// exit the entire game with a popup window
@@ -2301,6 +2304,8 @@ void idCommonLocal::InitCommands( void ) {
 	cmdSystem->AddCommand( "reloadEngine", Com_ReloadEngine_f, CMD_FL_SYSTEM, "reloads the engine down to including the file system" );
 	cmdSystem->AddCommand( "setMachineSpec", Com_SetMachineSpec_f, CMD_FL_SYSTEM, "detects system capabilities and sets com_machineSpec to appropriate value" );
 	cmdSystem->AddCommand( "execMachineSpec", Com_ExecMachineSpec_f, CMD_FL_SYSTEM, "execs the appropriate config files and sets cvars based on com_machineSpec" );
+
+	cmdSystem->AddCommand( "dhewm3Settings", Com_Dhewm3Settings_f, CMD_FL_SYSTEM, "Toggles (opens/closes) the (advanced) dhewm3 settings menu" );
 
 #if	!defined( ID_DEDICATED )
 	// compilers
