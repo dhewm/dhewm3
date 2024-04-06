@@ -1,9 +1,14 @@
 
-#if 1 // FIXME: introduce D3_ENABLE_IMGUI or similar from cmake? or use IMGUI_DISABLE? either way, no imgui for SDL1.2
+#include <SDL.h>
 
 #include "sys_imgui.h"
 
-#include <SDL.h>
+#ifdef D3_SDL_X11
+#include <dlfcn.h>
+#include <SDL_syswm.h>
+//char *XGetDefault(Display* display, const char*	program, const char* option)
+typedef char* (*MY_XGETDEFAULTFUN)(Display*, const char*, const char*);
+#endif
 
 #include "../libs/imgui/backends/imgui_impl_opengl2.h"
 #include "../libs/imgui/backends/imgui_impl_sdl2.h"
@@ -17,15 +22,58 @@ extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
 namespace D3 {
 namespace ImGuiHooks {
 
+static SDL_Window* sdlWindow = NULL;
 ImGuiContext* imguiCtx = NULL;
 static bool haveNewFrame = false;
-
 static int openImguiWindows = 0; // or-ed enum D3ImGuiWindow values
 
+float GetDefaultDPI()
+{
+	SDL_Window* win = sdlWindow;
+	float dpi = -1.0f;
+#ifdef D3_SDL_X11
+	SDL_SysWMinfo wmInfo = {};
+	SDL_VERSION(&wmInfo.version)
+	if(SDL_GetWindowWMInfo(win, &wmInfo) && wmInfo.subsystem == SDL_SYSWM_X11) {
+		Display* display = wmInfo.info.x11.display;
+
+		static void* libX11 = NULL;
+		if(libX11 == NULL) {
+			libX11 = dlopen("libX11.so.6", RTLD_LAZY);
+		}
+		if(libX11 == NULL) {
+			libX11 = dlopen("libX11.so", RTLD_LAZY);
+		}
+		if(libX11 != NULL) {
+			MY_XGETDEFAULTFUN my_xgetdefault = (MY_XGETDEFAULTFUN)dlsym(libX11, "XGetDefault");
+			if(my_xgetdefault != NULL) {
+				//char *XGetDefault(Display* display, const char*	program, const char* option)
+				const char* dpiStr = my_xgetdefault(display, "Xft", "dpi");
+				printf("XX dpistr = '%s'\n", dpiStr);
+				if(dpiStr != NULL) {
+					dpi = atof(dpiStr);
+				}
+			}
+		}
+	}
+	if (dpi == -1.0f)
+#endif
+	{
+		int winIdx = SDL_GetWindowDisplayIndex( win );
+		if (winIdx >= 0) {
+			SDL_GetDisplayDPI(winIdx, NULL, &dpi, NULL);
+		}
+	}
+	return dpi;
+}
+
 // using void* instead of SDL_Window and SDL_GLContext to avoid dragging SDL headers into sys_imgui.h
-bool Init(void* sdlWindow, void* sdlGlContext)
+bool Init(void* _sdlWindow, void* sdlGlContext)
 {
 	common->Printf( "Initializing ImGui\n" );
+
+	SDL_Window* win = (SDL_Window*)_sdlWindow;
+	sdlWindow = win;
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -56,18 +104,24 @@ bool Init(void* sdlWindow, void* sdlGlContext)
 	colors[ImGuiCol_TitleBg]                = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
 	colors[ImGuiCol_TabHovered]             = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
 	colors[ImGuiCol_TabActive]              = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
-
-	int winIdx = SDL_GetWindowDisplayIndex( (SDL_Window*)sdlWindow );
-	if (winIdx >= 0) {
-		float ddpi = 0, hdpi = 0, vdpi = 0;
-		SDL_GetDisplayDPI(winIdx, &ddpi, &hdpi, &vdpi);
-		printf("XXX ddpi = %f, hdpi = %f, vdpi = %f\n", ddpi, hdpi, vdpi);
-		// TODO: does this work good enough for high DPI support?
-		io.FontGlobalScale = vdpi / 96.0f;
+#if 0
+	float dpi = getFontDPI(win);
+	printf("XXX dpi = %f\n", dpi);
+	if (dpi != -1.0f) {
+		float fontScale = dpi / 96.0f; // TODO: is 96dpi not the default anywhere? macOS maybe?
+		fontScale = round(fontScale*2.0)*0.5; // round to .0 or .5
+		io.FontGlobalScale = fontScale;
+		printf("fontscale: %f\n", fontScale);
+		ImFontConfig fontCfg;
+		//fontCfg.OversampleH = fontCfg.OversampleV = 1;
+		fontCfg.PixelSnapH = true;
+		fontCfg.RasterizerDensity = fontScale;
+		io.Fonts->AddFontDefault(&fontCfg);
 	}
+#endif
 
 	// Setup Platform/Renderer backends
-	if ( ! ImGui_ImplSDL2_InitForOpenGL( (SDL_Window*)sdlWindow, sdlGlContext ) ) {
+	if ( ! ImGui_ImplSDL2_InitForOpenGL( win, sdlGlContext ) ) {
 		ImGui::DestroyContext( imguiCtx );
 		imguiCtx = NULL;
 		common->Warning( "Failed to initialize ImGui SDL platform backend!\n" );
@@ -231,5 +285,3 @@ void CloseWindow( D3ImGuiWindow win )
 }
 
 }} //namespace D3::ImGuiHooks
-
-#endif // D3_ENABLE_IMGUI

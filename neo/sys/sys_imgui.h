@@ -45,6 +45,8 @@ extern void NewFrame();
 // renders ImGui menus then
 extern void EndFrame();
 
+extern float GetDefaultDPI();
+
 #else // IMGUI_DISABLE - just stub out everything
 
 inline bool IsImguiEnabled()
@@ -69,6 +71,8 @@ inline void EndFrame() {}
 inline void OpenWindow( D3ImGuiWindow win ) {}
 
 inline void CloseWindow( D3ImGuiWindow win ) {}
+
+inline float GetDefaultDPI() { return 96.0f; }
 
 #endif
 

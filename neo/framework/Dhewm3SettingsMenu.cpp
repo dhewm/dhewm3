@@ -12,6 +12,15 @@ void Com_DrawDhewm3SettingsMenu()
 {
 	bool showSettingsWindow = true;
 	ImGui::Begin("dhewm3 Settings", &showSettingsWindow);
+	static float scale = 1.0f;
+
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui::SliderFloat("ImGui scale", &scale, 0.1f, 8.0f, "%.2f");
+	ImGui::SameLine();
+	if (ImGui::Button("Reset to Default")) {
+		scale = D3::ImGuiHooks::GetDefaultDPI() / 96.0f;
+	}
+	io.FontGlobalScale = scale;
 
 	if (ImGui::Button("Show ImGui Demo")) {
 		D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_Demo );
