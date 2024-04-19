@@ -83,7 +83,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef __MINGW32__
   #undef _alloca // in mingw _alloca is a #define
-  #define _alloca16( x )			( (assert((x)<ID_MAX_ALLOCA_SIZE)), __builtin_alloca_with_align( (x), 16*8 ) )
+  // NOTE: Do *not* use __builtin_alloca_with_align(), unlike regular alloca it frees at end of block instead of end of function !
+  #define _alloca16( x )			( (void *) ( (assert((x)<ID_MAX_ALLOCA_SIZE)), ((((uintptr_t)__builtin_alloca( (x)+15 )) + 15) & ~15) ) )
   #define _alloca( x )				( (assert((x)<ID_MAX_ALLOCA_SIZE)), __builtin_alloca( (x) ) )
 #else
   #define _alloca16( x )			( (void *) ( (assert((x)<ID_MAX_ALLOCA_SIZE)), ((((uintptr_t)_alloca( (x)+15 )) + 15) & ~15) ) )
@@ -185,14 +186,13 @@ If you have questions concerning this license or the applicable additional terms
 // Unix
 #ifdef __unix__
 
-#if !defined(__GNUC__) || (defined(__MCST__) && __LCC__ < 128)
-  // MCST-LCC < 1.28 does not support __builtin_alloca_with_align()
+#ifdef	__GNUC__
+  // NOTE: Do *not* use __builtin_alloca_with_align(), unlike regular alloca it frees at end of block instead of end of function !
+  #define _alloca16( x )			(({assert( (x)<ID_MAX_ALLOCA_SIZE );}),((void *)((((uintptr_t)__builtin_alloca( (x)+15 )) + 15) & ~15)))
+  #define _alloca( x )				( ({assert((x)<ID_MAX_ALLOCA_SIZE);}), __builtin_alloca( (x) ) )
+#else
   #define _alloca( x )				(({assert( (x)<ID_MAX_ALLOCA_SIZE );}), alloca( (x) ))
   #define _alloca16( x )			(({assert( (x)<ID_MAX_ALLOCA_SIZE );}),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
-#else
-  // GCC, CLANG, MCST-LCC >= 1.28
-  #define _alloca16( x )			( ({assert((x)<ID_MAX_ALLOCA_SIZE);}), __builtin_alloca_with_align( (x), 16*8 ) )
-  #define _alloca( x )				( ({assert((x)<ID_MAX_ALLOCA_SIZE);}), __builtin_alloca( (x) ) )
 #endif
 
 #ifdef GAME_DLL
