@@ -173,5 +173,6 @@ This can be configured with the following CVars:
 
 - `r_useCarmacksReverse` Use Z-Fail ("Carmack's Reverse") when rendering shadows (default `1`)
 - `r_useStencilOpSeparate` Use glStencilOpSeparate() (if available) when rendering shadow (default `1`)
+- `r_scaleMenusTo43` Render full-screen menus in 4:3 by adding black bars on the left/right if necessary (default `1`)
 
 - `s_alReverbGain` reduce strength of OpenAL (EAX-like) EFX reverb effects, `0.0` - `1.0` (default `0.5`)

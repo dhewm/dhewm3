@@ -33,6 +33,10 @@ extern void OpenWindow( D3ImGuiWindow win );
 
 extern void CloseWindow( D3ImGuiWindow win );
 
+// enum D3ImGuiWindow values of all currently open imgui windows or-ed together
+// (0 if none are open)
+extern int GetOpenWindowsMask();
+
 // called with every SDL event by Sys_GetEvent()
 // returns true if ImGui has handled the event (so it shouldn't be handled by D3)
 extern bool ProcessEvent(const void* sdlEvent);
@@ -45,7 +49,8 @@ extern void NewFrame();
 // renders ImGui menus then
 extern void EndFrame();
 
-extern float GetDefaultDPI();
+extern float GetScale();
+extern void SetScale( float scale );
 
 #else // IMGUI_DISABLE - just stub out everything
 
@@ -72,7 +77,10 @@ inline void OpenWindow( D3ImGuiWindow win ) {}
 
 inline void CloseWindow( D3ImGuiWindow win ) {}
 
-inline float GetDefaultDPI() { return 96.0f; }
+inline int GetOpenWindowsMask() { return 0; }
+
+inline float GetScale() { return 1.0f; }
+inline void SetScale( float scale ) {}
 
 #endif
 

@@ -56,7 +56,7 @@ typedef enum {
 typedef enum {
 	SE_NONE,				// evTime is still valid
 	SE_KEY,					// evValue is a key code, evValue2 is the down flag
-	SE_CHAR,				// evValue is an ascii char
+	SE_CHAR,				// evValue is a "High ASCII" (ISO-8859-1) char
 	SE_MOUSE,				// evValue and evValue2 are relative signed x / y moves
 	SE_MOUSE_ABS,			// evValue and evValue2 are absolute x / y coordinates in the window
 	SE_JOYSTICK,			// evValue is an axis number and evValue2 is the current state (-127 to 127)
