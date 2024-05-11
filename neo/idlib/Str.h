@@ -325,6 +325,9 @@ public:
 	int					DynamicMemoryUsed() const;
 	static idStr		FormatNumber( int number );
 
+	static idStr		Format( const char* format, ... )  id_attribute((format(printf,1,2)));
+	static idStr		VFormat( const char* format, va_list argptr );
+
 protected:
 	int					len;
 	char *				data;
