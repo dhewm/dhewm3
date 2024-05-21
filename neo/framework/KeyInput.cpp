@@ -667,18 +667,25 @@ const char *idKeyInput::KeysFromBinding( const char *bind ) {
 	int i;
 	static char keyName[MAX_STRING_CHARS];
 
+	const char* orstr = common->GetLanguageDict()->GetString( "#str_07183" );
+	if ( orstr == NULL || orstr[0] == '\0' || orstr[0] == '#' ) {
+		// fallback for windows demo where this string is missing
+		orstr = " or ";
+	}
+
 	keyName[0] = '\0';
 	if ( bind && *bind ) {
 		for ( i = 0; i < MAX_KEYS; i++ ) {
 			if ( keys[i].binding.Icmp( bind ) == 0 ) {
 				if ( keyName[0] != '\0' ) {
-					idStr::Append( keyName, sizeof( keyName ), common->GetLanguageDict()->GetString( "#str_07183" ) );
+					idStr::Append( keyName, sizeof( keyName ), orstr );
 				}
 				idStr::Append( keyName, sizeof( keyName ), KeyNumToString( i, true ) );
 			}
 		}
 	}
 	if ( keyName[0] == '\0' ) {
+		// "<empty>"
 		idStr::Copynz( keyName, common->GetLanguageDict()->GetString( "#str_07133" ), sizeof( keyName ) );
 	}
 	idStr::ToLower( keyName );
