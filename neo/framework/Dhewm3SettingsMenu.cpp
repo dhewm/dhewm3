@@ -276,7 +276,7 @@ const idDict* GetEntityDefDict( const char* name )
 }
 
 static idList<BindingEntry> bindingEntries;
-static idList<BindingEntry> obscureBindingEntries;
+static int firstObscureEntryIndex = 0;
 
 static void InitBindingEntries()
 {
@@ -335,6 +335,7 @@ static void InitBindingEntries()
 
 	int numReserve = IM_ARRAYSIZE(betsMoveLookAttack) + IM_ARRAYSIZE(betsOther);
 	numReserve += 16; // up to 14 weapons + weaponheading + moveLookHeading
+	numReserve += 43; // the remaining "obscure" impulses
 	if(bindingEntries.NumAllocated() < numReserve) {
 		bindingEntries.Resize( numReserve );
 	}
@@ -357,7 +358,7 @@ static void InitBindingEntries()
 		int impulseNum = i;
 		if (i == 13) {
 			// Hack: D3XP uses def_weapon18 for (MP-only) weapon_chainsaw
-			//  and the corresponding impulse is _impulse17
+			//  and the corresponding impulse is _impulse27
 			// (otherwise def_weaponX corresponds to _impulseX)
 			weapNum = 18;
 			impulseNum = 27;
@@ -394,26 +395,25 @@ static void InitBindingEntries()
 		bindingEntries.Append( BindingEntry( bet ) );
 	}
 
+	firstObscureEntryIndex = bindingEntries.Num();
 	// TODO: could instead save bindingEntries.Num() as "firstObscureIndex"
 	//  and put all the obscure bindings into the same list
 	// => makes handling the code ("what action are we currently trying to bind?")
 	//    more uniform and thus simpler
 
-	obscureBindingEntries.Clear();
-	obscureBindingEntries.Resize(43);
-	obscureBindingEntries.Append( BindingEntry( "_impulse16", "_impulse16" ) );
-	obscureBindingEntries.Append( BindingEntry( "_impulse21", "_impulse21" ) );
+	bindingEntries.Append( BindingEntry( "_impulse16", "_impulse16" ) );
+	bindingEntries.Append( BindingEntry( "_impulse21", "_impulse21" ) );
 	// _impulse22 is "spectate", handled in "Other" section
-	obscureBindingEntries.Append( BindingEntry( "_impulse23", "_impulse23" ) );
-	obscureBindingEntries.Append( BindingEntry( "_impulse24", "_impulse24" ) );
-	obscureBindingEntries.Append( BindingEntry( "_impulse25", "_impulse25 / midnight CTF light",
+	bindingEntries.Append( BindingEntry( "_impulse23", "_impulse23" ) );
+	bindingEntries.Append( BindingEntry( "_impulse24", "_impulse24" ) );
+	bindingEntries.Append( BindingEntry( "_impulse25", "_impulse25 / midnight CTF light",
 			"In RoE's Capture The Flag with si_midnight = 2, this appears to toggle some kind of light" ) );
 	for ( int i=26; i <= 63; ++i ) {
 		if ( i==40 ) // _impulse40 is "use vehicle", handled above in "Other" section
 			continue;
 
 		idStr impName = idStr::Format( "_impulse%d", i );
-		obscureBindingEntries.Append( BindingEntry( impName, impName ) );
+		bindingEntries.Append( BindingEntry( impName, impName ) );
 	}
 
 	// player.def defines, in player_base, used by player_doommarine and player_doommarine_mp (and player_doommarine_ctf),
@@ -428,14 +428,14 @@ static void InitBindingEntries()
 
 static void DrawBindingsMenu()
 {
-	for( BindingEntry& be : bindingEntries ) {
-		be.Draw();
+	for ( int i=0, n=firstObscureEntryIndex; i < n; ++i ) {
+		bindingEntries[i].Draw();
 	}
 	bool showObscImp = ImGui::CollapsingHeader( "Obscure Impulses" );
 	AddDescrTooltip( "_impulseXY commands that are usually unused, but might be used by some mods, e.g. for additional weapons" );
 	if (showObscImp) {
-		for( BindingEntry& be : obscureBindingEntries ) {
-			be.Draw();
+		for ( int i=firstObscureEntryIndex, n=bindingEntries.Num(); i < n; ++i ) {
+			bindingEntries[i].Draw();
 		}
 	}
 }
