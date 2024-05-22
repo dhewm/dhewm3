@@ -1,4 +1,6 @@
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include <SDL.h>
 
 #include "sys_imgui.h"
@@ -14,6 +16,7 @@ typedef char* (*MY_XGETDEFAULTFUN)(Display*, const char*, const char*);
 #include "../libs/imgui/backends/imgui_impl_sdl2.h"
 
 #include "framework/Common.h"
+#include "framework/KeyInput.h"
 #include "renderer/qgl.h"
 #include "renderer/tr_local.h" // glconfig
 
@@ -30,6 +33,82 @@ static SDL_Window* sdlWindow = NULL;
 ImGuiContext* imguiCtx = NULL;
 static bool haveNewFrame = false;
 static int openImguiWindows = 0; // or-ed enum D3ImGuiWindow values
+
+// was there a key down or button (mouse/gamepad) down event this frame?
+// used to make the warning overlay disappear
+static bool hadKeyDownEvent = false;
+
+static idStr warningOverlayText;
+static double warningOverlayStartTime = -100.0;
+static ImVec2 warningOverlayStartPos;
+
+static void UpdateWarningOverlay()
+{
+	double timeNow = ImGui::GetTime();
+	if ( timeNow - warningOverlayStartTime > 4.0f ) {
+		warningOverlayStartTime = -100.0f;
+		return;
+	}
+
+	// also hide if a key was pressed or maybe even if the mouse was moved (too much)
+	ImVec2 mdv = ImGui::GetMousePos() - warningOverlayStartPos; // Mouse Delta Vector
+	float mouseDelta = sqrtf( mdv.x * mdv.x + mdv.y * mdv.y );
+	const float fontSize = ImGui::GetFontSize();
+	if ( mouseDelta > fontSize * 4.0f || hadKeyDownEvent ) {
+		warningOverlayStartTime = -100.0f;
+		return;
+	}
+
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+	ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4(1.0f, 0.4f, 0.4f, 0.4f) );
+	float padSize = fontSize * 2.0f;
+	ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2(padSize, padSize) );
+
+	int winFlags = ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize;
+	ImGui::Begin("WarningOverlay", NULL, winFlags);
+
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	ImVec2 points[] = {
+		{0, 40}, {40, 40}, {20, 0}, // triangle
+		{20, 12}, {20, 28}, // line
+		{20, 33} // dot
+	};
+
+	float iconScale = 1.0f; // TODO: global scale also used for fontsize
+
+	ImVec2 offset = ImGui::GetWindowPos() + ImVec2(fontSize, fontSize);
+	for ( ImVec2& v : points ) {
+		v.x = roundf( v.x * iconScale );
+		v.y = roundf( v.y * iconScale );
+		v += offset;
+	}
+
+	ImU32 color = ImGui::GetColorU32( ImVec4(0.1f, 0.1f, 0.1f, 1.0f) );
+
+	drawList->AddTriangle( points[0], points[1], points[2], color, roundf( iconScale * 4.0f ) );
+
+	drawList->AddPolyline( points+3, 2, color, 0, roundf( iconScale * 3.0f ) );
+
+	float dotRadius = 2.0f * iconScale;
+	drawList->AddEllipseFilled( points[5], ImVec2(dotRadius, dotRadius), color, 0, 6 );
+
+	ImGui::Indent( 40.0f * iconScale );
+	ImGui::TextUnformatted( warningOverlayText.c_str() );
+
+	ImGui::End();
+
+	ImGui::PopStyleVar(); // WindowPadding
+	ImGui::PopStyleColor(); // WindowBg
+}
+
+void ShowWarningOverlay( const char* text )
+{
+	warningOverlayText = text;
+	warningOverlayStartTime = ImGui::GetTime();
+	warningOverlayStartPos = ImGui::GetMousePos();
+}
+
 
 static float GetDefaultDPI()
 {
@@ -203,6 +282,8 @@ void NewFrame()
 	ImGui::NewFrame();
 	haveNewFrame = true;
 
+	UpdateWarningOverlay();
+
 	if (openImguiWindows & D3_ImGuiWin_Settings) {
 		Com_DrawDhewm3SettingsMenu();
 	}
@@ -214,6 +295,8 @@ void NewFrame()
 			CloseWindow(D3_ImGuiWin_Demo);
 	}
 }
+
+bool keybindModeEnabled = false;
 
 // called with every SDL event by Sys_GetEvent()
 // returns true if ImGui has handled the event (so it shouldn't be handled by D3)
@@ -228,14 +311,42 @@ bool ProcessEvent(const void* sdlEvent)
 	//   - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
 	//   - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
 	//   Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-	if( ImGui_ImplSDL2_ProcessEvent( ev ) ) {
+
+	bool imguiUsedEvent = ImGui_ImplSDL2_ProcessEvent( ev );
+	if ( keybindModeEnabled ) {
+		// in keybind mode, all input events are passed to Doom3 so it can translate them
+		// to internal events and we can access and use them to create a new binding
+		return false;
+	}
+
+	if ( ImGui::IsWindowFocused( ImGuiFocusedFlags_AnyWindow )
+	    && (ev->type == SDL_CONTROLLERAXISMOTION || ev->type == SDL_CONTROLLERBUTTONDOWN) ) {
+		// don't pass on controller axis events to avoid moving the mouse cursor
+		// and controller button events to avoid emulating mouse clicks
+		return true;
+	}
+
+	switch( ev->type ) {
+		// Hack: detect if any key was pressed to close the warning overlay
+		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_MOUSEWHEEL:
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_KEYDOWN:
+			// TODO: controller trigger?
+			hadKeyDownEvent = true;
+	}
+	if( imguiUsedEvent ) {
 		ImGuiIO& io = ImGui::GetIO();
+
 		if ( io.WantCaptureMouse ) {
 			switch( ev->type ) {
 				case SDL_MOUSEMOTION:
 				case SDL_MOUSEWHEEL:
 				case SDL_MOUSEBUTTONDOWN:
-				case SDL_MOUSEBUTTONUP:
+
+				// Note: still pass button up events to the engine, so if they were pressed down
+				//   before an imgui window got focus they don't remain pressed indefinitely
+				//case SDL_MOUSEBUTTONUP:
 					return true;
 			}
 		}
@@ -243,13 +354,28 @@ bool ProcessEvent(const void* sdlEvent)
 		if ( io.WantCaptureKeyboard ) {
 			switch( ev->type ) {
 				case SDL_TEXTINPUT:
-				case SDL_KEYDOWN:
-				case SDL_KEYUP:
 					return true;
+				case SDL_KEYDOWN:
+				//case SDL_KEYUP: NOTE: see above why key up events are passed to the engine
+					if ( ev->key.keysym.sym < SDLK_F1 || ev->key.keysym.sym > SDLK_F12) {
+						// F1 - F12 are passed to the engine so its shortcuts
+						// (like quickload or screenshot) still work
+						// Doom3's menu does the same
+						return true;
+					}
 			}
 		}
+
 	}
+
 	return false;
+}
+
+void SetKeyBindMode( bool enable )
+{
+	keybindModeEnabled = enable;
+	// make sure no keys are registered as down, neither when entering nor when exiting keybind mode
+	idKeyInput::ClearStates();
 }
 
 void EndFrame()
@@ -296,6 +422,11 @@ void EndFrame()
 
 	if ( curArrayBuffer != 0 ) {
 		qglBindBufferARB( GL_ARRAY_BUFFER_ARB, curArrayBuffer );
+	}
+
+	// reset this at the end of each frame, will be set again by ProcessEvent()
+	if ( hadKeyDownEvent ) {
+		hadKeyDownEvent = false;
 	}
 }
 

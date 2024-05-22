@@ -41,6 +41,10 @@ extern int GetOpenWindowsMask();
 // returns true if ImGui has handled the event (so it shouldn't be handled by D3)
 extern bool ProcessEvent(const void* sdlEvent);
 
+// for binding keys from an ImGui-based menu: send input events to dhewm3
+// even if ImGui window has focus
+extern void SetKeyBindMode( bool enable );
+
 // NewFrame() is called once per D3 frame, after all events have been gotten
 // => ProcessEvent() has already been called (probably multiple times)
 extern void NewFrame();
@@ -51,6 +55,11 @@ extern void EndFrame();
 
 extern float GetScale();
 extern void SetScale( float scale );
+
+// show a red overlay-window at the center of the screen that contains
+// a warning symbol (triangle with !) and the given text
+// disappears after a few seconds or when a key is pressed or the mouse is moved
+extern void ShowWarningOverlay( const char* text );
 
 #else // IMGUI_DISABLE - just stub out everything
 
@@ -69,6 +78,8 @@ inline void Shutdown() {}
 
 inline bool ProcessEvent(const void* sdlEvent) { return false; }
 
+inline void SetKeyBindMode( bool enable ) {}
+
 inline void NewFrame() {}
 
 inline void EndFrame() {}
@@ -81,6 +92,8 @@ inline int GetOpenWindowsMask() { return 0; }
 
 inline float GetScale() { return 1.0f; }
 inline void SetScale( float scale ) {}
+
+inline void ShowWarningOverlay( const char* text ) {}
 
 #endif
 

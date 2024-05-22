@@ -278,6 +278,28 @@ static bool utf8ToISO8859_1(const char* inbuf, char* outbuf, size_t outsize) {
 }
 #endif // SDL2
 
+// start button isn't bindable, but I want to use its name in the imgui-based menu
+const char* D3_GetGamepadStartButtonName() {
+	int layout = joy_gamepadLayout.GetInteger();
+	if ( layout == -1 ) {
+		layout = gamepadType;
+	}
+
+	switch( layout ) {
+		default:
+			common->Warning( "joy_gamepadLayout has invalid value %d !\n", joy_gamepadLayout.GetInteger() );
+			// fall-through
+		case D3_GAMEPAD_PLAYSTATION_OLD:
+		case D3_GAMEPAD_XINPUT:
+			return "Pad Start";
+		case D3_GAMEPAD_NINTENDO:
+			return "Pad (+)";
+
+		case D3_GAMEPAD_PLAYSTATION:
+			return "Pad Options";
+	}
+}
+
 const char* Sys_GetLocalizedJoyKeyName( int key ) {
 	// Note: trying to keep the returned names short, because the Doom3 binding window doesn't have much space for names..
 
@@ -409,28 +431,41 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 	return NULL;
 }
 
-// returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
-// regarding the current keyboard layout - if that name is in ASCII or corresponds
-// to a "High-ASCII" char supported by Doom3.
-// Otherwise return same name as Sys_GetScancodeName()
-// !! Returned string is only valid until next call to this function !!
-const char* Sys_GetLocalizedScancodeName( int key ) {
+static const char* getLocalizedScancodeName( int key, bool useUtf8 )
+{
 	if ( key >= K_FIRST_SCANCODE && key <= K_LAST_SCANCODE ) {
 		int scIdx = key - K_FIRST_SCANCODE;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		SDL_Scancode sc = ( SDL_Scancode ) scancodemappings[scIdx].sdlScancode;
 		SDL_Keycode k = SDL_GetKeyFromScancode( sc );
 		if ( k >= 0xA1 && k <= 0xFF ) {
-			// luckily, the "High-ASCII" (ISO-8559-1) chars supported by Doom3
-			// have the same values as the corresponding SDL_Keycodes.
-			static char oneCharStr[2] = {0, 0};
-			oneCharStr[0] = (unsigned char)k;
-			return oneCharStr;
+			static char shortStr[3] = {};
+			if ( useUtf8 ) {
+				// SDL_Keycodes are unicode chars (where applicable),
+				// so at least for Latin-1 turn them directly into UTF-8
+				if ( k >= 0xE0 && k <= 0xFE && k != 0xF7 ) {
+					// turn lowercase chars into their uppercase equivalents
+					k -= 32;
+				}
+				shortStr[0] = (unsigned char)( 0xC0 + (k >> 6) );
+				shortStr[1] = (unsigned char)( 0x80 + (k & 0x3F) );
+				return shortStr;
+			} else {
+				// luckily, the "High-ASCII" (ISO-8559-1) chars supported by Doom3
+				// have the same values as the corresponding SDL_Keycodes.
+				shortStr[0] = (unsigned char)k;
+				shortStr[1] = 0;
+				return shortStr;
+			}
 		} else if ( k != SDLK_UNKNOWN ) {
 			const char *ret = SDL_GetKeyName( k );
 			// the keyname from SDL2 is in UTF-8, which Doom3 can't print,
 			// so only return the name if it's ASCII, otherwise fall back to "SC_bla"
 			if ( ret && *ret != '\0' ) {
+				if( useUtf8 ) {
+					return ret;
+				}
+
 				if( isAscii( ret ) ) {
 					return ret;
 				}
@@ -446,6 +481,19 @@ const char* Sys_GetLocalizedScancodeName( int key ) {
 
 	}
 	return NULL;
+}
+
+// returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
+// regarding the current keyboard layout - if that name is in ASCII or corresponds
+// to a "High-ASCII" char supported by Doom3.
+// Otherwise return same name as Sys_GetScancodeName()
+// !! Returned string is only valid until next call to this function !!
+const char* Sys_GetLocalizedScancodeName( int key ) {
+	return getLocalizedScancodeName( key, false );
+}
+
+const char* Sys_GetLocalizedScancodeNameUTF8( int key ) {
+	return getLocalizedScancodeName( key, true );
 }
 
 // returns keyNum_t (K_SC_* constant) for given scancode name (like "SC_A")
