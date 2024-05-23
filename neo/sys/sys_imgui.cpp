@@ -253,6 +253,16 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != nullptr);
 
+	const char* f10bind = idKeyInput::GetBinding( K_F10 );
+	if ( f10bind && f10bind[0] != '\0' ) {
+		if ( idStr::Icmp( f10bind, "dhewm3Settings" ) != 0 ) {
+			// if F10 is already bound, but not to dhewm3Settings, show a message
+			common->Printf( "... the F10 key is already bound to '%s', otherwise it could be used to open the dhewm3 Settings Menu\n" , f10bind );
+		}
+	} else {
+		idKeyInput::SetBinding( K_F10, "dhewm3Settings" );
+	}
+
 	imgui_initialized = true;
 	return true;
 }
