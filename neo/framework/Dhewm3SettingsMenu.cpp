@@ -1565,41 +1565,11 @@ static CVarOption controlOptions[] = {
 
 // TODO: r_scaleMenusTo43
 
-
+static bool showStyleEditor = false;
 
 static void DrawOtherOptionsMenu()
 {
-	int style_idx = imgui_style.GetInteger();
-	if ( ImGui::Combo( "ImGui Style", &style_idx, "Dhewm3\0ImGui Default\0Userstyle\0") )
-	{
-		switch (style_idx)
-		{
-			case 0: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::Dhewm3 ); break;
-			case 1: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::ImGui_Default ); break;
-			case 2: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::User ); break;
-		}
-		imgui_style.SetInteger( style_idx );
-	}
-
-	if ( ImGui::Button( "Write Userstyle" ) ) {
-		D3::ImGuiHooks::WriteUserStyle();
-		imgui_style.SetInteger( 2 );
-	}
-	AddTooltip( "Writes the current style settings (incl. colors) as userstyle" );
-}
-
-} //anon namespace
-
-// called from D3::ImGuiHooks::NewFrame() (if this window is enabled)
-void Com_DrawDhewm3SettingsMenu()
-{
-	bool showSettingsWindow = true;
-	ImGui::Begin("dhewm3 Settings", &showSettingsWindow);
-
 	float scale = D3::ImGuiHooks::GetScale();
-
-	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.4f);
-
 	if ( ImGui::DragFloat("ImGui scale", &scale, 0.005f, 0.25f, 8.0f, "%.3f") ) {
 		D3::ImGuiHooks::SetScale( scale );
 	}
@@ -1608,45 +1578,106 @@ void Com_DrawDhewm3SettingsMenu()
 		D3::ImGuiHooks::SetScale( -1.0f );
 	}
 
-	if (ImGui::Button("Show ImGui Demo")) {
+	int style_idx = imgui_style.GetInteger();
+	if ( ImGui::Combo( "ImGui Style", &style_idx, "dhewm3\0ImGui Default\0Userstyle\0") )
+	{
+		switch( style_idx )
+		{
+			case 0: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::Dhewm3 ); break;
+			case 1: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::ImGui_Default ); break;
+			case 2: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::User ); break;
+		}
+		imgui_style.SetInteger( style_idx );
+	}
+
+	ImGui::Spacing();
+
+	ImGui::Checkbox( "Show Dear ImGui Style Editor", &showStyleEditor );
+
+	ImGui::SameLine();
+
+	if ( ImGui::Button( "Write Userstyle" ) ) {
+		D3::ImGuiHooks::WriteUserStyle();
+		imgui_style.SetInteger( 2 );
+	}
+	AddTooltip( "Writes the current style settings (incl. colors) as userstyle" );
+
+	ImGui::Spacing();
+
+	if ( ImGui::Button( "Show ImGui Demo" ) ) {
 		D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_Demo );
 	}
+}
+
+} //anon namespace
+
+static bool BeginTabChild( const char* name )
+{
+	bool ret = ImGui::BeginChild( name );
+	float itemWidth = fminf( ImGui::GetWindowWidth() * 0.5f, ImGui::GetFontSize() * 20.0f );
+	ImGui::PushItemWidth( itemWidth );
+	return ret;
+}
+
+// called from D3::ImGuiHooks::NewFrame() (if this window is enabled)
+void Com_DrawDhewm3SettingsMenu()
+{
+	bool showSettingsWindow = true;
+	ImGui::Begin("dhewm3 Settings", &showSettingsWindow);
 
 	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 	if (ImGui::BeginTabBar("SettingsTabBar", tab_bar_flags))
 	{
 		if ( ImGui::BeginTabItem("Control Bindings") ) {
+			BeginTabChild("bindchild");
 			DrawBindingsMenu();
+			ImGui::EndChild();
 			ImGui::EndTabItem();
 		} else {
 			bindingsMenuAlreadyOpen = false;
 		}
 		if ( ImGui::BeginTabItem("Control Options") ) {
+			BeginTabChild( "ctrlchild" );
 			DrawOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
+			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Game Options"))
 		{
+			BeginTabChild( "gamechild" );
 			ImGui::Text("This is the Game Options tab!\nblah blah blah blah blah");
+			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Video Options"))
 		{
+			BeginTabChild( "vidchild" );
 			ImGui::Text("This is the Video tab!\nblah blah blah blah blah");
+			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Audio Options"))
 		{
+			ImGui::BeginChild( "audiochild" );
 			ImGui::Text("This is the Audio tab!\nblah blah blah blah blah");
+			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Other Options"))
 		{
+			BeginTabChild( "otherchild" );
 			DrawOtherOptionsMenu();
+			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
 
 		ImGui::EndTabBar();
+	}
+
+	if ( showStyleEditor ) {
+		ImGui::Begin( "Dear ImGui Style Editor", &showStyleEditor );
+		ImGui::ShowStyleEditor();
+		ImGui::End();
 	}
 
 	ImGui::End();
