@@ -18,6 +18,8 @@
 
 extern const char* D3_GetGamepadStartButtonName();
 
+extern idCVar imgui_style;
+
 namespace {
 
 const char* GetLocalizedString( const char* id, const char* fallback )
@@ -1563,6 +1565,29 @@ static CVarOption controlOptions[] = {
 
 // TODO: r_scaleMenusTo43
 
+
+
+static void DrawOtherOptionsMenu()
+{
+	int style_idx = imgui_style.GetInteger();
+	if ( ImGui::Combo( "ImGui Style", &style_idx, "Dhewm3\0ImGui Default\0Userstyle\0") )
+	{
+		switch (style_idx)
+		{
+			case 0: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::Dhewm3 ); break;
+			case 1: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::ImGui_Default ); break;
+			case 2: D3::ImGuiHooks::SetImGuiStyle( D3::ImGuiHooks::Style::User ); break;
+		}
+		imgui_style.SetInteger( style_idx );
+	}
+
+	if ( ImGui::Button( "Write Userstyle" ) ) {
+		D3::ImGuiHooks::WriteUserStyle();
+		imgui_style.SetInteger( 2 );
+	}
+	AddTooltip( "Writes the current style settings (incl. colors) as userstyle" );
+}
+
 } //anon namespace
 
 // called from D3::ImGuiHooks::NewFrame() (if this window is enabled)
@@ -1613,6 +1638,11 @@ void Com_DrawDhewm3SettingsMenu()
 		if (ImGui::BeginTabItem("Audio Options"))
 		{
 			ImGui::Text("This is the Audio tab!\nblah blah blah blah blah");
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Other Options"))
+		{
+			DrawOtherOptionsMenu();
 			ImGui::EndTabItem();
 		}
 

@@ -61,6 +61,22 @@ extern void SetScale( float scale );
 // disappears after a few seconds or when a key is pressed or the mouse is moved
 extern void ShowWarningOverlay( const char* text );
 
+enum Style {
+	Dhewm3,
+	ImGui_Default,
+	User
+};
+
+// set the overall style for ImGui: Both shape (sizes, roundings, etc) and colors
+extern void SetImGuiStyle( Style style );
+
+// set the default dhewm3 imgui style colors
+extern void SetDhewm3StyleColors();
+extern void SetUserStyleColors();
+
+// write current style settings (incl. colors) as userStyle
+extern bool WriteUserStyle();
+
 #else // IMGUI_DISABLE - just stub out everything
 
 inline bool IsImguiEnabled()
@@ -94,6 +110,8 @@ inline float GetScale() { return 1.0f; }
 inline void SetScale( float scale ) {}
 
 inline void ShowWarningOverlay( const char* text ) {}
+
+inline bool WriteUserStyle() { return false; }
 
 #endif
 

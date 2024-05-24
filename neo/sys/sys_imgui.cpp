@@ -24,6 +24,8 @@ extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
 
 static idCVar imgui_scale( "imgui_scale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI menus by (-1: auto)" ); // TODO: limit values?
 
+idCVar imgui_style( "imgui_style", "0", CVAR_SYSTEM|CVAR_INTEGER|CVAR_ARCHIVE, "Which ImGui style to use. 0: Dhewm3 theme, 1: Default ImGui theme, 2: User theme", 0.0f, 2.0f );
+
 namespace D3 {
 namespace ImGuiHooks {
 
@@ -34,6 +36,8 @@ ImGuiContext* imguiCtx = NULL;
 static bool haveNewFrame = false;
 static int openImguiWindows = 0; // or-ed enum D3ImGuiWindow values
 
+static ImGuiStyle userStyle;
+
 // was there a key down or button (mouse/gamepad) down event this frame?
 // used to make the warning overlay disappear
 static bool hadKeyDownEvent = false;
@@ -41,6 +45,15 @@ static bool hadKeyDownEvent = false;
 static idStr warningOverlayText;
 static double warningOverlayStartTime = -100.0;
 static ImVec2 warningOverlayStartPos;
+
+bool WriteStyle( const ImGuiStyle& s, const char* filename );
+bool ReadStyle( ImGuiStyle& s, const char* filename );
+
+idStr GetUserStyleFilename()
+{
+	// TODO: put this into the config dir
+	return idStr( "user.imstyle" );
+}
 
 static void UpdateWarningOverlay()
 {
@@ -196,24 +209,14 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
-	//ImGui::StyleColorsClassic();
-
-	// make it a bit prettier with rounded edges
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.WindowRounding = 2.0f;
-	style.FrameRounding = 3.0f;
-	//style.ChildRounding = 6.0f;
-	style.ScrollbarRounding = 8.0f;
-	style.GrabRounding = 1.0f;
-	style.PopupRounding = 2.0f;
-
-	ImVec4* colors = style.Colors;
-	colors[ImGuiCol_TitleBg]                = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
-	colors[ImGuiCol_TabHovered]             = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
-	colors[ImGuiCol_TabActive]              = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
+	SetImGuiStyle( Style::Dhewm3 );
+	userStyle = ImGui::GetStyle(); // set dhewm3 style as default, in case the user style is missing values
+	if ( ReadStyle( userStyle, GetUserStyleFilename() ) && imgui_style.GetInteger() == 2 ) {
+		ImGui::GetStyle() = userStyle;
+	} else if ( imgui_style.GetInteger() == 1 ) {
+		ImGui::GetStyle() = ImGuiStyle();
+		ImGui::StyleColorsDark();
+	}
 
 	ImFontConfig fontCfg;
 	strcpy(fontCfg.Name, "ProggyVector");
@@ -271,6 +274,7 @@ void Shutdown()
 {
 	if ( imgui_initialized ) {
 		common->Printf( "Shutting down ImGui\n" );
+
 		// TODO: only if init was successful!
 		ImGui_ImplOpenGL2_Shutdown();
 		ImGui_ImplSDL2_Shutdown();
@@ -455,5 +459,437 @@ int GetOpenWindowsMask()
 {
 	return openImguiWindows;
 }
+
+void SetImGuiStyle( Style d3style )
+{
+	ImGuiStyle& style = ImGui::GetStyle();
+	if ( d3style == Style::Dhewm3 ) {
+		style = ImGuiStyle(); // start with default style
+		// make it look a bit nicer with rounded edges
+		style.WindowRounding = 2.0f;
+		style.FrameRounding = 3.0f;
+		//style.ChildRounding = 6.0f;
+		style.ScrollbarRounding = 8.0f;
+		style.GrabRounding = 1.0f;
+		style.PopupRounding = 2.0f;
+		SetDhewm3StyleColors();
+	} else if ( d3style == Style::User ) {
+		style = userStyle;
+	} else {
+		assert( d3style == Style::ImGui_Default && "invalid/unknown style" );
+		style = ImGuiStyle();
+		ImGui::StyleColorsDark();
+	}
+}
+
+void SetDhewm3StyleColors()
+{
+	ImGui::StyleColorsDark();
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImVec4* colors = style.Colors;
+	colors[ImGuiCol_TitleBg]    = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
+	colors[ImGuiCol_TabHovered] = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
+	colors[ImGuiCol_TabActive]  = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
+}
+
+void SetUserStyleColors()
+{
+	ImGuiStyle& style = ImGui::GetStyle();
+	for ( int i=0; i < ImGuiCol_COUNT; ++i ) {
+		style.Colors[i] = userStyle.Colors[i];
+	}
+}
+
+bool WriteUserStyle()
+{
+	userStyle = ImGui::GetStyle();
+	if( !WriteStyle( ImGui::GetStyle(), GetUserStyleFilename() ) ) {
+		common->Warning( "Couldn't write ImGui userstyle!\n" );
+		return false;
+	}
+	return true;
+}
+
+// Note: The trick I'm using with these #defines below is called "X Macro"
+//       see https://en.wikipedia.org/wiki/X_macro (except I'm not calling the "entries" X)
+
+#define D3_IMSTYLE_ATTRS  \
+	D3_IMATTR_FLOAT( Alpha                       ) \
+	D3_IMATTR_FLOAT( DisabledAlpha               ) \
+	D3_IMATTR_VEC2(  WindowPadding               ) \
+	D3_IMATTR_FLOAT( WindowRounding              ) \
+	D3_IMATTR_FLOAT( WindowBorderSize            ) \
+	D3_IMATTR_VEC2(  WindowMinSize               ) \
+	D3_IMATTR_VEC2(  WindowTitleAlign            ) \
+	D3_IMATTR_INT(   WindowMenuButtonPosition    ) \
+	D3_IMATTR_FLOAT( ChildRounding               ) \
+	D3_IMATTR_FLOAT( ChildBorderSize             ) \
+	D3_IMATTR_FLOAT( PopupRounding               ) \
+	D3_IMATTR_FLOAT( PopupBorderSize             ) \
+	D3_IMATTR_VEC2(  FramePadding                ) \
+	D3_IMATTR_FLOAT( FrameRounding               ) \
+	D3_IMATTR_FLOAT( FrameBorderSize             ) \
+	D3_IMATTR_VEC2(  ItemSpacing                 ) \
+	D3_IMATTR_VEC2(  ItemInnerSpacing            ) \
+	D3_IMATTR_VEC2(  CellPadding                 ) \
+	D3_IMATTR_VEC2(  TouchExtraPadding           ) \
+	D3_IMATTR_FLOAT( IndentSpacing               ) \
+	D3_IMATTR_FLOAT( ColumnsMinSpacing           ) \
+	D3_IMATTR_FLOAT( ScrollbarSize               ) \
+	D3_IMATTR_FLOAT( ScrollbarRounding           ) \
+	D3_IMATTR_FLOAT( GrabMinSize                 ) \
+	D3_IMATTR_FLOAT( GrabRounding                ) \
+	D3_IMATTR_FLOAT( LogSliderDeadzone           ) \
+	D3_IMATTR_FLOAT( TabRounding                 ) \
+	D3_IMATTR_FLOAT( TabBorderSize               ) \
+	D3_IMATTR_FLOAT( TabMinWidthForCloseButton   ) \
+	D3_IMATTR_FLOAT( TabBarBorderSize            ) \
+	D3_IMATTR_FLOAT( TableAngledHeadersAngle     ) \
+	D3_IMATTR_VEC2(  TableAngledHeadersTextAlign ) \
+	D3_IMATTR_INT(   ColorButtonPosition         ) \
+	D3_IMATTR_VEC2(  ButtonTextAlign             ) \
+	D3_IMATTR_VEC2(  SelectableTextAlign         ) \
+	D3_IMATTR_FLOAT( SeparatorTextBorderSize     ) \
+	D3_IMATTR_VEC2(  SeparatorTextAlign          ) \
+	D3_IMATTR_VEC2(  SeparatorTextPadding        ) \
+	D3_IMATTR_VEC2(  DisplayWindowPadding        ) \
+	D3_IMATTR_VEC2(  DisplaySafeAreaPadding      ) \
+	D3_IMATTR_FLOAT( MouseCursorScale            ) \
+	D3_IMATTR_BOOL(  AntiAliasedLines            ) \
+	D3_IMATTR_BOOL(  AntiAliasedLinesUseTex      ) \
+	D3_IMATTR_BOOL(  AntiAliasedFill             ) \
+	D3_IMATTR_FLOAT( CurveTessellationTol        ) \
+	D3_IMATTR_FLOAT( CircleTessellationMaxError  )
+
+#define D3_IMSTYLE_BEHAVIORS \
+	D3_IMATTR_FLOAT( HoverStationaryDelay        ) \
+	D3_IMATTR_FLOAT( HoverDelayShort             ) \
+	D3_IMATTR_FLOAT( HoverDelayNormal            ) \
+	D3_IMATTR_INT(   HoverFlagsForTooltipMouse   ) \
+	D3_IMATTR_INT(   HoverFlagsForTooltipNav     )
+
+#define D3_IMSTYLE_COLORS \
+	D3_IMSTYLE_COLOR( Text                  ) \
+	D3_IMSTYLE_COLOR( TextDisabled          ) \
+	D3_IMSTYLE_COLOR( WindowBg              ) \
+	D3_IMSTYLE_COLOR( ChildBg               ) \
+	D3_IMSTYLE_COLOR( PopupBg               ) \
+	D3_IMSTYLE_COLOR( Border                ) \
+	D3_IMSTYLE_COLOR( BorderShadow          ) \
+	D3_IMSTYLE_COLOR( FrameBg               ) \
+	D3_IMSTYLE_COLOR( FrameBgHovered        ) \
+	D3_IMSTYLE_COLOR( FrameBgActive         ) \
+	D3_IMSTYLE_COLOR( TitleBg               ) \
+	D3_IMSTYLE_COLOR( TitleBgActive         ) \
+	D3_IMSTYLE_COLOR( TitleBgCollapsed      ) \
+	D3_IMSTYLE_COLOR( MenuBarBg             ) \
+	D3_IMSTYLE_COLOR( ScrollbarBg           ) \
+	D3_IMSTYLE_COLOR( ScrollbarGrab         ) \
+	D3_IMSTYLE_COLOR( ScrollbarGrabHovered  ) \
+	D3_IMSTYLE_COLOR( ScrollbarGrabActive   ) \
+	D3_IMSTYLE_COLOR( CheckMark             ) \
+	D3_IMSTYLE_COLOR( SliderGrab            ) \
+	D3_IMSTYLE_COLOR( SliderGrabActive      ) \
+	D3_IMSTYLE_COLOR( Button                ) \
+	D3_IMSTYLE_COLOR( ButtonHovered         ) \
+	D3_IMSTYLE_COLOR( ButtonActive          ) \
+	D3_IMSTYLE_COLOR( Header                ) \
+	D3_IMSTYLE_COLOR( HeaderHovered         ) \
+	D3_IMSTYLE_COLOR( HeaderActive          ) \
+	D3_IMSTYLE_COLOR( Separator             ) \
+	D3_IMSTYLE_COLOR( SeparatorHovered      ) \
+	D3_IMSTYLE_COLOR( SeparatorActive       ) \
+	D3_IMSTYLE_COLOR( ResizeGrip            ) \
+	D3_IMSTYLE_COLOR( ResizeGripHovered     ) \
+	D3_IMSTYLE_COLOR( ResizeGripActive      ) \
+	D3_IMSTYLE_COLOR( Tab                   ) \
+	D3_IMSTYLE_COLOR( TabHovered            ) \
+	D3_IMSTYLE_COLOR( TabActive             ) \
+	D3_IMSTYLE_COLOR( TabUnfocused          ) \
+	D3_IMSTYLE_COLOR( TabUnfocusedActive    ) \
+	D3_IMSTYLE_COLOR( PlotLines             ) \
+	D3_IMSTYLE_COLOR( PlotLinesHovered      ) \
+	D3_IMSTYLE_COLOR( PlotHistogram         ) \
+	D3_IMSTYLE_COLOR( PlotHistogramHovered  ) \
+	D3_IMSTYLE_COLOR( TableHeaderBg         ) \
+	D3_IMSTYLE_COLOR( TableBorderStrong     ) \
+	D3_IMSTYLE_COLOR( TableBorderLight      ) \
+	D3_IMSTYLE_COLOR( TableRowBg            ) \
+	D3_IMSTYLE_COLOR( TableRowBgAlt         ) \
+	D3_IMSTYLE_COLOR( TextSelectedBg        ) \
+	D3_IMSTYLE_COLOR( DragDropTarget        ) \
+	D3_IMSTYLE_COLOR( NavHighlight          ) \
+	D3_IMSTYLE_COLOR( NavWindowingHighlight ) \
+	D3_IMSTYLE_COLOR( NavWindowingDimBg     ) \
+	D3_IMSTYLE_COLOR( ModalWindowDimBg      )
+
+
+bool WriteStyle( const ImGuiStyle& s, const char* filename ) {
+	FILE* f = fopen( filename, "w" ); // TODO: "wt" on Windows?
+	if ( f == nullptr ) {
+
+		return false;
+	}
+
+	fprintf( f, "[style]\n" );
+
+#define D3_IMATTR_FLOAT( NAME ) \
+	fprintf( f, #NAME " = %g\n", s . NAME );
+#define D3_IMATTR_VEC2( NAME ) \
+	fprintf( f, #NAME " = %g, %g\n", s . NAME . x, s . NAME . y );
+#define D3_IMATTR_INT( NAME ) \
+	fprintf( f, #NAME " = %d\n", s . NAME );
+#define D3_IMATTR_BOOL( NAME ) \
+	fprintf( f, #NAME " = %d\n", (int) ( s . NAME ) );
+
+	// this (together with the D3_IMATTR_* defines in the previous lines)
+	// extends the D3_IMSTYLE_ATTRS table to
+	//  fprintf( f, "Alpha = %f\n", s . Alpha );
+	//  fprintf( f, "DisabledAlpha = %f\n", s . DisabledAlpha );
+	//  fprintf( f, "WindowPadding = %f %f\n", s . WindowPadding . x, s . WindowPadding . y );
+	// etc
+	D3_IMSTYLE_ATTRS
+
+	fprintf( f, "\n[behaviors]\n" );
+
+	// same for behaviors
+	D3_IMSTYLE_BEHAVIORS
+
+#undef D3_IMATTR_FLOAT
+#undef D3_IMATTR_VEC2
+#undef D3_IMATTR_INT
+#undef D3_IMATTR_BOOL
+
+	fprintf( f, "\n[colors]\n" );
+
+#define D3_IMSTYLE_COLOR( NAME ) { \
+		const ImVec4& c = s.Colors[ ImGuiCol_ ## NAME  ]; \
+		fprintf( f, #NAME " = %g, %g, %g, %g\n", c.x, c.y, c.z, c.w ); \
+	}
+
+	// this turns into
+	//  { const ImVec4& c = s.Colors[ ImGuiCol_Text ]; fprintf( f, "Text = %f %f %f %f\n", c.x, c.y, c.z, c.w ); }
+	//  { const ImVec4& c = s.Colors[ ImGuiCol_TextDisabled ]; fprintf( f, "TextDisabled = %f %f %f %f\n", c.x, c.y, c.z, c.w ); }
+	// etc
+	D3_IMSTYLE_COLORS
+
+#undef D3_IMSTYLE_COLOR
+
+	fprintf( f, "\n" );
+	fflush( f );
+	fclose( f );
+
+	return true;
+}
+
+static inline char* skipWhitespace( const char* s ) {
+	while( *s == ' ' || *s == '\t' )
+		++s;
+	return (char*)s;
+}
+
+#define D3_IMATTR_FLOAT( NAME ) \
+	if ( sscanf( line, #NAME " = %f", &f1 ) == 1 ) { \
+		s . NAME = f1; \
+		return; \
+	}
+
+#define D3_IMATTR_VEC2( NAME )  \
+	if ( sscanf( line, #NAME " = %f , %f", &f1, &f2 ) == 2 ) { \
+		s . NAME .x = f1; s . NAME .y = f2; \
+		return; \
+	}
+
+#define D3_IMATTR_INT( NAME )   \
+	if ( sscanf( line, #NAME " = %d", &i ) == 1 ) { \
+		s . NAME = i; \
+		return; \
+	}
+
+#define D3_IMATTR_BOOL( NAME )  \
+	if ( sscanf( line, #NAME " = %d", &i ) == 1 ) { \
+		s . NAME = ( i != 0 ); \
+		return; \
+	}
+
+
+static void parseStyleLine( ImGuiStyle& s, const char* line )
+{
+	float f1=0, f2=0;
+	int i=0;
+
+	D3_IMSTYLE_ATTRS
+
+	common->Warning( "Invalid line in ImGui style under [style] section: '%s'\n", line );
+}
+
+static void parseBehaviorLine( ImGuiStyle& s, const char* line )
+{
+	float f1=0, f2=0;
+	(void)f2; // currently unused in behavior section
+	int i=0;
+
+	D3_IMSTYLE_BEHAVIORS
+
+	common->Warning( "Invalid line in ImGui style under [behaviors] section: '%s'\n", line );
+}
+
+#undef D3_IMATTR_FLOAT
+#undef D3_IMATTR_VEC2
+#undef D3_IMATTR_INT
+#undef D3_IMATTR_BOOL
+
+static void parseColorLine( ImGuiStyle& s, const char* line )
+{
+	ImVec4 c;
+
+#define D3_IMSTYLE_COLOR( NAME ) \
+	if ( sscanf( line, #NAME " = %f , %f , %f , %f", &c.x, &c.y, &c.z, &c.w) == 4 ) { \
+		s.Colors[ ImGuiCol_ ## NAME ] = c; \
+		return; \
+	}
+
+	D3_IMSTYLE_COLORS
+
+#undef D3_IMSTYLE_COLOR
+
+	common->Warning( "Invalid line in ImGui style under [colors] section: '%s'\n", line );
+
+}
+
+bool ReadStyle( ImGuiStyle& s, const char* filename )
+{
+	FILE* f = fopen( filename, "r" ); // TODO: "rt" on Windows?
+	if ( f == nullptr ) {
+		return false;
+	}
+
+	char lineBuf[256];
+
+	int section = -1; // 0: style, 1: behaviors, 2: colors
+
+	for ( char* line = fgets( lineBuf, sizeof(lineBuf), f );
+		line != nullptr;
+		line = fgets( lineBuf, sizeof(lineBuf), f ) )
+	{
+		// skip whitespace, if any
+		line = skipWhitespace(line);
+		if ( *line == '#' ) // skip comment lines
+			continue;
+		if ( *line == '[' ) { // start of a section
+			const char* secStr = line+1; // skip '['
+			secStr = skipWhitespace(secStr);
+			// "[style]" "[behaviors]" "[colors]"
+			if ( idStr::Icmpn(secStr, "style", 5) == 0 ) {
+				section = 0;
+			} else if ( idStr::Icmpn(secStr, "behaviors", 9) == 0 ) {
+				section = 1;
+			} else if ( idStr::Icmpn(secStr, "colors", 6) == 0 ) {
+				section = 2;
+			} else {
+				common->Warning( "Invalid line that looks like a section in ImGui style: '%s'\n", line );
+			}
+			continue;
+		}
+		if ( *line == '\r' || *line == '\n' ) {
+			continue; // empty line
+		}
+		if ( section == 0 ) {
+			parseStyleLine( s, line );
+		} else if ( section == 1 ) {
+			parseBehaviorLine( s, line );
+		} else if ( section == 2 ) {
+			parseColorLine( s, line );
+		} else {
+			common->Warning( "Invalid line in ImGui before start of any section: '%s'\n", line );
+		}
+	}
+
+	return true;
+}
+
+// check correctness of the X macros above (detect when something is added to ImGuiStyle)
+namespace {
+
+#define D3_IMSTYLE_COLOR(C)   + 1
+// "0 D3_IMSTYLE_COLORS" is expanded to 0 + 1 + 1 ... for each D3_IMSTYLE_COLOR entry
+// => it should have the same value as the ImGuiCol_COUNT constant
+static_assert( ImGuiCol_COUNT == 0 D3_IMSTYLE_COLORS,
+		"something was added or removed in enum ImGuiCol_ => adjust D3_IMSTYLE_COLORS table above" );
+#undef D3_IMSTYLE_COLOR
+
+// recreate struct ImGuiStyle from the tables above and see if they're identical
+// (this struct is only used for the static assertions below)
+struct D3_ImGuiStyle_Check {
+
+#define D3_IMATTR_FLOAT( NAME ) float NAME ;
+#define D3_IMATTR_VEC2( NAME )  ImVec2 NAME ;
+#define D3_IMATTR_INT( NAME )   int NAME ;
+#define D3_IMATTR_BOOL( NAME )  bool NAME ;
+
+	// this expands to all the ImGuiStyle members, up to (excluding) Colors
+	// exactly like in ImGuiStyle (except the pseudo-enums like ImGuiDir are plain ints here)
+	D3_IMSTYLE_ATTRS
+
+	ImVec4 Colors[ImGuiCol_COUNT];
+
+	// just like the other members/attributes, expand the behaviors
+	D3_IMSTYLE_BEHAVIORS
+
+#undef D3_IMATTR_FLOAT
+#undef D3_IMATTR_VEC2
+#undef D3_IMATTR_INT
+#undef D3_IMATTR_BOOL
+
+};
+
+template<class T, class U>
+struct is_same {
+	static constexpr bool value = false;
+};
+
+template<class T>
+struct is_same<T, T> {
+	static constexpr bool value = true;
+};
+
+#define D3_IMATTR_FLOAT( NAME ) \
+	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
+			"member " #NAME " not at expected offset - is the member before it missing from the list, or moved to another position?" ); \
+	static_assert( is_same< decltype( ImGuiStyle :: NAME ), float >::value, "expected member " #NAME "to be a float - adjust the list!" );
+
+#define D3_IMATTR_VEC2( NAME ) \
+	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
+			"member " #NAME " not at expected offset - is the member before it missing from the list, or moved to another position?" ); \
+	static_assert( is_same< decltype( ImGuiStyle :: NAME ), ImVec2 >::value, "expected member " #NAME " to be an ImVec2 - adjust the list!" );
+
+#define D3_IMATTR_INT( NAME ) \
+	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
+			"member " #NAME " not at expected offset - is the member before it missing from the list, or moved to another position?" ); \
+	static_assert( is_same< decltype( ImGuiStyle :: NAME ), int >::value, "expected member " #NAME " to be an int - adjust the list!" );
+
+#define D3_IMATTR_BOOL( NAME ) \
+	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
+			"member " #NAME " not at expected offset - is the member before it missing from the list, or moved to another position?" ); \
+	static_assert( is_same< decltype( ImGuiStyle :: NAME ), bool >::value, "expected member " #NAME " to be a bool - adjust the list!" );
+
+// expanding those static assertions for offset and type for all attributes and behaviors
+
+D3_IMSTYLE_ATTRS
+
+D3_IMSTYLE_BEHAVIORS
+
+#undef D3_IMATTR_FLOAT
+#undef D3_IMATTR_VEC2
+#undef D3_IMATTR_INT
+#undef D3_IMATTR_BOOL
+
+static_assert( offsetof( ImGuiStyle, Colors ) == offsetof( D3_ImGuiStyle_Check, Colors ), "member Colors not at expected offset" );
+
+// if all other static assertions passed and the following failed, probably a member was added at the end of the ImGuiStyle struct
+static_assert( sizeof(D3_ImGuiStyle_Check) == sizeof(ImGuiStyle),
+		"something seems to be missing or wrong type in D3_IMSTYLE_ATTRS or D3_IMSTYLE_BEHAVIORS" );
+
+} //anon namespace
 
 }} //namespace D3::ImGuiHooks
