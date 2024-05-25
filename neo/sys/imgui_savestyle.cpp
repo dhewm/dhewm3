@@ -50,6 +50,10 @@ namespace DG {
 	// style to a sane default before calling that function.
 	// returns true on success, false if opening the file failed
 	extern bool ReadImGuiStyle( ImGuiStyle& style, const char* filename );
+
+	// generate C++ code that replicates the given style into a text buffer
+	// (that you can either write to a file or set the clipboard from or whatever)
+	extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s );
 } //namespace
 #endif
 
@@ -411,6 +415,48 @@ bool WriteImGuiStyle( const ImGuiStyle& s, const char* filename ) {
 	fclose( f );
 
 	return true;
+}
+
+ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s )
+{
+	ImGuiTextBuffer ret;
+	ret.reserve(6000);
+	ret.append( "ImGuiStyle& style = ImGui::GetStyle();\n" );
+
+#define D3_IMATTR_FLOAT( NAME ) \
+	ret.appendf( "style.%s = %g;\n", #NAME, s. NAME );
+#define D3_IMATTR_VEC2( NAME ) \
+	ret.appendf( "style.%s = ImVec2( %g, %g );\n", #NAME, s. NAME .x, s. NAME .y );
+#define D3_IMATTR_INT( NAME ) \
+	ret.appendf( "style.%s = %d; // TODO: flag\n", #NAME, s. NAME );
+#define D3_IMATTR_BOOL( NAME ) \
+	ret.appendf( "style.%s = %s;\n", #NAME, s. NAME ? "true" : "false" );
+
+	D3_IMSTYLE_ATTRS
+
+	ret.append("\n");
+
+	D3_IMSTYLE_BEHAVIORS
+
+#undef D3_IMATTR_FLOAT
+#undef D3_IMATTR_VEC2
+#undef D3_IMATTR_INT
+#undef D3_IMATTR_BOOL
+
+	ret.append( "\nImVec4* colors = style.Colors;\n" );
+
+#define D3_IMSTYLE_COLOR( NAME ) { \
+		const ImVec4& c = s.Colors[ ImGuiCol_ ## NAME ]; \
+		ret.appendf( "colors[ ImGuiCol_%s ] = ImVec4( %g, %g, %g, %g );\n", #NAME, c.x, c.y, c.z, c.w ); \
+	}
+
+	D3_IMSTYLE_COLORS
+
+#undef D3_IMSTYLE_COLOR
+
+	ret.append("\n");
+
+	return ret;
 }
 
 } //namespace DG
