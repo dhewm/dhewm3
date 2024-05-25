@@ -1602,6 +1602,11 @@ static void DrawOtherOptionsMenu()
 	}
 	AddTooltip( "Writes the current style settings (incl. colors) as userstyle" );
 
+	if ( ImGui::Button( "Copy style code to clipboard" ) ) {
+		D3::ImGuiHooks::CopyCurrentStyle();
+	}
+	AddTooltip( "Generates C++ code for the current style settings (incl. colors) and copies it into the clipboard" );
+
 	ImGui::Spacing();
 
 	if ( ImGui::Button( "Show ImGui Demo" ) ) {

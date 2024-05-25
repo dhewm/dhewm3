@@ -77,6 +77,9 @@ extern void SetUserStyleColors();
 // write current style settings (incl. colors) as userStyle
 extern bool WriteUserStyle();
 
+// copy current style to clipboard
+extern void CopyCurrentStyle();
+
 #else // IMGUI_DISABLE - just stub out everything
 
 inline bool IsImguiEnabled()

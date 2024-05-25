@@ -39,6 +39,10 @@ namespace DG {
 	// style to a sane default before calling that function.
 	// returns true on success, false if opening the file failed
 	extern bool ReadImGuiStyle( ImGuiStyle& style, const char* filename );
+
+	// generate C++ code that replicates the given style into a text buffer
+	// (that you can either write to a file or set the clipboard from or whatever)
+	extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s );
 } //namespace DG
 
 namespace D3 {
@@ -520,6 +524,12 @@ bool WriteUserStyle()
 		return false;
 	}
 	return true;
+}
+
+void CopyCurrentStyle()
+{
+	ImGuiTextBuffer buf = DG::WriteImGuiStyleToCode( ImGui::GetStyle() );
+	Sys_SetClipboardData( buf.c_str() );
 }
 
 }} //namespace D3::ImGuiHooks
