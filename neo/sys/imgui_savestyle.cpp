@@ -1,5 +1,6 @@
 /*
- * Functions to read/write a Dear ImGui style (ImGuiStyle) from/to a (ini-like) textfile.
+ * Functions to read/write a Dear ImGui style (ImGuiStyle) from/to a (ini-like)
+ * textfile, or generating C++ code for it.
  *
  * Hosted at https://github.com/DanielGibson/Snippets/
  *
@@ -47,12 +48,12 @@ namespace DG {
 	// and sets the given ImGuiStyle accordingly.
 	// if any attributes/colors/behaviors are missing the the file,
 	// they are not modified in style, so it probably makes sense to initialize
-	// style to a sane default before calling that function.
+	// style to a sane default before calling this function.
 	// returns true on success, false if opening the file failed
 	extern bool ReadImGuiStyle( ImGuiStyle& style, const char* filename );
 
 	// generate C++ code that replicates the given style into a text buffer
-	// (that you can either write to a file or set the clipboard from or whatever)
+	// (that you can write to a file or set the clipboard from or whatever)
 	extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s );
 } //namespace
 #endif
@@ -369,13 +370,13 @@ bool WriteImGuiStyle( const ImGuiStyle& s, const char* filename ) {
 	fprintf( f, "[style]\n" );
 
 #define D3_IMATTR_FLOAT( NAME ) \
-	fprintf( f, #NAME " = %g\n", s . NAME );
+	fprintf( f, "%s = %g\n", #NAME, s . NAME );
 #define D3_IMATTR_VEC2( NAME ) \
-	fprintf( f, #NAME " = %g, %g\n", s . NAME . x, s . NAME . y );
+	fprintf( f, "%s = %g, %g\n", #NAME, s . NAME . x, s . NAME . y );
 #define D3_IMATTR_INT( NAME ) \
-	fprintf( f, #NAME " = %d\n", s . NAME );
+	fprintf( f, "%s = %d\n", #NAME, s . NAME );
 #define D3_IMATTR_BOOL( NAME ) \
-	fprintf( f, #NAME " = %d\n", (int) ( s . NAME ) );
+	fprintf( f, "%s = %d\n", #NAME, (int)( s . NAME ) );
 
 	// this (together with the D3_IMATTR_* defines in the previous lines)
 	// expands the D3_IMSTYLE_ATTRS table to
@@ -399,7 +400,7 @@ bool WriteImGuiStyle( const ImGuiStyle& s, const char* filename ) {
 
 #define D3_IMSTYLE_COLOR( NAME ) { \
 		const ImVec4& c = s.Colors[ ImGuiCol_ ## NAME  ]; \
-		fprintf( f, #NAME " = %g, %g, %g, %g\n", c.x, c.y, c.z, c.w ); \
+		fprintf( f, "%s = %g, %g, %g, %g\n", #NAME, c.x, c.y, c.z, c.w ); \
 	}
 
 	// this turns into
@@ -417,6 +418,12 @@ bool WriteImGuiStyle( const ImGuiStyle& s, const char* filename ) {
 	return true;
 }
 
+static inline int numSpaces( const char* name, int targetLen )
+{
+	int ret = targetLen - strlen(name);
+	return ret > 0 ? ret : 0;
+}
+
 ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s )
 {
 	ImGuiTextBuffer ret;
@@ -424,13 +431,13 @@ ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s )
 	ret.append( "ImGuiStyle& style = ImGui::GetStyle();\n" );
 
 #define D3_IMATTR_FLOAT( NAME ) \
-	ret.appendf( "style.%s = %g;\n", #NAME, s. NAME );
+	ret.appendf( "style.%s %*s= %g;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME );
 #define D3_IMATTR_VEC2( NAME ) \
-	ret.appendf( "style.%s = ImVec2( %g, %g );\n", #NAME, s. NAME .x, s. NAME .y );
+	ret.appendf( "style.%s %*s= ImVec2( %g, %g );\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME .x, s. NAME .y );
 #define D3_IMATTR_INT( NAME ) \
 	ret.appendf( "style.%s = %d; // TODO: flag\n", #NAME, s. NAME );
 #define D3_IMATTR_BOOL( NAME ) \
-	ret.appendf( "style.%s = %s;\n", #NAME, s. NAME ? "true" : "false" );
+	ret.appendf( "style.%s %*s= %s;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME ? "true" : "false" );
 
 	D3_IMSTYLE_ATTRS
 
@@ -447,7 +454,8 @@ ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s )
 
 #define D3_IMSTYLE_COLOR( NAME ) { \
 		const ImVec4& c = s.Colors[ ImGuiCol_ ## NAME ]; \
-		ret.appendf( "colors[ ImGuiCol_%s ] = ImVec4( %g, %g, %g, %g );\n", #NAME, c.x, c.y, c.z, c.w ); \
+		ret.appendf( "colors[ ImGuiCol_%s ]%*s = ImVec4( %g, %g, %g, %g );\n", #NAME, \
+			numSpaces( #NAME , 21 ), "", c.x, c.y, c.z, c.w ); \
 	}
 
 	D3_IMSTYLE_COLORS
