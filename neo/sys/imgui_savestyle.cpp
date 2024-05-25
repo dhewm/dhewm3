@@ -67,7 +67,12 @@ namespace DG {
 
 #undef warnPrintf
 // TODO: maybe use your own logging system instead of fprintf() to stderr
-#define warnPrintf(...)  fprintf( stderr, "Warning: " __VA_ARGS__ )
+//#define warnPrintf(...)  fprintf( stderr, "Warning: " __VA_ARGS__ )
+
+// DG: adjustment for dhewm3:
+#include "framework/Common.h"
+#undef strncmp // No, I don't want to use idStr::Cmpn() in this file.
+#define warnPrintf(...)  common->Warning( __VA_ARGS__ )
 
 // Note: The trick I'm using with these #defines below is called "X Macro"
 //       see https://en.wikipedia.org/wiki/X_macro (except I'm not calling the "entries" X,
