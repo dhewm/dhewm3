@@ -54,7 +54,8 @@ namespace DG {
 
 	// generate C++ code that replicates the given style into a text buffer
 	// (that you can write to a file or set the clipboard from or whatever)
-	extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s );
+	// if refStyle is set, only differences in style compared to refStyle are written
+	extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& style, const ImGuiStyle* refStyle = nullptr );
 } //namespace
 #endif
 
@@ -424,20 +425,28 @@ static inline int numSpaces( const char* name, int targetLen )
 	return ret > 0 ? ret : 0;
 }
 
-ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s )
+ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s, const ImGuiStyle* refStyle )
 {
 	ImGuiTextBuffer ret;
 	ret.reserve(6000);
 	ret.append( "ImGuiStyle& style = ImGui::GetStyle();\n" );
 
 #define D3_IMATTR_FLOAT( NAME ) \
-	ret.appendf( "style.%s %*s= %g;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME );
+	if ( refStyle == nullptr || s. NAME != refStyle-> NAME ) { \
+		ret.appendf( "style.%s %*s= %g;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME ); \
+	}
 #define D3_IMATTR_VEC2( NAME ) \
-	ret.appendf( "style.%s %*s= ImVec2( %g, %g );\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME .x, s. NAME .y );
+	if ( refStyle == nullptr || s. NAME .x != refStyle-> NAME .x || s. NAME .y != refStyle-> NAME .y ) { \
+		ret.appendf( "style.%s %*s= ImVec2( %g, %g );\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME .x, s. NAME .y ); \
+	}
 #define D3_IMATTR_INT( NAME ) \
-	ret.appendf( "style.%s = %d; // TODO: flag\n", #NAME, s. NAME );
+	if ( refStyle == nullptr || s. NAME != refStyle-> NAME ) { \
+		ret.appendf( "style.%s = %d; // TODO: flag\n", #NAME, s. NAME ); \
+	}
 #define D3_IMATTR_BOOL( NAME ) \
-	ret.appendf( "style.%s %*s= %s;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME ? "true" : "false" );
+	if ( refStyle == nullptr || s. NAME != refStyle-> NAME ) { \
+		ret.appendf( "style.%s %*s= %s;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME ? "true" : "false" ); \
+	}
 
 	D3_IMSTYLE_ATTRS
 
@@ -452,15 +461,19 @@ ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s )
 
 	ret.append( "\nImVec4* colors = style.Colors;\n" );
 
-#define D3_IMSTYLE_COLOR( NAME ) { \
-		const ImVec4& c = s.Colors[ ImGuiCol_ ## NAME ]; \
-		ret.appendf( "colors[ ImGuiCol_%s ]%*s = ImVec4( %g, %g, %g, %g );\n", #NAME, \
-			numSpaces( #NAME , 21 ), "", c.x, c.y, c.z, c.w ); \
+	for ( ImGuiCol cIdx=0; cIdx < ImGuiCol_COUNT; ++cIdx ) {
+		const ImVec4& c = s.Colors[cIdx];
+		if ( refStyle != nullptr ) {
+			const ImVec4& c2 = refStyle->Colors[cIdx];
+			if ( c.x == c2.x && c.y == c2.y && c.z == c2.z && c.w == c2.w ) {
+				// same colors, nothing to do
+				continue;
+			}
+		}
+		const char* name = ImGui::GetStyleColorName( cIdx );
+		ret.appendf( "colors[ ImGuiCol_%s ]%*s = ImVec4( %g, %g, %g, %g );\n",
+		             name, numSpaces( name , 21 ), "", c.x, c.y, c.z, c.w );
 	}
-
-	D3_IMSTYLE_COLORS
-
-#undef D3_IMSTYLE_COLOR
 
 	ret.append("\n");
 

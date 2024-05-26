@@ -28,21 +28,22 @@ idCVar imgui_style( "imgui_style", "0", CVAR_SYSTEM|CVAR_INTEGER|CVAR_ARCHIVE, "
 
 // implemented in imgui_savestyle.cpp
 namespace DG {
-	// writes the given ImGuiStyle to the given filename (opened with fopen())
-	// returns true on success, false if opening the file failed
-	extern bool WriteImGuiStyle( const ImGuiStyle& style, const char* filename );
+// writes the given ImGuiStyle to the given filename (opened with fopen())
+// returns true on success, false if opening the file failed
+extern bool WriteImGuiStyle( const ImGuiStyle& style, const char* filename );
 
-	// reads the the given filename (opened with fopen())
-	// and sets the given ImGuiStyle accordingly.
-	// if any attributes/colors/behaviors are missing the the file,
-	// they are not modified in style, so it probably makes sense to initialize
-	// style to a sane default before calling that function.
-	// returns true on success, false if opening the file failed
-	extern bool ReadImGuiStyle( ImGuiStyle& style, const char* filename );
+// reads the the given filename (opened with fopen())
+// and sets the given ImGuiStyle accordingly.
+// if any attributes/colors/behaviors are missing the the file,
+// they are not modified in style, so it probably makes sense to initialize
+// style to a sane default before calling this function.
+// returns true on success, false if opening the file failed
+extern bool ReadImGuiStyle( ImGuiStyle& style, const char* filename );
 
-	// generate C++ code that replicates the given style into a text buffer
-	// (that you can either write to a file or set the clipboard from or whatever)
-	extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s );
+// generate C++ code that replicates the given style into a text buffer
+// (that you can write to a file or set the clipboard from or whatever)
+// if refStyle is set, only differences in style compared to refStyle are written
+extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& style, const ImGuiStyle* refStyle = nullptr );
 } //namespace DG
 
 namespace D3 {
@@ -476,11 +477,10 @@ int GetOpenWindowsMask()
 	return openImguiWindows;
 }
 
-void SetImGuiStyle( Style d3style )
+ImGuiStyle GetImGuiStyle( Style d3style )
 {
-	ImGuiStyle& style = ImGui::GetStyle();
+	ImGuiStyle style; // default style
 	if ( d3style == Style::Dhewm3 ) {
-		style = ImGuiStyle(); // start with default style
 		// make it look a bit nicer with rounded edges
 		style.WindowRounding = 2.0f;
 		style.FrameRounding = 3.0f;
@@ -488,21 +488,27 @@ void SetImGuiStyle( Style d3style )
 		style.ScrollbarRounding = 8.0f;
 		style.GrabRounding = 1.0f;
 		style.PopupRounding = 2.0f;
-		SetDhewm3StyleColors();
+		SetDhewm3StyleColors( &style );
 	} else if ( d3style == Style::User ) {
 		style = userStyle;
 	} else {
 		assert( d3style == Style::ImGui_Default && "invalid/unknown style" );
-		style = ImGuiStyle();
-		ImGui::StyleColorsDark();
+		ImGui::StyleColorsDark( &style );
 	}
+	return style;
 }
 
-void SetDhewm3StyleColors()
+void SetImGuiStyle( Style d3style )
 {
-	ImGui::StyleColorsDark();
-	ImGuiStyle& style = ImGui::GetStyle();
-	ImVec4* colors = style.Colors;
+	ImGui::GetStyle() = GetImGuiStyle( d3style );
+}
+
+void SetDhewm3StyleColors( ImGuiStyle* dst )
+{
+	if ( dst == nullptr )
+		dst = &ImGui::GetStyle();
+	ImGui::StyleColorsDark( dst );
+	ImVec4* colors = dst->Colors;
 	colors[ImGuiCol_TitleBg]    = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
 	colors[ImGuiCol_TabHovered] = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
 	colors[ImGuiCol_TabActive]  = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
@@ -526,9 +532,10 @@ bool WriteUserStyle()
 	return true;
 }
 
-void CopyCurrentStyle()
+void CopyCurrentStyle( bool onlyChanges )
 {
-	ImGuiTextBuffer buf = DG::WriteImGuiStyleToCode( ImGui::GetStyle() );
+	ImGuiStyle refStyle = GetImGuiStyle( Style::ImGui_Default );
+	ImGuiTextBuffer buf = DG::WriteImGuiStyleToCode( ImGui::GetStyle(), onlyChanges ? &refStyle : nullptr );
 	Sys_SetClipboardData( buf.c_str() );
 }
 

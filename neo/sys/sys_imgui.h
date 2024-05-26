@@ -71,14 +71,14 @@ enum Style {
 extern void SetImGuiStyle( Style style );
 
 // set the default dhewm3 imgui style colors
-extern void SetDhewm3StyleColors();
+extern void SetDhewm3StyleColors( ImGuiStyle* dst = nullptr );
 extern void SetUserStyleColors();
 
 // write current style settings (incl. colors) as userStyle
 extern bool WriteUserStyle();
 
 // copy current style to clipboard
-extern void CopyCurrentStyle();
+extern void CopyCurrentStyle( bool onlyChanges );
 
 #else // IMGUI_DISABLE - just stub out everything
 

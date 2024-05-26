@@ -1602,10 +1602,16 @@ static void DrawOtherOptionsMenu()
 	}
 	AddTooltip( "Writes the current style settings (incl. colors) as userstyle" );
 
+	static bool onlyChanges = false;
 	if ( ImGui::Button( "Copy style code to clipboard" ) ) {
-		D3::ImGuiHooks::CopyCurrentStyle();
+		D3::ImGuiHooks::CopyCurrentStyle( onlyChanges );
 	}
 	AddTooltip( "Generates C++ code for the current style settings (incl. colors) and copies it into the clipboard" );
+
+	ImGui::SameLine();
+
+	ImGui::Checkbox( "Only changed settings", &onlyChanges );
+	AddTooltip( "Only generate C++ code for attributes/colors that are changed compared to the default (dark) ImGui theme" );
 
 	ImGui::Spacing();
 
