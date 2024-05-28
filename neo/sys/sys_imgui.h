@@ -45,6 +45,9 @@ extern bool ProcessEvent(const void* sdlEvent);
 // even if ImGui window has focus
 extern void SetKeyBindMode( bool enable );
 
+// returns true if the system cursor should be shown because an ImGui menu is active
+extern bool ShouldShowCursor();
+
 // NewFrame() is called once per D3 frame, after all events have been gotten
 // => ProcessEvent() has already been called (probably multiple times)
 extern void NewFrame();
@@ -98,6 +101,8 @@ inline void Shutdown() {}
 inline bool ProcessEvent(const void* sdlEvent) { return false; }
 
 inline void SetKeyBindMode( bool enable ) {}
+
+inline bool ShouldShowCursor() { return false; }
 
 inline void NewFrame() {}
 

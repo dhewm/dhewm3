@@ -17,10 +17,12 @@ typedef char* (*MY_XGETDEFAULTFUN)(Display*, const char*, const char*);
 
 #include "framework/Common.h"
 #include "framework/KeyInput.h"
+#include "framework/Session_local.h" // sessLocal.GetActiveMenu()
 #include "renderer/qgl.h"
 #include "renderer/tr_local.h" // glconfig
 
 extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
+extern void Com_OpenCloseDhewm3SettingsMenu( bool open ); // ditto
 
 static idCVar imgui_scale( "imgui_scale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI menus by (-1: auto)" ); // TODO: limit values?
 
@@ -309,6 +311,12 @@ void NewFrame()
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL2_NewFrame();
+
+	if ( ShouldShowCursor() )
+		ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange;
+	else
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 	haveNewFrame = true;
@@ -409,6 +417,28 @@ void SetKeyBindMode( bool enable )
 	idKeyInput::ClearStates();
 }
 
+bool ShouldShowCursor()
+{
+	if ( sessLocal.GetActiveMenu() != nullptr ) {
+		// if we're in a menu (probably main menu), dhewm3 renders a cursor for it,
+		// so only show the ImGui cursor when the mouse cursor is over an ImGui window
+		return openImguiWindows != 0 && ImGui::GetIO().WantCaptureMouse;
+	} else {
+		// when ingame, render the ImGui/SDL/system cursor if an ImGui window is open
+		// because dhewm3 does *not* render its own cursor outside ImGui windows.
+		// additionally, only show it if an ImGui window has focus - this allows you
+		// to click outside the ImGui window to give Doom3 focus and look around.
+		// You can get focus on the ImGui window again by clicking while the invisible
+		//  cursor is over the window (things in it still get highlighted), or by
+		// opening the main (Esc) or by opening the Dhewm3 Settings window (F10, usually),
+		// which will either open it focused or give an ImGui window focus if it
+		// was open but unfocused.
+		// Might be nice to have a keyboard shortcut to give focus to any open
+		// ImGui window, maybe Pause?
+		return openImguiWindows != 0 && ImGui::IsWindowFocused( ImGuiFocusedFlags_AnyWindow );
+	}
+}
+
 void EndFrame()
 {
 	if (openImguiWindows == 0 && !haveNewFrame)
@@ -464,11 +494,33 @@ void EndFrame()
 
 void OpenWindow( D3ImGuiWindow win )
 {
+	if ( openImguiWindows & win )
+		return; // already open
+
+	ImGui::SetNextWindowFocus();
+
+	switch ( win ) {
+		case D3_ImGuiWin_Settings:
+			Com_OpenCloseDhewm3SettingsMenu( true );
+			break;
+		// TODO: other windows that need explicit opening
+	}
+
 	openImguiWindows |= win;
 }
 
 void CloseWindow( D3ImGuiWindow win )
 {
+	if ( (openImguiWindows & win) == 0 )
+		return; // already closed
+
+	switch ( win ) {
+		case D3_ImGuiWin_Settings:
+			Com_OpenCloseDhewm3SettingsMenu( false );
+			break;
+		// TODO: other windows that need explicit closing
+	}
+
 	openImguiWindows &= ~win;
 }
 

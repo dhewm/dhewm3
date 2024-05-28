@@ -8,8 +8,8 @@
 
 #include "KeyInput.h"
 #include "UsercmdGen.h" // key bindings
-//#include "Game.h" // idGameEdit to access entity definitions (player, weapons)
 #include "DeclEntityDef.h"
+#include "Session_local.h" // sessLocal.GetActiveMenu()
 
 #include "sys/sys_imgui.h"
 #include "../libs/imgui/imgui_internal.h"
@@ -1697,24 +1697,59 @@ void Com_DrawDhewm3SettingsMenu()
 	}
 }
 
-void Com_InitDhewm3SettingsMenu()
+static void InitDhewm3SettingsMenu()
 {
-	InitOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
 	InitBindingEntries();
+	InitOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
+
+}
+
+// !! Don't call this function directly, always use                          !!
+// !! D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_Settings )     !!
+// !! or D3::ImGuiHooks::CloseWindow( D3::ImGuiHooks::D3_ImGuiWin_Settings ) !!
+// (unless you're implementing those two functions, they call this..)
+void Com_OpenCloseDhewm3SettingsMenu( bool open )
+{
+	if ( open ) {
+		if ( !sessLocal.IsMultiplayer() ) {
+			// if we're in a SP game, pause the game.
+			// g_stopTime is the best we have for this..
+			// advantage of this, compared to the main menu with its settings menu:
+			// gamma and brightness can be modified and the effect is visible in realtime,
+			// but (at least in SP..) the player is still safe from monsters while doing this
+			idCVar* stopTime = cvarSystem->Find( "g_stoptime" );
+			if ( stopTime != nullptr ) {
+				stopTime->SetBool( true );
+			}
+		}
+
+		InitDhewm3SettingsMenu();
+	} else {
+		// unset g_stopTime (no matter if we're in MP now, maybe we weren't
+		// when the menu was opened, just set it to false now to be sure)
+		idCVar* stopTime = cvarSystem->Find( "g_stoptime" );
+		if ( stopTime != nullptr ) {
+			stopTime->SetBool( false );
+		}
+	}
 }
 
 void Com_Dhewm3Settings_f( const idCmdArgs &args )
 {
 	bool menuOpen = (D3::ImGuiHooks::GetOpenWindowsMask() & D3::ImGuiHooks::D3_ImGuiWin_Settings) != 0;
 	if ( !menuOpen ) {
-		// TODO: if in SP game, pause
-
-		Com_InitDhewm3SettingsMenu();
 		D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_Settings );
 	} else {
-		D3::ImGuiHooks::CloseWindow( D3::ImGuiHooks::D3_ImGuiWin_Settings );
-
-		// TODO: if in SP game, unpause
+		if ( ImGui::IsWindowFocused( ImGuiFocusedFlags_AnyWindow ) ) {
+			// if the settings window is open and an ImGui window has focus,
+			// close the settings window when "dhewm3Settings" is executed
+			D3::ImGuiHooks::CloseWindow( D3::ImGuiHooks::D3_ImGuiWin_Settings );
+		} else {
+			// if the settings window is open but no ImGui window has focus,
+			// give focus to one of the ImGui windows.
+			// useful to get the cursor back when ingame..
+			ImGui::SetNextWindowFocus();
+		}
 	}
 }
 

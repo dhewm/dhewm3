@@ -1618,7 +1618,7 @@ static void handleMouseGrab() {
 	bool relativeMouse = false;
 
 	// if com_editorActive, release everything, just like when we have no focus
-	if ( in_hasFocus && !com_editorActive ) {
+	if ( in_hasFocus && !com_editorActive && !D3::ImGuiHooks::ShouldShowCursor() ) {
 		// Note: this generally handles fullscreen menus, but not the PDA, because the PDA
 		//       is an ugly hack in gamecode that doesn't go through sessLocal.guiActive.
 		//       It goes through weapon input code or sth? That's also the reason only
