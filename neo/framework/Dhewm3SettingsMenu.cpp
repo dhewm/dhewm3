@@ -369,6 +369,7 @@ struct BindingEntry {
 			winPos.x = btnMax.x + ImGui::GetStyle().ItemInnerSpacing.x;
 			ImGui::OpenPopup( menuWinTitle );
 			ImGui::SetNextWindowPos(winPos);
+			ImGui::SetNextWindowFocus();
 		}
 
 		if ( ImGui::Begin( menuWinTitle, &showThisMenu, menuWinFlags ) )
@@ -914,9 +915,6 @@ struct BindingEntry {
 		{
 			const char* keyName = GetKeyName( rebindKeyNum );
 
-			// TODO: if rebindOtherEntry == NULL, get command for rebindKeyNum from Doom3 directly
-			//       and don't use rebindOtherEntry !
-
 			if ( rebindOtherEntry != nullptr ) {
 				ImGui::Text( "Key '%s' is already bound to command %s !\nBind to %s instead?",
 				             keyName, rebindOtherEntry->displayName.c_str(), displayName.c_str() );
@@ -1011,6 +1009,9 @@ struct BindingEntry {
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos( center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f) );
 
+		// with the default rounding the modal popup edges don't look rounded at all
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 4.0f );
+
 		BindingEntrySelectionState newSelState = BESS_Selected;
 		if ( selectionState == BESS_WantClear ) {
 			newSelState = HandleClearPopup( popupName, newOpen );
@@ -1019,6 +1020,8 @@ struct BindingEntry {
 		} else {
 			newSelState = HandleRebindPopup( popupName, newOpen );
 		}
+
+		ImGui::PopStyleVar(); // ImGuiStyleVar_WindowRounding
 
 		if ( newSelState != selectionState ) {
 			popupOpened = false;
@@ -1653,13 +1656,6 @@ void Com_DrawDhewm3SettingsMenu()
 			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
-		if (ImGui::BeginTabItem("Game Options"))
-		{
-			BeginTabChild( "gamechild" );
-			ImGui::Text("This is the Game Options tab!\nblah blah blah blah blah");
-			ImGui::EndChild();
-			ImGui::EndTabItem();
-		}
 		if (ImGui::BeginTabItem("Video Options"))
 		{
 			BeginTabChild( "vidchild" );
@@ -1671,6 +1667,13 @@ void Com_DrawDhewm3SettingsMenu()
 		{
 			ImGui::BeginChild( "audiochild" );
 			ImGui::Text("This is the Audio tab!\nblah blah blah blah blah");
+			ImGui::EndChild();
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Game Options"))
+		{
+			BeginTabChild( "gamechild" );
+			ImGui::Text("This is the Game Options tab!\nblah blah blah blah blah");
 			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
