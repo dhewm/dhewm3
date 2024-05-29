@@ -20,6 +20,7 @@ typedef char* (*MY_XGETDEFAULTFUN)(Display*, const char*, const char*);
 #include "framework/Session_local.h" // sessLocal.GetActiveMenu()
 #include "renderer/qgl.h"
 #include "renderer/tr_local.h" // glconfig
+#include "ui/DeviceContext.h"
 
 extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
 extern void Com_OpenCloseDhewm3SettingsMenu( bool open ); // ditto
@@ -27,6 +28,8 @@ extern void Com_OpenCloseDhewm3SettingsMenu( bool open ); // ditto
 static idCVar imgui_scale( "imgui_scale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI menus by (-1: auto)" ); // TODO: limit values?
 
 idCVar imgui_style( "imgui_style", "0", CVAR_SYSTEM|CVAR_INTEGER|CVAR_ARCHIVE, "Which ImGui style to use. 0: Dhewm3 theme, 1: Default ImGui theme, 2: User theme", 0.0f, 2.0f );
+
+extern idCVar r_scaleMenusTo43;
 
 // implemented in imgui_savestyle.cpp
 namespace DG {
@@ -419,11 +422,7 @@ void SetKeyBindMode( bool enable )
 
 bool ShouldShowCursor()
 {
-	if ( sessLocal.GetActiveMenu() != nullptr ) {
-		// if we're in a menu (probably main menu), dhewm3 renders a cursor for it,
-		// so only show the ImGui cursor when the mouse cursor is over an ImGui window
-		return openImguiWindows != 0 && ImGui::GetIO().WantCaptureMouse;
-	} else {
+	if ( sessLocal.GetActiveMenu() == nullptr ) {
 		// when ingame, render the ImGui/SDL/system cursor if an ImGui window is open
 		// because dhewm3 does *not* render its own cursor outside ImGui windows.
 		// additionally, only show it if an ImGui window has focus - this allows you
@@ -433,9 +432,48 @@ bool ShouldShowCursor()
 		// opening the main (Esc) or by opening the Dhewm3 Settings window (F10, usually),
 		// which will either open it focused or give an ImGui window focus if it
 		// was open but unfocused.
-		// Might be nice to have a keyboard shortcut to give focus to any open
-		// ImGui window, maybe Pause?
+		// TODO: Might be nice to have a keyboard shortcut to give focus to any open
+		//       ImGui window, maybe Pause?
 		return openImguiWindows != 0 && ImGui::IsWindowFocused( ImGuiFocusedFlags_AnyWindow );
+	} else {
+		// if we're in a menu (probably main menu), dhewm3 renders a cursor for it,
+		// so only show the ImGui cursor when the mouse cursor is over an ImGui window
+		// or in one of the black bars where Doom3's cursor isn't rendered in
+		// non 4:3 resolutions
+		if ( openImguiWindows == 0 ) {
+			return false; // no open ImGui window => no ImGui cursor
+		}
+		if ( ImGui::GetIO().WantCaptureMouse ) {
+			return true; // over an ImGui window => definitely want ImGui cursor
+		}
+		// if scaling Doom3 menus to 4:3 is enabled and the cursor is currently
+		// in a black bar (Doom3 cursor is not drawn there), show the ImGui cursor
+		if ( r_scaleMenusTo43.GetBool() ) {
+			ImVec2 mousePos = ImGui::GetMousePos();
+			float w = renderSystem->GetScreenWidth();
+			float h = renderSystem->GetScreenHeight();
+			float aspectRatio = w/h;
+			static const float virtualAspectRatio = float(VIRTUAL_WIDTH)/float(VIRTUAL_HEIGHT); // 4:3 = 1.333
+			if(aspectRatio > 1.4f) {
+				// widescreen (4:3 is 1.333 3:2 is 1.5, 16:10 is 1.6, 16:9 is 1.7778)
+				// => we need to scale and offset w to get the width of the black bars
+				float scaleX = virtualAspectRatio/aspectRatio;
+				float offsetX = (1.0f - scaleX) * w * 0.5f; // (w - scale*w)/2
+				if ( mousePos.x <= offsetX || mousePos.x >= w - offsetX ) {
+					return true;
+				}
+			} else if(aspectRatio < 1.24f) {
+				// portrait-mode, "thinner" than 5:4 (which is 1.25)
+				// => we need to scale and offset h to get the height of the black bars
+				// it's analogue to the other case, but inverted and with height and Y
+				float scaleY = aspectRatio/virtualAspectRatio;
+				float offsetY = (1.0f - scaleY)* h * 0.5f; // (h - scale*h)/2
+				if ( mousePos.y <= offsetY || mousePos.y >= h - offsetY ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
 
@@ -561,9 +599,14 @@ void SetDhewm3StyleColors( ImGuiStyle* dst )
 		dst = &ImGui::GetStyle();
 	ImGui::StyleColorsDark( dst );
 	ImVec4* colors = dst->Colors;
-	colors[ImGuiCol_TitleBg]    = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
-	colors[ImGuiCol_TabHovered] = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
-	colors[ImGuiCol_TabActive]  = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
+	//colors[ImGuiCol_TitleBg]       = ImVec4(0.28f, 0.36f, 0.48f, 0.88f);
+	//colors[ImGuiCol_TitleBg]       = ImVec4(0.09f, 0.23f, 0.22f, 0.90f);
+	//colors[ImGuiCol_TitleBgActive] = ImVec4(0.02f, 0.52f, 0.53f, 1.00f);
+	colors[ImGuiCol_TitleBg]       = ImVec4(0.09f, 0.13f, 0.12f, 0.90f);
+	colors[ImGuiCol_TitleBgActive] = ImVec4(0.03f, 0.33f, 0.33f, 1.00f);
+	//colors[ImGuiCol_TitleBg]       = ImVec4(0.12f, 0.17f, 0.16f, 0.90f);
+	colors[ImGuiCol_TabHovered]    = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
+	colors[ImGuiCol_TabActive]     = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
 }
 
 void SetUserStyleColors()
@@ -577,7 +620,7 @@ void SetUserStyleColors()
 bool WriteUserStyle()
 {
 	userStyle = ImGui::GetStyle();
-	if( !DG::WriteImGuiStyle( ImGui::GetStyle(), GetUserStyleFilename() ) ) {
+	if ( !DG::WriteImGuiStyle( ImGui::GetStyle(), GetUserStyleFilename() ) ) {
 		common->Warning( "Couldn't write ImGui userstyle!\n" );
 		return false;
 	}
