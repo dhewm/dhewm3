@@ -559,7 +559,7 @@ vidmode_t r_vidModes[] = {
 // DG: made this an enum so even stupid compilers accept it as array length below
 enum {	s_numVidModes = sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) };
 
-static bool R_GetModeInfo( int *width, int *height, int mode ) {
+bool R_GetModeInfo( int *width, int *height, int mode ) {
 	vidmode_t	*vm;
 
 	if ( mode < -1 ) {

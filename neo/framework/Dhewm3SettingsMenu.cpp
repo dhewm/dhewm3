@@ -2,7 +2,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include "Common.h"
-#include "CVarSystem.h"
+
+#ifndef IMGUI_DISABLE
 
 #include "idlib/LangDict.h"
 
@@ -14,11 +15,18 @@
 #include "sys/sys_imgui.h"
 #include "../libs/imgui/imgui_internal.h"
 
-#ifndef IMGUI_DISABLE
+#include "renderer/tr_local.h" // render cvars
+
+#include <algorithm> // std::sort - TODO: replace with something custom..
 
 extern const char* D3_GetGamepadStartButtonName();
 
 extern idCVar imgui_style;
+
+extern idCVar r_customWidth;
+extern idCVar r_customHeight;
+
+extern bool R_GetModeInfo( int *width, int *height, int mode );
 
 namespace {
 
@@ -106,7 +114,7 @@ static const char* GetGamepadStartName() {
 
 static const char* GetGamepadCancelButtonNames() {
 	static char ret[64];
-	// on xbox: "B or Start"
+	// on xbox: "Pad B or Pad Start"
 	D3_snprintfC99( ret, sizeof(ret), "%s or %s", Sys_GetLocalizedJoyKeyName( K_JOY_BTN_EAST ), GetGamepadStartName() );
 	return ret;
 }
@@ -1235,7 +1243,7 @@ static void UpdateKeyBindingsInEntries() {
 
 static void DrawBindingsMenu()
 {
-	if ( !bindingsMenuAlreadyOpen ) {
+	if ( !bindingsMenuAlreadyOpen ) { // TODO: could go into some init function
 		UpdateKeyBindingsInEntries();
 		bindingsMenuAlreadyOpen = true;
 	}
@@ -1465,7 +1473,7 @@ struct CVarOption {
 	{
 		if (type == OT_HEADING) {
 			if (label != NULL) {
-				ImGui::SeparatorText(label);
+				ImGui::SeparatorText( label );
 			}
 		} else if (cvar != nullptr) {
 			switch(type) {
@@ -1566,7 +1574,188 @@ static CVarOption controlOptions[] = {
 	// TODO: joy_dampenlook and joy_deltaPerMSLook ? comment in code says they were "bad idea"
 };
 
-// TODO: r_scaleMenusTo43
+struct VidMode {
+	idStr label;
+	int width;
+	int height;
+	int mode;
+
+	VidMode() : width(0), height(0), mode(0) {}
+
+	VidMode( int w, int h, int m ) : width(w), height(h), mode(m)  {}
+
+	void Init() {
+		if ( mode == -1 ) {
+			label = "Custom";
+		} else {
+			label = idStr::Format( "%4d x %d", width, height );
+		}
+	}
+};
+
+static CVarOption videoOptionsApply[] = {
+	//CVarOption( "r_fullsc" )
+};
+
+static int maxAnisotropyIndex = 0;
+
+static CVarOption videoOptionsImmediately[] = {
+	CVarOption( "Options that take effect in realtime" ),
+	CVarOption( "image_anisotropy", []( idCVar& cvar ) {
+		static const char* aniLevels[] = {
+			"No Anisotropic Filtering###texAniFil",
+			"2x Anisotropic Filtering###texAniFil",
+			"4x Anisotropic Filtering###texAniFil",
+			"8x Anisotropic Filtering###texAniFil",
+			"16x Anisotropic Filtering###texAniFil",
+			"32x Anisotropic Filtering###texAniFil", // future-proofing :-p
+			"64x Anisotropic Filtering###texAniFil",
+		};
+
+		int aniIdx = idMath::ClampInt( 0, maxAnisotropyIndex, idMath::ILog2( cvar.GetFloat() ) );
+
+		if ( ImGui::SliderInt( aniLevels[aniIdx], &aniIdx, 0, maxAnisotropyIndex, "", ImGuiSliderFlags_NoInput ) ) {
+			cvar.SetInteger( 1 << aniIdx );
+		}
+		const char* descr = (maxAnisotropyIndex == 0) ? "anisotropic filtering is not supported by this system!" : nullptr;
+		AddCVarOptionTooltips( cvar, descr );
+	} ),
+	CVarOption( "r_brightness", "Brightness", OT_FLOAT, 0.5f, 2.0f ),
+	CVarOption( "r_gamma", "Gamma", OT_FLOAT, 0.5f, 3.0f ),
+	CVarOption( "r_scaleMenusTo43", "Scale fullscreen menus to 4:3", OT_BOOL ),
+};
+
+idList<VidMode> vidModes;
+static int selModeIdx = 0;
+static int customVidRes[2];
+static int fullscreenChoice = 0;
+
+static void SetVideoStuffFromCVars()
+{
+	const int curMode = r_mode.GetInteger();
+
+	for ( int i=0, n=vidModes.Num(); i < n; ++i ) {
+		if ( vidModes[i].mode == curMode ) {
+			selModeIdx = i;
+			break;
+		}
+	}
+
+	customVidRes[0] = r_customWidth.GetInteger();
+	customVidRes[1] = r_customHeight.GetInteger();
+
+	fullscreenChoice = r_fullscreen.GetBool() ? ( r_fullscreenDesktop.GetBool() ? 2 : 1 ) : 0;
+
+	maxAnisotropyIndex = Min( 6, idMath::ILog2( glConfig.maxTextureAnisotropy ) );
+}
+
+static bool VideoHasApplyableChanges()
+{
+	const int curMode = r_mode.GetInteger();
+	if ( curMode != vidModes[selModeIdx].mode
+	   || ( curMode == -1 && ( customVidRes[0] != r_customWidth.GetInteger()
+	                          || customVidRes[1] != r_customHeight.GetInteger() ) ) )
+	{
+		return true;
+	}
+	int oldFullscreenChoice = r_fullscreen.GetBool() ? ( r_fullscreenDesktop.GetBool() ? 2 : 1 ) : 0;
+	if ( oldFullscreenChoice != fullscreenChoice )
+		return true;
+
+	// TODO: other options that need apply?
+
+	return false;
+}
+
+static void ApplyVideoSettings()
+{
+	if ( selModeIdx == 0 ) {
+		r_customWidth.SetInteger( customVidRes[0] );
+		r_customHeight.SetInteger( customVidRes[1] );
+		r_mode.SetInteger( -1 );
+	} else {
+		r_mode.SetInteger( vidModes[selModeIdx].mode );
+	}
+	switch ( fullscreenChoice ) {
+		case 0: r_fullscreen.SetBool( false ); break;
+		case 2: r_fullscreenDesktop.SetBool( true ); // fall-through
+		case 1: r_fullscreen.SetBool( true );
+	}
+
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart\n" );
+	// TODO: if only fullscreen is changed, the following would suffice
+	//cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart partial windowed\n" );
+}
+
+static void InitVideoOptionsMenu()
+{
+	InitOptions( videoOptionsApply, IM_ARRAYSIZE(videoOptionsApply) );
+	InitOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
+
+	vidModes.SetNum(0, false);
+
+	// modes 0-2 are not shown in the menu, probably too small
+	for( int m=3; ; ++m ) {
+		int w=0, h=0;
+		if( ! R_GetModeInfo(&w, &h, m) )
+			break;
+		vidModes.Append( VidMode(w, h, m) );
+	}
+
+	std::sort( vidModes.begin(), vidModes.end(), [](const VidMode& v1, const VidMode& v2) -> bool {
+		return v1.width < v2.width || (v1.width == v2.width && v1.height < v2.height);
+	} );
+
+	vidModes.Insert( VidMode(0, 0, -1), 0 );
+
+	for ( VidMode& vm : vidModes ) {
+		vm.Init();
+	}
+
+	SetVideoStuffFromCVars();
+}
+
+static void DrawVideoOptionsMenu()
+{
+	ImGui::SeparatorText( "Options that must be applied" );
+	ImGui::Combo( "Resolution", &selModeIdx, [](void* data, int idx) -> const char* {
+			const idList<VidMode>* vms = static_cast< const idList<VidMode>* >(data);
+			return (*vms)[idx].label.c_str();
+		}, &vidModes, vidModes.Num() );
+	if ( selModeIdx == 0 ) {
+		if ( ImGui::InputInt2( "Custom Resolution (width x height)", customVidRes ) ) {
+			customVidRes[0] = idMath::ClampInt(1, 128000, customVidRes[0]);
+			customVidRes[1] = idMath::ClampInt(1, 128000, customVidRes[1]);
+		}
+	}
+
+	// TODO: showing any configurable resolution doesn't really make sense for Desktop fullscreen,
+	//       because then the desktop resolution is used..
+
+	ImGui::Combo( "Fullscreen", &fullscreenChoice, "Windowed Mode\0\"Real\" Fullscreen\0\"Desktop\" Fullscreen\0" );
+
+	// TODO: MSAA, what else?
+	// r_multiSamples
+
+	// TODO: replicate quality settings from orig menu
+
+	// TODO: vsync (does that need vid_restart?) r_swapInterval
+
+	ImGui::BeginDisabled( ! VideoHasApplyableChanges() );
+	if ( ImGui::Button("Apply") ) {
+		ApplyVideoSettings();
+	}
+	ImGui::EndDisabled();
+
+	ImGui::SameLine();
+	if ( ImGui::Button("Reset") ) {
+		SetVideoStuffFromCVars();
+	}
+
+	DrawOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
+}
+
+
 
 static bool showStyleEditor = false;
 
@@ -1659,7 +1848,7 @@ void Com_DrawDhewm3SettingsMenu()
 		if (ImGui::BeginTabItem("Video Options"))
 		{
 			BeginTabChild( "vidchild" );
-			ImGui::Text("This is the Video tab!\nblah blah blah blah blah");
+			DrawVideoOptionsMenu();
 			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
@@ -1705,6 +1894,7 @@ static void InitDhewm3SettingsMenu()
 	InitBindingEntries();
 	InitOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
 
+	InitVideoOptionsMenu();
 }
 
 // !! Don't call this function directly, always use                          !!
