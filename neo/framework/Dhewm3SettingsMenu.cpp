@@ -1599,6 +1599,28 @@ static CVarOption videoOptionsApply[] = {
 
 static CVarOption videoOptionsImmediately[] = {
 	CVarOption( "Options that take effect in realtime" ),
+
+	CVarOption( "r_swapInterval", []( idCVar& cvar ) {
+		int curVsync = idMath::ClampInt( -1, 1, r_swapInterval.GetInteger() );
+		if ( curVsync == -1 ) {
+			curVsync = 2;
+		}
+		if ( ImGui::Combo( "Vertical Sync", &curVsync, "Disable VSync\0Enable VSync\0Adaptive VSync\0" ) ) {
+			if ( curVsync == 2 ) {
+				curVsync = -1;
+			}
+			if ( GLimp_SetSwapInterval( curVsync ) ) {
+				r_swapInterval.SetInteger( curVsync );
+				// this was just set with GLimp_SetSwapInterval(), no reason to set it again in R_CheckCvars()
+				r_swapInterval.ClearModified();
+			} else {
+				D3::ImGuiHooks::ShowWarningOverlay( "Setting VSync (GL SwapInterval) failed, maybe try another mode" );
+			}
+		} else {
+			AddTooltip( "r_swapInterval" );
+		}
+		AddDescrTooltip( "Note: Not all GPUs/drivers support Adaptive VSync" );
+	} ),
 	CVarOption( "image_anisotropy", []( idCVar& cvar ) {
 		const char* descr = nullptr;
 		if ( glConfig.maxTextureAnisotropy > 1 )
