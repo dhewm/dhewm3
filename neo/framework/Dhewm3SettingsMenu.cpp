@@ -1248,6 +1248,8 @@ static void DrawBindingsMenu()
 		bindingsMenuAlreadyOpen = true;
 	}
 
+	ImGui::Spacing();
+
 	{
 		// the InputInt will look kinda like this:
 		// [10] [-] [+] Number of Binding columns...
@@ -1593,12 +1595,8 @@ struct VidMode {
 	}
 };
 
-static CVarOption videoOptionsApply[] = {
-	//CVarOption( "r_fullsc" )
-};
-
 static CVarOption videoOptionsImmediately[] = {
-	CVarOption( "Options that take effect in realtime" ),
+	CVarOption( "Options that take effect immediately" ),
 
 	CVarOption( "r_swapInterval", []( idCVar& cvar ) {
 		int curVsync = idMath::ClampInt( -1, 1, r_swapInterval.GetInteger() );
@@ -1646,7 +1644,7 @@ static CVarOption videoOptionsImmediately[] = {
 		} else {
 			ImGui::BeginDisabled();
 			bool b = false;
-			ImGui::Checkbox("Enable Anisotropic Filtering##disabled", &b );
+			ImGui::Checkbox( "Enable Anisotropic Filtering##disabled", &b );
 			ImGui::EndDisabled();
 			descr = "Anisotropic filtering is not supported by this system!";
 		}
@@ -1654,7 +1652,18 @@ static CVarOption videoOptionsImmediately[] = {
 	} ),
 	CVarOption( "r_brightness", "Brightness", OT_FLOAT, 0.5f, 2.0f ),
 	CVarOption( "r_gamma", "Gamma", OT_FLOAT, 0.5f, 3.0f ),
+	CVarOption( "r_gammaInShader", "Apply gamma and brightness in shaders", OT_BOOL ),
 	CVarOption( "r_scaleMenusTo43", "Scale fullscreen menus to 4:3", OT_BOOL ),
+	CVarOption( "r_screenshotFormat", []( idCVar& cvar ) {
+		// "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG"
+		int curFormat = idMath::ClampInt( 0, 3, cvar.GetInteger() );
+		if ( ImGui::Combo( "Screenshot Format", &curFormat, "TGA\0BMP\0PNG\0JPG\0" ) ) {
+			cvar.SetInteger( curFormat );
+		}
+		AddTooltip( "r_screenshotFormat" );
+	} ),
+	CVarOption( "r_screenshotPngCompression", "Compression level for PNG screenshots", OT_INT, 0, 9 ),
+	CVarOption( "r_screenshotJpgQuality", "Quality level for JPG screenshots", OT_INT, 1, 100 ),
 
 	CVarOption( "Advanced Options" ),
 	CVarOption( "r_skipNewAmbient", "Disable High Quality Special Effects", OT_BOOL ),
@@ -1669,6 +1678,7 @@ static int selModeIdx = 0;
 static int customVidRes[2];
 static int fullscreenChoice = 0;
 static int msaaModeIndex = 0;
+static int qualityPreset = 0;
 
 static void SetVideoStuffFromCVars()
 {
@@ -1688,6 +1698,15 @@ static void SetVideoStuffFromCVars()
 
 	const int msaa = r_multiSamples.GetInteger();
 	msaaModeIndex = Min( 4, ( msaa > 1 ) ? idMath::ILog2( msaa ) : 0 );
+
+	qualityPreset = com_machineSpec.GetInteger();
+	if ( qualityPreset == -1 ) {
+		// if it's not set, most probably setMachineSpec hasn't been run yet
+		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "setMachineSpec\n" );
+		qualityPreset = com_machineSpec.GetInteger();
+		if ( qualityPreset == -1 )
+			qualityPreset = 1; // default to medium Quality
+	}
 }
 
 static bool VideoHasApplyableChanges()
@@ -1743,7 +1762,6 @@ static void ApplyVideoSettings()
 
 static void InitVideoOptionsMenu()
 {
-	InitOptions( videoOptionsApply, IM_ARRAYSIZE(videoOptionsApply) );
 	InitOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
 
 	vidModes.SetNum(0, false);
@@ -1771,6 +1789,26 @@ static void InitVideoOptionsMenu()
 
 static void DrawVideoOptionsMenu()
 {
+	ImGui::Spacing();
+	ImGui::Combo( "##qualPresets", &qualityPreset, "Low Quality\0Medium Quality\0High Quality\0Ultra Quality\0" );
+	AddTooltip( "com_machineSpec" );
+	ImGui::SameLine();
+	if ( ImGui::Button( "Load Quality Preset" ) ) {
+		com_machineSpec.SetInteger( qualityPreset ); // TODO: or always set this even if button is not pressed?
+		// execMachineSpec might change the MSAA value, so remember the old one (that's actually set)
+		const int oldMSAA = r_multiSamples.GetInteger();
+		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "execMachineSpec nores\n" );
+
+		const int newMSAA = r_multiSamples.GetInteger();
+		if ( newMSAA != oldMSAA ) {
+			// select the modified MSAA mode in the slider, but restore the CVars old value
+			// so the Apply button is active and can be pressed for vid_restart
+			msaaModeIndex = Min( 4, ( newMSAA > 1 ) ? idMath::ILog2( newMSAA ) : 0 );
+			r_multiSamples.SetInteger( oldMSAA );
+		}
+	}
+	AddTooltip( "Sets lots of rendering-related CVars based on the selected quality" );
+
 	ImGui::SeparatorText( "Options that must be applied" );
 
 	ImGui::Combo( "Window Mode", &fullscreenChoice,
@@ -1802,16 +1840,8 @@ static void DrawVideoOptionsMenu()
 		 "8x Antialiasing (MSAA)###msaaLvl",
 		"16x Antialiasing (MSAA)###msaaLvl"
 	};
-
 	ImGui::SliderInt( msaaLevels[msaaModeIndex], &msaaModeIndex, 0, 4, "", ImGuiSliderFlags_NoInput );
 	AddCVarOptionTooltips( r_multiSamples, "Note: Not all GPUs/drivers support all modes, esp. not 16x!" );
-
-	// TODO: MSAA, what else?
-	// r_multiSamples
-
-	// TODO: replicate quality settings from orig menu
-
-	// TODO: vsync (does that need vid_restart?) r_swapInterval
 
 	if ( !VideoHasApplyableChanges() ) {
 		ImGui::BeginDisabled();
@@ -1843,6 +1873,7 @@ static bool showStyleEditor = false;
 
 static void DrawOtherOptionsMenu()
 {
+	ImGui::Spacing();
 	float scale = D3::ImGuiHooks::GetScale();
 	if ( ImGui::DragFloat("ImGui scale", &scale, 0.005f, 0.25f, 8.0f, "%.3f") ) {
 		D3::ImGuiHooks::SetScale( scale );
@@ -1898,7 +1929,7 @@ static void DrawOtherOptionsMenu()
 
 static bool BeginTabChild( const char* name )
 {
-	bool ret = ImGui::BeginChild( name );
+	bool ret = ImGui::BeginChild( name, ImVec2(0, 0), 0, ImGuiWindowFlags_NavFlattened );
 	float itemWidth = fminf( ImGui::GetWindowWidth() * 0.5f, ImGui::GetFontSize() * 20.0f );
 	ImGui::PushItemWidth( itemWidth );
 	return ret;
@@ -1908,6 +1939,9 @@ static bool BeginTabChild( const char* name )
 void Com_DrawDhewm3SettingsMenu()
 {
 	bool showSettingsWindow = true;
+
+	ImGui::SetNextWindowCollapsed( false, ImGuiCond_Appearing );
+
 	ImGui::Begin("dhewm3 Settings", &showSettingsWindow);
 
 	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;

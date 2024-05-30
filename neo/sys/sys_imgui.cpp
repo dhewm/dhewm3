@@ -309,8 +309,18 @@ void Shutdown()
 // => ProcessEvent() has already been called (probably multiple times)
 void NewFrame()
 {
-	if (openImguiWindows == 0)
-		return;
+	// even if all windows are closed, still run a few frames
+	// so ImGui also recognizes internally that all windows are closed
+	// and e.g. ImGuiCond_Appearing works as intended
+	static int framesAfterAllWindowsClosed = 0;
+	if ( openImguiWindows == 0 ) {
+		if ( framesAfterAllWindowsClosed > 1 )
+			return;
+		else
+			++framesAfterAllWindowsClosed;
+	} else {
+		framesAfterAllWindowsClosed = 0;
+	}
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL2_NewFrame();
@@ -574,9 +584,10 @@ ImGuiStyle GetImGuiStyle( Style d3style )
 		// make it look a bit nicer with rounded edges
 		style.WindowRounding = 2.0f;
 		style.FrameRounding = 3.0f;
+		style.FramePadding = ImVec2( 6.0f, 3.0f );
 		//style.ChildRounding = 6.0f;
 		style.ScrollbarRounding = 8.0f;
-		style.GrabRounding = 1.0f;
+		style.GrabRounding = 3.0f;
 		style.PopupRounding = 2.0f;
 		SetDhewm3StyleColors( &style );
 	} else if ( d3style == Style::User ) {
