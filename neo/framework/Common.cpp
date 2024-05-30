@@ -1412,8 +1412,10 @@ void OSX_GetVideoCard( int& outVendorId, int& outDeviceId );
 bool OSX_GetCPUIdentification( int& cpuId, bool& oldArchitecture );
 #endif
 void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
-	if ( com_machineSpec.GetInteger() == 3 ) {
-		cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE );
+	// DG: add an optional "nores" argument for "don't change the resolution" (r_mode)
+	bool nores = args.Argc() > 1 && idStr::Icmp( args.Argv(1), "nores" ) == 0;
+	if ( com_machineSpec.GetInteger() == 3 ) { // ultra
+		//cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE ); DG: redundant, set again below
 		cvarSystem->SetCVarInteger( "image_lodbias", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_forceDownSize", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_roundDown", 1, CVAR_ARCHIVE );
@@ -1430,12 +1432,13 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 		cvarSystem->SetCVarInteger( "image_useCompression", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_ignoreHighQuality", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "s_maxSoundsPerShader", 0, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "r_mode", 5, CVAR_ARCHIVE );
+		if ( !nores ) // DG: added optional "nores" argument
+			cvarSystem->SetCVarInteger( "r_mode", 5, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_useNormalCompression", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
-	} else if ( com_machineSpec.GetInteger() == 2 ) {
+	} else if ( com_machineSpec.GetInteger() == 2 ) { // high
 		cvarSystem->SetCVarString( "image_filter", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE );
+		//cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE ); DG: redundant, set again below
 		cvarSystem->SetCVarInteger( "image_lodbias", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_forceDownSize", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_roundDown", 1, CVAR_ARCHIVE );
@@ -1452,9 +1455,10 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 		cvarSystem->SetCVarInteger( "image_ignoreHighQuality", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "s_maxSoundsPerShader", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_useNormalCompression", 0, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "r_mode", 4, CVAR_ARCHIVE );
+		if ( !nores ) // DG: added optional "nores" argument
+			cvarSystem->SetCVarInteger( "", 4, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
-	} else if ( com_machineSpec.GetInteger() == 1 ) {
+	} else if ( com_machineSpec.GetInteger() == 1 ) { // medium
 		cvarSystem->SetCVarString( "image_filter", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_lodbias", 0, CVAR_ARCHIVE );
@@ -1470,9 +1474,10 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 		cvarSystem->SetCVarInteger( "image_downSizeSpecularLimit", 64, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_downSizeBumpLimit", 256, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_useNormalCompression", 2, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "r_mode", 3, CVAR_ARCHIVE );
+		if ( !nores ) // DG: added optional "nores" argument
+			cvarSystem->SetCVarInteger( "r_mode", 3, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
-	} else {
+	} else { // low
 		cvarSystem->SetCVarString( "image_filter", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_lodbias", 0, CVAR_ARCHIVE );
@@ -1489,7 +1494,8 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 		cvarSystem->SetCVarInteger( "image_downSizeBump", 1, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_downSizeSpecularLimit", 64, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_downSizeBumpLimit", 256, CVAR_ARCHIVE );
-		cvarSystem->SetCVarInteger( "r_mode", 3	, CVAR_ARCHIVE );
+		if ( !nores ) // DG: added optional "nores" argument
+			cvarSystem->SetCVarInteger( "r_mode", 3	, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_useNormalCompression", 2, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
 	}
