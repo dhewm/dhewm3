@@ -1113,6 +1113,8 @@ const int GRAB_HIDECURSOR	= (1 << 1);
 const int GRAB_RELATIVEMOUSE = (1 << 2);
 
 void GLimp_GrabInput(int flags);
+
+bool GLimp_SetSwapInterval( int swapInterval );
 /*
 ====================================================================
 

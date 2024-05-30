@@ -397,6 +397,7 @@ void GLimp_SwapBuffers() {};
 void GLimp_ActivateContext() {};
 void GLimp_DeactivateContext() {};
 void GLimp_GrabInput(int flags) {};
+bool GLimp_SetSwapInterval( int swapInterval ) { return false; }
 
 #ifdef _MSC_VER
 #pragma warning(pop)

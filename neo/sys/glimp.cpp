@@ -404,8 +404,7 @@ try_again:
 
 		context = SDL_GL_CreateContext(window);
 
-		if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)
-			common->Warning("SDL_GL_SWAP_CONTROL not supported");
+		GLimp_SetSwapInterval( r_swapInterval.GetInteger() );
 
 		SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
 
@@ -735,5 +734,19 @@ void GLimp_GrabInput(int flags) {
 	// ignore GRAB_GRABMOUSE, SDL1.2 doesn't support grabbing without relative mode
 	// so only grab if we want relative mode
 	SDL_WM_GrabInput( (flags & GRAB_RELATIVEMOUSE) ? SDL_GRAB_ON : SDL_GRAB_OFF );
+#endif
+}
+
+bool GLimp_SetSwapInterval( int swapInterval )
+{
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	if ( SDL_GL_SetSwapInterval( swapInterval ) < 0 ) {
+		common->Warning( "SDL_GL_SetSwapInterval( %d ) not supported", swapInterval );
+		return false;
+	}
+	return true;
+#else
+	common->Warning( "SDL1.2 does not support changing the swapinterval (vsync) on-the-fly!" );
+	return false;
 #endif
 }
