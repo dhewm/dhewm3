@@ -1597,38 +1597,56 @@ static CVarOption videoOptionsApply[] = {
 	//CVarOption( "r_fullsc" )
 };
 
-static int maxAnisotropyIndex = 0;
-
 static CVarOption videoOptionsImmediately[] = {
 	CVarOption( "Options that take effect in realtime" ),
 	CVarOption( "image_anisotropy", []( idCVar& cvar ) {
-		static const char* aniLevels[] = {
-			"No Anisotropic Filtering###texAniFil",
-			"2x Anisotropic Filtering###texAniFil",
-			"4x Anisotropic Filtering###texAniFil",
-			"8x Anisotropic Filtering###texAniFil",
-			"16x Anisotropic Filtering###texAniFil",
-			"32x Anisotropic Filtering###texAniFil", // future-proofing :-p
-			"64x Anisotropic Filtering###texAniFil",
-		};
-
-		int aniIdx = idMath::ClampInt( 0, maxAnisotropyIndex, idMath::ILog2( cvar.GetFloat() ) );
-
-		if ( ImGui::SliderInt( aniLevels[aniIdx], &aniIdx, 0, maxAnisotropyIndex, "", ImGuiSliderFlags_NoInput ) ) {
-			cvar.SetInteger( 1 << aniIdx );
+		const char* descr = nullptr;
+		if ( glConfig.maxTextureAnisotropy > 1 )
+		{
+			int texAni = cvar.GetInteger();
+			bool enableTexAni = texAni > 1;
+			if ( ImGui::Checkbox("Enable Anisotropic Filtering", &enableTexAni) ) {
+				if ( !enableTexAni ) {
+					texAni = 1;
+				} else if ( texAni <= 1 ) {
+					texAni = 2;
+				}
+			}
+			if ( enableTexAni ) {
+				AddTooltip( "image_anisotropy" );
+				ImGui::SliderInt( "Max Texture Anisotropy", &texAni, 2,
+				                  glConfig.maxTextureAnisotropy, "%d",
+				                  ImGuiSliderFlags_AlwaysClamp );
+			}
+			if ( texAni != cvar.GetInteger() ) {
+				cvar.SetInteger( texAni );
+			}
+		} else {
+			ImGui::BeginDisabled();
+			bool b = false;
+			ImGui::Checkbox("Enable Anisotropic Filtering##disabled", &b );
+			ImGui::EndDisabled();
+			descr = "Anisotropic filtering is not supported by this system!";
 		}
-		const char* descr = (maxAnisotropyIndex == 0) ? "anisotropic filtering is not supported by this system!" : nullptr;
 		AddCVarOptionTooltips( cvar, descr );
 	} ),
 	CVarOption( "r_brightness", "Brightness", OT_FLOAT, 0.5f, 2.0f ),
 	CVarOption( "r_gamma", "Gamma", OT_FLOAT, 0.5f, 3.0f ),
 	CVarOption( "r_scaleMenusTo43", "Scale fullscreen menus to 4:3", OT_BOOL ),
+
+	CVarOption( "Advanced Options" ),
+	CVarOption( "r_skipNewAmbient", "Disable High Quality Special Effects", OT_BOOL ),
+	CVarOption( "r_shadows", "Enable Shadows", OT_BOOL ),
+	CVarOption( "r_skipSpecular", "Disable Specular", OT_BOOL ),
+	CVarOption( "r_skipBump", "Disable Bump Maps", OT_BOOL ),
+
 };
 
 idList<VidMode> vidModes;
 static int selModeIdx = 0;
 static int customVidRes[2];
 static int fullscreenChoice = 0;
+static int msaaModeIndex = 0;
 
 static void SetVideoStuffFromCVars()
 {
@@ -1644,9 +1662,10 @@ static void SetVideoStuffFromCVars()
 	customVidRes[0] = r_customWidth.GetInteger();
 	customVidRes[1] = r_customHeight.GetInteger();
 
-	fullscreenChoice = r_fullscreen.GetBool() ? ( r_fullscreenDesktop.GetBool() ? 2 : 1 ) : 0;
+	fullscreenChoice = r_fullscreen.GetBool() ? ( r_fullscreenDesktop.GetBool() ? 1 : 2 ) : 0;
 
-	maxAnisotropyIndex = Min( 6, idMath::ILog2( glConfig.maxTextureAnisotropy ) );
+	const int msaa = r_multiSamples.GetInteger();
+	msaaModeIndex = Min( 4, ( msaa > 1 ) ? idMath::ILog2( msaa ) : 0 );
 }
 
 static bool VideoHasApplyableChanges()
@@ -1658,11 +1677,13 @@ static bool VideoHasApplyableChanges()
 	{
 		return true;
 	}
-	int oldFullscreenChoice = r_fullscreen.GetBool() ? ( r_fullscreenDesktop.GetBool() ? 2 : 1 ) : 0;
+	int oldFullscreenChoice = r_fullscreen.GetBool() ? ( r_fullscreenDesktop.GetBool() ? 1 : 2 ) : 0;
 	if ( oldFullscreenChoice != fullscreenChoice )
 		return true;
 
-	// TODO: other options that need apply?
+	int msaa = ( msaaModeIndex > 0 ) ? ( 1 << msaaModeIndex ) : 0;
+	if ( msaa != r_multiSamples.GetInteger() )
+		return true;
 
 	return false;
 }
@@ -1677,13 +1698,24 @@ static void ApplyVideoSettings()
 		r_mode.SetInteger( vidModes[selModeIdx].mode );
 	}
 	switch ( fullscreenChoice ) {
-		case 0: r_fullscreen.SetBool( false ); break;
-		case 2: r_fullscreenDesktop.SetBool( true ); // fall-through
-		case 1: r_fullscreen.SetBool( true );
+		case 0:
+			r_fullscreen.SetBool( false );
+			break;
+		case 1:
+			r_fullscreen.SetBool( true );
+			r_fullscreenDesktop.SetBool( true );
+			break;
+		case 2:
+			r_fullscreen.SetBool( true );
+			r_fullscreenDesktop.SetBool( false );
+
 	}
 
+	int msaa = ( msaaModeIndex > 0 ) ? ( 1 << msaaModeIndex ) : 0;
+	r_multiSamples.SetInteger( msaa );
+
 	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart\n" );
-	// TODO: if only fullscreen is changed, the following would suffice
+	// TODO: if only fullscreen is changed, the following might suffice
 	//cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart partial windowed\n" );
 }
 
@@ -1718,21 +1750,39 @@ static void InitVideoOptionsMenu()
 static void DrawVideoOptionsMenu()
 {
 	ImGui::SeparatorText( "Options that must be applied" );
-	ImGui::Combo( "Resolution", &selModeIdx, [](void* data, int idx) -> const char* {
-			const idList<VidMode>* vms = static_cast< const idList<VidMode>* >(data);
-			return (*vms)[idx].label.c_str();
-		}, &vidModes, vidModes.Num() );
-	if ( selModeIdx == 0 ) {
-		if ( ImGui::InputInt2( "Custom Resolution (width x height)", customVidRes ) ) {
-			customVidRes[0] = idMath::ClampInt(1, 128000, customVidRes[0]);
-			customVidRes[1] = idMath::ClampInt(1, 128000, customVidRes[1]);
+
+	ImGui::Combo( "Window Mode", &fullscreenChoice,
+	              "Normal window\0Fullscreen window at screen resolution\0Real Fullscreen Mode\0" );
+
+	AddTooltip( "r_fullscreen / r_fullscreenDesktop" );
+
+	if ( fullscreenChoice == 1 ) {
+		ImGui::TextDisabled( "  (Resolution not configurable because for this mode\n   the current desktop/screen resolution is used)" );
+	} else {
+		ImGui::Combo( "Resolution", &selModeIdx, [](void* data, int idx) -> const char* {
+				const idList<VidMode>* vms = static_cast< const idList<VidMode>* >(data);
+				return (*vms)[idx].label.c_str();
+			}, &vidModes, vidModes.Num() );
+		AddTooltip( "r_mode" );
+		if ( selModeIdx == 0 ) {
+			if ( ImGui::InputInt2( "Custom Resolution (width x height)", customVidRes ) ) {
+				customVidRes[0] = idMath::ClampInt( 1, 128000, customVidRes[0] );
+				customVidRes[1] = idMath::ClampInt( 1, 128000, customVidRes[1] );
+			}
+			AddTooltip( "r_customWidth / r_customHeight" );
 		}
 	}
 
-	// TODO: showing any configurable resolution doesn't really make sense for Desktop fullscreen,
-	//       because then the desktop resolution is used..
+	static const char* msaaLevels[] = {
+		 "No Antialiasing (MSAA)###msaaLvl",
+		 "2x Antialiasing (MSAA)###msaaLvl",
+		 "4x Antialiasing (MSAA)###msaaLvl",
+		 "8x Antialiasing (MSAA)###msaaLvl",
+		"16x Antialiasing (MSAA)###msaaLvl"
+	};
 
-	ImGui::Combo( "Fullscreen", &fullscreenChoice, "Windowed Mode\0\"Real\" Fullscreen\0\"Desktop\" Fullscreen\0" );
+	ImGui::SliderInt( msaaLevels[msaaModeIndex], &msaaModeIndex, 0, 4, "", ImGuiSliderFlags_NoInput );
+	AddCVarOptionTooltips( r_multiSamples, "Note: Not all GPUs/drivers support all modes, esp. not 16x!" );
 
 	// TODO: MSAA, what else?
 	// r_multiSamples
@@ -1741,15 +1791,25 @@ static void DrawVideoOptionsMenu()
 
 	// TODO: vsync (does that need vid_restart?) r_swapInterval
 
-	ImGui::BeginDisabled( ! VideoHasApplyableChanges() );
-	if ( ImGui::Button("Apply") ) {
-		ApplyVideoSettings();
-	}
-	ImGui::EndDisabled();
-
-	ImGui::SameLine();
-	if ( ImGui::Button("Reset") ) {
-		SetVideoStuffFromCVars();
+	if ( !VideoHasApplyableChanges() ) {
+		ImGui::BeginDisabled();
+		ImGui::Button( "Apply" );
+		// TODO: the tooltips backgrounds are transparent (due to this being disabled), which sucks
+		AddTooltip( "No changes were made, so there's nothing to apply" );
+		ImGui::SameLine();
+		ImGui::Button( "Reset" );
+		AddTooltip( "No changes were made, so there's nothing to reset" );
+		ImGui::EndDisabled();
+	} else {
+		if ( ImGui::Button( "Apply" ) ) {
+			ApplyVideoSettings();
+		}
+		AddTooltip( "Click to apply the settings above, will restart the renderer (but not the game)" );
+		ImGui::SameLine();
+		if ( ImGui::Button("Reset") ) {
+			SetVideoStuffFromCVars();
+		}
+		AddTooltip( "Click to restore the settings as the were when opening this menu" );
 	}
 
 	DrawOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
