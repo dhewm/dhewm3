@@ -16,6 +16,7 @@
 #include "../libs/imgui/imgui_internal.h"
 
 #include "renderer/tr_local.h" // render cvars
+#include "sound/snd_local.h" // sound cvars
 
 #include <algorithm> // std::sort - TODO: replace with something custom..
 
@@ -1620,31 +1621,21 @@ static CVarOption videoOptionsImmediately[] = {
 		AddDescrTooltip( "Note: Not all GPUs/drivers support Adaptive VSync" );
 	} ),
 	CVarOption( "image_anisotropy", []( idCVar& cvar ) {
-		const char* descr = nullptr;
+		const char* descr = "Max Texture Anisotropy";
 		if ( glConfig.maxTextureAnisotropy > 1 )
 		{
 			int texAni = cvar.GetInteger();
-			bool enableTexAni = texAni > 1;
-			if ( ImGui::Checkbox("Enable Anisotropic Filtering", &enableTexAni) ) {
-				if ( !enableTexAni ) {
-					texAni = 1;
-				} else if ( texAni <= 1 ) {
-					texAni = 2;
-				}
-			}
-			if ( enableTexAni ) {
-				AddTooltip( "image_anisotropy" );
-				ImGui::SliderInt( "Max Texture Anisotropy", &texAni, 2,
-				                  glConfig.maxTextureAnisotropy, "%d",
-				                  ImGuiSliderFlags_AlwaysClamp );
-			}
+			const char* fmtStr = (texAni > 1) ? "%d" : "No Anisotropic Filtering";
+			ImGui::SliderInt( "Anisotropic Filtering", &texAni, 1,
+			                  glConfig.maxTextureAnisotropy, fmtStr,
+			                  ImGuiSliderFlags_AlwaysClamp );
 			if ( texAni != cvar.GetInteger() ) {
 				cvar.SetInteger( texAni );
 			}
 		} else {
 			ImGui::BeginDisabled();
-			bool b = false;
-			ImGui::Checkbox( "Enable Anisotropic Filtering##disabled", &b );
+			int texAni = 0;
+			ImGui::SliderInt( "Anisotropic Filtering", &texAni, 1, 8, "Not supported" );
 			ImGui::EndDisabled();
 			descr = "Anisotropic filtering is not supported by this system!";
 		}
@@ -1795,7 +1786,7 @@ static void DrawVideoOptionsMenu()
 	ImGui::SameLine();
 	if ( ImGui::Button( "Load Quality Preset" ) ) {
 		com_machineSpec.SetInteger( qualityPreset ); // TODO: or always set this even if button is not pressed?
-		// execMachineSpec might change the MSAA value, so remember the old one (that's actually set)
+		// execMachineSpec might change the MSAA value, so remember the old one (that's currently used)
 		const int oldMSAA = r_multiSamples.GetInteger();
 		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "execMachineSpec nores\n" );
 
@@ -1820,8 +1811,8 @@ static void DrawVideoOptionsMenu()
 		ImGui::TextDisabled( "  (Resolution not configurable because for this mode\n   the current desktop/screen resolution is used)" );
 	} else {
 		ImGui::Combo( "Resolution", &selModeIdx, [](void* data, int idx) -> const char* {
-				const idList<VidMode>* vms = static_cast< const idList<VidMode>* >(data);
-				return (*vms)[idx].label.c_str();
+				const idList<VidMode>& vms = *static_cast< const idList<VidMode>* >(data);
+				return vms[idx].label.c_str();
 			}, &vidModes, vidModes.Num() );
 		AddTooltip( "r_mode" );
 		if ( selModeIdx == 0 ) {
@@ -1833,14 +1824,9 @@ static void DrawVideoOptionsMenu()
 		}
 	}
 
-	static const char* msaaLevels[] = {
-		 "No Antialiasing (MSAA)###msaaLvl",
-		 "2x Antialiasing (MSAA)###msaaLvl",
-		 "4x Antialiasing (MSAA)###msaaLvl",
-		 "8x Antialiasing (MSAA)###msaaLvl",
-		"16x Antialiasing (MSAA)###msaaLvl"
-	};
-	ImGui::SliderInt( msaaLevels[msaaModeIndex], &msaaModeIndex, 0, 4, "", ImGuiSliderFlags_NoInput );
+	static const char* msaaLevels[] = { "No Antialiasing", "2x", "4x", "8x", "16x" };
+	const char* curLvl = msaaLevels[msaaModeIndex];
+	ImGui::SliderInt( "Antialiasing (MSAA)", &msaaModeIndex, 0, 4, curLvl, ImGuiSliderFlags_NoInput );
 	AddCVarOptionTooltips( r_multiSamples, "Note: Not all GPUs/drivers support all modes, esp. not 16x!" );
 
 	if ( !VideoHasApplyableChanges() ) {
@@ -1864,9 +1850,106 @@ static void DrawVideoOptionsMenu()
 		AddTooltip( "Click to restore the settings as the were when opening this menu" );
 	}
 
+	// options that take effect immediately, just by modifying their CVar:
+
 	DrawOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
 }
 
+
+static idStrList alDevices;
+static int selAlDevice = 0;
+static float audioMenuItemOffset = 0.0f;
+
+static void InitAudioOptionsMenu()
+{
+	alDevices.SetNum( 0, false );
+
+	const char* device = idSoundSystemLocal::s_device.GetString();
+	if ( *device == '\0' || idStr::Cmp( device, "default" ) == 0 ) {
+		device = nullptr;
+	}
+
+	alDevices.Append( idStr( "(System's default sound device)" ) );
+
+	if ( alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") ) {
+		const char *devs = alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER );
+
+		while (devs && *devs) {
+			if ( device && !idStr::Icmp(devs, device) ) {
+				selAlDevice = alDevices.Num();
+			}
+
+			alDevices.Append( idStr( devs ) );
+
+			devs += strlen(devs) + 1;
+		}
+	}
+
+	audioMenuItemOffset = ImGui::CalcTextSize( "Strength of EFX Reverb Effects (?)" ).x;
+	audioMenuItemOffset += ImGui::GetStyle().ItemSpacing.x;
+
+}
+
+static void DrawAudioOptionsMenu()
+{
+	float itemWidth = ImGui::GetContentRegionAvail().x - audioMenuItemOffset;
+	ImGui::PushItemWidth( itemWidth );
+
+	ImGui::SeparatorText( "Settings that require restarting dhewm3" );
+
+	if ( ImGui::Combo( "Sound Device", &selAlDevice, [](void* data, int idx) -> const char* {
+			const idStrList& devs = *static_cast< const idStrList* >(data);
+			return devs[idx].c_str();
+		}, &alDevices, alDevices.Num() ) )
+	{
+		if ( selAlDevice == 0 ) {
+			idSoundSystemLocal::s_device.SetString( "default" );
+		} else {
+			idSoundSystemLocal::s_device.SetString( alDevices[selAlDevice] );
+		}
+		D3::ImGuiHooks::ShowWarningOverlay( "Changing the sound device only takes effect after restarting dhewm3!" );
+	}
+	AddTooltip( "s_device" );
+
+	if ( !idSoundSystemLocal::EFXAvailable ) {
+		ImGui::BeginDisabled();
+		bool b = false;
+		ImGui::Checkbox( "Use EAX/EFX Reverb Effects", &b );
+		AddTooltip( "EFX effects are not available in your OpenAL implementation.\nConsider using OpenAL-Soft." );
+		ImGui::EndDisabled();
+	} else {
+		bool useReverb = idSoundSystemLocal::s_useEAXReverb.GetBool();
+		if ( ImGui::Checkbox( "Use EAX/EFX Reverb Effects", &useReverb ) ) {
+			idSoundSystemLocal::s_useEAXReverb.SetBool( useReverb );
+			if ( useReverb != idSoundSystemLocal::useEFXReverb ) {
+				D3::ImGuiHooks::ShowWarningOverlay( "Enabling/disabling EFX only takes effect after restarting dhewm3!" );
+			}
+		}
+		AddTooltip( "s_useEAXReverb" );
+	}
+
+	ImGui::SeparatorText( "Settings that take effect immediately" );
+
+	float vol = idSoundSystemLocal::s_volume.GetFloat(); // cvar is called s_volume_dB
+	if ( ImGui::SliderFloat( "Volume", &vol, -40, 10, "%.1f" ) ) {
+		idSoundSystemLocal::s_volume.SetFloat( vol );
+	}
+	AddTooltip( "s_volume_dB" );
+	AddDescrTooltip( "The game's main volume in dB. 0 is the regular maximum volume" );
+
+	if ( idSoundSystemLocal::useEFXReverb ) {
+		float reverbGain = idSoundSystemLocal::s_alReverbGain.GetFloat();
+		if ( ImGui::SliderFloat( "Strength of EFX Reverb Effects", &reverbGain, 0, 1,
+				"%.2f", ImGuiSliderFlags_AlwaysClamp ) )
+		{
+			idSoundSystemLocal::s_alReverbGain.SetFloat( reverbGain );
+		}
+		AddTooltip( "s_alReverbGain" );
+		AddDescrTooltip( "the default value is 0.5" );
+	} else {
+		ImGui::TextDisabled( "  (EFX reverb effects are currently disabled)" );
+	}
+}
 
 
 static bool showStyleEditor = false;
@@ -1971,7 +2054,7 @@ void Com_DrawDhewm3SettingsMenu()
 		if (ImGui::BeginTabItem("Audio Options"))
 		{
 			ImGui::BeginChild( "audiochild" );
-			ImGui::Text("This is the Audio tab!\nblah blah blah blah blah");
+			DrawAudioOptionsMenu();
 			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
@@ -2011,6 +2094,7 @@ static void InitDhewm3SettingsMenu()
 	InitOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
 
 	InitVideoOptionsMenu();
+	InitAudioOptionsMenu();
 }
 
 // !! Don't call this function directly, always use                          !!
