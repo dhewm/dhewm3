@@ -1871,7 +1871,7 @@ static void InitAudioOptionsMenu()
 
 	alDevices.Append( idStr( "(System's default sound device)" ) );
 
-	if ( alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") ) {
+	if ( idSoundSystemLocal::alEnumerateAllAvailable ) {
 		const char *devs = alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER );
 
 		while (devs && *devs) {
@@ -1887,13 +1887,23 @@ static void InitAudioOptionsMenu()
 
 	audioMenuItemOffset = ImGui::CalcTextSize( "Strength of EFX Reverb Effects (?)" ).x;
 	audioMenuItemOffset += ImGui::GetStyle().ItemSpacing.x;
-
 }
 
 static void DrawAudioOptionsMenu()
 {
 	float itemWidth = ImGui::GetContentRegionAvail().x - audioMenuItemOffset;
 	ImGui::PushItemWidth( itemWidth );
+
+	ALCdevice* alDevice = soundSystemLocal.openalDevice;
+
+	if ( alDevice == nullptr ) {
+		if ( soundSystemLocal.s_noSound.GetBool() ) {
+			ImGui::TextDisabled( "Sound is disabled with s_noSound, so there's nothing to show here!" );
+		} else {
+			ImGui::TextDisabled( "!!! No OpenAL device is opened, so there is no sound !!!" );
+		}
+		return;
+	}
 
 	ImGui::SeparatorText( "Settings that require restarting dhewm3" );
 
@@ -1931,11 +1941,48 @@ static void DrawAudioOptionsMenu()
 	ImGui::SeparatorText( "Settings that take effect immediately" );
 
 	float vol = idSoundSystemLocal::s_volume.GetFloat(); // cvar is called s_volume_dB
+	if ( vol == 0.0f && signbit(vol) != 0 ) {
+		vol = 0.0f; // turn -0.0 into 0.0
+	}
 	if ( ImGui::SliderFloat( "Volume", &vol, -40, 10, "%.1f" ) ) {
 		idSoundSystemLocal::s_volume.SetFloat( vol );
 	}
 	AddTooltip( "s_volume_dB" );
 	AddDescrTooltip( "The game's main volume in dB. 0 is the regular maximum volume" );
+
+	bool scaleDownAndClamp = idSoundSystemLocal::s_scaleDownAndClamp.GetBool();
+	if ( ImGui::Checkbox( "Scale down and clamp all sound volumes", &scaleDownAndClamp ) ) {
+		idSoundSystemLocal::s_scaleDownAndClamp.SetBool( scaleDownAndClamp );
+	}
+	AddCVarOptionTooltips( idSoundSystemLocal::s_scaleDownAndClamp );
+
+	if ( idSoundSystemLocal::alOutputLimiterAvailable ) {
+		int outLimSel = 1 + idMath::ClampInt( -1, 1, idSoundSystemLocal::s_alOutputLimiter.GetInteger() );
+		if ( ImGui::Combo( "OpenAL output limiter", &outLimSel, "Auto (let OpenAL decide)\0Disabled\0Enabled\0" ) ) {
+			idSoundSystemLocal::s_alOutputLimiter.SetInteger( outLimSel - 1 );
+		}
+		AddCVarOptionTooltips( idSoundSystemLocal::s_alOutputLimiter );
+	} else {
+		ImGui::BeginDisabled();
+		int c = 0;
+		ImGui::Combo( "OpenAL output limiter", &c, "Auto (let OpenAL decide)\0" );
+		AddTooltip( "Your OpenAL version doesn't support configuring output-limiter (needs ALC_SOFT_output_limiter extension)" );
+		ImGui::EndDisabled();
+	}
+
+	if ( idSoundSystemLocal::alHRTFavailable ) {
+		int hrtfSel = 1 + idMath::ClampInt( -1, 1, idSoundSystemLocal::s_alHRTF.GetInteger() );
+		if ( ImGui::Combo( "Use HRTF", &hrtfSel, "Auto (let OpenAL decide)\0Disabled\0Enabled\0" ) ) {
+			idSoundSystemLocal::s_alHRTF.SetInteger( hrtfSel - 1 );
+		}
+		AddCVarOptionTooltips( idSoundSystemLocal::s_alHRTF );
+	} else {
+		ImGui::BeginDisabled();
+		int c = 0;
+		ImGui::Combo( "Use HRTF", &c, "Auto (let OpenAL decide)\0" );
+		AddTooltip( "Your OpenAL version doesn't support configuring HRTF (needs ALC_SOFT_HRTF extension)" );
+		ImGui::EndDisabled();
+	}
 
 	if ( idSoundSystemLocal::useEFXReverb ) {
 		float reverbGain = idSoundSystemLocal::s_alReverbGain.GetFloat();
@@ -1947,7 +1994,116 @@ static void DrawAudioOptionsMenu()
 		AddTooltip( "s_alReverbGain" );
 		AddDescrTooltip( "the default value is 0.5" );
 	} else {
-		ImGui::TextDisabled( "  (EFX reverb effects are currently disabled)" );
+		ImGui::BeginDisabled();
+		float f = 0.0f;
+		ImGui::SliderFloat( "Strength of EFX Reverb Effects", &f, 0, 1, "Disabled" );
+		if ( !idSoundSystemLocal::EFXAvailable ) {
+			AddTooltip( "Your OpenAL version doesn't support EFX" );
+		} else {
+			AddTooltip( "EFX reverb effects are currently disabled" );
+		}
+		ImGui::EndDisabled();
+	}
+
+	bool playDefaultSound = idSoundSystemLocal::s_playDefaultSound.GetBool();
+	if ( ImGui::Checkbox( "Play default beep for missing sounds", &playDefaultSound ) ) {
+		idSoundSystemLocal::s_playDefaultSound.SetBool( playDefaultSound );
+	}
+	AddCVarOptionTooltips( idSoundSystemLocal::s_playDefaultSound );
+
+	ImGui::Separator();
+
+	if ( ImGui::TreeNode("OpenAL Info") ) {
+		ImGui::BeginDisabled();
+
+		ImGui::Text( "OpenAL vendor: %s", alGetString(AL_VENDOR) );
+		ImGui::Text( "OpenAL renderer: %s", alGetString(AL_RENDERER) );
+		ImGui::Text( "OpenAL version: %s", alGetString(AL_VERSION) );
+
+		if ( idSoundSystemLocal::alEnumerateAllAvailable ) {
+			ImGui::Text( "Current playback device: %s", alcGetString( alDevice, ALC_ALL_DEVICES_SPECIFIER ) );
+			ImGui::Text( "Default playback device: %s", alcGetString( nullptr, ALC_DEFAULT_ALL_DEVICES_SPECIFIER ) );
+		} else {
+			ImGui::Text( "Current playback device: %s", alcGetString( alDevice, ALC_DEVICE_SPECIFIER ) );
+			ImGui::Text( "Default playback device: %s", alcGetString( nullptr, ALC_DEFAULT_DEVICE_SPECIFIER) );
+		}
+
+		if ( idSoundSystemLocal::alIsDisconnectAvailable ) {
+			ALCint connected;
+			alcGetIntegerv( alDevice, ALC_CONNECTED, 1, &connected );
+			ImGui::Text( "The device is %s", connected ? "Connected" : "! Disconnected !" );
+		}
+
+		ALCint sampleRate = 0;
+		alcGetIntegerv( alDevice, ALC_FREQUENCY, 1, &sampleRate );
+
+		if ( idSoundSystemLocal::alOutputModeAvailable ) {
+			const char* modeName = "Unknown / Unspecified Mode";
+			ALCint mode = 0;
+			alcGetIntegerv(alDevice, ALC_OUTPUT_MODE_SOFT, 1, &mode);
+
+			switch ( mode ) {
+				//case ALC_ANY_SOFT : break; // Unknown is already the default string
+				case ALC_MONO_SOFT         : modeName = "Mono (1 channel)"; break;
+				case ALC_STEREO_SOFT       : modeName = "Stereo (2 channels)"; break;
+				case ALC_STEREO_BASIC_SOFT : modeName = "Basic 2-channel mixing"; break;
+				case ALC_STEREO_UHJ_SOFT   :
+					modeName = "Stereo-compatible 2-channel UHJ surround encoding";
+					break;
+				case ALC_STEREO_HRTF_SOFT  : modeName = "Stereo with HRTF"; break;
+				case ALC_QUAD_SOFT         : modeName = "Quadraphonic (4 channels)"; break;
+				case ALC_SURROUND_5_1_SOFT : modeName = "5.1 Surround"; break;
+				case ALC_SURROUND_6_1_SOFT : modeName = "6.1 Surround"; break;
+				case ALC_SURROUND_7_1_SOFT : modeName = "7.1 Surround"; break;
+			}
+
+			ImGui::Text( "Device's Playback Mode: %s with samplerate %dHz", modeName, sampleRate );
+		} else {
+			ImGui::Text( "Devices's Samplerate: %dHz", sampleRate );
+		}
+
+		if ( idSoundSystemLocal::alOutputLimiterAvailable ) {
+			ALCint limiterState = 0;
+			alcGetIntegerv( alDevice, ALC_OUTPUT_LIMITER_SOFT, 1, &limiterState );
+			ImGui::Text( "Output-Limiter: %s", limiterState ? "Enabled" : "Disabled" );
+		} else {
+			ImGui::TextUnformatted( "(Output-Limiter extension ALC_SOFT_output_limiter not available)" );
+		}
+
+		if ( idSoundSystemLocal::alHRTFavailable ) {
+			ALCint hrtfEnabled = 0;
+			alcGetIntegerv( alDevice, ALC_HRTF_SOFT, 1, &hrtfEnabled );
+			ImGui::Text( "HRTF is: %s", hrtfEnabled ? "Enabled" : "Disabled" );
+
+			ImGui::Indent();
+			ALCint status = 0;
+			alcGetIntegerv( alDevice, ALC_HRTF_STATUS_SOFT, 1, &status );
+			switch ( status ) {
+				case ALC_HRTF_DISABLED_SOFT:
+				case ALC_HRTF_ENABLED_SOFT:
+					break;
+				case ALC_HRTF_DENIED_SOFT:
+					ImGui::TextWrapped( "HRTF is disabled because it's not allowed on the device, or disabled in the config (alsoft.conf/alsoftrc/alsoft.ini - ALC_HRTF_DENIED_SOFT)" );
+					break;
+				case ALC_HRTF_REQUIRED_SOFT:
+					ImGui::TextWrapped( "HRTF is enabled because it's required, either by the hardware or by the config (alsoft.conf/alsoftrc/alsoft.ini - ALC_HRTF_REQUIRED_SOFT)" );
+					break;
+				case ALC_HRTF_HEADPHONES_DETECTED_SOFT:
+					ImGui::TextWrapped( "HRTF is enabled because the device was detected as headphones (ALC_HRTF_HEADPHONES_DETECTED_SOFT)" );
+					break;
+				case ALC_HRTF_UNSUPPORTED_FORMAT_SOFT:
+					ImGui::TextWrapped( "HRTF is disabled because it's unsupported with the current format, e.g. not stereo (ALC_HRTF_UNSUPPORTED_FORMAT_SOFT)" );
+					break;
+				default:
+					ImGui::Text( "Not sure why HRTF is %s, unknown status value %d!", hrtfEnabled ? "enabled" : "disabled ", status );
+			}
+			ImGui::Unindent();
+		}
+
+		ImGui::EndDisabled();
+		ImGui::TreePop();
+	} else {
+		AddTooltip( "Click to show information about the current OpenAL device" );
 	}
 }
 
