@@ -46,6 +46,38 @@ If you have questions concerning this license or the applicable additional terms
   typedef ALCboolean (ALC_APIENTRY*LPALCRESETDEVICESOFT)(ALCdevice *device, const ALCint *attribs);
 #endif
 
+// DG: ALC_SOFT_output_mode is pretty new, provide compatibility..
+#ifndef ALC_SOFT_output_mode
+  #define ALC_SOFT_output_mode
+  #define ALC_OUTPUT_MODE_SOFT                     0x19AC
+  #define ALC_ANY_SOFT                             0x19AD
+
+  #define ALC_STEREO_BASIC_SOFT                    0x19AE
+  #define ALC_STEREO_UHJ_SOFT                      0x19AF
+  #define ALC_STEREO_HRTF_SOFT                     0x19B2
+
+  #define ALC_SURROUND_5_1_SOFT                    0x1504
+  #define ALC_SURROUND_6_1_SOFT                    0x1505
+  #define ALC_SURROUND_7_1_SOFT                    0x1506
+#endif
+// the following formats are defined in https://openal-soft.org/openal-extensions/SOFT_output_mode.txt
+// but commented out in OpenAL Softs current AL/alext.h
+#ifndef ALC_MONO_SOFT
+  #define ALC_MONO_SOFT                            0x1500
+#endif
+#ifndef ALC_STEREO_SOFT
+  #define ALC_STEREO_SOFT                          0x1501
+#endif
+#ifndef ALC_QUAD_SOFT
+  #define ALC_QUAD_SOFT                            0x1503
+#endif
+
+// DG: in case ALC_SOFT_output_limiter is not available in some headers..
+#ifndef ALC_SOFT_output_limiter
+  #define ALC_SOFT_output_limiter
+  #define ALC_OUTPUT_LIMITER_SOFT                  0x199A
+#endif
+
 #include "framework/UsercmdGen.h"
 #include "sound/efxlib.h"
 #include "sound/sound.h"
@@ -709,6 +741,9 @@ public:
 	// otherwise it will try to recover the device and return false while it's gone
 	// (display audio sound devices sometimes disappear for a few seconds when switching resolution)
 	bool					CheckDeviceAndRecoverIfNeeded();
+	// resets the OpenAL device, applying the settings of s_alHRTF and s_alOutputLimiter
+	// returns false if that failed, or the necessary OpenAL extension isn't available
+	bool					ResetALDevice();
 
 	idSoundCache *			soundCache;
 
@@ -767,6 +802,12 @@ public:
 							// mark available during initialization, or through an explicit test
 	static int				EFXAvailable;
 
+	static bool				alHRTFavailable; // needs ALC_SOFT_HRTF extension
+	static bool				alOutputLimiterAvailable; // needs ALC_SOFT_output_limiter extension (+ HRTF extension)
+	static bool				alEnumerateAllAvailable;  // needs ALC_ENUMERATE_ALL_EXT
+	static bool				alIsDisconnectAvailable;  // needs ALC_EXT_disconnect
+	static bool				alOutputModeAvailable;    // needs ALC_SOFT_output_mode
+
 	// DG: for CheckDeviceAndRecoverIfNeeded()
 	LPALCRESETDEVICESOFT	alcResetDeviceSOFT; // needs ALC_SOFT_HRTF extension
 	int						resetRetryCount;
@@ -802,6 +843,10 @@ public:
 	static idCVar			s_decompressionLimit;
 
 	static idCVar			s_alReverbGain;
+
+	static idCVar			s_scaleDownAndClamp;
+	static idCVar			s_alOutputLimiter;
+	static idCVar			s_alHRTF;
 
 	static idCVar			s_slowAttenuate;
 
