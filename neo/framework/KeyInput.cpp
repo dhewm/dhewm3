@@ -423,7 +423,7 @@ const char *idKeyInput::KeyNumToString( int keynum, bool localized ) {
 	// check for a key string
 	for ( kn = keynames; kn->name; kn++ ) {
 		if ( keynum == kn->keynum ) {
-			if ( !localized || kn->strId[0] != '#' ) {
+			if ( !localized || (kn->strId && kn->strId[0] != '#') ) {
 				return kn->name;
 			} else {
 #if MACOS_X
