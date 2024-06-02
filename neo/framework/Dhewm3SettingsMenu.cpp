@@ -4,7 +4,6 @@
 
 #include "Common.h"
 
-
 #include "idlib/LangDict.h"
 
 #include "KeyInput.h"
@@ -75,7 +74,7 @@ static void AddDescrTooltip( const char* description )
 
 struct BindingEntry;
 static BindingEntry* FindBindingEntryForKey( int keyNum );
-static int numBindingColumns = 4; // TODO: in Doom3, save in CVar (in_maxBindingsPerCommand or sth)
+static idCVar imgui_numBindingColumns( "imgui_numBindingColumns", "3", CVAR_ARCHIVE|CVAR_SYSTEM|CVAR_INTEGER, "Number of columns with bindings in Dhewm3SettingsMenu's Bindings tab", 1, 10 );
 
 static int rebindKeyNum = -1; // only used for HandleRebindPopup()
 static BindingEntry* rebindOtherEntry = nullptr; // ditto
@@ -563,6 +562,7 @@ struct BindingEntry {
 				AddDescrTooltip( description );
 			}
 
+			const int numBindingColumns = imgui_numBindingColumns.GetInteger();
 			int numBindings = bindings.Num();
 			for ( int bnd=0; bnd < numBindingColumns ; ++bnd ) {
 				ImGui::TableSetColumnIndex( bnd+1 );
@@ -705,7 +705,7 @@ struct BindingEntry {
 					this->selectedBinding = 0;
 				} else {
 					Unbind( bindings[selectedBinding].keyNum );
-					if ( selectedBinding == numBindingColumns - 1 ) {
+					if ( selectedBinding == imgui_numBindingColumns.GetInteger() - 1 ) {
 						// when removing the binding of the last column visible
 						// in the big binding table, remove that entry so
 						// the next one not visible there can take its place
@@ -737,6 +737,8 @@ struct BindingEntry {
 	{
 		assert( selectedBinding != -1 );
 		Bind( keyNum );
+
+		const int numBindingColumns = imgui_numBindingColumns.GetInteger();
 
 		int numBindings = bindings.Num();
 		if ( selectedBinding == BIND_ALL || selectedBinding == BIND_APPEND ) {
@@ -1251,6 +1253,8 @@ static void DrawBindingsMenu()
 
 	ImGui::Spacing();
 
+	int numBindingColumns = imgui_numBindingColumns.GetInteger();
+
 	{
 		// the InputInt will look kinda like this:
 		// [10] [-] [+] Number of Binding columns...
@@ -1262,7 +1266,9 @@ static void DrawBindingsMenu()
 		w += 2.0f * (ImGui::GetFrameHeight() + st.FramePadding.x + st.ItemInnerSpacing.x);
 		ImGui::SetNextItemWidth(w);
 
-		ImGui::InputInt( "Number of Binding columns to show", &numBindingColumns );
+		if ( ImGui::InputInt( "Number of Binding columns to show", &numBindingColumns ) ) {
+			imgui_numBindingColumns.SetInteger( numBindingColumns );
+		}
 
 		numBindingColumns = idMath::ClampInt( 1, 10, numBindingColumns );
 
@@ -2111,6 +2117,7 @@ static void DrawAudioOptionsMenu()
 }
 
 static CVarOption gameOptions[] = {
+	CVarOption( "Movement and Weapons" ),
 	CVarOption( "in_alwaysRun", "Always Run (Multiplayer-only by default)", OT_BOOL ),
 	CVarOption( "in_allowAlwaysRunInSP", "Allow Always Run and Toggle Run in Singleplayer\n(Stamina is still limited!)", OT_BOOL ),
 	CVarOption( "in_toggleRun", "Toggle Run (Multiplayer-only by default)", OT_BOOL ),
@@ -2118,13 +2125,15 @@ static CVarOption gameOptions[] = {
 	CVarOption( "in_toggleZoom", "Toggle Zoom", OT_BOOL ),
 	CVarOption( "ui_autoReload", "Auto Weapon Reload", OT_BOOL ),
 	CVarOption( "ui_autoSwitch", "Auto Weapon Switch", OT_BOOL ),
+	CVarOption( "Visual" ),
 	CVarOption( "g_showHud", "Show HUD", OT_BOOL ),
 	CVarOption( "com_showFPS", "Show Framerate (FPS)", OT_BOOL ),
 	CVarOption( "ui_showGun", "Show Gun Model", OT_BOOL ),
 	CVarOption( "g_decals", "Show Decals", OT_BOOL ),
 	CVarOption( "g_bloodEffects", "Show Blood and Gibs", OT_BOOL ),
 	CVarOption( "g_doubleVision", "Show Double Vision when Taking Damage", OT_BOOL ),
-	CVarOption( "g_hitEffect", "Mess Up Player Camera when Taking Damage", OT_BOOL )
+	CVarOption( "g_hitEffect", "Mess Up Player Camera when Taking Damage", OT_BOOL ),
+	CVarOption( "con_noPrint", "Print console output only to console, don't show when it's closed", OT_BOOL ),
 };
 
 static char playerNameBuf[128] = {};
