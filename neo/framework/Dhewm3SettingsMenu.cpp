@@ -1,9 +1,9 @@
+#ifndef IMGUI_DISABLE
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include "Common.h"
 
-#ifndef IMGUI_DISABLE
 
 #include "idlib/LangDict.h"
 
@@ -2386,6 +2386,11 @@ void Com_Dhewm3Settings_f( const idCmdArgs &args )
 
 #else // IMGUI_DISABLE - just a stub function
 
-void Com_Dhewm3Settings_f( const idCmdArgs &args ) {}
+#include "Common.h"
+
+void Com_Dhewm3Settings_f( const idCmdArgs &args )
+{
+	common->Warning( "Dear ImGui is disabled in this build, so the dhewm3 settings menu is not available!" );
+}
 
 #endif
