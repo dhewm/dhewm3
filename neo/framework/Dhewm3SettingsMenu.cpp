@@ -1540,13 +1540,17 @@ static void DrawOptions(CVarOption options[], size_t numOptions)
 
 static CVarOption controlOptions[] = {
 
-	// TODO: always run?
-
 	CVarOption("Mouse Settings"),
 	CVarOption("sensitivity", "Sensitivity", OT_FLOAT, 1.0f, 30.0f),
 	CVarOption("m_smooth", "Smoothing Samples", OT_INT, 1, 8),
 	CVarOption("in_nograb", "Don't grab Mouse Cursor (for debugging/testing)", OT_BOOL),
-	// TODO: add in_invertLook or m_invertLook ?
+	CVarOption("m_invertLook", [](idCVar& cvar) {
+			int val = cvar.GetInteger();
+			if ( ImGui::Combo( "Invert Mouse Look", &val, "Don't Invert Mouse\0Invert Up/Down\0Invert Left/Right\0Invert Both Directions\0" ) ) {
+				cvar.SetInteger( val );
+			}
+			AddCVarOptionTooltips( cvar, "If you played too many flight sims.." );
+		} ),
 
 	CVarOption("Keyboard Settings"),
 	CVarOption("in_grabKeyboard", "Grab Keyboard", OT_BOOL),
@@ -1855,7 +1859,6 @@ static void DrawVideoOptionsMenu()
 	DrawOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
 }
 
-
 static idStrList alDevices;
 static int selAlDevice = 0;
 static float audioMenuItemOffset = 0.0f;
@@ -2046,7 +2049,7 @@ static void DrawAudioOptionsMenu()
 				//case ALC_ANY_SOFT : break; // Unknown is already the default string
 				case ALC_MONO_SOFT         : modeName = "Mono (1 channel)"; break;
 				case ALC_STEREO_SOFT       : modeName = "Stereo (2 channels)"; break;
-				case ALC_STEREO_BASIC_SOFT : modeName = "Basic 2-channel mixing"; break;
+				case ALC_STEREO_BASIC_SOFT : modeName = "Basic Stereo"; break;
 				case ALC_STEREO_UHJ_SOFT   :
 					modeName = "Stereo-compatible 2-channel UHJ surround encoding";
 					break;
@@ -2105,6 +2108,48 @@ static void DrawAudioOptionsMenu()
 	} else {
 		AddTooltip( "Click to show information about the current OpenAL device" );
 	}
+}
+
+static CVarOption gameOptions[] = {
+	CVarOption( "in_alwaysRun", "Always Run (Multiplayer-only by default)", OT_BOOL ),
+	CVarOption( "in_allowAlwaysRunInSP", "Allow Always Run and Toggle Run in Singleplayer\n(Stamina is still limited!)", OT_BOOL ),
+	CVarOption( "in_toggleRun", "Toggle Run (Multiplayer-only by default)", OT_BOOL ),
+	CVarOption( "in_toggleCrouch", "Toggle Crouch", OT_BOOL ),
+	CVarOption( "in_toggleZoom", "Toggle Zoom", OT_BOOL ),
+	CVarOption( "ui_autoReload", "Auto Weapon Reload", OT_BOOL ),
+	CVarOption( "ui_autoSwitch", "Auto Weapon Switch", OT_BOOL ),
+	CVarOption( "g_showHud", "Show HUD", OT_BOOL ),
+	CVarOption( "com_showFPS", "Show Framerate (FPS)", OT_BOOL ),
+	CVarOption( "ui_showGun", "Show Gun Model", OT_BOOL ),
+	CVarOption( "g_decals", "Show Decals", OT_BOOL ),
+	CVarOption( "g_bloodEffects", "Show Blood and Gibs", OT_BOOL ),
+	CVarOption( "g_doubleVision", "Show Double Vision when Taking Damage", OT_BOOL ),
+	CVarOption( "g_hitEffect", "Mess Up Player Camera when Taking Damage", OT_BOOL )
+};
+
+static char playerNameBuf[41] = {}; // the original menu allows up to 40 playername chars
+static idCVar* ui_nameVar = nullptr;
+
+void InitGameOptionsMenu()
+{
+	ui_nameVar = cvarSystem->Find( "ui_name" );
+	// FIXME: translate between ISO-8859-1 and UTF-8! (also needs bigger playerNameBuf!)
+	idStr::Copynz( playerNameBuf, ui_nameVar->GetString(), sizeof(playerNameBuf) );
+
+	InitOptions( gameOptions, IM_ARRAYSIZE(gameOptions) );
+}
+
+void DrawGameOptionsMenu()
+{
+	ImGui::Spacing();
+
+	// FIXME: translate between ISO-8859-1 and UTF-8! (also needs bigger playerNameBuf!)
+	if ( ImGui::InputText( "Player Name", playerNameBuf, sizeof(playerNameBuf) ) ) {
+		ui_nameVar->SetString( playerNameBuf );
+	}
+	AddTooltip( "ui_name" );
+
+	DrawOptions( gameOptions, IM_ARRAYSIZE(gameOptions) );
 }
 
 
@@ -2217,7 +2262,7 @@ void Com_DrawDhewm3SettingsMenu()
 		if (ImGui::BeginTabItem("Game Options"))
 		{
 			BeginTabChild( "gamechild" );
-			ImGui::Text("This is the Game Options tab!\nblah blah blah blah blah");
+			DrawGameOptionsMenu();
 			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
@@ -2251,6 +2296,7 @@ static void InitDhewm3SettingsMenu()
 
 	InitVideoOptionsMenu();
 	InitAudioOptionsMenu();
+	InitGameOptionsMenu();
 }
 
 // !! Don't call this function directly, always use                          !!
