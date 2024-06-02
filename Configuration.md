@@ -14,6 +14,33 @@ and a short description of what it does.
 Starting dhewm3 with the commandline argument `-h` (for example `dhewm3.exe -h`) will show some
 useful commandline arguments, for example how to tell dhewm3 where the game data can be found on your system.
 
+## dhewm3 Settings Menu
+
+When built with [Dear ImGui](https://github.com/ocornut/imgui) integration (which is the default
+when using SDL2), dhewm3 has an advanced settings menu with many settings that the main menu doesn't
+offer, including a *Control BIndings* menu that supports as many keys per command as you want and is
+fully navigable with keyboard or gamepad (or mouse, of course).
+
+Unless you have already bound your `F10` key to something else, it will open this menu.  
+If you `F10` key is already in use, you can either unbind it (in the old Options -> Controls menu),
+or open the dhewm3 settings menu by entering `dhewm3Settings` in the console - within that menu,
+you can also bind opening it to any other key.
+
+*By the way:* An especially nice feature of the dhewm3 Settings Menu is that you can **open it while
+your're in the game**. The game is be paused (if you're playing Single Player) but is still on the
+screen, so you **when you modify *Video Options* like *brightness* you can see the effect in realtime**!
+Is this cool or what? B-)
+
+Even though *using ImGui menus with a **gamepad*** is quite intuitive (basically use the DPad to navigate
+and `A` to select and `B` to cancel; in the *Control Bindings* menu read the *Usage Help* section
+for for things specific to that menu), the sheets on https://www.dearimgui.com/controls_sheets/
+might be useful for advanced tricks (note however that not all features are available on PC, it seems like
+there's no on-screen keyboard and I'm not sure whether controlling the mouse cursor with the PS4/5
+touchpad works).
+
+More information for *using ImGui menus with **keyboard and/or mouse*** can be found
+[here](https://github.com/ocornut/imgui/blob/v1.90.7/imgui.cpp#L126)
+
 ## The Console
 
 Like most id Software games from Quake 1 on, Doom3 has a console that allows entering commands 
@@ -145,13 +172,21 @@ This can be configured with the following CVars:
 
 - `r_screenshotFormat` What format screenshots should be in:
   `0` = TGA (default), `1` = BMP, `2` = PNG, `3` = JPG
-- `r_screenshotJpgQuality` Quality when using JPG screenshots (`0` - `100`)
-- `r_screenshotPngCompression` Compression level when using PNG screenshots (`0` - `9`)
+- `r_screenshotJpgQuality` Quality when using JPG screenshots (`1` - `100`). Lower value means smaller
+   image file but worse quality (default is `75`)
+- `r_screenshotPngCompression` Compression level when using PNG screenshots (`0` - `9`). Higher levels
+  generate smaller files, but take noticeably longer; `3` (the default) seems to be a good compromise.
 
 ## Other CVars added in dhewm3
 
 - `g_hitEffect` if set to `1` (the default), mess up player camera when taking damage.
    Set to `0` if you don't like that effect.
+
+- `m_invertLook` allows inverting mouse look: `0`: don't invert (this is the default),
+  `1`: invert up/down (flight controls), `2`: invert left/right, `3`: invert both directions
+
+- `in_allowAlwaysRunInSP` Allow always run (`in_alwaysRun`) and toggle run (`in_toggleRun`) in
+  Single Player as well - keep in mind you may run out of stamina!
 
 - `in_nograb` if set to `1`, the mouse isn't grabbed when ingame. Not overly useful for normal playing
   (unless maybe you play with a gamepad), but very useful for debugging. Default is `0`.
@@ -176,3 +211,17 @@ This can be configured with the following CVars:
 - `r_scaleMenusTo43` Render full-screen menus in 4:3 by adding black bars on the left/right if necessary (default `1`)
 
 - `s_alReverbGain` reduce strength of OpenAL (EAX-like) EFX reverb effects, `0.0` - `1.0` (default `0.5`)
+- `s_alHRTF` Enable [HRTF](https://en.wikipedia.org/w/index.php?title=Head-related_transfer_function)
+   for better surround sound with stereo **headphones**. `0`: Disable, `1`: Enable, `-1`: Let OpenAL decide (default).  
+   *Note* that OpenAL may automatically enable HRTF when it detects headphones, and it can happen that
+   it detects regular stereo speakers as headphones (when they're plugged into a jack that's somehow
+   labeled as headphone jack) - in that case you'll want to explicitly disable it.
+   The *Audio Options* tab of the [dhewm3 Settings Menu](#dhewm3-settings-menu) shows OpenAL Info,
+   including the current HRTF state (if supported by your OpenAL version).
+- `s_alOutputLimiter` Configure OpenAL's output-limiter which temporarily reduces the overall volume
+  when too many too loud sounds play at once, to avoid issues like clipping. `0`: Disable, `1`: Enable, `-1`: Let OpenAL decide (default)
+- `s_scaleDownAndClamp` Clamp and reduce volume of all sounds to prevent clipping or temporary downscaling by OpenAL's output limiter (default `1`)
+
+- `imgui_scale` Factor to scale ImGui menus by (especially relevant for HighDPI displays).
+  Should be a positive factor like `1.5` or `2`; or `-1` (the default) to let dhewm3 automatically
+  detect an appropriate factor.
