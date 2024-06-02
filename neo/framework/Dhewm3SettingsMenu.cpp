@@ -2127,25 +2127,61 @@ static CVarOption gameOptions[] = {
 	CVarOption( "g_hitEffect", "Mess Up Player Camera when Taking Damage", OT_BOOL )
 };
 
-static char playerNameBuf[41] = {}; // the original menu allows up to 40 playername chars
+static char playerNameBuf[128] = {};
 static idCVar* ui_nameVar = nullptr;
 
 void InitGameOptionsMenu()
 {
 	ui_nameVar = cvarSystem->Find( "ui_name" );
-	// FIXME: translate between ISO-8859-1 and UTF-8! (also needs bigger playerNameBuf!)
-	idStr::Copynz( playerNameBuf, ui_nameVar->GetString(), sizeof(playerNameBuf) );
+
+	// Note: ImGui uses UTF-8 for strings, Doom3 uses ISO8859-1, so we need to translate
+	if ( D3_ISO8859_1toUTF8( ui_nameVar->GetString(), playerNameBuf, sizeof(playerNameBuf) ) == nullptr ) {
+		// returning NULL means playerNameBuf wasn't big enough - that shouldn't happen,
+		// at least the player name input in the original menu only allowed 40 chars
+		playerNameBuf[sizeof(playerNameBuf)-1] = '\0';
+	}
 
 	InitOptions( gameOptions, IM_ARRAYSIZE(gameOptions) );
+}
+
+static int PlayerNameInputTextCallback(ImGuiInputTextCallbackData* data)
+{
+	if ( data->EventChar > 0xFF ) { // some unicode char that ISO8859-1 can't represent
+		data->EventChar = 0;
+		return 1;
+	}
+
+	if ( data->Buf ) {
+		// we want at most 40 codepoints
+		int newLen = D3_UTF8CutOffAfterNCodepoints( data->Buf, 40 );
+		if ( newLen != data->BufTextLen ) {
+			data->BufTextLen = newLen;
+			data->BufDirty = true;
+		}
+	}
+
+	return 0;
 }
 
 void DrawGameOptionsMenu()
 {
 	ImGui::Spacing();
 
-	// FIXME: translate between ISO-8859-1 and UTF-8! (also needs bigger playerNameBuf!)
-	if ( ImGui::InputText( "Player Name", playerNameBuf, sizeof(playerNameBuf) ) ) {
-		ui_nameVar->SetString( playerNameBuf );
+	ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_CallbackCharFilter;
+	if ( ImGui::InputText( "Player Name", playerNameBuf, sizeof(playerNameBuf), flags, PlayerNameInputTextCallback )
+	     && playerNameBuf[0] != '\0' )
+	{
+		char playerNameIso[128] = {};
+		if ( D3_UTF8toISO8859_1( playerNameBuf, playerNameIso, sizeof(playerNameIso), '!' ) != NULL ) {
+			playerNameIso[40] = '\0'; // limit to 40 chars, like the original menu
+			ui_nameVar->SetString( playerNameIso );
+			// update the playerNameBuf to reflect the name as it is now: limited to 40 chars
+			// and possibly containing '?' from non-translatable unicode chars
+			D3_ISO8859_1toUTF8( ui_nameVar->GetString(), playerNameBuf, sizeof(playerNameBuf) );
+		} else {
+			D3::ImGuiHooks::ShowWarningOverlay( "Player Name way too long (max 40 chars) or contains invalid UTF-8 encoding!" );
+			playerNameBuf[0] = '\0';
+		}
 	}
 	AddTooltip( "ui_name" );
 
