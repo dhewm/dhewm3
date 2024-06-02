@@ -143,11 +143,6 @@ static float joyAxis[MAX_JOYSTICK_AXIS];
 
 static idList<sysEvent_t> event_overflow;
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-// for utf8ToISO8859_1() - used for non-ascii text input and Sys_GetLocalizedScancodeName()
-static SDL_iconv_t iconvDesc = (SDL_iconv_t)-1;
-#endif
-
 struct scancodename_t {
 	int sdlScancode;
 	const char* name;
@@ -242,39 +237,6 @@ static bool isAscii( const char* str_ ) {
 		++str;
 	}
 	return true;
-}
-
-// convert inbuf (which is expected to be in UTF-8) to outbuf (in ISO-8859-1)
-static bool utf8ToISO8859_1(const char* inbuf, char* outbuf, size_t outsize) {
-	if ( iconvDesc == (SDL_iconv_t)-1 ) {
-		return false;
-	}
-
-	size_t outbytesleft = outsize;
-	size_t inbytesleft = strlen( inbuf ) + 1; // + terminating \0
-	size_t ret = SDL_iconv( iconvDesc, &inbuf, &inbytesleft, &outbuf, &outbytesleft );
-
-	while(inbytesleft > 0) {
-		switch ( ret ) {
-			case SDL_ICONV_E2BIG:
-				outbuf[outbytesleft-1] = '\0'; // whatever, just cut it off..
-				common->DPrintf( "Cutting off UTF-8 to ISO-8859-1 conversion to '%s' because destination is too small for '%s'\n", outbuf, inbuf );
-				SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
-				return true;
-			case SDL_ICONV_EILSEQ:
-				// try skipping invalid input data
-				++inbuf;
-				--inbytesleft;
-				break;
-			case SDL_ICONV_EINVAL:
-			case SDL_ICONV_ERROR:
-				// we can't recover from this
-				SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
-				return false;
-		}
-	}
-	SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
-	return outbytesleft < outsize; // return false if no char was written
 }
 #endif // SDL2
 
@@ -471,7 +433,8 @@ static const char* getLocalizedScancodeName( int key, bool useUtf8 )
 				}
 				static char isoName[32];
 				// try to convert name to ISO8859-1 (Doom3's supported "High ASCII")
-				if ( utf8ToISO8859_1( ret, isoName, sizeof(isoName) ) && isoName[0] != '\0' ) {
+				// TODO: pass '?' as invalidChar?
+				if ( D3_UTF8toISO8859_1( ret, isoName, sizeof(isoName) ) && isoName[0] != '\0' ) {
 					return isoName;
 				}
 			}
@@ -876,13 +839,6 @@ void Sys_InitInput() {
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-
-#else // SDL2 - for utf8ToISO8859_1() (non-ascii text input and key naming)
-	assert(iconvDesc == (SDL_iconv_t)-1);
-	iconvDesc = SDL_iconv_open( "ISO-8859-1", "UTF-8" );
-	if( iconvDesc == (SDL_iconv_t)-1 ) {
-		common->Warning( "Sys_SetInput(): iconv_open( \"ISO-8859-1\", \"UTF-8\" ) failed! Can't translate non-ascii input!\n" );
-	}
 #endif
 
 	in_kbd.SetModified();
@@ -932,10 +888,6 @@ void Sys_ShutdownInput() {
 	mouse_polls.Clear();
 	joystick_polls.Clear();
 	event_overflow.Clear();
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	SDL_iconv_close( iconvDesc ); // used by utf8ToISO8859_1()
-	iconvDesc = ( SDL_iconv_t ) -1; 
-#endif
 }
 
 /*
@@ -1326,7 +1278,7 @@ sysEvent_t Sys_GetEvent() {
 						s_pos = 1; // pos 0 is returned
 					}
 					return res;
-				} else if( utf8ToISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
+				} else if( D3_UTF8toISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
 					res.evValue = (unsigned char)s[0];
 					if ( s[1] == '\0' ) {
 						s_pos = 0;

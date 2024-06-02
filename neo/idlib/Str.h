@@ -1082,4 +1082,25 @@ int D3_snprintfC99(char *dst, size_t size, const char *format, ...) id_attribute
 // unlike idStr::vsnPrintf() which returns -1 in that case
 int D3_vsnprintfC99(char *dst, size_t size, const char *format, va_list ap);
 
+// convert UTF-8 to ISU8859-1 (the "High ASCII" 8-bit encoding Doom3 uses)
+// invalidChar is inserted into the output buffer for unicode characters that can't be
+// represented by ISO8859-1; if it's 0, those will just be skipped
+char * D3_UTF8toISO8859_1( const char *utf8str, char *isobuf, int n, char invalidChar=0 );
+
+// convert ISO8859-1 (the "High ASCII" 8-bit encoding Doom3 uses) to UTF-8
+// returns NULL on error (need more than utf8bufLen chars in utf8buf)
+char * D3_ISO8859_1toUTF8( const char* isoStr, char *utf8buf, int utf8bufLen );
+
+// returns number of Unicode codepoints (UTF32 char) in given UTF-8 string.
+// if n >= 0, it only looks at the first n bytes of str (but still stops at the first \0)
+// that's not necessarily the number of printed characters (as unicode allows graphemes that
+// consist of multiple codepoints), but for our purposes (limiting to Latin1 subset) it is..
+size_t D3_UTF8CountCodepoints( const char *str, size_t n = -1 );
+
+// cuts off str (by writing \0 char) after n Unicode codepoints
+// returns number of bytes that remain in string => returns strlen(str) (after cutting off)
+// if str contains <= n codepoints, it's not modified and the number of bytes in it
+// is still returned (excluding terminating \0)
+size_t D3_UTF8CutOffAfterNCodepoints( char *str, size_t n );
+
 #endif /* !__STR_H__ */

@@ -1880,3 +1880,171 @@ int D3_snprintfC99(char *dst, size_t size, const char *format, ...)
 	va_end( argptr );
 	return ret;
 }
+
+
+// convert UTF-8 to ISU8859-1 (the "High ASCII" 8-bit encoding Doom3 uses)
+// invalidChar is inserted into the output buffer for unicode characters that can't be
+// represented by ISO8859-1; if it's 0, those will just be skipped
+// returns NULL on error (need more than n chars in isobuf or invalid encoding in utf8str)
+// based on stb_from_utf8 from https://github.com/nothings/stb/blob/master/deprecated/stb.h#L1010
+char * D3_UTF8toISO8859_1( const char *utf8str, char *isobuf, int isobufLen, char invalidChar )
+{
+	const unsigned char *str = (const unsigned char *) utf8str;
+	unsigned char* buffer = (unsigned char *)isobuf;
+	unsigned c;
+	int i=0;
+	int n = isobufLen - 1;
+	while (*str) {
+		if (i >= n)
+			return NULL;
+		if (!(*str & 0x80)) // ASCII char => copy directly
+			buffer[i++] = *str++;
+		else if ((*str & 0xe0) == 0xc0) {
+			// Unicode character between 0x0080 and 0x07FF
+			// => might be representable by ISO8859-1
+			if (*str < 0xc2) return NULL;
+			c = (*str++ & 0x1f) << 6;
+			if ((*str & 0xc0) != 0x80) return NULL;
+			c += (*str++ & 0x3f);
+			if ( c < 0xFF )
+				buffer[i++] = c;
+			else if ( invalidChar != 0 )
+				buffer[i++] = invalidChar;
+		} else if ((*str & 0xf0) == 0xe0) {
+			// Unicode character between 0x0800 and 0xFFF => way out of range for ISO8859-1
+			// so just validate and skip the input bytes
+			if (*str == 0xe0 && (str[1] < 0xa0 || str[1] > 0xbf)) return NULL;
+			if (*str == 0xed && str[1] > 0x9f) return NULL; // str[1] < 0x80 is checked below
+			//c = (*str++ & 0x0f) << 12;
+			++str;
+			if ((*str & 0xc0) != 0x80) return NULL;
+			//c += (*str++ & 0x3f) << 6;
+			++str;
+			if ((*str & 0xc0) != 0x80) return NULL;
+			//buffer[i++] = c + (*str++ & 0x3f);
+			++str;
+			if ( invalidChar != 0 )
+				buffer[i++] = invalidChar;
+		} else if ((*str & 0xf8) == 0xf0) {
+			// Unicode character between 0x010000 and 0x10FFFF => even more out of range
+			// again, validate and skip
+			if (*str > 0xf4) return NULL;
+			if (*str == 0xf0 && (str[1] < 0x90 || str[1] > 0xbf)) return NULL;
+			if (*str == 0xf4 && str[1] > 0x8f) return NULL; // str[1] < 0x80 is checked below
+			c = (*str++ & 0x07) << 18;
+			if ((*str & 0xc0) != 0x80) return NULL;
+			c += (*str++ & 0x3f) << 12;
+			if ((*str & 0xc0) != 0x80) return NULL;
+			c += (*str++ & 0x3f) << 6;
+			if ((*str & 0xc0) != 0x80) return NULL;
+			c += (*str++ & 0x3f);
+			// utf-8 encodings of values used in surrogate pairs are invalid
+			if ((c & 0xFFFFF800) == 0xD800) return NULL;
+			if ( invalidChar != 0 )
+				buffer[i++] = invalidChar;
+		} else
+			return NULL;
+	}
+	buffer[i] = '\0';
+	return isobuf;
+}
+
+// convert ISO8859-1 (the "High ASCII" 8-bit encoding Doom3 uses) to UTF-8
+// returns NULL on error (need more than utf8bufLen chars in utf8buf)
+// based on stb_to_utf8 from https://github.com/nothings/stb/blob/master/deprecated/stb.h#L1060
+char * D3_ISO8859_1toUTF8( const char* isoStr, char *utf8buf, int utf8bufLen )
+{
+	const unsigned char *str = (const unsigned char *)isoStr;
+	unsigned char *buffer = (unsigned char *)utf8buf;
+	int i=0;
+	int n = utf8bufLen - 1;
+	while (*str) {
+		if (i >= n)
+			return NULL;
+		if (*str < 0x80) {
+			buffer[i++] = *str++;
+		} else {
+			buffer[i++] = 0xc0 + (*str >> 6);
+			buffer[i++] = 0x80 + (*str & 0x3f);
+			++str;
+		}
+	}
+	buffer[i] = '\0';
+	return utf8buf;
+}
+
+// returns number of Unicode codepoints (UTF32 char) in given UTF-8 string.
+// if n >= 0, it only looks at the first n bytes of str (but still stops at the first \0)
+// that's not necessarily the number of printed characters (as unicode allows graphemes that
+// consist of multiple codepoints), but for our purposes (limiting to Latin1 subset) it is..
+// based on utf8nlen from https://github.com/sheredom/utf8.h/blob/master/utf8.h
+size_t D3_UTF8CountCodepoints( const char *str, size_t n )
+{
+	const char *t = str;
+	size_t length = 0;
+	if ( n == (size_t)-1 ) {
+		n = strlen( str );
+	}
+
+	while ((size_t)(str - t) < n && '\0' != *str) {
+		if (0xf0 == (0xf8 & *str)) {
+			/* 4-byte utf8 code point (began with 0b11110xxx) */
+			str += 4;
+		} else if (0xe0 == (0xf0 & *str)) {
+			/* 3-byte utf8 code point (began with 0b1110xxxx) */
+			str += 3;
+		} else if (0xc0 == (0xe0 & *str)) {
+			/* 2-byte utf8 code point (began with 0b110xxxxx) */
+			str += 2;
+		} else { /* if (0x00 == (0x80 & *s)) { */
+			/* 1-byte ascii (began with 0b0xxxxxxx) */
+			str += 1;
+		}
+
+		/* no matter the bytes we marched s forward by, it was
+		 * only 1 utf8 codepoint */
+		length++;
+	}
+
+	if ((size_t)(str - t) > n) {
+		length--;
+	}
+	return length;
+}
+
+// cuts off str (by writing \0 char) after n Unicode codepoints
+// returns number of bytes that remain in string => returns strlen(str) (after cutting off)
+// if str contains <= n codepoints, it's not modified and the number of bytes in it
+// is still returned (excluding terminating \0)
+// based on utf8nlen from https://github.com/sheredom/utf8.h/blob/master/utf8.h
+size_t D3_UTF8CutOffAfterNCodepoints( char *str, size_t n )
+{
+	const char *t = str;
+	size_t length = 0;
+
+	while ('\0' != *str) {
+		if (0xf0 == (0xf8 & *str)) {
+			/* 4-byte utf8 code point (began with 0b11110xxx) */
+			str += 4;
+		} else if (0xe0 == (0xf0 & *str)) {
+			/* 3-byte utf8 code point (began with 0b1110xxxx) */
+			str += 3;
+		} else if (0xc0 == (0xe0 & *str)) {
+			/* 2-byte utf8 code point (began with 0b110xxxxx) */
+			str += 2;
+		} else { /* if (0x00 == (0x80 & *s)) { */
+			/* 1-byte ascii (began with 0b0xxxxxxx) */
+			str += 1;
+		}
+
+		/* no matter the bytes we marched s forward by, it was
+		 * only 1 utf8 codepoint */
+		length++;
+		/* if we have reached the desired amount of codepoints, cut the rest off */
+		if ( length == n ) {
+			*str = '\0';
+			break;
+		}
+	}
+	return (size_t)(str - t);
+}
