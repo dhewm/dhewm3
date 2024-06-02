@@ -203,11 +203,6 @@ float GetScale()
 
 void SetScale( float scale )
 {
-	ImGuiIO& io = ImGui::GetIO();
-	float realScale = (scale < 0.0f) ? GetDefaultScale() : scale;
-	io.FontGlobalScale = realScale;
-	// TODO: could instead set fontsize to 18.0f * scale
-	//  (io.Fonts->ClearFonts() and then add again with new size - but must be done before NewFrame() / after EndFrame())
 	imgui_scale.SetFloat( scale );
 }
 
@@ -240,11 +235,8 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 		ImGui::StyleColorsDark();
 	}
 
-	ImFontConfig fontCfg;
-	strcpy(fontCfg.Name, "ProggyVector");
-	ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size, 18.0f, nullptr);
 
-	SetScale( GetScale() );
+	imgui_scale.SetModified(); // so NewFrame() will load the scaled font
 
 	// Setup Platform/Renderer backends
 	if ( ! ImGui_ImplSDL2_InitForOpenGL( sdlWindow, sdlGlContext ) ) {
@@ -320,6 +312,18 @@ void NewFrame()
 			++framesAfterAllWindowsClosed;
 	} else {
 		framesAfterAllWindowsClosed = 0;
+	}
+
+	if( imgui_scale.IsModified() ) {
+		imgui_scale.ClearModified();
+		ImGuiIO& io = ImGui::GetIO();
+		io.Fonts->Clear();
+		ImGui_ImplOpenGL2_DestroyFontsTexture();
+		ImFontConfig fontCfg;
+		strcpy( fontCfg.Name, "ProggyVector" );
+		float fontSize = 18.0f * GetScale();
+		float fontSizeInt = roundf( fontSize ); // font sizes are supposed to be rounded to integers
+		ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size, fontSizeInt, nullptr);
 	}
 
 	// Start the Dear ImGui frame
