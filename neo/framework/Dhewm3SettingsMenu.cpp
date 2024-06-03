@@ -1,5 +1,7 @@
 #ifndef IMGUI_DISABLE
 
+#include <algorithm> // std::sort - TODO: replace with something custom..
+
 #include <SDL.h> // to show display size
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -18,8 +20,6 @@
 
 #include "renderer/tr_local.h" // render cvars
 #include "sound/snd_local.h" // sound cvars
-
-#include <algorithm> // std::sort - TODO: replace with something custom..
 
 extern const char* D3_GetGamepadStartButtonName();
 
@@ -261,7 +261,7 @@ struct BindingEntry {
 	// only removes the entry from bindings, does *not* unbind!
 	void RemoveBindingEntry( unsigned idx )
 	{
-		if ( idx < bindings.Num() ) {
+		if ( idx < (unsigned)bindings.Num() ) {
 			bindings.RemoveIndex( idx );
 		}
 	}
@@ -1532,14 +1532,14 @@ struct CVarOption {
 	}
 };
 
-static void InitOptions(CVarOption options[], size_t numOptions)
+static void InitOptions(CVarOption options[], int numOptions)
 {
 	for( int i=0; i < numOptions; ++i ) {
 		options[i].Init();
 	}
 }
 
-static void DrawOptions(CVarOption options[], size_t numOptions)
+static void DrawOptions(CVarOption options[], int numOptions)
 {
 	for( int i=0; i < numOptions; ++i ) {
 		options[i].Draw();
