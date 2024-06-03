@@ -1,5 +1,7 @@
 #ifndef IMGUI_DISABLE
 
+#include <SDL.h> // to show display size
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include "Common.h"
@@ -1832,6 +1834,22 @@ static void DrawVideoOptionsMenu()
 			}
 			AddTooltip( "r_customWidth / r_customHeight" );
 		}
+	}
+	int sdlDisplayIdx = SDL_GetWindowDisplayIndex( SDL_GL_GetCurrentWindow() );
+	SDL_Rect displayRect = {};
+	SDL_GetDisplayBounds( sdlDisplayIdx, &displayRect );
+	if ( (int)glConfig.winWidth != glConfig.vidWidth ) {
+		ImGui::TextDisabled( "Current Resolution: %g x %g (Physical: %d x %d)",
+		                     glConfig.winWidth, glConfig.winHeight, glConfig.vidWidth, glConfig.vidHeight );
+		AddDescrTooltip( "Apparently your system is using a HighDPI mode, where the logical resolution (used to specify"
+		                 " window sizes) is lower than the physical resolution (number of pixels actually rendered)." );
+		float scale = float(glConfig.vidWidth)/glConfig.winWidth;
+		int pw = scale * displayRect.w;
+		int ph = scale * displayRect.h;
+		ImGui::TextDisabled( "Display Size: %d x %d (Physical: %d x %d)", displayRect.w, displayRect.h, pw, ph );
+	} else {
+		ImGui::TextDisabled( "Current Resolution: %d x %d", glConfig.vidWidth, glConfig.vidHeight );
+		ImGui::TextDisabled( "Display Size: %d x %d", displayRect.w, displayRect.h );
 	}
 
 	static const char* msaaLevels[] = { "No Antialiasing", "2x", "4x", "8x", "16x" };

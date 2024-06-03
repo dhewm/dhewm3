@@ -1914,6 +1914,10 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 		"fullscreen"
 	};
 
+	const char* fsmode = fsstrings[r_fullscreen.GetBool()];
+	if ( r_fullscreen.GetBool() && r_fullscreenDesktop.GetBool() )
+		fsmode = "desktop-fullscreen";
+
 	common->Printf( "\nGL_VENDOR: %s\n", glConfig.vendor_string );
 	common->Printf( "GL_RENDERER: %s\n", glConfig.renderer_string );
 	common->Printf( "GL_VERSION: %s\n", glConfig.version_string );
@@ -1923,13 +1927,14 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	common->Printf( "GL_MAX_TEXTURE_COORDS_ARB: %d\n", glConfig.maxTextureCoords );
 	common->Printf( "GL_MAX_TEXTURE_IMAGE_UNITS_ARB: %d\n", glConfig.maxTextureImageUnits );
 	common->Printf( "\nPIXELFORMAT: color(%d-bits) Z(%d-bit) stencil(%d-bits)\n", glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
-	common->Printf( "MODE: %d, %d x %d %s hz:", r_mode.GetInteger(), glConfig.vidWidth, glConfig.vidHeight, fsstrings[r_fullscreen.GetBool()] );
+	common->Printf( "MODE: %d, %d x %d %s hz:", r_mode.GetInteger(), glConfig.vidWidth, glConfig.vidHeight, fsmode );
 
 	if ( glConfig.displayFrequency ) {
 		common->Printf( "%d\n", glConfig.displayFrequency );
 	} else {
 		common->Printf( "N/A\n" );
 	}
+	common->Printf( "Logical Window size: %g x %g\n", glConfig.winWidth, glConfig.winHeight );
 
 	const char *active[2] = { "", " (ACTIVE)" };
 
@@ -2033,8 +2038,8 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 		globalImages->ReloadAllImages();
 	} else {
 		glimpParms_t	parms;
-		parms.width = glConfig.vidWidth;
-		parms.height = glConfig.vidHeight;
+		parms.width = glConfig.winWidth;   // DG: HighDPI adjustment: explicitly use window size
+		parms.height = glConfig.winHeight;
 		parms.fullScreen = ( forceWindow ) ? false : r_fullscreen.GetBool();
 		parms.displayHz = r_displayRefresh.GetInteger();
 		parms.multiSamples = r_multiSamples.GetInteger();

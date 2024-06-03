@@ -187,6 +187,11 @@ static float GetDefaultDPI()
 
 static float GetDefaultScale()
 {
+	if ( glConfig.winWidth != glConfig.vidWidth ) {
+		// in HighDPI mode, the font sizes are already scaled (to window coordinates), apparently
+		return 1.0f;
+	}
+	// TODO: different reference DPI on mac? also, doesn't work that well on my laptop..
 	float ret = GetDefaultDPI() / 96.0f;
 	ret = round(ret*2.0)*0.5; // round to .0 or .5
 	return ret;
@@ -464,8 +469,8 @@ bool ShouldShowCursor()
 		// in a black bar (Doom3 cursor is not drawn there), show the ImGui cursor
 		if ( r_scaleMenusTo43.GetBool() ) {
 			ImVec2 mousePos = ImGui::GetMousePos();
-			float w = renderSystem->GetScreenWidth();
-			float h = renderSystem->GetScreenHeight();
+			float w = glConfig.winWidth;
+			float h = glConfig.winHeight;
 			float aspectRatio = w/h;
 			static const float virtualAspectRatio = float(VIRTUAL_WIDTH)/float(VIRTUAL_HEIGHT); // 4:3 = 1.333
 			if(aspectRatio > 1.4f) {

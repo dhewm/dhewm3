@@ -165,6 +165,8 @@ bool GLimp_Init(glimpParms_t parms) {
 	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+
 	/* Doom3 has the nasty habit of modifying the default framebuffer's alpha channel and then
 	 * relying on those modifications in blending operations (using GL_DST_(ONE_MINUS_)ALPHA).
 	 * So far that hasn't been much of a problem, because Windows, macOS, X11 etc
@@ -272,13 +274,13 @@ try_again:
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
-		const char* windowMode = "";
-		if(r_fullscreen.GetBool()) {
-			windowMode = r_fullscreenDesktop.GetBool() ? "desktop-fullscreen-" : "fullscreen-";
+		if ( r_fullscreen.GetBool() && r_fullscreenDesktop.GetBool() ) {
+			common->Printf( "Will create a pseudo-fullscreen window at the current desktop resolution\n" );
+		} else {
+			const char* windowMode = r_fullscreen.GetBool() ? "fullscreen-" : "";
+			common->Printf("Will create a %swindow with resolution %dx%d (r_mode = %d)\n",
+						   windowMode, parms.width, parms.height, r_mode.GetInteger());
 		}
-
-		common->Printf("Will create a %swindow with resolution %dx%d (r_mode = %d)\n",
-		               windowMode, parms.width, parms.height, r_mode.GetInteger());
 
 		int displayIndex = 0;
 #if SDL_VERSION_ATLEAST(2, 0, 4)
@@ -407,11 +409,23 @@ try_again:
 		GLimp_SetSwapInterval( r_swapInterval.GetInteger() );
 		r_swapInterval.ClearModified();
 
-		SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+		// for HighDPI, window size and drawable size can differ
+		int ww=0, wh=0;
+		SDL_GetWindowSize(window, &ww, &wh);
+		glConfig.winWidth = ww;
+		glConfig.winHeight = wh;
+		SDL_GL_GetDrawableSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
 
 		SetSDLIcon(); // for SDL2  this must be done after creating the window
 
 		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
+		const char* fsStr = glConfig.isFullscreen ? "fullscreen " : "";
+		if ( ww != glConfig.vidWidth ) {
+			common->Printf( "Got a HighDPI %swindow with physical resolution %d x %d and virtual resolution %d x %d\n",
+							fsStr, glConfig.vidWidth, glConfig.vidHeight, ww, wh );
+		} else {
+			common->Printf( "Got a %swindow with resolution %d x %d\n", fsStr, ww, wh );
+		}
 #else
 		SDL_WM_SetCaption(ENGINE_VERSION, ENGINE_VERSION);
 
