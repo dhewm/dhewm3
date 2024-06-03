@@ -49,7 +49,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <zlib.h>
+//#include <zlib.h>
+#include "../miniz/miniz.h" // DG: use miniz instead of zlib
+#include "../miniz/minizconf.h"
 
 #if defined(USE_FILE32API)
 #define fopen64 fopen

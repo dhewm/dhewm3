@@ -47,7 +47,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/win32/win_local.h"
 #endif
 
-#include <zlib.h>
+#include "framework/miniz/miniz.h"
 
 static unsigned char* compress_for_stbiw(unsigned char* data, int data_len, int* out_len, int quality)
 {
