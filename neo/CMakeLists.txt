@@ -362,20 +362,20 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 
 	CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 	if(cxx_has_Woverload_virtual)
-		add_compile_options(-Woverloaded-virtual)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Woverloaded-virtual")
 	endif()
 	
 	# shut up about using memcpy() on classes, in the cases doom3 uses it it seems to be fine
 	CHECK_CXX_COMPILER_FLAG("-Wno-class-memaccess" cxx_has_Wno-class-memaccess)
 	if(cxx_has_Wno-class-memaccess)
-		add_compile_options(-Wno-class-memaccess)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess")
 	endif()
 
 	# ignore warnings about variables named "requires" for now (in C++20 it's a keyword,
 	#  but currently we don't even use C++11 features)
 	CHECK_CXX_COMPILER_FLAG("-Wno-c++20-compat" cxx_has_Wno-cpp20-compat)
 	if(cxx_has_Wno-cpp20-compat)
-		add_compile_options(-Wno-c++20-compat)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++20-compat")
 	endif()
 
 	if(AROS)

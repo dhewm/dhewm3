@@ -34,18 +34,22 @@
 #ifndef COMMON_UNZIP_MINIZCONF_H
 #define COMMON_UNZIP_MINIZCONF_H
 
-#ifndef OF
- #define OF(args) args
+#ifndef z_off_t
+  #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
+    #include <unistd.h>
+    #define z_off_t off_t
+  #elif defined(off_t) // maybe we're lucky :-p
+    #define z_off_t off_t
+  #else
+    #define z_off_t long
+  #endif
 #endif
 
 #ifndef ZEXPORT
  #define ZEXPORT
 #endif
 
-#ifndef z_off_t
- #define z_off_t long
-#endif
-
+// FIXME: why not just set this to int64_t?
 #if !defined(_WIN32) && defined(Z_LARGE64)
 #  define z_off64_t off64_t
 #else
@@ -54,6 +58,10 @@
 #  else
 #    define z_off64_t z_off_t
 #  endif
+#endif
+
+#if defined(__cplusplus) && __cplusplus >= 201103L
+static_assert( sizeof(z_off64_t) == 8, "z_off64_t should be a 64bit type" );
 #endif
 
 #endif
