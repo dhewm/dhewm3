@@ -2282,12 +2282,25 @@ static bool BeginTabChild( const char* name )
 	return ret;
 }
 
+static ImVec2 settingsMenuDefaultSize;
+static ImVec2 settingsMenuDefaultPos;
+
 // called from D3::ImGuiHooks::NewFrame() (if this window is enabled)
 void Com_DrawDhewm3SettingsMenu()
 {
 	bool showSettingsWindow = true;
 
+	// to avoid people being too confused by the collapse window feature,
+	// uncollapse it when it's being opened (so pressing F10 twice will restore your window)
 	ImGui::SetNextWindowCollapsed( false, ImGuiCond_Appearing );
+	// for some reason ImGui doesn't calculate a sane default window size when using
+	// childwindows in the tabs and on first use the window is just the icons in the taskbar
+	// so set a sane default size the first time it's opened (afterwards the size set by the
+	// user is respected)
+	ImGui::SetNextWindowSize( settingsMenuDefaultSize, ImGuiCond_FirstUseEver );
+	// set a sane default pos first time each session (if the window somehow gets "lost" after
+	// switching to a lower resolution, restarting dhewm3 will fix it)
+	ImGui::SetNextWindowPos( settingsMenuDefaultPos, ImGuiCond_Once );
 
 	ImGui::Begin("dhewm3 Settings", &showSettingsWindow);
 
@@ -2360,6 +2373,15 @@ static void InitDhewm3SettingsMenu()
 	InitVideoOptionsMenu();
 	InitAudioOptionsMenu();
 	InitGameOptionsMenu();
+
+	const ImGuiStyle& style = ImGui::GetStyle();
+	float defaultWidth = ImGui::CalcTextSize( "Control BindingsControl OptionsVideo OptionsAudio OptionsGame OptionsOther Options" ).x;
+	defaultWidth += 2.0f * style.WindowPadding.x + 12.0f * style.FramePadding.x + 5.0f * style.ItemInnerSpacing.x;
+	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+	settingsMenuDefaultSize.x = fminf( defaultWidth, displaySize.x * 0.8f );
+	settingsMenuDefaultSize.y = displaySize.y * 0.95f;
+
+	settingsMenuDefaultPos = displaySize * 0.025f;
 }
 
 // !! Don't call this function directly, always use                          !!
