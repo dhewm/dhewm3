@@ -313,7 +313,8 @@ bool ReadImGuiStyle( ImGuiStyle& s, const char* filename )
 {
 	FILE* f = DG_IMSAVESTYLE_FOPEN( filename, "r" ); // TODO: "rt" on Windows?
 	if ( f == nullptr ) {
-		warnPrintf( "Couldn't open '%s' for reading\n", filename );
+		// DG: shut up this warning, user don't *have* to write their own style
+		//warnPrintf( "Couldn't open '%s' for reading\n", filename );
 		return false;
 	}
 

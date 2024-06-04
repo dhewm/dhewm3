@@ -73,8 +73,9 @@ static ImVec2 warningOverlayStartPos;
 
 idStr GetUserStyleFilename()
 {
-	// TODO: put this into the config dir
-	return idStr( "user.imstyle" );
+	idStr ret( cvarSystem->GetCVarString( "fs_configpath" ) );
+	ret += "/user.imstyle";
+	return ret;
 }
 
 static void UpdateWarningOverlay()
@@ -227,9 +228,14 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 		common->Warning( "Failed to create ImGui Context!\n" );
 		return false;
 	}
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	static idStr iniPath;
+	iniPath = cvarSystem->GetCVarString( "fs_configpath" );
+	iniPath += "/imgui.ini";
+	io.IniFilename = iniPath.c_str();
 
 	SetImGuiStyle( Style::Dhewm3 );
 	userStyle = ImGui::GetStyle(); // set dhewm3 style as default, in case the user style is missing values
