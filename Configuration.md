@@ -200,7 +200,8 @@ This can be configured with the following CVars:
 - `in_kbd` allows you to set your keyboard layout so the console key works better. Mostly useful with SDL1.2
 - `in_tty` tab completion and history for input from the **terminal** (on Unix-likes, like Linux, macOS, BSD, ...)
 
-- `r_fullscreenDesktop` `0`: "real"/"exclusive" fullscreen mode, might switch screen resolution  
+- `r_fullscreenDesktop` configures fullscreen windows (when `r_fullscreen` is `1`).  
+  `0`: "real"/"exclusive" fullscreen mode, might switch screen resolution  
   `1`: "desktop" fullscreen mode, which keeps desktop resolution and is more like a borderless fullscreen window
 - `r_fillWindowAlphaChan` Make sure alpha channel of windows default framebuffer is completely opaque
   at the end of each frame. Needed at least when using Wayland.  

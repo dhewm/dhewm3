@@ -4,6 +4,30 @@ dhewm3 Changelog
 Note: Numbers starting with a "#" like #330 refer to the bugreport with that number
       at https://github.com/dhewm/dhewm3/issues/
 
+1.5.4 (WIP)
+------------------------------------------------------------------------
+
+* A brand new settings menu that uses [Dear ImGui](https://github.com/ocornut/imgui).  
+  Can be opened with `F10` (unless that key is bound already) or by entering `dhewm3Settings`
+  in the console. It has lots of settings that the original options menu doesn't have and
+  can be easily navigated with gamepad or keyboard (or the mouse, of course).
+  It can also be opened while in the game, which then is paused (if Single Player) but still visible,
+  so the effect of most graphics settings can be seen immediately.
+  Needs SDL2 and C++11.
+* Replaced dependency on (external) zlib with integrated [miniz](https://github.com/richgel999/miniz)
+* HighDPI/Retina support
+* Allow inverted mouse look (horizontally, vertically or both) with `m_invertLook`
+* CVar to allow always run in single player (still drains stamina though!): `in_allowAlwaysRunInSP`
+* VSync can be enabled/disabled on the fly, without restarting the renderer (still with `r_swapInterval`
+  or in the menu, of course; needs SDL2)
+* Allow enabling/disabling [HRTF](https://en.wikipedia.org/wiki/Head-related_transfer_function)
+  with `s_alHRTF`
+* `s_alOutputLimiter`: Configure OpenAL's output-limiter which temporarily reduces the overall
+  volume when too many too loud sounds play at once, to avoid issues like clipping
+* `s_scaleDownAndClamp`: Clamp and reduce volume of all sounds to prevent clipping or temporary
+  downscaling by OpenAL's output limiter
+
+
 1.5.3 (2024-03-29)
 ------------------------------------------------------------------------
 
