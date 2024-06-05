@@ -469,6 +469,26 @@ if(WIN32)
 	)
 endif()
 
+# optimize this source file even in debug builds, to make speed (esp. loading times) more bearable
+# used for libs integrated here like stb_* and miniz(ip)
+if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION LESS 11 ))
+	function(always_optimize_sourcefile srcfilename)
+		if(MSVC)
+			set_source_files_properties(${srcfilename} PROPERTIES COMPILE_FLAGS "/Ox")
+		else()
+			set_source_files_properties(${srcfilename} PROPERTIES COMPILE_FLAGS "-O2")
+		endif()
+	endfunction()
+else()
+	function(always_optimize_sourcefile srcfilename)
+		if(MSVC)
+			set_source_files_properties(${srcfilename} PROPERTIES COMPILE_OPTIONS "/Ox")
+		else()
+			set_source_files_properties(${srcfilename} PROPERTIES COMPILE_OPTIONS "-O2")
+		endif()
+	endfunction()
+endif()
+
 # fallback for cmake versions without GNUInstallDirs
 if(GNUINSTALLDIRS MATCHES "NOTFOUND")
 	set(CMAKE_INSTALL_BINDIR		"bin"
@@ -561,7 +581,11 @@ set(src_renderer
 	renderer/tr_trace.cpp
 	renderer/tr_trisurf.cpp
 	renderer/tr_turboshadow.cpp
+
+	renderer/stblib_impls.c
 )
+
+always_optimize_sourcefile(renderer/stblib_impls.c)
 
 # I'm a bit sloppy with headers and just glob them in..
 # they're only handled in CMake at all so they turn up in Visual Studio solutions..
@@ -608,6 +632,10 @@ set(src_framework
 	framework/minizip/ioapi.c
 	framework/minizip/unzip.cpp
 )
+
+always_optimize_sourcefile(framework/miniz/miniz.c)
+always_optimize_sourcefile(framework/minizip/ioapi.c)
+always_optimize_sourcefile(framework/minizip/unzip.cpp)
 
 add_globbed_headers(src_framework "framework")
 
@@ -685,7 +713,11 @@ set(src_snd
 	sound/snd_system.cpp
 	sound/snd_wavefile.cpp
 	sound/snd_world.cpp
+
+	sound/stbvorbis_impl.c
 )
+
+always_optimize_sourcefile(sound/stbvorbis_impl.c)
 
 add_globbed_headers(src_snd "sound")
 
