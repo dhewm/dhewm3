@@ -6648,6 +6648,11 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
     // [EXPERIMENTAL] Skip Refresh mode
     UpdateWindowSkipRefresh(window);
 
+    // Nested root windows (typically tooltips) override disabled state
+    if (window->RootWindow == window)
+        if ((window->DC.BackupItemDisabled = (g.CurrentItemFlags & ImGuiItemFlags_Disabled) != 0))
+            BeginDisabledOverrideReenable();
+
     // We intentionally set g.CurrentWindow to NULL to prevent usage until when the viewport is set, then will call SetCurrentWindow()
     g.CurrentWindow = NULL;
 
@@ -7257,6 +7262,8 @@ void ImGui::End()
     if (!window->SkipRefresh)
         PopClipRect();   // Inner window clip rectangle
     PopFocusScope();
+    if (window->RootWindow == window && window->DC.BackupItemDisabled)
+        EndDisabledOverrideReenable();
 
     if (window->SkipRefresh)
     {
@@ -7521,7 +7528,7 @@ void ImGui::BeginDisabled(bool disabled)
     }
     if (was_disabled || disabled)
         g.CurrentItemFlags |= ImGuiItemFlags_Disabled;
-    g.ItemFlagsStack.push_back(g.CurrentItemFlags);
+    g.ItemFlagsStack.push_back(g.CurrentItemFlags); // FIXME-OPT: can we simply skip this and use DisabledStackSize?
     g.DisabledStackSize++;
 }
 
@@ -7536,6 +7543,29 @@ void ImGui::EndDisabled()
     g.CurrentItemFlags = g.ItemFlagsStack.back();
     if (was_disabled && (g.CurrentItemFlags & ImGuiItemFlags_Disabled) == 0)
         g.Style.Alpha = g.DisabledAlphaBackup; //PopStyleVar();
+}
+
+// Could have been called BeginDisabledDisable() but it didn't want to be award nominated for most awkward function name.
+// Ideally we would use a shared e.g. BeginDisabled()->BeginDisabledEx() but earlier needs to be optimal.
+// The whole code for this is awkward, will reevaluate if we find a way to implement SetNextItemDisabled().
+void ImGui::BeginDisabledOverrideReenable()
+{
+    ImGuiContext& g = *GImGui;
+    IM_ASSERT(g.CurrentItemFlags & ImGuiItemFlags_Disabled);
+    g.Style.Alpha = g.DisabledAlphaBackup;
+    g.CurrentItemFlags &= ~ImGuiItemFlags_Disabled;
+    g.ItemFlagsStack.push_back(g.CurrentItemFlags);
+    g.DisabledStackSize++;
+}
+
+void ImGui::EndDisabledOverrideReenable()
+{
+    ImGuiContext& g = *GImGui;
+    g.DisabledStackSize--;
+    IM_ASSERT(g.DisabledStackSize > 0);
+    g.ItemFlagsStack.pop_back();
+    g.CurrentItemFlags = g.ItemFlagsStack.back();
+    g.Style.Alpha = g.DisabledAlphaBackup * g.Style.DisabledAlpha;
 }
 
 void ImGui::PushTabStop(bool tab_stop)
@@ -9993,7 +10023,13 @@ void    ImGui::ErrorCheckEndWindowRecover(ImGuiErrorLogCallback log_callback, vo
     while (g.DisabledStackSize > stack_sizes->SizeOfDisabledStack) //-V1044
     {
         if (log_callback) log_callback(user_data, "Recovered from missing EndDisabled() in '%s'", window->Name);
-        EndDisabled();
+        if (g.CurrentItemFlags & ImGuiItemFlags_Disabled)
+            EndDisabled();
+        else
+        {
+            EndDisabledOverrideReenable();
+            window->DC.BackupItemDisabled = false;
+        }
     }
     while (g.ColorStack.Size > stack_sizes->SizeOfColorStack)
     {
