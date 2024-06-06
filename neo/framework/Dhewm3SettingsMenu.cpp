@@ -1475,9 +1475,7 @@ struct CVarOption {
 	{
 		if (name != NULL) {
 			cvar = cvarSystem->Find(name);
-			printf("# Init() name = %s cvar = %p\n", name, cvar);
 		}
-		else printf("# Init() name = NULL label = %s\n", label);
 	}
 
 	void Draw()
