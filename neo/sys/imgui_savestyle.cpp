@@ -95,7 +95,7 @@ namespace DG {
 	D3_IMATTR_FLOAT( WindowBorderSize            ) \
 	D3_IMATTR_VEC2(  WindowMinSize               ) \
 	D3_IMATTR_VEC2(  WindowTitleAlign            ) \
-	D3_IMATTR_INT(   WindowMenuButtonPosition    ) \
+	D3_IMATTR_DIR(   WindowMenuButtonPosition    ) \
 	D3_IMATTR_FLOAT( ChildRounding               ) \
 	D3_IMATTR_FLOAT( ChildBorderSize             ) \
 	D3_IMATTR_FLOAT( PopupRounding               ) \
@@ -120,7 +120,7 @@ namespace DG {
 	D3_IMATTR_FLOAT( TabBarBorderSize            ) \
 	D3_IMATTR_FLOAT( TableAngledHeadersAngle     ) \
 	D3_IMATTR_VEC2(  TableAngledHeadersTextAlign ) \
-	D3_IMATTR_INT(   ColorButtonPosition         ) \
+	D3_IMATTR_DIR(   ColorButtonPosition         ) \
 	D3_IMATTR_VEC2(  ButtonTextAlign             ) \
 	D3_IMATTR_VEC2(  SelectableTextAlign         ) \
 	D3_IMATTR_FLOAT( SeparatorTextBorderSize     ) \
@@ -227,6 +227,12 @@ static inline char* skipWhitespace( const char* s ) {
 		return; \
 	}
 
+#define D3_IMATTR_DIR( NAME )   \
+	if ( sscanf( line, #NAME " = %d", &i ) == 1 ) { \
+		s . NAME = (ImGuiDir)i; \
+		return; \
+	}
+
 #define D3_IMATTR_BOOL( NAME )  \
 	if ( sscanf( line, #NAME " = %d", &i ) == 1 ) { \
 		s . NAME = ( i != 0 ); \
@@ -282,6 +288,7 @@ static void parseBehaviorLine( ImGuiStyle& s, const char* line )
 #undef D3_IMATTR_FLOAT
 #undef D3_IMATTR_VEC2
 #undef D3_IMATTR_INT
+#undef D3_IMATTR_DIR
 #undef D3_IMATTR_BOOL
 
 static void parseColorLine( ImGuiStyle& s, const char* line )
@@ -377,6 +384,8 @@ bool WriteImGuiStyle( const ImGuiStyle& s, const char* filename ) {
 	fprintf( f, "%s = %g, %g\n", #NAME, s . NAME . x, s . NAME . y );
 #define D3_IMATTR_INT( NAME ) \
 	fprintf( f, "%s = %d\n", #NAME, s . NAME );
+#define D3_IMATTR_DIR( NAME ) \
+	fprintf( f, "%s = %d\n", #NAME, s . NAME );
 #define D3_IMATTR_BOOL( NAME ) \
 	fprintf( f, "%s = %d\n", #NAME, (int)( s . NAME ) );
 
@@ -396,6 +405,7 @@ bool WriteImGuiStyle( const ImGuiStyle& s, const char* filename ) {
 #undef D3_IMATTR_FLOAT
 #undef D3_IMATTR_VEC2
 #undef D3_IMATTR_INT
+#undef D3_IMATTR_DIR
 #undef D3_IMATTR_BOOL
 
 	fprintf( f, "\n[colors]\n" );
@@ -444,6 +454,10 @@ ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s, const ImGuiStyle* re
 	if ( refStyle == nullptr || s. NAME != refStyle-> NAME ) { \
 		ret.appendf( "style.%s = %d; // TODO: flag\n", #NAME, s. NAME ); \
 	}
+#define D3_IMATTR_DIR( NAME ) \
+	if ( refStyle == nullptr || s. NAME != refStyle-> NAME ) { \
+		ret.appendf( "style.%s = %d;\n", #NAME, s. NAME ); \
+	}
 #define D3_IMATTR_BOOL( NAME ) \
 	if ( refStyle == nullptr || s. NAME != refStyle-> NAME ) { \
 		ret.appendf( "style.%s %*s= %s;\n", #NAME, numSpaces( #NAME , 27 ), "", s. NAME ? "true" : "false" ); \
@@ -458,6 +472,7 @@ ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& s, const ImGuiStyle* re
 #undef D3_IMATTR_FLOAT
 #undef D3_IMATTR_VEC2
 #undef D3_IMATTR_INT
+#undef D3_IMATTR_DIR
 #undef D3_IMATTR_BOOL
 
 	ret.append( "\nImVec4* colors = style.Colors;\n" );
@@ -500,6 +515,7 @@ struct D3_ImGuiStyle_Check {
 #define D3_IMATTR_FLOAT( NAME ) float NAME ;
 #define D3_IMATTR_VEC2( NAME )  ImVec2 NAME ;
 #define D3_IMATTR_INT( NAME )   int NAME ;
+#define D3_IMATTR_DIR( NAME )   ImGuiDir NAME ;
 #define D3_IMATTR_BOOL( NAME )  bool NAME ;
 
 	// this expands to all the ImGuiStyle members, up to (excluding) Colors
@@ -514,6 +530,7 @@ struct D3_ImGuiStyle_Check {
 #undef D3_IMATTR_FLOAT
 #undef D3_IMATTR_VEC2
 #undef D3_IMATTR_INT
+#undef D3_IMATTR_DIR
 #undef D3_IMATTR_BOOL
 
 };
@@ -542,6 +559,11 @@ struct is_same<T, T> {
 	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
 			"member " #NAME " not at expected offset - is the member before it missing from the list, or moved to another position?" ); \
 	static_assert( is_same< decltype( ImGuiStyle :: NAME ), int >::value, "expected member " #NAME " to be an int - adjust the list!" );
+
+#define D3_IMATTR_DIR( NAME ) \
+	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
+			"member " #NAME " not at expected offset - is the member before it missing from the list, or moved to another position?" ); \
+	static_assert( is_same< decltype( ImGuiStyle :: NAME ), ImGuiDir >::value, "expected member " #NAME " to be an ImGuiDir - adjust the list!" );
 
 #define D3_IMATTR_BOOL( NAME ) \
 	static_assert( offsetof( ImGuiStyle, NAME ) == offsetof( D3_ImGuiStyle_Check, NAME ), \
