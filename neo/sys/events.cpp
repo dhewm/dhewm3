@@ -1156,6 +1156,9 @@ sysEvent_t Sys_GetEvent() {
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					in_hasFocus = false;
 					break;
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
+					GLimp_UpdateWindowSize();
+					break;
 			}
 
 			continue; // handle next event

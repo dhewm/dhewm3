@@ -166,6 +166,7 @@ bool GLimp_Init(glimpParms_t parms) {
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+	flags |= SDL_WINDOW_RESIZABLE;
 
 	/* Doom3 has the nasty habit of modifying the default framebuffer's alpha channel and then
 	 * relying on those modifications in blending operations (using GL_DST_(ONE_MINUS_)ALPHA).
@@ -410,21 +411,17 @@ try_again:
 		r_swapInterval.ClearModified();
 
 		// for HighDPI, window size and drawable size can differ
-		int ww=0, wh=0;
-		SDL_GetWindowSize(window, &ww, &wh);
-		glConfig.winWidth = ww;
-		glConfig.winHeight = wh;
-		SDL_GL_GetDrawableSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+		GLimp_UpdateWindowSize();
 
 		SetSDLIcon(); // for SDL2  this must be done after creating the window
 
 		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 		const char* fsStr = glConfig.isFullscreen ? "fullscreen " : "";
-		if ( ww != glConfig.vidWidth ) {
-			common->Printf( "Got a HighDPI %swindow with physical resolution %d x %d and virtual resolution %d x %d\n",
-							fsStr, glConfig.vidWidth, glConfig.vidHeight, ww, wh );
+		if ( (int)glConfig.winWidth != glConfig.vidWidth ) {
+			common->Printf( "Got a HighDPI %swindow with physical resolution %d x %d and virtual resolution %g x %g\n",
+							fsStr, glConfig.vidWidth, glConfig.vidHeight, glConfig.winWidth, glConfig.winHeight );
 		} else {
-			common->Printf( "Got a %swindow with resolution %d x %d\n", fsStr, ww, wh );
+			common->Printf( "Got a %swindow with resolution %g x %g\n", fsStr, glConfig.winWidth, glConfig.winHeight );
 		}
 #else
 		SDL_WM_SetCaption(ENGINE_VERSION, ENGINE_VERSION);
@@ -769,4 +766,13 @@ bool GLimp_SetSwapInterval( int swapInterval )
 	common->Warning( "SDL1.2 does not support changing the swapinterval (vsync) on-the-fly!" );
 	return false;
 #endif
+}
+
+void GLimp_UpdateWindowSize()
+{
+	int ww=0, wh=0;
+	SDL_GetWindowSize( window, &ww, &wh );
+	glConfig.winWidth = ww;
+	glConfig.winHeight = wh;
+	SDL_GL_GetDrawableSize( window, &glConfig.vidWidth, &glConfig.vidHeight );
 }
