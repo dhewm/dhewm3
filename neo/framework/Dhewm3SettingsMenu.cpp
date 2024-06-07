@@ -2283,10 +2283,40 @@ static bool BeginTabChild( const char* name )
 static ImVec2 settingsMenuDefaultSize;
 static ImVec2 settingsMenuDefaultPos;
 
+static bool d3settingsWinInitialized = false;
+
+static void InitDhewm3SettingsMenu()
+{
+	InitBindingEntries();
+	InitOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
+
+	InitVideoOptionsMenu();
+	InitAudioOptionsMenu();
+	InitGameOptionsMenu();
+
+	const ImGuiStyle& style = ImGui::GetStyle();
+	float defaultWidth = ImGui::CalcTextSize( "Control BindingsControl OptionsVideo OptionsAudio OptionsGame OptionsOther Options" ).x;
+	defaultWidth += 2.0f * style.WindowPadding.x + 12.0f * style.FramePadding.x + 5.0f * style.ItemInnerSpacing.x;
+	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+	settingsMenuDefaultSize.x = fminf( defaultWidth, displaySize.x * 0.8f );
+	settingsMenuDefaultSize.y = displaySize.y * 0.95f;
+
+	settingsMenuDefaultPos = displaySize * 0.025f;
+	d3settingsWinInitialized = true;
+}
+
 // called from D3::ImGuiHooks::NewFrame() (if this window is enabled)
 void Com_DrawDhewm3SettingsMenu()
 {
 	bool showSettingsWindow = true;
+
+	if ( !d3settingsWinInitialized ) {
+		// NOTE: InitDhewm3SettingsMenu() must be called after/by NewFrame(), because it calls
+		//       ImGui::CalcTextSize() which needs a valid font texture. Especially after
+		//       switching between windowed and fullscreen mode with Alt-Enter, calling it from
+		//       Com_OpenCloseDhewm3SettingsMenu() caused problems (crashes)
+		InitDhewm3SettingsMenu();
+	}
 
 	// to avoid people being too confused by the collapse window feature,
 	// uncollapse it when it's being opened (so pressing F10 twice will restore your window)
@@ -2363,24 +2393,6 @@ void Com_DrawDhewm3SettingsMenu()
 	}
 }
 
-static void InitDhewm3SettingsMenu()
-{
-	InitBindingEntries();
-	InitOptions( controlOptions, IM_ARRAYSIZE(controlOptions) );
-
-	InitVideoOptionsMenu();
-	InitAudioOptionsMenu();
-	InitGameOptionsMenu();
-
-	const ImGuiStyle& style = ImGui::GetStyle();
-	float defaultWidth = ImGui::CalcTextSize( "Control BindingsControl OptionsVideo OptionsAudio OptionsGame OptionsOther Options" ).x;
-	defaultWidth += 2.0f * style.WindowPadding.x + 12.0f * style.FramePadding.x + 5.0f * style.ItemInnerSpacing.x;
-	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-	settingsMenuDefaultSize.x = fminf( defaultWidth, displaySize.x * 0.8f );
-	settingsMenuDefaultSize.y = displaySize.y * 0.95f;
-
-	settingsMenuDefaultPos = displaySize * 0.025f;
-}
 
 // !! Don't call this function directly, always use                          !!
 // !! D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_Settings )     !!
@@ -2401,7 +2413,7 @@ void Com_OpenCloseDhewm3SettingsMenu( bool open )
 			}
 		}
 
-		InitDhewm3SettingsMenu();
+		d3settingsWinInitialized = false; // make sure it's initialized in first frame
 	} else {
 		// unset g_stopTime (no matter if we're in MP now, maybe we weren't
 		// when the menu was opened, just set it to false now to be sure)
