@@ -227,6 +227,12 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
+	// TODO: make configurable so it's not always enabled by default?
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	//io.ConfigViewportsNoAutoMerge = true;
+	//io.ConfigViewportsNoTaskBarIcon = true;
+
 	static idStr iniPath;
 	iniPath = cvarSystem->GetCVarString( "fs_configpath" );
 	iniPath += "/imgui.ini";
@@ -557,6 +563,18 @@ void EndFrame()
 	}
 
 	ImGui_ImplOpenGL2_RenderDrawData( ImGui::GetDrawData() );
+
+    // Update and Render additional Platform Windows
+    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+    //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+        SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+    }
 
 	if ( curArrayBuffer != 0 ) {
 		qglBindBufferARB( GL_ARRAY_BUFFER_ARB, curArrayBuffer );

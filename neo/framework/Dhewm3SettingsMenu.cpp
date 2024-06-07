@@ -2337,6 +2337,12 @@ static void DrawOtherOptionsMenu()
 	if ( ImGui::Button("Reset") ) {
 		D3::ImGuiHooks::SetScale( -1.0f );
 	}
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui::CheckboxFlags( "Enable multiple ImGui Viewports", &io.ConfigFlags, ImGuiConfigFlags_ViewportsEnable );
+	AddDescrTooltip( "Allows dragging ImGui windows out of the main dhewm3 window. Might not work (well) on all platforms or window managers" );
+
+	ImGui::CheckboxFlags( "Enable ImGui Docking support", &io.ConfigFlags, ImGuiConfigFlags_DockingEnable );
+	AddDescrTooltip( "Allows docking ImGui windows to each other (or the edge of real windows, if dhewm3 enables it, which it currently does not, but might for tools..)" );
 
 	int style_idx = imgui_style.GetInteger();
 	if ( ImGui::Combo( "ImGui Style", &style_idx, "dhewm3\0ImGui Default\0Userstyle\0") )
