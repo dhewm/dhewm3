@@ -1651,6 +1651,7 @@ static CVarOption videoOptionsImmediately[] = {
 		}
 		AddCVarOptionTooltips( cvar, descr );
 	} ),
+	CVarOption( "r_windowResizable", "Make dhewm3 window resizable", OT_BOOL ),
 	CVarOption( "r_brightness", "Brightness", OT_FLOAT, 0.5f, 2.0f ),
 	CVarOption( "r_gamma", "Gamma", OT_FLOAT, 0.5f, 3.0f ),
 	CVarOption( "r_gammaInShader", "Apply gamma and brightness in shaders", OT_BOOL ),

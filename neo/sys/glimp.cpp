@@ -164,9 +164,13 @@ bool GLimp_Init(glimpParms_t parms) {
 			flags |= SDL_WINDOW_FULLSCREEN;
 	}
 
+	r_windowResizable.ClearModified();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
-	flags |= SDL_WINDOW_RESIZABLE;
+
+	if ( r_windowResizable.GetBool() ) {
+		flags |= SDL_WINDOW_RESIZABLE;
+	}
 
 	/* Doom3 has the nasty habit of modifying the default framebuffer's alpha channel and then
 	 * relying on those modifications in blending operations (using GL_DST_(ONE_MINUS_)ALPHA).
@@ -768,11 +772,24 @@ bool GLimp_SetSwapInterval( int swapInterval )
 #endif
 }
 
+bool GLimp_SetWindowResizable( bool enableResizable )
+{
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	SDL_SetWindowResizable( window, (SDL_bool)enableResizable );
+	return true;
+#else
+	common->Warning( "dhewm3 must be built with SDL 2.0.5 or newer to change resizability of existing windows!" );
+	return false;
+#endif
+}
+
 void GLimp_UpdateWindowSize()
 {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	int ww=0, wh=0;
 	SDL_GetWindowSize( window, &ww, &wh );
 	glConfig.winWidth = ww;
 	glConfig.winHeight = wh;
 	SDL_GL_GetDrawableSize( window, &glConfig.vidWidth, &glConfig.vidHeight );
+#endif
 }

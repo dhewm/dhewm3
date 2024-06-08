@@ -818,6 +818,7 @@ extern idCVar r_displayRefresh;			// optional display refresh rate option for vi
 extern idCVar r_fullscreen;				// 0 = windowed, 1 = full screen
 extern idCVar r_fullscreenDesktop;		// 0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode
 extern idCVar r_multiSamples;			// number of antialiasing samples
+extern idCVar r_windowResizable;		// DG: allow resizing and maximizing the window
 
 extern idCVar r_ignore;					// used for random debugging without defining new vars
 extern idCVar r_ignore2;				// used for random debugging without defining new vars
@@ -1115,7 +1116,7 @@ const int GRAB_RELATIVEMOUSE = (1 << 2);
 void GLimp_GrabInput(int flags);
 
 bool GLimp_SetSwapInterval( int swapInterval );
-
+bool GLimp_SetWindowResizable( bool enableResizable );
 void GLimp_UpdateWindowSize();
 
 /*

@@ -203,6 +203,9 @@ This can be configured with the following CVars:
 - `r_fullscreenDesktop` configures fullscreen windows (when `r_fullscreen` is `1`).  
   `0`: "real"/"exclusive" fullscreen mode, might switch screen resolution  
   `1`: "desktop" fullscreen mode, which keeps desktop resolution and is more like a borderless fullscreen window
+- `r_windowResizable` if set to `1` (the default), the dhewm3 window (when in windowed mode..)
+   can be freely resized. Needs SDL2; with 2.0.5 and newer it's applied immediately, otherwise when
+   creating the window (startup or `vid_restart`).
 - `r_fillWindowAlphaChan` Make sure alpha channel of windows default framebuffer is completely opaque
   at the end of each frame. Needed at least when using Wayland.  
   `1`: do this, `0`: don't do it, `-1`: let dhewm3 decide (default)

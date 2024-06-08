@@ -26,6 +26,8 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   volume when too many too loud sounds play at once, to avoid issues like clipping
 * `s_scaleDownAndClamp`: Clamp and reduce volume of all sounds to prevent clipping or temporary
   downscaling by OpenAL's output limiter
+* If `r_windowResizable` is set, the dhewm3 window (when in windowed mode..) can be freely resized.
+  Needs SDL2; with 2.0.5 and newer it's applied immediately, otherwise when creating the window.
 
 
 1.5.3 (2024-03-29)

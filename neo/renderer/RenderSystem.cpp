@@ -265,6 +265,11 @@ static void R_CheckCvars( void ) {
 		GLimp_SetSwapInterval( r_swapInterval.GetInteger() );
 		r_swapInterval.ClearModified();
 	}
+
+	if ( r_windowResizable.IsModified() ) {
+		GLimp_SetWindowResizable( r_windowResizable.GetBool() );
+		r_windowResizable.ClearModified();
+	}
 }
 
 /*
