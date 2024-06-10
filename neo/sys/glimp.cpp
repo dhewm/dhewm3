@@ -608,8 +608,94 @@ GLimp_SetScreenParms
 ===================
 */
 bool GLimp_SetScreenParms(glimpParms_t parms) {
-	common->DPrintf("TODO: GLimp_ActivateContext\n");
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	int curMultiSamples = 0;
+	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) == 0 && curMultiSamples > 0 ) {
+		if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) != 0 ) {
+			curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+		}
+	} else {
+		curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+	}
+
+	if( parms.multiSamples != -1 && parms.multiSamples != curMultiSamples ) {
+		// if MSAA settings have changed, we really need a vid_restart
+		return false;
+	}
+
+	Uint32 winFlags = SDL_GetWindowFlags( window );
+	bool isFullscreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
+	bool isFullscreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+	bool wantFullscreenDesktop = parms.fullScreen && r_fullscreenDesktop.GetBool();
+
+	// TODO: parms.displayHz ?
+
+	if ( isFullscreenDesktop && wantFullscreenDesktop ) {
+		return true; // nothing to do (resolution is not configurable in that mode)
+	}
+
+	if ( !parms.fullScreen ) { // we want windowed mode
+		if ( isFullscreen && SDL_SetWindowFullscreen( window, 0 ) != 0 ) {
+			common->Warning( "GLimp_SetScreenParms(): Couldn't switch to windowed mode, SDL error: %s\n", SDL_GetError() );
+			return false;
+		}
+		SDL_RestoreWindow( window ); // make sure we're not maximized, then setting the size wouldn't work
+		SDL_SetWindowSize( window, parms.width, parms.height );
+	} else { // we want some kind of fullscreen mode
+
+		// it's probably safest to first switch to windowed mode
+		if ( isFullscreen ) {
+			SDL_SetWindowFullscreen( window, 0 );
+		}
+
+		if ( wantFullscreenDesktop ) {
+			if ( SDL_SetWindowFullscreen( window, SDL_WINDOW_FULLSCREEN_DESKTOP ) != 0 ) {
+				common->Warning( "GLimp_SetScreenParms(): Couldn't switch to fullscreen desktop mode, SDL error: %s\n", SDL_GetError() );
+				return false;
+			}
+		} else { // want real fullscreen
+			SDL_DisplayMode wanted_mode = {};
+
+			wanted_mode.w = parms.width;
+			wanted_mode.h = parms.height;
+
+			// TODO: refresh rate? parms.displayHz should probably try to get most similar mode before trying to set it?
+
+			if ( SDL_SetWindowDisplayMode( window, &wanted_mode ) != 0 )
+			{
+				common->Warning("GLimp_SetScreenParms(): Can't set fullscreen resolution to %ix%i: %s\n", wanted_mode.w, wanted_mode.h, SDL_GetError());
+				return false;
+			}
+
+			/* The SDL doku says, that SDL_SetWindowSize() shouldn't be
+			   used on fullscreen windows. But at least in my test with
+			   SDL 2.0.9 the subsequent SDL_GetWindowDisplayMode() fails
+			   if I don't call it. */
+			SDL_SetWindowSize( window, wanted_mode.w, wanted_mode.h );
+
+			SDL_DisplayMode real_mode = {};
+			if ( SDL_GetWindowDisplayMode( window, &real_mode ) != 0 )
+			{
+				common->Warning( "GLimp_SetScreenParms(): Can't get display mode: %s\n", SDL_GetError() );
+				return false; // trying other color depth etc is unlikely to help with this issue
+			}
+
+			if ( (real_mode.w != wanted_mode.w) || (real_mode.h != wanted_mode.h) )
+			{
+				common->Warning( "GLimp_SetScreenParms(): Still in wrong display mode: %ix%i instead of %ix%i\n",
+				                 real_mode.w, real_mode.h, wanted_mode.w, wanted_mode.h );
+
+				return false;
+			}
+		}
+	}
+
 	return true;
+
+#else // SDL1.2 - I don't feel like implementing this for old SDL, just do a full vid_restart, like before
+	return false;
+#endif
 }
 
 /*

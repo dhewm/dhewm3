@@ -1961,12 +1961,6 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 		return;
 	}
 
-	// DG: notify the game DLL about the reloadImages and vid_restart commands
-	if(gameCallbacks.reloadImagesCB != NULL)
-	{
-		gameCallbacks.reloadImagesCB(gameCallbacks.reloadImagesUserArg, args);
-	}
-
 	bool full = true;
 	bool forceWindow = false;
 	for ( int i = 1 ; i < args.Argc() ; i++ ) {
@@ -1978,6 +1972,38 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 			forceWindow = true;
 			continue;
 		}
+	}
+
+	// DG: in partial mode, try to just resize the window (and make it fullscreen or windowed)
+	//     instead of doing a full vid_restart. Still falls back to a full vid_restart
+	//     in case this doesn't work (for example because MSAA settings have changed)
+	if ( !full ) {
+		int wantedWidth=0, wantedHeight=0;
+		if ( !R_GetModeInfo( &wantedWidth, &wantedHeight, r_mode.GetInteger() ) ) {
+			common->Warning( "vid_restart: R_GetModeInfo() failed?!\n" );
+		} else {
+			glimpParms_t	parms;
+			parms.width = wantedWidth;
+			parms.height = wantedHeight;
+
+			parms.fullScreen = ( forceWindow ) ? false : r_fullscreen.GetBool();
+			parms.displayHz = r_displayRefresh.GetInteger();
+			// "vid_restart partial windowed" is used in case of errors to return to windowed mode
+			// before things explode more. in that case just keep whatever MSAA setting is active
+			parms.multiSamples = forceWindow ? -1 : r_multiSamples.GetInteger();
+			parms.stereo = false;
+
+			if ( GLimp_SetScreenParms( parms ) ) {
+				common->Printf( "'vid_restart partial' succeeded in changing resolution and/or fullscreen mode" );
+				return;
+			}
+		}
+	}
+
+	// DG: notify the game DLL about the reloadImages and (non-partial) vid_restart commands
+	if(gameCallbacks.reloadImagesCB != NULL)
+	{
+		gameCallbacks.reloadImagesCB(gameCallbacks.reloadImagesUserArg, args);
 	}
 
 	// this could take a while, so give them the cursor back ASAP
@@ -1998,37 +2024,24 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 
 	// sound and input are tied to the window we are about to destroy
 
-	if ( full ) {
-		// free all of our texture numbers
-		soundSystem->ShutdownHW();
-		Sys_ShutdownInput();
-		globalImages->PurgeAllImages();
-		// free the context and close the window
-		GLimp_Shutdown();
-		glConfig.isInitialized = false;
+	// free all of our texture numbers
+	soundSystem->ShutdownHW();
+	Sys_ShutdownInput();
+	globalImages->PurgeAllImages();
+	// free the context and close the window
+	GLimp_Shutdown();
+	glConfig.isInitialized = false;
 
-		// create the new context and vertex cache
-		bool latch = cvarSystem->GetCVarBool( "r_fullscreen" );
-		if ( forceWindow ) {
-			cvarSystem->SetCVarBool( "r_fullscreen", false );
-		}
-		R_InitOpenGL();
-		cvarSystem->SetCVarBool( "r_fullscreen", latch );
-
-		// regenerate all images
-		globalImages->ReloadAllImages();
-	} else {
-		glimpParms_t	parms;
-		parms.width = glConfig.winWidth;   // DG: HighDPI adjustment: explicitly use window size
-		parms.height = glConfig.winHeight;
-		parms.fullScreen = ( forceWindow ) ? false : r_fullscreen.GetBool();
-		parms.displayHz = r_displayRefresh.GetInteger();
-		parms.multiSamples = r_multiSamples.GetInteger();
-		parms.stereo = false;
-		GLimp_SetScreenParms( parms );
+	// create the new context and vertex cache
+	bool latch = cvarSystem->GetCVarBool( "r_fullscreen" );
+	if ( forceWindow ) {
+		cvarSystem->SetCVarBool( "r_fullscreen", false );
 	}
+	R_InitOpenGL();
+	cvarSystem->SetCVarBool( "r_fullscreen", latch );
 
-
+	// regenerate all images
+	globalImages->ReloadAllImages();
 
 	// make sure the regeneration doesn't use anything no longer valid
 	tr.viewCount++;

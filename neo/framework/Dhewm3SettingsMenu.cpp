@@ -1757,9 +1757,7 @@ static void ApplyVideoSettings()
 	int msaa = ( msaaModeIndex > 0 ) ? ( 1 << msaaModeIndex ) : 0;
 	r_multiSamples.SetInteger( msaa );
 
-	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart\n" );
-	// TODO: if only fullscreen is changed, the following might suffice
-	//cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart partial windowed\n" );
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart partial\n" );
 }
 
 static void InitVideoOptionsMenu()
@@ -1859,7 +1857,6 @@ static void DrawVideoOptionsMenu()
 	if ( !VideoHasApplyableChanges() ) {
 		ImGui::BeginDisabled();
 		ImGui::Button( "Apply" );
-		// TODO: the tooltips backgrounds are transparent (due to this being disabled), which sucks
 		AddTooltip( "No changes were made, so there's nothing to apply" );
 		ImGui::SameLine();
 		ImGui::Button( "Reset" );
