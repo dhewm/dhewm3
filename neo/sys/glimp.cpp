@@ -668,6 +668,8 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 				return false;
 			}
 
+			SDL_SetWindowFullscreen( window, SDL_WINDOW_FULLSCREEN );
+
 			/* The SDL doku says, that SDL_SetWindowSize() shouldn't be
 			   used on fullscreen windows. But at least in my test with
 			   SDL 2.0.9 the subsequent SDL_GetWindowDisplayMode() fails

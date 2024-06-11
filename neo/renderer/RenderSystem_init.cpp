@@ -1994,7 +1994,7 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 			parms.stereo = false;
 
 			if ( GLimp_SetScreenParms( parms ) ) {
-				common->Printf( "'vid_restart partial' succeeded in changing resolution and/or fullscreen mode" );
+				common->Printf( "'vid_restart partial' succeeded in changing resolution and/or fullscreen mode\n" );
 				return;
 			}
 		}
