@@ -691,6 +691,8 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 		}
 	}
 
+	glConfig.isFullscreen = (SDL_GetWindowFlags( window ) & SDL_WINDOW_FULLSCREEN) != 0;
+
 	return true;
 
 #else // SDL1.2 - I don't feel like implementing this for old SDL, just do a full vid_restart, like before
