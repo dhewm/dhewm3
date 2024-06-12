@@ -400,6 +400,7 @@ void GLimp_GrabInput(int flags) {};
 bool GLimp_SetSwapInterval( int swapInterval ) { return false; }
 void GLimp_UpdateWindowSize() {}
 bool GLimp_SetWindowResizable( bool enableResizable ) { return false; }
+glimpParms_t GLimp_GetCurState() { glimpParms_t ret = {}; return ret; }
 
 #ifdef _MSC_VER
 #pragma warning(pop)

@@ -157,7 +157,7 @@ bool GLimp_Init(glimpParms_t parms) {
 	if (parms.fullScreen == 1)
 	{
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		if(r_fullscreenDesktop.GetBool())
+		if(parms.fullScreenDesktop)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		else
 #endif
@@ -279,10 +279,10 @@ try_again:
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
-		if ( r_fullscreen.GetBool() && r_fullscreenDesktop.GetBool() ) {
+		if ( parms.fullScreen && parms.fullScreenDesktop ) {
 			common->Printf( "Will create a pseudo-fullscreen window at the current desktop resolution\n" );
 		} else {
-			const char* windowMode = r_fullscreen.GetBool() ? "fullscreen-" : "";
+			const char* windowMode = parms.fullScreen ? "fullscreen-" : "";
 			common->Printf("Will create a %swindow with resolution %dx%d (r_mode = %d)\n",
 						   windowMode, parms.width, parms.height, r_mode.GetInteger());
 		}
@@ -609,34 +609,23 @@ GLimp_SetScreenParms
 */
 bool GLimp_SetScreenParms(glimpParms_t parms) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	int curMultiSamples = 0;
-	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) == 0 && curMultiSamples > 0 ) {
-		if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) != 0 ) {
-			curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
-		}
-	} else {
-		curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
-	}
+	glimpParms_t curState = GLimp_GetCurState();
 
-	if( parms.multiSamples != -1 && parms.multiSamples != curMultiSamples ) {
+	if( parms.multiSamples != -1 && parms.multiSamples != curState.multiSamples ) {
 		// if MSAA settings have changed, we really need a vid_restart
 		return false;
 	}
 
-	Uint32 winFlags = SDL_GetWindowFlags( window );
-	bool isFullscreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
-	bool isFullscreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
-
-	bool wantFullscreenDesktop = parms.fullScreen && r_fullscreenDesktop.GetBool();
+	bool wantFullscreenDesktop = parms.fullScreen && parms.fullScreenDesktop;
 
 	// TODO: parms.displayHz ?
 
-	if ( isFullscreenDesktop && wantFullscreenDesktop ) {
+	if ( curState.fullScreenDesktop && wantFullscreenDesktop ) {
 		return true; // nothing to do (resolution is not configurable in that mode)
 	}
 
 	if ( !parms.fullScreen ) { // we want windowed mode
-		if ( isFullscreen && SDL_SetWindowFullscreen( window, 0 ) != 0 ) {
+		if ( curState.fullScreen && SDL_SetWindowFullscreen( window, 0 ) != 0 ) {
 			common->Warning( "GLimp_SetScreenParms(): Couldn't switch to windowed mode, SDL error: %s\n", SDL_GetError() );
 			return false;
 		}
@@ -645,7 +634,7 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 	} else { // we want some kind of fullscreen mode
 
 		// it's probably safest to first switch to windowed mode
-		if ( isFullscreen ) {
+		if ( curState.fullScreen ) {
 			SDL_SetWindowFullscreen( window, 0 );
 		}
 
@@ -700,6 +689,50 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 #else // SDL1.2 - I don't feel like implementing this for old SDL, just do a full vid_restart, like before
 	return false;
 #endif
+}
+
+// sets a glimpParms_t based on the current true state (according to SDL)
+// Note: here, ret.fullScreenDesktop is only true if currently in fullscreen desktop mode
+//       (and ret.fullScreen is true as well)
+glimpParms_t GLimp_GetCurState()
+{
+	glimpParms_t ret = {};
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	int curMultiSamples = 0;
+	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) == 0 && curMultiSamples > 0 ) {
+		if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) != 0 ) {
+			curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+		}
+	} else {
+		curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+	}
+	ret.multiSamples = curMultiSamples;
+
+	Uint32 winFlags = SDL_GetWindowFlags( window );
+	ret.fullScreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
+	ret.fullScreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+	if ( ret.fullScreen && !ret.fullScreenDesktop ) { // I think SDL_GetWindowDisplayMode() is only for "real" fullscreen?
+		SDL_DisplayMode real_mode = {};
+		if ( SDL_GetWindowDisplayMode( window, &real_mode ) == 0 ) {
+			ret.width = real_mode.w;
+			ret.height = real_mode.h;
+			ret.displayHz = real_mode.refresh_rate;
+		}
+	}
+	if ( ret.width == 0 && ret.height == 0 ) { // windowed mode or SDL_GetWindowDisplayMode() failed
+		SDL_GetWindowSize( window, &ret.width, &ret.height );
+	}
+
+	assert( ret.width == glConfig.winWidth && ret.height == glConfig.winHeight );
+	assert( ret.fullScreen == glConfig.isFullscreen );
+
+#else
+	assert( 0 && "Don't use GLimp_GetCurState() with SDL1.2 !" );
+#endif
+
+	return ret;
 }
 
 /*

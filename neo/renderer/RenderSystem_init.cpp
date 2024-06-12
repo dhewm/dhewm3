@@ -366,7 +366,7 @@ static void R_CheckPortableExtensions( void ) {
 	glConfig.anisotropicAvailable = R_CheckExtension( "GL_EXT_texture_filter_anisotropic" );
 	if ( glConfig.anisotropicAvailable ) {
 		qglGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxTextureAnisotropy );
-		common->Printf( "   maxTextureAnisotropy: %f\n", glConfig.maxTextureAnisotropy );
+		common->Printf( "   maxTextureAnisotropy: %g\n", glConfig.maxTextureAnisotropy );
 	} else {
 		glConfig.maxTextureAnisotropy = 1;
 	}
@@ -689,6 +689,7 @@ void R_InitOpenGL( void ) {
 		parms.width = glConfig.vidWidth;
 		parms.height = glConfig.vidHeight;
 		parms.fullScreen = r_fullscreen.GetBool();
+		parms.fullScreenDesktop = r_fullscreenDesktop.GetBool();
 		parms.displayHz = r_displayRefresh.GetInteger();
 		parms.multiSamples = r_multiSamples.GetInteger();
 		parms.stereo = false;
@@ -1987,6 +1988,7 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 			parms.height = wantedHeight;
 
 			parms.fullScreen = ( forceWindow ) ? false : r_fullscreen.GetBool();
+			parms.fullScreenDesktop = r_fullscreenDesktop.GetBool();
 			parms.displayHz = r_displayRefresh.GetInteger();
 			// "vid_restart partial windowed" is used in case of errors to return to windowed mode
 			// before things explode more. in that case just keep whatever MSAA setting is active

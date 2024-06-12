@@ -1065,6 +1065,7 @@ typedef struct {
 	int			width;
 	int			height;
 	bool		fullScreen;
+	bool		fullScreenDesktop;
 	bool		stereo;
 	int			displayHz;
 	int			multiSamples;
@@ -1118,6 +1119,8 @@ void GLimp_GrabInput(int flags);
 bool GLimp_SetSwapInterval( int swapInterval );
 bool GLimp_SetWindowResizable( bool enableResizable );
 void GLimp_UpdateWindowSize();
+
+glimpParms_t GLimp_GetCurState();
 
 /*
 ====================================================================
