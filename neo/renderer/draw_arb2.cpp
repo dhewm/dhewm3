@@ -104,7 +104,7 @@ void	RB_ARB2_DrawInteraction( const drawInteraction_t *din ) {
 		float parm[4];
 		parm[0] = parm[1] = parm[2] = r_brightness.GetFloat();
 		parm[3] = 1.0/r_gamma.GetFloat(); // 1.0/gamma so the shader doesn't have to do this calculation
-		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 4, parm );
+		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_GAMMA_BRIGHTNESS, parm );
 	}
 
 	// set the textures
@@ -345,6 +345,10 @@ static progDef_t	progs[MAX_GLPROGS] = {
 	{ GL_VERTEX_PROGRAM_ARB, VPROG_GLASSWARP, "arbVP_glasswarp.txt" },
 	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_GLASSWARP, "arbFP_glasswarp.txt" },
 
+	// SteveL #3878: Particle softening applied by the engine
+	{ GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE, "soft_particle.vfp" }, // TODO: can we specify this in C++?
+	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_SOFT_PARTICLE, "soft_particle.vfp" },
+
 	// additional programs can be dynamically specified in materials
 };
 
@@ -468,10 +472,10 @@ void R_LoadARBProgram( int progIndex ) {
 			// POW might not work with a negative base (it looks wrong with intel's Linux driver)
 			// and clamping values >1 to 1 is ok because when writing to result.color
 			// it's clamped anyway and pow(base, exp) is always >= 1 for base >= 1
-			"MUL_SAT dhewm3tmpres.xyz, program.env[4], dhewm3tmpres;\n" // first multiply with brightness
-			"POW result.color.x, dhewm3tmpres.x, program.env[4].w;\n" // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
-			"POW result.color.y, dhewm3tmpres.y, program.env[4].w;\n" // (apparently POW only supports scalars, not whole vectors)
-			"POW result.color.z, dhewm3tmpres.z, program.env[4].w;\n"
+			"MUL_SAT dhewm3tmpres.xyz, program.env[21], dhewm3tmpres;\n" // first multiply with brightness
+			"POW result.color.x, dhewm3tmpres.x, program.env[21].w;\n" // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
+			"POW result.color.y, dhewm3tmpres.y, program.env[21].w;\n" // (apparently POW only supports scalars, not whole vectors)
+			"POW result.color.z, dhewm3tmpres.z, program.env[21].w;\n"
 			"MOV result.color.w, dhewm3tmpres.w;\n" // alpha remains unmodified
 			"\nEND\n\n"; // we add this block right at the end, replacing the original "END" string
 

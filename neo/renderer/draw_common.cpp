@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 
 extern idCVar r_useCarmacksReverse;
 extern idCVar r_useStencilOpSeparate;
+
+idCVar r_skipDepthCapture( "r_skipDepthCapture", "0", CVAR_RENDERER | CVAR_BOOL, "skip depth capture" ); // #3877
+
 /*
 =====================
 RB_BakeTextureMatrixIntoTexgen
@@ -313,7 +316,7 @@ void RB_FinishStageTexturing( const shaderStage_t *pStage, const drawSurf_t *sur
 			qglDisable( GL_FRAGMENT_PROGRAM_ARB );
 			qglDisable( GL_VERTEX_PROGRAM_ARB );
 			// Fixme: Hack to get around an apparent bug in ATI drivers.  Should remove as soon as it gets fixed.
-			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, 0 );
+			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, 0 ); // FIXME ...
 		} else {
 			qglDisable( GL_TEXTURE_GEN_S );
 			qglDisable( GL_TEXTURE_GEN_T );
@@ -513,6 +516,9 @@ void RB_T_FillDepthBuffer( const drawSurf_t *surf ) {
 
 }
 
+
+void RB_SetProgramEnvironment( bool isPostProcess ); // so RB_STD_FillDepthBuffer() can use it
+
 /*
 =====================
 RB_STD_FillDepthBuffer
@@ -553,6 +559,19 @@ void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 
 	RB_RenderDrawSurfListWithFunction( drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer );
 
+	// Make the early depth pass available to shaders. #3877
+	if ( backEnd.viewDef->renderView.viewID >= 0  // Suppress for lightgem rendering passes
+		 && !r_skipDepthCapture.GetBool() )
+	{
+		globalImages->currentDepthImage->CopyDepthbuffer( backEnd.viewDef->viewport.x1,
+														  backEnd.viewDef->viewport.y1,
+														  backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1,
+														  backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1, 
+														  true );
+		bool isPostProcess = false; // TODO
+		RB_SetProgramEnvironment( isPostProcess );
+	}
+
 	if ( backEnd.viewDef->numClipPlanes ) {
 		GL_SelectTexture( 1 );
 		globalImages->BindNull();
@@ -575,6 +594,19 @@ SHADER PASSES
 RB_SetProgramEnvironment
 
 Sets variables that can be used by all vertex programs
+
+[SteveL #3877] Note on the use of fragment program environmental variables.
+Parameters 0 and 1 are set here to allow conversion of screen coordinates to
+texture coordinates, for use when sampling _currentRender.
+Those same parameters 0 and 1, plus 2 and 3, are given entirely different
+meanings in draw_arb2.cpp while light interactions are being drawn.
+This function is called again before currentRender size is needed by post processing
+effects are done, so there's no clash.
+// TODO: I'm using 4 for gamma in shaders, so the following shit must be incremented by 1
+Only parameters 0..3 were in use before #3877 - and in dhewm3 also 4, for gamma in shader.
+Now I've used a new parameter 5 for the size of _currentDepth. It's needed throughout,
+including by light interactions, and its size might in theory differ from _currentRender.
+Parameters 6 and 7 are used by soft particles #3878. Note these can be freely reused by different draw calls.
 ==================
 */
 void RB_SetProgramEnvironment( bool isPostProcess ) {
@@ -643,8 +675,22 @@ void RB_SetProgramEnvironment( bool isPostProcess ) {
 			// (setting them to 1.0 makes them no-ops)
 			parm[0] = parm[1] = parm[2] = parm[3] = 1.0f;
 		}
-		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 4, parm );
+		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_GAMMA_BRIGHTNESS, parm );
 	}
+
+	// #3877: Allow shaders to access depth buffer. 
+	// Two useful ratios are packed into this parm: [0] and [1] hold the x,y multipliers you need to map a screen 
+	// coordinate (fragment position) to the depth image: those are simply the reciprocal of the depth 
+	// image size, which has been rounded up to a power of two. Slots [3] and [4] hold the ratio of the depth image
+	// size to the current render image size. These sizes can differ if the game crops the render viewport temporarily 
+	// during post-processing effects. The depth render is smaller during the effect too, but the depth image doesn't 
+	// need to be downsized, whereas the current render image does get downsized when it's captured by the game after 
+	// the skybox render pass. The ratio is needed to map between the two render images.
+	parm[0] = 1.0f / globalImages->currentDepthImage->uploadWidth;
+	parm[1] = 1.0f / globalImages->currentDepthImage->uploadHeight;
+	parm[2] = static_cast<float>(globalImages->currentRenderImage->uploadWidth) / globalImages->currentDepthImage->uploadWidth;
+	parm[3] = static_cast<float>(globalImages->currentRenderImage->uploadHeight) / globalImages->currentDepthImage->uploadHeight;
+	qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_CURDEPTH_RECIPR, parm );
 
 	//
 	// set eye position in global space
@@ -654,8 +700,6 @@ void RB_SetProgramEnvironment( bool isPostProcess ) {
 	parm[2] = backEnd.viewDef->renderView.vieworg[2];
 	parm[3] = 1.0;
 	qglProgramEnvParameter4fvARB( GL_VERTEX_PROGRAM_ARB, 1, parm );
-
-
 }
 
 /*
@@ -749,6 +793,9 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 		return;
 	}
 
+	// check whether we're drawing a soft particle surface #3878
+	const bool soft_particle = ( surf->dsFlags & DSF_SOFT_PARTICLE ) != 0;
+	
 	// get the expressions for conditionals / color / texcoords
 	regs = surf->shaderRegisters;
 
@@ -765,7 +812,8 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 		RB_EnterWeaponDepthHack();
 	}
 
-	if ( surf->space->modelDepthHack != 0.0f ) {
+	if ( surf->space->modelDepthHack != 0.0f && !soft_particle ) // #3878 soft particles don't want modelDepthHack, which is 
+	{                                                            // an older way to slightly "soften" particles
 		RB_EnterModelDepthHack( surf->space->modelDepthHack );
 	}
 
@@ -790,6 +838,9 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 		if ( ( pStage->drawStateBits & (GLS_SRCBLEND_BITS|GLS_DSTBLEND_BITS) ) == ( GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE ) ) {
 			continue;
 		}
+
+		// determine the blend mode (used by soft particles #3878)
+		const int src_blend = pStage->drawStateBits & GLS_SRCBLEND_BITS;
 
 		// see if we are a new-style stage
 		newShaderStage_t *newStage = pStage->newStage;
@@ -866,12 +917,148 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 			qglDisable( GL_VERTEX_PROGRAM_ARB );
 			qglDisable( GL_FRAGMENT_PROGRAM_ARB );
 			// Fixme: Hack to get around an apparent bug in ATI drivers.  Should remove as soon as it gets fixed.
-			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, 0 );
+			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, 0 ); // FIXME: ...
 
 			qglDisableClientState( GL_COLOR_ARRAY );
 			qglDisableVertexAttribArrayARB( 9 );
 			qglDisableVertexAttribArrayARB( 10 );
 			qglDisableClientState( GL_NORMAL_ARRAY );
+			continue;
+		}
+		else if ( soft_particle 
+				 && surf->particle_radius > 0.0f 
+				 && ( src_blend == GLS_SRCBLEND_ONE || src_blend == GLS_SRCBLEND_SRC_ALPHA ) 
+				 && tr.backEndRenderer == BE_ARB2
+				 && !r_skipNewAmbient.GetBool() )
+		{
+			// SteveL #3878. Particles are automatically softened by the engine, unless they have shader programs of 
+			// their own (i.e. are "newstages" handled above). This section comes after the newstage part so that if a
+			// designer has specified their own shader programs, those will be used instead of the soft particle program.
+			if ( pStage->vertexColor == SVC_IGNORE )
+			{
+				// Ignoring vertexColor is not recommended for particles. The particle system uses vertexColor for fading.
+				// However, there are existing particle effects that don't use it, in which case we default to using the 
+				// rgb color modulation specified in the material like the "old stages" do below. 
+				color[0] = regs[pStage->color.registers[0]];
+				color[1] = regs[pStage->color.registers[1]];
+				color[2] = regs[pStage->color.registers[2]];
+				color[3] = regs[pStage->color.registers[3]];
+				qglColor4fv( color );
+			}
+			else
+			{
+				// A properly set-up particle shader
+				qglColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( idDrawVert ), (void *)&ac->color );
+				qglEnableClientState( GL_COLOR_ARRAY );
+			}
+
+			GL_State( pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS ); // Disable depth clipping. The fragment program will
+																	  // handle it to allow overdraw.
+			//GL_State( pStage->drawStateBits );
+
+			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE );
+			qglEnable( GL_VERTEX_PROGRAM_ARB );
+
+			// Bind image and _currentDepth
+			GL_SelectTexture( 0 );
+			pStage->texture.image->Bind();
+			GL_SelectTexture( 1 );
+			globalImages->currentDepthImage->Bind();
+
+			qglBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, FPROG_SOFT_PARTICLE );
+			qglEnable( GL_FRAGMENT_PROGRAM_ARB );
+
+			// Set up parameters for fragment program
+			const char* srcblendstr = "???";
+			if ( src_blend >= 0 && src_blend <= 9 ) {
+				const char* blendModes[] = {
+					"ONE",
+					"ZERO",
+					"!! INVALID !!",
+					"DST_COLOR",
+					"ONE_MINUS_DST_COLOR",
+					"SRC_ALPHA",
+					"ONE_MINUS_SRC_ALPHA",
+					"DST_ALPHA",
+					"ONE_MINUS_DST_ALPHA",
+					"ALPHA_SATURATE"
+				};
+				srcblendstr = blendModes[src_blend];
+			}
+			
+			/*
+			int dst_blend =
+
+			const int GLS_DSTBLEND_ZERO						= 0x0;
+			const int GLS_DSTBLEND_ONE						= 0x00000020;
+			const int GLS_DSTBLEND_SRC_COLOR				= 0x00000030;
+			const int GLS_DSTBLEND_ONE_MINUS_SRC_COLOR		= 0x00000040;
+			const int GLS_DSTBLEND_SRC_ALPHA				= 0x00000050;
+			const int GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA		= 0x00000060;
+			const int GLS_DSTBLEND_DST_ALPHA				= 0x00000070;
+			const int GLS_DSTBLEND_ONE_MINUS_DST_ALPHA		= 0x00000080;
+			const int GLS_DSTBLEND_BITS						= 0x000000f0;
+			*/
+
+
+			printf("XX mat: %s (%s), src_blend = %d (%s)\n", shader->GetName(), shader->GetDescription(), src_blend, srcblendstr);
+
+			// program.env[5] is the particle radius, given as { radius, 1/(faderange), 1/radius }
+			float fadeRange;
+			// fadeRange is the particle diameter for alpha blends (like smoke), but the particle radius for additive
+			// blends (light glares), because additive effects work differently. Fog is half as apparent when a wall
+			// is in the middle of it. Light glares lose no visibility when they have something to reflect off. See 
+			// issue #3878 for diagram
+			if ( src_blend == GLS_SRCBLEND_SRC_ALPHA ) // an alpha blend material
+			{
+				fadeRange = surf->particle_radius * 2.0f;
+			}
+			else if ( src_blend == GLS_SRCBLEND_ONE ) // an additive (blend add) material
+			{
+				fadeRange = surf->particle_radius;
+			}
+
+			float parm[4] = {
+				surf->particle_radius,
+				1.0f / ( fadeRange ),
+				1.0f / surf->particle_radius,
+				0.0f
+			};
+			qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_PARTICLE_RADIUS, parm );
+
+			// program.env[6] is the color channel mask. It gets added to the fade multiplier, so adding 1 
+			//    to a channel will make sure it doesn't get faded at all. Particles with additive blend 
+			//    need their RGB channels modifying to blend them out. Particles with an alpha blend need 
+			//    their alpha channel modifying.
+			if ( src_blend == GLS_SRCBLEND_SRC_ALPHA ) // an alpha blend material
+			{
+				parm[0] = parm[1] = parm[2] = 1.0f; // Leave the rgb channels at full strength when fading
+				parm[3] = 0.0f;						// but fade the alpha channel
+			}
+			else if ( src_blend == GLS_SRCBLEND_ONE ) // an additive (blend add) material
+			{
+				parm[0] = parm[1] = parm[2] = 0.0f; // Fade the rgb channels but
+				parm[3] = 1.0f;						// leave the alpha channel at full strength
+			}
+			//parm[0] = parm[1] = parm[2] = 0.0f; // XXX hack
+			//parm[3] = 1.0f; // XXX hack
+			qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_PARTICLE_COLCHAN_MASK, parm );
+			
+			// draw it
+			RB_DrawElementsWithCounters( tri );
+
+			// Clean up GL state
+			GL_SelectTexture( 1 );
+			globalImages->BindNull();
+			GL_SelectTexture( 0 );
+			globalImages->BindNull();
+			
+			qglDisable( GL_VERTEX_PROGRAM_ARB );
+			qglDisable( GL_FRAGMENT_PROGRAM_ARB );
+
+			if ( pStage->vertexColor != SVC_IGNORE ) {
+				qglDisableClientState( GL_COLOR_ARRAY );
+			}
 			continue;
 		}
 
@@ -972,7 +1159,8 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 	if ( shader->TestMaterialFlag(MF_POLYGONOFFSET) ) {
 		qglDisable( GL_POLYGON_OFFSET_FILL );
 	}
-	if ( surf->space->weaponDepthHack || surf->space->modelDepthHack != 0.0f ) {
+	if ( surf->space->weaponDepthHack || ( !soft_particle && surf->space->modelDepthHack != 0.0f ) ) // #3878 soft particles
+	{
 		RB_LeaveDepthHack();
 	}
 }
