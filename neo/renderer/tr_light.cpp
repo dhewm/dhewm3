@@ -35,7 +35,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#include "Model_local.h"
+
+
 static const float CHECK_BOUNDS_EPSILON = 1.0f;
+
+static idCVar r_useSoftParticles( "r_useSoftParticles", "1", CVAR_RENDERER | CVAR_BOOL, "soften particle transitions when player walks through them or they cross solid geometry" );
 
 /*
 ===========================================================================================
@@ -673,6 +678,8 @@ void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const 
 	drawSurf->material = shader;
 	drawSurf->scissorRect = scissor;
 	drawSurf->dsFlags = 0;
+	drawSurf->particle_radius = 0.0f; // #3878
+
 	if ( viewInsideShadow ) {
 		drawSurf->dsFlags |= DSF_VIEW_INSIDE_SHADOW;
 	}
@@ -1186,7 +1193,8 @@ R_AddDrawSurf
 =================
 */
 void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const renderEntity_t *renderEntity,
-					const idMaterial *shader, const idScreenRect &scissor ) {
+					const idMaterial *shader, const idScreenRect &scissor, const float soft_particle_radius )
+{
 	drawSurf_t		*drawSurf;
 	const float		*shaderParms;
 	static float	refRegs[MAX_EXPRESSION_REGISTERS];	// don't put on stack, or VC++ will do a page touch
@@ -1198,7 +1206,17 @@ void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const 
 	drawSurf->material = shader;
 	drawSurf->scissorRect = scissor;
 	drawSurf->sort = shader->GetSort() + tr.sortOffset;
-	drawSurf->dsFlags = 0;
+
+	if ( soft_particle_radius != -1.0f )	// #3878
+	{
+		drawSurf->dsFlags = DSF_SOFT_PARTICLE;
+		drawSurf->particle_radius = soft_particle_radius;
+	}
+	else
+	{
+		drawSurf->dsFlags = 0;
+		drawSurf->particle_radius = 0.0f;
+	}
 
 	// bumping this offset each time causes surfaces with equal sort orders to still
 	// deterministically draw in the order they are added
@@ -1218,7 +1236,7 @@ void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const 
 		}
 		tr.viewDef->drawSurfs = (drawSurf_t **)R_FrameAlloc( tr.viewDef->maxDrawSurfs * sizeof( tr.viewDef->drawSurfs[0] ) );
 		if(count > 0)
-			memcpy( tr.viewDef->drawSurfs, old, count ); // XXX null pointer passed as argument 2, which is declared to never be null
+			memcpy( tr.viewDef->drawSurfs, old, count );
 	}
 	tr.viewDef->drawSurfs[tr.viewDef->numDrawSurfs] = drawSurf;
 	tr.viewDef->numDrawSurfs++;
@@ -1423,8 +1441,21 @@ static void R_AddAmbientDrawsurfs( viewEntity_t *vEntity ) {
 				vertexCache.Touch( tri->indexCache );
 			}
 
+			// Soft Particles -- SteveL #3878
+			float particle_radius = -1.0f;		// Default = disallow softening, but allow modelDepthHack if specified in the decl.
+			if ( r_useSoftParticles.GetBool()
+				&& !shader->ReceivesLighting()							// don't soften surfaces that are meant to be solid
+				&& tr.viewDef->renderView.viewID >= 0 ) // Skip during "invisible" rendering passes (e.g. lightgem)
+			{
+				const idRenderModelPrt* prt = dynamic_cast<const idRenderModelPrt*>( def->parms.hModel ); // yuck.
+				if ( prt )
+				{
+					particle_radius = prt->SofteningRadius( surf->id );
+				}
+			}
+
 			// add the surface for drawing
-			R_AddDrawSurf( tri, vEntity, &vEntity->entityDef->parms, shader, vEntity->scissorRect );
+			R_AddDrawSurf( tri, vEntity, &vEntity->entityDef->parms, shader, vEntity->scissorRect, particle_radius );
 
 			// ambientViewCount is used to allow light interactions to be rejected
 			// if the ambient surface isn't visible at all
@@ -1511,6 +1542,14 @@ void R_AddModelSurfaces( void ) {
 				tr.viewDef->floatTime = oldFloatTime;
 				tr.viewDef->renderView.time = oldTime;
 			}
+			continue;
+		}
+
+		// Don't let particle entities re-instantiate their dynamic model during non-visible 
+		// views (in TDM, the light gem render) -- SteveL #3970
+		if ( tr.viewDef->renderView.viewID < 0
+			&& dynamic_cast<const idRenderModelPrt*>( vEntity->entityDef->parms.hModel ) != NULL ) // yuck.
+		{
 			continue;
 		}
 
