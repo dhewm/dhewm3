@@ -560,8 +560,8 @@ void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	RB_RenderDrawSurfListWithFunction( drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer );
 
 	// Make the early depth pass available to shaders. #3877
-	if ( backEnd.viewDef->renderView.viewID >= 0  // Suppress for lightgem rendering passes
-		 && !r_skipDepthCapture.GetBool() )
+	if ( /*backEnd.viewDef->renderView.viewID >= 0  // Suppress for lightgem rendering passes
+		 &&*/ !r_skipDepthCapture.GetBool() )
 	{
 		globalImages->currentDepthImage->CopyDepthbuffer( backEnd.viewDef->viewport.x1,
 														  backEnd.viewDef->viewport.y1,
@@ -986,25 +986,26 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 				srcblendstr = blendModes[src_blend];
 			}
 			
-			/*
-			int dst_blend =
 
-			const int GLS_DSTBLEND_ZERO						= 0x0;
-			const int GLS_DSTBLEND_ONE						= 0x00000020;
-			const int GLS_DSTBLEND_SRC_COLOR				= 0x00000030;
-			const int GLS_DSTBLEND_ONE_MINUS_SRC_COLOR		= 0x00000040;
-			const int GLS_DSTBLEND_SRC_ALPHA				= 0x00000050;
-			const int GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA		= 0x00000060;
-			const int GLS_DSTBLEND_DST_ALPHA				= 0x00000070;
-			const int GLS_DSTBLEND_ONE_MINUS_DST_ALPHA		= 0x00000080;
-			const int GLS_DSTBLEND_BITS						= 0x000000f0;
-			*/
+			int dst_blend = pStage->drawStateBits & GLS_DSTBLEND_BITS;
+			const char* dstblend = "???";
+			switch ( dst_blend ) {
+#define MY_CASE(X)  case GLS_DSTBLEND_ ##X : dstblend = #X; break;
+				MY_CASE(ZERO)
+				MY_CASE(ONE)
+				MY_CASE(SRC_COLOR)
+				MY_CASE(ONE_MINUS_SRC_COLOR)
+				MY_CASE(SRC_ALPHA)
+				MY_CASE(ONE_MINUS_SRC_ALPHA)
+				MY_CASE(DST_ALPHA)
+				MY_CASE(ONE_MINUS_DST_ALPHA)
+#undef MY_CASE
+			}
 
-
-			printf("XX mat: %s (%s), src_blend = %d (%s)\n", shader->GetName(), shader->GetDescription(), src_blend, srcblendstr);
+			//printf("XX mat: %s, src_blend = %s dest_blend = %s radius = %g\n", shader->GetName(), srcblendstr, dstblend, surf->particle_radius);
 
 			// program.env[5] is the particle radius, given as { radius, 1/(faderange), 1/radius }
-			float fadeRange;
+			float fadeRange = 1.0f;
 			// fadeRange is the particle diameter for alpha blends (like smoke), but the particle radius for additive
 			// blends (light glares), because additive effects work differently. Fog is half as apparent when a wall
 			// is in the middle of it. Light glares lose no visibility when they have something to reflect off. See 
@@ -1040,7 +1041,7 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 				parm[0] = parm[1] = parm[2] = 0.0f; // Fade the rgb channels but
 				parm[3] = 1.0f;						// leave the alpha channel at full strength
 			}
-			//parm[0] = parm[1] = parm[2] = 0.0f; // XXX hack
+			//parm[0] = parm[1] = parm[2] = 1.0f; // XXX hack
 			//parm[3] = 1.0f; // XXX hack
 			qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_PARTICLE_COLCHAN_MASK, parm );
 			
