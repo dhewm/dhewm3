@@ -560,8 +560,8 @@ void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	RB_RenderDrawSurfListWithFunction( drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer );
 
 	// Make the early depth pass available to shaders. #3877
-	if ( /*backEnd.viewDef->renderView.viewID >= 0  // Suppress for lightgem rendering passes
-		 &&*/ !r_skipDepthCapture.GetBool() )
+	if ( backEnd.viewDef->renderView.viewID >= 0  // Suppress for lightgem rendering passes
+		 && !r_skipDepthCapture.GetBool() )
 	{
 		globalImages->currentDepthImage->CopyDepthbuffer( backEnd.viewDef->viewport.x1,
 														  backEnd.viewDef->viewport.y1,
@@ -812,7 +812,7 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 		RB_EnterWeaponDepthHack();
 	}
 
-	if ( surf->space->modelDepthHack != 0.0f && !soft_particle ) // #3878 soft particles don't want modelDepthHack, which is 
+	if ( surf->space->modelDepthHack != 0.0f && !soft_particle ) // #3878 soft particles don't want modelDepthHack, which is
 	{                                                            // an older way to slightly "soften" particles
 		RB_EnterModelDepthHack( surf->space->modelDepthHack );
 	}
@@ -954,7 +954,6 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 
 			GL_State( pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS ); // Disable depth clipping. The fragment program will
 																	  // handle it to allow overdraw.
-			//GL_State( pStage->drawStateBits );
 
 			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE );
 			qglEnable( GL_VERTEX_PROGRAM_ARB );
