@@ -78,6 +78,7 @@ typedef struct glconfig_s {
 	bool				twoSidedStencilAvailable;
 	bool				textureNonPowerOfTwoAvailable;
 	bool				depthBoundsTestAvailable;
+	bool				glDebugOutputAvailable;
 
 	// GL framebuffer size, see also winWidth and winHeight
 	int					vidWidth, vidHeight;	// passed to R_BeginFrame
@@ -94,6 +95,8 @@ typedef struct glconfig_s {
 	//     used if r_fillWindowAlphaChan == -1
 	bool				shouldFillWindowAlpha;
 	bool				isWayland; // DG: for other wayland-specific hacks.. (does *not* detect XWayland!)
+
+	bool				haveDebugContext;
 
 	// For some reason people decided that we need displays with ultra small pixels,
 	// so everything rendered on them must be scaled up to be legible.

@@ -119,6 +119,9 @@ extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC	qglProgramLocalParameter4fvARB;
 // GL_EXT_depth_bounds_test
 extern PFNGLDEPTHBOUNDSEXTPROC              qglDepthBoundsEXT;
 
+// GL_ARB_debug_output
+extern PFNGLDEBUGMESSAGECALLBACKARBPROC    qglDebugMessageCallbackARB;
+
 #if defined( _WIN32 ) && defined(ID_ALLOW_TOOLS)
 
 extern  BOOL(WINAPI * qwglSwapBuffers)(HDC);
