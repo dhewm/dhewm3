@@ -952,8 +952,13 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 				qglEnableClientState( GL_COLOR_ARRAY );
 			}
 
-			GL_State( pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS ); // Disable depth clipping. The fragment program will
+
+			//GL_State( pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS ); // Disable depth clipping. The fragment program will
 																	  // handle it to allow overdraw.
+			int dsbits = pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS;
+			dsbits &= ~(GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
+			//dsbits |= GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO; both values are 0, so this would be a noop
+			GL_State( dsbits );
 
 			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE );
 			qglEnable( GL_VERTEX_PROGRAM_ARB );
