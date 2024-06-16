@@ -463,16 +463,25 @@ void RB_ShowDepthBuffer( void ) {
 
 	qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback );
 
-#if 0
-	for ( i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++ ) {
-		((byte *)depthReadback)[i*4] =
-		((byte *)depthReadback)[i*4+1] =
-		((byte *)depthReadback)[i*4+2] = 255 * ((float *)depthReadback)[i];
-		((byte *)depthReadback)[i*4+3] = 1;
-	}
-#endif
 
-	qglDrawPixels( glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, depthReadback );
+	for ( int i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++ ) {
+		float& px = ((float *)depthReadback)[i];
+		float d = px;
+		// the following calculation is based on how the TDM soft particle shader translates the depth value to doom units
+
+		// 0.9995 is practically infinite distance, clamping to 0.9994 clamps to max 30k doom units,
+		// which is more than enough (and prevents a potential division by 0 below)
+		d = (d < 0.9994f) ? d : 0.9994f;
+
+		d = d - 0.9995f; // d is now negative, between -0.0001 and -0.9995
+		d = 1.0f / d;
+		// d *= -3.0f; // this would translate d to distance in doom units, doing it together with the next step
+
+		d *= (-3.0f / 3000.0f); // now 3000 units is 1.0, i.e. completely white (=> more details for closer distances)
+		px = d;
+	}
+
+	qglDrawPixels( glConfig.vidWidth, glConfig.vidHeight, GL_LUMINANCE, GL_FLOAT, depthReadback );
 	R_StaticFree( depthReadback );
 }
 
