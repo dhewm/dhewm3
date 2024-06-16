@@ -983,7 +983,8 @@ extern idCVar r_materialOverride;		// override all materials
 
 extern idCVar r_debugRenderToTexture;
 
-extern idCVar r_glDebugContext;
+extern idCVar r_glDebugContext; // DG: use debug context to call logging callbacks on GL errors
+extern idCVar r_skipDepthCapture; // DG: disable capturing depth buffer, used for soft particles
 
 /*
 ====================================================================
