@@ -210,6 +210,11 @@ This can be configured with the following CVars:
   at the end of each frame. Needed at least when using Wayland.  
   `1`: do this, `0`: don't do it, `-1`: let dhewm3 decide (default)
 
+- `r_useSoftParticles` Soften particle transitions when player walks through them or they cross solid geometry.
+   Needs r_enableDepthCapture. Can slow down rendering! `1`: enable (default), `0`: disable
+- `r_enableDepthCapture` Enable capturing depth buffer to texture. `0`: disable, `1`: enable,  
+  `-1`: enable automatically (if soft particles are enabled; the default).   
+   This can be used in custom materials with the "_currentDepth" texture.
 - `r_useCarmacksReverse` Use Z-Fail ("Carmack's Reverse") when rendering shadows (default `1`)
 - `r_useStencilOpSeparate` Use glStencilOpSeparate() (if available) when rendering shadow (default `1`)
 - `r_scaleMenusTo43` Render full-screen menus in 4:3 by adding black bars on the left/right if necessary (default `1`)

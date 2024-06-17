@@ -453,7 +453,12 @@ void RB_ShowDepthBuffer( void ) {
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
 	qglColor3f( 1, 1, 1 );
 
-	if ( !r_skipDepthCapture.GetBool() ) {
+	bool haveDepthCapture = r_enableDepthCapture.GetInteger() == 1
+			|| (r_enableDepthCapture.GetInteger() == -1 && r_useSoftParticles.GetBool());
+
+	if ( haveDepthCapture ) {
+		//GL_SelectTexture( 0 );
+		//qglEnable(GL_TEXTURE_2D);
 		globalImages->currentDepthImage->Bind();
 
 		const float x=0, y=0, w=1, h=1;

@@ -1142,6 +1142,14 @@ static void InitBindingEntries()
 		bindingEntries.Append( BindingEntry( bet ) );
 	}
 
+	// player.def defines, in player_base, used by player_doommarine and player_doommarine_mp (and player_doommarine_ctf),
+	// "def_weapon0"  "weapon_fists", "def_weapon1"  "weapon_pistol" etc
+	// => get all those definitions (up to MAX_WEAPONS=16) from Player, and then
+	//    get the entities for the corresponding keys ("weapon_fists" etc),
+	//    which should have an entry like "inv_name"  "Pistol" (could also be #str_00100207 though!)
+
+	// hardcorps uses: idCVar pm_character("pm_character", "0", CVAR_GAME | CVAR_BOOL, "Change Player character. 1 = Scarlet. 0 = Doom Marine");
+	// but I guess (hope) they use the same weapons..
 	const idDict* playerDict = GetEntityDefDict( "player_doommarine" );
 	const idDict* playerDictMP = GetEntityDefDict( "player_doommarine_mp" );
 	bool impulse27used = false;
@@ -1209,15 +1217,6 @@ static void InitBindingEntries()
 		idStr impName = idStr::Format( "_impulse%d", i );
 		bindingEntries.Append( BindingEntry( impName, impName ) );
 	}
-
-	// player.def defines, in player_base, used by player_doommarine and player_doommarine_mp (and player_doommarine_ctf),
-	// "def_weapon0"  "weapon_fists", "def_weapon1"  "weapon_pistol" etc
-	// => get all those definitions (up to MAX_WEAPONS=16) from Player, and then
-	//    get the entities for the corresponding keys ("weapon_fists" etc),
-	//    which should have an entry like "inv_name"  "Pistol" (could also be #str_00100207 though!)
-
-	// hardcorps uses: idCVar pm_character("pm_character", "0", CVAR_GAME | CVAR_BOOL, "Change Player character. 1 = Scarlet. 0 = Doom Marine");
-	// but I guess (hope) they use the same weapons..
 }
 
 // this initialization should be done every time the bindings tab is opened,
@@ -1666,8 +1665,31 @@ static CVarOption videoOptionsImmediately[] = {
 	} ),
 	CVarOption( "r_screenshotPngCompression", "Compression level for PNG screenshots", OT_INT, 0, 9 ),
 	CVarOption( "r_screenshotJpgQuality", "Quality level for JPG screenshots", OT_INT, 1, 100 ),
+	CVarOption( "r_useSoftParticles", []( idCVar& cvar ) {
+		bool enable = cvar.GetBool();
+		if ( ImGui::Checkbox( "Use Soft Particles", &enable ) ) {
+			cvar.SetBool( enable );
+			if ( enable && r_enableDepthCapture.GetInteger() == 0 ) {
+				r_enableDepthCapture.SetInteger(-1);
+				D3::ImGuiHooks::ShowWarningOverlay( "Capturing the Depth Buffer was disabled.\nEnabled it because soft particles need it!" );
+			}
+		}
+		AddCVarOptionTooltips( cvar );
+	} ),
 
 	CVarOption( "Advanced Options" ),
+	CVarOption( "r_enableDepthCapture", []( idCVar& cvar ) {
+			int sel = idMath::ClampInt( -1, 1, cvar.GetInteger() ) + 1; // +1 for -1..1 to 0..2
+			if ( ImGui::Combo( "Capture Depth Buffer to Texture", &sel, "Auto (enable if needed for Soft Particles)\0Disabled\0Always Enabled\0" ) ) {
+				--sel; // back to -1..1 from 0..2
+				cvar.SetInteger( sel );
+				if ( sel == 0 && r_useSoftParticles.GetBool() ) {
+					r_useSoftParticles.SetBool( false );
+					D3::ImGuiHooks::ShowWarningOverlay( "You disabled capturing the Depth Buffer.\nDisabling Soft Particles because they need the depth buffer texture." );
+				}
+			}
+			AddCVarOptionTooltips( cvar );
+		}),
 	CVarOption( "r_skipNewAmbient", "Disable High Quality Special Effects", OT_BOOL ),
 	CVarOption( "r_shadows", "Enable Shadows", OT_BOOL ),
 	CVarOption( "r_skipSpecular", "Disable Specular", OT_BOOL ),
@@ -2262,7 +2284,7 @@ void DrawGameOptionsMenu()
 			playerNameIso[40] = '\0'; // limit to 40 chars, like the original menu
 			ui_nameVar->SetString( playerNameIso );
 			// update the playerNameBuf to reflect the name as it is now: limited to 40 chars
-			// and possibly containing '?' from non-translatable unicode chars
+			// and possibly containing '!' from non-translatable unicode chars
 			D3_ISO8859_1toUTF8( ui_nameVar->GetString(), playerNameBuf, sizeof(playerNameBuf) );
 		} else {
 			D3::ImGuiHooks::ShowWarningOverlay( "Player Name way too long (max 40 chars) or contains invalid UTF-8 encoding!" );
