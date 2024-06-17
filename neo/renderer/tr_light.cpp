@@ -40,8 +40,6 @@ If you have questions concerning this license or the applicable additional terms
 
 static const float CHECK_BOUNDS_EPSILON = 1.0f;
 
-static idCVar r_useSoftParticles( "r_useSoftParticles", "1", CVAR_RENDERER | CVAR_BOOL, "soften particle transitions when player walks through them or they cross solid geometry" );
-
 /*
 ===========================================================================================
 
