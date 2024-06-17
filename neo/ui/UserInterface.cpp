@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "ui/UserInterfaceLocal.h"
 
+#include "renderer/tr_local.h" // glConfig for winWidth/winHeight
+
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 extern idCVar r_scaleMenusTo43; // DG: for the "scale menus to 4:3" hack
 
@@ -355,12 +357,14 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
 			//     by 640/w, because the GUI pretends that everything is 640x480
 			//     even if the actual resolution is higher => mouse moved too fast
-			float w = renderSystem->GetScreenWidth();
-			float h = renderSystem->GetScreenHeight();
+			float w = glConfig.winWidth;
+			float h = glConfig.winHeight;
 			if( w <= 0.0f || h <= 0.0f ) {
 				w = VIRTUAL_WIDTH;
 				h = VIRTUAL_HEIGHT;
 			}
+			const float realW = w;
+			const float realH = h;
 
 			if(r_scaleMenusTo43.GetBool()) {
 				// in case we're scaling menus to 4:3, we need to take that into account
@@ -387,8 +391,8 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 				// Note: In case of scaling to 4:3, w and h are already scaled down
 				//       to the 4:3 size that fits into the real resolution.
 				//       Otherwise xOffset/yOffset will just be 0
-				float xOffset = (renderSystem->GetScreenWidth()  - w) * 0.5f;
-				float yOffset = (renderSystem->GetScreenHeight() - h) * 0.5f;
+				float xOffset = (realW  - w) * 0.5f;
+				float yOffset = (realH - h) * 0.5f;
 				// offset the mouse coordinates into 4:3 area and scale down to 640x480
 				// yes, result could be negative, doesn't matter, code below checks that anyway
 				cursorX = (event->evValue  - xOffset) * (float(VIRTUAL_WIDTH)/w);

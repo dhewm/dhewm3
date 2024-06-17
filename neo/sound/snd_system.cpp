@@ -80,11 +80,52 @@ idCVar idSoundSystemLocal::s_decompressionLimit( "s_decompressionLimit", "6", CV
 
 idCVar idSoundSystemLocal::s_alReverbGain( "s_alReverbGain", "0.5", CVAR_SOUND | CVAR_FLOAT | CVAR_ARCHIVE, "reduce reverb strength (0.0 to 1.0)", 0.0f, 1.0f );
 
+idCVar idSoundSystemLocal::s_scaleDownAndClamp( "s_scaleDownAndClamp", "1", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "Clamp and reduce volume of all sounds to prevent clipping or temporary downscaling by OpenAL. When disabling this, you probably want to explicitly disable s_alOutputLimiter" );
+idCVar idSoundSystemLocal::s_alOutputLimiter( "s_alOutputLimiter", "-1", CVAR_SOUND | CVAR_INTEGER | CVAR_ARCHIVE, "Configure OpenAL's output-limiter. 0: Disable, 1: Enable, -1: Let OpenAL decide (default)" );
+idCVar idSoundSystemLocal::s_alHRTF( "s_alHRTF", "-1", CVAR_SOUND | CVAR_INTEGER | CVAR_ARCHIVE, "Enable HRTF for better surround sound with stereo *headphones*. 0: Disable, 1: Enable, -1: Let OpenAL decide (default)" );
+
 bool idSoundSystemLocal::useEFXReverb = false;
 int idSoundSystemLocal::EFXAvailable = -1;
 
+bool idSoundSystemLocal::alHRTFavailable = false;
+bool idSoundSystemLocal::alOutputLimiterAvailable = false;
+bool idSoundSystemLocal::alEnumerateAllAvailable = false;
+bool idSoundSystemLocal::alIsDisconnectAvailable = false;
+bool idSoundSystemLocal::alOutputModeAvailable = false;
+
+
 idSoundSystemLocal	soundSystemLocal;
 idSoundSystem	*soundSystem  = &soundSystemLocal;
+
+enum { D3_ALC_ATTRLIST_LEN = 6 }; // currently we set at most two setting-pairs + terminating 0, 0
+
+static ALCint cvarToAlcBoolish( const idCVar& cvar )
+{
+	int val = cvar.GetInteger();
+	return (val < 0) ? ALC_DONT_CARE_SOFT : ( (val > 0) ? ALC_TRUE : ALC_FALSE );
+}
+
+// initialize attrList for alcCreateContext() or alcResetDeviceSOFT(),
+// based on s_alHRTF and s_alOutputLimiter
+static void SetAlcAttrList( ALCint attrList[D3_ALC_ATTRLIST_LEN] )
+{
+	int idx = 0;
+	// ALC_HRTF_SOFT, ALC_TRUE            // or ALC_FALSE or ALC_DONT_CARE_SOFT
+	if ( idSoundSystemLocal::alHRTFavailable ) {
+		attrList[idx++] = ALC_HRTF_SOFT;
+		attrList[idx++] = cvarToAlcBoolish( idSoundSystemLocal::s_alHRTF );
+	}
+	// TODO: ALC_HRTF_ID_SOFT, index  // to select an HRTF model?
+
+	// ALC_OUTPUT_LIMITER_SOFT, ALC_FALSE // or ALC_FALSE or ALC_DONT_CARE_SOFT
+	if ( idSoundSystemLocal::alOutputLimiterAvailable ) {
+		attrList[idx++] = ALC_OUTPUT_LIMITER_SOFT;
+		attrList[idx++] = cvarToAlcBoolish( idSoundSystemLocal::s_alOutputLimiter );
+	}
+	// terminating 0, 0
+	attrList[idx++] = 0;
+	attrList[idx++] = 0;
+}
 
 /*
 ===============
@@ -347,7 +388,8 @@ void idSoundSystemLocal::Init() {
 		else if (!idStr::Icmp(device, "default"))
 			device = NULL;
 
-		if ( alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") ) {
+		alEnumerateAllAvailable = alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT");
+		if ( alEnumerateAllAvailable ) {
 			const char *devs = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
 			bool found = false;
 
@@ -381,7 +423,32 @@ void idSoundSystemLocal::Init() {
 			common->Printf( "OpenAL: failed to open default device (0x%x), disabling sound\n", alGetError() );
 			openalContext = NULL;
 		} else {
-			openalContext = alcCreateContext( openalDevice, NULL );
+			// DG: extensions needed for CheckDeviceAndRecoverIfNeeded(), HRTF, output-limiter, the info in the settings menu, ...
+			alHRTFavailable = alcIsExtensionPresent( openalDevice, "ALC_SOFT_HRTF" ) != AL_FALSE;
+			alIsDisconnectAvailable = alcIsExtensionPresent( openalDevice, "ALC_EXT_disconnect" ) != AL_FALSE;
+			if ( alHRTFavailable ) {
+				common->Printf( "OpenAL: found extension for HRTF\n" );
+				alcResetDeviceSOFT = (LPALCRESETDEVICESOFT)alcGetProcAddress( openalDevice, "alcResetDeviceSOFT" );
+				if ( alIsDisconnectAvailable ) {
+					common->Printf( "OpenAL: found extensions for resetting disconnected devices\n" );
+				}
+				alOutputLimiterAvailable = alcIsExtensionPresent( openalDevice, "ALC_SOFT_output_limiter" ) != AL_FALSE;
+				if ( alOutputLimiterAvailable ) {
+					common->Printf( "OpenAL: found extension to control output-limiter\n" );
+				}
+			} else {
+				alOutputLimiterAvailable = false;
+				alcResetDeviceSOFT = NULL;
+			}
+			alOutputModeAvailable = alcIsExtensionPresent( openalDevice, "ALC_SOFT_output_mode" );
+
+			ALCint attrList[D3_ALC_ATTRLIST_LEN] = {};
+			SetAlcAttrList( attrList );
+
+			s_alHRTF.ClearModified();
+			s_alOutputLimiter.ClearModified();
+
+			openalContext = alcCreateContext( openalDevice, attrList );
 			if ( openalContext == NULL ) {
 				common->Printf( "OpenAL: failed to create context (0x%x), disabling sound\n", alcGetError(openalDevice) );
 				alcCloseDevice( openalDevice );
@@ -403,14 +470,6 @@ void idSoundSystemLocal::Init() {
 		common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR) );
 		common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER) );
 		common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION) );
-
-		// DG: extensions needed for CheckDeviceAndRecoverIfNeeded()
-		bool hasAlcExtDisconnect = alcIsExtensionPresent( openalDevice, "ALC_EXT_disconnect" ) != AL_FALSE;
-		bool hasAlcSoftHrtf = alcIsExtensionPresent( openalDevice, "ALC_SOFT_HRTF" ) != AL_FALSE;
-		if ( hasAlcExtDisconnect && hasAlcSoftHrtf ) {
-			common->Printf( "OpenAL: found extensions for resetting disconnected devices\n" );
-			alcResetDeviceSOFT = (LPALCRESETDEVICESOFT)alcGetProcAddress( openalDevice, "alcResetDeviceSOFT" );
-		}
 
 		// try to obtain EFX extensions
 		if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
@@ -599,6 +658,37 @@ bool idSoundSystemLocal::ShutdownHW() {
 	return true;
 }
 
+/*
+===============
+idSoundSystemLocal::ResetALDevice
+
+ DG: resets the OpenAL device, applying the settings of s_alHRTF and s_alOutputLimiter
+     returns false if that failed, or the necessary OpenAL extension isn't available
+===============
+*/
+bool idSoundSystemLocal::ResetALDevice()
+{
+	s_alHRTF.ClearModified();
+	s_alOutputLimiter.ClearModified();
+
+	if ( alcResetDeviceSOFT == NULL ) {
+		common->Warning( "Can't reset OpenAL device, because OpenAL Extension (ALC_SOFT_HRTF) is missing!\nConsider using (a recent-ish version of) OpenAL-Soft!" );
+		return false;
+	}
+
+	ALCint attrList[D3_ALC_ATTRLIST_LEN] = {};
+	SetAlcAttrList( attrList );
+
+	if ( alcResetDeviceSOFT( openalDevice, attrList ) ) {
+		common->Printf( "OpenAL: resetting device succeeded!\n" );
+		resetRetryCount = 0;
+		return true;
+	} else if ( resetRetryCount == 0 ) {
+		common->Warning( "OpenAL: resetting device FAILED!\n" );
+	}
+	return false;
+}
+
 
 /*
 ===============
@@ -607,6 +697,8 @@ idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded
  DG: returns true if openalDevice is still available,
      otherwise it will try to recover the device and return false while it's gone
      (display audio sound devices sometimes disappear for a few seconds when switching resolution)
+     As this is called every frame, it now also checks if s_alHRTF or s_alOutputLimiter are
+     modified and if they are, resets the device to apply the change
 ===============
 */
 bool idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded()
@@ -615,6 +707,12 @@ bool idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded()
 
 	if ( alcResetDeviceSOFT == NULL ) {
 		return true; // we can't check or reset, just pretend everything is fine..
+	}
+
+	if ( s_alOutputLimiter.IsModified() || s_alHRTF.IsModified() ) {
+		common->Printf( "%s is modified, trying to reset OpenAL device to apply that change\n",
+		                s_alOutputLimiter.IsModified() ? "s_alOutputLimiter" : "s_alHRTF" );
+		return ResetALDevice();
 	}
 
 	unsigned int curTime = Sys_Milliseconds();
@@ -643,9 +741,7 @@ bool idSoundSystemLocal::CheckDeviceAndRecoverIfNeeded()
 			return false;
 		}
 
-		if ( alcResetDeviceSOFT( openalDevice, NULL ) ) {
-			common->Printf( "OpenAL: resetting device succeeded!\n" );
-			resetRetryCount = 0;
+		if ( ResetALDevice() ) {
 			return true;
 		}
 

@@ -39,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 
 #include "sys/sys_public.h"
+#include "sys/sys_imgui.h"
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDL_Keycode SDLKey
@@ -142,11 +143,6 @@ static float joyAxis[MAX_JOYSTICK_AXIS];
 
 static idList<sysEvent_t> event_overflow;
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-// for utf8ToISO8859_1() - used for non-ascii text input and Sys_GetLocalizedScancodeName()
-static SDL_iconv_t iconvDesc = (SDL_iconv_t)-1;
-#endif
-
 struct scancodename_t {
 	int sdlScancode;
 	const char* name;
@@ -242,40 +238,29 @@ static bool isAscii( const char* str_ ) {
 	}
 	return true;
 }
-
-// convert inbuf (which is expected to be in UTF-8) to outbuf (in ISO-8859-1)
-static bool utf8ToISO8859_1(const char* inbuf, char* outbuf, size_t outsize) {
-	if ( iconvDesc == (SDL_iconv_t)-1 ) {
-		return false;
-	}
-
-	size_t outbytesleft = outsize;
-	size_t inbytesleft = strlen( inbuf ) + 1; // + terminating \0
-	size_t ret = SDL_iconv( iconvDesc, &inbuf, &inbytesleft, &outbuf, &outbytesleft );
-
-	while(inbytesleft > 0) {
-		switch ( ret ) {
-			case SDL_ICONV_E2BIG:
-				outbuf[outbytesleft-1] = '\0'; // whatever, just cut it off..
-				common->DPrintf( "Cutting off UTF-8 to ISO-8859-1 conversion to '%s' because destination is too small for '%s'\n", outbuf, inbuf );
-				SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
-				return true;
-			case SDL_ICONV_EILSEQ:
-				// try skipping invalid input data
-				++inbuf;
-				--inbytesleft;
-				break;
-			case SDL_ICONV_EINVAL:
-			case SDL_ICONV_ERROR:
-				// we can't recover from this
-				SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
-				return false;
-		}
-	}
-	SDL_iconv( iconvDesc, NULL, NULL, NULL, NULL ); // reset descriptor for next conversion
-	return outbytesleft < outsize; // return false if no char was written
-}
 #endif // SDL2
+
+// start button isn't bindable, but I want to use its name in the imgui-based menu
+const char* D3_GetGamepadStartButtonName() {
+	int layout = joy_gamepadLayout.GetInteger();
+	if ( layout == -1 ) {
+		layout = gamepadType;
+	}
+
+	switch( layout ) {
+		default:
+			common->Warning( "joy_gamepadLayout has invalid value %d !\n", joy_gamepadLayout.GetInteger() );
+			// fall-through
+		case D3_GAMEPAD_PLAYSTATION_OLD:
+		case D3_GAMEPAD_XINPUT:
+			return "Pad Start";
+		case D3_GAMEPAD_NINTENDO:
+			return "Pad (+)";
+
+		case D3_GAMEPAD_PLAYSTATION:
+			return "Pad Options";
+	}
+}
 
 const char* Sys_GetLocalizedJoyKeyName( int key ) {
 	// Note: trying to keep the returned names short, because the Doom3 binding window doesn't have much space for names..
@@ -408,34 +393,48 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 	return NULL;
 }
 
-// returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
-// regarding the current keyboard layout - if that name is in ASCII or corresponds
-// to a "High-ASCII" char supported by Doom3.
-// Otherwise return same name as Sys_GetScancodeName()
-// !! Returned string is only valid until next call to this function !!
-const char* Sys_GetLocalizedScancodeName( int key ) {
+static const char* getLocalizedScancodeName( int key, bool useUtf8 )
+{
 	if ( key >= K_FIRST_SCANCODE && key <= K_LAST_SCANCODE ) {
 		int scIdx = key - K_FIRST_SCANCODE;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		SDL_Scancode sc = ( SDL_Scancode ) scancodemappings[scIdx].sdlScancode;
 		SDL_Keycode k = SDL_GetKeyFromScancode( sc );
 		if ( k >= 0xA1 && k <= 0xFF ) {
-			// luckily, the "High-ASCII" (ISO-8559-1) chars supported by Doom3
-			// have the same values as the corresponding SDL_Keycodes.
-			static char oneCharStr[2] = {0, 0};
-			oneCharStr[0] = (unsigned char)k;
-			return oneCharStr;
+			static char shortStr[3] = {};
+			if ( useUtf8 ) {
+				// SDL_Keycodes are unicode chars (where applicable),
+				// so at least for Latin-1 turn them directly into UTF-8
+				if ( k >= 0xE0 && k <= 0xFE && k != 0xF7 ) {
+					// turn lowercase chars into their uppercase equivalents
+					k -= 32;
+				}
+				shortStr[0] = (unsigned char)( 0xC0 + (k >> 6) );
+				shortStr[1] = (unsigned char)( 0x80 + (k & 0x3F) );
+				return shortStr;
+			} else {
+				// luckily, the "High-ASCII" (ISO-8559-1) chars supported by Doom3
+				// have the same values as the corresponding SDL_Keycodes.
+				shortStr[0] = (unsigned char)k;
+				shortStr[1] = 0;
+				return shortStr;
+			}
 		} else if ( k != SDLK_UNKNOWN ) {
 			const char *ret = SDL_GetKeyName( k );
 			// the keyname from SDL2 is in UTF-8, which Doom3 can't print,
 			// so only return the name if it's ASCII, otherwise fall back to "SC_bla"
 			if ( ret && *ret != '\0' ) {
+				if( useUtf8 ) {
+					return ret;
+				}
+
 				if( isAscii( ret ) ) {
 					return ret;
 				}
 				static char isoName[32];
 				// try to convert name to ISO8859-1 (Doom3's supported "High ASCII")
-				if ( utf8ToISO8859_1( ret, isoName, sizeof(isoName) ) && isoName[0] != '\0' ) {
+				// TODO: pass '?' as invalidChar?
+				if ( D3_UTF8toISO8859_1( ret, isoName, sizeof(isoName) ) && isoName[0] != '\0' ) {
 					return isoName;
 				}
 			}
@@ -445,6 +444,19 @@ const char* Sys_GetLocalizedScancodeName( int key ) {
 
 	}
 	return NULL;
+}
+
+// returns localized name of the key (between K_FIRST_SCANCODE and K_LAST_SCANCODE),
+// regarding the current keyboard layout - if that name is in ASCII or corresponds
+// to a "High-ASCII" char supported by Doom3.
+// Otherwise return same name as Sys_GetScancodeName()
+// !! Returned string is only valid until next call to this function !!
+const char* Sys_GetLocalizedScancodeName( int key ) {
+	return getLocalizedScancodeName( key, false );
+}
+
+const char* Sys_GetLocalizedScancodeNameUTF8( int key ) {
+	return getLocalizedScancodeName( key, true );
 }
 
 // returns keyNum_t (K_SC_* constant) for given scancode name (like "SC_A")
@@ -827,13 +839,6 @@ void Sys_InitInput() {
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-
-#else // SDL2 - for utf8ToISO8859_1() (non-ascii text input and key naming)
-	assert(iconvDesc == (SDL_iconv_t)-1);
-	iconvDesc = SDL_iconv_open( "ISO-8859-1", "UTF-8" );
-	if( iconvDesc == (SDL_iconv_t)-1 ) {
-		common->Warning( "Sys_SetInput(): iconv_open( \"ISO-8859-1\", \"UTF-8\" ) failed! Can't translate non-ascii input!\n" );
-	}
 #endif
 
 	in_kbd.SetModified();
@@ -883,10 +888,6 @@ void Sys_ShutdownInput() {
 	mouse_polls.Clear();
 	joystick_polls.Clear();
 	event_overflow.Clear();
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	SDL_iconv_close( iconvDesc ); // used by utf8ToISO8859_1()
-	iconvDesc = ( SDL_iconv_t ) -1; 
-#endif
 }
 
 /*
@@ -1124,6 +1125,11 @@ sysEvent_t Sys_GetEvent() {
 
 	// loop until there is an event we care about (will return then) or no more events
 	while(SDL_PollEvent(&ev)) {
+		if(D3::ImGuiHooks::ProcessEvent(&ev)) {
+			// ImGui has used the event, so it shouldn't also be handled by the game
+			continue;
+		}
+
 		switch (ev.type) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_WINDOWEVENT:
@@ -1149,6 +1155,9 @@ sysEvent_t Sys_GetEvent() {
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					in_hasFocus = false;
+					break;
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
+					GLimp_UpdateWindowSize();
 					break;
 			}
 
@@ -1181,7 +1190,7 @@ sysEvent_t Sys_GetEvent() {
 		case SDL_KEYDOWN:
 			if (ev.key.keysym.sym == SDLK_RETURN && (ev.key.keysym.mod & KMOD_ALT) > 0) {
 				cvarSystem->SetCVarBool("r_fullscreen", !renderSystem->IsFullScreen());
-				PushConsoleEvent("vid_restart");
+				PushConsoleEvent("vid_restart partial");
 				return res_none;
 			}
 
@@ -1272,7 +1281,7 @@ sysEvent_t Sys_GetEvent() {
 						s_pos = 1; // pos 0 is returned
 					}
 					return res;
-				} else if( utf8ToISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
+				} else if( D3_UTF8toISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
 					res.evValue = (unsigned char)s[0];
 					if ( s[1] == '\0' ) {
 						s_pos = 0;
@@ -1564,7 +1573,7 @@ static void handleMouseGrab() {
 	bool relativeMouse = false;
 
 	// if com_editorActive, release everything, just like when we have no focus
-	if ( in_hasFocus && !com_editorActive ) {
+	if ( in_hasFocus && !com_editorActive && !D3::ImGuiHooks::ShouldShowCursor() ) {
 		// Note: this generally handles fullscreen menus, but not the PDA, because the PDA
 		//       is an ugly hack in gamecode that doesn't go through sessLocal.guiActive.
 		//       It goes through weapon input code or sth? That's also the reason only

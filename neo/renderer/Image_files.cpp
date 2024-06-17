@@ -27,12 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // DG: replace libjpeg with stb_image.h because it causes fewer headaches
-// include this first, otherwise build breaks because of  use_idStr_* #defines in Str.h
-#if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__) && __GNUC__ < 5
-  // Extra-Hack for ancient GCC 4.2-based Apple compilers that don't support __thread
-  #define STBI_NO_THREAD_LOCALS
-#endif
-#define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
 #define STBI_ONLY_JPEG // at least for now, only use it for JPEG

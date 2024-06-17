@@ -260,6 +260,16 @@ static void R_CheckCvars( void ) {
 			R_SetColorMappings();
 		}
 	}
+
+	if ( r_swapInterval.IsModified() ) {
+		GLimp_SetSwapInterval( r_swapInterval.GetInteger() );
+		r_swapInterval.ClearModified();
+	}
+
+	if ( r_windowResizable.IsModified() ) {
+		GLimp_SetWindowResizable( r_windowResizable.GetBool() );
+		r_windowResizable.ClearModified();
+	}
 }
 
 /*

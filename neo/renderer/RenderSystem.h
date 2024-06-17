@@ -79,6 +79,7 @@ typedef struct glconfig_s {
 	bool				textureNonPowerOfTwoAvailable;
 	bool				depthBoundsTestAvailable;
 
+	// GL framebuffer size, see also winWidth and winHeight
 	int					vidWidth, vidHeight;	// passed to R_BeginFrame
 
 	int					displayFrequency;
@@ -92,6 +93,23 @@ typedef struct glconfig_s {
 	// DG: current video backend is known to need opaque default framebuffer
 	//     used if r_fillWindowAlphaChan == -1
 	bool				shouldFillWindowAlpha;
+
+	// For some reason people decided that we need displays with ultra small pixels,
+	// so everything rendered on them must be scaled up to be legible.
+	// unfortunately, this bullshit feature was "improved" upon by deciding that the best
+	// way to implement "High DPI" was to pretend that windows have fewer pixels than they
+	// actually do, so the window size you get and mouse coordinates in them etc
+	// are in e.g. 1024x768, while the physical window size is e.g. 1536x1152 pixels
+	// (when the scaling factor is 1.5), and ideally the GL framebuffer has the physical
+	// window size so things still look crisp.
+	// Of course the reasonable solution would be to go back and time and nuke Cupertino,
+	// where this nonsense scheme was invented, but as I lack the necessary funds,
+	// I reluctantly add winWidth and winHeight and adjust the code that deals with window
+	// coordinates, as far as that's possible..
+	// (Isn't it fun that you have a 2256x1504 display, tell SDL to create a 1920x1080 window
+	//  and you get one that's much bigger and doesn't fit on the screen?)
+
+	float				winWidth, winHeight;	// logical window size (different to vidWidth/height in HighDPI cases)
 } glconfig_t;
 
 
@@ -171,7 +189,11 @@ public:
 	virtual bool			IsOpenGLRunning( void ) const = 0;
 
 	virtual bool			IsFullScreen( void ) const = 0;
+	// NOTE: this is the physical width of the GL drawable (framebuffer) in pixels,
+	//      *not* the logical window size (in case of HighDPI that's not the same!)
 	virtual int				GetScreenWidth( void ) const = 0;
+	// NOTE: this is the physical height of the GL drawable (framebuffer) in pixels,
+	//      *not* the logical window size (in case of HighDPI that's not the same!)
 	virtual int				GetScreenHeight( void ) const = 0;
 
 	// allocate a renderWorld to be used for drawing

@@ -1799,17 +1799,18 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 	//     I guess this happens because the loud sounds mixed together are too loud so
 	//     OpenAL just makes *everything* quiter or sth like that.
 	//     See also https://github.com/dhewm/dhewm3/issues/179
+	if( soundSystemLocal.s_scaleDownAndClamp.GetBool() ) {
+		// First clamp it to 1.0 - that's done anyway when setting AL_GAIN below,
+		// for consistency it must be done before scaling, because many player-weapon
+		// sounds have a too high volume defined and only sound right (relative to
+		// other weapons) when clamped
+		// see https://github.com/dhewm/dhewm3/issues/326#issuecomment-1366833004
+		if(volume > 1.0f) {
+			volume = 1.0f;
+		}
 
-	// First clamp it to 1.0 - that's done anyway when setting AL_GAIN below,
-	// for consistency it must be done before scaling, because many player-weapon
-	// sounds have a too high volume defined and only sound right (relative to
-	// other weapons) when clamped
-	// see https://github.com/dhewm/dhewm3/issues/326#issuecomment-1366833004
-	if(volume > 1.0f) {
-		volume = 1.0f;
+		volume *= 0.333f; // (0.333 worked fine, 0.5 didn't)
 	}
-
-	volume *= 0.333f; // (0.333 worked fine, 0.5 didn't)
 
 	// global volume scale - DG: now done after clamping to 1.0, so reducing the
 	// global volume doesn't cause the different weapon volume issues described above

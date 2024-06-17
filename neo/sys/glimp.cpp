@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+#include "sys/sys_imgui.h"
+
 #if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 #include "sys/win32/win_local.h"
 #include <SDL_syswm.h>
@@ -155,14 +157,21 @@ bool GLimp_Init(glimpParms_t parms) {
 	if (parms.fullScreen == 1)
 	{
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		if(r_fullscreenDesktop.GetBool())
+		if(parms.fullScreenDesktop)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		else
 #endif
 			flags |= SDL_WINDOW_FULLSCREEN;
 	}
 
+	r_windowResizable.ClearModified();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+
+	if ( r_windowResizable.GetBool() ) {
+		flags |= SDL_WINDOW_RESIZABLE;
+	}
+
 	/* Doom3 has the nasty habit of modifying the default framebuffer's alpha channel and then
 	 * relying on those modifications in blending operations (using GL_DST_(ONE_MINUS_)ALPHA).
 	 * So far that hasn't been much of a problem, because Windows, macOS, X11 etc
@@ -270,13 +279,13 @@ try_again:
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
-		const char* windowMode = "";
-		if(r_fullscreen.GetBool()) {
-			windowMode = r_fullscreenDesktop.GetBool() ? "desktop-fullscreen-" : "fullscreen-";
+		if ( parms.fullScreen && parms.fullScreenDesktop ) {
+			common->Printf( "Will create a pseudo-fullscreen window at the current desktop resolution\n" );
+		} else {
+			const char* windowMode = parms.fullScreen ? "fullscreen-" : "";
+			common->Printf("Will create a %swindow with resolution %dx%d (r_mode = %d)\n",
+						   windowMode, parms.width, parms.height, r_mode.GetInteger());
 		}
-
-		common->Printf("Will create a %swindow with resolution %dx%d (r_mode = %d)\n",
-		               windowMode, parms.width, parms.height, r_mode.GetInteger());
 
 		int displayIndex = 0;
 #if SDL_VERSION_ATLEAST(2, 0, 4)
@@ -402,14 +411,22 @@ try_again:
 
 		context = SDL_GL_CreateContext(window);
 
-		if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)
-			common->Warning("SDL_GL_SWAP_CONTROL not supported");
+		GLimp_SetSwapInterval( r_swapInterval.GetInteger() );
+		r_swapInterval.ClearModified();
 
-		SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+		// for HighDPI, window size and drawable size can differ
+		GLimp_UpdateWindowSize();
 
 		SetSDLIcon(); // for SDL2  this must be done after creating the window
 
 		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
+		const char* fsStr = glConfig.isFullscreen ? "fullscreen " : "";
+		if ( (int)glConfig.winWidth != glConfig.vidWidth ) {
+			common->Printf( "Got a HighDPI %swindow with physical resolution %d x %d and virtual resolution %g x %g\n",
+							fsStr, glConfig.vidWidth, glConfig.vidHeight, glConfig.winWidth, glConfig.winHeight );
+		} else {
+			common->Printf( "Got a %swindow with resolution %g x %g\n", fsStr, glConfig.winWidth, glConfig.winHeight );
+		}
 #else
 		SDL_WM_SetCaption(ENGINE_VERSION, ENGINE_VERSION);
 
@@ -417,6 +434,8 @@ try_again:
 
 		if (SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, r_swapInterval.GetInteger()) < 0)
 			common->Warning("SDL_GL_SWAP_CONTROL not supported");
+
+		r_swapInterval.ClearModified();
 
 		window = SDL_SetVideoMode(parms.width, parms.height, colorbits, flags);
 		if (!window) {
@@ -575,6 +594,11 @@ try_again:
 		return false;
 	}
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// SDL1.2 has no context, and is not supported by ImGui anyway
+	D3::ImGuiHooks::Init(window, context);
+#endif
+
 	return true;
 }
 
@@ -584,8 +608,131 @@ GLimp_SetScreenParms
 ===================
 */
 bool GLimp_SetScreenParms(glimpParms_t parms) {
-	common->DPrintf("TODO: GLimp_ActivateContext\n");
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	glimpParms_t curState = GLimp_GetCurState();
+
+	if( parms.multiSamples != -1 && parms.multiSamples != curState.multiSamples ) {
+		// if MSAA settings have changed, we really need a vid_restart
+		return false;
+	}
+
+	bool wantFullscreenDesktop = parms.fullScreen && parms.fullScreenDesktop;
+
+	// TODO: parms.displayHz ?
+
+	if ( curState.fullScreenDesktop && wantFullscreenDesktop ) {
+		return true; // nothing to do (resolution is not configurable in that mode)
+	}
+
+	if ( !parms.fullScreen ) { // we want windowed mode
+		if ( curState.fullScreen && SDL_SetWindowFullscreen( window, 0 ) != 0 ) {
+			common->Warning( "GLimp_SetScreenParms(): Couldn't switch to windowed mode, SDL error: %s\n", SDL_GetError() );
+			return false;
+		}
+		SDL_RestoreWindow( window ); // make sure we're not maximized, then setting the size wouldn't work
+		SDL_SetWindowSize( window, parms.width, parms.height );
+	} else { // we want some kind of fullscreen mode
+
+		// it's probably safest to first switch to windowed mode
+		if ( curState.fullScreen ) {
+			SDL_SetWindowFullscreen( window, 0 );
+		}
+
+		if ( wantFullscreenDesktop ) {
+			if ( SDL_SetWindowFullscreen( window, SDL_WINDOW_FULLSCREEN_DESKTOP ) != 0 ) {
+				common->Warning( "GLimp_SetScreenParms(): Couldn't switch to fullscreen desktop mode, SDL error: %s\n", SDL_GetError() );
+				return false;
+			}
+		} else { // want real fullscreen
+			SDL_DisplayMode wanted_mode = {};
+
+			wanted_mode.w = parms.width;
+			wanted_mode.h = parms.height;
+
+			// TODO: refresh rate? parms.displayHz should probably try to get most similar mode before trying to set it?
+
+			if ( SDL_SetWindowDisplayMode( window, &wanted_mode ) != 0 )
+			{
+				common->Warning("GLimp_SetScreenParms(): Can't set fullscreen resolution to %ix%i: %s\n", wanted_mode.w, wanted_mode.h, SDL_GetError());
+				return false;
+			}
+
+			SDL_SetWindowFullscreen( window, SDL_WINDOW_FULLSCREEN );
+
+			/* The SDL doku says, that SDL_SetWindowSize() shouldn't be
+			   used on fullscreen windows. But at least in my test with
+			   SDL 2.0.9 the subsequent SDL_GetWindowDisplayMode() fails
+			   if I don't call it. */
+			SDL_SetWindowSize( window, wanted_mode.w, wanted_mode.h );
+
+			SDL_DisplayMode real_mode = {};
+			if ( SDL_GetWindowDisplayMode( window, &real_mode ) != 0 )
+			{
+				common->Warning( "GLimp_SetScreenParms(): Can't get display mode: %s\n", SDL_GetError() );
+				return false; // trying other color depth etc is unlikely to help with this issue
+			}
+
+			if ( (real_mode.w != wanted_mode.w) || (real_mode.h != wanted_mode.h) )
+			{
+				common->Warning( "GLimp_SetScreenParms(): Still in wrong display mode: %ix%i instead of %ix%i\n",
+				                 real_mode.w, real_mode.h, wanted_mode.w, wanted_mode.h );
+
+				return false;
+			}
+		}
+	}
+
+	glConfig.isFullscreen = (SDL_GetWindowFlags( window ) & SDL_WINDOW_FULLSCREEN) != 0;
+
 	return true;
+
+#else // SDL1.2 - I don't feel like implementing this for old SDL, just do a full vid_restart, like before
+	return false;
+#endif
+}
+
+// sets a glimpParms_t based on the current true state (according to SDL)
+// Note: here, ret.fullScreenDesktop is only true if currently in fullscreen desktop mode
+//       (and ret.fullScreen is true as well)
+glimpParms_t GLimp_GetCurState()
+{
+	glimpParms_t ret = {};
+
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	int curMultiSamples = 0;
+	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) == 0 && curMultiSamples > 0 ) {
+		if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) != 0 ) {
+			curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+		}
+	} else {
+		curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+	}
+	ret.multiSamples = curMultiSamples;
+
+	Uint32 winFlags = SDL_GetWindowFlags( window );
+	ret.fullScreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
+	ret.fullScreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+	if ( ret.fullScreen && !ret.fullScreenDesktop ) { // I think SDL_GetWindowDisplayMode() is only for "real" fullscreen?
+		SDL_DisplayMode real_mode = {};
+		if ( SDL_GetWindowDisplayMode( window, &real_mode ) == 0 ) {
+			ret.width = real_mode.w;
+			ret.height = real_mode.h;
+			ret.displayHz = real_mode.refresh_rate;
+		}
+	}
+	if ( ret.width == 0 && ret.height == 0 ) { // windowed mode or SDL_GetWindowDisplayMode() failed
+		SDL_GetWindowSize( window, &ret.width, &ret.height );
+	}
+
+	assert( ret.width == glConfig.winWidth && ret.height == glConfig.winHeight );
+	assert( ret.fullScreen == glConfig.isFullscreen );
+
+#else
+	assert( 0 && "Don't use GLimp_GetCurState() with SDL1.2 !" );
+#endif
+
+	return ret;
 }
 
 /*
@@ -594,6 +741,9 @@ GLimp_Shutdown
 ===================
 */
 void GLimp_Shutdown() {
+
+	D3::ImGuiHooks::Shutdown();
+
 	common->Printf("Shutting down OpenGL subsystem\n");
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -728,5 +878,41 @@ void GLimp_GrabInput(int flags) {
 	// ignore GRAB_GRABMOUSE, SDL1.2 doesn't support grabbing without relative mode
 	// so only grab if we want relative mode
 	SDL_WM_GrabInput( (flags & GRAB_RELATIVEMOUSE) ? SDL_GRAB_ON : SDL_GRAB_OFF );
+#endif
+}
+
+bool GLimp_SetSwapInterval( int swapInterval )
+{
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	if ( SDL_GL_SetSwapInterval( swapInterval ) < 0 ) {
+		common->Warning( "SDL_GL_SetSwapInterval( %d ) not supported", swapInterval );
+		return false;
+	}
+	return true;
+#else
+	common->Warning( "SDL1.2 does not support changing the swapinterval (vsync) on-the-fly!" );
+	return false;
+#endif
+}
+
+bool GLimp_SetWindowResizable( bool enableResizable )
+{
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	SDL_SetWindowResizable( window, (SDL_bool)enableResizable );
+	return true;
+#else
+	common->Warning( "dhewm3 must be built with SDL 2.0.5 or newer to change resizability of existing windows!" );
+	return false;
+#endif
+}
+
+void GLimp_UpdateWindowSize()
+{
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	int ww=0, wh=0;
+	SDL_GetWindowSize( window, &ww, &wh );
+	glConfig.winWidth = ww;
+	glConfig.winHeight = wh;
+	SDL_GL_GetDrawableSize( window, &glConfig.vidWidth, &glConfig.vidHeight );
 #endif
 }

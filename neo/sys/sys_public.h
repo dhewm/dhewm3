@@ -56,7 +56,7 @@ typedef enum {
 typedef enum {
 	SE_NONE,				// evTime is still valid
 	SE_KEY,					// evValue is a key code, evValue2 is the down flag
-	SE_CHAR,				// evValue is an ascii char
+	SE_CHAR,				// evValue is a "High ASCII" (ISO-8859-1) char
 	SE_MOUSE,				// evValue and evValue2 are relative signed x / y moves
 	SE_MOUSE_ABS,			// evValue and evValue2 are absolute x / y coordinates in the window
 	SE_JOYSTICK,			// evValue is an axis number and evValue2 is the current state (-127 to 127)
@@ -218,6 +218,8 @@ const char* Sys_GetScancodeName( int key );
 // Otherwise return same name as Sys_GetScancodeName()
 // !! Returned string is only valid until next call to this function !!
 const char* Sys_GetLocalizedScancodeName( int key );
+// the same, but using UTF-8 instead of "High-ASCII"
+const char* Sys_GetLocalizedScancodeNameUTF8( int key );
 // returns keyNum_t (K_SC_* constant) for given scancode name (like "SC_A")
 int Sys_GetKeynumForScancodeName( const char* name );
 
