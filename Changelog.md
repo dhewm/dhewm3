@@ -28,6 +28,14 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   downscaling by OpenAL's output limiter
 * If `r_windowResizable` is set, the dhewm3 window (when in windowed mode..) can be freely resized.
   Needs SDL2; with 2.0.5 and newer it's applied immediately, otherwise when creating the window.
+* "Soft" Particles (that don't "cut" into geometry but fade smoothly), based on code from The Dark Mod
+  2.04. Can be enabled/disabled with `r_useSoftParticles`, is applied automatically for all appropriate
+  particles (view-aligned and using additive or alpha blending).  
+  For custom particles you can configure this per particle stage, with the `"softeningRadius"` attribute.
+  Generally it's the radius in Doom-Units used for fading, special values are `-2` (auto-mode, same
+  as particles where this isn't specified at all) and `-1` (disable softening, render like in orig Doom3).
+* `r_enableDepthCapture`: Enable capturing depth buffer to texture, needed for the soft particles.
+  Can be used in custom materials by using the `"_currentDepth"` texture.
 
 
 1.5.3 (2024-03-29)

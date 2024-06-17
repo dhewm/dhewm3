@@ -1441,8 +1441,8 @@ static void R_AddAmbientDrawsurfs( viewEntity_t *vEntity ) {
 
 			// Soft Particles -- SteveL #3878
 			float particle_radius = -1.0f;		// Default = disallow softening, but allow modelDepthHack if specified in the decl.
-			if ( r_useSoftParticles.GetBool()
-				&& !shader->ReceivesLighting()							// don't soften surfaces that are meant to be solid
+			if ( r_useSoftParticles.GetBool() && r_enableDepthCapture.GetInteger() != 0
+				&& !shader->ReceivesLighting()          // don't soften surfaces that are meant to be solid
 				&& tr.viewDef->renderView.viewID >= 0 ) // Skip during "invisible" rendering passes (e.g. lightgem)
 			{
 				const idRenderModelPrt* prt = dynamic_cast<const idRenderModelPrt*>( def->parms.hModel ); // yuck.
