@@ -34,8 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 extern idCVar r_useCarmacksReverse;
 extern idCVar r_useStencilOpSeparate;
 
-idCVar r_skipDepthCapture( "r_skipDepthCapture", "0", CVAR_RENDERER | CVAR_BOOL, "skip depth capture" ); // #3877
-
 /*
 =====================
 RB_BakeTextureMatrixIntoTexgen
@@ -952,13 +950,14 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 				qglEnableClientState( GL_COLOR_ARRAY );
 			}
 
-
-			//GL_State( pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS ); // Disable depth clipping. The fragment program will
-																	  // handle it to allow overdraw.
+#if 0 // debug stuff: render particles opaque so debug colors written in the shader are properly visible
 			int dsbits = pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS;
 			dsbits &= ~(GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
 			//dsbits |= GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO; both values are 0, so this would be a noop
 			GL_State( dsbits );
+#endif
+			GL_State( pStage->drawStateBits | GLS_DEPTHFUNC_ALWAYS ); // Disable depth clipping. The fragment program will
+																	  // handle it to allow overdraw.
 
 			qglBindProgramARB( GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE );
 			qglEnable( GL_VERTEX_PROGRAM_ARB );
@@ -972,6 +971,7 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 			qglBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, FPROG_SOFT_PARTICLE );
 			qglEnable( GL_FRAGMENT_PROGRAM_ARB );
 
+#if 0 // debug stuff
 			// Set up parameters for fragment program
 			const char* srcblendstr = "???";
 			if ( src_blend >= 0 && src_blend <= 9 ) {
@@ -1006,14 +1006,15 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 #undef MY_CASE
 			}
 
-			//printf("XX mat: %s, src_blend = %s dest_blend = %s radius = %g\n", shader->GetName(), srcblendstr, dstblend, surf->particle_radius);
+			printf("XX mat: %s, src_blend = %s dest_blend = %s radius = %g\n", shader->GetName(), srcblendstr, dstblend, surf->particle_radius);
+#endif
 
-			// program.env[5] is the particle radius, given as { radius, 1/(faderange), 1/radius }
+			// program.env[23] is the particle radius, given as { radius, 1/(faderange), 1/radius }
 			float fadeRange = 1.0f;
 			// fadeRange is the particle diameter for alpha blends (like smoke), but the particle radius for additive
 			// blends (light glares), because additive effects work differently. Fog is half as apparent when a wall
 			// is in the middle of it. Light glares lose no visibility when they have something to reflect off. See 
-			// issue #3878 for diagram
+			// The Dark Mod issue #3878 for diagram
 			if ( src_blend == GLS_SRCBLEND_SRC_ALPHA ) // an alpha blend material
 			{
 				fadeRange = surf->particle_radius * 2.0f;
@@ -1031,7 +1032,7 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 			};
 			qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_PARTICLE_RADIUS, parm );
 
-			// program.env[6] is the color channel mask. It gets added to the fade multiplier, so adding 1 
+			// program.env[24] is the color channel mask. It gets added to the fade multiplier, so adding 1
 			//    to a channel will make sure it doesn't get faded at all. Particles with additive blend 
 			//    need their RGB channels modifying to blend them out. Particles with an alpha blend need 
 			//    their alpha channel modifying.
@@ -1045,8 +1046,6 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 				parm[0] = parm[1] = parm[2] = 0.0f; // Fade the rgb channels but
 				parm[3] = 1.0f;						// leave the alpha channel at full strength
 			}
-			//parm[0] = parm[1] = parm[2] = 1.0f; // XXX hack
-			//parm[3] = 1.0f; // XXX hack
 			qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_PARTICLE_COLCHAN_MASK, parm );
 			
 			// draw it
