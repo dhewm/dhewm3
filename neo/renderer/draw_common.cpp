@@ -602,11 +602,10 @@ Those same parameters 0 and 1, plus 2 and 3, are given entirely different
 meanings in draw_arb2.cpp while light interactions are being drawn.
 This function is called again before currentRender size is needed by post processing
 effects are done, so there's no clash.
-// TODO: I'm using 4 for gamma in shaders, so the following shit must be incremented by 1
 Only parameters 0..3 were in use before #3877 - and in dhewm3 also 4, for gamma in shader.
-Now I've used a new parameter 5 for the size of _currentDepth. It's needed throughout,
+Now I've used a new parameter 22 for the size of _currentDepth. It's needed throughout,
 including by light interactions, and its size might in theory differ from _currentRender.
-Parameters 6 and 7 are used by soft particles #3878. Note these can be freely reused by different draw calls.
+Parameters 23 and 24 are used by soft particles #3878. Note these can be freely reused by different draw calls.
 ==================
 */
 void RB_SetProgramEnvironment( bool isPostProcess ) {
