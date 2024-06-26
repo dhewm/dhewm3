@@ -3231,9 +3231,14 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 			if ( weapon.GetEntity()->GetGrabberState() == 1 || weapon.GetEntity()->GetGrabberState() == 2 ) {
 				cursor->SetStateString( "grabbercursor", "1" );
 				cursor->SetStateString( "combatcursor", "0" );
+				cursor->SetStateBool("scaleto43", false);   // dezo2, unscaled
+				cursor->StateChanged(gameLocal.realClientTime);   // dezo2, set state
 			} else {
 				cursor->SetStateString( "grabbercursor", "0" );
 				cursor->SetStateString( "combatcursor", "1" );
+				cursor->SetStateBool("scaleto43", true);   // dezo2, scaled
+				cursor->StateChanged(gameLocal.realClientTime);   // dezo2, set state
+
 			}
 #endif
 
