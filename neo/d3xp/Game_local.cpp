@@ -632,7 +632,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteBool( isMultiplayer );
 	savegame.WriteInt( gameType );
 
-	savegame.WriteFloat(preciseTime);
+	savegame.WriteFloat(preciseTime); // DG: added in internalSavegameVersion 2
 
 	savegame.WriteInt( framenum );
 	savegame.WriteInt( previousTime );
@@ -1400,7 +1400,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadBuildNumber();
 
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
-	//     for which I bumped th BUILD_NUMBER to 1305
+	//     for which I bumped the BUILD_NUMBER to 1305
 	if( savegame.GetBuildNumber() >= 1305 )
 	{
 		savegame.ReadInternalSavegameVersion();
@@ -1544,7 +1544,9 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadBool( isMultiplayer );
 	savegame.ReadInt( (int &)gameType );
 
-	savegame.ReadFloat(preciseTime);
+	if ( savegame.GetInternalSavegameVersion() >= 2 ) {
+		savegame.ReadFloat( preciseTime );
+	}
 
 	savegame.ReadInt( framenum );
 	savegame.ReadInt( previousTime );
