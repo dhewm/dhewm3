@@ -382,7 +382,8 @@ public:
 							idAFConstraint_HingeSteering( void );
 	void					Setup( idAFConstraint_Hinge *cc );
 	void					SetSteerAngle( const float degrees ) { steerAngle = degrees; }
-	void					SetSteerSpeed( const float speed ) { steerSpeed = speed; }
+							// DG: take com_gameHz into account
+	void					SetSteerSpeed( const float speed ) { steerSpeed = speed * (60.0f / gameLocal.gameFps); }
 	void					SetEpsilon( const float e ) { epsilon = e; }
 	bool					Add( idPhysics_AF *phys, float invTimeStep );
 	virtual void			Translate( const idVec3 &translation );
