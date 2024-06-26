@@ -348,7 +348,7 @@ void idGameLocal::Init( void ) {
 	//Update MSEC and gameFps
 	gameFps = cvarSystem->GetCVarInteger("com_gameHz");
 	msec = 1000.0f / cvarSystem->GetCVarFloat("com_gameHz");
-	msec *= 0.96f*0.96f; //HACK to emulate OG D3 msec error, in order to have exactly the same game logic speed
+	msec *= 0.96f; // HACK to emulate OG D3 msec error, in order to have exactly the same game logic speed
 	gameMsec = msec;
 
 	Printf( "----- Initializing Game -----\n" );
