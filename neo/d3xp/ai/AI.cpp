@@ -2984,8 +2984,12 @@ void idAI::AdjustFlyingAngles( void ) {
 		}
 	}
 
-	fly_roll = fly_roll * 0.95f + roll * 0.05f;
-	fly_pitch = fly_pitch * 0.95f + pitch * 0.05f;
+	// DG: make this framerate-independent, code suggested by tyuah8 on Github
+	// https://en.wikipedia.org/wiki/Exponential_smoothing#Time_constant
+	static const float tau = -16.0f / idMath::Log( 0.95f );
+	const float a = 1.0f - idMath::Exp( -gameLocal.msec / tau );
+	fly_roll  = fly_roll  * (1.0f - a) + roll  * a;
+	fly_pitch = fly_pitch * (1.0f - a) + pitch * a;
 
 	if ( flyTiltJoint != INVALID_JOINT ) {
 		animator.SetJointAxis( flyTiltJoint, JOINTMOD_WORLD, idAngles( fly_pitch, 0.0f, fly_roll ).ToMat3() );
