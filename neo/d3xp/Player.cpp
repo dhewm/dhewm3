@@ -1599,8 +1599,8 @@ void idPlayer::Init( void ) {
 	// stamina always initialized to maximum
 	stamina = pm_stamina.GetFloat();
 
-	// air always initialized to maximum too
-	airTics = pm_airTics.GetFloat();
+	// air always initialized to maximum too - DG: pm_airTics must be scaled for actual FPS from com_gameHz
+	airTics = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
 	airless = false;
 
 	gibDeath = false;
@@ -3238,6 +3238,9 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 			} else {
 				cursor->SetStateString( "grabbercursor", "0" );
 				cursor->SetStateString( "combatcursor", "1" );
+				cursor->SetStateBool("scaleto43", true);   // dezo2, scaled
+				cursor->StateChanged(gameLocal.realClientTime);   // dezo2, set state
+
 			}
 			// DG: update scaleto43 state if necessary
 			if ( cursor->GetStateBool( "scaleto43" ) != wantScaleTo43 ) {
@@ -3520,12 +3523,14 @@ bool idPlayer::Give( const char *statname, const char *value ) {
 		}
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		if ( airTics >= pm_airTics.GetInteger() ) {
+		// DG: pm_airTics must be scaled for actual FPS from com_gameHz
+		int airTicsCnt = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
+		if ( airTics >= airTicsCnt ) {
 			return false;
 		}
 		airTics += atoi( value ) / 100.0 * pm_airTics.GetInteger();
-		if ( airTics > pm_airTics.GetInteger() ) {
-			airTics = pm_airTics.GetInteger();
+		if ( airTics > airTicsCnt ) {
+			airTics = airTicsCnt;
 		}
 #ifdef _D3XP
 	} else if ( !idStr::Icmp( statname, "enviroTime" ) ) {
@@ -6080,6 +6085,9 @@ void idPlayer::UpdateAir( void ) {
 		return;
 	}
 
+	// DG: pm_airTics must be scaled for actual FPS from com_gameHz
+	int airTicsCnt = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
+
 	// see if the player is connected to the info_vacuum
 	bool	newAirless = false;
 
@@ -6135,15 +6143,15 @@ void idPlayer::UpdateAir( void ) {
 			}
 		}
 		airTics+=2;	// regain twice as fast as lose
-		if ( airTics > pm_airTics.GetInteger() ) {
-			airTics = pm_airTics.GetInteger();
+		if ( airTics > airTicsCnt ) {
+			airTics = airTicsCnt;
 		}
 	}
 
 	airless = newAirless;
 
 	if ( hud ) {
-		hud->SetStateInt( "player_air", 100 * airTics / pm_airTics.GetInteger() );
+		hud->SetStateInt( "player_air", 100 * airTics / airTicsCnt );
 	}
 }
 
@@ -7657,7 +7665,9 @@ bool idPlayer::CanGive( const char *statname, const char *value ) {
 		return true;
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		if ( airTics >= pm_airTics.GetInteger() ) {
+		// DG: pm_airTics must be scaled for actual FPS from com_gameHz
+		int airTicsCnt = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
+		if ( airTics >= airTicsCnt ) {
 			return false;
 		}
 		return true;
