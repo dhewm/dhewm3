@@ -1149,8 +1149,7 @@ int idParser::Directive_define( void ) {
 	int numHackTokens = 0;
 	idToken* hackTokens[12] = {};
 	if ( idStr::Icmp(defName, "GAME_FPS") == 0 || idStr::Icmp(defName, "GAME_FRAMETIME") == 0 ) {
-		// FIXME: in d3xp, getFrameTime returns gameLocal.msec, which is modified for slowmo, which is not what we want
-		const char* funName = (idStr::Icmp(defName, "GAME_FPS") == 0) ? "getTicsPerSecond" : "getFrameTime";
+		const char* funName = (idStr::Icmp(defName, "GAME_FPS") == 0) ? "getTicsPerSecond" : "getRawFrameTime";
 		int line = token.line;
 
 		// change "#define GAME_FPS 60" to "#define GAME_FPS sys.getTicsPerSecond()"

@@ -117,6 +117,7 @@ const idEventDef EV_Thread_RadiusDamage( "radiusDamage", "vEEEsf" );
 const idEventDef EV_Thread_IsClient( "isClient", NULL, 'f' );
 const idEventDef EV_Thread_IsMultiplayer( "isMultiplayer", NULL, 'f' );
 const idEventDef EV_Thread_GetFrameTime( "getFrameTime", NULL, 'f' );
+const idEventDef EV_Thread_GetRawFrameTime( "getRawFrameTime", NULL, 'f' ); // DG: for com_gameHz (returns frametime, unlike getFrameTime() *not* scaled for slowmo)
 const idEventDef EV_Thread_GetTicsPerSecond( "getTicsPerSecond", NULL, 'f' );
 const idEventDef EV_Thread_DebugLine( "debugLine", "vvvf" );
 const idEventDef EV_Thread_DebugArrow( "debugArrow", "vvvdf" );
@@ -207,6 +208,7 @@ CLASS_DECLARATION( idClass, idThread )
 	EVENT( EV_Thread_IsClient,				idThread::Event_IsClient )
 	EVENT( EV_Thread_IsMultiplayer,			idThread::Event_IsMultiplayer )
 	EVENT( EV_Thread_GetFrameTime,			idThread::Event_GetFrameTime )
+	EVENT( EV_Thread_GetRawFrameTime,		idThread::Event_GetRawFrameTime ) // DG: for com_gameHz (returns frametime, unlike getFrameTime() *not* scaled for slowmo)
 	EVENT( EV_Thread_GetTicsPerSecond,		idThread::Event_GetTicsPerSecond )
 	EVENT( EV_CacheSoundShader,				idThread::Event_CacheSoundShader )
 	EVENT( EV_Thread_DebugLine,				idThread::Event_DebugLine )
@@ -1841,6 +1843,16 @@ idThread::Event_GetFrameTime
 */
 void idThread::Event_GetFrameTime( void ) {
 	idThread::ReturnFloat( MS2SEC( gameLocal.msec ) );
+}
+
+/*
+================
+idThread::Event_GetRawFrameTime
+================
+*/
+void idThread::Event_GetRawFrameTime( void ) {
+	// DG: for com_gameHz, to replace GAME_FRAMETIME (raw frametime, unlike getFrameTime() *not* scaled for slowmo)
+	idThread::ReturnFloat( MS2SEC( gameLocal.gameMsec ) );
 }
 
 /*

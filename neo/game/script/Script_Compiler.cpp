@@ -2516,6 +2516,37 @@ void idCompiler::ParseEventDef( idTypeDef *returnType, const char *name ) {
 
 		// mark the parms as local
 		func.locals	= func.parmTotal;
+
+		// DG: Hack: when "scriptEvent float getFrameTime()" is parsed,
+		//     inject "scriptEvent float getRawFrameTime()"
+		if ( idStr::Cmp( name, "getFrameTime" ) == 0
+		     && gameLocal.program.FindType( "getRawFrameTime" ) == NULL )
+		{
+			// NOTE: getRawFrameTime() has the same signature as getFrameTime()
+			//       so its type settings can be copied, only the name must be changed
+			newtype.SetName( "getRawFrameTime" );
+
+			ev = idEventDef::FindEvent( "getRawFrameTime" );
+			if ( ev == NULL ) {
+				Error( "Couldn't find Event getRawFrameTime!" );
+			}
+
+			type = gameLocal.program.AllocType( newtype );
+			type->def = gameLocal.program.AllocDef( type, "getRawFrameTime", &def_namespace, true );
+
+			function_t &func2	= gameLocal.program.AllocFunction( type->def );
+			func2.eventdef		= ev;
+			func2.parmSize.SetNum( num );
+			for( i = 0; i < num; i++ ) {
+				argType = newtype.GetParmType( i );
+				func2.parmTotal		+= argType->Size();
+				func2.parmSize[ i ]	= argType->Size();
+			}
+
+			// mark the parms as local
+			func2.locals = func2.parmTotal;
+		}
+		// DG end
 	}
 }
 
