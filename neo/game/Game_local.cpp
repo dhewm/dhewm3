@@ -4446,3 +4446,11 @@ idGameLocal::GetMapLoadingGUI
 ===============
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
+
+// DG: Added for configurable framerate
+void idGameLocal::SetGameHz( float hz, float frametime, float ticScaleFactor )
+{
+	gameHz = hz;
+	gameMsec = msec = frametime;
+	gameTicScale = ticScaleFactor;
+}

@@ -114,13 +114,20 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
+// DG: the next block is for configurable framerate
+idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, "Frames per second the game runs at", 10, 480 ); // TODO: make it float? make it default to 62.5?
+// the next three values will be set based on com_gameHz
+int    com_gameHzVal = 60;
+int    com_gameFrameTime = 16; // length of one frame in msec, 1000 / com_gameHz
+float  com_gameTicScale = 1.0f; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
+
 // com_speeds times
 int				time_gameFrame;
 int				time_gameDraw;
 int				time_frontend;			// renderSystem frontend time
 int				time_backend;			// renderSystem backend time
 
-int				com_frameTime;			// time for the current frame in milliseconds
+int				com_frameTime;			// time for the current frame in milliseconds - TODO: DG: make it double?
 int				com_frameNumber;		// variable frame number
 volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
@@ -223,6 +230,8 @@ private:
 	void						UnloadGameDLL( void );
 	void						PrintLoadingMessage( const char *msg );
 	void						FilterLangList( idStrList* list, idStr lang );
+
+	void						UpdateGameHz(); // DG: for configurable framerate
 
 	bool						com_fullyInitialized;
 	bool						com_refreshOnPrint;		// update the screen every print for dmap
@@ -2444,12 +2453,17 @@ void idCommonLocal::Frame( void ) {
 			}
 		}
 
+		// DG: for configurable framerate
+		if ( com_gameHz.IsModified() ) {
+			UpdateGameHz();
+		}
+
 		eventLoop->RunEventLoop();
 
 		// DG: prepare new ImGui frame - I guess this is a good place, as all new events should be available?
 		D3::ImGuiHooks::NewFrame();
 
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+		com_frameTime = com_ticNumber * USERCMD_MSEC; // TODO: can we continue using 60hz tics and still run at higher fps? com_frameNumber vs com_ticNumber suggests that..
 
 		idAsyncNetwork::RunFrame();
 
@@ -2576,7 +2590,7 @@ idCommonLocal::Async
 =================
 */
 void idCommonLocal::Async( void ) {
-	int	msec = Sys_Milliseconds();
+	int	msec = Sys_Milliseconds(); // TODO: make double?
 	if ( !lastTicMsec ) {
 		lastTicMsec = msec - USERCMD_MSEC;
 	}
@@ -2587,7 +2601,7 @@ void idCommonLocal::Async( void ) {
 		return;
 	}
 
-	int ticMsec = USERCMD_MSEC;
+	int ticMsec = USERCMD_MSEC; // TODO: make float?
 
 	// the number of msec per tic can be varies with the timescale cvar
 	float timescale = com_timescale.GetFloat();
@@ -2753,6 +2767,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// initialize the game object
 	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale ); // DG: make sure it knows the ticrate
 		game->Init();
 	}
 }
@@ -3121,7 +3136,7 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		Sys_Error( "Error during initialization" );
 	}
 
-	async_timer = SDL_AddTimer(USERCMD_MSEC, AsyncTimer, NULL);
+	async_timer = SDL_AddTimer(USERCMD_MSEC, AsyncTimer, NULL); // TODO: maybe rework the whole async timer thing, might be too imprecise
 
 	if (!async_timer)
 		Sys_Error("Error while starting the async timer: %s", SDL_GetError());
@@ -3255,6 +3270,8 @@ void idCommonLocal::InitGame( void ) {
 	// if any archived cvars are modified after this, we will trigger a writing of the config file
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 
+	UpdateGameHz(); // DG: for configurable framerate
+
 	// init the user command input code
 	usercmdGen->Init();
 
@@ -3366,6 +3383,23 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 
 	// shut down the file system
 	fileSystem->Shutdown( reloading );
+}
+
+// DG: for configurable framerate
+void idCommonLocal::UpdateGameHz()
+{
+	com_gameHz.ClearModified();
+	com_gameHzVal = com_gameHz.GetInteger();
+	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
+	// but for 60Hz (16.6667ms) it remains 16ms, like before
+	com_gameFrameTime = ( 1000.0f / com_gameHzVal ) + 0.1f; // TODO: idMath::Rint ?
+	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5 ?
+
+	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameTime );
+
+	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale );
+	}
 }
 
 // DG: below here are hacks to allow adding callbacks and exporting additional functions to the
