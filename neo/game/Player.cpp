@@ -6015,8 +6015,12 @@ void idPlayer::Move( void ) {
 		if ( spectating ) {
 			SetEyeHeight( newEyeOffset );
 		} else {
+			// DG: make this framerate-independent, code suggested by tyuah8 on Github
+			// https://en.wikipedia.org/wiki/Exponential_smoothing#Time_constant
+			const float tau = -16.0f / idMath::Log( pm_crouchrate.GetFloat() );
+			const float a = 1.0f - idMath::Exp( -gameLocal.gameMsec / tau );
 			// smooth out duck height changes
-			SetEyeHeight( EyeHeight() * pm_crouchrate.GetFloat() + newEyeOffset * ( 1.0f - pm_crouchrate.GetFloat() ) );
+			SetEyeHeight( EyeHeight() * (1.0f - a) + newEyeOffset * a );
 		}
 	}
 
