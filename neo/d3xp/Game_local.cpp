@@ -629,6 +629,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteInt( time );
 
 #ifdef _D3XP
+	savegame.WriteInt( gameMsec ); // DG: added with INTERNAL_SAVEGAME_VERSION 2
 	savegame.WriteInt( msec );
 #endif
 
@@ -1538,7 +1539,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadInt( time );
 
 #ifdef _D3XP
+	int savedGameMsec = 16;
+	if( savegame.GetInternalSavegameVersion() > 1 ) {
+		savegame.ReadInt( savedGameMsec );
+	}
+	float gameMsecScale = float(gameMsec) / float(savedGameMsec);
+
 	savegame.ReadInt( msec );
+	// DG: the saved msec must be scaled, in case com_gameHz has a different value now
+	msec *= gameMsecScale;
 #endif
 
 	savegame.ReadInt( vacuumAreaNum );
@@ -1561,12 +1570,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	fast.Restore( &savegame );
 	slow.Restore( &savegame );
+	fast.msec *= gameMsecScale; // DG: the saved value must be scaled, in case com_gameHz has a different value now
+	slow.msec *= gameMsecScale; //     same here
 
 	int blah;
 	savegame.ReadInt( blah );
 	slowmoState = (slowmoState_t)blah;
 
 	savegame.ReadFloat( slowmoMsec );
+	slowmoMsec *= gameMsecScale; // DG: the saved value must be scaled, in case com_gameHz has a different value now
 	savegame.ReadBool( quickSlowmoReset );
 
 	if ( slowmoState == SLOWMO_STATE_OFF ) {
@@ -5051,8 +5063,20 @@ void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
 void idGameLocal::SetGameHz( float hz, float frametime, float ticScaleFactor )
 {
 	gameHz = hz;
+	int oldGameMsec = gameMsec;
 	gameMsec = frametime;
-	msec = frametime; // TODO: maybe msec must be scaled
-	// TODO: adjust this->fast and this->slow
 	gameTicScale = ticScaleFactor;
+
+	if ( slowmoState == SLOWMO_STATE_OFF ) {
+		// if slowmo is off, msec, slowmoMsec and slow/fast.msec should all be set to gameMsec
+		// ResetSlowTimeVars() does just that
+		ResetSlowTimeVars();
+	} else {
+		// otherwise the msec values must be scaled accordingly
+		float gameMsecScale = frametime / float(oldGameMsec);
+		msec *= gameMsecScale;
+		slowmoMsec *= gameMsecScale;
+		fast.msec *= gameMsecScale;
+		slow.msec *= gameMsecScale;
+	}
 }
