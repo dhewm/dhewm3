@@ -203,6 +203,10 @@ idGameLocal::idGameLocal
 */
 idGameLocal::idGameLocal() {
 	Clear();
+	// DG: some sane default values until the proper values are set by SetGameHz()
+	msec = gameMsec = 16;
+	gameHz = 60;
+	gameTicScale = 1.0f;
 }
 
 /*
