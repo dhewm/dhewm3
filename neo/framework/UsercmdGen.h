@@ -37,8 +37,16 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-const int USERCMD_HZ			= 60;			// 60 frames per second
-const int USERCMD_MSEC			= 1000 / USERCMD_HZ;
+// DG: The framerate/ticrate is now configurable. This hacks lets us continue using USERCMD_HZ/MSEC
+//const int USERCMD_HZ			= 60;			// 60 frames per second
+//const int USERCMD_MSEC			= 1000 / USERCMD_HZ;
+#ifdef GAME_DLL // in the game DLLs we can't access com_gameHzVal, so it's mirrored in idGameLocal
+  #define USERCMD_HZ   gameLocal.gameHz
+  #define USERCMD_MSEC gameLocal.gameMsec
+#else
+  #define USERCMD_HZ   com_gameHzVal
+  #define USERCMD_MSEC com_gameFrameTime
+#endif
 
 // usercmd_t->button bits
 const int BUTTON_ATTACK			= BIT(0);
