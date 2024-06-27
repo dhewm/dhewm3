@@ -3238,6 +3238,9 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 			} else {
 				cursor->SetStateString( "grabbercursor", "0" );
 				cursor->SetStateString( "combatcursor", "1" );
+				cursor->SetStateBool("scaleto43", true);   // dezo2, scaled
+				cursor->StateChanged(gameLocal.realClientTime);   // dezo2, set state
+
 			}
 			// DG: update scaleto43 state if necessary
 			if ( cursor->GetStateBool( "scaleto43" ) != wantScaleTo43 ) {
