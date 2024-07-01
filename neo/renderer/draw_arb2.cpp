@@ -31,6 +31,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+// DG: if this is defined, the soft particle shaders will be compiled into the executable
+//  otherwise soft_particle.vfp will be opened as a file just like the other shaders
+//  (useful when tweaking that shader - when loaded from disk, you can use `reloadARBprograms`
+//   instead of recompiling the executable)
+#ifndef D3_INTEGRATE_SOFTPART_SHADERS
+  #define D3_INTEGRATE_SOFTPART_SHADERS 1
+#endif
+
 /*
 =========================================================================================
 
@@ -346,12 +354,13 @@ static progDef_t	progs[MAX_GLPROGS] = {
 	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_GLASSWARP, "arbFP_glasswarp.txt" },
 
 	// SteveL #3878: Particle softening applied by the engine
-	{ GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE, "soft_particle.vp" },
-	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_SOFT_PARTICLE, "soft_particle.fp" },
+	{ GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE, "soft_particle.vfp" },
+	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_SOFT_PARTICLE, "soft_particle.vfp" },
 
 	// additional programs can be dynamically specified in materials
 };
 
+#if D3_INTEGRATE_SOFTPART_SHADERS
 // DG: the following two shaders are taken from TheDarkMod 2.04 (glprogs/soft_particle.vfp)
 // (C) 2005-2016 Broken Glass Studios (The Dark Mod Team) and the individual authors
 //     released under a revised BSD license and GPLv3
@@ -436,6 +445,8 @@ const char* softpartFShader = "!!ARBfp1.0  \n"
 	"\n"
 	"END \n";
 
+#endif // D3_INTEGRATE_SOFTPART_SHADERS
+
 /*
 =================
 R_LoadARBProgram
@@ -482,6 +493,7 @@ void R_LoadARBProgram( int progIndex ) {
 	char	*buffer;
 	char	*start = NULL, *end;
 
+#if D3_INTEGRATE_SOFTPART_SHADERS
 	if ( progs[progIndex].ident == VPROG_SOFT_PARTICLE || progs[progIndex].ident == FPROG_SOFT_PARTICLE ) {
 		// these shaders are loaded directly from a string
 		common->Printf( "<internal> %s", progs[progIndex].name );
@@ -490,7 +502,10 @@ void R_LoadARBProgram( int progIndex ) {
 		// copy to stack memory
 		buffer = (char *)_alloca( strlen( srcstr ) + 1 );
 		strcpy( buffer, srcstr );
-	} else {
+	}
+	else
+#endif // D3_INTEGRATE_SOFTPART_SHADERS
+	{
 		idStr	fullPath = "glprogs/";
 		fullPath += progs[progIndex].name;
 		char	*fileBuffer;
