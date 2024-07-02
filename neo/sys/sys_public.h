@@ -163,6 +163,13 @@ void			Sys_Sleep( int msec );
 // any game related timing information should come from event timestamps
 unsigned int	Sys_Milliseconds( void );
 
+// like Sys_Milliseconds(), but with higher precision
+double			Sys_MillisecondsPrecise( void );
+
+// sleep until Sys_MillisecondsPrecise() returns >= targetTimeMS
+// aims for about 0.01ms precision (but might busy wait for the last 1.5ms or so)
+void Sys_SleepUntilPrecise( double targetTimeMS );
+
 // returns a selection of the CPUID_* flags
 int				Sys_GetProcessorId( void );
 
