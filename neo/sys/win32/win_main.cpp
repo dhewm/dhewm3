@@ -1070,7 +1070,6 @@ static void Win_InitTime() {
 	}
 	double after = Sys_MillisecondsPrecise();
 	double callDiff = after - before;
-	printf( "Win_InitTime(): 1000 calls to Sys_MillisecondsPrecise() took %g usec (%g usec per call)\n", diff*1000, diff );
 
 #ifdef D3_CpuPause
 	// figure out how long D3_CpuPause() instructions take
