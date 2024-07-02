@@ -1911,7 +1911,7 @@ char * D3_UTF8toISO8859_1( const char *utf8str, char *isobuf, int isobufLen, cha
 			else if ( invalidChar != 0 )
 				buffer[i++] = invalidChar;
 		} else if ((*str & 0xf0) == 0xe0) {
-			// Unicode character between 0x0800 and 0xFFF => way out of range for ISO8859-1
+			// Unicode character between 0x0800 and 0xFFFF => way out of range for ISO8859-1
 			// so just validate and skip the input bytes
 			if (*str == 0xe0 && (str[1] < 0xa0 || str[1] > 0xbf)) return NULL;
 			if (*str == 0xed && str[1] > 0x9f) return NULL; // str[1] < 0x80 is checked below
