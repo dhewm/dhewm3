@@ -517,58 +517,40 @@ try_again:
 				common->Warning("Can't get display mode: %s\n", SDL_GetError());
 				return false; // trying other color depth etc is unlikely to help with this issue
 			}
-			if ((real_mode.w != parms.width) || (real_mode.h != parms.height))
+			bool gotRequestedResolution = (real_mode.w == parms.width && real_mode.h == parms.height);
+			bool gotRequestedDisplayHz = (parms.displayHz == 0 || real_mode.refresh_rate == parms.displayHz);
+			if ( !gotRequestedResolution || !gotRequestedDisplayHz )
 			{
-				common->Warning("Current display mode isn't requested display mode\n");
-				common->Warning("Likely SDL bug #4700, trying to work around it..\n");
+				if ( !gotRequestedResolution ) {
+					common->Warning("Current display mode isn't requested display mode\n");
+					common->Warning("Likely SDL bug #4700, trying to work around it..\n");
+				}
+				if ( !gotRequestedDisplayHz ) {
+					common->Printf( "Requested a different display refreshrate than the default one, need to set it..\n" );
+				}
 				int dIdx = SDL_GetWindowDisplayIndex(window);
 				if(dIdx != selectedDisplay) {
 					common->Warning("Window's display index is %d, but we wanted %d!\n", dIdx, selectedDisplay);
 				}
 
-				/* Mkay, try to hack around that. */
-				SDL_DisplayMode wanted_mode = {};
-
-				wanted_mode.w = parms.width;
-				wanted_mode.h = parms.height;
-
-				if (SDL_SetWindowDisplayMode(window, &wanted_mode) != 0)
+				// try again - this time uses GLimp_SetScreenParms(), it contains the code for this
+				// and also handles the refreshrate (that can't be set in SDL_CreateWindow())
+				glimpParms_t parms2 = parms;
+				parms2.multiSamples = -1; // ignore multisample settings.
+				if ( !GLimp_SetScreenParms(parms2, true) )
 				{
 					SDL_DestroyWindow(window);
 					window = NULL;
 
-					common->Warning("Can't force resolution to %ix%i: %s\n", parms.width, parms.height, SDL_GetError());
-
 					return false; // trying other color depth etc is unlikely to help with this issue
 				}
-
-				/* The SDL doku says, that SDL_SetWindowSize() shouldn't be
-				   used on fullscreen windows. But at least in my test with
-				   SDL 2.0.9 the subsequent SDL_GetWindowDisplayMode() fails
-				   if I don't call it. */
-				SDL_SetWindowSize(window, wanted_mode.w, wanted_mode.h);
-
-				if (SDL_GetWindowDisplayMode(window, &real_mode) != 0)
+				SDL_DisplayMode real_mode = {};
+				if ( SDL_GetWindowDisplayMode( window, &real_mode ) != 0 )
 				{
-					SDL_DestroyWindow(window);
-					window = NULL;
-
-					common->Warning("Can't get display mode: %s\n", SDL_GetError());
-
+					common->Warning( "GLimp_SetScreenParms(): Can't get display mode: %s\n", SDL_GetError() );
 					return false; // trying other color depth etc is unlikely to help with this issue
 				}
-
-				if ((real_mode.w != parms.width) || (real_mode.h != parms.height))
-				{
-					SDL_DestroyWindow(window);
-					window = NULL;
-
-					common->Warning("Still in wrong display mode: %ix%i instead of %ix%i\n",
-					                real_mode.w, real_mode.h, parms.width, parms.height);
-
-					return false; // trying other color depth etc is unlikely to help with this issue
-				}
-				common->Warning("Now we have the requested resolution (%d x %d)\n", parms.width, parms.height);
+				common->Warning("Now we have the requested resolution (%d x %d @ %d Hz)\n", parms.width, parms.height, real_mode.refresh_rate);
 			}
 		}
 	#endif // SDL2
@@ -804,18 +786,17 @@ try_again:
 GLimp_SetScreenParms
 ===================
 */
-bool GLimp_SetScreenParms(glimpParms_t parms) {
+bool GLimp_SetScreenParms( glimpParms_t parms, bool fromInit ) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	glimpParms_t curState = GLimp_GetCurState();
+	glimpParms_t curState = GLimp_GetCurState( !fromInit );
 
 	if( parms.multiSamples != -1 && parms.multiSamples != curState.multiSamples ) {
+		common->Printf( " (GLimp_SetScreenParms() not possible because multiSample settings have changed: Have %d, want %d)\n", curState.multiSamples, parms.multiSamples );
 		// if MSAA settings have changed, we really need a vid_restart
 		return false;
 	}
 
 	bool wantFullscreenDesktop = parms.fullScreen && parms.fullScreenDesktop;
-
-	// TODO: parms.displayHz ?
 
 	if ( curState.fullScreenDesktop && wantFullscreenDesktop ) {
 		return true; // nothing to do (resolution is not configurable in that mode)
@@ -908,8 +889,20 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 
 			wanted_mode.w = parms.width;
 			wanted_mode.h = parms.height;
+			wanted_mode.refresh_rate = parms.displayHz;
 
-			// TODO: refresh rate? parms.displayHz should probably try to get most similar mode before trying to set it?
+			SDL_DisplayMode closest_mode = {};
+			int displayIndex = SDL_GetWindowDisplayIndex( window );
+			if ( SDL_GetClosestDisplayMode( displayIndex, &wanted_mode, &closest_mode ) == NULL ) {
+				common->Warning( "GLimp_SetScreenParms(): Couldn't get a matching fullscreen display mode for %d x %d on display %d (%s): %s\n",
+				                 parms.width, parms.height, displayIndex, SDL_GetDisplayName( displayIndex ), SDL_GetError() );
+				return false;
+			}
+
+			if ( parms.displayHz != 0 && closest_mode.refresh_rate != 0 && parms.displayHz != closest_mode.refresh_rate ) {
+				common->Warning( "GLimp_SetScreenParms(): Couldn't find a fullscreen display mode with requested refresh rate %d, getting %d instead\n",
+				                 parms.displayHz, closest_mode.refresh_rate );
+			}
 
 			if ( SDL_SetWindowDisplayMode( window, &wanted_mode ) != 0 )
 			{
@@ -929,7 +922,13 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 			if ( SDL_GetWindowDisplayMode( window, &real_mode ) != 0 )
 			{
 				common->Warning( "GLimp_SetScreenParms(): Can't get display mode: %s\n", SDL_GetError() );
-				return false; // trying other color depth etc is unlikely to help with this issue
+				return false;
+			}
+
+			if ( parms.displayHz != 0 && real_mode.refresh_rate != 0 && parms.displayHz != real_mode.refresh_rate ) {
+				common->Warning( "GLimp_SetScreenParms(): Couldn't get the requested refresh rate %d, got %d instead\n",
+				                  parms.displayHz, real_mode.refresh_rate );
+				// don't make this an error, I think
 			}
 
 			if ( (real_mode.w != wanted_mode.w) || (real_mode.h != wanted_mode.h) )
@@ -955,7 +954,7 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 // sets a glimpParms_t based on the current true state (according to SDL)
 // Note: here, ret.fullScreenDesktop is only true if currently in fullscreen desktop mode
 //       (and ret.fullScreen is true as well)
-glimpParms_t GLimp_GetCurState()
+glimpParms_t GLimp_GetCurState( bool checkConsistency)
 {
 	glimpParms_t ret = {};
 
@@ -1004,6 +1003,12 @@ glimpParms_t GLimp_GetCurState()
 		} else {
 			common->Warning( "GLimp_GetCurState(): Can't get display mode: %s\n", SDL_GetError() );
 		}
+	} else {
+		SDL_DisplayMode real_mode = {};
+		int displayIndex = SDL_GetWindowDisplayIndex( window );
+		if ( SDL_GetDesktopDisplayMode(displayIndex, &real_mode) == 0 ) {
+			ret.displayHz = real_mode.refresh_rate;
+		}
 	}
   #endif
 
@@ -1013,8 +1018,10 @@ glimpParms_t GLimp_GetCurState()
 		SDL_GetWindowSize( window, &ret.width, &ret.height );
 	}
 
-	assert( ret.width == glConfig.winWidth && ret.height == glConfig.winHeight );
-	assert( ret.fullScreen == glConfig.isFullscreen );
+	if ( checkConsistency ) {
+		assert( ret.width == glConfig.winWidth && ret.height == glConfig.winHeight );
+		assert( ret.fullScreen == glConfig.isFullscreen );
+	}
 
 #else
 	assert( 0 && "Don't use GLimp_GetCurState() with SDL1.2 !" );

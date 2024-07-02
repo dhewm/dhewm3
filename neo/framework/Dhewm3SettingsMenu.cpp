@@ -1774,9 +1774,11 @@ static bool VideoHasResettableChanges()
 	return false;
 }
 
+static glimpParms_t curState;
+
 static bool VideoHasApplyableChanges()
 {
-	glimpParms_t curState = GLimp_GetCurState();
+	curState = GLimp_GetCurState();
 	int wantedWidth = 0, wantedHeight = 0;
 	R_GetModeInfo( &wantedWidth, &wantedHeight, r_mode.GetInteger() );
 	if ( wantedWidth != curState.width || wantedHeight != curState.height ) {
@@ -1958,10 +1960,10 @@ static void DrawVideoOptionsMenu()
 		float scale = float(glConfig.vidWidth)/glConfig.winWidth;
 		int pw = scale * displayRect.w;
 		int ph = scale * displayRect.h;
-		ImGui::TextDisabled( "Display Size: %d x %d (Physical: %d x %d)", displayRect.w, displayRect.h, pw, ph );
+		ImGui::TextDisabled( "Display Size: %d x %d (Physical: %d x %d) @ %d Hz", displayRect.w, displayRect.h, pw, ph, curState.displayHz );
 	} else {
 		ImGui::TextDisabled( "Current Resolution: %d x %d", glConfig.vidWidth, glConfig.vidHeight );
-		ImGui::TextDisabled( "Display Size: %d x %d", displayRect.w, displayRect.h );
+		ImGui::TextDisabled( "Display Size: %d x %d @ %d Hz", displayRect.w, displayRect.h, curState.displayHz );
 	}
 
 	// MSAA
