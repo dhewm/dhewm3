@@ -550,7 +550,11 @@ try_again:
 					common->Warning( "GLimp_SetScreenParms(): Can't get display mode: %s\n", SDL_GetError() );
 					return false; // trying other color depth etc is unlikely to help with this issue
 				}
-				common->Warning("Now we have the requested resolution (%d x %d @ %d Hz)\n", parms.width, parms.height, real_mode.refresh_rate);
+				// TODO: in obscure cases (XWayland fake "real" fullscreen with lower than desktop resolution)
+				//       SDL_GetWindowDisplayMode() seems to return the wrong resolution, but SDL_GetWindowSize()
+				//       returns the correct one.. *might* make sense to switch to that, but I think it was broken
+				//       in other cases (at least in older SDL versions)
+				common->Warning( "Now we have %d x %d @ %d Hz\n", real_mode.w, real_mode.h, real_mode.refresh_rate );
 			}
 		}
 	#endif // SDL2
