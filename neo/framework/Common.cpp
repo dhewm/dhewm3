@@ -119,8 +119,11 @@ idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SY
 idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, COM_GAMEHZ_DESCR, 10, 480 ); // TODO: make it float? make it default to 62.5?
 // the next three values will be set based on com_gameHz
 int    com_gameHzVal = 60;
-int    com_gameFrameTime = 16; // length of one frame in msec, 1000 / com_gameHz
+int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz
+float  com_preciseFrameLengthMS = 16.6667f;    // 1000.0f / gameHzVal
 float  com_gameTicScale = 1.0f; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
+
+double com_preciseFrameTimeMS = 0; // like com_frameTime but as double: time (since start) for the current frame in milliseconds
 
 // com_speeds times
 int				time_gameFrame;
@@ -128,7 +131,7 @@ int				time_gameDraw;
 int				time_frontend;			// renderSystem frontend time
 int				time_backend;			// renderSystem backend time
 
-int				com_frameTime;			// time (since start) for the current frame in milliseconds - TODO: DG: make it double?
+int				com_frameTime;			// time (since start) for the current frame in milliseconds
 int				com_frameNumber;		// variable frame number
 volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
@@ -275,7 +278,8 @@ void Com_UpdateFrameTime() {
 	int ticNum = com_ticNumber;
 	int ticDiff = ticNum - lastTicNum;
 	assert(ticDiff >= 0);
-	com_frameTime += ticDiff * USERCMD_MSEC;
+	com_preciseFrameTimeMS += ticDiff * com_preciseFrameLengthMS;
+	com_frameTime = idMath::Rint( com_preciseFrameTimeMS );
 	lastTicNum = ticNum;
 }
 
@@ -2565,8 +2569,8 @@ typedef struct {
 
 static const int MAX_ASYNC_STATS = 1024;
 asyncStats_t	com_asyncStats[MAX_ASYNC_STATS];		// indexed by com_ticNumber
-static int	lastTicMsec;
-static int	nextTicTargetMsec; // when (according to Sys_Milliseconds()) the next async tic should start
+static double lastTicMsec = 0.0;
+static double nextTicTargetMsec = 0.0; // when (according to Sys_Milliseconds()) the next async tic should start
 
 void idCommonLocal::SingleAsyncTic( void ) {
 	// main thread code can prevent this from happening while modifying
@@ -2609,19 +2613,19 @@ idCommonLocal::Async
 =================
 */
 void idCommonLocal::Async( void ) {
-	int	msec = Sys_Milliseconds(); // TODO: make double?
+	double msec = Sys_MillisecondsPrecise();
 	if ( !lastTicMsec ) {
-		lastTicMsec = msec - USERCMD_MSEC;
+		lastTicMsec = msec - com_preciseFrameLengthMS;
 	}
 
 	if ( !com_preciseTic.GetBool() ) {
 		// just run a single tic, even if the exact msec isn't precise
 		SingleAsyncTic();
-		nextTicTargetMsec = msec + USERCMD_MSEC;
+		nextTicTargetMsec = msec + com_preciseFrameLengthMS;
 		return;
 	}
 
-	int ticMsec = USERCMD_MSEC; // TODO: make float?
+	float ticMsec = com_preciseFrameLengthMS;
 
 	// the number of msec per tic can be varies with the timescale cvar
 	float timescale = com_timescale.GetFloat();
@@ -2634,8 +2638,8 @@ void idCommonLocal::Async( void ) {
 
 	// don't skip too many
 	if ( timescale == 1.0f ) {
-		if ( lastTicMsec + 10 * USERCMD_MSEC < msec ) {
-			lastTicMsec = msec - 10*USERCMD_MSEC;
+		if ( lastTicMsec + 10 * com_preciseFrameLengthMS < msec ) {
+			lastTicMsec = msec - 10.0*com_preciseFrameLengthMS;
 		}
 	}
 
@@ -2788,7 +2792,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// initialize the game object
 	if ( game != NULL ) {
-		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale ); // DG: make sure it knows the ticrate
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale ); // DG: make sure it knows the ticrate
 		game->Init();
 	}
 }
@@ -2861,14 +2865,22 @@ int idCommonLocal::AsyncThread(void* arg)
 
 	while ( self->runAsyncThread ) {
 
+		// The idea is to make this run super-exact, but round *down* com_gameFrameTime (USERCMD_MSEC).
+		// Then (I think..) when the game thread actually runs (0.x ms later than it might expect)
+		// all the things that waited for USERCMD_MSEC will run because they're (slightly) overdue
+		//  => they'll be exactly on time
+		// TODO: .. well, unless maybe if they waited for so many frametimes that we're a frame early..
+		//       But does it even matter for such long waits?
+		//       (and also, so far USERCMD_MSEC *has* been rounded down from 16.6667 to 16,
+		//        and with VSync enabled there was more or less correct timing)
+
 		self->Async();
 
+		// idSessionLocal::Frame() waits for TRIGGER_EVENT_ONE
+		// => this syncs the main thread with the async thread
 		Sys_TriggerEvent(TRIGGER_EVENT_ONE);
 
-		// TODO: -1 is so we don't sleep too long - would -2 be better, or can we have a more precise sleep?
-		//       IIRC especially on Windows sleeping is imprecise by at least on MS
-		int sleepTime = Max( 0, nextTicTargetMsec - (int)Sys_Milliseconds() - 1 );
-		Sys_Sleep( sleepTime );
+		Sys_SleepUntilPrecise( nextTicTargetMsec );
 	}
 	return 0;
 }
@@ -3407,15 +3419,17 @@ void idCommonLocal::UpdateGameHz()
 {
 	com_gameHz.ClearModified();
 	com_gameHzVal = com_gameHz.GetInteger();
+	com_preciseFrameLengthMS = 1000.0f / com_gameHzVal;
 	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
 	// but for 60Hz (16.6667ms) it remains 16ms, like before
-	com_gameFrameTime = ( 1000.0f / com_gameHzVal ) + 0.1f; // TODO: idMath::Rint ?
-	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5 ?
+	com_gameFrameLengthMS = com_preciseFrameLengthMS + 0.1f; // TODO: idMath::Rint ? or always round down?
 
-	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameTime );
+	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5?
+
+	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameLengthMS );
 
 	if ( game != NULL ) {
-		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale );
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale );
 	}
 }
 

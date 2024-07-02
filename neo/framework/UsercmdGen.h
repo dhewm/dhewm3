@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
   #define USERCMD_MSEC gameLocal.gameMsec
 #else
   #define USERCMD_HZ   com_gameHzVal
-  #define USERCMD_MSEC com_gameFrameTime
+  #define USERCMD_MSEC com_gameFrameLengthMS
 #endif
 
 // usercmd_t->button bits
