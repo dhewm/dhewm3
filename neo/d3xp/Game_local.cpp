@@ -205,6 +205,10 @@ idGameLocal::idGameLocal
 */
 idGameLocal::idGameLocal() {
 	Clear();
+	// DG: some sane default values until the proper values are set by SetGameHz()
+	msec = gameMsec = 16;
+	gameHz = 60;
+	gameTicScale = 1.0f;
 }
 
 /*
@@ -626,6 +630,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteInt( time );
 
 #ifdef _D3XP
+	savegame.WriteInt( gameMsec ); // DG: added with INTERNAL_SAVEGAME_VERSION 2
 	savegame.WriteInt( msec );
 #endif
 
@@ -1535,7 +1540,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadInt( time );
 
 #ifdef _D3XP
+	int savedGameMsec = 16;
+	if( savegame.GetInternalSavegameVersion() > 1 ) {
+		savegame.ReadInt( savedGameMsec );
+	}
+	float gameMsecScale = float(gameMsec) / float(savedGameMsec);
+
 	savegame.ReadInt( msec );
+	// DG: the saved msec must be scaled, in case com_gameHz has a different value now
+	msec *= gameMsecScale;
 #endif
 
 	savegame.ReadInt( vacuumAreaNum );
@@ -1558,12 +1571,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	fast.Restore( &savegame );
 	slow.Restore( &savegame );
+	fast.msec *= gameMsecScale; // DG: the saved value must be scaled, in case com_gameHz has a different value now
+	slow.msec *= gameMsecScale; //     same here
 
 	int blah;
 	savegame.ReadInt( blah );
 	slowmoState = (slowmoState_t)blah;
 
 	savegame.ReadFloat( slowmoMsec );
+	slowmoMsec *= gameMsecScale; // DG: the saved value must be scaled, in case com_gameHz has a different value now
 	savegame.ReadBool( quickSlowmoReset );
 
 	if ( slowmoState == SLOWMO_STATE_OFF ) {
@@ -4913,10 +4929,10 @@ void idGameLocal::ComputeSlowMsec() {
 
 	// do any necessary ramping
 	if ( slowmoState == SLOWMO_STATE_RAMPUP ) {
-		delta = 4 - slowmoMsec;
+		delta = gameMsec * 0.25f - slowmoMsec; // DG: adjust to support com_gameHz
 
 		if ( fabs( delta ) < g_slowmoStepRate.GetFloat() ) {
-			slowmoMsec = 4;
+			slowmoMsec = gameMsec * 0.25f; // DG: adjust to support com_gameHz (was 4 = 16/4)
 			slowmoState = SLOWMO_STATE_ON;
 		}
 		else {
@@ -4928,10 +4944,10 @@ void idGameLocal::ComputeSlowMsec() {
 		}
 	}
 	else if ( slowmoState == SLOWMO_STATE_RAMPDOWN ) {
-		delta = 16 - slowmoMsec;
+		delta = gameMsec - slowmoMsec; // DG: adjust to support com_gameHz
 
 		if ( fabs( delta ) < g_slowmoStepRate.GetFloat() ) {
-			slowmoMsec = 16;
+			slowmoMsec = gameMsec; // DG: adjust to support com_gameHz
 			slowmoState = SLOWMO_STATE_OFF;
 			if ( gameSoundWorld ) {
 				gameSoundWorld->SetSlowmo( false );
@@ -5043,3 +5059,25 @@ idGameLocal::GetMapLoadingGUI
 ===============
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
+
+// DG: Added for configurable framerate
+void idGameLocal::SetGameHz( float hz, float frametime, float ticScaleFactor )
+{
+	gameHz = hz;
+	int oldGameMsec = gameMsec;
+	gameMsec = frametime;
+	gameTicScale = ticScaleFactor;
+
+	if ( slowmoState == SLOWMO_STATE_OFF ) {
+		// if slowmo is off, msec, slowmoMsec and slow/fast.msec should all be set to gameMsec
+		// ResetSlowTimeVars() does just that
+		ResetSlowTimeVars();
+	} else {
+		// otherwise the msec values must be scaled accordingly
+		float gameMsecScale = frametime / float(oldGameMsec);
+		msec *= gameMsecScale;
+		slowmoMsec *= gameMsecScale;
+		fast.msec *= gameMsecScale;
+		slow.msec *= gameMsecScale;
+	}
+}

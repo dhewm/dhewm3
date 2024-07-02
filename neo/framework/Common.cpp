@@ -109,13 +109,24 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
+// DG: the next block is for configurable framerate
+#define COM_GAMEHZ_DESCR "Frames per second the game should run at - keep in mind that Vertical Sync (or a too slow computer) may slow it down, and that running below this configured framerate can cause problems!"
+idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, COM_GAMEHZ_DESCR, 10, 480 ); // TODO: make it float? make it default to 62.5?
+// the next three values will be set based on com_gameHz
+int    com_gameHzVal = 60;
+int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz
+float  com_preciseFrameLengthMS = 16.6667f;    // 1000.0f / gameHzVal
+float  com_gameTicScale = 1.0f; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
+
+double com_preciseFrameTimeMS = 0; // like com_frameTime but as double: time (since start) for the current frame in milliseconds
+
 // com_speeds times
 int				time_gameFrame;
 int				time_gameDraw;
 int				time_frontend;			// renderSystem frontend time
 int				time_backend;			// renderSystem backend time
 
-int				com_frameTime;			// time for the current frame in milliseconds
+int				com_frameTime;			// time (since start) for the current frame in milliseconds
 int				com_frameNumber;		// variable frame number
 volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
@@ -219,6 +230,8 @@ private:
 	void						PrintLoadingMessage( const char *msg );
 	void						FilterLangList( idStrList* list, idStr lang );
 
+	void						UpdateGameHz(); // DG: for configurable framerate
+
 	bool						com_fullyInitialized;
 	bool						com_refreshOnPrint;		// update the screen every print for dmap
 	int							com_errorEntered;		// 0, ERP_DROP, etc
@@ -241,11 +254,29 @@ private:
 	idCompressor *				config_compressor;
 #endif
 
-	SDL_TimerID					async_timer;
+	static int					AsyncThread(void* arg);
+	xthreadInfo					asyncThread;
+	volatile bool				runAsyncThread;
 };
 
 idCommonLocal	commonLocal;
 idCommon *		common = &commonLocal;
+
+// DG: updates com_frameTime based on the current tic number and USERCMD_MSEC (com_gameFrameTime == 1000/com_gameHz)
+void Com_UpdateFrameTime() {
+	// It used to be just com_frameTime = com_ticNumber * USERCMD_MSEC;
+	// But now that USERCMD_MSEC isn't fixed to 16 for fixed 60fps anymore (thanks to com_gameHz),
+	// that doesn't work anymore (com_frameTime would decrease when setting com_gameHz to a lower value!)
+	// So I moved updating it into a function (it's done in 3 places) that has just slightly more logic
+	// to ensure com_frameTime never decreases (well, until it overflows :-p)
+	static int lastTicNum = 0;
+	int ticNum = com_ticNumber;
+	int ticDiff = ticNum - lastTicNum;
+	assert(ticDiff >= 0);
+	com_preciseFrameTimeMS += ticDiff * com_preciseFrameLengthMS;
+	com_frameTime = idMath::Rint( com_preciseFrameTimeMS );
+	lastTicNum = ticNum;
+}
 
 /*
 ==================
@@ -270,7 +301,8 @@ idCommonLocal::idCommonLocal( void ) {
 	config_compressor = NULL;
 #endif
 
-	async_timer = 0;
+	memset( &asyncThread, 0, sizeof(asyncThread) );
+	runAsyncThread = false;
 }
 
 /*
@@ -2437,12 +2469,17 @@ void idCommonLocal::Frame( void ) {
 			}
 		}
 
+		// DG: for configurable framerate
+		if ( com_gameHz.IsModified() ) {
+			UpdateGameHz();
+		}
+
 		eventLoop->RunEventLoop();
 
 		// DG: prepare new ImGui frame - I guess this is a good place, as all new events should be available?
 		D3::ImGuiHooks::NewFrame();
 
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+		Com_UpdateFrameTime(); // DG: put updating com_frameTime into a function
 
 		idAsyncNetwork::RunFrame();
 
@@ -2488,7 +2525,7 @@ idCommonLocal::GUIFrame
 void idCommonLocal::GUIFrame( bool execCmd, bool network ) {
 	Sys_GenerateEvents();
 	eventLoop->RunEventLoop( execCmd );	// and execute any commands
-	com_frameTime = com_ticNumber * USERCMD_MSEC;
+	Com_UpdateFrameTime(); // DG: put updating com_frameTime into a function
 	if ( network ) {
 		idAsyncNetwork::RunFrame();
 	}
@@ -2525,8 +2562,8 @@ typedef struct {
 
 static const int MAX_ASYNC_STATS = 1024;
 asyncStats_t	com_asyncStats[MAX_ASYNC_STATS];		// indexed by com_ticNumber
-int prevAsyncMsec;
-int	lastTicMsec;
+static double lastTicMsec = 0.0;
+static double nextTicTargetMsec = 0.0; // when (according to Sys_Milliseconds()) the next async tic should start
 
 void idCommonLocal::SingleAsyncTic( void ) {
 	// main thread code can prevent this from happening while modifying
@@ -2569,18 +2606,19 @@ idCommonLocal::Async
 =================
 */
 void idCommonLocal::Async( void ) {
-	int	msec = Sys_Milliseconds();
+	double msec = Sys_MillisecondsPrecise();
 	if ( !lastTicMsec ) {
-		lastTicMsec = msec - USERCMD_MSEC;
+		lastTicMsec = msec - com_preciseFrameLengthMS;
 	}
 
 	if ( !com_preciseTic.GetBool() ) {
 		// just run a single tic, even if the exact msec isn't precise
 		SingleAsyncTic();
+		nextTicTargetMsec = msec + com_preciseFrameLengthMS;
 		return;
 	}
 
-	int ticMsec = USERCMD_MSEC;
+	float ticMsec = com_preciseFrameLengthMS;
 
 	// the number of msec per tic can be varies with the timescale cvar
 	float timescale = com_timescale.GetFloat();
@@ -2593,8 +2631,8 @@ void idCommonLocal::Async( void ) {
 
 	// don't skip too many
 	if ( timescale == 1.0f ) {
-		if ( lastTicMsec + 10 * USERCMD_MSEC < msec ) {
-			lastTicMsec = msec - 10*USERCMD_MSEC;
+		if ( lastTicMsec + 10 * com_preciseFrameLengthMS < msec ) {
+			lastTicMsec = msec - 10.0*com_preciseFrameLengthMS;
 		}
 	}
 
@@ -2602,6 +2640,7 @@ void idCommonLocal::Async( void ) {
 		SingleAsyncTic();
 		lastTicMsec += ticMsec;
 	}
+	nextTicTargetMsec = lastTicMsec + ticMsec;
 }
 
 /*
@@ -2725,6 +2764,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// initialize the game object
 	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale ); // DG: make sure it knows the ticrate
 		game->Init();
 	}
 }
@@ -2790,21 +2830,30 @@ void idCommonLocal::SetMachineSpec( void ) {
 	}
 }
 
-static unsigned int AsyncTimer(unsigned int interval, void *) {
-	common->Async();
-	Sys_TriggerEvent(TRIGGER_EVENT_ONE);
+int idCommonLocal::AsyncThread(void* arg)
+{
+	idCommonLocal* self = (idCommonLocal*)arg;
 
-	// calculate the next interval to get as close to 60fps as possible
-	unsigned int now = SDL_GetTicks();
-	unsigned int tick = com_ticNumber * USERCMD_MSEC;
-	// FIXME: this is pretty broken and basically always returns 1 because now now is much bigger than tic
-	//        (probably com_tickNumber only starts incrementing a second after engine starts?)
-	//        only reason this works is common->Async() checking again before calling SingleAsyncTic()
+	while ( self->runAsyncThread ) {
 
-	if (now >= tick)
-		return 1;
+		// The idea is to make this run super-exact, but round *down* com_gameFrameTime (USERCMD_MSEC).
+		// Then (I think..) when the game thread actually runs (0.x ms later than it might expect)
+		// all the things that waited for USERCMD_MSEC will run because they're (slightly) overdue
+		//  => they'll be exactly on time
+		// TODO: .. well, unless maybe if they waited for so many frametimes that we're a frame early..
+		//       But does it even matter for such long waits?
+		//       (and also, so far USERCMD_MSEC *has* been rounded down from 16.6667 to 16,
+		//        and with VSync enabled there was more or less correct timing)
 
-	return tick - now;
+		self->Async();
+
+		// idSessionLocal::Frame() waits for TRIGGER_EVENT_ONE
+		// => this syncs the main thread with the async thread
+		Sys_TriggerEvent(TRIGGER_EVENT_ONE);
+
+		Sys_SleepUntilPrecise( nextTicTargetMsec );
+	}
+	return 0;
 }
 
 #ifdef _WIN32
@@ -3069,10 +3118,8 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		Sys_Error( "Error during initialization" );
 	}
 
-	async_timer = SDL_AddTimer(USERCMD_MSEC, AsyncTimer, NULL);
-
-	if (!async_timer)
-		Sys_Error("Error while starting the async timer: %s", SDL_GetError());
+	runAsyncThread = true;
+	Sys_CreateThread( AsyncThread, this, asyncThread, "AsyncThread" );
 }
 
 
@@ -3082,9 +3129,10 @@ idCommonLocal::Shutdown
 =================
 */
 void idCommonLocal::Shutdown( void ) {
-	if (async_timer) {
-		SDL_RemoveTimer(async_timer);
-		async_timer = 0;
+	if ( asyncThread.threadHandle != NULL ) {
+		runAsyncThread = false;
+		Sys_DestroyThread( asyncThread );
+		memset( &asyncThread, 0, sizeof(asyncThread) );
 	}
 
 	idAsyncNetwork::server.Kill();
@@ -3203,6 +3251,8 @@ void idCommonLocal::InitGame( void ) {
 	// if any archived cvars are modified after this, we will trigger a writing of the config file
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 
+	UpdateGameHz(); // DG: for configurable framerate
+
 	// init the user command input code
 	usercmdGen->Init();
 
@@ -3314,6 +3364,25 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 
 	// shut down the file system
 	fileSystem->Shutdown( reloading );
+}
+
+// DG: for configurable framerate
+void idCommonLocal::UpdateGameHz()
+{
+	com_gameHz.ClearModified();
+	com_gameHzVal = com_gameHz.GetInteger();
+	com_preciseFrameLengthMS = 1000.0f / com_gameHzVal;
+	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
+	// but for 60Hz (16.6667ms) it remains 16ms, like before
+	com_gameFrameLengthMS = com_preciseFrameLengthMS + 0.1f; // TODO: idMath::Rint ? or always round down?
+
+	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5?
+
+	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameLengthMS );
+
+	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale );
+	}
 }
 
 // DG: below here are hacks to allow adding callbacks and exporting additional functions to the

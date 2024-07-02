@@ -391,7 +391,7 @@ GLExtension_t GLimp_ExtensionPointer( const char *a) { return StubFunction; };
 bool GLimp_Init(glimpParms_t a) {return true;};
 void GLimp_SetGamma(unsigned short*a, unsigned short*b, unsigned short*c) {};
 void GLimp_ResetGamma() {}
-bool GLimp_SetScreenParms(glimpParms_t parms) { return true; };
+bool GLimp_SetScreenParms(glimpParms_t parms, bool) { return true; };
 void GLimp_Shutdown() {};
 void GLimp_SwapBuffers() {};
 void GLimp_ActivateContext() {};
@@ -400,7 +400,7 @@ void GLimp_GrabInput(int flags) {};
 bool GLimp_SetSwapInterval( int swapInterval ) { return false; }
 void GLimp_UpdateWindowSize() {}
 bool GLimp_SetWindowResizable( bool enableResizable ) { return false; }
-glimpParms_t GLimp_GetCurState() { glimpParms_t ret = {}; return ret; }
+glimpParms_t GLimp_GetCurState(bool) { glimpParms_t ret = {}; return ret; }
 
 #ifdef _MSC_VER
 #pragma warning(pop)

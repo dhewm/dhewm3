@@ -59,7 +59,7 @@ idCVar r_inhibitFragmentProgram( "r_inhibitFragmentProgram", "0", CVAR_RENDERER 
 idCVar r_useLightPortalFlow( "r_useLightPortalFlow", "1", CVAR_RENDERER | CVAR_BOOL, "use a more precise area reference determination" );
 idCVar r_multiSamples( "r_multiSamples", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "number of antialiasing samples" );
 idCVar r_mode( "r_mode", "5", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
-idCVar r_displayRefresh( "r_displayRefresh", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_NOCHEAT, "optional display refresh rate option for vid mode", 0.0f, 200.0f );
+idCVar r_displayRefresh( "r_displayRefresh", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_NOCHEAT | CVAR_ARCHIVE, "optional display refresh rate option for vid mode", 0.0f, 500.0f );
 idCVar r_fullscreen( "r_fullscreen", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0 = windowed, 1 = full screen" );
 idCVar r_fullscreenDesktop( "r_fullscreenDesktop", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode" );
 idCVar r_customWidth( "r_customWidth", "720", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "custom screen width. set r_mode to -1 to activate" );
@@ -238,6 +238,13 @@ idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDER
 // DG: allow freely resizing the window
 idCVar r_windowResizable("r_windowResizable", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Allow resizing (and maximizing) the window (needs SDL2; with 2.0.5 or newer it's applied immediately)" );
 
+// DG: for soft particles (ported from TDM)
+idCVar r_enableDepthCapture( "r_enableDepthCapture", "-1", CVAR_RENDERER | CVAR_INTEGER,
+		"enable capturing depth buffer to texture. -1: enable automatically (if soft particles are enabled), 0: disable, 1: enable", -1, 1 ); // #3877
+idCVar r_useSoftParticles( "r_useSoftParticles", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Soften particle transitions when player walks through them or they cross solid geometry. Needs r_enableDepthCapture. Can slow down rendering!" ); // #3878
+
+idCVar r_glDebugContext( "r_glDebugContext", "0", CVAR_RENDERER | CVAR_BOOL, "Enable OpenGL Debug context - requires vid_restart, needs SDL2" );
+
 // define qgl functions
 #define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
 #include "renderer/qgl_proc.h"
@@ -287,6 +294,9 @@ PFNGLDEPTHBOUNDSEXTPROC                 qglDepthBoundsEXT;
 // DG: couldn't find any extension for this, it's supported in GL2.0 and newer, incl OpenGL ES2.0
 PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
 
+// GL_ARB_debug_output
+PFNGLDEBUGMESSAGECALLBACKARBPROC        qglDebugMessageCallbackARB;
+
 // eez: This is a slight hack for letting us select the desired screenshot format in other functions
 //  This is a hack to avoid adding another function parameter to idRenderSystem::TakeScreenshot(),
 //  which would break the API of the dhewm3 SDK for mods.
@@ -294,6 +304,60 @@ PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
 //  idRenderSystemLocal::TakeScreenshot(), so if your code wants to enforce a specific format,
 //  it must set g_screenshotFormat accordingly before each call to TakeScreenshot().
 int g_screenshotFormat = -1;
+
+enum {
+	// Not all GL.h header know about GL_DEBUG_SEVERITY_NOTIFICATION_*.
+	QGL_DEBUG_SEVERITY_NOTIFICATION = 0x826B
+};
+
+/*
+ * Callback function for debug output.
+ */
+static void APIENTRY
+DebugCallback( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+              const GLchar *message, const void *userParam )
+{
+	const char* sourceStr = "Source: Unknown";
+	const char* typeStr = "Type: Unknown";
+	const char* severityStr = "Severity: Unknown";
+
+	switch (severity)
+	{
+#define SVRCASE(X, STR)  case GL_DEBUG_SEVERITY_ ## X ## _ARB : severityStr = STR; break;
+		case QGL_DEBUG_SEVERITY_NOTIFICATION: return;
+		SVRCASE(HIGH, "Severity: High")
+		SVRCASE(MEDIUM, "Severity: Medium")
+		SVRCASE(LOW, "Severity: Low")
+#undef SVRCASE
+	}
+
+	switch (source)
+	{
+#define SRCCASE(X)  case GL_DEBUG_SOURCE_ ## X ## _ARB: sourceStr = "Source: " #X; break;
+		SRCCASE(API);
+		SRCCASE(WINDOW_SYSTEM);
+		SRCCASE(SHADER_COMPILER);
+		SRCCASE(THIRD_PARTY);
+		SRCCASE(APPLICATION);
+		SRCCASE(OTHER);
+#undef SRCCASE
+	}
+
+	switch(type)
+	{
+#define TYPECASE(X)  case GL_DEBUG_TYPE_ ## X ## _ARB: typeStr = "Type: " #X; break;
+		TYPECASE(ERROR);
+		TYPECASE(DEPRECATED_BEHAVIOR);
+		TYPECASE(UNDEFINED_BEHAVIOR);
+		TYPECASE(PORTABILITY);
+		TYPECASE(PERFORMANCE);
+		TYPECASE(OTHER);
+#undef TYPECASE
+	}
+
+	common->Warning( "GLDBG %s %s %s: %s\n", sourceStr, typeStr, severityStr, message );
+
+}
 
 /*
 =================
@@ -414,15 +478,15 @@ static void R_CheckPortableExtensions( void ) {
 		qglActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)GLimp_ExtensionPointer( "glActiveStencilFaceEXT" );
 
 	if( glConfig.glVersion >= 2.0) {
-		common->Printf( "... got GL2.0+ glStencilOpSeparate()\n" );
+		common->Printf( "...got GL2.0+ glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparate" );
 	} else if( R_CheckExtension( "GL_ATI_separate_stencil" ) ) {
-		common->Printf( "... got glStencilOpSeparateATI() (GL_ATI_separate_stencil)\n" );
+		common->Printf( "...got glStencilOpSeparateATI() (GL_ATI_separate_stencil)\n" );
 		// the ATI version of glStencilOpSeparate() has the same signature and should also
 		// behave identical to the GL2 version (in Mesa3D it's just an alias)
 		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparateATI" );
 	} else {
-		common->Printf( "... don't have glStencilOpSeparateATI() or (GL2.0+) glStencilOpSeparate()\n" );
+		common->Printf( "X..don't have glStencilOpSeparateATI() or (GL2.0+) glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = NULL;
 	}
 
@@ -481,6 +545,37 @@ static void R_CheckPortableExtensions( void ) {
 		qglDepthBoundsEXT = (PFNGLDEPTHBOUNDSEXTPROC)GLimp_ExtensionPointer( "glDepthBoundsEXT" );
 	}
 
+	// GL_ARB_debug_output
+	glConfig.glDebugOutputAvailable = false;
+	if ( glConfig.haveDebugContext ) {
+		if ( strstr( glConfig.extensions_string, "GL_ARB_debug_output" ) ) {
+			glConfig.glDebugOutputAvailable = true;
+			qglDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC)GLimp_ExtensionPointer( "glDebugMessageCallbackARB" );
+			if ( r_glDebugContext.GetBool() ) {
+				common->Printf( "...using GL_ARB_debug_output (r_glDebugContext is set)\n" );
+				qglDebugMessageCallbackARB(DebugCallback, NULL);
+				qglEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+			} else {
+				common->Printf( "...found GL_ARB_debug_output, but not using it (r_glDebugContext is not set)\n" );
+			}
+		} else {
+			common->Printf( "X..GL_ARB_debug_output not found\n" );
+			qglDebugMessageCallbackARB = NULL;
+			if ( r_glDebugContext.GetBool() ) {
+				common->Warning( "r_glDebugContext is set, but can't be used because GL_ARB_debug_output is not supported" );
+			}
+		}
+	} else {
+		if ( strstr( glConfig.extensions_string, "GL_ARB_debug_output" ) ) {
+			if ( r_glDebugContext.GetBool() ) {
+				common->Printf( "...found GL_ARB_debug_output, but not using it (no debug context)\n" );
+			} else {
+				common->Printf( "...found GL_ARB_debug_output, but not using it (r_glDebugContext is not set)\n" );
+			}
+		} else {
+			common->Printf( "X..GL_ARB_debug_output not found\n" );
+		}
+	}
 }
 
 

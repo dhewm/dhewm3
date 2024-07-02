@@ -409,6 +409,10 @@ idParticleStage *idDeclParticle::ParseParticleStage( idLexer &src ) {
 			stage->gravity = src.ParseFloat();
 			continue;
 		}
+		if ( !token.Icmp( "softeningRadius" ) ) { // #3878 soft particles
+			stage->softeningRadius = src.ParseFloat();
+			continue;
+		}
 
 		src.Error( "unknown token %s\n", token.c_str() );
 	}
@@ -733,6 +737,7 @@ idParticleStage::idParticleStage( void ) {
 	hidden = false;
 	boundsExpansion = 0.0f;
 	bounds.Clear();
+	softeningRadius = -2.0f;	// -2 means "auto" - #3878 soft particles
 }
 
 /*
@@ -806,6 +811,7 @@ void idParticleStage::Default() {
 	randomDistribution = true;
 	entityColor = false;
 	cycleMsec = ( particleLife + deadTime ) * 1000;
+	softeningRadius = -2.0f;	// -2 means "auto" - #3878 soft particles
 }
 
 /*
