@@ -550,7 +550,7 @@ double Sys_MillisecondsPrecise() {
 #endif
 
 	long long sec = now.tv_sec - first.tv_sec;
-	long long nsec = now.tv_nsec - first.tv_nsec;
+	long nsec = now.tv_nsec - first.tv_nsec;
 
 	double ret = sec * 1000.0;
 	ret += double(nsec) * 0.000001;
