@@ -579,10 +579,12 @@ try_again:
 
 		// for r_fillWindowAlphaChan -1, see also the big comment above
 		glConfig.shouldFillWindowAlpha = false;
+		glConfig.isWayland = false;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		const char* videoDriver = SDL_GetCurrentVideoDriver();
 		if (idStr::Icmp(videoDriver, "wayland") == 0) {
 			glConfig.shouldFillWindowAlpha = true;
+			glConfig.isWayland = true;
 		}
 #endif
 

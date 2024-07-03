@@ -93,6 +93,7 @@ typedef struct glconfig_s {
 	// DG: current video backend is known to need opaque default framebuffer
 	//     used if r_fillWindowAlphaChan == -1
 	bool				shouldFillWindowAlpha;
+	bool				isWayland; // DG: for other wayland-specific hacks.. (does *not* detect XWayland!)
 
 	// For some reason people decided that we need displays with ultra small pixels,
 	// so everything rendered on them must be scaled up to be legible.

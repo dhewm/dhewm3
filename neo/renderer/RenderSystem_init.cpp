@@ -1251,8 +1251,22 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 				h = height - yo;
 			}
 
-			qglReadBuffer( GL_FRONT );
-			qglReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
+			if ( glConfig.isWayland ) {
+				// DG: Native Wayland (=> not XWayland) doesn't seem to support reading
+				//     from the front buffer - screenshot is black then..
+				//     So just read from the default (probably back-) buffer
+				qglReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
+			} else {
+				// DG: It's probably better to restore the glReadBuffer mode after reading the pixels..
+				//     (at least with XWayland on GNOME changing resolutions is wonky when not doing this)
+				GLint oldReadBuf = GL_BACK;
+				qglGetIntegerv( GL_READ_BUFFER, &oldReadBuf );
+				qglReadBuffer( GL_FRONT );
+
+				qglReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
+
+				qglReadBuffer( oldReadBuf );
+			}
 
 			int	row = ( w * 3 + 3 ) & ~3;		// OpenGL pads to dword boundaries
 
