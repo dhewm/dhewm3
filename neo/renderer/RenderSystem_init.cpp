@@ -237,6 +237,7 @@ idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CV
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9). Higher levels generate smaller files, but take noticeably longer");
 // DG: allow freely resizing the window
 idCVar r_windowResizable("r_windowResizable", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Allow resizing (and maximizing) the window (needs SDL2; with 2.0.5 or newer it's applied immediately)" );
+idCVar r_vidRestartAlwaysFull( "r_vidRestartAlwaysFull", 0, CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Always do a full vid_restart (ignore 'partial' argument), e.g. when changing window size" );
 
 // define qgl functions
 #define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
@@ -1987,6 +1988,13 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 			forceWindow = true;
 			continue;
 		}
+	}
+
+	// DG: allow enforcing full vid restarts (when vid_restart is called from the menu or whatever)
+	//     to let users work around driver bugs or whatever, like
+	//     https://github.com/dhewm/dhewm3/issues/587#issuecomment-2206937752
+	if ( r_vidRestartAlwaysFull.GetBool() ) {
+		full = true;
 	}
 
 	// DG: in partial mode, try to just resize the window (and make it fullscreen or windowed)
