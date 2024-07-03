@@ -193,26 +193,29 @@ void SCR_DrawTextRightAlign( float &y, const char *text, ... ) {
 SCR_DrawFPS
 ==================
 */
-#define	FPS_FRAMES	10
+#define	FPS_FRAMES	256
 float SCR_DrawFPS( float y ) {
 	static float previousTimes[FPS_FRAMES];
-	static int	index;
+	static unsigned	index;
 	static double previous;
+
+	// DG: take all frames from last half second into account
+	const int maxFrames = Min(FPS_FRAMES, com_gameHzVal/2);
 
 	// don't use serverTime, because that will be drifting to
 	// correct for internet lag changes, timescales, timedemos, etc
-	double t = Sys_MillisecondsPrecise();
+	double t = Sys_MillisecondsPrecise(); // DG: more precision
 	float frameTime = t - previous;
 	previous = t;
 
-	previousTimes[index % FPS_FRAMES] = frameTime;
+	previousTimes[index % maxFrames] = frameTime;
 	index++;
-	if ( index > FPS_FRAMES ) {
+	if ( index > maxFrames ) {
 		// average multiple frames together to smooth changes out a bit
 		float total = 0.0;
 		float minTime = 10000;
 		float maxTime = 0;
-		for ( int i = 0 ; i < FPS_FRAMES ; i++ ) {
+		for ( int i = 0 ; i < maxFrames ; i++ ) {
 			float pt = previousTimes[i];
 			total += pt;
 			minTime = Min( minTime, pt );
@@ -221,7 +224,7 @@ float SCR_DrawFPS( float y ) {
 		if ( !total ) {
 			total = 1;
 		}
-		float fps = (1000.0f * FPS_FRAMES) / total;
+		float fps = (1000.0f * maxFrames) / total;
 		int ifps = idMath::Rint( fps );
 
 		char* s = va( "%dfps", ifps );
@@ -232,7 +235,7 @@ float SCR_DrawFPS( float y ) {
 		if ( com_showFPS.GetInteger() > 1 ) {
 			y +=  BIGCHAR_HEIGHT + 4;
 
-			s = va( "avg %.2fms min %.2f max %.2f", total * (1.0f / FPS_FRAMES), minTime, maxTime );
+			s = va( "avg %5.2fms min %5.2f max %5.2f", total * (1.0f / maxFrames), minTime, maxTime );
 			w = strlen ( s ) * SMALLCHAR_WIDTH;
 			renderSystem->DrawSmallStringExt( 635 - w, idMath::FtoiFast( y ) + 2, s, colorWhite, true, localConsole.charSetShader );
 		}
