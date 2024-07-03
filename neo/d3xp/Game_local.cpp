@@ -5073,8 +5073,7 @@ void idGameLocal::SetGameHz( float hz, float frametime, float ticScaleFactor )
 
 	if ( slowmoState == SLOWMO_STATE_OFF ) {
 		// if slowmo is off, msec, slowmoMsec and slow/fast.msec should all be set to gameMsec
-		// ResetSlowTimeVars() does just that
-		ResetSlowTimeVars();
+		msec = slowmoMsec = slow.msec = fast.msec = gameMsec;
 	} else {
 		// otherwise the msec values must be scaled accordingly
 		float gameMsecScale = frametime / float(oldGameMsec);
