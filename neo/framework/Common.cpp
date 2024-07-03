@@ -2570,7 +2570,7 @@ typedef struct {
 static const int MAX_ASYNC_STATS = 1024;
 asyncStats_t	com_asyncStats[MAX_ASYNC_STATS];		// indexed by com_ticNumber
 static double lastTicMsec = 0.0;
-static double nextTicTargetMsec = 0.0; // when (according to Sys_Milliseconds()) the next async tic should start
+static double nextTicTargetMsec = 0.0; // when (according to Sys_MillisecondsPrecise()) the next async tic should start
 
 void idCommonLocal::SingleAsyncTic( void ) {
 	// main thread code can prevent this from happening while modifying

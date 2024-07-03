@@ -1232,7 +1232,9 @@ idRegion *idDeviceContext::GetTextRegion(const char *text, float textScale, idRe
 }
 
 void idDeviceContext::DrawEditCursor( float x, float y, float scale ) {
-	if ( (int)( com_ticNumber >> 4 ) & 1 ) {
+	// DG: fix cursor blinking speed for >60fps
+	unsigned scaledTicNumber = com_ticNumber / com_gameTicScale;
+	if ( ( scaledTicNumber >> 4 ) & 1 ) {
 		return;
 	}
 	SetFontByScale(scale);
