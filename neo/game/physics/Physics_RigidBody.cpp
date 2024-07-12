@@ -38,7 +38,9 @@ If you have questions concerning this license or the applicable additional terms
 CLASS_DECLARATION( idPhysics_Base, idPhysics_RigidBody )
 END_CLASS
 
-const float STOP_SPEED		= 10.0f;
+// DG: physics fixes from TDM
+const float STOP_SPEED = 50.0f; // grayman #3452 (was 10) - allow less movement at end to prevent excessive jiggling
+const float OLD_STOP_SPEED = 10.0f; // grayman #3452 - still needed at this value for some of the math
 
 
 #undef RB_TIMINGS
@@ -139,10 +141,10 @@ bool idPhysics_RigidBody::CollisionImpulse( const trace_t &collision, idVec3 &im
 	// velocity in normal direction
 	vel = velocity * collision.c.normal;
 
-	if ( vel > -STOP_SPEED ) {
-		impulseNumerator = STOP_SPEED;
-	}
-	else {
+	// DG: physics fixes from TDM (use OLD_STOP_SPEED here)
+	if ( vel > -OLD_STOP_SPEED ) { // grayman #3452 - was STOP_SPEED
+		impulseNumerator = OLD_STOP_SPEED;
+	} else {
 		impulseNumerator = -( 1.0f + bouncyness ) * vel;
 	}
 	impulseDenominator = inverseMass + ( ( inverseWorldInertiaTensor * r.Cross( collision.c.normal ) ).Cross( r ) * collision.c.normal );
@@ -843,6 +845,10 @@ bool idPhysics_RigidBody::Evaluate( int timeStepMSec, int endTimeMSec ) {
 	idMat3 oldAxis, masterAxis;
 	float timeStep;
 	bool collided, cameToRest = false;
+
+	// DG: from TDM: stgatilov: avoid doing zero steps (useless and causes division by zero)
+	if (timeStepMSec <= 0)
+		return false;
 
 	timeStep = MS2SEC( timeStepMSec );
 	current.lastTimeStep = timeStep;
