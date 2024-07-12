@@ -38,13 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 CLASS_DECLARATION( idPhysics_Base, idPhysics_RigidBody )
 END_CLASS
 
-// DG: moved STOP_SPEED into the functions using it, because it now
-//     depends on com_gameHz which can change at runtime
-// const float STOP_SPEED		= 10.0f;
-static inline float GetStopSpeed()
-{
-	return 10.0f * gameLocal.gameTicScale;
-}
+const float STOP_SPEED		= 10.0f;
+
 
 #undef RB_TIMINGS
 
@@ -126,8 +121,6 @@ bool idPhysics_RigidBody::CollisionImpulse( const trace_t &collision, idVec3 &im
 	float impulseNumerator, impulseDenominator, vel;
 	impactInfo_t info;
 	idEntity *ent;
-
-	const float STOP_SPEED = GetStopSpeed(); // DG: moved this here because gameLocal.gameHz can change
 
 	// get info from other entity involved
 	ent = gameLocal.entities[collision.c.entityNum];
@@ -339,8 +332,6 @@ bool idPhysics_RigidBody::TestIfAtRest( void ) const {
 	gv = v * gravityNormal;
 	// linear velocity orthogonal to gravity direction
 	v -= gv * gravityNormal;
-
-	const float STOP_SPEED = GetStopSpeed(); // DG: moved this here because gameLocal.gameHz can change
 
 	// if too much velocity orthogonal to gravity direction
 	if ( v.Length() > STOP_SPEED ) {
