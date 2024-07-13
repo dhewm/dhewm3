@@ -2233,6 +2233,8 @@ bool idAFConstraint_HingeSteering::Add( idPhysics_AF *phys, float invTimeStep ) 
 	}
 
 	speed = steerAngle - angle;
+	// DG: steerSpeed is applied per frame, so it must be adjusted for the actual frametime
+	float steerSpeed = this->steerSpeed / gameLocal.gameTicScale;
 	if ( steerSpeed != 0.0f ) {
 		if ( speed > steerSpeed ) {
 			speed = steerSpeed;
