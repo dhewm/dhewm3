@@ -2231,6 +2231,13 @@ void idGameLocal::SortActiveEntityList( void ) {
 	sortPushers = false;
 }
 
+// DG: returns number of milliseconds for this frame, based on gameLocal.gameHz, for high-fps support
+//     either 1000/gameHz or 1000/gameHz + 1, so the frametimes of gameHz frames add up to 1000ms
+static int CalcMSec( long long framenum ) {
+	long long divisor = 100LL * gameLocal.gameHz;
+	return int( (framenum * 100000LL) / divisor - ((framenum-1) * 100000LL) / divisor );
+}
+
 /*
 ================
 idGameLocal::RunFrame
@@ -2267,6 +2274,10 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		// update the game time
 		framenum++;
 		previousTime = time;
+		// dezo2/DG: for high-fps support, calculate the frametime msec every frame
+		//           the length actually varies between 1000/gameHz and (1000/gameHz) + 1
+		//           so the sum of gameHz frames is 1000 (while still keeping integer frametimes)
+		msec = CalcMSec( framenum );
 		time += msec;
 		realClientTime = time;
 
