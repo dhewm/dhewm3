@@ -2444,11 +2444,11 @@ void idGameLocal::SortActiveEntityList( void ) {
 idGameLocal::RunTimeGroup2
 ================
 */
-void idGameLocal::RunTimeGroup2() {
+void idGameLocal::RunTimeGroup2( int msec_fast ) {  // dezo2: add argument for high-fps support
 	idEntity *ent;
 	int num = 0;
 
-	fast.Increment();
+	fast.Increment( msec_fast );
 	fast.Get( time, previousTime, msec, framenum, realClientTime );
 
 	for( ent = activeEntities.Next(); ent != NULL; ent = ent->activeNode.Next() ) {
@@ -2463,6 +2463,13 @@ void idGameLocal::RunTimeGroup2() {
 	slow.Get( time, previousTime, msec, framenum, realClientTime );
 }
 #endif
+
+// DG: returns number of milliseconds for this frame, based on gameLocal.gameHz
+//     either 1000/gameHz or 1000/gameHz + 1, so the frametimes of gameHz frames add up to 1000ms
+static int CalcMSec( long long framenum ) {
+	long long divisor = 100LL * gameLocal.gameHz;
+	return int( (framenum * 100000LL) / divisor - ((framenum-1) * 100000LL) / divisor );
+}
 
 /*
 ================
@@ -2507,6 +2514,12 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
 		// update the game time
 		framenum++;
 		previousTime = time;
+		// dezo2/DG: for high-fps support, calculate the frametime msec every frame
+		//           the length actually varies between 1000/gameHz and (1000/gameHz) + 1
+		//           so the sum of gameHz frames is 1000 (while still keeping integer frametimes)
+		int msec_fast = CalcMSec( framenum );
+		if ( slowmoState == SLOWMO_STATE_OFF )
+			msec = msec_fast;
 		time += msec;
 		realClientTime = time;
 
@@ -2604,7 +2617,7 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
 		}
 
 #ifdef _D3XP
-		RunTimeGroup2();
+		RunTimeGroup2( msec_fast );  // dezo2: pass msec_fast for better high-fps support
 #endif
 
 		// remove any entities that have stopped thinking
