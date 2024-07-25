@@ -202,7 +202,9 @@ public:
 	This is more flexible even when not using soft particles, as modelDepthHack
 	can be turned off for specific stages to stop them poking through walls.
 	*/
-	float					softeningRadius;
+	// DG: disable this for now because it breaks the game DLL's ABI (re-enable in dhewm3 1.6.0 or 2.0.0)
+	//     (this header is part of the SDK)
+	//float					softeningRadius;
 };
 
 
