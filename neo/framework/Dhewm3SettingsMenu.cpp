@@ -1608,6 +1608,8 @@ struct VidMode {
 static CVarOption videoOptionsImmediately[] = {
 	CVarOption( "Options that take effect immediately" ),
 
+	CVarOption( "com_gameHz", "Framerate", OT_INT, 30, 250 ),
+
 	CVarOption( "r_swapInterval", []( idCVar& cvar ) {
 		int curVsync = idMath::ClampInt( -1, 1, r_swapInterval.GetInteger() );
 		if ( curVsync == -1 ) {
@@ -2334,9 +2336,14 @@ static CVarOption gameOptions[] = {
 	CVarOption( "ui_autoReload", "Auto Weapon Reload", OT_BOOL ),
 	CVarOption( "ui_autoSwitch", "Auto Weapon Switch", OT_BOOL ),
 	CVarOption( "Visual" ),
-	CVarOption( "com_gameHz", "Framerate", OT_INT, 10, 500 ),
 	CVarOption( "g_showHud", "Show HUD", OT_BOOL ),
-	CVarOption( "com_showFPS", "Show Framerate (FPS)", OT_BOOL ),
+	CVarOption( "com_showFPS",  []( idCVar& cvar ) {
+		int curSel = idMath::ClampInt( 0, 2, cvar.GetInteger() );
+		if ( ImGui::Combo( "Show Framerate (FPS)", &curSel, "No\0Yes (simple)\0Yes, also frametimes\0" ) ) {
+			cvar.SetInteger( curSel );
+		}
+		AddTooltip( "com_showFPS" );
+	} ),
 	CVarOption( "ui_showGun", "Show Gun Model", OT_BOOL ),
 	CVarOption( "g_decals", "Show Decals", OT_BOOL ),
 	CVarOption( "g_bloodEffects", "Show Blood and Gibs", OT_BOOL ),
