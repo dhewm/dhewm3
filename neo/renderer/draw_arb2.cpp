@@ -31,6 +31,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "renderer/tr_local.h"
 
+// DG: if this is defined, the soft particle shaders will be compiled into the executable
+//  otherwise soft_particle.vfp will be opened as a file just like the other shaders
+//  (useful when tweaking that shader - when loaded from disk, you can use `reloadARBprograms`
+//   instead of recompiling the executable)
+#ifndef D3_INTEGRATE_SOFTPART_SHADERS
+  #define D3_INTEGRATE_SOFTPART_SHADERS 1
+#endif
+
 /*
 =========================================================================================
 
@@ -104,7 +112,7 @@ void	RB_ARB2_DrawInteraction( const drawInteraction_t *din ) {
 		float parm[4];
 		parm[0] = parm[1] = parm[2] = r_brightness.GetFloat();
 		parm[3] = 1.0/r_gamma.GetFloat(); // 1.0/gamma so the shader doesn't have to do this calculation
-		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, 4, parm );
+		qglProgramEnvParameter4fvARB( GL_FRAGMENT_PROGRAM_ARB, PP_GAMMA_BRIGHTNESS, parm );
 	}
 
 	// set the textures
@@ -345,8 +353,99 @@ static progDef_t	progs[MAX_GLPROGS] = {
 	{ GL_VERTEX_PROGRAM_ARB, VPROG_GLASSWARP, "arbVP_glasswarp.txt" },
 	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_GLASSWARP, "arbFP_glasswarp.txt" },
 
+	// SteveL #3878: Particle softening applied by the engine
+	{ GL_VERTEX_PROGRAM_ARB, VPROG_SOFT_PARTICLE, "soft_particle.vfp" },
+	{ GL_FRAGMENT_PROGRAM_ARB, FPROG_SOFT_PARTICLE, "soft_particle.vfp" },
+
 	// additional programs can be dynamically specified in materials
 };
+
+#if D3_INTEGRATE_SOFTPART_SHADERS
+// DG: the following two shaders are taken from TheDarkMod 2.04 (glprogs/soft_particle.vfp)
+// (C) 2005-2016 Broken Glass Studios (The Dark Mod Team) and the individual authors
+//     released under a revised BSD license and GPLv3
+const char* softpartVShader = "!!ARBvp1.0  \n"
+	"OPTION ARB_position_invariant;  \n"
+	"# NOTE: unlike the TDM shader, the following lines use .texcoord and .color  \n"
+	"#   instead of .attrib[8] and .attrib[3], to make it work with non-nvidia drivers \n"
+	"MOV    result.texcoord, vertex.texcoord; \n"
+	"MOV    result.color, vertex.color; \n"
+	"END \n";
+
+const char* softpartFShader = "!!ARBfp1.0  \n"
+	"# == Fragment Program == \n"
+	"# taken from The Dark Mod 2.04, adjusted for dhewm3 \n"
+	"# (C) 2005-2016 Broken Glass Studios (The Dark Mod Team) \n"
+	"# \n"
+	"# Input textures \n"
+	"#   texture[0]   particle diffusemap \n"
+	"#   texture[1]   _currentDepth \n"
+	"# \n"
+	"# Constants set by the engine: \n"
+	"#   program.env[22] is reciprocal of _currentDepth size. Lets us convert a screen position to a texcoord in _currentDepth \n"
+	"#      { 1.0f / depthtex.width, 1.0f / depthtex.height, float(depthtex.width)/int(depthtex.width), \n"
+	"#          float(depthtex.height)/int(depthtex.height) } \n"
+	"#   program.env[23] is the particle radius, given as { radius, 1/(fadeRange), 1/radius } \n"
+	"#      fadeRange is the particle diameter for alpha blends (like smoke), but the particle radius for additive \n"
+	"#      blends (light glares), because additive effects work differently. Fog is half as apparent when a wall   \n"
+	"#      is in the middle of it. Light glares lose no visibility when they have something to reflect off.  \n"
+	"#   program.env[24] is the color channel mask. Particles with additive blend need their RGB channels modified to blend them out. \n"
+	"#                                              Particles with an alpha blend need their alpha channel modified. \n"
+	"# \n"
+	"# Hard-coded constants \n"
+	"#    depth_consts allows us to recover the original depth in Doom units of anything in the depth \n"
+	"#    buffer. Doom3's and thus TDM's projection matrix differs slightly from the classic projection matrix as \n"
+	"#    it implements a \"nearly-infinite\" zFar. The matrix is hard-coded in the engine, so we use hard-coded \n"
+	"#    constants here for efficiency. depth_consts is derived from the numbers in that matrix. \n"
+	"# \n"
+	"# next line: prevent dhewm3 from injecting gamma in shader code into this shader,  \n"
+	"#            because that looks bad when rendered with additive blending (gets too bright) \n"
+	"# nodhewm3gammahack \n"
+	"\n"
+	"PARAM   depth_consts = { 0.33333333, -0.33316667, 0.0, 0.0 }; \n"
+	"PARAM   particle_radius  = program.env[23]; \n"
+	"TEMP    tmp, scene_depth, particle_depth, near_fade, fade; \n"
+	"\n"
+	"# Map the fragment to a texcoord on our depth image, and sample to find scene_depth \n"
+	"MUL   tmp.xy, fragment.position, program.env[22]; \n"
+	"TEX   scene_depth, tmp, texture[1], 2D; \n"
+	"MIN   scene_depth, scene_depth, 0.9994; # Required by TDM projection matrix. Equates to max recoverable  \n"
+	"                                        # depth of 30k units, which is enough. 0.9995 is infinite depth. \n"
+	"                                        # This is needed only if there is caulk sky on show (which writes \n"
+	"                                        # no depth, so leaves 1 in the depth texture).  \n"
+	"\n"
+	"# Recover original depth in doom units  \n"
+	"MAD   tmp, scene_depth, depth_consts.x, depth_consts.y; \n"
+	"RCP   scene_depth, tmp.x; \n"
+	"\n"
+	"# Convert particle depth to doom units too \n"
+	"MAD   tmp, fragment.position.z, depth_consts.x, depth_consts.y; \n"
+	"RCP   particle_depth, tmp.x; \n"
+	"\n"
+	"# Scale the depth difference by the particle diameter to calc an alpha  \n"
+	"# value based on how much of the 3d volume represented by the particle  \n"
+	"# is in front of the solid scene  \n"
+	"ADD      tmp, -scene_depth, particle_depth;     # NB depth is negative. 0 at the eye, -100 at 100 units into the screen. \n"
+	"ADD      tmp, tmp, particle_radius.x;           # Add the radius so a depth difference of particle radius now equals 0 \n"
+	"MUL_SAT  fade, tmp, particle_radius.y;          # divide by the particle radius or diameter and clamp \n"
+	"\n"
+	"# Also fade if the particle is too close to our eye position, so it doesn't 'pop' in and out of view \n"
+	"# Start a linear fade at particle_radius distance from the particle. \n"
+	"MUL_SAT  near_fade, particle_depth, -particle_radius.z;  \n"
+	"\n"
+	"# Calculate final fade and apply the channel mask \n"
+	"MUL      fade, near_fade, fade; \n"
+	"ADD_SAT  fade, fade, program.env[24];  # saturate the channels that don't want modifying \n"
+	"\n"
+	"# Set the color. Multiply by vertex/fragment color as that's how the particle system fades particles in and out \n"
+	"TEMP  oColor; \n"
+	"TEX   oColor, fragment.texcoord, texture[0], 2D; \n"
+	"MUL   oColor, oColor, fade; \n"
+	"MUL   result.color, oColor, fragment.color; \n"
+	"\n"
+	"END \n";
+
+#endif // D3_INTEGRATE_SOFTPART_SHADERS
 
 /*
 =================
@@ -391,26 +490,40 @@ static ID_INLINE bool isARBidentifierChar( int c ) {
 void R_LoadARBProgram( int progIndex ) {
 	int		ofs;
 	int		err;
-	idStr	fullPath = "glprogs/";
-	fullPath += progs[progIndex].name;
-	char	*fileBuffer;
 	char	*buffer;
 	char	*start = NULL, *end;
 
-	common->Printf( "%s", fullPath.c_str() );
+#if D3_INTEGRATE_SOFTPART_SHADERS
+	if ( progs[progIndex].ident == VPROG_SOFT_PARTICLE || progs[progIndex].ident == FPROG_SOFT_PARTICLE ) {
+		// these shaders are loaded directly from a string
+		common->Printf( "<internal> %s", progs[progIndex].name );
+		const char* srcstr = (progs[progIndex].ident == VPROG_SOFT_PARTICLE) ? softpartVShader : softpartFShader;
 
-	// load the program even if we don't support it, so
-	// fs_copyfiles can generate cross-platform data dumps
-	fileSystem->ReadFile( fullPath.c_str(), (void **)&fileBuffer, NULL );
-	if ( !fileBuffer ) {
-		common->Printf( ": File not found\n" );
-		return;
+		// copy to stack memory
+		buffer = (char *)_alloca( strlen( srcstr ) + 1 );
+		strcpy( buffer, srcstr );
 	}
+	else
+#endif // D3_INTEGRATE_SOFTPART_SHADERS
+	{
+		idStr	fullPath = "glprogs/";
+		fullPath += progs[progIndex].name;
+		char	*fileBuffer;
+		common->Printf( "%s", fullPath.c_str() );
 
-	// copy to stack memory and free
-	buffer = (char *)_alloca( strlen( fileBuffer ) + 1 );
-	strcpy( buffer, fileBuffer );
-	fileSystem->FreeFile( fileBuffer );
+		// load the program even if we don't support it, so
+		// fs_copyfiles can generate cross-platform data dumps
+		fileSystem->ReadFile( fullPath.c_str(), (void **)&fileBuffer, NULL );
+		if ( !fileBuffer ) {
+			common->Printf( ": File not found\n" );
+			return;
+		}
+
+		// copy to stack memory and free
+		buffer = (char *)_alloca( strlen( fileBuffer ) + 1 );
+		strcpy( buffer, fileBuffer );
+		fileSystem->FreeFile( fileBuffer );
+	}
 
 	if ( !glConfig.isInitialized ) {
 		return;
@@ -454,12 +567,14 @@ void R_LoadARBProgram( int progIndex ) {
 	end[3] = 0;
 
 	// DG: hack gamma correction into shader
-	if ( r_gammaInShader.GetBool() && progs[progIndex].target == GL_FRAGMENT_PROGRAM_ARB ) {
+	if ( r_gammaInShader.GetBool() && progs[progIndex].target == GL_FRAGMENT_PROGRAM_ARB
+	     && strstr( start, "nodhewm3gammahack" ) == NULL )
+	{
 
 		// note that strlen("dhewm3tmpres") == strlen("result.color")
 		const char* tmpres = "TEMP dhewm3tmpres; # injected by dhewm3 for gamma correction\n";
 
-		// Note: program.env[4].xyz = r_brightness; program.env[4].w = 1.0/r_gamma
+		// Note: program.env[21].xyz = r_brightness; program.env[21].w = 1.0/r_gamma
 		// outColor.rgb = pow(dhewm3tmpres.rgb*r_brightness, vec3(1.0/r_gamma))
 		// outColor.a = dhewm3tmpres.a;
 		const char* extraLines =
@@ -468,10 +583,10 @@ void R_LoadARBProgram( int progIndex ) {
 			// POW might not work with a negative base (it looks wrong with intel's Linux driver)
 			// and clamping values >1 to 1 is ok because when writing to result.color
 			// it's clamped anyway and pow(base, exp) is always >= 1 for base >= 1
-			"MUL_SAT dhewm3tmpres.xyz, program.env[4], dhewm3tmpres;\n" // first multiply with brightness
-			"POW result.color.x, dhewm3tmpres.x, program.env[4].w;\n" // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
-			"POW result.color.y, dhewm3tmpres.y, program.env[4].w;\n" // (apparently POW only supports scalars, not whole vectors)
-			"POW result.color.z, dhewm3tmpres.z, program.env[4].w;\n"
+			"MUL_SAT dhewm3tmpres.xyz, program.env[21], dhewm3tmpres;\n" // first multiply with brightness
+			"POW result.color.x, dhewm3tmpres.x, program.env[21].w;\n" // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
+			"POW result.color.y, dhewm3tmpres.y, program.env[21].w;\n" // (apparently POW only supports scalars, not whole vectors)
+			"POW result.color.z, dhewm3tmpres.z, program.env[21].w;\n"
 			"MOV result.color.w, dhewm3tmpres.w;\n" // alpha remains unmodified
 			"\nEND\n\n"; // we add this block right at the end, replacing the original "END" string
 

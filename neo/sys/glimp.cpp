@@ -279,6 +279,11 @@ try_again:
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
+		if ( r_glDebugContext.GetBool() ) {
+			common->Printf( "Requesting an OpenGL Debug Context (r_glDebugContext is enabled)\n" );
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+		}
+
 		if ( parms.fullScreen && parms.fullScreenDesktop ) {
 			common->Printf( "Will create a pseudo-fullscreen window at the current desktop resolution\n" );
 		} else {
@@ -435,6 +440,10 @@ try_again:
 		if (SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, r_swapInterval.GetInteger()) < 0)
 			common->Warning("SDL_GL_SWAP_CONTROL not supported");
 
+		if ( r_glDebugContext.GetBool() ) {
+			common->Warning( "r_glDebugContext is set, but not supported by SDL1.2!\n" );
+		}
+
 		r_swapInterval.ClearModified();
 
 		window = SDL_SetVideoMode(parms.width, parms.height, colorbits, flags);
@@ -588,6 +597,18 @@ try_again:
 		}
 #endif
 
+		glConfig.haveDebugContext = false;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		int cflags = 0;
+		if ( SDL_GL_GetAttribute( SDL_GL_CONTEXT_FLAGS, &cflags ) == 0 ) {
+			glConfig.haveDebugContext = (cflags & SDL_GL_CONTEXT_DEBUG_FLAG) != 0;
+			if ( glConfig.haveDebugContext )
+				common->Printf( "Got a debug context!\n" );
+			else if( r_glDebugContext.GetBool() ) {
+				common->Warning( "Requested a debug context, but didn't get one!\n" );
+			}
+		}
+#endif
 		break;
 	}
 

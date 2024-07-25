@@ -302,8 +302,13 @@ public:
 	virtual float				DepthHack() const;
 	virtual int					Memory() const;
 
+	float						SofteningRadius( const int stage ) const;	// #3878 soft particles
+
 private:
+	void						SetSofteningRadii(); // #3878 soft particles
+
 	const idDeclParticle *		particleSystem;
+	idList<float>				softeningRadii; // #3878 soft particles
 };
 
 /*

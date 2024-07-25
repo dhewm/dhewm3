@@ -437,7 +437,6 @@ Draw the depth buffer as colors
 ===================
 */
 void RB_ShowDepthBuffer( void ) {
-	void	*depthReadback;
 
 	if ( !r_showDepth.GetBool() ) {
 		return;
@@ -450,30 +449,81 @@ void RB_ShowDepthBuffer( void ) {
 	qglLoadIdentity();
 	qglOrtho( 0, 1, 0, 1, -1, 1 );
 	qglRasterPos2f( 0, 0 );
-	qglPopMatrix();
-	qglMatrixMode( GL_MODELVIEW );
-	qglPopMatrix();
 
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
 	qglColor3f( 1, 1, 1 );
-	globalImages->BindNull();
 
-	depthReadback = R_StaticAlloc( glConfig.vidWidth * glConfig.vidHeight*4 );
-	memset( depthReadback, 0, glConfig.vidWidth * glConfig.vidHeight*4 );
+	bool haveDepthCapture = r_enableDepthCapture.GetInteger() == 1
+			|| (r_enableDepthCapture.GetInteger() == -1 && r_useSoftParticles.GetBool());
 
-	qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback );
+	if ( haveDepthCapture ) {
+		//GL_SelectTexture( 0 );
+		//qglEnable(GL_TEXTURE_2D);
+		globalImages->currentDepthImage->Bind();
 
-#if 0
-	for ( i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++ ) {
-		((byte *)depthReadback)[i*4] =
-		((byte *)depthReadback)[i*4+1] =
-		((byte *)depthReadback)[i*4+2] = 255 * ((float *)depthReadback)[i];
-		((byte *)depthReadback)[i*4+3] = 1;
-	}
+		const float x=0, y=0, w=1, h=1;
+		// debug values:
+		//const float x = 0.1, y = 0.1, w = 0.8, h = 0.8;
+		//qglColor4f( 0.0f, 0.0f, 0.5f, 1.0f );
+
+		const float tx=0, ty=0;
+		// the actual texturesize of currentDepthImage is the next bigger power of two (POT),
+		// so the normalized width/height of the part of it we actually wanna show is the following
+		const float tw = float(glConfig.vidWidth) / float(globalImages->currentDepthImage->uploadWidth);
+		const float th = float(glConfig.vidHeight) / float(globalImages->currentDepthImage->uploadHeight);
+
+		qglBegin( GL_QUADS );
+			qglTexCoord2f(tx, ty);
+			qglVertex2f( x,   y   ); // ( 0,0 );
+
+			qglTexCoord2f(tx, ty+th);
+			qglVertex2f( x,   y+h ); // ( 0,1 );
+
+			qglTexCoord2f(tx+tw, ty+th);
+			qglVertex2f( x+w, y+h ); // ( 1,1 );
+
+			qglTexCoord2f(tx+tw, ty);
+			qglVertex2f( x+w, y   ); // ( 1,0 );
+		qglEnd();
+
+		// TODO: probably a shader transforming this to something viewable
+
+		qglPopMatrix();
+		qglMatrixMode( GL_MODELVIEW );
+		qglPopMatrix();
+
+	} else {
+		qglPopMatrix();
+		qglMatrixMode( GL_MODELVIEW );
+		qglPopMatrix();
+		globalImages->BindNull();
+
+		void* depthReadback = R_StaticAlloc( glConfig.vidWidth * glConfig.vidHeight*4 );
+		memset( depthReadback, 0, glConfig.vidWidth * glConfig.vidHeight*4 );
+
+		qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback );
+#if 0 // the following looks better, but is different from the !r_skipDepthCapture.GetBool() case above
+	  // (which draws the captured depth buffer unaltered, unless we add a shader)
+		for ( int i = 0, n=glConfig.vidWidth * glConfig.vidHeight; i < n ; i++ ) {
+			float& px = ((float *)depthReadback)[i];
+			float d = px;
+			// the following calculation is based on how the TDM soft particle shader translates the depth value to doom units
+
+			// 0.9995 is practically infinite distance, clamping to 0.9994 clamps to max 30k doom units,
+			// which is more than enough (and prevents a potential division by 0 below)
+			d = (d < 0.9994f) ? d : 0.9994f;
+
+			d = d - 0.9995f; // d is now negative, between -0.0001 and -0.9995
+			d = 1.0f / d;
+			// d *= -3.0f; // this would translate d to distance in doom units, doing it together with the next step
+
+			d *= (-3.0f / 3000.0f); // now 3000 units is 1.0, i.e. completely white (=> more details for closer distances)
+			px = d;
+		}
 #endif
-
-	qglDrawPixels( glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, depthReadback );
-	R_StaticFree( depthReadback );
+		qglDrawPixels( glConfig.vidWidth, glConfig.vidHeight, GL_LUMINANCE, GL_FLOAT, depthReadback );
+		R_StaticFree( depthReadback );
+	}
 }
 
 /*

@@ -193,6 +193,18 @@ public:
 	float					boundsExpansion;	// user tweak to fix poorly calculated bounds
 
 	idBounds				bounds;				// derived
+
+	/* Soft particles -- SteveL #3878
+	-2.0 is the value at initialization, meaning no user specification: "auto".
+	-1.0 means no change to old system: suppress soft particles, but allow modelDepthhack if specified.
+	 0   means disable all softening for this stage, including modelDepthHack.
+	 +ve value means apply soft particle effect, allowing overdraw up to the specified depth.
+	This is more flexible even when not using soft particles, as modelDepthHack
+	can be turned off for specific stages to stop them poking through walls.
+	*/
+	// DG: disable this for now because it breaks the game DLL's ABI (re-enable in dhewm3 1.6.0 or 2.0.0)
+	//     (this header is part of the SDK)
+	//float					softeningRadius;
 };
 
 
