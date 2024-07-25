@@ -14,6 +14,11 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   It can also be opened while in the game, which then is paused (if Single Player) but still visible,
   so the effect of most graphics settings can be seen immediately.
   Needs SDL2 and C++11.
+* "Soft" Particles (that don't "cut" into geometry but fade smoothly), based on code from The Dark Mod
+  2.04. Can be enabled/disabled with `r_useSoftParticles`, is applied automatically for all appropriate
+  particles (view-aligned, using additive or alpha blending and not too small)
+* `r_enableDepthCapture`: Enable capturing depth buffer to texture, needed for the soft particles.
+  Can be used in custom materials by using the `"_currentDepth"` texture
 * Replaced dependency on (external) zlib with integrated [miniz](https://github.com/richgel999/miniz)
 * HighDPI/Retina support
 * Allow inverted mouse look (horizontally, vertically or both) with `m_invertLook`
@@ -28,15 +33,15 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   downscaling by OpenAL's output limiter
 * If `r_windowResizable` is set, the dhewm3 window (when in windowed mode..) can be freely resized.
   Needs SDL2; with 2.0.5 and newer it's applied immediately, otherwise when creating the window.
-* "Soft" Particles (that don't "cut" into geometry but fade smoothly), based on code from The Dark Mod
-  2.04. Can be enabled/disabled with `r_useSoftParticles`, is applied automatically for all appropriate
-  particles (view-aligned and using additive or alpha blending).  
-  For custom particles you can configure this per particle stage, with the `"softeningRadius"` attribute.
-  Generally it's the radius in Doom-Units used for fading, special values are `-2` (auto-mode, same
-  as particles where this isn't specified at all) and `-1` (disable softening, render like in orig Doom3).
-* `r_enableDepthCapture`: Enable capturing depth buffer to texture, needed for the soft particles.
-  Can be used in custom materials by using the `"_currentDepth"` texture.
-
+* If switching between fullscreen and windowed mode or similar changes causes issues (like
+  [here](https://github.com/dhewm/dhewm3/issues/587#issuecomment-2205807989)), you can set
+  `r_vidRestartAlwaysFull 1`, so (again) a full `vid_restart` is done, instead of the partial one
+  which *usually* suffices for just changing the resolution or fullscreen state. If you run into that
+  issue (probably a driver bug), you'll probably also want to set `r_windowResizable 0`, because
+  resizing the window that way also triggered the bug, and in that case no `vid_restart` is done at all
+* Fixed screenshots when using native Wayland (`SDL_VIDEODRIVER=wayland`)
+* If you enter the `map` command in the console, without any arguments, the current map name is printed
+* Support OpenGL debug contexts and messages (`GL_ARB_debug_output`). Can be enabled with `r_glDebugContext 1`. Changing that CVar requires a `vid_restart` (or set it as startup argument)
 
 1.5.3 (2024-03-29)
 ------------------------------------------------------------------------
