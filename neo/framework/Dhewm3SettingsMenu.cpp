@@ -1971,6 +1971,7 @@ static float audioMenuItemOffset = 0.0f;
 static void InitAudioOptionsMenu()
 {
 	alDevices.SetNum( 0, false );
+	selAlDevice = 0; // default device (another one might be set in loop below)
 
 	const char* device = idSoundSystemLocal::s_device.GetString();
 	if ( *device == '\0' || idStr::Cmp( device, "default" ) == 0 ) {
