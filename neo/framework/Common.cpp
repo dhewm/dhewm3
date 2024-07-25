@@ -2637,6 +2637,13 @@ void idCommonLocal::LoadGameDLLbyName( const char *dll, idStr& s ) {
 			s.AppendPath(dll);
 			gameDLL = sys->DLL_Load(s);
 		}
+
+		// if not found in the bundle's directory, try in the bundle itself
+		if (!gameDLL && Sys_GetPath(PATH_EXE, s)) {
+			s.AppendPath("Contents/MacOS/base");
+			s.AppendPath(dll);
+			gameDLL = sys->DLL_Load(s);
+		}
 	#else
 		// then the install folder on *nix
 		if (!gameDLL) {
