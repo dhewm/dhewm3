@@ -410,10 +410,7 @@ idParticleStage *idDeclParticle::ParseParticleStage( idLexer &src ) {
 			continue;
 		}
 		if ( !token.Icmp( "softeningRadius" ) ) { // #3878 soft particles
-			common->Warning( "Particle %s from %s has stage with \"softeningRadius\" attribute, which is currently ignored (we soften all suitable particles)\n",
-					this->GetName(), src.GetFileName() );
-			// DG: disable this for now to avoid breaking the game ABI
-			//stage->softeningRadius = src.ParseFloat();
+			stage->softeningRadius = src.ParseFloat();
 			continue;
 		}
 
@@ -740,9 +737,7 @@ idParticleStage::idParticleStage( void ) {
 	hidden = false;
 	boundsExpansion = 0.0f;
 	bounds.Clear();
-	// DG: disable softeningRadius for now to avoid breaking the game ABI
-	//     (will always behave like if softeningRadius = -2.0f)
-	//softeningRadius = -2.0f;	// -2 means "auto" - #3878 soft particles
+	softeningRadius = -2.0f;	// -2 means "auto" - #3878 soft particles
 }
 
 /*
@@ -816,8 +811,7 @@ void idParticleStage::Default() {
 	randomDistribution = true;
 	entityColor = false;
 	cycleMsec = ( particleLife + deadTime ) * 1000;
-	// DG: disable softeningRadius for now to avoid breaking game ABI
-	//softeningRadius = -2.0f;	// -2 means "auto" - #3878 soft particles
+	softeningRadius = -2.0f;	// -2 means "auto" - #3878 soft particles
 }
 
 /*
