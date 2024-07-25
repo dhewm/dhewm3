@@ -310,14 +310,11 @@ void idRenderModelPrt::SetSofteningRadii()
 	for ( int i = 0; i < particleSystem->stages.Num(); ++i )
 	{
 		const idParticleStage* ps = particleSystem->stages[i];
-		// DG: for now softeningRadius isn't configurable to avoid breaking the game DLL's ABI
-		//     => always behave like if ps->softeningRadius == -2, which means "auto"
-		//        (doesn't make a difference, so far only TDM particles set the softeningRadius)
-		/* if ( ps->softeningRadius > -2.0f )	// User has specified a setting
+		if ( ps->softeningRadius > -2.0f )	// User has specified a setting
 		{
 			softeningRadii[i] = ps->softeningRadius;
 		}
-		else */ if ( ps->orientation == POR_VIEW ) // Only view-aligned particle stages qualify for softening
+		else if ( ps->orientation == POR_VIEW ) // Only view-aligned particle stages qualify for softening
 		{
 			float diameter = Max( ps->size.from, ps->size.to );
 			float scale = Max( ps->aspect.from, ps->aspect.to );
