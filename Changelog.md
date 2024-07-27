@@ -41,7 +41,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   resizing the window that way also triggered the bug, and in that case no `vid_restart` is done at all
 * Fixed screenshots when using native Wayland (`SDL_VIDEODRIVER=wayland`)
 * If you enter the `map` command in the console, without any arguments, the current map name is printed
-* Support OpenGL debug contexts and messages (`GL_ARB_debug_output`). Can be enabled with `r_glDebugContext 1`. Changing that CVar requires a `vid_restart` (or set it as startup argument)
+* Support OpenGL debug contexts and messages (`GL_ARB_debug_output`). Can be enabled with `r_glDebugContext 1`.
+  Changing that CVar requires a `vid_restart` (or set it as startup argument)
+* The Mods Menu's entries for the base game and d3xp/RoE are now clearer, and it can load the new
+  d3xp-based mods (sikkmodd3xp, perfected_roe)
 
 1.5.3 (2024-03-29)
 ------------------------------------------------------------------------

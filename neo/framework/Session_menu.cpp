@@ -562,6 +562,8 @@ static void loadMod ( const idStr& modName ) {
 		// (and that are supported by dhewm3), add them here
 		"d3le", // The Lost Mission
 		"librecoopd3xp",
+		"perfected_roe",
+		"sikkmodd3xp",
 		// Doom 3: Phobos (they haven't released source yet, so it won't work yet,
 		//                 but ain't I ever the optimist..)
 		"tfphobos"

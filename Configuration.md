@@ -215,6 +215,8 @@ This can be configured with the following CVars:
 - `r_enableDepthCapture` Enable capturing depth buffer to texture. `0`: disable, `1`: enable,  
   `-1`: enable automatically (if soft particles are enabled; the default).   
    This can be used in custom materials with the "_currentDepth" texture.
+- `r_gammaInShader` If set to `1` (the default), gamma and brightness are applied in shaders
+   instead of using hardware gamma. May cause visual glitches with some mods like Sikkmod.
 - `r_useCarmacksReverse` Use Z-Fail ("Carmack's Reverse") when rendering shadows (default `1`)
 - `r_useStencilOpSeparate` Use glStencilOpSeparate() (if available) when rendering shadow (default `1`)
 - `r_scaleMenusTo43` Render full-screen menus in 4:3 by adding black bars on the left/right if necessary (default `1`)

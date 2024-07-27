@@ -1741,8 +1741,8 @@ idModList *idFileSystemLocal::ListMods( void ) {
 			ListOSFiles( gamepath, ".pk4", pk4s );
 			if ( pk4s.Num() ) {
 				if ( !list->mods.Find( dirs[ i ] ) ) {
-					// D3 1.3 #31, only list d3xp if the pak is present
-					if ( dirs[ i ].Icmp( "d3xp" ) || HasD3XP() ) {
+					// DG: ignore d3xp, it's added explicitly later, if available
+					if ( dirs[ i ].Icmp( "d3xp" ) ) {
 						list->mods.Append( dirs[ i ] );
 					}
 				}
@@ -1778,7 +1778,13 @@ idModList *idFileSystemLocal::ListMods( void ) {
 	}
 
 	list->mods.Insert( "" );
-	list->descriptions.Insert( "dhewm 3" );
+	list->descriptions.Insert( "Doom 3 (base game)" );
+
+	// DG: if installed, add d3xp with useful description, right below the base game
+	if ( HasD3XP() ) {
+		list->mods.Insert( "d3xp", 1 );
+		list->descriptions.Insert( "Resurrection Of Evil (d3xp)", 1 );
+	}
 
 	assert( list->mods.Num() == list->descriptions.Num() );
 
