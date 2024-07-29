@@ -368,7 +368,12 @@ const char* softpartVShader = "!!ARBvp1.0  \n"
 	"OPTION ARB_position_invariant;  \n"
 	"# NOTE: unlike the TDM shader, the following lines use .texcoord and .color  \n"
 	"#   instead of .attrib[8] and .attrib[3], to make it work with non-nvidia drivers \n"
-	"MOV    result.texcoord, vertex.texcoord; \n"
+	"#   Furthermore, I added support for a texture matrix \n"
+	"PARAM defaultTexCoord = { 0, 0.5, 0, 1 }; \n"
+	"MOV    result.texcoord, defaultTexCoord; \n"
+	"# program.env[12] is PP_DIFFUSE_MATRIX_S, 13 is PP_DIFFUSE_MATRIX_T \n"
+	"DP4    result.texcoord.x, vertex.texcoord, program.env[12]; \n"
+	"DP4    result.texcoord.y, vertex.texcoord, program.env[13]; \n"
 	"MOV    result.color, vertex.color; \n"
 	"END \n";
 

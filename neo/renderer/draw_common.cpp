@@ -1010,6 +1010,37 @@ void RB_STD_T_RenderShaderPasses( const drawSurf_t *surf ) {
 			printf("XX mat: %s, src_blend = %s dest_blend = %s radius = %g\n", shader->GetName(), srcblendstr, dstblend, surf->particle_radius);
 #endif
 
+			// DG: some particle materials (at least the muzzle flash in dentonmod) set the
+			//     texture matrix (with scroll, translate, scale, centerScale, shear or rotate).
+			//     Support that like in R_SetDrawInteraction() (the soft particle shader only
+			//     uses one texture, so I set the diffuse matrix for it)
+			idVec4 texMatrix[2];
+			if ( pStage->texture.hasMatrix ) {
+				texMatrix[0][0] = regs[pStage->texture.matrix[0][0]];
+				texMatrix[0][1] = regs[pStage->texture.matrix[0][1]];
+				texMatrix[0][2] = 0;
+				texMatrix[0][3] = regs[pStage->texture.matrix[0][2]];
+
+				texMatrix[1][0] = regs[pStage->texture.matrix[1][0]];
+				texMatrix[1][1] = regs[pStage->texture.matrix[1][1]];
+				texMatrix[1][2] = 0;
+				texMatrix[1][3] = regs[pStage->texture.matrix[1][2]];
+
+				// we attempt to keep scrolls from generating incredibly large texture values, but
+				// center rotations and center scales can still generate offsets that need to be > 1
+				if ( texMatrix[0][3] < -40 || texMatrix[0][3] > 40 ) {
+					texMatrix[0][3] -= (int)texMatrix[0][3];
+				}
+				if ( texMatrix[1][3] < -40 || texMatrix[1][3] > 40 ) {
+					texMatrix[1][3] -= (int)texMatrix[1][3];
+				}
+			} else {
+				texMatrix[0].Set( 1, 0, 0, 0 );
+				texMatrix[1].Set( 0, 1, 0, 0 );
+			}
+			qglProgramEnvParameter4fvARB( GL_VERTEX_PROGRAM_ARB, PP_DIFFUSE_MATRIX_S, texMatrix[0].ToFloatPtr() );
+			qglProgramEnvParameter4fvARB( GL_VERTEX_PROGRAM_ARB, PP_DIFFUSE_MATRIX_T, texMatrix[1].ToFloatPtr() );
+
 			// program.env[23] is the particle radius, given as { radius, 1/(faderange), 1/radius }
 			float fadeRange = 1.0f;
 			// fadeRange is the particle diameter for alpha blends (like smoke), but the particle radius for additive
