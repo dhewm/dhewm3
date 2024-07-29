@@ -2865,6 +2865,9 @@ static bool checkForHelp(int argc, char **argv)
 				WriteString("  set path to your Doom3 game data (the directory base/ is in)\n");
 				WriteString("+set fs_game <modname>\n");
 				WriteString("  start the given addon/mod, e.g. +set fs_game d3xp\n");
+				WriteString("+set fs_game_base <base-modname>\n");
+				WriteString("  some mods are based on other mods, usually d3xp.\n");
+				WriteString("  This specifies the base mod e.g. +set fs_game d3le +set fs_game_base d3xp\n");
 #ifndef ID_DEDICATED
 				WriteString("+set r_fullscreen <0 or 1>\n");
 				WriteString("  start game in windowed (0) or fullscreen (1) mode\n");
