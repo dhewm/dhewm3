@@ -1674,7 +1674,8 @@ static CVarOption videoOptionsImmediately[] = {
 				D3::ImGuiHooks::ShowWarningOverlay( "Capturing the Depth Buffer was disabled.\nEnabled it because soft particles need it!" );
 			}
 		}
-		AddCVarOptionTooltips( cvar );
+		const char* descr = "! Can slow down rendering !\nSoften particle transitions when player walks through them or they cross solid geometry. Needs r_enableDepthCapture.";
+		AddCVarOptionTooltips( cvar, descr );
 	} ),
 
 	CVarOption( "Advanced Options" ),

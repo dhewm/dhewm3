@@ -1414,6 +1414,7 @@ bool OSX_GetCPUIdentification( int& cpuId, bool& oldArchitecture );
 void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 	// DG: add an optional "nores" argument for "don't change the resolution" (r_mode)
 	bool nores = args.Argc() > 1 && idStr::Icmp( args.Argv(1), "nores" ) == 0;
+	cvarSystem->SetCVarInteger( "r_useSoftParticles", 0, CVAR_ARCHIVE ); // DG: disable soft particles for all but ultra
 	if ( com_machineSpec.GetInteger() == 3 ) { // ultra
 		//cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE ); DG: redundant, set again below
 		cvarSystem->SetCVarInteger( "image_lodbias", 0, CVAR_ARCHIVE );
@@ -1436,6 +1437,7 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 			cvarSystem->SetCVarInteger( "r_mode", 5, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_useNormalCompression", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
+		cvarSystem->SetCVarInteger( "r_useSoftParticles", 1, CVAR_ARCHIVE ); // DG: enable soft particles for ultra preset
 	} else if ( com_machineSpec.GetInteger() == 2 ) { // high
 		cvarSystem->SetCVarString( "image_filter", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 		//cvarSystem->SetCVarInteger( "image_anisotropy", 1, CVAR_ARCHIVE ); DG: redundant, set again below
