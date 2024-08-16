@@ -1599,8 +1599,8 @@ void idPlayer::Init( void ) {
 	// stamina always initialized to maximum
 	stamina = pm_stamina.GetFloat();
 
-	// air always initialized to maximum too - DG: pm_airTics must be scaled for actual FPS from com_gameHz
-	airTics = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
+	// air always initialized to maximum too
+	airTics = pm_airTics.GetFloat();
 	airless = false;
 
 	gibDeath = false;
@@ -2152,7 +2152,7 @@ void idPlayer::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( numProjectileHits );
 
 	savefile->WriteBool( airless );
-	savefile->WriteInt( airTics );
+	savefile->WriteInt( (int)airTics );
 	savefile->WriteInt( lastAirDamage );
 
 	savefile->WriteBool( gibDeath );
@@ -2420,7 +2420,11 @@ void idPlayer::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( numProjectileHits );
 
 	savefile->ReadBool( airless );
-	savefile->ReadInt( airTics );
+	// DG: I made made airTics float for high-fps (where we have fractions of 60Hz tics),
+	//     but for saving ints should still suffice (and this preserves savegame compat)
+	int iairTics;
+	savefile->ReadInt( iairTics );
+	airTics = iairTics;
 	savefile->ReadInt( lastAirDamage );
 
 	savefile->ReadBool( gibDeath );
@@ -3523,14 +3527,12 @@ bool idPlayer::Give( const char *statname, const char *value ) {
 		}
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		// DG: pm_airTics must be scaled for actual FPS from com_gameHz
-		int airTicsCnt = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
-		if ( airTics >= airTicsCnt ) {
+		if ( airTics >= pm_airTics.GetFloat() ) { // DG: airTics are floats now for high-fps support
 			return false;
 		}
-		airTics += atoi( value ) / 100.0 * pm_airTics.GetInteger();
-		if ( airTics > airTicsCnt ) {
-			airTics = airTicsCnt;
+		airTics += atoi( value ) / 100.0 * pm_airTics.GetFloat();
+		if ( airTics > pm_airTics.GetFloat() ) {
+			airTics = pm_airTics.GetFloat();
 		}
 #ifdef _D3XP
 	} else if ( !idStr::Icmp( statname, "enviroTime" ) ) {
@@ -6085,9 +6087,6 @@ void idPlayer::UpdateAir( void ) {
 		return;
 	}
 
-	// DG: pm_airTics must be scaled for actual FPS from com_gameHz
-	int airTicsCnt = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
-
 	// see if the player is connected to the info_vacuum
 	bool	newAirless = false;
 
@@ -6122,7 +6121,8 @@ void idPlayer::UpdateAir( void ) {
 				hud->HandleNamedEvent( "noAir" );
 			}
 		}
-		airTics--;
+		// DG: was airTics--, but airTics assume 60Hz tics and we support other ticrates now (com_gameHz)
+		airTics -= 1.0f / gameLocal.gameTicScale;
 		if ( airTics < 0 ) {
 			airTics = 0;
 			// check for damage
@@ -6142,16 +6142,16 @@ void idPlayer::UpdateAir( void ) {
 				hud->HandleNamedEvent( "Air" );
 			}
 		}
-		airTics+=2;	// regain twice as fast as lose
-		if ( airTics > airTicsCnt ) {
-			airTics = airTicsCnt;
+		airTics += 2.0f / gameLocal.gameTicScale; // regain twice as fast as lose - DG: scale for com_gameHz
+		if ( airTics > pm_airTics.GetFloat() ) {
+			airTics = pm_airTics.GetFloat();
 		}
 	}
 
 	airless = newAirless;
 
 	if ( hud ) {
-		hud->SetStateInt( "player_air", 100 * airTics / airTicsCnt );
+		hud->SetStateInt( "player_air", 100 * (airTics / pm_airTics.GetFloat()) );
 	}
 }
 
@@ -7669,9 +7669,7 @@ bool idPlayer::CanGive( const char *statname, const char *value ) {
 		return true;
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		// DG: pm_airTics must be scaled for actual FPS from com_gameHz
-		int airTicsCnt = idMath::Rint( pm_airTics.GetFloat() * gameLocal.gameTicScale );
-		if ( airTics >= airTicsCnt ) {
+		if ( airTics >= pm_airTics.GetFloat() ) {
 			return false;
 		}
 		return true;
