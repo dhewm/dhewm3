@@ -82,15 +82,6 @@ void Sys_Sleep(int msec) {
 }
 
 /*
-================
-Sys_Milliseconds
-================
-*/
-unsigned int Sys_Milliseconds() {
-	return (unsigned int)Sys_MillisecondsPrecise();
-}
-
-/*
 ==================
 Sys_InitThreads
 ==================
