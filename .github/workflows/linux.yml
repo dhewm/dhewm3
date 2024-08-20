@@ -1,0 +1,68 @@
+name: Testbuild for Linux
+run-name: testbuild_linux
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    types:
+      - edited
+      - opened
+      - synchronize
+concurrency:
+  # Cancel concurrent workflows for the same PR or commit hash.
+  group: ${{github.workflow}}-${{github.event_name == 'pull_request' && github.head_ref || github.sha}}
+  cancel-in-progress: true
+jobs:
+  build_ubuntu_x86_64:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env: ubuntu
+    steps:
+    - name: Install build dependencies
+      run: |
+        sudo apt update
+        sudo apt install libgl1-mesa-dev libsdl2-dev libopenal-dev libcurl4-openssl-dev cmake ninja-build
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        # -DFORCE_COLORED_OUTPUT=ON ? didn't seem to work, or at least not visible on website
+        cmake -G Ninja -DDEDICATED=ON ../neo/
+        ninja
+    - name: Create testbuild package
+      run: |
+        # Create release directory tree
+        export PKGDIR="dhewm3-linux-$(git rev-parse --short HEAD)"
+        echo "pkgname=$PKGDIR" >> $GITHUB_ENV
+        mkdir -p publish/$PKGDIR/base
+        mkdir publish/$PKGDIR/d3xp
+        # Copy release assets
+        cd build
+        cp dhewm3 dhewm3ded base.so d3xp.so ../publish/$PKGDIR/
+        cd ..
+        # Copy misc assets
+        cp base/gamepad.cfg publish/$PKGDIR/base/
+        cp base/gamepad-d3xp.cfg publish/$PKGDIR/d3xp/
+        cp COPYING.txt publish/$PKGDIR/
+        # TODO: prepend to README that executables must be set executable? (and maybe commit, build, arch etc)
+        echo "dhewm3 for 64bit (amd64 aka x86_64 aka x64) Linux, built $(date)" > publish/$PKGDIR/README.txt
+        echo -e "from ${{ github.ref_name }} commit ${{ github.sha }}\n" >> publish/$PKGDIR/README.txt
+        echo "!!! Note that you must set dhewm3(ded) executable !!!" >> publish/$PKGDIR/README.txt
+        echo "! In a Terminal, in this directory, run:" >> publish/$PKGDIR/README.txt
+        echo "  chmod 755 dhewm3 dhewm3ded" >> publish/$PKGDIR/README.txt
+        echo -e "(this is because of limitations in Githubs Workflow Actions)\n" >> publish/$PKGDIR/README.txt
+        cat README.md >> publish/$PKGDIR/README.txt
+        cp Changelog.md publish/$PKGDIR/Changelog.txt
+        cp Configuration.md publish/$PKGDIR/Configuration.txt
+    - name: Upload testbuild package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.pkgname }}
+        path: publish/
+        if-no-files-found: error

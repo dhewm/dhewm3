@@ -1,0 +1,63 @@
+name: Testbuild for MacOS
+run-name: testbuild_macos
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    types:
+      - edited
+      - opened
+      - synchronize
+concurrency:
+  # Cancel concurrent workflows for the same PR or commit hash.
+  group: ${{github.workflow}}-${{github.event_name == 'pull_request' && github.head_ref || github.sha}}
+  cancel-in-progress: true
+jobs:
+  build_macos_aarch64:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env: macos
+    steps:
+    - name: Install build dependencies
+      run: |
+        brew update
+        brew install sdl2 openal-soft
+        # not installing make and cmake, cmake is installed by default, make doesn't seem to be needed
+        # when using cmake --build
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Build
+      run: |
+        mkdir build
+        # Note: not building dedicated server because it's not supported on Macs
+        cmake -DOPENAL_LIBRARY="/opt/homebrew/opt/openal-soft/lib/libopenal.dylib" -DOPENAL_INCLUDE_DIR="/opt/homebrew/opt/openal-soft/include" -S neo/ -B build
+        cmake --build build
+    - name: Create testbuild package
+      run: |
+        # Create release directory tree
+        export PKGDIR="dhewm3-macos-$(git rev-parse --short HEAD)"
+        echo "pkgname=$PKGDIR" >> $GITHUB_ENV
+        mkdir -p publish/$PKGDIR/base
+        mkdir publish/$PKGDIR/d3xp
+        # Copy release assets
+        cd build
+        cp -r dhewm3.app ../publish/$PKGDIR/
+        cp base.dylib d3xp.dylib ../publish/$PKGDIR/
+        cd ..
+        # Copy misc assets
+        cp base/gamepad.cfg publish/$PKGDIR/base/
+        cp base/gamepad-d3xp.cfg publish/$PKGDIR/d3xp/
+        cp COPYING.txt publish/$PKGDIR/
+        cp README.md publish/$PKGDIR/README.txt
+        cp Changelog.md publish/$PKGDIR/Changelog.txt
+        cp Configuration.md publish/$PKGDIR/Configuration.txt
+    - name: Upload testbuild package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.pkgname }}
+        path: publish/
+        if-no-files-found: error
