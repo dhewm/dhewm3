@@ -4,7 +4,13 @@ dhewm3 Changelog
 Note: Numbers starting with a "#" like #330 refer to the bugreport with that number
       at https://github.com/dhewm/dhewm3/issues/
 
-1.5.4 (WIP)
+1.5.5 (WIP)
+------------------------------------------------------------------------
+
+* Enable/disable Soft Particles when **loading** a graphics quality preset (only enabled in Ultra preset,
+  though you can still configure it independently as before; #604)
+
+1.5.4 (2024-08-03)
 ------------------------------------------------------------------------
 
 * A brand new settings menu that uses [Dear ImGui](https://github.com/ocornut/imgui).  
@@ -16,7 +22,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   Needs SDL2 and C++11.
 * "Soft" Particles (that don't "cut" into geometry but fade smoothly), based on code from The Dark Mod
   2.04. Can be enabled/disabled with `r_useSoftParticles`, is applied automatically for all appropriate
-  particles (view-aligned, using additive or alpha blending and not too small)
+  particles (view-aligned, using additive or alpha blending and not too small).  
+  **NOTE** that on some systems Soft Particles noticeably slow down rendering. If dhewm3 doesn't run
+  as smoothly as you'd expect, try disabling them (`r_useSoftParticles 0` or in the new *Settings Menu*
+  under *Video Options* -> *Use Soft Particles*)
 * `r_enableDepthCapture`: Enable capturing depth buffer to texture, needed for the soft particles.
   Can be used in custom materials by using the `"_currentDepth"` texture
 * Replaced dependency on (external) zlib with integrated [miniz](https://github.com/richgel999/miniz)
