@@ -1688,7 +1688,7 @@ void idAsyncClient::SetupConnection( void ) {
 		}
 #else
 		if (! Sys_IsLANAddress( serverAddress ) ) {
-			common->Printf( "Build Does not have CD Key Enforcement enabled. The Server ( %s ) is not within the lan addresses. Attemting to connect.\n", Sys_NetAdrToString( serverAddress ) );
+			common->Printf( "Build Does not have CD Key Enforcement enabled. The Server ( %s ) is not within the lan addresses. Attempting to connect.\n", Sys_NetAdrToString( serverAddress ) );
 		}
 		common->Printf( "Not Testing key.\n" );
 #endif
