@@ -121,6 +121,7 @@ namespace DG {
 	D3_IMATTR_FLOAT( TabBorderSize               ) \
 	D3_IMATTR_FLOAT( TabMinWidthForCloseButton   ) \
 	D3_IMATTR_FLOAT( TabBarBorderSize            ) \
+	D3_IMATTR_FLOAT( TabBarOverlineSize          ) \
 	D3_IMATTR_FLOAT( TableAngledHeadersAngle     ) \
 	D3_IMATTR_VEC2(  TableAngledHeadersTextAlign ) \
 	D3_IMATTR_DIR(   ColorButtonPosition         ) \
@@ -186,11 +187,13 @@ namespace DG {
 	D3_IMSTYLE_COLOR( ResizeGrip            ) \
 	D3_IMSTYLE_COLOR( ResizeGripHovered     ) \
 	D3_IMSTYLE_COLOR( ResizeGripActive      ) \
-	D3_IMSTYLE_COLOR( Tab                   ) \
 	D3_IMSTYLE_COLOR( TabHovered            ) \
-	D3_IMSTYLE_COLOR( TabActive             ) \
-	D3_IMSTYLE_COLOR( TabUnfocused          ) \
-	D3_IMSTYLE_COLOR( TabUnfocusedActive    ) \
+	D3_IMSTYLE_COLOR( Tab                   ) \
+	D3_IMSTYLE_COLOR( TabSelected           ) \
+	D3_IMSTYLE_COLOR( TabSelectedOverline   ) \
+	D3_IMSTYLE_COLOR( TabDimmed             ) \
+	D3_IMSTYLE_COLOR( TabDimmedSelected     ) \
+	D3_IMSTYLE_COLOR( TabDimmedSelectedOverline ) \
 	DGIMST_ENABLE_IF_DOCKING( D3_IMSTYLE_COLOR( DockingPreview ) ) \
 	DGIMST_ENABLE_IF_DOCKING( D3_IMSTYLE_COLOR( DockingEmptyBg ) ) \
 	D3_IMSTYLE_COLOR( PlotLines             ) \
@@ -202,6 +205,7 @@ namespace DG {
 	D3_IMSTYLE_COLOR( TableBorderLight      ) \
 	D3_IMSTYLE_COLOR( TableRowBg            ) \
 	D3_IMSTYLE_COLOR( TableRowBgAlt         ) \
+	D3_IMSTYLE_COLOR( TextLink              ) \
 	D3_IMSTYLE_COLOR( TextSelectedBg        ) \
 	D3_IMSTYLE_COLOR( DragDropTarget        ) \
 	D3_IMSTYLE_COLOR( NavHighlight          ) \
@@ -297,6 +301,21 @@ static void parseBehaviorLine( ImGuiStyle& s, const char* line )
 #undef D3_IMATTR_DIR
 #undef D3_IMATTR_BOOL
 
+namespace {
+// for renamed colors
+struct ImGuiColorBackwardCompat {
+	const char* oldColorStr;
+	enum ImGuiCol_ newColorVal;
+};
+
+static struct ImGuiColorBackwardCompat backwardCompatColorMappings[] = {
+	{ "TabActive",                    ImGuiCol_TabSelected },
+	{ "TabUnfocused",                 ImGuiCol_TabDimmed },
+	{ "TabUnfocusedActive",           ImGuiCol_TabDimmedSelected },
+};
+
+} //anon namespace
+
 static void parseColorLine( ImGuiStyle& s, const char* line )
 {
 	ImVec4 c;
@@ -313,9 +332,18 @@ static void parseColorLine( ImGuiStyle& s, const char* line )
 
 	// NOTE: here backwards-compat is also possible, like
 	// if ( sscanf( line, "OldColorName = %f , %f , %f , %f", &c.x, &c.y, &c.z, &c.w) == 4 ) {
-	//     s.Colors[ ImGuiCol_NewColorName = c;
+	//     s.Colors[ ImGuiCol_NewColorName ] = c;
 	//     return;
 	// }
+	for( const ImGuiColorBackwardCompat& bc : backwardCompatColorMappings ) {
+		char matchString[64];
+		snprintf( matchString, sizeof(matchString), "%s = %%f , %%f , %%f , %%f", bc.oldColorStr );
+
+		if ( sscanf( line, matchString, &c.x, &c.y, &c.z, &c.w) == 4 ) {
+			s.Colors[ bc.newColorVal ] = c;
+			return;
+		}
+	}
 
 	warnPrintf( "Invalid line in ImGui style under [colors] section: '%s'\n", line );
 }

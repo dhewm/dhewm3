@@ -632,7 +632,7 @@ void SetDhewm3StyleColors( ImGuiStyle* dst )
 	colors[ImGuiCol_TitleBgActive] = ImVec4(0.03f, 0.33f, 0.33f, 1.00f);
 	//colors[ImGuiCol_TitleBg]       = ImVec4(0.12f, 0.17f, 0.16f, 0.90f);
 	colors[ImGuiCol_TabHovered]    = ImVec4(0.42f, 0.69f, 1.00f, 0.80f);
-	colors[ImGuiCol_TabActive]     = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
+	colors[ImGuiCol_TabSelected]     = ImVec4(0.24f, 0.51f, 0.83f, 1.00f);
 }
 
 void SetUserStyleColors()
