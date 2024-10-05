@@ -564,7 +564,8 @@ private:
 	int						numProjectileHits;		// number of hits on mobs
 
 	bool					airless;
-	int						airTics;				// set to pm_airTics at start, drops in vacuum
+	// DG: Note: airTics are tics at 60Hz, so no real tics (unless com_gameHz happens to be 60)
+	float					airTics;				// set to pm_airTics at start, drops in vacuum
 	int						lastAirDamage;
 
 	bool					gibDeath;

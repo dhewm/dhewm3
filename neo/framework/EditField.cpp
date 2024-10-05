@@ -587,7 +587,9 @@ void idEditField::Draw( int x, int y, int width, bool showCursor, const idMateri
 		return;
 	}
 
-	if ( (int)( com_ticNumber >> 4 ) & 1 ) {
+	// DG: fix cursor blinking speed for >60fps
+	unsigned scaledTicNumber = com_ticNumber / com_gameTicScale;
+	if ( ( scaledTicNumber >> 4 ) & 1 ) {
 		return;		// off blink
 	}
 

@@ -159,9 +159,18 @@ void			Sys_DebugVPrintf( const char *fmt, va_list arg );
 // NOTE: due to SDL_TIMESLICE this is very bad portability karma, and should be completely removed
 void			Sys_Sleep( int msec );
 
+// like Sys_Milliseconds(), but with higher precision
+double			Sys_MillisecondsPrecise( void );
+
 // Sys_Milliseconds should only be used for profiling purposes,
 // any game related timing information should come from event timestamps
-unsigned int	Sys_Milliseconds( void );
+ID_INLINE unsigned int Sys_Milliseconds( void ) {
+	return (unsigned int)Sys_MillisecondsPrecise();
+}
+
+// sleep until Sys_MillisecondsPrecise() returns >= targetTimeMS
+// aims for about 0.01ms precision (but might busy wait for the last 1.5ms or so)
+void Sys_SleepUntilPrecise( double targetTimeMS );
 
 // returns a selection of the CPUID_* flags
 int				Sys_GetProcessorId( void );

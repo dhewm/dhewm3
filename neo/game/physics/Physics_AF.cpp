@@ -2233,6 +2233,8 @@ bool idAFConstraint_HingeSteering::Add( idPhysics_AF *phys, float invTimeStep ) 
 	}
 
 	speed = steerAngle - angle;
+	// DG: steerSpeed is applied per frame, so it must be adjusted for the actual frametime
+	float steerSpeed = this->steerSpeed / gameLocal.gameTicScale;
 	if ( steerSpeed != 0.0f ) {
 		if ( speed > steerSpeed ) {
 			speed = steerSpeed;
@@ -5374,6 +5376,9 @@ void idPhysics_AF::Evolve( float timeStep ) {
 	// make absolutely sure all contact constraints are satisfied
 	VerifyContactConstraints();
 
+	// DG: from TDM: make friction independent of the frametime (i.e. the time between two calls of this function)
+	float frictionTickMul = timeStep / MS2SEC( 16 ); // USERCMD_MSEC was 16 before introducing com_gameHz
+
 	// calculate the position of the bodies for the next physics state
 	for ( i = 0; i < bodies.Num(); i++ ) {
 		body = bodies[i];
@@ -5392,8 +5397,9 @@ void idPhysics_AF::Evolve( float timeStep ) {
 		body->next->worldAxis.OrthoNormalizeSelf();
 
 		// linear and angular friction
-		body->next->spatialVelocity.SubVec3(0) -= body->linearFriction * body->next->spatialVelocity.SubVec3(0);
-		body->next->spatialVelocity.SubVec3(1) -= body->angularFriction * body->next->spatialVelocity.SubVec3(1);
+		// DG: from TDM: use frictionTicMul from above
+		body->next->spatialVelocity.SubVec3(0) -= frictionTickMul * body->linearFriction * body->next->spatialVelocity.SubVec3(0);
+		body->next->spatialVelocity.SubVec3(1) -= frictionTickMul * body->angularFriction * body->next->spatialVelocity.SubVec3(1);
 	}
 }
 
