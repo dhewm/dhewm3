@@ -51,12 +51,13 @@ option(CORE			"Build the core" ON)
 option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
 if(MSVC)
-	option(TOOLS		"Build the tools game code (Visual Studio+SDL2 only)" OFF)
+	option(TOOLS		"Build the tools game code (Visual Studio+SDL2/SDL3 only)" OFF)
 endif()
 option(DEDICATED	"Build the dedicated server" OFF)
 option(ONATIVE		"Optimize for the host CPU" OFF)
 option(SDL2			"Use SDL2 instead of SDL1.2" ON)
-option(IMGUI		"Build with Dear ImGui integration - requires SDL2 and C++11" ON)
+option(SDL3			"Use SDL3 instead of SDL2 or SDL1.2" OFF)
+option(IMGUI		"Build with Dear ImGui integration - requires SDL2/SDL3 and C++11" ON)
 option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
 option(HARDLINK_GAME "Compile gamecode into executable (no game DLLs)" OFF)
@@ -193,7 +194,19 @@ endif()
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
-if (SDL2)
+if (SDL3)
+	if(SDL2)
+		message(WARNING "You enabled both SDL2 and SDL3. Only one can be used at a time, disabling SDL2")
+		set(SDL2 OFF CACHE BOOL "Use SDL2 (make sure SDL3 is disabled!)" FORCE)
+	endif()
+	# 1. Look for a SDL3 package,
+	# 2. look for the SDL3-shared component, and
+	# 3. fail if the shared component cannot be found.
+	find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+	# TODO: include dirs?
+	set(SDLx_LIBRARY SDL3::SDL3)
+	add_definitions(-DD3_SDL3=1)
+elseif (SDL2)
 	# skip SDL2main
 	if(APPLE OR WIN32)
 		set(SDL2_BUILDING_LIBRARY TRUE)
@@ -217,12 +230,12 @@ if(REPRODUCIBLE_BUILD)
 endif()
 
 if(IMGUI)
-	if(SDL2)
+	if(SDL2 OR SDL3)
 		# we need C++11 for ImGui
 		set (CMAKE_CXX_STANDARD 11)
 		message(STATUS "Dear ImGui integration enabled")
 	else()
-		message(WARNING "Disabling IMGUI because SDL1.2 is used - it needs SDL2!")
+		message(WARNING "Disabling IMGUI because SDL1.2 is used - it needs SDL2 or SDL3!")
 		set(IMGUI OFF)
 		add_definitions(-DIMGUI_DISABLE)
 	endif()
@@ -273,7 +286,7 @@ if(NOT WIN32)
 	endif()
 	
 	# check if our SDL2 supports X11 in SDL_syswm so we can use it for DPI scaling ImGui
-	if(SDL2)
+	if(SDL2) # TODO: SDL3? Or just kick this feature?
 		set(CMAKE_REQUIRED_LIBRARIES SDL2)
 		check_c_source_compiles( "#include <SDL_syswm.h>
 		int main() { SDL_SysWMinfo wmInfo = {}; wmInfo.info.x11.display = NULL; return 0; }" HAVE_SDL_X11)
@@ -799,8 +812,14 @@ set(src_idlib
 add_globbed_headers(src_idlib "idlib")
 
 if(IMGUI)
-set(src_imgui
-	libs/imgui/backends/imgui_impl_sdl2.cpp
+
+	if(SDL3)
+		set(src_imgui libs/imgui/backends/imgui_impl_sdl3.cpp)
+	else()
+		set(src_imgui libs/imgui/backends/imgui_impl_sdl2.cpp)
+	endif()
+
+set(src_imgui ${src_imgui}
 	libs/imgui/backends/imgui_impl_opengl2.cpp
 	
 	libs/imgui/imgui.h
