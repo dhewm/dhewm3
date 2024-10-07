@@ -346,15 +346,26 @@ try_again:
 			common->Printf("SDL detected %d displays: \n", numDisplays);
 			bool found = false;
 			for ( int j=0; j<numDisplays; ++j ) {
+				SDL_Rect rect;
 		#if SDL_VERSION_ATLEAST(3, 0, 0)
 				SDL_DisplayID displayId_x = displayIDs[j];
+				int numModes = 0;
+				SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(displayId_x, &numModes);
+				common->Printf( " Display %d (ID %u) has the following modes:\n", j, displayId_x );
+				for ( int dmIdx=0; dmIdx < numModes; ++dmIdx ) {
+					SDL_DisplayMode* mode = modes[dmIdx];
+					common->Printf( " - %d x %d @ %g Hz, density %g \n", mode->w, mode->h, mode->refresh_rate, mode->pixel_density );
+				}
+				SDL_free( modes );
+				if ( SDL_GetDisplayBounds(displayId_x, &rect) ) {
+					common->Printf("  Currently: %dx%d at (%d, %d) to (%d, %d)\n", rect.w, rect.h,
+					               rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
 		#else // SDL2
 				int displayId_x = j;
-		#endif
-				SDL_Rect rect;
 				if (SDL_GetDisplayBounds(displayId_x, &rect) == 0) {
 					common->Printf(" %d: %dx%d at (%d, %d) to (%d, %d)\n", j, rect.w, rect.h,
 					               rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
+		#endif
 					if ( !found && x >= rect.x && x < rect.x + rect.w
 						&& y >= rect.y && y < rect.y + rect.h )
 					{
@@ -1129,6 +1140,11 @@ void GLimp_GrabInput(int flags) {
 	} else {
 		SDL_SetWindowMouseGrab( window, false );
 		SDL_SetWindowKeyboardGrab( window, false );
+	}
+	if (flags & GRAB_ENABLETEXTINPUT) {
+		SDL_StartTextInput( window );
+	} else {
+		SDL_StopTextInput( window );
 	}
 #elif SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_ShowCursor( (flags & GRAB_HIDECURSOR) ? SDL_DISABLE : SDL_ENABLE );

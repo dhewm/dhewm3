@@ -1119,6 +1119,7 @@ void		GLimp_DeactivateContext( void );
 const int GRAB_GRABMOUSE	= (1 << 0);
 const int GRAB_HIDECURSOR	= (1 << 1);
 const int GRAB_RELATIVEMOUSE = (1 << 2);
+const int GRAB_ENABLETEXTINPUT = (1 << 3); // only used with SDL3, where textinput must be explicitly activated
 
 void GLimp_GrabInput(int flags);
 

@@ -115,10 +115,6 @@ If you have questions concerning this license or the applicable additional terms
   #define SDL_CONTROLLER_AXIS_RIGHTY SDL_GAMEPAD_AXIS_RIGHTY
   #define SDL_CONTROLLER_AXIS_TRIGGERLEFT SDL_GAMEPAD_AXIS_LEFT_TRIGGER
   #define SDL_CONTROLLER_AXIS_TRIGGERRIGHT SDL_GAMEPAD_AXIS_RIGHT_TRIGGER
-  //#define SDL_CONTROLLER_BINDTYPE_AXIS SDL_GAMEPAD_BINDTYPE_AXIS
-  //#define SDL_CONTROLLER_BINDTYPE_BUTTON SDL_GAMEPAD_BINDTYPE_BUTTON
-  //#define SDL_CONTROLLER_BINDTYPE_HAT SDL_GAMEPAD_BINDTYPE_HAT
-  //#define SDL_CONTROLLER_BINDTYPE_NONE SDL_GAMEPAD_BINDTYPE_NONE
   #define SDL_CONTROLLER_BUTTON_A SDL_GAMEPAD_BUTTON_SOUTH
   #define SDL_CONTROLLER_BUTTON_B SDL_GAMEPAD_BUTTON_EAST
   #define SDL_CONTROLLER_BUTTON_X SDL_GAMEPAD_BUTTON_WEST
@@ -525,13 +521,14 @@ static const char* getLocalizedScancodeName( int key, bool useUtf8 )
 			}
 		} else if ( k != SDLK_UNKNOWN ) {
 			const char *ret = SDL_GetKeyName( k );
-			// the keyname from SDL2 is in UTF-8, which Doom3 can't print,
-			// so only return the name if it's ASCII, otherwise fall back to "SC_bla"
 			if ( ret && *ret != '\0' ) {
 				if( useUtf8 ) {
 					return ret;
 				}
 
+				// the keyname from SDL2 is in UTF-8, which Doom3 can't print (except with ImGui),
+				// so only return the name directly if it's ASCII, otherwise try to translate it
+				// to ISO8859-1, and if that fails fall back to SC_*
 				if( isAscii( ret ) ) {
 					return ret;
 				}
@@ -1264,7 +1261,6 @@ sysEvent_t Sys_GetEvent() {
 					SDL_SetModState((SDL_Keymod)newmod);
 				} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
 
-
 				in_hasFocus = true;
 
 				// start playing the game sound world again (when coming from editor)
@@ -1295,7 +1291,6 @@ sysEvent_t Sys_GetEvent() {
 						SDL_SetModState((SDL_Keymod)newmod);
 					} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
 
-					
 					in_hasFocus = true;
 
 					// start playing the game sound world again (when coming from editor)
@@ -1349,7 +1344,7 @@ sysEvent_t Sys_GetEvent() {
 
 			// fall through
 		case SDL_KEYUP:
-#if !SDL_VERSION_ATLEAST(2, 0, 0)
+#if !SDL_VERSION_ATLEAST(2, 0, 0) // SDL1.2
 			key = mapkey(ev.key.keysym.sym);
 			if (!key) {
 				if ( !in_ignoreConsoleKey.GetBool() ) {
@@ -1737,9 +1732,12 @@ static void handleMouseGrab() {
 	bool showCursor = true;
 	bool grabMouse = false;
 	bool relativeMouse = false;
+	bool enableTextInput = false;
+
+	const bool imguiHasFocus = D3::ImGuiHooks::ShouldShowCursor();
 
 	// if com_editorActive, release everything, just like when we have no focus
-	if ( in_hasFocus && !com_editorActive && !D3::ImGuiHooks::ShouldShowCursor() ) {
+	if ( in_hasFocus && !com_editorActive && !imguiHasFocus ) {
 		// Note: this generally handles fullscreen menus, but not the PDA, because the PDA
 		//       is an ugly hack in gamecode that doesn't go through sessLocal.guiActive.
 		//       It goes through weapon input code or sth? That's also the reason only
@@ -1751,9 +1749,11 @@ static void handleMouseGrab() {
 			showCursor = false;
 			relativeMouse = false;
 			grabMouse = false; // TODO: or still grab to window? (maybe only if in exclusive fullscreen mode?)
+			enableTextInput = true;
 		} else if ( console->Active() ) {
 			showCursor = true;
 			relativeMouse = grabMouse = false;
+			enableTextInput = true;
 		} else { // in game
 			showCursor = false;
 			grabMouse = relativeMouse = true;
@@ -1769,6 +1769,10 @@ static void handleMouseGrab() {
 		}
 	} else {
 		in_relativeMouseMode = false;
+		// if an ImGui window has focus, enable text input so one can write in there
+		// TODO: add explicit GRAB_DISABLETEXTINPUT and don't set it at all here for ImGui?
+		//  in theory, ImGui handles that itself, but currently GLimp_GrabInput() seems to override it
+		enableTextInput = imguiHasFocus;
 	}
 
 	int flags = 0;
@@ -1778,6 +1782,8 @@ static void handleMouseGrab() {
 		flags |= GRAB_GRABMOUSE;
 	if ( relativeMouse )
 		flags |= GRAB_RELATIVEMOUSE;
+	if ( enableTextInput )
+		flags |= GRAB_ENABLETEXTINPUT;
 
 	GLimp_GrabInput( flags );
 }
