@@ -1,8 +1,9 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
-#ifdef D3_SDL3
-  #include <SDL3/SDL.h>
+#include "sys_sdl.h"
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
   // compat with SDL2
   #define SDL_TEXTINPUT SDL_EVENT_TEXT_INPUT
   #define SDL_CONTROLLERAXISMOTION SDL_EVENT_GAMEPAD_AXIS_MOTION
@@ -11,8 +12,6 @@
   #define SDL_MOUSEMOTION SDL_EVENT_MOUSE_MOTION
   #define SDL_MOUSEWHEEL SDL_EVENT_MOUSE_WHEEL
   #define SDL_KEYDOWN SDL_EVENT_KEY_DOWN
-#else // SDL2
-  #include <SDL.h>
 #endif
 
 

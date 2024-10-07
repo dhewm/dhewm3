@@ -26,10 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifdef D3_SDL3
-  #define SDL_oldnames_h_ // HACK: I don't want SDL.h to drag in SDL_oldnames.h to avoid all the warnings about redefined definitions
-  #include <SDL3/SDL.h>
-#else // SDL1.2 or SDL2
+#include "sys/sys_sdl.h"
+
+#if 0 // TODO: was there a reason not to include full SDL.h?
   #include <SDL_version.h>
   #include <SDL_mutex.h>
   #include <SDL_thread.h>

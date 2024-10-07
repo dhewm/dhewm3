@@ -2,11 +2,7 @@
 
 #include <algorithm> // std::sort - TODO: replace with something custom..
 
-#ifdef D3_SDL3
-  #include <SDL3/SDL.h>
-#else // SDL1.2 or SDL2
-  #include <SDL.h>
-#endif
+#include "sys/sys_sdl.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 

@@ -26,12 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifdef D3_SDL3
-  #include <SDL3/SDL.h>
+#include "sys/sys_sdl.h"
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
   // DG: compat with SDL2
   #define SDL_setenv SDL_setenv_unsafe
-#else // SDL1.2 or SDL2
-  #include <SDL.h>
 #endif
 
 #include "sys/platform.h"

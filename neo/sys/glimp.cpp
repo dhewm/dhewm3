@@ -26,14 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifdef D3_SDL3
-  #include <SDL3/SDL.h>
+#include "sys/sys_sdl.h"
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
   // backwards-compat with SDL2
   #define SDL_WINDOW_ALLOW_HIGHDPI SDL_WINDOW_HIGH_PIXEL_DENSITY
   #define SDL_GL_DeleteContext SDL_GL_DestroyContext
   typedef SDL_WindowFlags My_SDL_WindowFlags;
 #else // SDL1.2 or SDL2
-  #include <SDL.h>
   // for compat with SDL3 - unfortunately SDL2 also has a SDL_WindowFlags type, but it's an enum
   typedef Uint32 My_SDL_WindowFlags;
 #endif

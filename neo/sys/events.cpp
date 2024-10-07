@@ -26,13 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifdef D3_SDL3
-  // HACK: I don't want SDL.h to drag in SDL_oldnames.h to avoid all the warnings about redefined definitions
-  #define SDL_oldnames_h_
-  #include <SDL3/SDL.h>
-#else // SDL1.2 or SDL2
-  #include <SDL.h>
-#endif
+#include "sys/sys_sdl.h"
 
 #include "sys/platform.h"
 #include "idlib/containers/List.h"

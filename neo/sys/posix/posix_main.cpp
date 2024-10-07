@@ -50,11 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/posix/posix_public.h"
 
 // SDL.h for clipboard:
-#ifdef D3_SDL3
-  #include <SDL3/SDL.h>
-#else // SDL1.2 or SDL2
-  #include <SDL.h>
-#endif
+#include "sys/sys_sdl.h"
 
 
 #define					COMMAND_HISTORY 64
