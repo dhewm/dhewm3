@@ -46,6 +46,7 @@ set(DHEWM3BINARY "dhewm3")
 
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
+include(TestBigEndian)
 
 option(CORE			"Build the core" ON)
 option(BASE			"Build the base game code" ON)
@@ -312,6 +313,15 @@ endif()
 unset(compiler_id_lower)
 
 endif() # not MSVC
+
+TEST_BIG_ENDIAN(is_big_endian)
+if(is_big_endian)
+	message(STATUS "Detected Big Endian architecture, setting -DD3_IS_BIG_ENDIAN=1")
+	add_definitions(-DD3_IS_BIG_ENDIAN=1)
+else()
+	message(STATUS "Detected Little Endian architecture, setting -DD3_IS_BIG_ENDIAN=0")
+	add_definitions(-DD3_IS_BIG_ENDIAN=0)
+endif()
 
 # compiler specific flags
 if(D3_COMPILER_IS_GCC_OR_CLANG)

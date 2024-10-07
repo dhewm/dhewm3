@@ -5,8 +5,7 @@
 // (I'm doing this instead of renaming stb_vorbis.h to stb_vorbis.c so the configuration
 //  like STB_VORBIS_BIG_ENDIAN etc can be done here in code)
 
-#include "SDL_endian.h"
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#if D3_IS_BIG_ENDIAN
   #define STB_VORBIS_BIG_ENDIAN
 #endif
 #define STB_VORBIS_NO_STDIO

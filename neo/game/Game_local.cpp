@@ -26,8 +26,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <SDL_endian.h>
-
 #include "sys/platform.h"
 #include "idlib/LangDict.h"
 #include "idlib/Timer.h"
@@ -469,7 +467,12 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteString( D3_ARCH ); // CPU architecture (e.g. "x86" or "x86_64") - from CMake
 	savegame.WriteString( ENGINE_VERSION );
 	savegame.WriteShort( (short)sizeof(void*) ); // tells us if it's from a 32bit (4) or 64bit system (8)
-	savegame.WriteShort( SDL_BYTEORDER ) ; // SDL_LIL_ENDIAN or SDL_BIG_ENDIAN
+#if D3_IS_BIG_ENDIAN
+	const short byteOrder = 4321; // SDL_BIG_ENDIAN
+#else
+	const short byteOrder = 1234; // SDL_LIL_ENDIAN
+#endif
+	savegame.WriteShort( byteOrder ) ;
 	// DG end
 
 	// go through all entities and threads and add them to the object list
