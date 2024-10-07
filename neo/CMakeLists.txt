@@ -1224,6 +1224,9 @@ include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
+if(SDL3)
+	target_link_libraries(idlib SDL3::Headers) # so it can use SDL_Endian.h
+endif()
 if (AROS)
 	add_library(dll STATIC ${src_arosdll})
         if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")

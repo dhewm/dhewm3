@@ -2,7 +2,11 @@
 
 #include <algorithm> // std::sort - TODO: replace with something custom..
 
-#include <SDL.h> // to show display size
+#ifdef D3_SDL3
+  #include <SDL3/SDL.h>
+#else // SDL1.2 or SDL2
+  #include <SDL.h>
+#endif
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
@@ -1903,9 +1907,15 @@ static void DrawVideoOptionsMenu()
 	}
 
 	// resolution info text
-	int sdlDisplayIdx = SDL_GetWindowDisplayIndex( SDL_GL_GetCurrentWindow() );
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	// in SDL3 it's a Display ID, in SDL2 a Display Index, in both cases the value
+	// can be fed into SDL_GetDisplayBounds()
+	SDL_DisplayID sdlDisplayId_x = SDL_GetDisplayForWindow( SDL_GL_GetCurrentWindow() );
+#else // SDL2
+	int sdlDisplayId_x = SDL_GetWindowDisplayIndex( SDL_GL_GetCurrentWindow() );
+#endif
 	SDL_Rect displayRect = {};
-	SDL_GetDisplayBounds( sdlDisplayIdx, &displayRect );
+	SDL_GetDisplayBounds( sdlDisplayId_x, &displayRect );
 	if ( (int)glConfig.winWidth != glConfig.vidWidth ) {
 		ImGui::TextDisabled( "Current Resolution: %g x %g (Physical: %d x %d)",
 		                     glConfig.winWidth, glConfig.winHeight, glConfig.vidWidth, glConfig.vidHeight );

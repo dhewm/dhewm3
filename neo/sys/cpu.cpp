@@ -28,7 +28,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <float.h>
 
-#include <SDL_cpuinfo.h>
+#ifdef D3_SDL3
+  #include <SDL3/SDL_cpuinfo.h>
+  // in SDL3, SDL_Has3DNow() has been removed, and nowadays it's not really relevant anyway,
+  // so just replace it with 0/false
+  #define SDL_Has3DNow() 0
+#else // SDL1.2 or SDL2
+  #include <SDL_cpuinfo.h>
+#endif
 
 // MSVC header intrin.h uses strcmp and errors out when not set
 #define IDSTR_NO_REDIRECT

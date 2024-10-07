@@ -28,7 +28,16 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERSERVER_H_
 #define DEBUGGERSERVER_H_
 
-#include <SDL.h>
+#ifdef D3_SDL3
+  #define SDL_oldnames_h_ // HACK: I don't want SDL.h to drag in SDL_oldnames.h to avoid all the warnings about redefined definitions
+  #include <SDL3/SDL.h>
+  // backwards-compat with SDL <= 2
+  #define SDL_mutex SDL_Mutex
+  #define SDL_cond SDL_Condition
+#else // SDL1.2 or SDL2
+  #include <SDL.h>
+#endif
+
 #include "sys/platform.h"
 #include "idlib/Str.h"
 #include "DebuggerMessages.h"

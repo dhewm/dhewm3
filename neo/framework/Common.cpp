@@ -26,7 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <SDL.h>
+#ifdef D3_SDL3
+  #include <SDL3/SDL.h>
+  // DG: compat with SDL2
+  #define SDL_setenv SDL_setenv_unsafe
+#else // SDL1.2 or SDL2
+  #include <SDL.h>
+#endif
 
 #include "sys/platform.h"
 #include "idlib/containers/HashTable.h"
@@ -2799,7 +2805,12 @@ void idCommonLocal::SetMachineSpec( void ) {
 	}
 }
 
-static unsigned int AsyncTimer(unsigned int interval, void *) {
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+static Uint32 AsyncTimer(void * /*userdata*/, SDL_TimerID /* timerID */, Uint32 interval)
+#else // SDL2 or SDL1.2
+static unsigned int AsyncTimer(unsigned int interval, void *)
+#endif
+{
 	common->Async();
 	Sys_TriggerEvent(TRIGGER_EVENT_ONE);
 
@@ -2947,13 +2958,19 @@ void idCommonLocal::Init( int argc, char **argv ) {
 #endif
 #endif
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	if ( ! SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD) )
+	{
+		if ( SDL_Init(SDL_INIT_VIDEO) ) { // retry without joystick/gamepad if it failed
+			Sys_Printf( "WARNING: Couldn't get SDL gamepad support! Gamepads won't work!\n" );
+		} else
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) != 0)
 	{
 		if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0) { // retry without joystick/gamecontroller if it failed
 			Sys_Printf( "WARNING: Couldn't get SDL gamecontroller support! Gamepads won't work!\n" );
 		} else
-#else
+#else // SDL1.2
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) != 0) // no gamecontroller support in SDL1
 	{
 #endif
@@ -3005,14 +3022,22 @@ void idCommonLocal::Init( int argc, char **argv ) {
 		idCVar::RegisterStaticVars();
 
 		// print engine version
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+		int sdlv = SDL_GetVersion();
+		int sdlvmaj = SDL_VERSIONNUM_MAJOR(sdlv);
+		int sdlvmin = SDL_VERSIONNUM_MINOR(sdlv);
+		int sdlvmicro = SDL_VERSIONNUM_MICRO(sdlv);
+		Printf( "%s using SDL v%d.%d.%d\n", version.string, sdlvmaj, sdlvmin, sdlvmicro );
+#else
+  #if SDL_VERSION_ATLEAST(2, 0, 0)
 		SDL_version sdlv;
 		SDL_GetVersion(&sdlv);
-#else
+  #else
 		SDL_version sdlv = *SDL_Linked_Version();
-#endif
+  #endif
 		Printf( "%s using SDL v%u.%u.%u\n",
 				version.string, sdlv.major, sdlv.minor, sdlv.patch );
+#endif
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		Printf( "SDL video driver: %s\n", SDL_GetCurrentVideoDriver() );

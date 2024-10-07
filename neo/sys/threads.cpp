@@ -26,10 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <SDL_version.h>
-#include <SDL_mutex.h>
-#include <SDL_thread.h>
-#include <SDL_timer.h>
+#ifdef D3_SDL3
+  #define SDL_oldnames_h_ // HACK: I don't want SDL.h to drag in SDL_oldnames.h to avoid all the warnings about redefined definitions
+  #include <SDL3/SDL.h>
+#else // SDL1.2 or SDL2
+  #include <SDL_version.h>
+  #include <SDL_mutex.h>
+  #include <SDL_thread.h>
+  #include <SDL_timer.h>
+#endif
 
 #include "sys/platform.h"
 #include "framework/Common.h"
@@ -40,6 +45,15 @@ If you have questions concerning this license or the applicable additional terms
   // SDL1.2 doesn't have SDL_threadID but uses Uint32.
   // this typedef helps using the same code for SDL1.2 and SDL2
   typedef Uint32 SDL_threadID;
+#elif SDL_MAJOR_VERSION >= 3
+  // backwards-compat with SDL2
+  #define SDL_mutex SDL_Mutex
+  #define SDL_cond SDL_Condition
+  #define SDL_threadID SDL_ThreadID
+  #define SDL_CreateCond SDL_CreateCondition
+  #define SDL_DestroyCond SDL_DestroyCondition
+  #define SDL_CondWait SDL_WaitCondition
+  #define SDL_CondSignal SDL_SignalCondition
 #endif
 
 #if __cplusplus >= 201103
@@ -159,8 +173,12 @@ Sys_EnterCriticalSection
 void Sys_EnterCriticalSection(int index) {
 	assert(index >= 0 && index < MAX_CRITICAL_SECTIONS);
 
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	SDL_LockMutex(mutex[index]); // in SDL3, this returns void and can't fail
+#else // SDL2 and SDL1.2
 	if (SDL_LockMutex(mutex[index]) != 0)
 		common->Error("ERROR: SDL_LockMutex failed\n");
+#endif
 }
 
 /*
@@ -171,8 +189,12 @@ Sys_LeaveCriticalSection
 void Sys_LeaveCriticalSection(int index) {
 	assert(index >= 0 && index < MAX_CRITICAL_SECTIONS);
 
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	SDL_UnlockMutex(mutex[index]); // in SDL3, this returns void and can't fail
+#else // SDL2 and SDL1.2
 	if (SDL_UnlockMutex(mutex[index]) != 0)
 		common->Error("ERROR: SDL_UnlockMutex failed\n");
+#endif
 }
 
 /*
@@ -204,8 +226,12 @@ void Sys_WaitForEvent(int index) {
 		signaled[index] = false;
 	} else {
 		waiting[index] = true;
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+		SDL_CondWait(cond[index], mutex[CRITICAL_SECTION_SYS]); // in SDL3, this returns void and can't fail
+#else // SDL2 and SDL1.2
 		if (SDL_CondWait(cond[index], mutex[CRITICAL_SECTION_SYS]) != 0)
 			common->Error("ERROR: SDL_CondWait failed\n");
+#endif
 		waiting[index] = false;
 	}
 
@@ -223,8 +249,12 @@ void Sys_TriggerEvent(int index) {
 	Sys_EnterCriticalSection(CRITICAL_SECTION_SYS);
 
 	if (waiting[index]) {
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+		SDL_CondSignal(cond[index]); // in SDL3, this returns void and can't fail
+#else // SDL2 and SDL1.2
 		if (SDL_CondSignal(cond[index]) != 0)
 			common->Error("ERROR: SDL_CondSignal failed\n");
+#endif
 	} else {
 		// emulate windows behaviour: if no thread is waiting, leave the signal on so next wait keeps going
 		signaled[index] = true;

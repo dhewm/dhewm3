@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include <SDL_main.h>
+//#include <SDL_main.h> - not needed, dhewm3 doesn't currently use SDL's SDL_main
 
 #include "sys/platform.h"
 #include "framework/Licensee.h"

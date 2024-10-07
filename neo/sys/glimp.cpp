@@ -26,7 +26,17 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <SDL.h>
+#ifdef D3_SDL3
+  #include <SDL3/SDL.h>
+  // backwards-compat with SDL2
+  #define SDL_WINDOW_ALLOW_HIGHDPI SDL_WINDOW_HIGH_PIXEL_DENSITY
+  #define SDL_GL_DeleteContext SDL_GL_DestroyContext
+  typedef SDL_WindowFlags My_SDL_WindowFlags;
+#else // SDL1.2 or SDL2
+  #include <SDL.h>
+  // for compat with SDL3 - unfortunately SDL2 also has a SDL_WindowFlags type, but it's an enum
+  typedef Uint32 My_SDL_WindowFlags;
+#endif
 
 #include "sys/platform.h"
 #include "framework/Licensee.h"
@@ -99,7 +109,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif // _WIN32 and ID_ALLOW_TOOLS
 
-
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 static SDL_Window *window = NULL;
 static SDL_GLContext context = NULL;
@@ -108,6 +117,24 @@ static SDL_Surface *window = NULL;
 #define SDL_WINDOW_OPENGL SDL_OPENGL
 #define SDL_WINDOW_FULLSCREEN SDL_FULLSCREEN
 #endif
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+
+extern idCVar in_grabKeyboard;
+
+static void SetSDLIcon()
+{
+	#include "doom_icon.h" // contains the struct d3_icon
+
+	SDL_Surface* icon = SDL_CreateSurfaceFrom(d3_icon.width, d3_icon.height,
+	                                          SDL_PIXELFORMAT_RGBA32, (void*)d3_icon.pixel_data,
+	                                          d3_icon.bytes_per_pixel*d3_icon.width);
+
+	SDL_SetWindowIcon(window, icon);
+	SDL_DestroySurface(icon);
+}
+
+#else // SDL2 and SDL1.2
 
 static void SetSDLIcon()
 {
@@ -141,6 +168,7 @@ static void SetSDLIcon()
 
 	SDL_FreeSurface(icon);
 }
+#endif // SDL2 and SDL1.2
 
 /*
 ===================
@@ -152,16 +180,23 @@ bool GLimp_Init(glimpParms_t parms) {
 
 	assert(SDL_WasInit(SDL_INIT_VIDEO));
 
-	Uint32 flags = SDL_WINDOW_OPENGL;
+	My_SDL_WindowFlags flags = SDL_WINDOW_OPENGL;
 
 	if (parms.fullScreen == 1)
 	{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-		if(parms.fullScreenDesktop)
-			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-		else
-#endif
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+		// in SDL3 windows with SDL_WINDOW_FULLSCREEN set are fullscreen-desktop by default
+		// and for exclusive fullscreen SDL_SetWindowFullscreenMode() must be called
+		// after creating the window, so only set the flag if we want fullscreen-desktop mode
+		if(parms.fullScreen && parms.fullScreenDesktop) {
 			flags |= SDL_WINDOW_FULLSCREEN;
+		}
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
+		flags |= parms.fullScreenDesktop ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN;
+#else // SDL1.2
+		flags |= SDL_WINDOW_FULLSCREEN;
+#endif
+
 	}
 
 	r_windowResizable.ClearModified();
@@ -190,9 +225,10 @@ bool GLimp_Init(glimpParms_t parms) {
 	 * (unless the user disables that with r_fillWindowAlphaChan 0) */
   #ifdef SDL_HINT_VIDEO_EGL_ALLOW_TRANSPARENCY
 	SDL_SetHint(SDL_HINT_VIDEO_EGL_ALLOW_TRANSPARENCY, "1");
-  #else // little hack so this works if the SDL2 version used for building is older than runtime version
+  #elif SDL_MAJOR_VERSION == 2 // little hack so this works if the SDL2 version used for building is older than runtime version
 	SDL_SetHint("SDL_VIDEO_EGL_ALLOW_TRANSPARENCY", "1");
   #endif
+	// Note: for SDL3 we use SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN below
 #endif
 
 	int colorbits = 24;
@@ -277,7 +313,7 @@ try_again:
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, (multisamples > 1) ? 1 : 0);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+#if SDL_VERSION_ATLEAST(2, 0, 0) // SDL2 and SDL3 window creation
 
 		if ( r_glDebugContext.GetBool() ) {
 			common->Printf( "Requesting an OpenGL Debug Context (r_glDebugContext is enabled)\n" );
@@ -292,37 +328,137 @@ try_again:
 						   windowMode, parms.width, parms.height, r_mode.GetInteger());
 		}
 
-		int displayIndex = 0;
-#if SDL_VERSION_ATLEAST(2, 0, 4)
+		Uint32 selectedDisplay = 0;
+	#if SDL_VERSION_ATLEAST(2, 0, 4)
 		// try to put the window on the display the mousecursor currently is on
 		{
+		#if SDL_VERSION_ATLEAST(3, 0, 0)
+			float x, y;
+			int numDisplays = 0;
+			SDL_DisplayID* displayIDs = SDL_GetDisplays(&numDisplays);
+		#else // SDL2
+			int numDisplays = SDL_GetNumVideoDisplays();
 			int x, y;
+		#endif
+
 			SDL_GetGlobalMouseState(&x, &y);
 
-			int numDisplays = SDL_GetNumVideoDisplays();
 			common->Printf("SDL detected %d displays: \n", numDisplays);
 			bool found = false;
 			for ( int j=0; j<numDisplays; ++j ) {
+		#if SDL_VERSION_ATLEAST(3, 0, 0)
+				SDL_DisplayID displayId_x = displayIDs[j];
+		#else // SDL2
+				int displayId_x = j;
+		#endif
 				SDL_Rect rect;
-				if (SDL_GetDisplayBounds(j, &rect) == 0) {
+				if (SDL_GetDisplayBounds(displayId_x, &rect) == 0) {
 					common->Printf(" %d: %dx%d at (%d, %d) to (%d, %d)\n", j, rect.w, rect.h,
 					               rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
 					if ( !found && x >= rect.x && x < rect.x + rect.w
 						&& y >= rect.y && y < rect.y + rect.h )
 					{
-						displayIndex = j;
+						selectedDisplay = j;
 						found = true;
 					}
 				}
 			}
-			common->Printf("Will use display %d because mouse cursor is at (%d, %d).\n",
-			               displayIndex, x, y);
+		#if SDL_VERSION_ATLEAST(3, 0, 0)
+			if(displayIDs != NULL) {
+				SDL_DisplayID displayID = displayIDs[selectedDisplay];
+				common->Printf("Will use display %u (%u) because mouse cursor is at (%g, %g).\n",
+				               selectedDisplay, displayID, x, y);
+				selectedDisplay = displayID;
+				SDL_free(displayIDs);
+			}
+		#else // SDL2
+			common->Printf("Will use display %u because mouse cursor is at (%d, %d).\n",
+			               selectedDisplay, x, y);
+		#endif
 		}
-#endif
+	#endif // SDL_VERSION_ATLEAST(2, 0, 4)
 
+	#if SDL_VERSION_ATLEAST(3, 0, 0)
+		SDL_PropertiesID props = SDL_CreateProperties();
+		SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, ENGINE_VERSION);
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_UNDEFINED_DISPLAY(selectedDisplay));
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_UNDEFINED_DISPLAY(selectedDisplay));
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, parms.width);
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, parms.height);
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, flags);
+		// TODO: the following is probably redundant with the flag already set
+		//if ( parms.fullScreen && parms.fullScreenDesktop ) {
+		//	SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, true);
+		//} // for exclusive fullscreen, create in windowed mode first, need to call
+
+		// TODO: SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, true);
+		//       as replacement for SDL_VIDEO_EGL_ALLOW_TRANSPARENCY - but when?
+		//       I don't want this on all platforms.. but can I already detect wayland at this point?
+		//   Also: recent mesa versions should have this fixed, so maybe ignore the issue for SDL3? what about nvidia?
+
+		window = SDL_CreateWindowWithProperties(props);
+		SDL_DestroyProperties(props);
+		if (window == NULL) {
+			common->Warning("Couldn't set GL mode %d/%d/%d with %dx MSAA: %s",
+							channelcolorbits, tdepthbits, tstencilbits, parms.multiSamples, SDL_GetError());
+
+			// before trying to reduce color channel size or whatever, first try reducing MSAA, if possible
+			if (multisamples > 1) {
+				multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
+
+				// using goto because enhancing that logic which reduces attributes
+				// based on i (so it'd first try reducing MSAA) would be too painful
+				goto try_again;
+			}
+
+			continue;
+		} else {
+			// creating the window succeeded, so adjust r_multiSamples to the value that was actually used
+			parms.multiSamples = multisamples;
+			r_multiSamples.SetInteger(multisamples);
+		}
+
+		// handle exclusive fullscreen mode
+		// TODO: just call GLimp_SetScreenParms() ?
+		if (parms.fullScreen && !parms.fullScreenDesktop) {
+			SDL_DisplayID displayID = SDL_GetDisplayForWindow( window );
+			SDL_DisplayMode mode = {};
+			if ( SDL_GetClosestFullscreenDisplayMode(displayID, parms.width, parms.height,
+			                                         parms.displayHz, true, &mode) )
+			{
+				if ( ! SDL_SetWindowFullscreenMode(window, &mode) ) {
+					common->Warning("Can't set window fullscreen mode: %s\n", SDL_GetError());
+					SDL_DestroyWindow(window);
+					window = NULL;
+					return false; // trying other color depth etc is unlikely to help with this issue
+				}
+
+				if ( ! SDL_SetWindowFullscreen(window, true) ) {
+					common->Warning("Can't switch window to fullscreen mode: %s\n", SDL_GetError());
+					SDL_DestroyWindow(window);
+					window = NULL;
+					return false; // trying other color depth etc is unlikely to help with this issue
+				}
+
+				if ( ! SDL_SyncWindow(window) ) {
+					common->Warning("SDL_SyncWindow() failed: %s\n", SDL_GetError());
+					SDL_DestroyWindow(window);
+					window = NULL;
+					return false; // trying other color depth etc is unlikely to help with this issue
+				}
+
+			} else {
+				common->Warning("Can't get display mode: %s\n", SDL_GetError());
+				SDL_DestroyWindow(window);
+				window = NULL;
+				return false; // trying other color depth etc is unlikely to help with this issue
+			}
+		}
+
+	#else // SDL2
 		window = SDL_CreateWindow(ENGINE_VERSION,
-									SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
-									SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
+									SDL_WINDOWPOS_UNDEFINED_DISPLAY(selectedDisplay),
+									SDL_WINDOWPOS_UNDEFINED_DISPLAY(selectedDisplay),
 									parms.width, parms.height, flags);
 
 		if (!window) {
@@ -364,8 +500,8 @@ try_again:
 				common->Warning("Current display mode isn't requested display mode\n");
 				common->Warning("Likely SDL bug #4700, trying to work around it..\n");
 				int dIdx = SDL_GetWindowDisplayIndex(window);
-				if(dIdx != displayIndex) {
-					common->Warning("Window's display index is %d, but we wanted %d!\n", dIdx, displayIndex);
+				if(dIdx != selectedDisplay) {
+					common->Warning("Window's display index is %d, but we wanted %d!\n", dIdx, selectedDisplay);
 				}
 
 				/* Mkay, try to hack around that. */
@@ -413,6 +549,7 @@ try_again:
 				common->Warning("Now we have the requested resolution (%d x %d)\n", parms.width, parms.height);
 			}
 		}
+	#endif // SDL2
 
 		context = SDL_GL_CreateContext(window);
 
@@ -424,7 +561,8 @@ try_again:
 
 		SetSDLIcon(); // for SDL2  this must be done after creating the window
 
-		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
+		// TODO: also check for fullscreen-desktop?
+		glConfig.isFullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
 		const char* fsStr = glConfig.isFullscreen ? "fullscreen " : "";
 		if ( (int)glConfig.winWidth != glConfig.vidWidth ) {
 			common->Printf( "Got a HighDPI %swindow with physical resolution %d x %d and virtual resolution %g x %g\n",
@@ -432,7 +570,7 @@ try_again:
 		} else {
 			common->Printf( "Got a %swindow with resolution %g x %g\n", fsStr, glConfig.winWidth, glConfig.winHeight );
 		}
-#else
+#else // SDL1.2 window creation
 		SDL_WM_SetCaption(ENGINE_VERSION, ENGINE_VERSION);
 
 		SetSDLIcon(); // for SDL1.2  this must be done before creating the window
@@ -654,6 +792,9 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 		}
 		SDL_RestoreWindow( window ); // make sure we're not maximized, then setting the size wouldn't work
 		SDL_SetWindowSize( window, parms.width, parms.height );
+  #if SDL_VERSION_ATLEAST(3, 0, 0)
+		SDL_SyncWindow( window );
+  #endif
 	} else { // we want some kind of fullscreen mode
 
 		// it's probably safest to first switch to windowed mode
@@ -661,6 +802,60 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 			SDL_SetWindowFullscreen( window, 0 );
 		}
 
+	#if SDL_VERSION_ATLEAST(3, 0, 0)
+		if ( wantFullscreenDesktop ) {
+			SDL_SetWindowFullscreenMode( window, NULL ); // setting it to NULL enables fullscreen desktop mode
+			SDL_SetWindowFullscreen( window, true );
+			// TODO: check return values
+
+			if ( ! SDL_SyncWindow( window ) ) {
+				common->Warning( "SDL_SyncWindow() failed: %s\n", SDL_GetError() );
+				//TODO: probably not SDL_DestroyWindow( window );
+				//window = NULL;
+				return false;
+			}
+		} else { // want real fullscreen
+			SDL_DisplayID displayID = SDL_GetDisplayForWindow( window );
+			SDL_DisplayMode mode = {};
+			if ( SDL_GetClosestFullscreenDisplayMode( displayID, parms.width, parms.height,
+			                                         parms.displayHz, true, &mode ) )
+			{
+				if ( ! SDL_SetWindowFullscreenMode( window, &mode ) ) {
+					common->Warning( "Can't set window fullscreen mode: %s\n", SDL_GetError() );
+					//TODO: probably not SDL_DestroyWindow( window );
+					//window = NULL;
+					return false;
+				}
+
+				if ( ! SDL_SetWindowFullscreen( window, true ) ) {
+					common->Warning( "Can't switch window to fullscreen mode: %s\n", SDL_GetError() );
+					//TODO: probably not SDL_DestroyWindow( window );
+					//window = NULL;
+					return false;
+				}
+
+				if ( ! SDL_SyncWindow( window ) ) {
+					common->Warning( "SDL_SyncWindow() failed: %s\n", SDL_GetError() );
+					//TODO: probably not SDL_DestroyWindow( window );
+					//window = NULL;
+					return false;
+				}
+
+			} else {
+				if ( parms.displayHz != 0 ) {
+					common->Warning( "Can't get display mode for %d x %d @ %dHz: %s\n", parms.width,
+					                 parms.height, parms.displayHz, SDL_GetError() );
+				} else {
+					common->Warning( "Can't get display mode for %d x %d: %s\n", parms.width,
+					                 parms.height, SDL_GetError() );
+				}
+				//TODO: probably not SDL_DestroyWindow( window );
+				//window = NULL;
+				return false;
+			}
+		}
+
+	#else // SDL2
 		if ( wantFullscreenDesktop ) {
 			if ( SDL_SetWindowFullscreen( window, SDL_WINDOW_FULLSCREEN_DESKTOP ) != 0 ) {
 				common->Warning( "GLimp_SetScreenParms(): Couldn't switch to fullscreen desktop mode, SDL error: %s\n", SDL_GetError() );
@@ -703,6 +898,7 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 				return false;
 			}
 		}
+	#endif // SDL2
 	}
 
 	glConfig.isFullscreen = (SDL_GetWindowFlags( window ) & SDL_WINDOW_FULLSCREEN) != 0;
@@ -732,10 +928,23 @@ glimpParms_t GLimp_GetCurState()
 	}
 	ret.multiSamples = curMultiSamples;
 
-	Uint32 winFlags = SDL_GetWindowFlags( window );
+	My_SDL_WindowFlags winFlags = SDL_GetWindowFlags( window );
 	ret.fullScreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	if (ret.fullScreen) {
+		const SDL_DisplayMode* fullscreenMode = SDL_GetWindowFullscreenMode( window );
+		if (fullscreenMode != NULL) {
+			ret.width = fullscreenMode->w;
+			ret.height = fullscreenMode->h;
+			ret.displayHz = fullscreenMode->refresh_rate;
+		} else {
+			// SDL_WINDOW_FULLSCREEN is set, but SDL_GetWindowFullscreenMode() returns NULL
+			// => fullscreen desktop mode
+			ret.fullScreenDesktop = true;
+		}
+	}
+#else // SDL2
 	ret.fullScreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
-
 	if ( ret.fullScreen && !ret.fullScreenDesktop ) { // I think SDL_GetWindowDisplayMode() is only for "real" fullscreen?
 		SDL_DisplayMode real_mode = {};
 		if ( SDL_GetWindowDisplayMode( window, &real_mode ) == 0 ) {
@@ -746,7 +955,9 @@ glimpParms_t GLimp_GetCurState()
 			common->Warning( "GLimp_GetCurState(): Can't get display mode: %s\n", SDL_GetError() );
 		}
 	}
-	if ( ret.width == 0 && ret.height == 0 ) { // windowed mode or SDL_GetWindowDisplayMode() failed
+#endif
+
+	if ( ret.width == 0 && ret.height == 0 ) { // windowed mode, fullscreen-desktop mode or SDL_GetWindowDisplayMode() failed
 		SDL_GetWindowSize( window, &ret.width, &ret.height );
 	}
 
@@ -797,11 +1008,14 @@ void GLimp_SwapBuffers() {
 #endif
 }
 
+// SDL3 doesn't support hardware gamma
+#if ! SDL_VERSION_ATLEAST(3, 0, 0)
 static bool gammaOrigError = false;
 static bool gammaOrigSet = false;
 static unsigned short gammaOrigRed[256];
 static unsigned short gammaOrigGreen[256];
 static unsigned short gammaOrigBlue[256];
+#endif
 
 /*
 =================
@@ -809,6 +1023,12 @@ GLimp_SetGamma
 =================
 */
 void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned short blue[256]) {
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	if ( ! r_gammaInShader.GetBool() ) {
+		common->Warning( "This build of dhewm3 uses SDL3, which does not support hardware gamma." );
+		common->Warning( "If you want to adjust gamma or brightness, enable r_gammaInShader" );
+	}
+#else // SDL2 and SDL1.2
 	if (!window) {
 		common->Warning("GLimp_SetGamma called without window");
 		return;
@@ -833,6 +1053,7 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 	if (SDL_SetGammaRamp(red, green, blue))
 #endif
 		common->Warning("Couldn't set gamma ramp: %s", SDL_GetError());
+#endif // SDL2 and SDL1.2
 }
 
 /*
@@ -843,6 +1064,7 @@ Restore original system gamma setting
 =================
 */
 void GLimp_ResetGamma() {
+#if ! SDL_VERSION_ATLEAST(3, 0, 0) // only for SDL2 and SDL1.2
 	if( gammaOrigError ) {
 		common->Warning( "Can't reset hardware gamma because getting the Gamma Ramp at startup failed!\n" );
 		common->Warning( "You might have to restart the game for gamma/brightness in shaders to work properly.\n" );
@@ -850,12 +1072,13 @@ void GLimp_ResetGamma() {
 	}
 
 	if( gammaOrigSet ) {
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+  #if SDL_VERSION_ATLEAST(2, 0, 0)
 		SDL_SetWindowGammaRamp( window, gammaOrigRed, gammaOrigGreen, gammaOrigBlue );
-#else
+  #else
 		SDL_SetGammaRamp( gammaOrigRed, gammaOrigGreen, gammaOrigBlue );
-#endif
+  #endif
 	}
+#endif // ! SDL_VERSION_ATLEAST(3, 0, 0)
 }
 
 
@@ -893,8 +1116,21 @@ void GLimp_GrabInput(int flags) {
 		common->Warning("GLimp_GrabInput called without window");
 		return;
 	}
-
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	if (flags & GRAB_HIDECURSOR) {
+		SDL_HideCursor();
+	} else {
+		SDL_ShowCursor();
+	}
+	SDL_SetWindowRelativeMouseMode( window, (flags & GRAB_RELATIVEMOUSE) != 0 );
+	if (flags & GRAB_GRABMOUSE) {
+		SDL_SetWindowMouseGrab( window, true );
+		SDL_SetWindowKeyboardGrab( window, in_grabKeyboard.GetBool() );
+	} else {
+		SDL_SetWindowMouseGrab( window, false );
+		SDL_SetWindowKeyboardGrab( window, false );
+	}
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_ShowCursor( (flags & GRAB_HIDECURSOR) ? SDL_DISABLE : SDL_ENABLE );
 	SDL_SetRelativeMouseMode( (flags & GRAB_RELATIVEMOUSE) ? SDL_TRUE : SDL_FALSE );
 	SDL_SetWindowGrab( window, (flags & GRAB_GRABMOUSE) ? SDL_TRUE : SDL_FALSE );
@@ -909,7 +1145,11 @@ void GLimp_GrabInput(int flags) {
 bool GLimp_SetSwapInterval( int swapInterval )
 {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+  #if SDL_VERSION_ATLEAST(3, 0, 0)
+	if ( ! SDL_GL_SetSwapInterval( swapInterval ) ) {
+  #elif SDL_VERSION_ATLEAST(2, 0, 0)
 	if ( SDL_GL_SetSwapInterval( swapInterval ) < 0 ) {
+  #endif
 		common->Warning( "SDL_GL_SetSwapInterval( %d ) not supported", swapInterval );
 		return false;
 	}
@@ -922,7 +1162,10 @@ bool GLimp_SetSwapInterval( int swapInterval )
 
 bool GLimp_SetWindowResizable( bool enableResizable )
 {
-#if SDL_VERSION_ATLEAST(2, 0, 5)
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	SDL_SetWindowResizable( window, enableResizable );
+	return true;
+#elif SDL_VERSION_ATLEAST(2, 0, 5)
 	SDL_SetWindowResizable( window, (SDL_bool)enableResizable );
 	return true;
 #else
@@ -934,7 +1177,18 @@ bool GLimp_SetWindowResizable( bool enableResizable )
 void GLimp_UpdateWindowSize()
 {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	Uint32 winFlags = SDL_GetWindowFlags( window );
+	My_SDL_WindowFlags winFlags = SDL_GetWindowFlags( window );
+
+  #if SDL_VERSION_ATLEAST(3, 0, 0)
+	SDL_GetWindowSizeInPixels( window, &glConfig.vidWidth, &glConfig.vidHeight );
+
+	const SDL_DisplayMode* fullscreenMode = SDL_GetWindowFullscreenMode( window );
+	if ( (winFlags & SDL_WINDOW_FULLSCREEN) != 0 && fullscreenMode != NULL) {
+		glConfig.winWidth = fullscreenMode->w;
+		glConfig.winHeight = fullscreenMode->h;
+	}
+  #else // SDL2
+	SDL_GL_GetDrawableSize( window, &glConfig.vidWidth, &glConfig.vidHeight );
 	if ( (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN ) {
 		// real fullscreen mode => must use SDL_GetWindowDisplayMode()
 		// TODO: well, theoretically SDL_GetWindowSize() should work for fullscreen mode as well,
@@ -951,13 +1205,13 @@ void GLimp_UpdateWindowSize()
 		} else {
 			common->Warning( "GLimp_UpdateWindowSize(): SDL_GetWindowDisplayMode() failed: %s\n", SDL_GetError() );
 		}
-
-	} else {
+	}
+  #endif // SDL2
+	  else {
 		int ww=0, wh=0;
 		SDL_GetWindowSize( window, &ww, &wh );
 		glConfig.winWidth = ww;
 		glConfig.winHeight = wh;
 	}
-	SDL_GL_GetDrawableSize( window, &glConfig.vidWidth, &glConfig.vidHeight );
 #endif
 }
