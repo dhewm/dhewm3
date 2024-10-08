@@ -749,7 +749,11 @@ try_again:
 		glConfig.haveDebugContext = false;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		int cflags = 0;
+	#if SDL_VERSION_ATLEAST(3, 0, 0)
+		if ( SDL_GL_GetAttribute( SDL_GL_CONTEXT_FLAGS, &cflags ) ) {
+	#else // SDL2
 		if ( SDL_GL_GetAttribute( SDL_GL_CONTEXT_FLAGS, &cflags ) == 0 ) {
+	#endif
 			glConfig.haveDebugContext = (cflags & SDL_GL_CONTEXT_DEBUG_FLAG) != 0;
 			if ( glConfig.haveDebugContext )
 				common->Printf( "Got a debug context!\n" );
@@ -935,19 +939,19 @@ glimpParms_t GLimp_GetCurState()
 	glimpParms_t ret = {};
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+	My_SDL_WindowFlags winFlags = SDL_GetWindowFlags( window );
+	ret.fullScreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
 	int curMultiSamples = 0;
-	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) == 0 && curMultiSamples > 0 ) {
-		if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) != 0 ) {
+
+  #if SDL_VERSION_ATLEAST(3, 0, 0)
+	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) && curMultiSamples > 0 ) {
+		if ( ! SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) ) {
 			curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
 		}
 	} else {
 		curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
 	}
-	ret.multiSamples = curMultiSamples;
 
-	My_SDL_WindowFlags winFlags = SDL_GetWindowFlags( window );
-	ret.fullScreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
-#if SDL_VERSION_ATLEAST(3, 0, 0)
 	if (ret.fullScreen) {
 		const SDL_DisplayMode* fullscreenMode = SDL_GetWindowFullscreenMode( window );
 		if (fullscreenMode != NULL) {
@@ -960,7 +964,15 @@ glimpParms_t GLimp_GetCurState()
 			ret.fullScreenDesktop = true;
 		}
 	}
-#else // SDL2
+  #else // SDL2
+	if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &curMultiSamples ) == 0 && curMultiSamples > 0 ) {
+		if ( SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &curMultiSamples ) != 0 ) {
+			curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+		}
+	} else {
+		curMultiSamples = 0; // SDL_GL_GetAttribute() call failed, assume no MSAA
+	}
+
 	ret.fullScreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
 	if ( ret.fullScreen && !ret.fullScreenDesktop ) { // I think SDL_GetWindowDisplayMode() is only for "real" fullscreen?
 		SDL_DisplayMode real_mode = {};
@@ -972,7 +984,9 @@ glimpParms_t GLimp_GetCurState()
 			common->Warning( "GLimp_GetCurState(): Can't get display mode: %s\n", SDL_GetError() );
 		}
 	}
-#endif
+  #endif
+
+	ret.multiSamples = curMultiSamples;
 
 	if ( ret.width == 0 && ret.height == 0 ) { // windowed mode, fullscreen-desktop mode or SDL_GetWindowDisplayMode() failed
 		SDL_GetWindowSize( window, &ret.width, &ret.height );
