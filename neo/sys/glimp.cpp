@@ -429,7 +429,8 @@ try_again:
 			r_multiSamples.SetInteger(multisamples);
 		}
 
-		// handle exclusive fullscreen mode
+		// handle exclusive fullscreen mode (windowed mode and fullscreen
+		//  desktop were set when creating the window)
 		// TODO: just call GLimp_SetScreenParms() ?
 		if (parms.fullScreen && !parms.fullScreenDesktop) {
 			SDL_DisplayID displayID = SDL_GetDisplayForWindow( window );
@@ -450,20 +451,19 @@ try_again:
 					window = NULL;
 					return false; // trying other color depth etc is unlikely to help with this issue
 				}
-
-				if ( ! SDL_SyncWindow(window) ) {
-					common->Warning("SDL_SyncWindow() failed: %s\n", SDL_GetError());
-					SDL_DestroyWindow(window);
-					window = NULL;
-					return false; // trying other color depth etc is unlikely to help with this issue
-				}
-
 			} else {
 				common->Warning("Can't get display mode: %s\n", SDL_GetError());
 				SDL_DestroyWindow(window);
 				window = NULL;
 				return false; // trying other color depth etc is unlikely to help with this issue
 			}
+		}
+
+		if ( ! SDL_SyncWindow(window) ) {
+			common->Warning("SDL_SyncWindow() failed: %s\n", SDL_GetError());
+			SDL_DestroyWindow(window);
+			window = NULL;
+			return false; // trying other color depth etc is unlikely to help with this issue
 		}
 
 	#else // SDL2
@@ -797,7 +797,13 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 	}
 
 	if ( !parms.fullScreen ) { // we want windowed mode
-		if ( curState.fullScreen && SDL_SetWindowFullscreen( window, 0 ) != 0 ) {
+		if ( curState.fullScreen &&
+	#if SDL_VERSION_ATLEAST(3, 0, 0)
+			SDL_SetWindowFullscreen( window, 0 ) == false
+	#else
+			SDL_SetWindowFullscreen( window, 0 ) != 0
+	#endif
+		) {
 			common->Warning( "GLimp_SetScreenParms(): Couldn't switch to windowed mode, SDL error: %s\n", SDL_GetError() );
 			return false;
 		}
