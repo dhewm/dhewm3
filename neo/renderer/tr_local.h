@@ -1073,7 +1073,7 @@ typedef struct {
 	bool		fullScreen;
 	bool		fullScreenDesktop;
 	bool		stereo;
-	int			displayHz;
+	int			displayHz; // TODO: SDL3 uses float
 	int			multiSamples;
 } glimpParms_t;
 

@@ -152,8 +152,6 @@ If you have questions concerning this license or the applicable additional terms
 
   #define IS_SDL_BTN_DOWN(EV)  EV.down
 
-  // FIXME: at some point I need to enable (and possibly later disable) SDL_TextInput!
-
 #else // SDL2 and SDL1.2
 
   #define IS_SDL_BTN_DOWN(EV)  (EV.state == SDL_PRESSED)
@@ -1209,7 +1207,9 @@ sysEvent_t Sys_GetEvent() {
 	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	// s used to have SDL_TEXTINPUTEVENT_TEXT_SIZE (32) bytes, but in SDL3 the string can have
+	// s holds the string from the last SDL_TEXTINPUT event, to generate SE_CHARS D3 events,
+	// one event per call to this function until all chars have been handled
+	// it used to have SDL_TEXTINPUTEVENT_TEXT_SIZE (32) bytes, but in SDL3 the string can have
 	// arbitrary size, however I assume that 128 should still be more than enough
 	static char s[128] = {0};
 	static size_t s_pos = 0;
@@ -1229,6 +1229,9 @@ sysEvent_t Sys_GetEvent() {
 	}
 #endif
 
+	// c holds a single char for a SE_CHAR event, probably coming from a SDL_KEYDOWN event
+	// (that was also returned as SE_KEY), or from a SDL_TEXTINPUT event that contained just one char.
+	// It's 0 when not currently holding a char to generate an event
 	static byte c = 0;
 
 	if (c) {
@@ -1421,6 +1424,7 @@ sysEvent_t Sys_GetEvent() {
 			if (ev.key.state == SDL_PRESSED && (ev.key.keysym.unicode & 0xff00) == 0)
 				c = ev.key.keysym.unicode & 0xff;
 #endif
+			// Note: c will be sent as SE_CHAR next time this function is called
 
 			return res;
 
@@ -1440,7 +1444,9 @@ sysEvent_t Sys_GetEvent() {
 						memcpy( s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE );
 						s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = '\0';
 	#endif
-						s_pos = 1; // pos 0 is returned
+						// pos 0 is returned, the rest of s is returned as SE_CHAR events
+						// at the next times this function is called
+						s_pos = 1;
 					}
 					return res;
 				} else if( D3_UTF8toISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
@@ -1449,7 +1455,9 @@ sysEvent_t Sys_GetEvent() {
 						s_pos = 0;
 						s[0] = '\0';
 					} else {
-						s_pos = 1; // pos 0 is returned
+						// pos 0 is returned, the rest of s is returned as SE_CHAR events
+						// at the next times this function is called
+						s_pos = 1;
 					}
 					return res;
 				}
