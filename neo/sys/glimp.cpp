@@ -47,7 +47,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 #include "sys/win32/win_local.h"
-#include <SDL_syswm.h>
+
+// SDL3 doesn't have SDL_syswm.h
+#if ! SDL_VERSION_ATLEAST(3, 0, 0)
+  #include <SDL_syswm.h>
+#endif
 
 // from SDL_windowsopengl.h (internal SDL2 header)
 #ifndef WGL_ARB_pixel_format
@@ -632,6 +636,13 @@ try_again:
 		// then we know we are win32 and we have to include this
 		// config to get the editors to work.
 
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+		HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+		HDC hdc = (HDC)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WIN32_HDC_POINTER, NULL);
+		if ( hwnd && hdc ) {
+			win32.hWnd = hwnd;
+			win32.hDC = hdc;
+#else // SDL2
 		// Get the HWND for later use.
 		SDL_SysWMinfo sdlinfo;
 		SDL_version sdlver;
@@ -640,6 +651,7 @@ try_again:
 		if (SDL_GetWindowWMInfo(window, &sdlinfo) && sdlinfo.subsystem == SDL_SYSWM_WINDOWS) {
 			win32.hWnd = sdlinfo.info.win.window;
 			win32.hDC = sdlinfo.info.win.hdc;
+#endif
 			// NOTE: hInstance is set in main()
 			win32.hGLRC = qwglGetCurrentContext();
 

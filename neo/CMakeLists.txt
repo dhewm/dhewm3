@@ -1181,8 +1181,12 @@ elseif(WIN32)
 		sys/win32/win_net.cpp
 		sys/win32/win_shared.cpp
 		sys/win32/win_syscon.cpp
-		sys/win32/SDL_win32_main.c
 	)
+
+	if(NOT SDL2 AND NOT SDL3)
+		# only SDL1.2 still uses SDL_win32_main.c
+		set(src_sys_base ${src_sys_base} sys/win32/SDL_win32_main.c)
+	endif()
 
 	# adding the few relevant headers in sys/ manually..
 	set(src_sys_base ${src_sys_base}
