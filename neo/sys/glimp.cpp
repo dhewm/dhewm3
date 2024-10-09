@@ -219,20 +219,25 @@ bool GLimp_Init(glimpParms_t parms) {
 	 * rendering bugs (the window is partly transparent or very white in areas with low alpha).
 	 * Mesa introduced an EGL extension that's supposed to fix that (EGL_EXT_present_opaque)
 	 * and newer SDL2 versions use it by default (in the Wayland backend).
-	 * Unfortunately, the implementation of that extension is (currently?) broken (at least
-	 * in Mesa), seems like they just give you a visual without any alpha chan - which doesn't
+	 * Unfortunately, the implementation of that extension was broken (at least in Mesa before 24.1),
+	 * seems like they just give you a visual without any alpha chan - which doesn't
 	 * work for Doom3, as it needs a functioning alpha chan for blending operations, see above.
 	 * See also: https://gitlab.freedesktop.org/mesa/mesa/-/issues/5886
 	 *
 	 * So to make sure dhewm3 (finally) works as expected on Wayland, we tell SDL2 to
 	 * allow transparency and then fill the alpha-chan ourselves in RB_SwapBuffers()
-	 * (unless the user disables that with r_fillWindowAlphaChan 0) */
+	 * (unless the user disables that with r_fillWindowAlphaChan 0)
+	 *
+	 * NOTE: This bug is fixed in Mesa 24.1 and newer, and doesn't seem to occur with recent
+	 *       NVIDIA drivers either, so for SDL3 (which should be mostly used with current drivers/mesa)
+	 *       I don't enable this hack by default. If r_fillWindowAlphaChan == 1, it's enabled
+	 *       when creating the window, though.
+	 */
   #ifdef SDL_HINT_VIDEO_EGL_ALLOW_TRANSPARENCY
 	SDL_SetHint(SDL_HINT_VIDEO_EGL_ALLOW_TRANSPARENCY, "1");
   #elif SDL_MAJOR_VERSION == 2 // little hack so this works if the SDL2 version used for building is older than runtime version
 	SDL_SetHint("SDL_VIDEO_EGL_ALLOW_TRANSPARENCY", "1");
   #endif
-	// Note: for SDL3 we use SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN below
 #endif
 
 	int colorbits = 24;
@@ -401,15 +406,17 @@ try_again:
 		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, parms.width);
 		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, parms.height);
 		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, flags);
-		// TODO: the following is probably redundant with the flag already set
-		//if ( parms.fullScreen && parms.fullScreenDesktop ) {
-		//	SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, true);
-		//} // for exclusive fullscreen, create in windowed mode first, need to call
 
-		// TODO: SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, true);
-		//       as replacement for SDL_VIDEO_EGL_ALLOW_TRANSPARENCY - but when?
-		//       I don't want this on all platforms.. but can I already detect wayland at this point?
-		//   Also: recent mesa versions should have this fixed, so maybe ignore the issue for SDL3? what about nvidia?
+		// See above for the big comment about Wayland and alpha channels.
+		// When using SDL3 I assume that people usually won't be affected by this bug,
+		// because it's fixed in recent Mesa versions (and also works with the NVIDIA driver).
+		// However, with `r_fillWindowAlphaChan 1` its usage can still be enforced
+		// on Unix-like platforms (I don't think there's a point in this on Windows or Mac)
+	  #if defined(__unix__) && !defined(__APPLE__)
+		if ( cvarSystem->GetCVarInteger( "r_fillWindowAlphaChan" ) == 1 ) {
+			SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, true);
+		}
+	  #endif
 
 		window = SDL_CreateWindowWithProperties(props);
 		SDL_DestroyProperties(props);
@@ -753,7 +760,9 @@ try_again:
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		const char* videoDriver = SDL_GetCurrentVideoDriver();
 		if (idStr::Icmp(videoDriver, "wayland") == 0) {
+	#if SDL_MAJOR_VERSION == 2 // don't enable this hack by default with SDL3
 			glConfig.shouldFillWindowAlpha = true;
+	#endif
 			glConfig.isWayland = true;
 		}
 #endif

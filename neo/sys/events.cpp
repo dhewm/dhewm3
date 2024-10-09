@@ -152,8 +152,6 @@ If you have questions concerning this license or the applicable additional terms
 
   #define IS_SDL_BTN_DOWN(EV)  EV.down
 
-  // FIXME: at some point I need to enable (and possibly later disable) SDL_TextInput!
-
 #else // SDL2 and SDL1.2
 
   #define IS_SDL_BTN_DOWN(EV)  (EV.state == SDL_PRESSED)

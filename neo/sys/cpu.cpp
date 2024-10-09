@@ -30,9 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef D3_SDL3
   #include <SDL3/SDL_cpuinfo.h>
-  // in SDL3, SDL_Has3DNow() has been removed, and nowadays it's not really relevant anyway,
-  // so just replace it with 0/false
-  #define SDL_Has3DNow() 0
 #else // SDL1.2 or SDL2
   #include <SDL_cpuinfo.h>
 #endif
@@ -208,8 +205,11 @@ int Sys_GetProcessorId( void ) {
 	if (SDL_HasMMX())
 		flags |= CPUID_MMX;
 
+	// SDL3 doesn't support detecting 3DNow, and current CPUs (even from AMD) don't support it either
+#ifndef D3_SDL3
 	if (SDL_Has3DNow())
 		flags |= CPUID_3DNOW;
+#endif
 
 	if (SDL_HasSSE())
 		flags |= CPUID_SSE;
