@@ -190,6 +190,7 @@ private:
 	void						Event_IsClient( void );
 	void						Event_IsMultiplayer( void );
 	void						Event_GetFrameTime( void );
+	void						Event_GetRawFrameTime( void ); // DG: for com_gameHz (returns frametime, unlike getFrameTime() *not* scaled for slowmo)
 	void						Event_GetTicsPerSecond( void );
 	void						Event_CacheSoundShader( const char *soundName );
 	void						Event_DebugLine( const idVec3 &color, const idVec3 &start, const idVec3 &end, const float lifetime );

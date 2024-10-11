@@ -186,7 +186,11 @@ monsterMoveResult_t idPhysics_Monster::StepMove( idVec3 &start, idVec3 &velocity
 	// try to move at the stepped up position
 	stepPos = tr.endpos;
 	stepVel = velocity;
-	result2 = SlideMove( stepPos, stepVel, delta );
+	// DG: this hack allows monsters to climb stairs at high framerates
+	//     the tr.fraction < 1.0 check should prevent monsters from sliding faster when not
+	//     actually on stairs (when climbing stairs it's apparently 1.0)
+	idVec3 fixedDelta = delta * ( tr.fraction < 1.0f ? 1.0f : gameLocal.gameTicScale );
+	result2 = SlideMove( stepPos, stepVel, fixedDelta );
 	if ( result2 == MM_BLOCKED ) {
 		start = noStepPos;
 		velocity = noStepVel;
