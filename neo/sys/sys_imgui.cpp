@@ -1,7 +1,19 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
-#include <SDL.h>
+#include "sys_sdl.h"
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+  // compat with SDL2
+  #define SDL_TEXTINPUT SDL_EVENT_TEXT_INPUT
+  #define SDL_CONTROLLERAXISMOTION SDL_EVENT_GAMEPAD_AXIS_MOTION
+  #define SDL_CONTROLLERBUTTONDOWN SDL_EVENT_GAMEPAD_BUTTON_DOWN
+  #define SDL_MOUSEBUTTONDOWN SDL_EVENT_MOUSE_BUTTON_DOWN
+  #define SDL_MOUSEMOTION SDL_EVENT_MOUSE_MOTION
+  #define SDL_MOUSEWHEEL SDL_EVENT_MOUSE_WHEEL
+  #define SDL_KEYDOWN SDL_EVENT_KEY_DOWN
+#endif
+
 
 #include "sys_imgui.h"
 
@@ -13,7 +25,20 @@ typedef char* (*MY_XGETDEFAULTFUN)(Display*, const char*, const char*);
 #endif
 
 #include "../libs/imgui/backends/imgui_impl_opengl2.h"
-#include "../libs/imgui/backends/imgui_impl_sdl2.h"
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+  #include "../libs/imgui/backends/imgui_impl_sdl3.h"
+  #define ImGui_ImplSDLx_InitForOpenGL ImGui_ImplSDL3_InitForOpenGL
+  #define ImGui_ImplSDLx_Shutdown ImGui_ImplSDL3_Shutdown
+  #define ImGui_ImplSDLx_NewFrame ImGui_ImplSDL3_NewFrame
+  #define ImGui_ImplSDLx_ProcessEvent ImGui_ImplSDL3_ProcessEvent
+#else
+  #include "../libs/imgui/backends/imgui_impl_sdl2.h"
+  #define ImGui_ImplSDLx_InitForOpenGL ImGui_ImplSDL2_InitForOpenGL
+  #define ImGui_ImplSDLx_Shutdown ImGui_ImplSDL2_Shutdown
+  #define ImGui_ImplSDLx_NewFrame ImGui_ImplSDL2_NewFrame
+  #define ImGui_ImplSDLx_ProcessEvent ImGui_ImplSDL2_ProcessEvent
+#endif
 
 #include "framework/Common.h"
 #include "framework/KeyInput.h"
@@ -145,7 +170,7 @@ void ShowWarningOverlay( const char* text )
 	warningOverlayStartPos = ImGui::GetMousePos();
 }
 
-
+#if SDL_MAJOR_VERSION == 2 // not used with SDL3
 static float GetDefaultDPI()
 {
 	SDL_Window* win = sdlWindow;
@@ -185,6 +210,7 @@ static float GetDefaultDPI()
 	}
 	return dpi;
 }
+#endif // SDL2-only
 
 static float GetDefaultScale()
 {
@@ -192,8 +218,13 @@ static float GetDefaultScale()
 		// in HighDPI mode, the font sizes are already scaled (to window coordinates), apparently
 		return 1.0f;
 	}
+
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	float ret = SDL_GetWindowDisplayScale( sdlWindow );
+#else
 	// TODO: different reference DPI on mac? also, doesn't work that well on my laptop..
 	float ret = GetDefaultDPI() / 96.0f;
+#endif
 	ret = round(ret*2.0)*0.5; // round to .0 or .5
 	return ret;
 }
@@ -250,7 +281,7 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	imgui_scale.SetModified(); // so NewFrame() will load the scaled font
 
 	// Setup Platform/Renderer backends
-	if ( ! ImGui_ImplSDL2_InitForOpenGL( sdlWindow, sdlGlContext ) ) {
+	if ( ! ImGui_ImplSDLx_InitForOpenGL( sdlWindow, sdlGlContext ) ) {
 		ImGui::DestroyContext( imguiCtx );
 		imguiCtx = NULL;
 		common->Warning( "Failed to initialize ImGui SDL platform backend!\n" );
@@ -258,7 +289,7 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	}
 
 	if ( ! ImGui_ImplOpenGL2_Init() ) {
-		ImGui_ImplSDL2_Shutdown();
+		ImGui_ImplSDLx_Shutdown();
 		ImGui::DestroyContext( imguiCtx );
 		imguiCtx = NULL;
 		common->Warning( "Failed to initialize ImGui OpenGL renderer backend!\n" );
@@ -302,7 +333,7 @@ void Shutdown()
 
 		// TODO: only if init was successful!
 		ImGui_ImplOpenGL2_Shutdown();
-		ImGui_ImplSDL2_Shutdown();
+		ImGui_ImplSDLx_Shutdown();
 		ImGui::DestroyContext( imguiCtx );
 		imgui_initialized = false;
 	}
@@ -345,7 +376,7 @@ void NewFrame()
 	else
 		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
-	ImGui_ImplSDL2_NewFrame();
+	ImGui_ImplSDLx_NewFrame();
 	ImGui::NewFrame();
 	haveNewFrame = true;
 
@@ -379,7 +410,7 @@ bool ProcessEvent(const void* sdlEvent)
 	//   - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
 	//   Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 
-	bool imguiUsedEvent = ImGui_ImplSDL2_ProcessEvent( ev );
+	bool imguiUsedEvent = ImGui_ImplSDLx_ProcessEvent( ev );
 	if ( keybindModeEnabled ) {
 		// in keybind mode, all input events are passed to Doom3 so it can translate them
 		// to internal events and we can access and use them to create a new binding
@@ -424,7 +455,11 @@ bool ProcessEvent(const void* sdlEvent)
 					return true;
 				case SDL_KEYDOWN:
 				//case SDL_KEYUP: NOTE: see above why key up events are passed to the engine
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+					if ( ev->key.key < SDLK_F1 || ev->key.key > SDLK_F12) {
+#else
 					if ( ev->key.keysym.sym < SDLK_F1 || ev->key.keysym.sym > SDLK_F12) {
+#endif
 						// F1 - F12 are passed to the engine so its shortcuts
 						// (like quickload or screenshot) still work
 						// Doom3's menu does the same

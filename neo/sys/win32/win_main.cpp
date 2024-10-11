@@ -53,7 +53,15 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tools/edit_public.h"
 
-#include <SDL_main.h>
+#include "sys/sys_sdl.h"
+
+#ifdef D3_SDL3
+  #define SDL_MAIN_HANDLED // dhewm3 implements WinMain() itself
+  #include <SDL3/SDL_main.h>
+#else // SDL1.2 or SDL2
+  #include <SDL_main.h>
+#endif
+
 
 idCVar Win32Vars_t::win_outputDebugString( "win_outputDebugString", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_outputEditString( "win_outputEditString", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
@@ -1001,14 +1009,154 @@ int Win_ChoosePixelFormat(HDC hdc)
 }
 #endif
 
+// stdout/stderr redirection, originally from SDL_win32_main.c
+
+/* The standard output files */
+#define STDOUT_FILE	TEXT("dhewm3log.txt") /* DG: renamed this */
+#define STDERR_FILE	TEXT("stderr.txt")
+
+/* Set a variable to tell if the stdio redirect has been enabled. */
+static int stdioRedirectEnabled = 0;
+static char stdoutPath[MAX_PATH];
+static char stderrPath[MAX_PATH];
+#define DIR_SEPERATOR TEXT("/")
+
+
+/* Remove the output files if there was no output written */
+static void cleanup_output(void) {
+	FILE *file;
+	int empty;
+
+	/* Flush the output in case anything is queued */
+	fclose(stdout);
+	fclose(stderr);
+
+	/* Without redirection we're done */
+	if (!stdioRedirectEnabled) {
+		return;
+	}
+
+	/* See if the files have any output in them */
+	if ( stdoutPath[0] ) {
+		file = fopen(stdoutPath, TEXT("rb"));
+		if ( file ) {
+			empty = (fgetc(file) == EOF) ? 1 : 0;
+			fclose(file);
+			if ( empty ) {
+				remove(stdoutPath);
+			}
+		}
+	}
+	if ( stderrPath[0] ) {
+		file = fopen(stderrPath, TEXT("rb"));
+		if ( file ) {
+			empty = (fgetc(file) == EOF) ? 1 : 0;
+			fclose(file);
+			if ( empty ) {
+				remove(stderrPath);
+			}
+		}
+	}
+}
+
+/* Redirect the output (stdout and stderr) to a file */
+static void redirect_output(void)
+{
+	char path[MAX_PATH];
+	struct _stat st;
+
+	/* DG: use "My Documents/My Games/dhewm3" to write stdout.txt and stderr.txt
+	*     instead of the binary, which might not be writable */
+	Win_GetHomeDir(path, sizeof(path));
+
+	if (_stat(path, &st) == -1) {
+		/* oops, "My Documents/My Games/dhewm3" doesn't exist - does My Games/ at least exist? */
+		char myGamesPath[MAX_PATH];
+		char* lastslash;
+		memcpy(myGamesPath, path, MAX_PATH);
+		lastslash = strrchr(myGamesPath, '/');
+		if (lastslash != NULL) {
+			*lastslash = '\0';
+		}
+		if (_stat(myGamesPath, &st) == -1) {
+			/* if My Documents/My Games/ doesn't exist, create it */
+			_mkdir(myGamesPath);
+		}
+
+		_mkdir(path); /* create My Documents/My Games/dhewm3/ */
+	}
+
+	FILE *newfp;
+
+#if 0 /* DG: don't do this anymore. */
+	DWORD pathlen;
+	pathlen = GetModuleFileName(NULL, path, SDL_arraysize(path));
+	while ( pathlen > 0 && path[pathlen] != '\\' ) {
+		--pathlen;
+	}
+	path[pathlen] = '\0';
+#endif
+
+	SDL_strlcpy( stdoutPath, path, SDL_arraysize(stdoutPath) );
+	SDL_strlcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE, SDL_arraysize(stdoutPath) );
+
+	{ /* DG: rename old stdout log */
+		char stdoutPathBK[MAX_PATH];
+		SDL_strlcpy( stdoutPathBK, path, SDL_arraysize(stdoutPath) );
+		SDL_strlcat( stdoutPathBK, DIR_SEPERATOR TEXT("dhewm3log-old.txt"), SDL_arraysize(stdoutPath) );
+		rename( stdoutPath, stdoutPathBK );
+	} /* DG end */
+
+	  /* Redirect standard input and standard output */
+	newfp = freopen(stdoutPath, TEXT("w"), stdout);
+
+	if ( newfp == NULL ) {	/* This happens on NT */
+#if !defined(stdout)
+		stdout = fopen(stdoutPath, TEXT("w"));
+#else
+		newfp = fopen(stdoutPath, TEXT("w"));
+		if ( newfp ) {
+			*stdout = *newfp;
+		}
+#endif
+	}
+
+	SDL_strlcpy( stderrPath, path, SDL_arraysize(stderrPath) );
+	SDL_strlcat( stderrPath, DIR_SEPERATOR STDERR_FILE, SDL_arraysize(stderrPath) );
+
+	newfp = freopen(stderrPath, TEXT("w"), stderr);
+	if ( newfp == NULL ) {	/* This happens on NT */
+#if !defined(stderr)
+		stderr = fopen(stderrPath, TEXT("w"));
+#else
+		newfp = fopen(stderrPath, TEXT("w"));
+		if ( newfp ) {
+			*stderr = *newfp;
+		}
+#endif
+	}
+
+	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);	/* Line buffered */
+	setbuf(stderr, NULL);			/* No buffering */
+	stdioRedirectEnabled = 1;
+}
+
+// end of stdout/stderr redirection code from old SDL
+
 /*
 ==================
-WinMain
+The pseudo-main function called from real main (either in SDL_win32_main.c or WinMain() below)
+NOTE: Currently argv[] are ANSI strings, not UTF-8 strings as usual in SDL2 and SDL3!
 ==================
 */
-int main(int argc, char *argv[]) {
-	// SDL_win32_main.c creates the dhewm3log.txt and redirects stdout into it
-	// so here we can log its (approx.) creation time before anything else is logged:
+int SDL_main(int argc, char *argv[]) {
+	// as the very first thing, redirect stdout to dhewm3log.txt (and stderr to stderr.txt)
+	// so we can log
+	redirect_output();
+	atexit(cleanup_output);
+
+	// now that stdout is redirected to dhewm3log.txt,
+	// log its (approx.) creation time before anything else is logged:
 	{
 		time_t tt = time(NULL);
 		const struct tm* tms = localtime(&tt);
@@ -1016,8 +1164,6 @@ int main(int argc, char *argv[]) {
 		strftime(timeStr, sizeof(timeStr), "%F %H:%M:%S", tms);
 		printf("Opened this log at %s\n", timeStr);
 	}
-
-	const HCURSOR hcurSave = ::SetCursor( LoadCursor( 0, IDC_WAIT ) );
 
 	InitializeCriticalSection( &printfCritSect );
 
@@ -1064,8 +1210,6 @@ int main(int argc, char *argv[]) {
 	// give the main thread an affinity for the first cpu
 	SetThreadAffinityMask( GetCurrentThread(), 1 );
 #endif
-
-	// ::SetCursor( hcurSave ); // DG: I think SDL handles the cursor fine..
 
 	// Launch the script debugger
 	if ( strstr( GetCommandLine(), "+debugger" ) ) {
@@ -1204,3 +1348,80 @@ void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 	}
 }
+
+// the actual WinMain(), based on SDL2_main and SDL3's SDL_main_impl.h + SDL_RunApp()
+// but modified to pass ANSI strings to SDL_main() instead of UTF-8,
+// because dhewm3 doesn't use Unicode internally (except for Dear ImGui,
+// which doesn't use commandline arguments)
+// for SDL1.2, SDL_win32_main.c is still used instead
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+
+/* Pop up an out of memory message, returns to Windows */
+static BOOL OutOfMemory(void)
+{
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", "Out of memory - aborting", NULL);
+	return -1;
+}
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
+{
+	(void)hInst;
+	(void)hPrev;
+	(void)szCmdLine;
+	(void)sw;
+
+	LPWSTR *argvw;
+	char **argv;
+	int i, argc, result;
+
+	argvw = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (!argvw) {
+		return OutOfMemory();
+	}
+
+	/* Note that we need to be careful about how we allocate/free memory here.
+	* If the application calls SDL_SetMemoryFunctions(), we can't rely on
+	* SDL_free() to use the same allocator after SDL_main() returns.
+	*/
+
+	/* Parse it into argv and argc */
+	argv = (char **)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (argc + 1) * sizeof(*argv));
+	if (!argv) {
+		return OutOfMemory();
+	}
+	for (i = 0; i < argc; ++i) {
+		// NOTE: SDL2+ uses CP_UTF8 instead of CP_ACP here (and in the other call below)
+		//       but Doom3 needs ANSI strings on Windows (so paths work with the Windows ANSI APIs)
+		const int ansiSize = WideCharToMultiByte(CP_ACP, 0, argvw[i], -1, NULL, 0, NULL, NULL);
+		if (!ansiSize) {  // uhoh?
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", "Error processing command line arguments", NULL);
+			return -1;
+		}
+
+		argv[i] = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, ansiSize);  // this size includes the null-terminator character.
+		if (!argv[i]) {
+			return OutOfMemory();
+		}
+
+		if (WideCharToMultiByte(CP_ACP, 0, argvw[i], -1, argv[i], ansiSize, NULL, NULL) == 0) {  // failed? uhoh!
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", "Error processing command line arguments", NULL);
+			return -1;
+		}
+	}
+	argv[i] = NULL;
+	LocalFree(argvw);
+
+	SDL_SetMainReady();
+
+	// Run the application main() code
+	result = SDL_main(argc, argv);
+
+	// Free argv, to avoid memory leak
+	for (i = 0; i < argc; ++i) {
+		HeapFree(GetProcessHeap(), 0, argv[i]);
+	}
+	HeapFree(GetProcessHeap(), 0, argv);
+
+	return result;
+}
+#endif

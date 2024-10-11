@@ -10,7 +10,15 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-#include "SDL.h"
+#ifdef D3_SDL3
+  #include <SDL3/SDL.h>
+  // as SDL.h doesn't implicitly include SDL_main.h anymore,
+  // declare SDL_main() here. I think it's the only part of SDL_main.h we used,
+  // we implement it in DOOMController.mm an call it here in applicationDidFinishLaunching
+  extern "C" int SDL_main( int argc, char *argv[] );
+#else // SDL2 and SDL1.2
+  #include "SDL.h"
+#endif
 #include "SDLMain.h"
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
