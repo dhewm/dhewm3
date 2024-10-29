@@ -4,7 +4,7 @@
  *
  * Hosted at https://github.com/DanielGibson/Snippets/
  *
- * Written for/tested with Dear ImGui v1.90.8 (incl. Docking Branch)
+ * Written for/tested with Dear ImGui v1.91.4 (incl. Docking Branch)
  *
  * If anything changes in struct ImGuiStyle or enum ImGuiCol_, this code should detect it
  * during compilation and give (hopefully) helpful errors with static_assert() (always check and
@@ -208,7 +208,7 @@ namespace DG {
 	D3_IMSTYLE_COLOR( TextLink              ) \
 	D3_IMSTYLE_COLOR( TextSelectedBg        ) \
 	D3_IMSTYLE_COLOR( DragDropTarget        ) \
-	D3_IMSTYLE_COLOR( NavHighlight          ) \
+	D3_IMSTYLE_COLOR( NavCursor             ) \
 	D3_IMSTYLE_COLOR( NavWindowingHighlight ) \
 	D3_IMSTYLE_COLOR( NavWindowingDimBg     ) \
 	D3_IMSTYLE_COLOR( ModalWindowDimBg      )
@@ -309,9 +309,10 @@ struct ImGuiColorBackwardCompat {
 };
 
 static struct ImGuiColorBackwardCompat backwardCompatColorMappings[] = {
-	{ "TabActive",                    ImGuiCol_TabSelected },
-	{ "TabUnfocused",                 ImGuiCol_TabDimmed },
-	{ "TabUnfocusedActive",           ImGuiCol_TabDimmedSelected },
+	{ "TabActive",                    ImGuiCol_TabSelected },       // renamed in 1.90.9
+	{ "TabUnfocused",                 ImGuiCol_TabDimmed },         // renamed in 1.90.9
+	{ "TabUnfocusedActive",           ImGuiCol_TabDimmedSelected }, // renamed in 1.90.9
+	{ "NavHighlight",                 ImGuiCol_NavCursor },      // renamed in 1.91.4
 };
 
 } //anon namespace
@@ -330,11 +331,6 @@ static void parseColorLine( ImGuiStyle& s, const char* line )
 
 #undef D3_IMSTYLE_COLOR
 
-	// NOTE: here backwards-compat is also possible, like
-	// if ( sscanf( line, "OldColorName = %f , %f , %f , %f", &c.x, &c.y, &c.z, &c.w) == 4 ) {
-	//     s.Colors[ ImGuiCol_NewColorName ] = c;
-	//     return;
-	// }
 	for( const ImGuiColorBackwardCompat& bc : backwardCompatColorMappings ) {
 		char matchString[64];
 		snprintf( matchString, sizeof(matchString), "%s = %%f , %%f , %%f , %%f", bc.oldColorStr );
