@@ -35,7 +35,32 @@ If you have questions concerning this license or the applicable additional terms
 #include <unistd.h>
 #endif
 
-#include <SDL_endian.h>
+#ifdef D3_SDL3
+  #include <SDL3/SDL_endian.h>
+  // some defines for backwards-compat with SDL2
+  #define SDL_SwapBE16(X)  SDL_Swap16BE(X)
+  #define SDL_SwapLE16(X)  SDL_Swap16LE(X)
+  #define SDL_SwapBE32(X)  SDL_Swap32BE(X)
+  #define SDL_SwapLE32(X)  SDL_Swap32LE(X)
+#else // SDL1.2 or SDL2
+  #include <SDL_endian.h>
+#endif
+
+#ifndef D3_IS_BIG_ENDIAN
+  #error "D3_IS_BIG_ENDIAN should be defined by the build system (CMake)!"
+#endif
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  #if D3_IS_BIG_ENDIAN != 1
+    #error "CMake (which sets D3_IS_BIG_ENDIAN) and SDL disagree about the endianess! CMake says little, SDL says big"
+  #endif
+#elif SDL_BYTEORDER == SDL_LIL_ENDIAN
+  #if D3_IS_BIG_ENDIAN != 0
+    #error "CMake (which sets D3_IS_BIG_ENDIAN) and SDL disagree about the endianess! CMake says big, SDL says little"
+  #endif
+#else
+  #error "According to SDL, endianess is neither Big nor Little - dhewm3 doesn't support other byteorders!"
+#endif
 
 #include "sys/platform.h"
 #include "idlib/math/Vector.h"

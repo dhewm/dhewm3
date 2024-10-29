@@ -49,7 +49,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/posix/posix_public.h"
 
-#include <SDL.h> // clipboard
+// SDL.h for clipboard:
+#include "sys/sys_sdl.h"
+
 
 #define					COMMAND_HISTORY 64
 

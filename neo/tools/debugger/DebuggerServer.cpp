@@ -41,6 +41,14 @@ If you have questions concerning this license or the applicable additional terms
 const int MAX_MSGLEN = 8600;
 #endif
 
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+  // compat with SDL2
+  #define SDL_CreateCond SDL_CreateCondition
+  #define SDL_DestroyCond SDL_DestroyCondition
+  #define SDL_CondWait SDL_WaitCondition
+  #define SDL_CondSignal SDL_SignalCondition
+#endif
+
 /*
 ================
 rvDebuggerServer::rvDebuggerServer

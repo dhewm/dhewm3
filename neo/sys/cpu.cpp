@@ -28,7 +28,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <float.h>
 
-#include <SDL_cpuinfo.h>
+#ifdef D3_SDL3
+  #include <SDL3/SDL_cpuinfo.h>
+#else // SDL1.2 or SDL2
+  #include <SDL_cpuinfo.h>
+#endif
 
 // MSVC header intrin.h uses strcmp and errors out when not set
 #define IDSTR_NO_REDIRECT
@@ -201,8 +205,11 @@ int Sys_GetProcessorId( void ) {
 	if (SDL_HasMMX())
 		flags |= CPUID_MMX;
 
+	// SDL3 doesn't support detecting 3DNow, and current CPUs (even from AMD) don't support it either
+#ifndef D3_SDL3
 	if (SDL_Has3DNow())
 		flags |= CPUID_3DNOW;
+#endif
 
 	if (SDL_HasSSE())
 		flags |= CPUID_SSE;

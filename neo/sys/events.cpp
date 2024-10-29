@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <SDL.h>
+#include "sys/sys_sdl.h"
 
 #include "sys/platform.h"
 #include "idlib/containers/List.h"
@@ -61,6 +61,103 @@ If you have questions concerning this license or the applicable additional terms
 #define SDLK_PRINTSCREEN SDLK_PRINT
 #endif
 
+// unholy hacks to make it work with SDL3 (and also SDL2 and partly SDL1.2)
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+  // in SDL3 SDL_GetKeyFromScancode() got additional arguments that I don't care about
+  #define SDL_GetKeyFromScancode(SC)  SDL_GetKeyFromScancode(SC, 0, true)
+
+  #define SDLK_z SDLK_Z
+
+  #define SDL_TEXTINPUT SDL_EVENT_TEXT_INPUT
+  #define SDL_KEYDOWN SDL_EVENT_KEY_DOWN
+  #define SDL_KEYUP SDL_EVENT_KEY_UP
+
+  #define SDL_USEREVENT SDL_EVENT_USER
+  #define SDL_QUIT SDL_EVENT_QUIT
+
+  #define SDL_MOUSEBUTTONDOWN SDL_EVENT_MOUSE_BUTTON_DOWN
+  #define SDL_MOUSEBUTTONUP SDL_EVENT_MOUSE_BUTTON_UP
+  #define SDL_MOUSEMOTION SDL_EVENT_MOUSE_MOTION
+  #define SDL_MOUSEWHEEL SDL_EVENT_MOUSE_WHEEL
+
+  #define SDL_JoystickGUID SDL_GUID
+  #define SDL_JoystickGetGUID SDL_GetJoystickGUID
+  #define SDL_JoystickName SDL_GetJoystickName
+  #define SDL_JoystickGetGUIDString SDL_GUIDToString
+
+  #define SDL_JOYDEVICEADDED SDL_EVENT_JOYSTICK_ADDED
+  #define SDL_JOYDEVICEREMOVED SDL_EVENT_JOYSTICK_REMOVED
+
+  // game controllers have been renamed to gamepads and the
+  // corresponding SDL_Event members are now prefixed with g instead of c
+  #define cbutton gbutton
+  #define caxis gaxis
+
+  #define SDL_GameController SDL_Gamepad
+  #define SDL_GameControllerAxis SDL_GamepadAxis
+  #define SDL_GameControllerButton SDL_GamepadButton
+
+  #define SDL_GameControllerGetType SDL_GetGamepadType
+  #define SDL_GameControllerName SDL_GetGamepadName
+  #define SDL_GameControllerGetJoystick SDL_GetGamepadJoystick
+  #define SDL_GameControllerGetVendor SDL_GetGamepadVendor
+  #define SDL_GameControllerGetProduct SDL_GetGamepadProduct
+  #define SDL_GameControllerOpen SDL_OpenGamepad
+
+  #define SDL_CONTROLLERAXISMOTION SDL_EVENT_GAMEPAD_AXIS_MOTION
+  #define SDL_CONTROLLERBUTTONDOWN SDL_EVENT_GAMEPAD_BUTTON_DOWN
+  #define SDL_CONTROLLERBUTTONUP SDL_EVENT_GAMEPAD_BUTTON_UP
+
+  #define SDL_CONTROLLER_AXIS_LEFTX SDL_GAMEPAD_AXIS_LEFTX
+  #define SDL_CONTROLLER_AXIS_LEFTY SDL_GAMEPAD_AXIS_LEFTY
+  #define SDL_CONTROLLER_AXIS_MAX SDL_GAMEPAD_AXIS_MAX
+  #define SDL_CONTROLLER_AXIS_RIGHTX SDL_GAMEPAD_AXIS_RIGHTX
+  #define SDL_CONTROLLER_AXIS_RIGHTY SDL_GAMEPAD_AXIS_RIGHTY
+  #define SDL_CONTROLLER_AXIS_TRIGGERLEFT SDL_GAMEPAD_AXIS_LEFT_TRIGGER
+  #define SDL_CONTROLLER_AXIS_TRIGGERRIGHT SDL_GAMEPAD_AXIS_RIGHT_TRIGGER
+  #define SDL_CONTROLLER_BUTTON_A SDL_GAMEPAD_BUTTON_SOUTH
+  #define SDL_CONTROLLER_BUTTON_B SDL_GAMEPAD_BUTTON_EAST
+  #define SDL_CONTROLLER_BUTTON_X SDL_GAMEPAD_BUTTON_WEST
+  #define SDL_CONTROLLER_BUTTON_Y SDL_GAMEPAD_BUTTON_NORTH
+  #define SDL_CONTROLLER_BUTTON_BACK SDL_GAMEPAD_BUTTON_BACK
+  #define SDL_CONTROLLER_BUTTON_DPAD_DOWN SDL_GAMEPAD_BUTTON_DPAD_DOWN
+  #define SDL_CONTROLLER_BUTTON_DPAD_LEFT SDL_GAMEPAD_BUTTON_DPAD_LEFT
+  #define SDL_CONTROLLER_BUTTON_DPAD_RIGHT SDL_GAMEPAD_BUTTON_DPAD_RIGHT
+  #define SDL_CONTROLLER_BUTTON_DPAD_UP SDL_GAMEPAD_BUTTON_DPAD_UP
+  #define SDL_CONTROLLER_BUTTON_GUIDE SDL_GAMEPAD_BUTTON_GUIDE
+  #define SDL_CONTROLLER_BUTTON_INVALID SDL_GAMEPAD_BUTTON_INVALID
+  #define SDL_CONTROLLER_BUTTON_LEFTSHOULDER SDL_GAMEPAD_BUTTON_LEFT_SHOULDER
+  #define SDL_CONTROLLER_BUTTON_LEFTSTICK SDL_GAMEPAD_BUTTON_LEFT_STICK
+  #define SDL_CONTROLLER_BUTTON_MISC1 SDL_GAMEPAD_BUTTON_MISC1
+  #define SDL_CONTROLLER_BUTTON_PADDLE1 SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1
+  #define SDL_CONTROLLER_BUTTON_PADDLE2 SDL_GAMEPAD_BUTTON_LEFT_PADDLE1
+  #define SDL_CONTROLLER_BUTTON_PADDLE3 SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2
+  #define SDL_CONTROLLER_BUTTON_PADDLE4 SDL_GAMEPAD_BUTTON_LEFT_PADDLE2
+  #define SDL_CONTROLLER_BUTTON_RIGHTSHOULDER SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER
+  #define SDL_CONTROLLER_BUTTON_RIGHTSTICK SDL_GAMEPAD_BUTTON_RIGHT_STICK
+  #define SDL_CONTROLLER_BUTTON_START SDL_GAMEPAD_BUTTON_START
+  #define SDL_CONTROLLER_BUTTON_TOUCHPAD SDL_GAMEPAD_BUTTON_TOUCHPAD
+
+  #define SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT
+  #define SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR
+  #define SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT
+  #define SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO
+  #define SDL_CONTROLLER_TYPE_PS3 SDL_GAMEPAD_TYPE_PS3
+  #define SDL_CONTROLLER_TYPE_PS4 SDL_GAMEPAD_TYPE_PS4
+  #define SDL_CONTROLLER_TYPE_PS5 SDL_GAMEPAD_TYPE_PS5
+  #define SDL_CONTROLLER_TYPE_UNKNOWN SDL_GAMEPAD_TYPE_STANDARD
+  #define SDL_CONTROLLER_TYPE_VIRTUAL SDL_GAMEPAD_TYPE_VIRTUAL
+  #define SDL_CONTROLLER_TYPE_XBOX360 SDL_GAMEPAD_TYPE_XBOX360
+  #define SDL_CONTROLLER_TYPE_XBOXONE SDL_GAMEPAD_TYPE_XBOXONE
+
+  #define IS_SDL_BTN_DOWN(EV)  EV.down
+
+#else // SDL2 and SDL1.2
+
+  #define IS_SDL_BTN_DOWN(EV)  (EV.state == SDL_PRESSED)
+
+#endif // SDL_VERSION_ATLEAST(3, 0, 0) - unholy hacks
+
 extern idCVar in_useGamepad; // from UsercmdGen.cpp
 extern idCVar joy_deadZone;  // ditto
 
@@ -78,7 +175,7 @@ static idCVar in_ignoreConsoleKey("in_ignoreConsoleKey", "0", CVAR_SYSTEM | CVAR
 		"Console only opens with Shift+Esc, not ` or ^ etc");
 
 static idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing");
-static idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
+idCVar in_grabKeyboard("in_grabKeyboard", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_BOOL,
 		"if enabled, grabs all keyboard input if mouse is grabbed (so keyboard shortcuts from the OS like Alt-Tab or Windows Key won't work)");
 
 idCVar joy_gamepadLayout("joy_gamepadLayout", "-1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT | CVAR_INTEGER,
@@ -100,7 +197,7 @@ struct kbd_poll_t {
 	int key;
 	bool state;
 
-	kbd_poll_t() {
+	kbd_poll_t() : key(0), state(false) {
 	}
 
 	kbd_poll_t(int k, bool s) {
@@ -113,7 +210,7 @@ struct mouse_poll_t {
 	int action;
 	int value;
 
-	mouse_poll_t() {
+	mouse_poll_t() : action(0), value(0) {
 	}
 
 	mouse_poll_t(int a, int v) {
@@ -269,10 +366,11 @@ const char* Sys_GetLocalizedJoyKeyName( int key ) {
 	if (key >= K_FIRST_JOY && key <= K_LAST_JOY) {
 
 		if (key <= K_JOY_BTN_BACK) {
-#if SDL_VERSION_ATLEAST(3, 0, 0)
+#if 0 //SDL_VERSION_ATLEAST(3, 0, 0)
 			// TODO: or use the SDL2 code and just set joy_gamepadLayout automatically based on SDL_GetGamepadType() ?
-			SDL_GamepadButton gpbtn = SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_SOUTH);
-			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabelForType(TODO, gpbtn);
+			SDL_GamepadButton gpbtn = (SDL_GamepadButton)(SDL_GAMEPAD_BUTTON_SOUTH + (key - K_JOY_BTN_SOUTH));
+			SDL_GamepadType sdlGamepadType = TODO;
+			SDL_GamepadButtonLabel label = SDL_GetGamepadButtonLabelForType(sdlGamepadType, gpbtn);
 			switch(label) {
 				case SDL_GAMEPAD_BUTTON_LABEL_A:
 					return "Pad A";
@@ -421,13 +519,14 @@ static const char* getLocalizedScancodeName( int key, bool useUtf8 )
 			}
 		} else if ( k != SDLK_UNKNOWN ) {
 			const char *ret = SDL_GetKeyName( k );
-			// the keyname from SDL2 is in UTF-8, which Doom3 can't print,
-			// so only return the name if it's ASCII, otherwise fall back to "SC_bla"
 			if ( ret && *ret != '\0' ) {
 				if( useUtf8 ) {
 					return ret;
 				}
 
+				// the keyname from SDL2 is in UTF-8, which Doom3 can't print (except with ImGui),
+				// so only return the name directly if it's ASCII, otherwise try to translate it
+				// to ISO8859-1, and if that fails fall back to SC_*
 				if( isAscii( ret ) ) {
 					return ret;
 				}
@@ -844,7 +943,8 @@ void Sys_InitInput() {
 	in_kbd.SetModified();
 	Sys_GetConsoleKey(false); // initialize consoleKeymappingIdx from in_kbd
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	const char* grabKeyboardEnv = SDL_getenv(SDL_HINT_GRAB_KEYBOARD);
+	// NOTE: SDL3 doesn't support that hint/env var, but whatever, support the env var anyway
+	const char* grabKeyboardEnv = SDL_getenv("SDL_GRAB_KEYBOARD");
 	if ( grabKeyboardEnv ) {
 		common->Printf( "The SDL_GRAB_KEYBOARD environment variable is set, setting the in_grabKeyboard CVar to the same value (%s)\n", grabKeyboardEnv );
 		in_grabKeyboard.SetString( grabKeyboardEnv );
@@ -861,7 +961,19 @@ void Sys_InitInput() {
 	memset( buttonStates, 0, sizeof( buttonStates ) );
 	memset( joyAxis, 0, sizeof( joyAxis ) );
 
-#if SDL_VERSION_ATLEAST(2, 0, 0) // gamecontroller/gamepad not supported in SDL1
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	int numJoysticks = 0;
+	SDL_JoystickID* joysticks = SDL_GetJoysticks(&numJoysticks);
+	for( int i = 0; i < numJoysticks; ++i )
+	{
+		SDL_GameController* gc = SDL_GameControllerOpen( joysticks[i] );
+		if ( gc != NULL ) {
+			setGamepadType( gc );
+		}
+	}
+	SDL_free(joysticks);
+
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
 	// use button positions instead of button labels,
 	// Sys_GetLocalizedJoyKeyName() will do the translation
 	// (I think this also was the default before 2.0.12?)
@@ -875,7 +987,7 @@ void Sys_InitInput() {
 			setGamepadType( gc );
 		}
 	}
-#endif
+#endif // gamecontroller/gamepad not supported in SDL1
 }
 
 /*
@@ -1082,6 +1194,7 @@ sysEvent_t Sys_GetEvent() {
 	SDL_Event ev;
 	sysEvent_t res = { };
 	int key;
+	bool isDown = false;
 
 	static const sysEvent_t res_none = { SE_NONE, 0, 0, 0, NULL };
 
@@ -1094,7 +1207,11 @@ sysEvent_t Sys_GetEvent() {
 	}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	static char s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
+	// s holds the string from the last SDL_TEXTINPUT event, to generate SE_CHARS D3 events,
+	// one event per call to this function until all chars have been handled
+	// it used to have SDL_TEXTINPUTEVENT_TEXT_SIZE (32) bytes, but in SDL3 the string can have
+	// arbitrary size, however I assume that 128 should still be more than enough
+	static char s[128] = {0};
 	static size_t s_pos = 0;
 
 	if (s[0] != '\0') {
@@ -1103,7 +1220,7 @@ sysEvent_t Sys_GetEvent() {
 
 		++s_pos;
 
-		if (!s[s_pos] || s_pos == SDL_TEXTINPUTEVENT_TEXT_SIZE) {
+		if (!s[s_pos] || s_pos == sizeof(s)) {
 			memset(s, 0, sizeof(s));
 			s_pos = 0;
 		}
@@ -1112,6 +1229,9 @@ sysEvent_t Sys_GetEvent() {
 	}
 #endif
 
+	// c holds a single char for a SE_CHAR event, probably coming from a SDL_KEYDOWN event
+	// (that was also returned as SE_KEY), or from a SDL_TEXTINPUT event that contained just one char.
+	// It's 0 when not currently holding a char to generate an event
 	static byte c = 0;
 
 	if (c) {
@@ -1131,7 +1251,35 @@ sysEvent_t Sys_GetEvent() {
 		}
 
 		switch (ev.type) {
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+			case SDL_EVENT_WINDOW_FOCUS_GAINED: {
+					// unset modifier, in case alt-tab was used to leave window and ALT is still set
+					// as that can cause fullscreen-toggling when pressing enter...
+					SDL_Keymod currentmod = SDL_GetModState();
+
+					int newmod = SDL_KMOD_NONE;
+					if (currentmod & SDL_KMOD_CAPS) // preserve capslock
+						newmod |= SDL_KMOD_CAPS;
+
+					SDL_SetModState((SDL_Keymod)newmod);
+				} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
+
+				in_hasFocus = true;
+
+				// start playing the game sound world again (when coming from editor)
+				session->SetPlayingSoundWorld();
+				continue; // handle next event
+
+			case SDL_EVENT_WINDOW_FOCUS_LOST:
+				in_hasFocus = false;
+				continue; // handle next event
+
+			case SDL_EVENT_WINDOW_RESIZED:
+			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+				GLimp_UpdateWindowSize();
+				continue;  // handle next event
+
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
 		case SDL_WINDOWEVENT:
 			switch (ev.window.event) {
 				case SDL_WINDOWEVENT_FOCUS_GAINED: {
@@ -1146,7 +1294,6 @@ sysEvent_t Sys_GetEvent() {
 						SDL_SetModState((SDL_Keymod)newmod);
 					} // new context because visual studio complains about newmod and currentmod not initialized because of the case SDL_WINDOWEVENT_FOCUS_LOST
 
-					
 					in_hasFocus = true;
 
 					// start playing the game sound world again (when coming from editor)
@@ -1188,7 +1335,11 @@ sysEvent_t Sys_GetEvent() {
 #endif
 
 		case SDL_KEYDOWN:
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+			if (ev.key.key == SDLK_RETURN && (ev.key.mod & SDL_KMOD_ALT) > 0) {
+#else
 			if (ev.key.keysym.sym == SDLK_RETURN && (ev.key.keysym.mod & KMOD_ALT) > 0) {
+#endif
 				cvarSystem->SetCVarBool("r_fullscreen", !renderSystem->IsFullScreen());
 				PushConsoleEvent("vid_restart partial");
 				return res_none;
@@ -1196,7 +1347,7 @@ sysEvent_t Sys_GetEvent() {
 
 			// fall through
 		case SDL_KEYUP:
-#if !SDL_VERSION_ATLEAST(2, 0, 0)
+#if !SDL_VERSION_ATLEAST(2, 0, 0) // SDL1.2
 			key = mapkey(ev.key.keysym.sym);
 			if (!key) {
 				if ( !in_ignoreConsoleKey.GetBool() ) {
@@ -1213,12 +1364,18 @@ sysEvent_t Sys_GetEvent() {
 					continue; // handle next event
 				}
 			}
-#else
+#else // SDL2+
 		{
+	#if SDL_VERSION_ATLEAST(3, 0, 0)
+			SDL_Scancode sc = ev.key.scancode;
+			SDL_Keycode keycode = ev.key.key;
+	#else // SDL2
+			SDL_Scancode sc = ev.key.keysym.scancode;
+			SDL_Keycode keycode = ev.key.keysym.sym;
+	#endif
 			// workaround for AZERTY-keyboards, which don't have 1, 2, ..., 9, 0 in first row:
 			// always map those physical keys (scancodes) to those keycodes anyway
 			// see also https://bugzilla.libsdl.org/show_bug.cgi?id=3188
-			SDL_Scancode sc = ev.key.keysym.scancode;
 			if(sc == SDL_SCANCODE_0)
 			{
 				key = '0';
@@ -1232,10 +1389,10 @@ sysEvent_t Sys_GetEvent() {
 			}
 			else
 			{
-				key = mapkey(ev.key.keysym.sym);
+				key = mapkey(keycode);
 			}
 
-			if ( !in_ignoreConsoleKey.GetBool() && ev.key.keysym.scancode == SDL_SCANCODE_GRAVE ) {
+			if ( !in_ignoreConsoleKey.GetBool() && sc == SDL_SCANCODE_GRAVE ) {
 				// that key between Esc, Tab and 1 is the console key
 				key = K_CONSOLE;
 			}
@@ -1245,27 +1402,29 @@ sysEvent_t Sys_GetEvent() {
 				key = getKeynumForSDLscancode(sc);
 				if(!key) {
 					if (ev.type == SDL_KEYDOWN) {
-						common->Warning("unmapped SDL key %d (scancode %d)", ev.key.keysym.sym, (int)sc);
+						common->Warning("unmapped SDL key %d (scancode %d)", keycode, (int)sc);
 					}
 					continue; // handle next event
 				}
 			}
 		}
 #endif
+			isDown = IS_SDL_BTN_DOWN( ev.key );
 
 			res.evType = SE_KEY;
 			res.evValue = key;
-			res.evValue2 = ev.key.state == SDL_PRESSED ? 1 : 0;
+			res.evValue2 = isDown;
 
-			kbd_polls.Append(kbd_poll_t(key, ev.key.state == SDL_PRESSED));
+			kbd_polls.Append( kbd_poll_t( key, isDown ) );
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-			if (key == K_BACKSPACE && ev.key.state == SDL_PRESSED)
+			if (key == K_BACKSPACE && isDown)
 				c = key;
 #else
 			if (ev.key.state == SDL_PRESSED && (ev.key.keysym.unicode & 0xff00) == 0)
 				c = ev.key.keysym.unicode & 0xff;
 #endif
+			// Note: c will be sent as SE_CHAR next time this function is called
 
 			return res;
 
@@ -1277,8 +1436,17 @@ sysEvent_t Sys_GetEvent() {
 				if ( isAscii(ev.text.text) ) {
 					res.evValue = ev.text.text[0];
 					if ( ev.text.text[1] != '\0' ) {
+	#if SDL_VERSION_ATLEAST(3, 0, 0)
+						// yes, it's ok if this is not 0-terminated, the code generating
+						// events from s handles that
+						strncpy(s, ev.text.text, sizeof(s));
+	#else // SDL2
 						memcpy( s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE );
-						s_pos = 1; // pos 0 is returned
+						s[SDL_TEXTINPUTEVENT_TEXT_SIZE] = '\0';
+	#endif
+						// pos 0 is returned, the rest of s is returned as SE_CHAR events
+						// at the next times this function is called
+						s_pos = 1;
 					}
 					return res;
 				} else if( D3_UTF8toISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
@@ -1287,17 +1455,15 @@ sysEvent_t Sys_GetEvent() {
 						s_pos = 0;
 						s[0] = '\0';
 					} else {
-						s_pos = 1; // pos 0 is returned
+						// pos 0 is returned, the rest of s is returned as SE_CHAR events
+						// at the next times this function is called
+						s_pos = 1;
 					}
 					return res;
 				}
 			}
 
 			continue; // handle next event
-
-		case SDL_TEXTEDITING:
-			// on windows we get this event whenever the window gains focus.. just ignore it.
-			continue;
 #endif
 
 		case SDL_MOUSEMOTION:
@@ -1335,20 +1501,21 @@ sysEvent_t Sys_GetEvent() {
 
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
+			isDown = IS_SDL_BTN_DOWN(ev.button);
 			res.evType = SE_KEY;
 
 			switch (ev.button.button) {
 			case SDL_BUTTON_LEFT:
 				res.evValue = K_MOUSE1;
-				mouse_polls.Append(mouse_poll_t(M_ACTION1, ev.button.state == SDL_PRESSED ? 1 : 0));
+				mouse_polls.Append(mouse_poll_t(M_ACTION1, isDown));
 				break;
 			case SDL_BUTTON_MIDDLE:
 				res.evValue = K_MOUSE3;
-				mouse_polls.Append(mouse_poll_t(M_ACTION3, ev.button.state == SDL_PRESSED ? 1 : 0));
+				mouse_polls.Append(mouse_poll_t(M_ACTION3, isDown));
 				break;
 			case SDL_BUTTON_RIGHT:
 				res.evValue = K_MOUSE2;
-				mouse_polls.Append(mouse_poll_t(M_ACTION2, ev.button.state == SDL_PRESSED ? 1 : 0));
+				mouse_polls.Append(mouse_poll_t(M_ACTION2, isDown));
 				break;
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
@@ -1370,14 +1537,14 @@ sysEvent_t Sys_GetEvent() {
 				{
 					int buttonIndex = ev.button.button - SDL_BUTTON_LEFT;
 					res.evValue = K_MOUSE1 + buttonIndex;
-					mouse_polls.Append( mouse_poll_t( M_ACTION1 + buttonIndex, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
+					mouse_polls.Append( mouse_poll_t( M_ACTION1 + buttonIndex, isDown ) );
 				}
 				else
 #endif
 				continue; // handle next event
 			}
 
-			res.evValue2 = ev.button.state == SDL_PRESSED ? 1 : 0;
+			res.evValue2 = isDown;
 
 			return res;
 
@@ -1390,8 +1557,10 @@ sysEvent_t Sys_GetEvent() {
 				continue;
 			}
 
+			isDown = IS_SDL_BTN_DOWN(ev.cbutton);
+
 			res.evType = SE_KEY;
-			res.evValue2 = ev.cbutton.state == SDL_PRESSED ? 1 : 0;
+			res.evValue2 = isDown;
 
 			// special case: always treat the start button as escape so it opens/closes the menu
 			// (also makes that button non-bindable)
@@ -1410,7 +1579,7 @@ sysEvent_t Sys_GetEvent() {
 			}
 
 			sys_jEvents jEvent =  mapjoybutton( (SDL_GameControllerButton)ev.cbutton.button );
-			joystick_polls.Append( joystick_poll_t(jEvent, ev.cbutton.state == SDL_PRESSED ? 1 : 0) );
+			joystick_polls.Append( joystick_poll_t(jEvent, isDown) );
 
 			if ( ( jEvent >= J_ACTION_FIRST ) && ( jEvent <= J_ACTION_MAX ) ) {
 				res.evValue = K_FIRST_JOY + ( jEvent - J_ACTION_FIRST );
@@ -1571,9 +1740,12 @@ static void handleMouseGrab() {
 	bool showCursor = true;
 	bool grabMouse = false;
 	bool relativeMouse = false;
+	bool enableTextInput = false;
+
+	const bool imguiHasFocus = D3::ImGuiHooks::ShouldShowCursor();
 
 	// if com_editorActive, release everything, just like when we have no focus
-	if ( in_hasFocus && !com_editorActive && !D3::ImGuiHooks::ShouldShowCursor() ) {
+	if ( in_hasFocus && !com_editorActive && !imguiHasFocus ) {
 		// Note: this generally handles fullscreen menus, but not the PDA, because the PDA
 		//       is an ugly hack in gamecode that doesn't go through sessLocal.guiActive.
 		//       It goes through weapon input code or sth? That's also the reason only
@@ -1585,9 +1757,11 @@ static void handleMouseGrab() {
 			showCursor = false;
 			relativeMouse = false;
 			grabMouse = false; // TODO: or still grab to window? (maybe only if in exclusive fullscreen mode?)
+			enableTextInput = true;
 		} else if ( console->Active() ) {
 			showCursor = true;
 			relativeMouse = grabMouse = false;
+			enableTextInput = true;
 		} else { // in game
 			showCursor = false;
 			grabMouse = relativeMouse = true;
@@ -1603,6 +1777,10 @@ static void handleMouseGrab() {
 		}
 	} else {
 		in_relativeMouseMode = false;
+		// if an ImGui window has focus, enable text input so one can write in there
+		// TODO: add explicit GRAB_DISABLETEXTINPUT and don't set it at all here for ImGui?
+		//  in theory, ImGui handles that itself, but currently GLimp_GrabInput() seems to override it
+		enableTextInput = imguiHasFocus;
 	}
 
 	int flags = 0;
@@ -1612,6 +1790,8 @@ static void handleMouseGrab() {
 		flags |= GRAB_GRABMOUSE;
 	if ( relativeMouse )
 		flags |= GRAB_RELATIVEMOUSE;
+	if ( enableTextInput )
+		flags |= GRAB_ENABLETEXTINPUT;
 
 	GLimp_GrabInput( flags );
 }
@@ -1630,7 +1810,8 @@ void Sys_GenerateEvents() {
 	if (s)
 		PushConsoleEvent(s);
 
-#ifndef ID_DEDICATED // doesn't make sense on dedicated server
+	// doesn't make sense on dedicated server and SDL3 handles this in GLimp_GrabInput()
+#if !defined(ID_DEDICATED) && ! SDL_VERSION_ATLEAST(3, 0, 0)
 	if ( in_grabKeyboard.IsModified() ) {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		SDL_SetHint( SDL_HINT_GRAB_KEYBOARD, in_grabKeyboard.GetString() );
