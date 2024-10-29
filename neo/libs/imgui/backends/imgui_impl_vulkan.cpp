@@ -4,14 +4,7 @@
 // Implemented features:
 //  [!] Renderer: User texture binding. Use 'VkDescriptorSet' as ImTextureID. Read the FAQ about ImTextureID! See https://github.com/ocornut/imgui/pull/914 for discussions.
 //  [X] Renderer: Large meshes support (64k+ vertices) with 16-bit indices.
-
-// Important: on 32-bit systems, user texture binding is only supported if your imconfig file has '#define ImTextureID ImU64'.
-// This is because we need ImTextureID to carry a 64-bit value and by default ImTextureID is defined as void*.
-// To build this on 32-bit systems and support texture changes:
-// - [Solution 1] IDE/msbuild: in "Properties/C++/Preprocessor Definitions" add 'ImTextureID=ImU64' (this is what we do in our .vcxproj files)
-// - [Solution 2] IDE/msbuild: in "Properties/C++/Preprocessor Definitions" add 'IMGUI_USER_CONFIG="my_imgui_config.h"' and inside 'my_imgui_config.h' add '#define ImTextureID ImU64' and as many other options as you like.
-// - [Solution 3] IDE/msbuild: edit imconfig.h and add '#define ImTextureID ImU64' (prefer solution 2 to create your own config file!)
-// - [Solution 4] command-line: add '/D ImTextureID=ImU64' to your cl.exe command-line (this is what we do in our batch files)
+//  [X] Renderer: Expose selected render state for draw callbacks to use. Access in '(ImGui_ImplXXXX_RenderState*)GetPlatformIO().Renderer_RenderState'.
 
 // The aim of imgui_impl_vulkan.h/.cpp is to be usable in your engine without any modification.
 // IF YOU FEEL YOU NEED TO MAKE ANY CHANGE TO THIS CODE, please share them and your feedback at https://github.com/ocornut/imgui/
@@ -33,6 +26,9 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
+//  2024-10-07: Vulkan: Changed default texture sampler to Clamp instead of Repeat/Wrap.
+//  2024-10-07: Vulkan: Expose selected render state in ImGui_ImplVulkan_RenderState, which you can access in 'void* platform_io.Renderer_RenderState' during draw callbacks.
+//  2024-10-07: Vulkan: Compiling with '#define ImTextureID=ImU64' is unnecessary now that dear imgui defaults ImTextureID to u64 instead of void*.
 //  2024-04-19: Vulkan: Added convenience support for Volk via IMGUI_IMPL_VULKAN_USE_VOLK define (you can also use IMGUI_IMPL_VULKAN_NO_PROTOTYPES + wrap Volk via ImGui_ImplVulkan_LoadFunctions().)
 //  2024-02-14: *BREAKING CHANGE*: Moved RenderPass parameter from ImGui_ImplVulkan_Init() function to ImGui_ImplVulkan_InitInfo structure. Not required when using dynamic rendering.
 //  2024-02-12: *BREAKING CHANGE*: Dynamic rendering now require filling PipelineRenderingCreateInfo structure.
@@ -394,7 +390,7 @@ static inline VkDeviceSize AlignBufferSize(VkDeviceSize size, VkDeviceSize align
     return (size + alignment - 1) & ~(alignment - 1);
 }
 
-static void CreateOrResizeBuffer(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkDeviceSize& buffer_size, size_t new_size, VkBufferUsageFlagBits usage)
+static void CreateOrResizeBuffer(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkDeviceSize& buffer_size, VkDeviceSize new_size, VkBufferUsageFlagBits usage)
 {
     ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
     ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
@@ -502,8 +498,8 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
     if (draw_data->TotalVtxCount > 0)
     {
         // Create or resize the vertex/index buffers
-        size_t vertex_size = AlignBufferSize(draw_data->TotalVtxCount * sizeof(ImDrawVert), bd->BufferMemoryAlignment);
-        size_t index_size = AlignBufferSize(draw_data->TotalIdxCount * sizeof(ImDrawIdx), bd->BufferMemoryAlignment);
+        VkDeviceSize vertex_size = AlignBufferSize(draw_data->TotalVtxCount * sizeof(ImDrawVert), bd->BufferMemoryAlignment);
+        VkDeviceSize index_size = AlignBufferSize(draw_data->TotalIdxCount * sizeof(ImDrawIdx), bd->BufferMemoryAlignment);
         if (rb->VertexBuffer == VK_NULL_HANDLE || rb->VertexBufferSize < vertex_size)
             CreateOrResizeBuffer(rb->VertexBuffer, rb->VertexBufferMemory, rb->VertexBufferSize, vertex_size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
         if (rb->IndexBuffer == VK_NULL_HANDLE || rb->IndexBufferSize < index_size)
@@ -518,11 +514,11 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
         check_vk_result(err);
         for (int n = 0; n < draw_data->CmdListsCount; n++)
         {
-            const ImDrawList* cmd_list = draw_data->CmdLists[n];
-            memcpy(vtx_dst, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
-            memcpy(idx_dst, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
-            vtx_dst += cmd_list->VtxBuffer.Size;
-            idx_dst += cmd_list->IdxBuffer.Size;
+            const ImDrawList* draw_list = draw_data->CmdLists[n];
+            memcpy(vtx_dst, draw_list->VtxBuffer.Data, draw_list->VtxBuffer.Size * sizeof(ImDrawVert));
+            memcpy(idx_dst, draw_list->IdxBuffer.Data, draw_list->IdxBuffer.Size * sizeof(ImDrawIdx));
+            vtx_dst += draw_list->VtxBuffer.Size;
+            idx_dst += draw_list->IdxBuffer.Size;
         }
         VkMappedMemoryRange range[2] = {};
         range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -540,6 +536,14 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
     // Setup desired Vulkan state
     ImGui_ImplVulkan_SetupRenderState(draw_data, pipeline, command_buffer, rb, fb_width, fb_height);
 
+    // Setup render state structure (for callbacks and custom texture bindings)
+    ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+    ImGui_ImplVulkan_RenderState render_state;
+    render_state.CommandBuffer = command_buffer;
+    render_state.Pipeline = pipeline;
+    render_state.PipelineLayout = bd->PipelineLayout;
+    platform_io.Renderer_RenderState = &render_state;
+
     // Will project scissor/clipping rectangles into framebuffer space
     ImVec2 clip_off = draw_data->DisplayPos;         // (0,0) unless using multi-viewports
     ImVec2 clip_scale = draw_data->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
@@ -550,10 +554,10 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
     int global_idx_offset = 0;
     for (int n = 0; n < draw_data->CmdListsCount; n++)
     {
-        const ImDrawList* cmd_list = draw_data->CmdLists[n];
-        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
+        const ImDrawList* draw_list = draw_data->CmdLists[n];
+        for (int cmd_i = 0; cmd_i < draw_list->CmdBuffer.Size; cmd_i++)
         {
-            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
+            const ImDrawCmd* pcmd = &draw_list->CmdBuffer[cmd_i];
             if (pcmd->UserCallback != nullptr)
             {
                 // User callback, registered via ImDrawList::AddCallback()
@@ -561,7 +565,7 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
                     ImGui_ImplVulkan_SetupRenderState(draw_data, pipeline, command_buffer, rb, fb_width, fb_height);
                 else
-                    pcmd->UserCallback(cmd_list, pcmd);
+                    pcmd->UserCallback(draw_list, pcmd);
             }
             else
             {
@@ -586,11 +590,11 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
                 vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
                 // Bind DescriptorSet with font or user texture
-                VkDescriptorSet desc_set[1] = { (VkDescriptorSet)pcmd->TextureId };
+                VkDescriptorSet desc_set[1] = { (VkDescriptorSet)pcmd->GetTexID() };
                 if (sizeof(ImTextureID) < sizeof(ImU64))
                 {
                     // We don't support texture switches if ImTextureID hasn't been redefined to be 64-bit. Do a flaky check that other textures haven't been used.
-                    IM_ASSERT(pcmd->TextureId == (ImTextureID)bd->FontDescriptorSet);
+                    IM_ASSERT(pcmd->GetTexID() == (ImTextureID)bd->FontDescriptorSet);
                     desc_set[0] = bd->FontDescriptorSet;
                 }
                 vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, bd->PipelineLayout, 0, 1, desc_set, 0, nullptr);
@@ -599,9 +603,10 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
                 vkCmdDrawIndexed(command_buffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
             }
         }
-        global_idx_offset += cmd_list->IdxBuffer.Size;
-        global_vtx_offset += cmd_list->VtxBuffer.Size;
+        global_idx_offset += draw_list->IdxBuffer.Size;
+        global_vtx_offset += draw_list->VtxBuffer.Size;
     }
+    platform_io.Renderer_RenderState = NULL;
 
     // Note: at this point both vkCmdSetViewport() and vkCmdSetScissor() have been called.
     // Our last values will leak into user/application rendering IF:
@@ -981,9 +986,9 @@ bool ImGui_ImplVulkan_CreateDeviceObjects()
         info.magFilter = VK_FILTER_LINEAR;
         info.minFilter = VK_FILTER_LINEAR;
         info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
         info.minLod = -1000;
         info.maxLod = 1000;
         info.maxAnisotropy = 1.0f;
