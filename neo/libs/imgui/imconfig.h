@@ -137,3 +137,13 @@ namespace ImGui
     void MyFunction(const char* name, MyMatrix44* mtx);
 }
 */
+
+// DG: on Big Endian systems the order of color channels in an uint32 color is inverted.
+//     this seems to be the official way to support Big Endian platforms in ImGUI:
+#if D3_IS_BIG_ENDIAN
+  #define IM_COL32_R_SHIFT    24
+  #define IM_COL32_G_SHIFT    16
+  #define IM_COL32_B_SHIFT    8
+  #define IM_COL32_A_SHIFT    0
+  #define IM_COL32_A_MASK     0x000000FF
+#endif
