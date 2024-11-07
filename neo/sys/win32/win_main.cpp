@@ -53,6 +53,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tools/edit_public.h"
 
+#undef strcmp // get rid of "#define strcmp idStr::Cmp", it conflicts with SDL headers
+
 #include "sys/sys_sdl.h"
 
 #ifdef D3_SDL3
@@ -646,6 +648,24 @@ uintptr_t Sys_DLL_Load( const char *dllName ) {
 		}
 	} else {
 		DWORD e = GetLastError();
+
+		if ( e ==  0x7E ) {
+			// 0x7E is "The specified module could not be found."
+			// don't print a warning for that error, it's expected
+			// when trying different possible paths for a DLL
+			return 0;
+		}
+
+		if ( e == 0xC1) {
+			// "[193 (0xC1)] is not a valid Win32 application"
+			// probably going to be common. Lets try to be less cryptic.
+			common->Warning( "LoadLibrary( \"%s\" ) Failed ! [%i (0x%X)]\tprobably the DLL is of the wrong architecture, "
+			                 "like x64 instead of x86 (this build of dhewm3 expects %s)",
+			                 dllName, e, e, D3_ARCH );
+			return 0;
+		}
+
+		// for all other errors, print whatever FormatMessage() gives us
 		LPVOID msgBuf = NULL;
 
 		FormatMessage(
@@ -658,17 +678,7 @@ uintptr_t Sys_DLL_Load( const char *dllName ) {
 			(LPTSTR)&msgBuf,
 			0, NULL);
 
-		idStr errorStr = va( "[%i (0x%X)]\t%s", e, e, msgBuf );
-
-		// common, skipped.
-		if ( e == 0x7E ) // [126 (0x7E)] The specified module could not be found.
-			errorStr = "";
-		// probably going to be common. Lets try to be less cryptic.
-		else if ( e == 0xC1 ) // [193 (0xC1)] is not a valid Win32 application.
-			errorStr = va( "[%i (0x%X)]\t%s", e, e, "probably the DLL is of the wrong architecture, like x64 instead of x86" );
-
-		if ( errorStr.Length() )
-			common->Warning( "LoadLibrary(%s) Failed ! %s", dllName, errorStr.c_str() );
+		common->Warning( "LoadLibrary( \"%s\" ) Failed ! [%i (0x%X)]\t%s", dllName, e, e, msgBuf );
 
 		::LocalFree( msgBuf );
 	}
