@@ -2688,13 +2688,27 @@ void idCommonLocal::LoadGameDLL( void ) {
 	// there was no gamelib for this mod, use default one from base game
 	if (!gameDLL) {
 		common->Printf( "\n" );
-		common->Warning( "couldn't load mod-specific %s, defaulting to base game's library!\n", dll );
-		sys->DLL_GetFileName(BASE_GAMEDIR, dll, sizeof(dll));
-		LoadGameDLLbyName(dll, s);
+
+		const char *fs_base = cvarSystem->GetCVarString("fs_game_base");
+		if (fs_base && fs_base[0]) {
+			common->Warning( "couldn't load mod-specific %s, defaulting to library of fs_game_base (%s)!\n", dll, fs_base);
+			sys->DLL_GetFileName(fs_base, dll, sizeof(dll));
+			LoadGameDLLbyName(dll, s);
+			if ( !gameDLL ) {
+				common->Warning( "couldn't load fs_game_base lib %s either, defaulting to base game's library!\n", dll);
+			}
+		} else {
+			common->Warning( "couldn't load mod-specific %s, defaulting to base game's library!\n", dll );
+		}
+
+		if ( !gameDLL ) {
+			sys->DLL_GetFileName(BASE_GAMEDIR, dll, sizeof(dll));
+			LoadGameDLLbyName(dll, s);
+		}
 	}
 
 	if ( !gameDLL ) {
-		common->FatalError( "couldn't load game dynamic library" );
+		common->FatalError( "couldn't load game dynamic library '%s'", dll );
 		return;
 	}
 
