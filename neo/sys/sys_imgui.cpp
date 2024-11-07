@@ -79,7 +79,7 @@ extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& style, const ImG
 namespace D3 {
 namespace ImGuiHooks {
 
-#include "proggyvector_font.h"
+#include "proggyvector_font_base85.h"
 
 static SDL_Window* sdlWindow = NULL;
 ImGuiContext* imguiCtx = NULL;
@@ -365,7 +365,7 @@ void NewFrame()
 		strcpy( fontCfg.Name, "ProggyVector" );
 		float fontSize = 18.0f * GetScale();
 		float fontSizeInt = roundf( fontSize ); // font sizes are supposed to be rounded to integers
-		ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size, fontSizeInt, nullptr);
+		io.Fonts->AddFontFromMemoryCompressedBase85TTF(ProggyVector_compressed_data_base85, fontSizeInt, &fontCfg);
 	}
 
 	// Start the Dear ImGui frame
