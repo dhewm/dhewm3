@@ -27,7 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "sys/platform.h"
-
 #include "idlib/math/Simd_MMX.h"
 
 //===============================================================
@@ -55,7 +54,7 @@ const char * idSIMD_MMX::GetName( void ) const {
 idSIMD_MMX::GetName
 ============
 */
-const char * idSIMD_MMX::GetName( void ) const {
+const char *idSIMD_MMX::GetName( void ) const {
 	return "MMX";
 }
 

@@ -30,7 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <float.h>
 
 #include "sys/platform.h"
-
 #include "idlib/math/Simd_AltiVec.h"
 
 // Doom3 SIMD Library version 0.5
@@ -293,6 +292,7 @@ inline void debugPrintVector( vector unsigned short v, char *msg ) {
 	printf("%s -- %vs\n", msg, v );
 }
 #endif
+
 /*
 ===============
   Reciprocal
