@@ -101,7 +101,6 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_GAME_API
 #endif
 #define ALIGN16( x )				__declspec( align( 16 ) ) x
-#define ALIGNTYPE16					__declspec( align( 16 ) )
 #define PACKED
 #define ID_INLINE					__forceinline
 // DG: alternative to forced inlining of ID_INLINE for functions that do alloca()
@@ -116,7 +115,6 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_GAME_API
 #endif
 #define ALIGN16( x )				x __attribute__ ( ( aligned ( 16 ) ) )
-#define ALIGNTYPE16					__attribute__ ( ( aligned ( 16 ) ) )
 #define PACKED						__attribute__( ( packed ) )
 #define ID_INLINE					inline
 #define ID_STATIC_TEMPLATE
@@ -163,7 +161,6 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #define ALIGN16( x )				x __attribute__ ( ( aligned ( 16 ) ) )
-#define ALIGNTYPE16					__attribute__ ( ( aligned ( 16 ) ) )
 #define PACKED						__attribute__( ( packed ) )
 
 #define _alloca						alloca
@@ -201,7 +198,6 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #define ALIGN16( x )				x __attribute__ ( ( aligned ( 16 ) ) )
-#define ALIGNTYPE16					__attribute__ ( ( aligned ( 16 ) ) )
 #define PACKED						__attribute__( (packed) )
 
 #define PATHSEPERATOR_STR			"/"
