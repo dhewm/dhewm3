@@ -465,9 +465,9 @@ void RB_ARB2_DrawInteractions( void ) {
 //===================================================================================
 
 typedef struct {
-    GLenum target;
-    GLuint ident;
-    char name[64];
+    GLenum     target;
+    GLuint     ident;
+    char       name[64];
 } progDef_t;
 
 static const int MAX_GLPROGS = 256;
@@ -1240,7 +1240,7 @@ void R_ReloadARBPrograms_f( const idCmdArgs &args ) {
 
         // replace ARB interaction shaders with GLSL counterparts, it is possible to use external GLSL shaders as
         // well.
-        rb_glsl_interaction_program = GL_CreateGLSLProgram( ( vs != NULL ) ? vs : interaction_vs, ( fs != NULL ) ? fs : interaction_fs, interactionAttribs,
+        rb_glsl_interaction_program = GL_CreateGLSLProgram( ( vs != NULL ) ? vs : const_cast<GLchar *>( interaction_vs ), ( fs != NULL ) ? fs : const_cast<GLchar *>( interaction_fs ), interactionAttribs,
                                                             sizeof( interactionAttribs ) / sizeof( interactionAttribs[0] ) );
 
         // free externally loaded vertex shader.
