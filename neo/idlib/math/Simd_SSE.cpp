@@ -27,7 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "sys/platform.h"
-#include "idlib/geometry/DrawVert.h"
 #include "idlib/math/Simd_SSE.h"
 
 //===============================================================
@@ -35,6 +34,16 @@ If you have questions concerning this license or the applicable additional terms
 //  SSE implementation of idSIMDProcessor                MrE
 //                                                        E
 //===============================================================
+
+#include <xmmintrin.h>
+
+#include "idlib/geometry/DrawVert.h"
+#include "idlib/geometry/JointTransform.h"
+#include "idlib/math/Vector.h"
+#include "idlib/math/Matrix.h"
+#include "idlib/math/Quat.h"
+#include "idlib/math/Plane.h"
+#include "renderer/Model.h"
 
 #define DRAWVERT_SIZE				60
 #define DRAWVERT_XYZ_OFFSET			(0*4)
@@ -45,8 +54,6 @@ If you have questions concerning this license or the applicable additional terms
 #define DRAWVERT_COLOR_OFFSET		(14*4)
 
 #if defined(__GNUC__) && defined(__SSE__)
-
-#include <xmmintrin.h>
 
 #define SHUFFLEPS( x, y, z, w )		(( (x) & 3 ) << 6 | ( (y) & 3 ) << 4 | ( (z) & 3 ) << 2 | ( (w) & 3 ))
 #define R_SHUFFLEPS( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))
@@ -625,15 +632,6 @@ void VPCALL idSIMD_SSE::Dot( float *dst, const idVec3 &constant, const idPlane *
 }
 
 #elif defined(_MSC_VER) && defined(_M_IX86)
-
-#include <xmmintrin.h>
-
-#include "idlib/geometry/JointTransform.h"
-#include "idlib/math/Vector.h"
-#include "idlib/math/Matrix.h"
-#include "idlib/math/Quat.h"
-#include "idlib/math/Plane.h"
-#include "renderer/Model.h"
 
 #define SHUFFLEPS( x, y, z, w )		(( (x) & 3 ) << 6 | ( (y) & 3 ) << 4 | ( (z) & 3 ) << 2 | ( (w) & 3 ))
 #define R_SHUFFLEPS( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))
@@ -18093,6 +18091,8 @@ void VPCALL idSIMD_SSE::MixedSoundToSamples( short *samples, const float *mixBuf
 #endif
 }
 
+#endif  /* _MSC_VER */
+
 /*
 ============
 idSIMD_SSE::CullByFrustum
@@ -18107,31 +18107,32 @@ void VPCALL idSIMD_SSE::CullByFrustum( idDrawVert *verts, const int numVerts, co
 	__m128 fC56 = _mm_set_ps( 0, 0, frustum[5][2], frustum[4][2] );
 	__m128 fD14 = _mm_set_ps( frustum[3][3], frustum[2][3], frustum[1][3], frustum[0][3] );
 	__m128 fD56 = _mm_set_ps( 0, 0, frustum[5][3], frustum[4][3] );
+
 	for ( int j = 0; j < numVerts; j++ ) {
 		idVec3 &vec = verts[j].xyz;
 		__m128 vX = _mm_set1_ps( vec.x );
 		__m128 vY = _mm_set1_ps( vec.y );
 		__m128 vZ = _mm_set1_ps( vec.z );
 		__m128 d14 = _mm_add_ps(
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fA14, vX ),
-		                     _mm_mul_ps( fB14, vY )
-		                 ),
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fC14, vZ ),
-		                     fD14
-		                 )
-		             );
+			_mm_add_ps(
+				_mm_mul_ps( fA14, vX ),
+				_mm_mul_ps( fB14, vY )
+			),
+			_mm_add_ps(
+				_mm_mul_ps( fC14, vZ ),
+				fD14
+			)
+		);
 		__m128 d56 = _mm_add_ps(
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fA56, vX ),
-		                     _mm_mul_ps( fB56, vY )
-		                 ),
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fC56, vZ ),
-		                     fD56
-		                 )
-		             );
+			_mm_add_ps(
+				_mm_mul_ps( fA56, vX ),
+				_mm_mul_ps( fB56, vY )
+			),
+			_mm_add_ps(
+				_mm_mul_ps( fC56, vZ ),
+				fD56
+			)
+		);
 		const short mask6 = ( 1 << 6 ) - 1;
 		__m128 eps = _mm_set1_ps( epsilon );
 		int mask_lo14 = _mm_movemask_ps( _mm_cmplt_ps( d14, eps ) );
@@ -18155,31 +18156,32 @@ void VPCALL idSIMD_SSE::CullByFrustum2( idDrawVert *verts, const int numVerts, c
 	__m128 fC56 = _mm_set_ps( 0, 0, frustum[5][2], frustum[4][2] );
 	__m128 fD14 = _mm_set_ps( frustum[3][3], frustum[2][3], frustum[1][3], frustum[0][3] );
 	__m128 fD56 = _mm_set_ps( 0, 0, frustum[5][3], frustum[4][3] );
+
 	for ( int j = 0; j < numVerts; j++ ) {
 		idVec3 &vec = verts[j].xyz;
 		__m128 vX = _mm_set1_ps( vec.x );
 		__m128 vY = _mm_set1_ps( vec.y );
 		__m128 vZ = _mm_set1_ps( vec.z );
 		__m128 d14 = _mm_add_ps(
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fA14, vX ),
-		                     _mm_mul_ps( fB14, vY )
-		                 ),
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fC14, vZ ),
-		                     fD14
-		                 )
-		             );
+			_mm_add_ps(
+				_mm_mul_ps( fA14, vX ),
+				_mm_mul_ps( fB14, vY )
+			),
+			_mm_add_ps(
+				_mm_mul_ps( fC14, vZ ),
+				fD14
+			)
+		);
 		__m128 d56 = _mm_add_ps(
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fA56, vX ),
-		                     _mm_mul_ps( fB56, vY )
-		                 ),
-		                 _mm_add_ps(
-		                     _mm_mul_ps( fC56, vZ ),
-		                     fD56
-		                 )
-		             );
+			_mm_add_ps(
+				_mm_mul_ps( fA56, vX ),
+				_mm_mul_ps( fB56, vY )
+			),
+			_mm_add_ps(
+				_mm_mul_ps( fC56, vZ ),
+				fD56
+			)
+		);
 		const short mask6 = ( 1 << 6 ) - 1;
 		__m128 eps = _mm_set1_ps( epsilon );
 		int mask_lo14 = _mm_movemask_ps( _mm_cmplt_ps( d14, eps ) );
@@ -18192,5 +18194,3 @@ void VPCALL idSIMD_SSE::CullByFrustum2( idDrawVert *verts, const int numVerts, c
 		pointCull[j] = mask_lo & mask6 | ( mask_hi & mask6 ) << 6;
 	}
 }
-
-#endif /* _MSC_VER */

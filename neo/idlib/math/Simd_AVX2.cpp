@@ -31,22 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 //===============================================================
 //
-//	AVX implementation of idSIMDProcessor
+//	AVX2 implementation of idSIMDProcessor
 //
 //===============================================================
-
-#if defined(__GNUC__) && defined(__SSE3__)
-
-/*
-============
-idSIMD_SSE3::GetName
-============
-*/
-const char *idSIMD_AVX:2:GetName( void ) const {
-	return "MMX & SSE & SSE2 & SSE3 & AVX & AVX2";
-}
-
-#elif defined(_MSC_VER) && defined(_M_IX86)
 
 #include <immintrin.h>
 
@@ -76,6 +63,7 @@ void VPCALL idSIMD_AVX2::CullByFrustum( idDrawVert *verts, const int numVerts, c
 	const __m256 fD = _mm256_set_ps( 0, 0, frustum[5][3], frustum[4][3], frustum[3][3], frustum[2][3], frustum[1][3], frustum[0][3] );
 	const __m256 eps = _mm256_set1_ps( epsilon );
 	const byte mask6 = (1 << 6) - 1;
+
 	for ( int j = 0; j < numVerts; j++ ) {
 		idVec3 &vec = verts[j].xyz;
 		__m256 vX = _mm256_set1_ps( vec.x );
@@ -105,6 +93,7 @@ void VPCALL idSIMD_AVX2::CullByFrustum2( idDrawVert *verts, const int numVerts, 
 	const __m256 eps = _mm256_set1_ps( epsilon );
 	static const __m256 epsM = _mm256_set1_ps( -epsilon );
 	const short mask6 = (1 << 6) - 1;
+
 	for ( int j = 0; j < numVerts; j++ ) {
 		idVec3 &vec = verts[j].xyz;
 		__m256 vX = _mm256_set1_ps( vec.x );
@@ -121,6 +110,3 @@ void VPCALL idSIMD_AVX2::CullByFrustum2( idDrawVert *verts, const int numVerts, 
 	}
 	_mm256_zeroupper();
 }
-
-#endif
-

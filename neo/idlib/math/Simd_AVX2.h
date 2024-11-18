@@ -28,13 +28,10 @@
 
 class idSIMD_AVX2 : public idSIMD_AVX {
 public:
-#if defined(__GNUC__) && defined(__AVX__)
-	virtual const char *VPCALL GetName( void ) const;
-#elif defined(_MSC_VER) && defined(_M_IX86)
+	// Revelator: these work whether gcc clang or msvc in x86 or x64 (no inline assembly used)
 	virtual const char *VPCALL GetName( void ) const;
 	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
 	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
-#endif
 };
 
 #endif /* !__MATH_SIMD_AVX2_H__ */

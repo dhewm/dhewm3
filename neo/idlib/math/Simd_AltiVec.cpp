@@ -416,7 +416,6 @@ inline vector float VectorSin16( vector float v ) {
 #if 0
 	// load up half PI and use it to calculate the rest of the values. This is
 	// sometimes cheaper than loading them from memory
-
 	vector float halfPI = (vector float) ( 0.5f * 3.14159265358979323846f );
 	vector float PI = vec_add( halfPI, halfPI );
 	vector float oneandhalfPI = vec_add( PI, halfPI );
@@ -602,7 +601,6 @@ inline void FastScalarInvSqrt_x6( float *arg1, float *arg2, float *arg3, float *
 	*arg6 = idMath::InvSqrt( *arg6 );
 #endif
 }
-
 
 // End Helper Functions
 
