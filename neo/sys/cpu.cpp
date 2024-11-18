@@ -216,43 +216,6 @@ static inline bool SDL_HasAVX2( void ) {
 
 #endif /* SDL_HAS_ABOVE_SSE2_INSTRUCTIONS */
 
-// bitmasks for Denormals are zero and Flush to zero
-#define MXCSR_DAZ	(1 << 6)
-#define MXCSR_FTZ	(1 << 15)
-
-/*
-================
-SDL_HasDAZ
-================
-*/
-static inline bool SDL_HasDAZ( void ) {
-	ALIGNTYPE16 unsigned char	FXSaveArea[512];
-	unsigned char				*FXArea = FXSaveArea;
-	unsigned					regs[4] = { 0, 0, 0, 0 };
-
-	// get CPU feature bits
-	CPUid( 1, regs );
-
-	// bit 24 of EDX denotes support for FXSAVE (possibly deprecated)
-	if ( !( regs[_REG_EDX] & ( 1 << 24 ) ) ) {
-		return false;
-	}
-	memset( FXArea, 0, sizeof( FXSaveArea ) );
-
-	// inline assembly not supported by msvc on 64 bit
-#if defined(_MSC_VER) && defined(_M_X64) || \
-	defined(__GNUC__) && (defined(__i386__) || defined (__x86_64__))
-	_fxsave( FXArea );
-#elif defined(_MSC_VER) && defined(_M_IX86)
-	__asm {
-		mov	   eax, FXArea
-		FXSAVE[eax]
-	}
-#endif
-	DWORD dwMask = *( DWORD * )&FXArea[28];				// Read the MXCSR Mask
-	return ( ( dwMask & MXCSR_DAZ ) == MXCSR_DAZ );		// Return if the DAZ bit is set
-}
-
 /*
 ================
 SDL_HasFMA3
@@ -273,6 +236,43 @@ static inline bool SDL_HasFMA3( void ) {
 		return true;
 	}
 	return false;
+}
+
+// bitmasks for Denormals are zero and Flush to zero
+#define MXCSR_DAZ	(1 << 6)
+#define MXCSR_FTZ	(1 << 15)
+
+/*
+================
+SDL_HasDAZ
+================
+*/
+static inline bool SDL_HasDAZ( void ) {
+	ALIGN16( unsigned char	FXSaveArea[512] );
+	unsigned char			*FXArea = FXSaveArea;
+	unsigned				regs[4] = { 0, 0, 0, 0 };
+
+	// get CPU feature bits
+	CPUid( 1, regs );
+
+	// bit 24 of EDX denotes support for FXSAVE (possibly deprecated)
+	if ( !( regs[_REG_EDX] & ( 1 << 24 ) ) ) {
+		return false;
+	}
+	memset( FXArea, 0, sizeof( FXSaveArea ) );
+
+// inline assembly not supported by msvc on 64 bit
+#if defined(_MSC_VER) && defined(_M_X64) || \
+	defined(__GNUC__) && (defined(__i386__) || defined (__x86_64__))
+	_fxsave( FXArea );
+#elif defined(_MSC_VER) && defined(_M_IX86)
+	__asm {
+		mov	   eax, FXArea
+		FXSAVE[eax]
+	}
+#endif
+	DWORD dwMask = *( DWORD * )&FXArea[28];				// Read the MXCSR Mask
+	return ( ( dwMask & MXCSR_DAZ ) == MXCSR_DAZ );		// Return if the DAZ bit is set
 }
 
 /*
@@ -296,7 +296,7 @@ int Sys_GetProcessorId( void ) {
 		flags |= CPUID_MMX;
 	}
 
-	// SDL3 doesn't support detecting 3DNow, and current CPUs (even from AMD) don't support it either
+// SDL3 doesn't support detecting 3DNow, and current CPUs (even from AMD) don't support it either
 #if !defined(D3_SDL3)
 	// check for 3DNow! (deprecated and removed in SDL3)
 	if ( SDL_Has3DNow() ) {
@@ -324,7 +324,7 @@ int Sys_GetProcessorId( void ) {
 		flags |= CPUID_SSE41;
 	}
 
-	// check for FMA3
+	// check for FMA3 (SDL2 does set the AVX2 flag without this but SDL1 does not even support AVX)
 	if ( SDL_HasFMA3() ) {
 		flags |= CPUID_FMA3;
 	}
@@ -334,7 +334,7 @@ int Sys_GetProcessorId( void ) {
 		flags |= CPUID_AVX;
 	}
 
-	// check for AVX2 (SDL does not have a check for FMA so to not break the detection routine we pass it anyway)
+	// check for AVX2
 	if ( SDL_HasAVX2() ) {
 		flags |= CPUID_AVX2;
 	}
@@ -354,12 +354,13 @@ int Sys_GetProcessorId( void ) {
 // inline assembly not supported by msvc 64 bit
 // so use the standard intel functions to get the value there.
 // removed unused macros and added some that also work on 64 bit msvc
+// btw the return values are unsigned not plain int.
 #if defined(_MSC_VER) && defined(_M_IX86)
-#define STREFLOP_STMXCSR( cw ) do { int tmp; __asm { stmxcsr tmp }; ( cw ) = tmp; } while (0)
-#define STREFLOP_LDMXCSR( cw ) do { int tmp = ( cw ); __asm { ldmxcsr tmp }; } while (0)
+#define STREFLOP_STMXCSR( cw ) do { unsigned int tmp = 0; __asm { stmxcsr tmp }; ( cw ) = tmp; } while (0)
+#define STREFLOP_LDMXCSR( cw ) do { unsigned int tmp = ( cw ); __asm { ldmxcsr tmp }; } while (0)
 #elif defined(_MSC_VER) && defined(_M_X64)
-#define STREFLOP_STMXCSR( cw ) do { int tmp; tmp = _mm_getcsr(); ( cw ) = tmp; } while (0)
-#define STREFLOP_LDMXCSR( cw ) do { int tmp = ( cw ); _mm_setcsr( tmp ); } while (0)
+#define STREFLOP_STMXCSR( cw ) do { unsigned int tmp = 0; tmp = _mm_getcsr(); ( cw ) = tmp; } while (0)
+#define STREFLOP_LDMXCSR( cw ) do { unsigned int tmp = ( cw ); _mm_setcsr( tmp ); } while (0)
 #else /* __GNUC__? */
 #define STREFLOP_STMXCSR( cw ) do { asm volatile ( "stmxcsr %0" : "=m" ( cw ) : ); } while (0)
 #define STREFLOP_LDMXCSR( cw ) do { asm volatile ( "ldmxcsr %0" : : "m" ( cw ) ); } while (0)
@@ -369,12 +370,14 @@ int Sys_GetProcessorId( void ) {
 ================
 EnableMXCSRFlag
 
-Ignored anyway if the CPU does not support SSE2
+Ignored anyway if the CPU does not support SSE
 ================
 */
-static inline void EnableMXCSRFlag( int flag, bool enable, const char *name ) {
-	int sse_mode = 0;
+static inline void EnableMXCSRFlag( unsigned int flag, bool enable, const char *name ) {
+	unsigned int sse_mode = 0;
 
+	// stgatilov: note that MXCSR affects only SSE+ arithmetic
+	// old x87 FPU has its own control register, but we don't care about it =)
 	STREFLOP_STMXCSR( sse_mode );
 
 	if ( enable && ( sse_mode & flag ) == flag ) {
@@ -394,9 +397,6 @@ static inline void EnableMXCSRFlag( int flag, bool enable, const char *name ) {
 		common->Printf( "disabling %s mode\n", name );
 		sse_mode &= ~flag;
 	}
-
-	// stgatilov: note that MXCSR affects only SSE+ arithmetic
-	// old x87 FPU has its own control register, but we don't care about it =)
 	STREFLOP_LDMXCSR( sse_mode );
 }
 
