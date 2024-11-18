@@ -380,6 +380,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	endif()
 
 	# TODO fix these warnings
+	add_compile_options(-Wno-unused-variable)
 	add_compile_options(-Wno-sign-compare)
 	add_compile_options(-Wno-switch)
 
