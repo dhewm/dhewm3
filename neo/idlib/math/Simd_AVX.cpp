@@ -35,6 +35,10 @@ If you have questions concerning this license or the applicable additional terms
 //
 //===============================================================
 
+// Revelator: these work whether in gcc clang or msvc in x86 or x64 (no inline assembly used)
+#if defined(_MSC_VER) && ( defined(_M_X64) || defined(_M_IX86) ) || \
+	defined(__GNUC__) && ( defined(__i386__) || defined (__x86_64__) ) && defined(__AVX__)
+
 #include <immintrin.h>
 
 #include "idlib/geometry/DrawVert.h"
@@ -122,3 +126,5 @@ void VPCALL idSIMD_AVX::CullByFrustum2( idDrawVert *verts, const int numVerts, c
 	}
 	_mm256_zeroupper();
 }
+
+#endif  /* _MSC_VER */

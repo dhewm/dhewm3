@@ -28,10 +28,15 @@
 
 class idSIMD_AVX : public idSIMD_SSE3 {
 public:
-	// Revelator: these work whether in gcc clang or msvc x86 or x64 (no inline assembly used)
+// Revelator: these work whether in gcc clang or msvc x86 or x64 (no inline assembly used)
+#if defined(_MSC_VER) && ( defined(_M_X64) || defined(_M_IX86) ) || \
+	defined(__GNUC__) && ( defined(__i386__) || defined (__x86_64__) ) && defined(__AVX__)
+
 	virtual const char *VPCALL GetName( void ) const;
 	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
 	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
+
+#endif  /* _MSC_VER */
 };
 
 #endif /* !__MATH_SIMD_AVX_H__ */
