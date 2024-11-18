@@ -51,7 +51,7 @@ const int FALLOFF_TEXTURE_SIZE =	64;
 const float	DEFAULT_FOG_DISTANCE = 500.0f;
 
 const int FOG_ENTER_SIZE = 64;
-const float FOG_ENTER = (FOG_ENTER_SIZE+1.0f)/(FOG_ENTER_SIZE*2);
+const float FOG_ENTER = ( FOG_ENTER_SIZE + 1.0f ) / ( FOG_ENTER_SIZE * 2 );
 // picky to get the bilerp correct at terminator
 
 
@@ -146,9 +146,9 @@ typedef struct areaReference_s {
 	struct areaReference_s *areaNext;				// chain in the area
 	struct areaReference_s *areaPrev;
 	struct areaReference_s *ownerNext;				// chain on either the entityDef or lightDef
-	idRenderEntityLocal *	entity;					// only one of entity / light will be non-NULL
-	idRenderLightLocal *	light;					// only one of entity / light will be non-NULL
-	struct portalArea_s	*	area;					// so owners can find all the areas they are in
+	idRenderEntityLocal 	*entity;					// only one of entity / light will be non-NULL
+	idRenderLightLocal 	*light;					// only one of entity / light will be non-NULL
+	struct portalArea_s		*area;					// so owners can find all the areas they are in
 } areaReference_t;
 
 
@@ -184,7 +184,7 @@ public:
 
 class idRenderLightLocal : public idRenderLight {
 public:
-							idRenderLightLocal();
+	idRenderLightLocal();
 
 	virtual void			FreeRenderLight();
 	virtual void			UpdateRenderLight( const renderLight_t *re, bool forceUpdate = false );
@@ -195,52 +195,52 @@ public:
 	renderLight_t			parms;					// specification
 
 	bool					lightHasMoved;			// the light has changed its position since it was
-													// first added, so the prelight model is not valid
+	// first added, so the prelight model is not valid
 
 	float					modelMatrix[16];		// this is just a rearrangement of parms.axis and parms.origin
 
-	idRenderWorldLocal *	world;
+	idRenderWorldLocal 	*world;
 	int						index;					// in world lightdefs
 
 	int						areaNum;				// if not -1, we may be able to cull all the light's
-													// interactions if !viewDef->connectedAreas[areaNum]
+	// interactions if !viewDef->connectedAreas[areaNum]
 
 	int						lastModifiedFrameNum;	// to determine if it is constantly changing,
-													// and should go in the dynamic frame memory, or kept
-													// in the cached memory
+	// and should go in the dynamic frame memory, or kept
+	// in the cached memory
 	bool					archived;				// for demo writing
 
 
 	// derived information
 	idPlane					lightProject[4];
 
-	const idMaterial *		lightShader;			// guaranteed to be valid, even if parms.shader isn't
-	idImage *				falloffImage;
+	const idMaterial 		*lightShader;			// guaranteed to be valid, even if parms.shader isn't
+	idImage 				*falloffImage;
 
 	idVec3					globalLightOrigin;		// accounting for lightCenter and parallel
 
 
 	idPlane					frustum[6];				// in global space, positive side facing out, last two are front/back
-	idWinding *				frustumWindings[6];		// used for culling
-	srfTriangles_t *		frustumTris;			// triangulated frustumWindings[]
+	idWinding 				*frustumWindings[6];		// used for culling
+	srfTriangles_t 		*frustumTris;			// triangulated frustumWindings[]
 
 	int						numShadowFrustums;		// one for projected lights, usually six for point lights
 	shadowFrustum_t			shadowFrustums[6];
 
 	int						viewCount;				// if == tr.viewCount, the light is on the viewDef->viewLights list
-	struct viewLight_s *	viewLight;
+	struct viewLight_s 	*viewLight;
 
-	areaReference_t *		references;				// each area the light is present in will have a lightRef
-	idInteraction *			firstInteraction;		// doubly linked list
-	idInteraction *			lastInteraction;
+	areaReference_t 		*references;				// each area the light is present in will have a lightRef
+	idInteraction 			*firstInteraction;		// doubly linked list
+	idInteraction 			*lastInteraction;
 
-	struct doublePortal_s *	foggedPortals;
+	struct doublePortal_s 	*foggedPortals;
 };
 
 
 class idRenderEntityLocal : public idRenderEntity {
 public:
-							idRenderEntityLocal();
+	idRenderEntityLocal();
 
 	virtual void			FreeRenderEntity();
 	virtual void			UpdateRenderEntity( const renderEntity_t *re, bool forceUpdate = false );
@@ -256,26 +256,26 @@ public:
 
 	float					modelMatrix[16];		// this is just a rearrangement of parms.axis and parms.origin
 
-	idRenderWorldLocal *	world;
+	idRenderWorldLocal 	*world;
 	int						index;					// in world entityDefs
 
 	int						lastModifiedFrameNum;	// to determine if it is constantly changing,
-													// and should go in the dynamic frame memory, or kept
-													// in the cached memory
+	// and should go in the dynamic frame memory, or kept
+	// in the cached memory
 	bool					archived;				// for demo writing
 
-	idRenderModel *			dynamicModel;			// if parms.model->IsDynamicModel(), this is the generated data
+	idRenderModel 			*dynamicModel;			// if parms.model->IsDynamicModel(), this is the generated data
 	int						dynamicModelFrameCount;	// continuously animating dynamic models will recreate
-													// dynamicModel if this doesn't == tr.viewCount
-	idRenderModel *			cachedDynamicModel;
+	// dynamicModel if this doesn't == tr.viewCount
+	idRenderModel 			*cachedDynamicModel;
 
 	idBounds				referenceBounds;		// the local bounds used to place entityRefs, either from parms or a model
 
 	// a viewEntity_t is created whenever a idRenderEntityLocal is considered for inclusion
 	// in a given view, even if it turns out to not be visible
 	int						viewCount;				// if tr.viewCount == viewCount, viewEntity is valid,
-													// but the entity may still be off screen
-	struct viewEntity_s *	viewEntity;				// in frame temporary memory
+	// but the entity may still be off screen
+	struct viewEntity_s 	*viewEntity;				// in frame temporary memory
 
 	int						visibleCount;
 	// if tr.viewCount == visibleCount, at least one ambient
@@ -283,12 +283,12 @@ public:
 	// note that an entity could still be in the view frustum and not be visible due
 	// to portal passing
 
-	idRenderModelDecal *	decals;					// chain of decals that have been projected on this model
-	idRenderModelOverlay *	overlay;				// blood overlays on animated models
+	idRenderModelDecal 	*decals;					// chain of decals that have been projected on this model
+	idRenderModelOverlay 	*overlay;				// blood overlays on animated models
 
-	areaReference_t *		entityRefs;				// chain of all references
-	idInteraction *			firstInteraction;		// doubly linked list
-	idInteraction *			lastInteraction;
+	areaReference_t 		*entityRefs;				// chain of all references
+	idInteraction 			*firstInteraction;		// doubly linked list
+	idInteraction 			*lastInteraction;
 
 	bool					needsPortalSky;
 };
@@ -300,10 +300,10 @@ public:
 // a viewLight may exist even without any surfaces, and may be relevent for fogging,
 // but should never exist if its volume does not intersect the view frustum
 typedef struct viewLight_s {
-	struct viewLight_s *	next;
+	struct viewLight_s 	*next;
 
 	// back end should NOT reference the lightDef, because it can change when running SMP
-	idRenderLightLocal *	lightDef;
+	idRenderLightLocal 	*lightDef;
 
 	// for scissor clipping, local inside renderView viewport
 	// scissorRect.Empty() is true if the viewEntity_t was never actually
@@ -326,10 +326,10 @@ typedef struct viewLight_s {
 	idVec3					globalLightOrigin;			// global light origin used by backend
 	idPlane					lightProject[4];			// light project used by backend
 	idPlane					fogPlane;					// fog plane for backend fog volume rendering
-	const srfTriangles_t *	frustumTris;				// light frustum for backend fog volume rendering
-	const idMaterial *		lightShader;				// light shader used by backend
-	const float	*			shaderRegisters;			// shader registers used by backend
-	idImage *				falloffImage;				// falloff image used by backend
+	const srfTriangles_t 	*frustumTris;				// light frustum for backend fog volume rendering
+	const idMaterial 		*lightShader;				// light shader used by backend
+	const float				*shaderRegisters;			// shader registers used by backend
+	idImage 				*falloffImage;				// falloff image used by backend
 
 	const struct drawSurf_s	*globalShadows;				// shadow everything
 	const struct drawSurf_s	*localInteractions;			// don't get local shadows
@@ -398,7 +398,7 @@ typedef struct viewDef_s {
 
 	int					numClipPlanes;			// mirrors will often use a single clip plane
 	idPlane				clipPlanes[MAX_CLIP_PLANES];		// in world space, the positive side
-												// of the plane is the visible side
+	// of the plane is the visible side
 	idScreenRect		viewport;				// in real pixels and proper Y flip
 
 	idScreenRect		scissor;
@@ -407,12 +407,12 @@ typedef struct viewDef_s {
 	// these are real physical pixel values, possibly scaled and offset from the
 	// renderView x/y/width/height
 
-	struct viewDef_s *	superView;				// never go into an infinite subview loop
-	struct drawSurf_s *	subviewSurface;
+	struct viewDef_s 	*superView;				// never go into an infinite subview loop
+	struct drawSurf_s 	*subviewSurface;
 
 	// drawSurfs are the visible surfaces of the viewEntities, sorted
 	// by the material sort parameter
-	drawSurf_t **		drawSurfs;				// we don't use an idList for this, because
+	drawSurf_t 		**drawSurfs;				// we don't use an idList for this, because
 	int					numDrawSurfs;			// it is allocated in frame temporary memory
 	int					maxDrawSurfs;			// may be resized
 
@@ -427,7 +427,7 @@ typedef struct viewDef_s {
 
 	int					areaNum;				// -1 = not in a valid area
 
-	bool *				connectedAreas;
+	bool 				*connectedAreas;
 	// An array in frame temporary memory that lists if an area can be reached without
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
@@ -438,13 +438,13 @@ typedef struct viewDef_s {
 // complex light / surface interactions are broken up into multiple passes of a
 // simple interaction shader
 typedef struct {
-	const drawSurf_t *	surf;
+	const drawSurf_t 	*surf;
 
-	idImage *			lightImage;
-	idImage *			lightFalloffImage;
-	idImage *			bumpImage;
-	idImage *			diffuseImage;
-	idImage *			specularImage;
+	idImage 			*lightImage;
+	idImage 			*lightFalloffImage;
+	idImage 			*bumpImage;
+	idImage 			*diffuseImage;
+	idImage 			*specularImage;
 
 	idVec4				diffuseColor;	// may have a light color baked into it, will be < tr.backEndRendererMaxLight
 	idVec4				specularColor;	// may have a light color baked into it, will be < tr.backEndRendererMaxLight
@@ -479,7 +479,7 @@ typedef enum {
 	RC_SET_BUFFER,
 	RC_COPY_RENDER,
 	RC_SWAP_BUFFERS		// can't just assume swap at end of list because
-						// of forced list submission before syncs
+	// of forced list submission before syncs
 } renderCommand_t;
 
 typedef struct {
@@ -535,8 +535,8 @@ typedef struct {
 	// alloc will point somewhere into the memory chain
 	frameMemoryBlock_t	*alloc;
 
-	srfTriangles_t *	firstDeferredFreeTriSurf;
-	srfTriangles_t *	lastDeferredFreeTriSurf;
+	srfTriangles_t 	*firstDeferredFreeTriSurf;
+	srfTriangles_t 	*lastDeferredFreeTriSurf;
 
 	int					memoryHighwater;	// max used on any frame
 
@@ -641,24 +641,24 @@ typedef struct {
 // from the front end state
 typedef struct {
 	int					frameCount;		// used to track all images used in a frame
-	const viewDef_t	*	viewDef;
+	const viewDef_t		*viewDef;
 	backEndCounters_t	pc;
 
 	const viewEntity_t *currentSpace;		// for detecting when a matrix must change
 	idScreenRect		currentScissor;
 	// for scissor clipping, local inside renderView viewport
 
-	viewLight_t *		vLight;
+	viewLight_t 		*vLight;
 	int					depthFunc;			// GLS_DEPTHFUNC_EQUAL, or GLS_DEPTHFUNC_LESS for translucent
 	float				lightTextureMatrix[16];	// only if lightStage->texture.hasMatrix
 	float				lightColor[4];		// evaluation of current light's color stage
 
 	float				lightScale;			// Every light color calaculation will be multiplied by this,
-											// which will guarantee that the result is < tr.backEndRendererMaxLight
-											// A card with high dynamic range will have this set to 1.0
+	// which will guarantee that the result is < tr.backEndRendererMaxLight
+	// A card with high dynamic range will have this set to 1.0
 	float				overBright;			// The amount that all light interactions must be multiplied by
-											// with post processing to get the desired total light level.
-											// A high dynamic range card will have this set to 1.0.
+	// with post processing to get the desired total light level.
+	// A high dynamic range card will have this set to 1.0.
 
 	bool				currentRenderCopied;	// true if any material has already referenced _currentRender
 
@@ -670,7 +670,7 @@ typedef struct {
 
 
 const int MAX_GUI_SURFACES	= 1024;		// default size of the drawSurfs list for guis, will
-										// be automatically expanded as needed
+// be automatically expanded as needed
 
 typedef enum {
 	BE_ARB2,
@@ -699,20 +699,20 @@ public:
 	virtual bool			IsFullScreen( void ) const;
 	virtual int				GetScreenWidth( void ) const;
 	virtual int				GetScreenHeight( void ) const;
-	virtual idRenderWorld *	AllocRenderWorld( void );
+	virtual idRenderWorld 	*AllocRenderWorld( void );
 	virtual void			FreeRenderWorld( idRenderWorld *rw );
 	virtual void			BeginLevelLoad( void );
 	virtual void			EndLevelLoad( void );
 	virtual bool			RegisterFont( const char *fontName, fontInfoEx_t &font );
 	virtual void			SetColor( const idVec4 &rgba );
 	virtual void			SetColor4( float r, float g, float b, float a );
-	virtual void			DrawStretchPic ( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
-											bool clip = true, float x = 0.0f, float y = 0.0f, float w = 640.0f, float h = 0.0f );
-	virtual void			DrawStretchPic ( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material );
+	virtual void			DrawStretchPic( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
+	                                        bool clip = true, float x = 0.0f, float y = 0.0f, float w = 640.0f, float h = 0.0f );
+	virtual void			DrawStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material );
 
-	virtual void			DrawStretchTri ( idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVec2 t2, idVec2 t3, const idMaterial *material );
+	virtual void			DrawStretchTri( idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVec2 t2, idVec2 t3, const idMaterial *material );
 	virtual void			GlobalToNormalizedDeviceCoordinates( const idVec3 &global, idVec3 &ndc );
-	virtual void			GetGLSettings( int& width, int& height );
+	virtual void			GetGLSettings( int &width, int &height );
 	virtual void			PrintMemInfo( MemInfo_t *mi );
 
 	virtual void			DrawSmallChar( int x, int y, int ch, const idMaterial *material );
@@ -732,8 +732,8 @@ public:
 
 public:
 	// internal functions
-							idRenderSystemLocal( void );
-							~idRenderSystemLocal( void );
+	idRenderSystemLocal( void );
+	~idRenderSystemLocal( void );
 
 	void					Clear( void );
 	void					SetBackEndRenderer();			// sets tr.backEndRenderer based on cvars
@@ -747,7 +747,7 @@ public:
 
 	int						frameCount;		// incremented every frame
 	int						viewCount;		// incremented every view (twice a scene if subviewed)
-											// and every R_MarkFragments call
+	// and every R_MarkFragments call
 
 	int						staticAllocCount;	// running total of bytes allocated
 
@@ -760,28 +760,28 @@ public:
 	backEndName_t			backEndRenderer;
 	bool					backEndRendererHasVertexPrograms;
 	float					backEndRendererMaxLight;	// 1.0 for standard, unlimited for floats
-														// determines how much overbrighting needs
-														// to be done post-process
+	// determines how much overbrighting needs
+	// to be done post-process
 
-	idVec4					ambientLightVector;	// used for "ambient bump mapping"
+	idVec4					ambientLightVector;			// used for "ambient bump mapping"
 
-	float					sortOffset;				// for determinist sorting of equal sort materials
+	float					sortOffset;					// for determinist sorting of equal sort materials
 
-	idList<idRenderWorldLocal*>worlds;
+	idList<idRenderWorldLocal *>worlds;
 
-	idRenderWorldLocal *	primaryWorld;
+	idRenderWorldLocal 		*primaryWorld;
 	renderView_t			primaryRenderView;
-	viewDef_t *				primaryView;
+	viewDef_t 				*primaryView;
 	// many console commands need to know which world they should operate on
 
-	const idMaterial *		defaultMaterial;
-	idImage *				testImage;
-	idCinematic *			testVideo;
+	const idMaterial 		*defaultMaterial;
+	idImage 				*testImage;
+	idCinematic 			*testVideo;
 	float					testVideoStartTime;
 
-	idImage *				ambientCubeImage;	// hack for testing dependent ambient lighting
+	idImage 				*ambientCubeImage;	// hack for testing dependent ambient lighting
 
-	viewDef_t *				viewDef;
+	viewDef_t 				*viewDef;
 
 	performanceCounters_t	pc;					// performance counters
 
@@ -798,8 +798,8 @@ public:
 
 	// GUI drawing variables for surface creation
 	int						guiRecursionLevel;		// to prevent infinite overruns
-	class idGuiModel *		guiModel;
-	class idGuiModel *		demoGuiModel;
+	class idGuiModel 		*guiModel;
+	class idGuiModel 		*demoGuiModel;
 
 	// DG: remember the original glConfig.vidWidth/Height values that get overwritten in BeginFrame()
 	//     so they can be reset in EndFrame() (Editors tend to mess up the viewport by using BeginFrame())
@@ -881,6 +881,7 @@ extern idCVar r_useIndexBuffers;		// if 0, don't use ARB_vertex_buffer_object fo
 extern idCVar r_useEntityCallbacks;		// if 0, issue the callback immediately at update time, rather than defering
 extern idCVar r_lightAllBackFaces;		// light all the back faces, even when they would be shadowed
 extern idCVar r_useDepthBoundsTest;     // use depth bounds test to reduce shadow fill
+extern idCVar r_useGLSL;                // use GLSL backend for interaction passes
 
 extern idCVar r_skipPostProcess;		// skip all post-process renderings
 extern idCVar r_skipSuppress;			// ignore the per-view suppressions
@@ -1031,7 +1032,7 @@ const int GLS_REDMASK							= 0x00000200;
 const int GLS_GREENMASK							= 0x00000400;
 const int GLS_BLUEMASK							= 0x00000800;
 const int GLS_ALPHAMASK							= 0x00001000;
-const int GLS_COLORMASK							= (GLS_REDMASK|GLS_GREENMASK|GLS_BLUEMASK);
+const int GLS_COLORMASK							= ( GLS_REDMASK | GLS_GREENMASK | GLS_BLUEMASK );
 
 const int GLS_POLYMODE_LINE						= 0x00002000;
 
@@ -1095,8 +1096,8 @@ void		GLimp_SwapBuffers( void );
 // This will not be called if 'r_drawBuffer GL_FRONT'
 
 void		GLimp_SetGamma( unsigned short red[256],
-							unsigned short green[256],
-							unsigned short blue[256] );
+                            unsigned short green[256],
+                            unsigned short blue[256] );
 // Sets the hardware gamma ramps for gamma and brightness adjustment.
 // These are now taken as 16 bit values, so we can take full advantage
 // of dacs with >8 bits of precision
@@ -1116,12 +1117,12 @@ void		GLimp_DeactivateContext( void );
 // being immediate returns, which lets us guage how much time is
 // being spent inside OpenGL.
 
-const int GRAB_GRABMOUSE	= (1 << 0);
-const int GRAB_HIDECURSOR	= (1 << 1);
-const int GRAB_RELATIVEMOUSE = (1 << 2);
-const int GRAB_ENABLETEXTINPUT = (1 << 3); // only used with SDL3, where textinput must be explicitly activated
+const int GRAB_GRABMOUSE	= ( 1 << 0 );
+const int GRAB_HIDECURSOR	= ( 1 << 1 );
+const int GRAB_RELATIVEMOUSE = ( 1 << 2 );
+const int GRAB_ENABLETEXTINPUT = ( 1 << 3 ); // only used with SDL3, where textinput must be explicitly activated
 
-void GLimp_GrabInput(int flags);
+void GLimp_GrabInput( int flags );
 
 bool GLimp_SetSwapInterval( int swapInterval );
 bool GLimp_SetWindowResizable( bool enableResizable );
@@ -1166,7 +1167,7 @@ void R_TransposeGLMatrix( const float in[16], float out[16] );
 
 void R_SetViewMatrix( viewDef_t *viewDef );
 
-void myGlMultMatrix( const float *a, const float *b, float *out );
+void R_MatrixMultiply( const float *a, const float *b, float *out );
 
 /*
 ============================================================
@@ -1186,10 +1187,10 @@ viewEntity_t *R_SetEntityDefViewEntity( idRenderEntityLocal *def );
 viewLight_t *R_SetLightDefViewLight( idRenderLightLocal *def );
 
 void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const renderEntity_t *renderEntity,
-					const idMaterial *shader, const idScreenRect &scissor, const float soft_particle_radius = -1.0f ); // soft particles in #3878
+                    const idMaterial *shader, const idScreenRect &scissor, const float soft_particle_radius = -1.0f ); // soft particles in #3878
 
 void R_LinkLightSurf( const drawSurf_t **link, const srfTriangles_t *tri, const viewEntity_t *space,
-				   const idRenderLightLocal *light, const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow );
+                      const idRenderLightLocal *light, const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow );
 
 bool R_CreateAmbientCache( srfTriangles_t *tri, bool needsLighting );
 bool R_CreateLightingCache( const idRenderEntityLocal *ent, const idRenderLightLocal *light, srfTriangles_t *tri );
@@ -1209,7 +1210,7 @@ void R_RegenerateWorld_f( const idCmdArgs &args );
 void R_ModulateLights_f( const idCmdArgs &args );
 
 void R_SetLightProject( idPlane lightProject[4], const idVec3 origin, const idVec3 targetPoint,
-	   const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop );
+                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop );
 
 void R_AddLightSurfaces( void );
 void R_AddModelSurfaces( void );
@@ -1227,7 +1228,6 @@ void R_CheckForEntityDefsUsingModel( idRenderModel *model );
 
 void R_ClearEntityDefDynamicModel( idRenderEntityLocal *def );
 void R_FreeEntityDefDerivedData( idRenderEntityLocal *def, bool keepDecals, bool keepCachedDynamicModel );
-void R_FreeEntityDefCachedDynamicModel( idRenderEntityLocal *def );
 void R_FreeEntityDefDecals( idRenderEntityLocal *def );
 void R_FreeEntityDefOverlay( idRenderEntityLocal *def );
 void R_FreeEntityDefFadedDecals( idRenderEntityLocal *def, int time );
@@ -1259,21 +1259,18 @@ void RB_DrawElementsImmediate( const srfTriangles_t *tri );
 void RB_RenderTriangleSurface( const srfTriangles_t *tri );
 void RB_T_RenderTriangleSurface( const drawSurf_t *surf );
 void RB_RenderDrawSurfListWithFunction( drawSurf_t **drawSurfs, int numDrawSurfs,
-					  void (*triFunc_)( const drawSurf_t *) );
+                                        void ( *triFunc_ )( const drawSurf_t * ) );
 void RB_RenderDrawSurfChainWithFunction( const drawSurf_t *drawSurfs,
-										void (*triFunc_)( const drawSurf_t *) );
-void RB_DrawShaderPasses( drawSurf_t **drawSurfs, int numDrawSurfs );
+        void ( *triFunc_ )( const drawSurf_t * ) );
 void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const textureStage_t *texture );
 void RB_GetShaderTextureMatrix( const float *shaderRegisters, const textureStage_t *texture, float matrix[16] );
-void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void (*DrawInteraction)(const drawInteraction_t *) );
-
-const shaderStage_t *RB_SetLightTexture( const idRenderLightLocal *light );
+void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void ( *DrawInteraction )( const drawInteraction_t * ) );
 
 void RB_DrawView( const void *data );
-
+void RB_SetProgramEnvironment( bool isPostProcess ); // so RB_STD_FillDepthBuffer() can use it
 void RB_DetermineLightScale( void );
 void RB_STD_LightScale( void );
-void RB_BeginDrawingView (void);
+void RB_BeginDrawingView( void );
 
 /*
 ============================================================
@@ -1287,12 +1284,125 @@ void RB_DrawElementsWithCounters( const srfTriangles_t *tri );
 void RB_DrawShadowElementsWithCounters( const srfTriangles_t *tri, int numIndexes );
 void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs );
 void RB_BindVariableStageImage( const textureStage_t *texture, const float *shaderRegisters );
-void RB_BindStageTexture( const float *shaderRegisters, const textureStage_t *texture, const drawSurf_t *surf );
-void RB_FinishStageTexture( const textureStage_t *texture, const drawSurf_t *surf );
 void RB_StencilShadowPass( const drawSurf_t *drawSurfs );
 void RB_STD_DrawView( void );
 void RB_STD_FogAllLights( void );
 void RB_BakeTextureMatrixIntoTexgen( idPlane lightProject[3], const float textureMatrix[16] );
+
+/*
+===========================================================================
+
+DEFAULT GLSL *SHADER
+
+===========================================================================
+*/
+
+#define GLSL_VERSION_ATTRIBS "#version 130\n"
+
+#define GLSL_INPUT_ATTRIBS                                                                                             \
+    "in vec4 attrTexCoords;\n"                                                                                         \
+    "in vec3 attrTangents0;\n"                                                                                         \
+    "in vec3 attrTangents1;\n"                                                                                         \
+    "in vec3 attrNormal;\n"                                                                                            \
+    "mat3x3 u_lightMatrix = mat3x3 (attrTangents0, attrTangents1, attrNormal);\n\n"
+
+#define GLSL_UNIFORMS                                                                                                  \
+    "uniform vec4 u_light_origin;\n"                                                                                   \
+    "uniform vec4 u_view_origin;\n"                                                                                    \
+    "uniform vec4 u_color_modulate;\n"                                                                                 \
+    "uniform vec4 u_color_add;\n"                                                                                      \
+    "uniform mat2x4 u_diffMatrix;\n"                                                                                   \
+    "uniform mat2x4 u_bumpMatrix;\n"                                                                                   \
+    "uniform mat2x4 u_specMatrix;\n"                                                                                   \
+    "uniform mat4x4 u_projMatrix;\n"                                                                                   \
+    "uniform mat4x4 u_fallMatrix;\n"                                                                                   \
+    "uniform sampler2D bumpImage;\n"                                                                                   \
+    "uniform sampler2D lightFalloffImage;\n"                                                                           \
+    "uniform sampler2D lightProjectImage;\n"                                                                           \
+    "uniform sampler2D diffuseImage;\n"                                                                                \
+    "uniform sampler2D specularImage;\n"                                                                               \
+    "uniform vec4 u_constant_diffuse;\n"                                                                               \
+    "uniform vec4 u_constant_specular;\n\n"
+
+#define GLSL_VARYINGS                                                                                                  \
+    "varying vec2 diffCoords;\n"                                                                                       \
+    "varying vec2 bumpCoords;\n"                                                                                       \
+    "varying vec2 specCoords;\n"                                                                                       \
+    "varying vec4 projCoords;\n"                                                                                       \
+    "varying vec4 fallCoords;\n"                                                                                       \
+    "varying vec3 lightDir;\n"                                                                                         \
+    "varying vec3 halfAngle;\n"                                                                                        \
+    "varying vec4 Color;\n"
+
+// these are our GLSL interaction shaders
+#define interaction_vs                                                                                                 \
+    GLSL_VERSION_ATTRIBS                                                                                               \
+    GLSL_INPUT_ATTRIBS                                                                                                 \
+    GLSL_UNIFORMS                                                                                                      \
+    GLSL_VARYINGS                                                                                                      \
+    "void main ()\n"                                                                                                   \
+    "{\n"                                                                                                              \
+    "	// we must use ftransform as Doom 3 needs invariant position\n"                                                \
+    "	gl_Position = ftransform ();\n"                                                                                \
+    "\n"                                                                                                               \
+    "	diffCoords = attrTexCoords * u_diffMatrix;\n"                                                                  \
+    "	bumpCoords = attrTexCoords * u_bumpMatrix;\n"                                                                  \
+    "	specCoords = attrTexCoords * u_specMatrix;\n"                                                                  \
+    "\n"                                                                                                               \
+    "	projCoords = gl_Vertex * u_projMatrix;\n"                                                                      \
+    "	fallCoords = gl_Vertex * u_fallMatrix;\n"                                                                      \
+    "\n"                                                                                                               \
+    "	Color = (gl_Color * u_color_modulate) + u_color_add;\n"                                                        \
+    "\n"                                                                                                               \
+    "	vec3 OffsetViewOrigin = (u_view_origin - gl_Vertex).xyz;\n"                                                    \
+    "	vec3 OffsetLightOrigin = (u_light_origin - gl_Vertex).xyz;\n"                                                  \
+    "\n"                                                                                                               \
+    "	lightDir = OffsetLightOrigin * u_lightMatrix;\n"                                                               \
+    "	halfAngle = (normalize (OffsetViewOrigin) + normalize (OffsetLightOrigin)) * u_lightMatrix;\n"                 \
+    "}\n\n"
+
+#define interaction_fs                                                                                                 \
+    GLSL_VERSION_ATTRIBS                                                                                               \
+    GLSL_UNIFORMS                                                                                                      \
+    GLSL_VARYINGS                                                                                                      \
+    "void main ()\n"                                                                                                   \
+    "{\n"                                                                                                              \
+    "	vec3 normalMap = texture2D (bumpImage, bumpCoords).agb * 2.0 - 1.0;\n"                                         \
+    "	vec4 lightMap = texture2DProj (lightProjectImage, projCoords);\n"                                              \
+    "\n"                                                                                                               \
+    "	lightMap *= dot (normalize (lightDir), normalMap);\n"                                                          \
+    "	lightMap *= texture2DProj (lightFalloffImage, fallCoords);\n"                                                  \
+    "	lightMap *= Color;\n"                                                                                          \
+    "\n"                                                                                                               \
+    "	vec4 diffuseMap = texture2D (diffuseImage, diffCoords) * u_constant_diffuse;\n"                                \
+    "	float specularComponent = clamp ((dot (normalize (halfAngle), normalMap) - 0.75) * 4.0, 0.0, 1.0);\n"          \
+    "\n"                                                                                                               \
+    "	vec4 specularResult = u_constant_specular * (specularComponent * specularComponent);\n"                        \
+    "	vec4 specularMap = texture2D (specularImage, specCoords) * 2.0;\n"                                             \
+    "\n"                                                                                                               \
+    "	gl_FragColor = (diffuseMap + (specularResult * specularMap)) * lightMap;\n"                                    \
+    "}\n\n"
+
+/* 32 bit hexadecimal 0, BFG had this set to a negative value which is illegal on unsigned */
+static const GLuint INVALID_PROGRAM = 0x00000000;
+
+static GLuint u_light_origin = INVALID_PROGRAM;
+static GLuint u_view_origin = INVALID_PROGRAM;
+
+static GLuint u_color_modulate = INVALID_PROGRAM;
+static GLuint u_color_add = INVALID_PROGRAM;
+
+static GLuint u_constant_diffuse = INVALID_PROGRAM;
+static GLuint u_constant_specular = INVALID_PROGRAM;
+
+static GLuint u_diffMatrix = INVALID_PROGRAM;
+static GLuint u_bumpMatrix = INVALID_PROGRAM;
+static GLuint u_specMatrix = INVALID_PROGRAM;
+
+static GLuint u_projMatrix = INVALID_PROGRAM;
+static GLuint u_fallMatrix = INVALID_PROGRAM;
+
+static GLuint rb_glsl_interaction_program = INVALID_PROGRAM;
 
 /*
 ============================================================
@@ -1325,7 +1435,6 @@ typedef enum {
 	// SteveL #3878: soft particles
 	VPROG_SOFT_PARTICLE,
 	FPROG_SOFT_PARTICLE,
-	//
 	PROG_USER
 } program_t;
 
@@ -1411,8 +1520,8 @@ typedef enum {
 } shadowGen_t;
 
 srfTriangles_t *R_CreateShadowVolume( const idRenderEntityLocal *ent,
-									 const srfTriangles_t *tri, const idRenderLightLocal *light,
-									 shadowGen_t optimize, srfCullInfo_t &cullInfo );
+                                      const srfTriangles_t *tri, const idRenderLightLocal *light,
+                                      shadowGen_t optimize, srfCullInfo_t &cullInfo );
 
 /*
 ============================================================
@@ -1428,12 +1537,12 @@ calling this function may modify "facing" based on culling
 */
 
 srfTriangles_t *R_CreateVertexProgramTurboShadowVolume( const idRenderEntityLocal *ent,
-									 const srfTriangles_t *tri, const idRenderLightLocal *light,
-									 srfCullInfo_t &cullInfo );
+        const srfTriangles_t *tri, const idRenderLightLocal *light,
+        srfCullInfo_t &cullInfo );
 
 srfTriangles_t *R_CreateTurboShadowVolume( const idRenderEntityLocal *ent,
-									 const srfTriangles_t *tri, const idRenderLightLocal *light,
-									 srfCullInfo_t &cullInfo );
+        const srfTriangles_t *tri, const idRenderLightLocal *light,
+        srfCullInfo_t &cullInfo );
 
 /*
 ============================================================
@@ -1460,7 +1569,7 @@ typedef struct {
 } optimizedShadow_t;
 
 optimizedShadow_t SuperOptimizeOccluders( idVec4 *verts, glIndex_t *indexes, int numIndexes,
-										 idPlane projectionPlane, idVec3 projectionOrigin );
+        idPlane projectionPlane, idVec3 projectionOrigin );
 
 void CleanupOptimizedShadowTris( srfTriangles_t *tri );
 
@@ -1479,8 +1588,8 @@ void				R_ShutdownTriSurfData( void );
 void				R_PurgeTriSurfData( frameData_t *frame );
 void				R_ShowTriSurfMemory_f( const idCmdArgs &args );
 
-srfTriangles_t *	R_AllocStaticTriSurf( void );
-srfTriangles_t *	R_CopyStaticTriSurf( const srfTriangles_t *tri );
+srfTriangles_t 	*R_AllocStaticTriSurf( void );
+srfTriangles_t 	*R_CopyStaticTriSurf( const srfTriangles_t *tri );
 void				R_AllocStaticTriSurfVerts( srfTriangles_t *tri, int numVerts );
 void				R_AllocStaticTriSurfIndexes( srfTriangles_t *tri, int numIndexes );
 void				R_AllocStaticTriSurfShadowVerts( srfTriangles_t *tri, int numVerts );
@@ -1510,8 +1619,8 @@ void				R_ReverseTriangles( srfTriangles_t *tri );
 
 // Only deals with vertexes and indexes, not silhouettes, planes, etc.
 // Does NOT perform a cleanup triangles, so there may be duplicated verts in the result.
-srfTriangles_t *	R_MergeSurfaceList( const srfTriangles_t **surfaces, int numSurfaces );
-srfTriangles_t *	R_MergeTriangles( const srfTriangles_t *tri1, const srfTriangles_t *tri2 );
+srfTriangles_t 	*R_MergeSurfaceList( const srfTriangles_t **surfaces, int numSurfaces );
+srfTriangles_t 	*R_MergeTriangles( const srfTriangles_t *tri1, const srfTriangles_t *tri2 );
 
 // if the deformed verts have significant enough texture coordinate changes to reverse the texture
 // polarity of a triangle, the tangents will be incorrect
@@ -1528,24 +1637,24 @@ typedef struct deformInfo_s {
 	int				numOutputVerts;
 
 	int				numMirroredVerts;
-	int *			mirroredVerts;
+	int 			*mirroredVerts;
 
 	int				numIndexes;
-	glIndex_t *		indexes;
+	glIndex_t 		*indexes;
 
-	glIndex_t *		silIndexes;
+	glIndex_t 		*silIndexes;
 
 	int				numDupVerts;
-	int *			dupVerts;
+	int 			*dupVerts;
 
 	int				numSilEdges;
-	silEdge_t *		silEdges;
+	silEdge_t 		*silEdges;
 
-	dominantTri_t *	dominantTris;
+	dominantTri_t 	*dominantTris;
 } deformInfo_t;
 
 
-deformInfo_t *		R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numIndexes, const int *indexes, bool useUnsmoothedTangents );
+deformInfo_t 		*R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numIndexes, const int *indexes, bool useUnsmoothedTangents );
 void				R_FreeDeformInfo( deformInfo_t *deformInfo );
 int					R_DeformInfoMemoryUsed( deformInfo_t *deformInfo );
 
@@ -1614,13 +1723,19 @@ TR_BACKEND
 =============================================================
 */
 
+// RAII-style wrapper for glDepthBoundsEXT
+class DepthBoundsTest {
+public:
+	DepthBoundsTest( const idScreenRect &scissorRect );
+	~DepthBoundsTest();
+};
+
 void RB_SetDefaultGLState( void );
 void RB_SetGL2D( void );
 
 void RB_ShowImages( void );
 
 void RB_ExecuteBackEndCommands( const emptyCommand_t *cmds );
-
 
 /*
 =============================================================
@@ -1679,9 +1794,9 @@ TR_SHADOWBOUNDS
 
 =============================================================
 */
-idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
-										const idRenderEntityLocal * entityDef,
-										const viewDef_t * viewDef );
+idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal *lightDef,
+                                        const idRenderEntityLocal *entityDef,
+                                        const viewDef_t *viewDef );
 
 //=============================================
 

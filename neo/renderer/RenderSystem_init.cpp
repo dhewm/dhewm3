@@ -37,9 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/GuiModel.h"
 #include "sound/sound.h"
 #include "ui/UserInterface.h"
-
 #include "renderer/tr_local.h"
-
 #include "framework/GameCallbacks_local.h"
 
 // Vista OpenGL wrapper check
@@ -79,8 +77,9 @@ idCVar r_useTwoSidedStencil( "r_useTwoSidedStencil", "1", CVAR_RENDERER | CVAR_B
 idCVar r_useDeferredTangents( "r_useDeferredTangents", "1", CVAR_RENDERER | CVAR_BOOL, "defer tangents calculations after deform" );
 idCVar r_useCachedDynamicModels( "r_useCachedDynamicModels", "1", CVAR_RENDERER | CVAR_BOOL, "cache snapshots of dynamic models" );
 
-idCVar r_useVertexBuffers( "r_useVertexBuffers", "1", CVAR_RENDERER | CVAR_INTEGER, "use ARB_vertex_buffer_object for vertexes", 0, 1, idCmdSystem::ArgCompletion_Integer<0,1>  );
-idCVar r_useIndexBuffers( "r_useIndexBuffers", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "use ARB_vertex_buffer_object for indexes", 0, 1, idCmdSystem::ArgCompletion_Integer<0,1>  );
+idCVar r_useVertexBuffers( "r_useVertexBuffers", "1", CVAR_RENDERER | CVAR_INTEGER, "use ARB_vertex_buffer_object for vertexes", 0, 1, idCmdSystem::ArgCompletion_Integer<0, 1> );
+idCVar r_useIndexBuffers( "r_useIndexBuffers", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "use ARB_vertex_buffer_object for indexes", 0, 1, idCmdSystem::ArgCompletion_Integer<0, 1> );
+idCVar r_useGLSL( "r_useGLSL", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use GLSL backend for interaction passes" );
 
 idCVar r_useStateCaching( "r_useStateCaching", "1", CVAR_RENDERER | CVAR_BOOL, "avoid redundant state changes in GL_*() calls" );
 idCVar r_useInfiniteFarZ( "r_useInfiniteFarZ", "1", CVAR_RENDERER | CVAR_BOOL, "use the no-far-clip-plane trick" );
@@ -93,7 +92,7 @@ idCVar r_swapInterval( "r_swapInterval", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVA
 
 idCVar r_gamma( "r_gamma", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f );
 idCVar r_brightness( "r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 2.0f );
-idCVar r_gammaInShader( "r_gammaInShader", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Set gamma and brightness in shaders instead using hardware gamma" );
+idCVar r_gammaInShader( "r_gammaInShader", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Set gamma and brightness in shaders instead using hardware gamma" );
 
 idCVar r_renderer( "r_renderer", "best", CVAR_RENDERER | CVAR_ARCHIVE, "hardware specific renderer path to use", r_rendererArgs, idCmdSystem::ArgCompletion_String<r_rendererArgs> );
 
@@ -125,14 +124,14 @@ idCVar r_skipROQ( "r_skipROQ", "0", CVAR_RENDERER | CVAR_BOOL, "skip ROQ decodin
 idCVar r_ignore( "r_ignore", "0", CVAR_RENDERER, "used for random debugging without defining new vars" );
 idCVar r_ignore2( "r_ignore2", "0", CVAR_RENDERER, "used for random debugging without defining new vars" );
 idCVar r_usePreciseTriangleInteractions( "r_usePreciseTriangleInteractions", "0", CVAR_RENDERER | CVAR_BOOL, "1 = do winding clipping to determine if each ambiguous tri should be lit" );
-idCVar r_useCulling( "r_useCulling", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = sphere, 2 = sphere + box", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
-idCVar r_useLightCulling( "r_useLightCulling", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = box, 2 = exact clip of polyhedron faces, 3 = also areas", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+idCVar r_useCulling( "r_useCulling", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = sphere, 2 = sphere + box", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar r_useLightCulling( "r_useLightCulling", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = box, 2 = exact clip of polyhedron faces, 3 = also areas", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar r_useLightScissors( "r_useLightScissors", "1", CVAR_RENDERER | CVAR_BOOL, "1 = use custom scissor rectangle for each light" );
-idCVar r_useClippedLightScissors( "r_useClippedLightScissors", "1", CVAR_RENDERER | CVAR_INTEGER, "0 = full screen when near clipped, 1 = exact when near clipped, 2 = exact always", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
+idCVar r_useClippedLightScissors( "r_useClippedLightScissors", "1", CVAR_RENDERER | CVAR_INTEGER, "0 = full screen when near clipped, 1 = exact when near clipped, 2 = exact always", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 idCVar r_useEntityCulling( "r_useEntityCulling", "1", CVAR_RENDERER | CVAR_BOOL, "0 = none, 1 = box" );
 idCVar r_useEntityScissors( "r_useEntityScissors", "0", CVAR_RENDERER | CVAR_BOOL, "1 = use custom scissor rectangle for each entity" );
 idCVar r_useInteractionCulling( "r_useInteractionCulling", "1", CVAR_RENDERER | CVAR_BOOL, "1 = cull interactions" );
-idCVar r_useInteractionScissors( "r_useInteractionScissors", "2", CVAR_RENDERER | CVAR_INTEGER, "1 = use a custom scissor rectangle for each shadow interaction, 2 = also crop using portal scissors", -2, 2, idCmdSystem::ArgCompletion_Integer<-2,2> );
+idCVar r_useInteractionScissors( "r_useInteractionScissors", "2", CVAR_RENDERER | CVAR_INTEGER, "1 = use a custom scissor rectangle for each shadow interaction, 2 = also crop using portal scissors", -2, 2, idCmdSystem::ArgCompletion_Integer < -2, 2 > );
 idCVar r_useShadowCulling( "r_useShadowCulling", "1", CVAR_RENDERER | CVAR_BOOL, "try to cull shadows from partially visible lights" );
 idCVar r_useFrustumFarDistance( "r_useFrustumFarDistance", "0", CVAR_RENDERER | CVAR_FLOAT, "if != 0 force the view frustum far distance to this distance" );
 idCVar r_clear( "r_clear", "2", CVAR_RENDERER, "force screen clear every frame, 1 = purple, 2 = black, 'r g b' = custom" );
@@ -142,8 +141,8 @@ idCVar r_shadowPolygonOffset( "r_shadowPolygonOffset", "-1", CVAR_RENDERER | CVA
 idCVar r_shadowPolygonFactor( "r_shadowPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT, "scale value for stencil shadow drawing" );
 idCVar r_frontBuffer( "r_frontBuffer", "0", CVAR_RENDERER | CVAR_BOOL, "draw to front buffer for debugging" );
 idCVar r_skipSubviews( "r_skipSubviews", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = don't render any gui elements on surfaces" );
-idCVar r_skipGuiShaders( "r_skipGuiShaders", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = skip all gui elements on surfaces, 2 = skip drawing but still handle events, 3 = draw but skip events", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
-idCVar r_skipParticles( "r_skipParticles", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = skip all particle systems", 0, 1, idCmdSystem::ArgCompletion_Integer<0,1> );
+idCVar r_skipGuiShaders( "r_skipGuiShaders", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = skip all gui elements on surfaces, 2 = skip drawing but still handle events, 3 = draw but skip events", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar r_skipParticles( "r_skipParticles", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = skip all particle systems", 0, 1, idCmdSystem::ArgCompletion_Integer<0, 1> );
 idCVar r_subviewOnly( "r_subviewOnly", "0", CVAR_RENDERER | CVAR_BOOL, "1 = don't render main view, allowing subviews to be debugged" );
 idCVar r_shadows( "r_shadows", "1", CVAR_RENDERER | CVAR_BOOL  | CVAR_ARCHIVE, "enable shadows" );
 idCVar r_testARBProgram( "r_testARBProgram", "0", CVAR_RENDERER | CVAR_BOOL, "experiment with vertex/fragment programs" );
@@ -154,7 +153,7 @@ idCVar r_lightScale( "r_lightScale", "2", CVAR_RENDERER | CVAR_FLOAT, "all light
 idCVar r_lightSourceRadius( "r_lightSourceRadius", "0", CVAR_RENDERER | CVAR_FLOAT, "for soft-shadow sampling" );
 idCVar r_flareSize( "r_flareSize", "1", CVAR_RENDERER | CVAR_FLOAT, "scale the flare deforms from the material def" );
 
-idCVar r_useExternalShadows( "r_useExternalShadows", "1", CVAR_RENDERER | CVAR_INTEGER, "1 = skip drawing caps when outside the light volume, 2 = force to no caps for testing", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
+idCVar r_useExternalShadows( "r_useExternalShadows", "1", CVAR_RENDERER | CVAR_INTEGER, "1 = skip drawing caps when outside the light volume, 2 = force to no caps for testing", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 idCVar r_useOptimizedShadows( "r_useOptimizedShadows", "1", CVAR_RENDERER | CVAR_BOOL, "use the dmap generated static shadow volumes" );
 idCVar r_useScissor( "r_useScissor", "1", CVAR_RENDERER | CVAR_BOOL, "scissor clip as portals and lights are processed" );
 idCVar r_useCombinerDisplayLists( "r_useCombinerDisplayLists", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_NOCHEAT, "put all nvidia register combiner programming in display lists" );
@@ -181,20 +180,20 @@ idCVar r_showDemo( "r_showDemo", "0", CVAR_RENDERER | CVAR_BOOL, "report reads a
 idCVar r_showDynamic( "r_showDynamic", "0", CVAR_RENDERER | CVAR_BOOL, "report stats on dynamic surface generation" );
 idCVar r_showLightScale( "r_showLightScale", "0", CVAR_RENDERER | CVAR_BOOL, "report the scale factor applied to drawing for overbrights" );
 idCVar r_showDefs( "r_showDefs", "0", CVAR_RENDERER | CVAR_BOOL, "report the number of modeDefs and lightDefs in view" );
-idCVar r_showTrace( "r_showTrace", "0", CVAR_RENDERER | CVAR_INTEGER, "show the intersection of an eye trace with the world", idCmdSystem::ArgCompletion_Integer<0,2> );
+idCVar r_showTrace( "r_showTrace", "0", CVAR_RENDERER | CVAR_INTEGER, "show the intersection of an eye trace with the world", idCmdSystem::ArgCompletion_Integer<0, 2> );
 idCVar r_showIntensity( "r_showIntensity", "0", CVAR_RENDERER | CVAR_BOOL, "draw the screen colors based on intensity, red = 0, green = 128, blue = 255" );
-idCVar r_showImages( "r_showImages", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = show all images instead of rendering, 2 = show in proportional size", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
+idCVar r_showImages( "r_showImages", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = show all images instead of rendering, 2 = show in proportional size", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 idCVar r_showSmp( "r_showSmp", "0", CVAR_RENDERER | CVAR_BOOL, "show which end (front or back) is blocking" );
-idCVar r_showLights( "r_showLights", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = just print volumes numbers, highlighting ones covering the view, 2 = also draw planes of each volume, 3 = also draw edges of each volume", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
-idCVar r_showShadows( "r_showShadows", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = visualize the stencil shadow volumes, 2 = draw filled in", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
-idCVar r_showShadowCount( "r_showShadowCount", "0", CVAR_RENDERER | CVAR_INTEGER, "colors screen based on shadow volume depth complexity, >= 2 = print overdraw count based on stencil index values, 3 = only show turboshadows, 4 = only show static shadows", 0, 4, idCmdSystem::ArgCompletion_Integer<0,4> );
+idCVar r_showLights( "r_showLights", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = just print volumes numbers, highlighting ones covering the view, 2 = also draw planes of each volume, 3 = also draw edges of each volume", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar r_showShadows( "r_showShadows", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = visualize the stencil shadow volumes, 2 = draw filled in", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar r_showShadowCount( "r_showShadowCount", "0", CVAR_RENDERER | CVAR_INTEGER, "colors screen based on shadow volume depth complexity, >= 2 = print overdraw count based on stencil index values, 3 = only show turboshadows, 4 = only show static shadows", 0, 4, idCmdSystem::ArgCompletion_Integer<0, 4> );
 idCVar r_showLightScissors( "r_showLightScissors", "0", CVAR_RENDERER | CVAR_BOOL, "show light scissor rectangles" );
 idCVar r_showEntityScissors( "r_showEntityScissors", "0", CVAR_RENDERER | CVAR_BOOL, "show entity scissor rectangles" );
-idCVar r_showInteractionFrustums( "r_showInteractionFrustums", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = show a frustum for each interaction, 2 = also draw lines to light origin, 3 = also draw entity bbox", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
-idCVar r_showInteractionScissors( "r_showInteractionScissors", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = show screen rectangle which contains the interaction frustum, 2 = also draw construction lines", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
-idCVar r_showLightCount( "r_showLightCount", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = colors surfaces based on light count, 2 = also count everything through walls, 3 = also print overdraw", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+idCVar r_showInteractionFrustums( "r_showInteractionFrustums", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = show a frustum for each interaction, 2 = also draw lines to light origin, 3 = also draw entity bbox", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar r_showInteractionScissors( "r_showInteractionScissors", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = show screen rectangle which contains the interaction frustum, 2 = also draw construction lines", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar r_showLightCount( "r_showLightCount", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = colors surfaces based on light count, 2 = also count everything through walls, 3 = also print overdraw", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar r_showViewEntitys( "r_showViewEntitys", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = displays the bounding boxes of all view models, 2 = print index numbers" );
-idCVar r_showTris( "r_showTris", "0", CVAR_RENDERER | CVAR_INTEGER, "enables wireframe rendering of the world, 1 = only draw visible ones, 2 = draw all front facing, 3 = draw all", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+idCVar r_showTris( "r_showTris", "0", CVAR_RENDERER | CVAR_INTEGER, "enables wireframe rendering of the world, 1 = only draw visible ones, 2 = draw all front facing, 3 = draw all", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar r_showSurfaceInfo( "r_showSurfaceInfo", "0", CVAR_RENDERER | CVAR_BOOL, "show surface material name under crosshair" );
 idCVar r_showNormals( "r_showNormals", "0", CVAR_RENDERER | CVAR_FLOAT, "draws wireframe normals" );
 idCVar r_showMemory( "r_showMemory", "0", CVAR_RENDERER | CVAR_BOOL, "print frame memory utilization" );
@@ -205,16 +204,16 @@ idCVar r_showSurfaces( "r_showSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "report
 idCVar r_showPrimitives( "r_showPrimitives", "0", CVAR_RENDERER | CVAR_INTEGER, "report drawsurf/index/vertex counts" );
 idCVar r_showEdges( "r_showEdges", "0", CVAR_RENDERER | CVAR_BOOL, "draw the sil edges" );
 idCVar r_showTexturePolarity( "r_showTexturePolarity", "0", CVAR_RENDERER | CVAR_BOOL, "shade triangles by texture area polarity" );
-idCVar r_showTangentSpace( "r_showTangentSpace", "0", CVAR_RENDERER | CVAR_INTEGER, "shade triangles by tangent space, 1 = use 1st tangent vector, 2 = use 2nd tangent vector, 3 = use normal vector", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+idCVar r_showTangentSpace( "r_showTangentSpace", "0", CVAR_RENDERER | CVAR_INTEGER, "shade triangles by tangent space, 1 = use 1st tangent vector, 2 = use 2nd tangent vector, 3 = use normal vector", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar r_showDominantTri( "r_showDominantTri", "0", CVAR_RENDERER | CVAR_BOOL, "draw lines from vertexes to center of dominant triangles" );
 idCVar r_showAlloc( "r_showAlloc", "0", CVAR_RENDERER | CVAR_BOOL, "report alloc/free counts" );
 idCVar r_showTextureVectors( "r_showTextureVectors", "0", CVAR_RENDERER | CVAR_FLOAT, " if > 0 draw each triangles texture (tangent) vectors" );
-idCVar r_showOverDraw( "r_showOverDraw", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = geometry overdraw, 2 = light interaction overdraw, 3 = geometry and light interaction overdraw", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+idCVar r_showOverDraw( "r_showOverDraw", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = geometry overdraw, 2 = light interaction overdraw, 3 = geometry and light interaction overdraw", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 
 idCVar r_lockSurfaces( "r_lockSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "allow moving the view point without changing the composition of the scene, including culling" );
 idCVar r_useEntityCallbacks( "r_useEntityCallbacks", "1", CVAR_RENDERER | CVAR_BOOL, "if 0, issue the callback immediately at update time, rather than defering" );
 
-idCVar r_showSkel( "r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
+idCVar r_showSkel( "r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 idCVar r_jointNameScale( "r_jointNameScale", "0.02", CVAR_RENDERER | CVAR_FLOAT, "size of joint names when r_showskel is set to 1" );
 idCVar r_jointNameOffset( "r_jointNameOffset", "0.5", CVAR_RENDERER | CVAR_FLOAT, "offset of joint names when r_showskel is set to 1" );
 
@@ -232,16 +231,16 @@ idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "1", CVAR_RENDERER | CVAR_ARCHIVE |
 // DG: the fscking patent has finally expired
 idCVar r_useCarmacksReverse( "r_useCarmacksReverse", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use Z-Fail (Carmack's Reverse) when rendering shadows" );
 idCVar r_useStencilOpSeparate( "r_useStencilOpSeparate", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use glStencilOpSeparate() (if available) when rendering shadows" );
-idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG");
-idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (1-100). Lower value means smaller file but worse quality");
-idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9). Higher levels generate smaller files, but take noticeably longer");
+idCVar r_screenshotFormat( "r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG" );
+idCVar r_screenshotJpgQuality( "r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (1-100). Lower value means smaller file but worse quality" );
+idCVar r_screenshotPngCompression( "r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9). Higher levels generate smaller files, but take noticeably longer" );
 // DG: allow freely resizing the window
-idCVar r_windowResizable("r_windowResizable", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Allow resizing (and maximizing) the window (needs SDL2; with 2.0.5 or newer it's applied immediately)" );
+idCVar r_windowResizable( "r_windowResizable", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Allow resizing (and maximizing) the window (needs SDL2; with 2.0.5 or newer it's applied immediately)" );
 idCVar r_vidRestartAlwaysFull( "r_vidRestartAlwaysFull", 0, CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Always do a full vid_restart (ignore 'partial' argument), e.g. when changing window size" );
 
 // DG: for soft particles (ported from TDM)
 idCVar r_enableDepthCapture( "r_enableDepthCapture", "-1", CVAR_RENDERER | CVAR_INTEGER,
-		"enable capturing depth buffer to texture. -1: enable automatically (if soft particles are enabled), 0: disable, 1: enable", -1, 1 ); // #3877
+                             "enable capturing depth buffer to texture. -1: enable automatically (if soft particles are enabled), 0: disable, 1: enable", -1, 1 ); // #3877
 idCVar r_useSoftParticles( "r_useSoftParticles", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Soften particle transitions when player walks through them or they cross solid geometry. Needs r_enableDepthCapture. Can slow down rendering!" ); // #3878
 
 idCVar r_glDebugContext( "r_glDebugContext", "0", CVAR_RENDERER | CVAR_BOOL, "Enable OpenGL Debug context - requires vid_restart, needs SDL2" );
@@ -250,14 +249,14 @@ idCVar r_glDebugContext( "r_glDebugContext", "0", CVAR_RENDERER | CVAR_BOOL, "En
 #define QGLPROC(name, rettype, args) rettype (APIENTRYP q##name) args;
 #include "renderer/qgl_proc.h"
 
-void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
-void ( APIENTRY * qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
-void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
-void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
+void ( APIENTRY *qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
+void ( APIENTRY *qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
+void ( APIENTRY *qglActiveTextureARB )( GLenum texture );
+void ( APIENTRY *qglClientActiveTextureARB )( GLenum texture );
 
-void (APIENTRY *qglTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *);
+void ( APIENTRY *qglTexImage3D )( GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid * );
 
-void (APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void * );
+void ( APIENTRY *qglColorTableEXT )( int, int, int, int, int, const void * );
 
 // EXT_stencil_two_side
 PFNGLACTIVESTENCILFACEEXTPROC			qglActiveStencilFaceEXT;
@@ -265,6 +264,60 @@ PFNGLACTIVESTENCILFACEEXTPROC			qglActiveStencilFaceEXT;
 // ARB_texture_compression
 PFNGLCOMPRESSEDTEXIMAGE2DARBPROC		qglCompressedTexImage2DARB;
 PFNGLGETCOMPRESSEDTEXIMAGEARBPROC		qglGetCompressedTexImageARB;
+
+// ARB_MapBufferRange
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC			qglFlushMappedBufferRange;
+PFNGLMAPBUFFERRANGEPROC					qglMapBufferRange;
+
+// ARB_shading_language_100
+PFNGLUNIFORM1FPROC						qglUniform1f;
+PFNGLUNIFORM1FVPROC						qglUniform1fv;
+PFNGLUNIFORM1IPROC						qglUniform1i;
+PFNGLUNIFORM1IVPROC						qglUniform1iv;
+PFNGLUNIFORM2FPROC						qglUniform2f;
+PFNGLUNIFORM2FVPROC						qglUniform2fv;
+PFNGLUNIFORM2IPROC						qglUniform2i;
+PFNGLUNIFORM2IVPROC						qglUniform2iv;
+PFNGLUNIFORM3FPROC						qglUniform3f;
+PFNGLUNIFORM3FVPROC						qglUniform3fv;
+PFNGLUNIFORM3IPROC						qglUniform3i;
+PFNGLUNIFORM3IVPROC						qglUniform3iv;
+PFNGLUNIFORM4FPROC						qglUniform4f;
+PFNGLUNIFORM4FVPROC						qglUniform4fv;
+PFNGLUNIFORM4IPROC						qglUniform4i;
+PFNGLUNIFORM4IVPROC						qglUniform4iv;
+PFNGLUNIFORMMATRIX2FVPROC				qglUniformMatrix2fv;
+PFNGLUNIFORMMATRIX3FVPROC				qglUniformMatrix3fv;
+PFNGLUNIFORMMATRIX4FVPROC				qglUniformMatrix4fv;
+PFNGLUNIFORMMATRIX2X3FVPROC				qglUniformMatrix2x3fv;
+PFNGLUNIFORMMATRIX2X4FVPROC				qglUniformMatrix2x4fv;
+PFNGLUNIFORMMATRIX3X2FVPROC				qglUniformMatrix3x2fv;
+PFNGLUNIFORMMATRIX3X4FVPROC				qglUniformMatrix3x4fv;
+PFNGLUNIFORMMATRIX4X2FVPROC				qglUniformMatrix4x2fv;
+PFNGLUNIFORMMATRIX4X3FVPROC				qglUniformMatrix4x3fv;
+
+PFNGLISPROGRAMPROC						qglIsProgram;
+PFNGLCREATEPROGRAMPROC					qglCreateProgram;
+PFNGLVALIDATEPROGRAMPROC				qglValidateProgram;
+PFNGLLINKPROGRAMPROC					qglLinkProgram;
+
+PFNGLISSHADERPROC						qglIsShader;
+PFNGLSHADERSOURCEPROC					qglShaderSource;
+PFNGLCREATESHADERPROC					qglCreateShader;
+PFNGLATTACHSHADERPROC					qglAttachShader;
+PFNGLBINDATTRIBLOCATIONPROC				qglBindAttribLocation;
+PFNGLCOMPILESHADERPROC					qglCompileShader;
+PFNGLDETACHSHADERPROC					qglDetachShader;
+PFNGLDELETESHADERPROC					qglDeleteShader;
+
+PFNGLGETPROGRAMINFOLOGPROC				qglGetProgramInfoLog;
+PFNGLGETPROGRAMIVPROC					qglGetProgramiv;
+PFNGLGETSHADERINFOLOGPROC				qglGetShaderInfoLog;
+PFNGLGETSHADERSOURCEPROC				qglGetShaderSource;
+PFNGLGETSHADERIVPROC					qglGetShaderiv;
+PFNGLGETUNIFORMLOCATIONPROC				qglGetUniformLocation;
+PFNGLGETUNIFORMFVPROC					qglGetUniformfv;
+PFNGLGETUNIFORMIVPROC					qglGetUniformiv;
 
 // ARB_vertex_buffer_object
 PFNGLBINDBUFFERARBPROC					qglBindBufferARB;
@@ -316,48 +369,43 @@ enum {
  */
 static void APIENTRY
 DebugCallback( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-              const GLchar *message, const void *userParam )
-{
-	const char* sourceStr = "Source: Unknown";
-	const char* typeStr = "Type: Unknown";
-	const char* severityStr = "Severity: Unknown";
+               const GLchar *message, const void *userParam ) {
+	const char *sourceStr = "Source: Unknown";
+	const char *typeStr = "Type: Unknown";
+	const char *severityStr = "Severity: Unknown";
 
-	switch (severity)
-	{
+	switch ( severity ) {
 #define SVRCASE(X, STR)  case GL_DEBUG_SEVERITY_ ## X ## _ARB : severityStr = STR; break;
-		case QGL_DEBUG_SEVERITY_NOTIFICATION: return;
-		SVRCASE(HIGH, "Severity: High")
-		SVRCASE(MEDIUM, "Severity: Medium")
-		SVRCASE(LOW, "Severity: Low")
+	case QGL_DEBUG_SEVERITY_NOTIFICATION:
+		return;
+		SVRCASE( HIGH, "Severity: High" )
+		SVRCASE( MEDIUM, "Severity: Medium" )
+		SVRCASE( LOW, "Severity: Low" )
 #undef SVRCASE
 	}
 
-	switch (source)
-	{
+	switch ( source ) {
 #define SRCCASE(X)  case GL_DEBUG_SOURCE_ ## X ## _ARB: sourceStr = "Source: " #X; break;
-		SRCCASE(API);
-		SRCCASE(WINDOW_SYSTEM);
-		SRCCASE(SHADER_COMPILER);
-		SRCCASE(THIRD_PARTY);
-		SRCCASE(APPLICATION);
-		SRCCASE(OTHER);
+		SRCCASE( API );
+		SRCCASE( WINDOW_SYSTEM );
+		SRCCASE( SHADER_COMPILER );
+		SRCCASE( THIRD_PARTY );
+		SRCCASE( APPLICATION );
+		SRCCASE( OTHER );
 #undef SRCCASE
 	}
 
-	switch(type)
-	{
+	switch ( type ) {
 #define TYPECASE(X)  case GL_DEBUG_TYPE_ ## X ## _ARB: typeStr = "Type: " #X; break;
-		TYPECASE(ERROR);
-		TYPECASE(DEPRECATED_BEHAVIOR);
-		TYPECASE(UNDEFINED_BEHAVIOR);
-		TYPECASE(PORTABILITY);
-		TYPECASE(PERFORMANCE);
-		TYPECASE(OTHER);
+		TYPECASE( ERROR );
+		TYPECASE( DEPRECATED_BEHAVIOR );
+		TYPECASE( UNDEFINED_BEHAVIOR );
+		TYPECASE( PORTABILITY );
+		TYPECASE( PERFORMANCE );
+		TYPECASE( OTHER );
 #undef TYPECASE
 	}
-
 	common->Warning( "GLDBG %s %s %s: %s\n", sourceStr, typeStr, severityStr, message );
-
 }
 
 /*
@@ -370,7 +418,6 @@ bool R_CheckExtension( const char *name ) {
 		common->Printf( "X..%s not found\n", name );
 		return false;
 	}
-
 	common->Printf( "...using %s\n", name );
 	return true;
 }
@@ -386,20 +433,23 @@ static void R_CheckPortableExtensions( void ) {
 
 	// GL_ARB_multitexture
 	glConfig.multitextureAvailable = R_CheckExtension( "GL_ARB_multitexture" );
+
 	if ( glConfig.multitextureAvailable ) {
-		qglMultiTexCoord2fARB = (void(APIENTRY *)(GLenum, GLfloat, GLfloat))GLimp_ExtensionPointer( "glMultiTexCoord2fARB" );
-		qglMultiTexCoord2fvARB = (void(APIENTRY *)(GLenum, GLfloat *))GLimp_ExtensionPointer( "glMultiTexCoord2fvARB" );
-		qglActiveTextureARB = (void(APIENTRY *)(GLenum))GLimp_ExtensionPointer( "glActiveTextureARB" );
-		qglClientActiveTextureARB = (void(APIENTRY *)(GLenum))GLimp_ExtensionPointer( "glClientActiveTextureARB" );
-		qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, (GLint *)&glConfig.maxTextureUnits );
+		qglMultiTexCoord2fARB = ( void( APIENTRY * )( GLenum, GLfloat, GLfloat ) )GLimp_ExtensionPointer( "glMultiTexCoord2fARB" );
+		qglMultiTexCoord2fvARB = ( void( APIENTRY * )( GLenum, GLfloat * ) )GLimp_ExtensionPointer( "glMultiTexCoord2fvARB" );
+		qglActiveTextureARB = ( void( APIENTRY * )( GLenum ) )GLimp_ExtensionPointer( "glActiveTextureARB" );
+		qglClientActiveTextureARB = ( void( APIENTRY * )( GLenum ) )GLimp_ExtensionPointer( "glClientActiveTextureARB" );
+		qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, ( GLint * )&glConfig.maxTextureUnits );
+
 		if ( glConfig.maxTextureUnits > MAX_MULTITEXTURE_UNITS ) {
 			glConfig.maxTextureUnits = MAX_MULTITEXTURE_UNITS;
 		}
+
 		if ( glConfig.maxTextureUnits < 2 ) {
 			glConfig.multitextureAvailable = false;	// shouldn't ever happen
 		}
-		qglGetIntegerv( GL_MAX_TEXTURE_COORDS_ARB, (GLint *)&glConfig.maxTextureCoords );
-		qglGetIntegerv( GL_MAX_TEXTURE_IMAGE_UNITS_ARB, (GLint *)&glConfig.maxTextureImageUnits );
+		qglGetIntegerv( GL_MAX_TEXTURE_COORDS_ARB, ( GLint * )&glConfig.maxTextureCoords );
+		qglGetIntegerv( GL_MAX_TEXTURE_IMAGE_UNITS_ARB, ( GLint * )&glConfig.maxTextureImageUnits );
 	}
 
 	// GL_ARB_texture_env_combine
@@ -421,14 +471,15 @@ static void R_CheckPortableExtensions( void ) {
 	// DRI drivers may have GL_ARB_texture_compression but no GL_EXT_texture_compression_s3tc
 	if ( R_CheckExtension( "GL_ARB_texture_compression" ) && R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) ) {
 		glConfig.textureCompressionAvailable = true;
-		qglCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexImage2DARB" );
-		qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImageARB" );
+		qglCompressedTexImage2DARB = ( PFNGLCOMPRESSEDTEXIMAGE2DARBPROC )GLimp_ExtensionPointer( "glCompressedTexImage2DARB" );
+		qglGetCompressedTexImageARB = ( PFNGLGETCOMPRESSEDTEXIMAGEARBPROC )GLimp_ExtensionPointer( "glGetCompressedTexImageARB" );
 	} else {
 		glConfig.textureCompressionAvailable = false;
 	}
 
 	// GL_EXT_texture_filter_anisotropic
 	glConfig.anisotropicAvailable = R_CheckExtension( "GL_EXT_texture_filter_anisotropic" );
+
 	if ( glConfig.anisotropicAvailable ) {
 		qglGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxTextureAnisotropy );
 		common->Printf( "   maxTextureAnisotropy: %g\n", glConfig.maxTextureAnisotropy );
@@ -449,16 +500,16 @@ static void R_CheckPortableExtensions( void ) {
 
 	// GL_EXT_shared_texture_palette
 	glConfig.sharedTexturePaletteAvailable = R_CheckExtension( "GL_EXT_shared_texture_palette" );
+
 	if ( glConfig.sharedTexturePaletteAvailable ) {
-		qglColorTableEXT = ( void ( APIENTRY * ) ( int, int, int, int, int, const void * ) ) GLimp_ExtensionPointer( "glColorTableEXT" );
+		qglColorTableEXT = ( void ( APIENTRY * )( int, int, int, int, int, const void * ) ) GLimp_ExtensionPointer( "glColorTableEXT" );
 	}
 
 	// GL_EXT_texture3D (not currently used for anything)
 	glConfig.texture3DAvailable = R_CheckExtension( "GL_EXT_texture3D" );
+
 	if ( glConfig.texture3DAvailable ) {
-		qglTexImage3D =
-			(void (APIENTRY *)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) )
-			GLimp_ExtensionPointer( "glTexImage3D" );
+		qglTexImage3D = ( void ( APIENTRY * )( GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid * ) ) GLimp_ExtensionPointer( "glTexImage3D" );
 	}
 
 	// EXT_stencil_wrap
@@ -475,49 +526,118 @@ static void R_CheckPortableExtensions( void ) {
 
 	// GL_EXT_stencil_two_side
 	glConfig.twoSidedStencilAvailable = R_CheckExtension( "GL_EXT_stencil_two_side" );
-	if ( glConfig.twoSidedStencilAvailable )
-		qglActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)GLimp_ExtensionPointer( "glActiveStencilFaceEXT" );
 
-	if( glConfig.glVersion >= 2.0) {
+	if ( glConfig.twoSidedStencilAvailable ) {
+		qglActiveStencilFaceEXT = ( PFNGLACTIVESTENCILFACEEXTPROC )GLimp_ExtensionPointer( "glActiveStencilFaceEXT" );
+	}
+
+	if ( glConfig.glVersion >= 2.0 ) {
 		common->Printf( "...got GL2.0+ glStencilOpSeparate()\n" );
-		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparate" );
-	} else if( R_CheckExtension( "GL_ATI_separate_stencil" ) ) {
+		qglStencilOpSeparate = ( PFNGLSTENCILOPSEPARATEPROC )GLimp_ExtensionPointer( "glStencilOpSeparate" );
+	} else if ( R_CheckExtension( "GL_ATI_separate_stencil" ) ) {
 		common->Printf( "...got glStencilOpSeparateATI() (GL_ATI_separate_stencil)\n" );
 		// the ATI version of glStencilOpSeparate() has the same signature and should also
 		// behave identical to the GL2 version (in Mesa3D it's just an alias)
-		qglStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)GLimp_ExtensionPointer( "glStencilOpSeparateATI" );
+		qglStencilOpSeparate = ( PFNGLSTENCILOPSEPARATEPROC )GLimp_ExtensionPointer( "glStencilOpSeparateATI" );
 	} else {
 		common->Printf( "X..don't have glStencilOpSeparateATI() or (GL2.0+) glStencilOpSeparate()\n" );
 		qglStencilOpSeparate = NULL;
 	}
 
+	// ARB_MapBufferRange
+	glConfig.ARBMapBufferRangeAvailable = R_CheckExtension( "GL_ARB_map_buffer_range" );
+
+	if ( glConfig.ARBMapBufferRangeAvailable ) {
+		qglFlushMappedBufferRange = ( PFNGLFLUSHMAPPEDBUFFERRANGEPROC )GLimp_ExtensionPointer( "glFlushMappedBufferRange" );
+		qglMapBufferRange = ( PFNGLMAPBUFFERRANGEPROC )GLimp_ExtensionPointer( "glMapBufferRange" );
+	}
+
+	// ARB_shading_language_100
+	glConfig.ARBShadingLanguageAvailable = R_CheckExtension( "GL_ARB_shading_language_100" );
+
+	if ( glConfig.ARBShadingLanguageAvailable ) {
+		qglUniform1f = ( PFNGLUNIFORM1FPROC ) GLimp_ExtensionPointer( "glUniform1f" );
+		qglUniform1fv = ( PFNGLUNIFORM1FVPROC ) GLimp_ExtensionPointer( "glUniform1fv" );
+		qglUniform1i = ( PFNGLUNIFORM1IPROC ) GLimp_ExtensionPointer( "glUniform1i" );
+		qglUniform1iv = ( PFNGLUNIFORM1IVPROC ) GLimp_ExtensionPointer( "glUniform1iv" );
+		qglUniform2f = ( PFNGLUNIFORM2FPROC ) GLimp_ExtensionPointer( "glUniform2f" );
+		qglUniform2fv = ( PFNGLUNIFORM2FVPROC ) GLimp_ExtensionPointer( "glUniform2fv" );
+		qglUniform2i = ( PFNGLUNIFORM2IPROC ) GLimp_ExtensionPointer( "glUniform2i" );
+		qglUniform2iv = ( PFNGLUNIFORM2IVPROC ) GLimp_ExtensionPointer( "glUniform2iv" );
+		qglUniform3f = ( PFNGLUNIFORM3FPROC ) GLimp_ExtensionPointer( "glUniform3f" );
+		qglUniform3fv = ( PFNGLUNIFORM3FVPROC ) GLimp_ExtensionPointer( "glUniform3fv" );
+		qglUniform3i = ( PFNGLUNIFORM3IPROC ) GLimp_ExtensionPointer( "glUniform3i" );
+		qglUniform3iv = ( PFNGLUNIFORM3IVPROC ) GLimp_ExtensionPointer( "glUniform3iv" );
+		qglUniform4f = ( PFNGLUNIFORM4FPROC ) GLimp_ExtensionPointer( "glUniform4f" );
+		qglUniform4fv = ( PFNGLUNIFORM4FVPROC ) GLimp_ExtensionPointer( "glUniform4fv" );
+		qglUniform4i = ( PFNGLUNIFORM4IPROC ) GLimp_ExtensionPointer( "glUniform4i" );
+		qglUniform4iv = ( PFNGLUNIFORM4IVPROC ) GLimp_ExtensionPointer( "glUniform4iv" );
+
+		qglUniformMatrix2fv = ( PFNGLUNIFORMMATRIX2FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix2fv" );
+		qglUniformMatrix3fv = ( PFNGLUNIFORMMATRIX3FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix3fv" );
+		qglUniformMatrix4fv = ( PFNGLUNIFORMMATRIX4FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix4fv" );
+		qglUniformMatrix2x3fv = ( PFNGLUNIFORMMATRIX2X3FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix2x3fv" );
+		qglUniformMatrix2x4fv = ( PFNGLUNIFORMMATRIX2X4FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix2x4fv" );
+		qglUniformMatrix3x2fv = ( PFNGLUNIFORMMATRIX3X2FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix3x2fv" );
+		qglUniformMatrix3x4fv = ( PFNGLUNIFORMMATRIX3X4FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix3x4fv" );
+		qglUniformMatrix4x2fv = ( PFNGLUNIFORMMATRIX4X2FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix4x2fv" );
+		qglUniformMatrix4x3fv = ( PFNGLUNIFORMMATRIX4X3FVPROC ) GLimp_ExtensionPointer( "glUniformMatrix4x3fv" );
+
+		qglIsProgram = ( PFNGLISPROGRAMPROC ) GLimp_ExtensionPointer( "glIsProgram" );
+		qglCreateProgram = ( PFNGLCREATEPROGRAMPROC ) GLimp_ExtensionPointer( "glCreateProgram" );
+		qglValidateProgram = ( PFNGLVALIDATEPROGRAMPROC ) GLimp_ExtensionPointer( "glValidateProgram" );
+		qglLinkProgram = ( PFNGLLINKPROGRAMPROC ) GLimp_ExtensionPointer( "glLinkProgram" );
+		qglUseProgram = ( PFNGLUSEPROGRAMPROC ) GLimp_ExtensionPointer( "glUseProgram" );
+		qglDeleteProgram = ( PFNGLDELETEPROGRAMPROC ) GLimp_ExtensionPointer( "glDeleteProgram" );
+
+		qglIsShader = ( PFNGLISSHADERPROC ) GLimp_ExtensionPointer( "glIsShader" );
+		qglShaderSource = ( PFNGLSHADERSOURCEPROC ) GLimp_ExtensionPointer( "glShaderSource" );
+		qglCreateShader = ( PFNGLCREATESHADERPROC ) GLimp_ExtensionPointer( "glCreateShader" );
+		qglAttachShader = ( PFNGLATTACHSHADERPROC ) GLimp_ExtensionPointer( "glAttachShader" );
+		qglBindAttribLocation = ( PFNGLBINDATTRIBLOCATIONPROC ) GLimp_ExtensionPointer( "glBindAttribLocation" );
+		qglCompileShader = ( PFNGLCOMPILESHADERPROC ) GLimp_ExtensionPointer( "glCompileShader" );
+		qglDetachShader = ( PFNGLDETACHSHADERPROC ) GLimp_ExtensionPointer( "glDetachShader" );
+		qglDeleteShader = ( PFNGLDELETESHADERPROC ) GLimp_ExtensionPointer( "glDeleteShader" );
+
+		qglGetProgramInfoLog = ( PFNGLGETPROGRAMINFOLOGPROC ) GLimp_ExtensionPointer( "glGetProgramInfoLog" );
+		qglGetProgramiv = ( PFNGLGETPROGRAMIVPROC ) GLimp_ExtensionPointer( "glGetProgramiv" );
+		qglGetShaderInfoLog = ( PFNGLGETSHADERINFOLOGPROC ) GLimp_ExtensionPointer( "glGetShaderInfoLog" );
+		qglGetShaderSource = ( PFNGLGETSHADERSOURCEPROC ) GLimp_ExtensionPointer( "glGetShaderSource" );
+		qglGetShaderiv = ( PFNGLGETSHADERIVPROC ) GLimp_ExtensionPointer( "glGetShaderiv" );
+		qglGetUniformLocation = ( PFNGLGETUNIFORMLOCATIONPROC ) GLimp_ExtensionPointer( "glGetUniformLocation" );
+		qglGetUniformfv = ( PFNGLGETUNIFORMFVPROC ) GLimp_ExtensionPointer( "glGetUniformfv" );
+		qglGetUniformiv = ( PFNGLGETUNIFORMIVPROC ) GLimp_ExtensionPointer( "glGetUniformiv" );
+	}
+
 	// ARB_vertex_buffer_object
 	glConfig.ARBVertexBufferObjectAvailable = R_CheckExtension( "GL_ARB_vertex_buffer_object" );
-	if(glConfig.ARBVertexBufferObjectAvailable) {
-		qglBindBufferARB = (PFNGLBINDBUFFERARBPROC)GLimp_ExtensionPointer( "glBindBufferARB");
-		qglDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)GLimp_ExtensionPointer( "glDeleteBuffersARB");
-		qglGenBuffersARB = (PFNGLGENBUFFERSARBPROC)GLimp_ExtensionPointer( "glGenBuffersARB");
-		qglIsBufferARB = (PFNGLISBUFFERARBPROC)GLimp_ExtensionPointer( "glIsBufferARB");
-		qglBufferDataARB = (PFNGLBUFFERDATAARBPROC)GLimp_ExtensionPointer( "glBufferDataARB");
-		qglBufferSubDataARB = (PFNGLBUFFERSUBDATAARBPROC)GLimp_ExtensionPointer( "glBufferSubDataARB");
-		qglGetBufferSubDataARB = (PFNGLGETBUFFERSUBDATAARBPROC)GLimp_ExtensionPointer( "glGetBufferSubDataARB");
-		qglMapBufferARB = (PFNGLMAPBUFFERARBPROC)GLimp_ExtensionPointer( "glMapBufferARB");
-		qglUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)GLimp_ExtensionPointer( "glUnmapBufferARB");
-		qglGetBufferParameterivARB = (PFNGLGETBUFFERPARAMETERIVARBPROC)GLimp_ExtensionPointer( "glGetBufferParameterivARB");
-		qglGetBufferPointervARB = (PFNGLGETBUFFERPOINTERVARBPROC)GLimp_ExtensionPointer( "glGetBufferPointervARB");
+
+	if ( glConfig.ARBVertexBufferObjectAvailable ) {
+		qglBindBufferARB = ( PFNGLBINDBUFFERARBPROC ) GLimp_ExtensionPointer( "glBindBufferARB" );
+		qglDeleteBuffersARB = ( PFNGLDELETEBUFFERSARBPROC ) GLimp_ExtensionPointer( "glDeleteBuffersARB" );
+		qglGenBuffersARB = ( PFNGLGENBUFFERSARBPROC ) GLimp_ExtensionPointer( "glGenBuffersARB" );
+		qglIsBufferARB = ( PFNGLISBUFFERARBPROC ) GLimp_ExtensionPointer( "glIsBufferARB" );
+		qglBufferDataARB = ( PFNGLBUFFERDATAARBPROC ) GLimp_ExtensionPointer( "glBufferDataARB" );
+		qglBufferSubDataARB = ( PFNGLBUFFERSUBDATAARBPROC ) GLimp_ExtensionPointer( "glBufferSubDataARB" );
+		qglGetBufferSubDataARB = ( PFNGLGETBUFFERSUBDATAARBPROC ) GLimp_ExtensionPointer( "glGetBufferSubDataARB" );
+		qglMapBufferARB = ( PFNGLMAPBUFFERARBPROC ) GLimp_ExtensionPointer( "glMapBufferARB" );
+		qglUnmapBufferARB = ( PFNGLUNMAPBUFFERARBPROC ) GLimp_ExtensionPointer( "glUnmapBufferARB" );
+		qglGetBufferParameterivARB = ( PFNGLGETBUFFERPARAMETERIVARBPROC ) GLimp_ExtensionPointer( "glGetBufferParameterivARB" );
+		qglGetBufferPointervARB = ( PFNGLGETBUFFERPOINTERVARBPROC ) GLimp_ExtensionPointer( "glGetBufferPointervARB" );
 	}
 
 	// ARB_vertex_program
 	glConfig.ARBVertexProgramAvailable = R_CheckExtension( "GL_ARB_vertex_program" );
-	if (glConfig.ARBVertexProgramAvailable) {
-		qglVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)GLimp_ExtensionPointer( "glVertexAttribPointerARB" );
-		qglEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glEnableVertexAttribArrayARB" );
-		qglDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glDisableVertexAttribArrayARB" );
-		qglProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)GLimp_ExtensionPointer( "glProgramStringARB" );
-		qglBindProgramARB = (PFNGLBINDPROGRAMARBPROC)GLimp_ExtensionPointer( "glBindProgramARB" );
-		qglGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)GLimp_ExtensionPointer( "glGenProgramsARB" );
-		qglProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)GLimp_ExtensionPointer( "glProgramEnvParameter4fvARB" );
-		qglProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)GLimp_ExtensionPointer( "glProgramLocalParameter4fvARB" );
+
+	if ( glConfig.ARBVertexProgramAvailable ) {
+		qglVertexAttribPointerARB = ( PFNGLVERTEXATTRIBPOINTERARBPROC ) GLimp_ExtensionPointer( "glVertexAttribPointerARB" );
+		qglEnableVertexAttribArrayARB = ( PFNGLENABLEVERTEXATTRIBARRAYARBPROC ) GLimp_ExtensionPointer( "glEnableVertexAttribArrayARB" );
+		qglDisableVertexAttribArrayARB = ( PFNGLDISABLEVERTEXATTRIBARRAYARBPROC ) GLimp_ExtensionPointer( "glDisableVertexAttribArrayARB" );
+		qglProgramStringARB = ( PFNGLPROGRAMSTRINGARBPROC ) GLimp_ExtensionPointer( "glProgramStringARB" );
+		qglBindProgramARB = ( PFNGLBINDPROGRAMARBPROC ) GLimp_ExtensionPointer( "glBindProgramARB" );
+		qglGenProgramsARB = ( PFNGLGENPROGRAMSARBPROC ) GLimp_ExtensionPointer( "glGenProgramsARB" );
+		qglProgramEnvParameter4fvARB = ( PFNGLPROGRAMENVPARAMETER4FVARBPROC ) GLimp_ExtensionPointer( "glProgramEnvParameter4fvARB" );
+		qglProgramLocalParameter4fvARB = ( PFNGLPROGRAMLOCALPARAMETER4FVARBPROC ) GLimp_ExtensionPointer( "glProgramLocalParameter4fvARB" );
 	}
 
 	// ARB_fragment_program
@@ -525,43 +645,47 @@ static void R_CheckPortableExtensions( void ) {
 		glConfig.ARBFragmentProgramAvailable = false;
 	} else {
 		glConfig.ARBFragmentProgramAvailable = R_CheckExtension( "GL_ARB_fragment_program" );
-		if (glConfig.ARBFragmentProgramAvailable) {
+		if ( glConfig.ARBFragmentProgramAvailable ) {
 			// these are the same as ARB_vertex_program
-			qglProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)GLimp_ExtensionPointer( "glProgramStringARB" );
-			qglBindProgramARB = (PFNGLBINDPROGRAMARBPROC)GLimp_ExtensionPointer( "glBindProgramARB" );
-			qglProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)GLimp_ExtensionPointer( "glProgramEnvParameter4fvARB" );
-			qglProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)GLimp_ExtensionPointer( "glProgramLocalParameter4fvARB" );
+			qglProgramStringARB = ( PFNGLPROGRAMSTRINGARBPROC ) GLimp_ExtensionPointer( "glProgramStringARB" );
+			qglBindProgramARB = ( PFNGLBINDPROGRAMARBPROC ) GLimp_ExtensionPointer( "glBindProgramARB" );
+			qglProgramEnvParameter4fvARB = ( PFNGLPROGRAMENVPARAMETER4FVARBPROC ) GLimp_ExtensionPointer( "glProgramEnvParameter4fvARB" );
+			qglProgramLocalParameter4fvARB = ( PFNGLPROGRAMLOCALPARAMETER4FVARBPROC ) GLimp_ExtensionPointer( "glProgramLocalParameter4fvARB" );
 		}
 	}
 
 	// check for minimum set
 	if ( !glConfig.multitextureAvailable || !glConfig.textureEnvCombineAvailable || !glConfig.cubeMapAvailable
-		|| !glConfig.envDot3Available ) {
-			common->Error( "%s", common->GetLanguageDict()->GetString( "#str_06780" ) );
+	        || !glConfig.envDot3Available ) {
+		common->Error( "%s", common->GetLanguageDict()->GetString( "#str_06780" ) );
 	}
 
 	// GL_EXT_depth_bounds_test
 	glConfig.depthBoundsTestAvailable = R_CheckExtension( "EXT_depth_bounds_test" );
+
 	if ( glConfig.depthBoundsTestAvailable ) {
-		qglDepthBoundsEXT = (PFNGLDEPTHBOUNDSEXTPROC)GLimp_ExtensionPointer( "glDepthBoundsEXT" );
+		qglDepthBoundsEXT = ( PFNGLDEPTHBOUNDSEXTPROC ) GLimp_ExtensionPointer( "glDepthBoundsEXT" );
 	}
 
 	// GL_ARB_debug_output
 	glConfig.glDebugOutputAvailable = false;
+
 	if ( glConfig.haveDebugContext ) {
 		if ( strstr( glConfig.extensions_string, "GL_ARB_debug_output" ) ) {
 			glConfig.glDebugOutputAvailable = true;
-			qglDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC)GLimp_ExtensionPointer( "glDebugMessageCallbackARB" );
+			qglDebugMessageCallbackARB = ( PFNGLDEBUGMESSAGECALLBACKARBPROC ) GLimp_ExtensionPointer( "glDebugMessageCallbackARB" );
+
 			if ( r_glDebugContext.GetBool() ) {
 				common->Printf( "...using GL_ARB_debug_output (r_glDebugContext is set)\n" );
-				qglDebugMessageCallbackARB(DebugCallback, NULL);
-				qglEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+				qglDebugMessageCallbackARB( DebugCallback, NULL );
+				qglEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
 			} else {
 				common->Printf( "...found GL_ARB_debug_output, but not using it (r_glDebugContext is not set)\n" );
 			}
 		} else {
 			common->Printf( "X..GL_ARB_debug_output not found\n" );
 			qglDebugMessageCallbackARB = NULL;
+
 			if ( r_glDebugContext.GetBool() ) {
 				common->Warning( "r_glDebugContext is set, but can't be used because GL_ARB_debug_output is not supported" );
 			}
@@ -634,7 +758,7 @@ vidmode_t r_vidModes[] = {
 	{ "Mode 32: 7680x2160",		7680,   2160 },
 };
 // DG: made this an enum so even stupid compilers accept it as array length below
-enum {	s_numVidModes = sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) };
+enum { s_numVidModes = sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) };
 
 bool R_GetModeInfo( int *width, int *height, int mode ) {
 	vidmode_t	*vm;
@@ -642,6 +766,7 @@ bool R_GetModeInfo( int *width, int *height, int mode ) {
 	if ( mode < -1 ) {
 		return false;
 	}
+
 	if ( mode >= s_numVidModes ) {
 		return false;
 	}
@@ -651,16 +776,15 @@ bool R_GetModeInfo( int *width, int *height, int mode ) {
 		*height = r_customHeight.GetInteger();
 		return true;
 	}
-
 	vm = &r_vidModes[mode];
 
 	if ( width ) {
 		*width  = vm->width;
 	}
+
 	if ( height ) {
 		*height = vm->height;
 	}
-
 	return true;
 }
 
@@ -670,54 +794,47 @@ bool R_GetModeInfo( int *width, int *height, int mode ) {
 //     sorted in the menu.
 
 struct vidModePtr {
-	vidmode_t* vidMode;
+	vidmode_t *vidMode;
 	int modeIndex;
 };
 
 static vidModePtr sortedVidModes[s_numVidModes];
 
-static int vidModeCmp(const void* vm1, const void* vm2)
-{
-	const vidModePtr* v1 = static_cast<const vidModePtr*>(vm1);
-	const vidModePtr* v2 = static_cast<const vidModePtr*>(vm2);
+static int vidModeCmp( const void *vm1, const void *vm2 ) {
+	const vidModePtr *v1 = static_cast<const vidModePtr *>( vm1 );
+	const vidModePtr *v2 = static_cast<const vidModePtr *>( vm2 );
 
 	// sort primarily by width, secondarily by height
 	int wdiff = v1->vidMode->width - v2->vidMode->width;
-	return (wdiff != 0) ? wdiff : (v1->vidMode->height - v2->vidMode->height);
+
+	return ( wdiff != 0 ) ? wdiff : ( v1->vidMode->height - v2->vidMode->height );
 }
 
-static void initSortedVidModes()
-{
-	if(sortedVidModes[0].vidMode != NULL)
-	{
+static void initSortedVidModes() {
+	if ( sortedVidModes[0].vidMode != NULL ) {
 		// already initialized
 		return;
 	}
 
-	for(int i=0; i<s_numVidModes; ++i)
-	{
+	for ( int i = 0; i < s_numVidModes; ++i ) {
 		sortedVidModes[i].modeIndex = i;
 		sortedVidModes[i].vidMode = &r_vidModes[i];
 	}
-
-	qsort(sortedVidModes, s_numVidModes, sizeof(vidModePtr), vidModeCmp);
+	qsort( sortedVidModes, s_numVidModes, sizeof( vidModePtr ), vidModeCmp );
 }
 
 // DG: the following two functions are part of a horrible hack in ChoiceWindow.cpp
 //     to overwrite the default resolution list in the system options menu
 
 // "r_custom*;640x480;800x600;1024x768;..."
-idStr R_GetVidModeListString(bool addCustom)
-{
+idStr R_GetVidModeListString( bool addCustom ) {
 	idStr ret = addCustom ? "r_custom*" : "";
 
-	for(int i=0; i<s_numVidModes; ++i)
-	{
+	for ( int i = 0; i < s_numVidModes; ++i ) {
 		// for some reason, modes 0-2 are not used. maybe too small for GUI?
-		if(sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL)
-		{
+		if ( sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL ) {
 			idStr modeStr;
-			sprintf(modeStr, ";%dx%d", sortedVidModes[i].vidMode->width, sortedVidModes[i].vidMode->height);
+			sprintf( modeStr, ";%dx%d", sortedVidModes[i].vidMode->width, sortedVidModes[i].vidMode->height );
 			ret += modeStr;
 		}
 	}
@@ -725,14 +842,12 @@ idStr R_GetVidModeListString(bool addCustom)
 }
 
 // r_mode values for resolutions from R_GetVidModeListString(): "-1;3;4;5;..."
-idStr R_GetVidModeValsString(bool addCustom)
-{
+idStr R_GetVidModeValsString( bool addCustom ) {
 	idStr ret = addCustom ? "-1" : ""; // for custom resolutions using r_customWidth/r_customHeight
-	for(int i=0; i<s_numVidModes; ++i)
-	{
+
+	for ( int i = 0; i < s_numVidModes; ++i ) {
 		// for some reason, modes 0-2 are not used. maybe too small for GUI?
-		if(sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL)
-		{
+		if ( sortedVidModes[i].modeIndex >= 3 && sortedVidModes[i].vidMode != NULL ) {
 			ret += ";";
 			ret += sortedVidModes[i].modeIndex;
 		}
@@ -807,12 +922,11 @@ void R_InitOpenGL( void ) {
 		r_multiSamples.SetInteger( 0 );
 	}
 
-// load qgl function pointers
+	// load qgl function pointers
 #define QGLPROC(name, rettype, args) \
-	q##name = (rettype(APIENTRYP)args)GLimp_ExtensionPointer(#name); \
-	if (!q##name) \
-		common->FatalError("Unable to initialize OpenGL (%s)", #name);
-
+	q##name = ( rettype( APIENTRYP )args ) GLimp_ExtensionPointer( #name ); \
+	if ( !q##name ) \
+		common->FatalError( "Unable to initialize OpenGL (%s)", #name );
 #include "renderer/qgl_proc.h"
 
 	// input and sound systems need to be tied to the new window
@@ -820,10 +934,23 @@ void R_InitOpenGL( void ) {
 	soundSystem->InitHW();
 
 	// get our config strings
-	glConfig.vendor_string = (const char *)qglGetString(GL_VENDOR);
-	glConfig.renderer_string = (const char *)qglGetString(GL_RENDERER);
-	glConfig.version_string = (const char *)qglGetString(GL_VERSION);
-	glConfig.extensions_string = (const char *)qglGetString(GL_EXTENSIONS);
+	glConfig.vendor_string = ( const char * )qglGetString( GL_VENDOR );
+	glConfig.renderer_string = ( const char * )qglGetString( GL_RENDERER );
+	glConfig.version_string = ( const char * )qglGetString( GL_VERSION );
+	glConfig.extensions_string = ( const char * )qglGetString( GL_EXTENSIONS );
+
+	// simplify a few things
+	if ( idStr::Cmp( glConfig.vendor_string, "Intel" ) == 0 ) {
+		glConfig.vendor = glvIntel;
+	} else if ( idStr::Cmp( glConfig.vendor_string, "ATI Technologies Inc." ) == 0 ) {
+		glConfig.vendor = glvAMD;
+	} else if ( idStr::Cmpn( glConfig.vendor_string, "NVIDIA", 6 ) == 0 ||
+	            idStr::Cmpn( glConfig.vendor_string, "Nvidia", 6 ) == 0 ||
+	            idStr::Cmpn( glConfig.vendor_string, "nvidia", 6 ) == 0 ) {
+		glConfig.vendor = glvNVIDIA;
+	} else {
+		glConfig.vendor = glvAny;
+	}
 
 	// OpenGL driver constants
 	qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &temp );
@@ -833,12 +960,11 @@ void R_InitOpenGL( void ) {
 	if ( glConfig.maxTextureSize <= 0 ) {
 		glConfig.maxTextureSize = 256;
 	}
-
 	glConfig.isInitialized = true;
 
-	common->Printf("OpenGL vendor: %s\n", glConfig.vendor_string );
-	common->Printf("OpenGL renderer: %s\n", glConfig.renderer_string );
-	common->Printf("OpenGL version: %s\n", glConfig.version_string );
+	common->Printf( "OpenGL vendor: %s\n", glConfig.vendor_string );
+	common->Printf( "OpenGL renderer: %s\n", glConfig.renderer_string );
+	common->Printf( "OpenGL version: %s\n", glConfig.version_string );
 
 	// recheck all the extensions (FIXME: this might be dangerous)
 	R_CheckPortableExtensions();
@@ -862,8 +988,9 @@ void R_InitOpenGL( void ) {
 
 	// Reset our gamma
 	r_gammaInShader.ClearModified();
+
 	if ( r_gammaInShader.GetBool() ) {
-		common->Printf( "Will apply r_gamma and r_brightness in shaders (r_gammaInShader 1)\n" );
+		common->Printf( "Will apply r_gamma and r_brightness in shaders (ARB2 only: r_gammaInShader 1)\n" );
 	} else {
 		common->Printf( "Will apply r_gamma and r_brightness in hardware (possibly on all screens; r_gammaInShader 0)\n" );
 		R_SetColorMappings();
@@ -871,19 +998,22 @@ void R_InitOpenGL( void ) {
 
 #ifdef _WIN32
 	static bool glCheck = false;
+
 	if ( !glCheck && win32.osversion.dwMajorVersion == 6 ) {
 		glCheck = true;
+
 		if ( !idStr::Icmp( glConfig.vendor_string, "Microsoft" ) && idStr::FindText( glConfig.renderer_string, "OpenGL-D3D" ) != -1 ) {
 			if ( cvarSystem->GetCVarBool( "r_fullscreen" ) ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_NOW, "vid_restart partial windowed\n" );
 				Sys_GrabMouseCursor( false );
 			}
 			int ret = MessageBox( NULL, "Please install OpenGL drivers from your graphics hardware vendor to run " GAME_NAME ".\nYour OpenGL functionality is limited.",
-				"Insufficient OpenGL capabilities", MB_OKCANCEL | MB_ICONWARNING | MB_TASKMODAL );
+			                      "Insufficient OpenGL capabilities", MB_OKCANCEL | MB_ICONWARNING | MB_TASKMODAL );
 			if ( ret == IDCANCEL ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 				cmdSystem->ExecuteCommandBuffer();
 			}
+
 			if ( cvarSystem->GetCVarBool( "r_fullscreen" ) ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart\n" );
 			}
@@ -905,31 +1035,33 @@ void GL_CheckErrors( void ) {
 	// check for up to 10 errors pending
 	for ( i = 0 ; i < 10 ; i++ ) {
 		err = qglGetError();
+
 		if ( err == GL_NO_ERROR ) {
 			return;
 		}
-		switch( err ) {
-			case GL_INVALID_ENUM:
-				strcpy( s, "GL_INVALID_ENUM" );
-				break;
-			case GL_INVALID_VALUE:
-				strcpy( s, "GL_INVALID_VALUE" );
-				break;
-			case GL_INVALID_OPERATION:
-				strcpy( s, "GL_INVALID_OPERATION" );
-				break;
-			case GL_STACK_OVERFLOW:
-				strcpy( s, "GL_STACK_OVERFLOW" );
-				break;
-			case GL_STACK_UNDERFLOW:
-				strcpy( s, "GL_STACK_UNDERFLOW" );
-				break;
-			case GL_OUT_OF_MEMORY:
-				strcpy( s, "GL_OUT_OF_MEMORY" );
-				break;
-			default:
-				idStr::snPrintf( s, sizeof(s), "%i", err);
-				break;
+
+		switch ( err ) {
+		case GL_INVALID_ENUM:
+			strcpy( s, "GL_INVALID_ENUM" );
+			break;
+		case GL_INVALID_VALUE:
+			strcpy( s, "GL_INVALID_VALUE" );
+			break;
+		case GL_INVALID_OPERATION:
+			strcpy( s, "GL_INVALID_OPERATION" );
+			break;
+		case GL_STACK_OVERFLOW:
+			strcpy( s, "GL_STACK_OVERFLOW" );
+			break;
+		case GL_STACK_UNDERFLOW:
+			strcpy( s, "GL_STACK_UNDERFLOW" );
+			break;
+		case GL_OUT_OF_MEMORY:
+			strcpy( s, "GL_OUT_OF_MEMORY" );
+			break;
+		default:
+			idStr::snPrintf( s, sizeof( s ), "%i", err );
+			break;
 		}
 
 		if ( !r_ignoreGLErrors.GetBool() ) {
@@ -952,10 +1084,10 @@ static void R_ReloadSurface_f( const idCmdArgs &args ) {
 	// start far enough away that we don't hit the player model
 	start = tr.primaryView->renderView.vieworg + tr.primaryView->renderView.viewaxis[0] * 16;
 	end = start + tr.primaryView->renderView.viewaxis[0] * 1000.0f;
+
 	if ( !tr.primaryWorld->Trace( mt, start, end, 0.0f, false ) ) {
 		return;
 	}
-
 	common->Printf( "Reloading %s\n", mt.material->GetName() );
 
 	// reload the decl
@@ -976,6 +1108,7 @@ static void R_ListModes_f( const idCmdArgs &args ) {
 	int i;
 
 	common->Printf( "\n" );
+
 	for ( i = 0; i < s_numVidModes; i++ ) {
 		common->Printf( "%s\n", r_vidModes[i].description );
 	}
@@ -1006,8 +1139,9 @@ void R_TestImage_f( const idCmdArgs &args ) {
 		return;
 	}
 
-	if ( idStr::IsNumeric( args.Argv(1) ) ) {
-		imageNum = atoi( args.Argv(1) );
+	if ( idStr::IsNumeric( args.Argv( 1 ) ) ) {
+		imageNum = atoi( args.Argv( 1 ) );
+
 		if ( imageNum >= 0 && imageNum < globalImages->images.Num() ) {
 			tr.testImage = globalImages->images[imageNum];
 		}
@@ -1033,22 +1167,19 @@ void R_TestVideo_f( const idCmdArgs &args ) {
 	if ( args.Argc() < 2 ) {
 		return;
 	}
-
 	tr.testImage = globalImages->ImageFromFile( "_scratch", TF_DEFAULT, false, TR_REPEAT, TD_DEFAULT );
 	tr.testVideo = idCinematic::Alloc();
 	tr.testVideo->InitFromFile( args.Argv( 1 ), true );
 
-	cinData_t	cin;
-	cin = tr.testVideo->ImageForTime( 0 );
+	cinData_t cin = tr.testVideo->ImageForTime( 0 );
+
 	if ( !cin.image ) {
 		delete tr.testVideo;
 		tr.testVideo = NULL;
 		tr.testImage = NULL;
 		return;
 	}
-
 	common->Printf( "%i x %i images\n", cin.imageWidth, cin.imageHeight );
-
 	int	len = tr.testVideo->AnimationLength();
 	common->Printf( "%5.1f seconds of video\n", len * 0.001 );
 
@@ -1061,17 +1192,24 @@ void R_TestVideo_f( const idCmdArgs &args ) {
 	session->sw->PlayShaderDirectly( wavString.c_str() );
 }
 
+/*
+===================
+R_QsortSurfaceAreas
+===================
+*/
 static int R_QsortSurfaceAreas( const void *a, const void *b ) {
 	const idMaterial	*ea, *eb;
-	int	ac, bc;
+	int					ac, bc;
 
-	ea = *(idMaterial **)a;
+	ea = *( idMaterial ** )a;
+
 	if ( !ea->EverReferenced() ) {
 		ac = 0;
 	} else {
 		ac = ea->GetSurfaceArea();
 	}
-	eb = *(idMaterial **)b;
+	eb = *( idMaterial ** )b;
+
 	if ( !eb->EverReferenced() ) {
 		bc = 0;
 	} else {
@@ -1081,13 +1219,12 @@ static int R_QsortSurfaceAreas( const void *a, const void *b ) {
 	if ( ac < bc ) {
 		return -1;
 	}
+
 	if ( ac > bc ) {
 		return 1;
 	}
-
 	return idStr::Icmp( ea->GetName(), eb->GetName() );
 }
-
 
 /*
 ===================
@@ -1101,12 +1238,11 @@ void R_ReportSurfaceAreas_f( const idCmdArgs &args ) {
 	idMaterial	**list;
 
 	count = declManager->GetNumDecls( DECL_MATERIAL );
-	list = (idMaterial **)_alloca( count * sizeof( *list ) );
+	list = ( idMaterial ** )_alloca( count * sizeof( *list ) );
 
 	for ( i = 0 ; i < count ; i++ ) {
-		list[i] = (idMaterial *)declManager->DeclByIndex( DECL_MATERIAL, i, false );
+		list[i] = ( idMaterial * )declManager->DeclByIndex( DECL_MATERIAL, i, false );
 	}
-
 	qsort( list, count, sizeof( list[0] ), R_QsortSurfaceAreas );
 
 	// skip over ones with 0 area
@@ -1144,14 +1280,17 @@ void R_ReportImageDuplication_f( const idCmdArgs &args ) {
 			// ignore background loading stubs
 			continue;
 		}
+
 		if ( image1->generatorFunction ) {
 			// ignore procedural images
 			continue;
 		}
+
 		if ( image1->cubeFiles != CF_2D ) {
 			// ignore cube maps
 			continue;
 		}
+
 		if ( image1->defaulted ) {
 			continue;
 		}
@@ -1166,27 +1305,31 @@ void R_ReportImageDuplication_f( const idCmdArgs &args ) {
 			if ( image2->isPartialImage ) {
 				continue;
 			}
+
 			if ( image2->generatorFunction ) {
 				continue;
 			}
+
 			if ( image2->cubeFiles != CF_2D ) {
 				continue;
 			}
+
 			if ( image2->defaulted ) {
 				continue;
 			}
+
 			if ( image1->imageHash != image2->imageHash ) {
 				continue;
 			}
-			if ( image2->uploadWidth != image1->uploadWidth
-				|| image2->uploadHeight != image1->uploadHeight ) {
+
+			if ( image2->uploadWidth != image1->uploadWidth || image2->uploadHeight != image1->uploadHeight ) {
 				continue;
 			}
+
 			if ( !idStr::Icmp( image1->imgName, image2->imgName ) ) {
 				// ignore same image-with-different-parms
 				continue;
 			}
-
 			byte	*data2;
 			int		w2, h2;
 
@@ -1197,11 +1340,10 @@ void R_ReportImageDuplication_f( const idCmdArgs &args ) {
 				continue;
 			}
 
-			if ( memcmp( data1, data2, w1*h1*4 ) ) {
+			if ( memcmp( data1, data2, w1 * h1 * 4 ) ) {
 				R_StaticFree( data2 );
 				continue;
 			}
-
 			R_StaticFree( data2 );
 
 			common->Printf( "%s == %s\n", image1->imgName.c_str(), image2->imgName.c_str() );
@@ -1209,7 +1351,6 @@ void R_ReportImageDuplication_f( const idCmdArgs &args ) {
 			count++;
 			break;
 		}
-
 		R_StaticFree( data1 );
 	}
 	common->Printf( "%i / %i collisions\n", count, globalImages->images.Num() );
@@ -1236,7 +1377,7 @@ static float R_RenderingFPS( const renderView_t *renderView ) {
 	int		end;
 	int		count = 0;
 
-	while( 1 ) {
+	while ( 1 ) {
 		// render
 		renderSystem->BeginFrame( glConfig.vidWidth, glConfig.vidHeight );
 		tr.primaryWorld->RenderScene( renderView );
@@ -1244,11 +1385,11 @@ static float R_RenderingFPS( const renderView_t *renderView ) {
 		qglFinish();
 		count++;
 		end = Sys_Milliseconds();
+
 		if ( end - start > SAMPLE_MSEC ) {
 			break;
 		}
 	}
-
 	float fps = count * 1000.0 / ( end - start );
 
 	return fps;
@@ -1293,7 +1434,6 @@ void R_Benchmark_f( const idCmdArgs &args ) {
 	r_skipRenderContext.SetBool( false );
 }
 
-
 /*
 ==============================================================================
 
@@ -1314,7 +1454,7 @@ If ref isn't specified, the full session UpdateScreen will be done.
 */
 void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref = NULL ) {
 	// include extra space for OpenGL padding to word boundaries
-	byte	*temp = (byte *)R_StaticAlloc( (glConfig.vidWidth+3) * glConfig.vidHeight * 3 );
+	byte	*temp = ( byte * )R_StaticAlloc( ( glConfig.vidWidth + 3 ) * glConfig.vidHeight * 3 );
 
 	int	oldWidth = glConfig.vidWidth;
 	int oldHeight = glConfig.vidHeight;
@@ -1335,14 +1475,15 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 				tr.primaryWorld->RenderScene( ref );
 				tr.EndFrame( NULL, NULL );
 			} else {
-				session->UpdateScreen(false);
+				session->UpdateScreen( false );
 			}
-
 			int w = oldWidth;
+
 			if ( xo + w > width ) {
 				w = width - xo;
 			}
 			int h = oldHeight;
+
 			if ( yo + h > height ) {
 				h = height - yo;
 			}
@@ -1363,16 +1504,13 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 
 				qglReadBuffer( oldReadBuf );
 			}
-
 			int	row = ( w * 3 + 3 ) & ~3;		// OpenGL pads to dword boundaries
 
 			for ( int y = 0 ; y < h ; y++ ) {
-				memcpy( buffer + ( ( yo + y )* width + xo ) * 3,
-					temp + y * row, w * 3 );
+				memcpy( buffer + ( ( yo + y )* width + xo ) * 3, temp + y * row, w * 3 );
 			}
 		}
 	}
-
 	r_useScissor.SetBool( true );
 
 	tr.viewportOffset[0] = 0;
@@ -1393,10 +1531,9 @@ WriteScreenshotForSTBIW
 Callback to each stbi_write_* function
 ==================
 */
-static void WriteScreenshotForSTBIW(void* context, void* data, int size)
-{
-	idFile* f = (idFile*)context;
-	f->Write(data, size);
+static void WriteScreenshotForSTBIW( void *context, void *data, int size ) {
+	idFile *f = ( idFile * )context;
+	f->Write( data, size );
 }
 
 /*
@@ -1419,14 +1556,15 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 	int	pix = width * height;
 	int lineSize = width * 3;
 
-	buffer = (byte *)R_StaticAlloc(pix*3);
-	swapBuffer = (byte*)R_StaticAlloc(lineSize);
+	buffer = ( byte * )R_StaticAlloc( pix * 3 );
+	swapBuffer = ( byte * )R_StaticAlloc( lineSize );
 
 	if ( blends <= 1 ) {
 		R_ReadTiledPixels( width, height, buffer, ref );
 	} else {
-		unsigned short *shortBuffer = (unsigned short *)R_StaticAlloc(pix*2*3);
-		memset( shortBuffer, 0, pix*2*3 );
+		unsigned short *shortBuffer = ( unsigned short * )R_StaticAlloc( pix * 2 * 3 );
+
+		memset( shortBuffer, 0, pix * 2 * 3 );
 
 		// enable anti-aliasing jitter
 		r_jitter.SetBool( true );
@@ -1434,69 +1572,64 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 		for ( i = 0 ; i < blends ; i++ ) {
 			R_ReadTiledPixels( width, height, buffer, ref );
 
-			for ( j = 0 ; j < pix*3 ; j++ ) {
+			for ( j = 0 ; j < pix * 3 ; j++ ) {
 				shortBuffer[j] += buffer[j];
 			}
 		}
 
 		// divide back to bytes
-		for ( i = 0 ; i < pix*3 ; i++ ) {
+		for ( i = 0 ; i < pix * 3 ; i++ ) {
 			buffer[i] = shortBuffer[i] / blends;
 		}
-
 		R_StaticFree( shortBuffer );
 		r_jitter.SetBool( false );
 	}
 
 	// The buffer is upside down, we need to flip it the right way.
-	for (i = 0; i < height / 2; ++i) {
-		byte* line1 = &buffer[i * lineSize];
-		byte* line2 = &buffer[(height - i - 1) * lineSize];
-		memcpy(swapBuffer, line1, lineSize);
-		memcpy(line1, line2, lineSize);
-		memcpy(line2, swapBuffer, lineSize);
+	for ( i = 0; i < height / 2; ++i ) {
+		byte *line1 = &buffer[i * lineSize];
+		byte *line2 = &buffer[( height - i - 1 ) * lineSize];
+		memcpy( swapBuffer, line1, lineSize );
+		memcpy( line1, line2, lineSize );
+		memcpy( line2, swapBuffer, lineSize );
 	}
-	
-	idFile* f;
-	if (strstr(fileName, "viewnote")) {
+	idFile *f;
+
+	if ( strstr( fileName, "viewnote" ) ) {
 		f = fileSystem->OpenFileWrite( fileName, "fs_cdpath" );
-	}
-	else {
+	} else {
 		f = fileSystem->OpenFileWrite( fileName );
 	}
 
 	// If no specific format is requested, default to using the CVar value.
-	if (g_screenshotFormat == -1) {
+	if ( g_screenshotFormat == -1 ) {
 		g_screenshotFormat = cvarSystem->GetCVarInteger( "r_screenshotFormat" );
 	}
 
-	switch (g_screenshotFormat) {
-		default:
-			stbi_write_tga_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer );
-			break;
-		case 1:
-			stbi_write_bmp_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer);
-			break;
-		case 2:
-			stbi_write_png_compression_level = idMath::ClampInt( 0, 9, r_screenshotPngCompression.GetInteger() );
-			stbi_write_png_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer, 3 * width );
-			break;
-		case 3:
-			stbi_write_jpg_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer, idMath::ClampInt( 1, 100, r_screenshotJpgQuality.GetInteger() ) );
-			break;
+	switch ( g_screenshotFormat ) {
+	default:
+		stbi_write_tga_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer );
+		break;
+	case 1:
+		stbi_write_bmp_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer );
+		break;
+	case 2:
+		stbi_write_png_compression_level = idMath::ClampInt( 0, 9, r_screenshotPngCompression.GetInteger() );
+		stbi_write_png_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer, 3 * width );
+		break;
+	case 3:
+		stbi_write_jpg_to_func( WriteScreenshotForSTBIW, f, width, height, 3, buffer, idMath::ClampInt( 1, 100, r_screenshotJpgQuality.GetInteger() ) );
+		break;
 	}
-
 	g_screenshotFormat = -1;
 
-	fileSystem->CloseFile(f);
+	fileSystem->CloseFile( f );
 
 	R_StaticFree( buffer );
 	R_StaticFree( swapBuffer );
 
 	takingScreenshot = false;
-
 }
-
 
 /*
 ==================
@@ -1509,49 +1642,51 @@ thousands of shots
 ==================
 */
 void R_ScreenshotFilename( int &lastNumber, const char *base, idStr &fileName ) {
-	int	a,b,c,d, e;
+	int	a, b, c, d, e;
 
 	bool fsrestrict = cvarSystem->GetCVarBool( "fs_restrict" );
 	cvarSystem->SetCVarBool( "fs_restrict", false );
-
-	int format = cvarSystem->GetCVarInteger("r_screenshotFormat");
+	int format = cvarSystem->GetCVarInteger( "r_screenshotFormat" );
 
 	lastNumber++;
+
 	if ( lastNumber > 99999 ) {
 		lastNumber = 99999;
 	}
+
 	for ( ; lastNumber < 99999 ; lastNumber++ ) {
 		int	frac = lastNumber;
 
 		a = frac / 10000;
-		frac -= a*10000;
+		frac -= a * 10000;
 		b = frac / 1000;
-		frac -= b*1000;
+		frac -= b * 1000;
 		c = frac / 100;
-		frac -= c*100;
+		frac -= c * 100;
 		d = frac / 10;
-		frac -= d*10;
+		frac -= d * 10;
 		e = frac;
 
-		switch (format) {
-			default:
-				sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
-				break;
-			case 1:
-				sprintf(fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e);
-				break;
-			case 2:
-				sprintf(fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e);
-				break;
-			case 3:
-				sprintf(fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e);
-				break;
+		switch ( format ) {
+		default:
+			sprintf( fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e );
+			break;
+		case 1:
+			sprintf( fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e );
+			break;
+		case 2:
+			sprintf( fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e );
+			break;
+		case 3:
+			sprintf( fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e );
+			break;
 		}
-		
+
 		if ( lastNumber == 99999 ) {
 			break;
 		}
 		int len = fileSystem->ReadFile( fileName, NULL, NULL );
+
 		if ( len <= 0 ) {
 			break;
 		}
@@ -1602,9 +1737,11 @@ void R_ScreenShot_f( const idCmdArgs &args ) {
 		width = atoi( args.Argv( 1 ) );
 		height = atoi( args.Argv( 2 ) );
 		blends = atoi( args.Argv( 3 ) );
+
 		if ( blends < 1 ) {
 			blends = 1;
 		}
+
 		if ( blends > MAX_BLENDS ) {
 			blends = MAX_BLENDS;
 		}
@@ -1635,22 +1772,21 @@ void R_StencilShot( void ) {
 
 	int	width = tr.GetScreenWidth();
 	int	height = tr.GetScreenHeight();
-
 	int	pix = width * height;
 
 	c = pix * 3 + 18;
-	buffer = (byte *)Mem_Alloc(c);
-	memset (buffer, 0, 18);
+	buffer = ( byte * )Mem_Alloc( c );
+	memset( buffer, 0, 18 );
 
-	byte *byteBuffer = (byte *)Mem_Alloc(pix);
+	byte *byteBuffer = ( byte * )Mem_Alloc( pix );
 
-	qglReadPixels( 0, 0, width, height, GL_STENCIL_INDEX , GL_UNSIGNED_BYTE, byteBuffer );
+	qglReadPixels( 0, 0, width, height, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, byteBuffer );
 
 	for ( i = 0 ; i < pix ; i++ ) {
-		buffer[18+i*3] =
-		buffer[18+i*3+1] =
-			//		buffer[18+i*3+2] = ( byteBuffer[i] & 15 ) * 16;
-		buffer[18+i*3+2] = byteBuffer[i];
+		buffer[18 + i * 3] =
+		buffer[18 + i * 3 + 1] =
+//		buffer[18+i*3+2] = ( byteBuffer[i] & 15 ) * 16;
+		buffer[18 + i * 3 + 2] = byteBuffer[i];
 	}
 
 	// fill in the header (this is vertically flipped, which qglReadPixels emits)
@@ -1685,7 +1821,8 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 	viewDef_t	primary;
 	int			blends;
 	const char	*extensions[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga",
-		"_pz.tga", "_nz.tga" };
+	                                "_pz.tga", "_nz.tga"
+	                              };
 	int			size;
 
 	if ( args.Argc() != 2 && args.Argc() != 3 && args.Argc() != 4 ) {
@@ -1695,6 +1832,7 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 	baseName = args.Argv( 1 );
 
 	blends = 1;
+
 	if ( args.Argc() == 4 ) {
 		size = atoi( args.Argv( 2 ) );
 		blends = atoi( args.Argv( 3 ) );
@@ -1710,10 +1848,10 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 		common->Printf( "No primary view.\n" );
 		return;
 	}
-
 	primary = *tr.primaryView;
 
 	memset( &axis, 0, sizeof( axis ) );
+
 	axis[0][0][0] = 1;
 	axis[0][1][2] = 1;
 	axis[0][2][1] = 1;
@@ -1749,14 +1887,12 @@ void R_EnvShot_f( const idCmdArgs &args ) {
 		g_screenshotFormat = 0;
 		tr.TakeScreenshot( size, size, fullname, blends, &ref );
 	}
-
 	common->Printf( "Wrote %s, etc\n", fullname.c_str() );
 }
 
 //============================================================================
 
 static idMat3		cubeAxis[6];
-
 
 /*
 ==================
@@ -1767,9 +1903,9 @@ void R_SampleCubeMap( const idVec3 &dir, int size, byte *buffers[6], byte result
 	float	adir[3];
 	int		axis, x, y;
 
-	adir[0] = fabs(dir[0]);
-	adir[1] = fabs(dir[1]);
-	adir[2] = fabs(dir[2]);
+	adir[0] = fabs( dir[0] );
+	adir[1] = fabs( dir[1] );
+	adir[2] = fabs( dir[2] );
 
 	if ( dir[0] >= adir[1] && dir[0] >= adir[2] ) {
 		axis = 0;
@@ -1784,29 +1920,29 @@ void R_SampleCubeMap( const idVec3 &dir, int size, byte *buffers[6], byte result
 	} else {
 		axis = 5;
 	}
-
-	float	fx = (dir * cubeAxis[axis][1]) / (dir * cubeAxis[axis][0]);
-	float	fy = (dir * cubeAxis[axis][2]) / (dir * cubeAxis[axis][0]);
+	float	fx = ( dir * cubeAxis[axis][1] ) / ( dir * cubeAxis[axis][0] );
+	float	fy = ( dir * cubeAxis[axis][2] ) / ( dir * cubeAxis[axis][0] );
 
 	fx = -fx;
 	fy = -fy;
-	x = size * 0.5 * (fx + 1);
-	y = size * 0.5 * (fy + 1);
+	x = size * 0.5 * ( fx + 1 );
+	y = size * 0.5 * ( fy + 1 );
+
 	if ( x < 0 ) {
 		x = 0;
 	} else if ( x >= size ) {
-		x = size-1;
+		x = size - 1;
 	}
+
 	if ( y < 0 ) {
 		y = 0;
 	} else if ( y >= size ) {
-		y = size-1;
+		y = size - 1;
 	}
-
-	result[0] = buffers[axis][(y*size+x)*4+0];
-	result[1] = buffers[axis][(y*size+x)*4+1];
-	result[2] = buffers[axis][(y*size+x)*4+2];
-	result[3] = buffers[axis][(y*size+x)*4+3];
+	result[0] = buffers[axis][( y * size + x ) * 4 + 0];
+	result[1] = buffers[axis][( y * size + x ) * 4 + 1];
+	result[2] = buffers[axis][( y * size + x ) * 4 + 2];
+	result[3] = buffers[axis][( y * size + x ) * 4 + 3];
 }
 
 /*
@@ -1823,7 +1959,8 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 	const char	*baseName;
 	int			i;
 	const char	*extensions[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga",
-		"_pz.tga", "_nz.tga" };
+	                                "_pz.tga", "_nz.tga"
+	                              };
 	int			outSize;
 	byte		*buffers[6];
 	int			width, height;
@@ -1839,8 +1976,8 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 	} else {
 		outSize = 32;
 	}
-
 	memset( &cubeAxis, 0, sizeof( cubeAxis ) );
+
 	cubeAxis[0][0][0] = 1;
 	cubeAxis[0][1][2] = 1;
 	cubeAxis[0][2][1] = 1;
@@ -1871,8 +2008,10 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 		common->Printf( "loading %s\n", fullname.c_str() );
 		session->UpdateScreen();
 		R_LoadImage( fullname, &buffers[i], &width, &height, NULL, true );
+
 		if ( !buffers[i] ) {
 			common->Printf( "failed.\n" );
+
 			for ( i-- ; i >= 0 ; i-- ) {
 				Mem_Free( buffers[i] );
 			}
@@ -1881,9 +2020,8 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 	}
 
 	// resample with hemispherical blending
-	int	samples = 1000;
-
-	byte	*outBuffer = (byte *)_alloca( outSize * outSize * 4 );
+	int		samples = 1000;
+	byte	*outBuffer = ( byte * )_alloca( outSize * outSize * 4 );
 
 	for ( int map = 0 ; map < 2 ; map++ ) {
 		for ( i = 0 ; i < 6 ; i++ ) {
@@ -1892,39 +2030,43 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 					idVec3	dir;
 					float	total[3];
 
-					dir = cubeAxis[i][0] + -( -1 + 2.0*x/(outSize-1) ) * cubeAxis[i][1] + -( -1 + 2.0*y/(outSize-1) ) * cubeAxis[i][2];
+					dir = cubeAxis[i][0] + -( -1 + 2.0 * x / ( outSize - 1 ) ) * cubeAxis[i][1] + -( -1 + 2.0 * y / ( outSize - 1 ) ) * cubeAxis[i][2];
 					dir.Normalize();
 					total[0] = total[1] = total[2] = 0;
-	//samples = 1;
+					//samples = 1;
 					float	limit = map ? 0.95 : 0.25;		// small for specular, almost hemisphere for ambient
 
 					for ( int s = 0 ; s < samples ; s++ ) {
 						// pick a random direction vector that is inside the unit sphere but not behind dir,
 						// which is a robust way to evenly sample a hemisphere
 						idVec3	test;
-						while( 1 ) {
+
+						while ( 1 ) {
 							for ( int j = 0 ; j < 3 ; j++ ) {
-								test[j] = -1 + 2 * (rand()&0x7fff)/(float)0x7fff;
+								test[j] = -1 + 2 * ( rand() & 0x7fff ) / ( float )0x7fff;
 							}
+
 							if ( test.Length() > 1.0 ) {
 								continue;
 							}
 							test.Normalize();
+
 							if ( test * dir > limit ) {	// don't do a complete hemisphere
 								break;
 							}
 						}
 						byte	result[4];
-	//test = dir;
+
+						//test = dir;
 						R_SampleCubeMap( test, width, buffers, result );
 						total[0] += result[0];
 						total[1] += result[1];
 						total[2] += result[2];
 					}
-					outBuffer[(y*outSize+x)*4+0] = total[0] / samples;
-					outBuffer[(y*outSize+x)*4+1] = total[1] / samples;
-					outBuffer[(y*outSize+x)*4+2] = total[2] / samples;
-					outBuffer[(y*outSize+x)*4+3] = 255;
+					outBuffer[( y * outSize + x ) * 4 + 0] = total[0] / samples;
+					outBuffer[( y * outSize + x ) * 4 + 1] = total[1] / samples;
+					outBuffer[( y * outSize + x ) * 4 + 2] = total[2] / samples;
+					outBuffer[( y * outSize + x ) * 4 + 3] = 255;
 				}
 			}
 
@@ -1955,44 +2097,42 @@ R_SetColorMappings
 ===============
 */
 void R_SetColorMappings( void ) {
-
 	if ( r_gammaInShader.GetBool() ) {
 		// nothing to do here
 		return;
 	}
-
-	int		i, j;
-	float	g, b;
-	int		inf;
-	unsigned short gammaTable[256];
+	int				i, j;
+	float			g, b;
+	int				inf;
+	unsigned short	gammaTable[256];
 
 	b = r_brightness.GetFloat();
 	g = r_gamma.GetFloat();
 
 	for ( i = 0; i < 256; i++ ) {
 		j = i * b;
-		if (j > 255) {
+
+		if ( j > 255 ) {
 			j = 255;
 		}
 
 		if ( g == 1 ) {
-			inf = (j<<8) | j;
+			inf = ( j << 8 ) | j;
 		} else {
-			inf = 0xffff * pow ( j/255.0f, 1.0f / g ) + 0.5f;
+			inf = 0xffff * pow( j / 255.0f, 1.0f / g ) + 0.5f;
 		}
-		if (inf < 0) {
+
+		if ( inf < 0 ) {
 			inf = 0;
 		}
-		if (inf > 0xffff) {
+
+		if ( inf > 0xffff ) {
 			inf = 0xffff;
 		}
-
 		gammaTable[i] = inf;
 	}
-
 	GLimp_SetGamma( gammaTable, gammaTable, gammaTable );
 }
-
 
 /*
 ================
@@ -2000,16 +2140,16 @@ GfxInfo_f
 ================
 */
 static void GfxInfo_f( const idCmdArgs &args ) {
-	const char *fsstrings[] =
-	{
+	const char *fsstrings[] = {
 		"windowed",
 		"fullscreen"
 	};
 
-	const char* fsmode = fsstrings[r_fullscreen.GetBool()];
-	if ( r_fullscreen.GetBool() && r_fullscreenDesktop.GetBool() )
-		fsmode = "desktop-fullscreen";
+	const char *fsmode = fsstrings[r_fullscreen.GetBool()];
 
+	if ( r_fullscreen.GetBool() && r_fullscreenDesktop.GetBool() ) {
+		fsmode = "desktop-fullscreen";
+	}
 	common->Printf( "\nGL_VENDOR: %s\n", glConfig.vendor_string );
 	common->Printf( "GL_RENDERER: %s\n", glConfig.renderer_string );
 	common->Printf( "GL_VERSION: %s\n", glConfig.version_string );
@@ -2041,7 +2181,6 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	} else {
 		common->Printf( "glFinish not forced\n" );
 	}
-
 	bool tss = glConfig.twoSidedStencilAvailable;
 
 	if ( !r_useTwoSidedStencil.GetBool() && tss ) {
@@ -2050,12 +2189,6 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 		common->Printf( "Two sided stencil not available\n" );
 	} else if ( tss ) {
 		common->Printf( "Using two sided stencil\n" );
-	}
-
-	if ( vertexCache.IsFast() ) {
-		common->Printf( "Vertex cache is fast\n" );
-	} else {
-		common->Printf( "Vertex cache is SLOW\n" );
 	}
 }
 
@@ -2071,14 +2204,15 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 	if ( !glConfig.isInitialized ) {
 		return;
 	}
-
 	bool full = true;
 	bool forceWindow = false;
+
 	for ( int i = 1 ; i < args.Argc() ; i++ ) {
 		if ( idStr::Icmp( args.Argv( i ), "partial" ) == 0 ) {
 			full = false;
 			continue;
 		}
+
 		if ( idStr::Icmp( args.Argv( i ), "windowed" ) == 0 ) {
 			forceWindow = true;
 			continue;
@@ -2096,7 +2230,8 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 	//     instead of doing a full vid_restart. Still falls back to a full vid_restart
 	//     in case this doesn't work (for example because MSAA settings have changed)
 	if ( !full ) {
-		int wantedWidth=0, wantedHeight=0;
+		int wantedWidth = 0, wantedHeight = 0;
+
 		if ( !R_GetModeInfo( &wantedWidth, &wantedHeight, r_mode.GetInteger() ) ) {
 			common->Warning( "vid_restart: R_GetModeInfo() failed?!\n" );
 		} else {
@@ -2107,6 +2242,7 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 			parms.fullScreen = ( forceWindow ) ? false : r_fullscreen.GetBool();
 			parms.fullScreenDesktop = r_fullscreenDesktop.GetBool();
 			parms.displayHz = r_displayRefresh.GetInteger();
+
 			// "vid_restart partial windowed" is used in case of errors to return to windowed mode
 			// before things explode more. in that case just keep whatever MSAA setting is active
 			parms.multiSamples = forceWindow ? -1 : r_multiSamples.GetInteger();
@@ -2120,9 +2256,8 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 	}
 
 	// DG: notify the game DLL about the reloadImages and (non-partial) vid_restart commands
-	if(gameCallbacks.reloadImagesCB != NULL)
-	{
-		gameCallbacks.reloadImagesCB(gameCallbacks.reloadImagesUserArg, args);
+	if ( gameCallbacks.reloadImagesCB != NULL ) {
+		gameCallbacks.reloadImagesCB( gameCallbacks.reloadImagesUserArg, args );
 	}
 
 	// this could take a while, so give them the cursor back ASAP
@@ -2147,12 +2282,14 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 	soundSystem->ShutdownHW();
 	Sys_ShutdownInput();
 	globalImages->PurgeAllImages();
+
 	// free the context and close the window
 	GLimp_Shutdown();
 	glConfig.isInitialized = false;
 
 	// create the new context and vertex cache
 	bool latch = cvarSystem->GetCVarBool( "r_fullscreen" );
+
 	if ( forceWindow ) {
 		cvarSystem->SetCVarBool( "r_fullscreen", false );
 	}
@@ -2171,6 +2308,7 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 
 	// check for problems
 	err = qglGetError();
+
 	if ( err != GL_NO_ERROR ) {
 		common->Printf( "glGetError() = 0x%x\n", err );
 	}
@@ -2187,6 +2325,7 @@ R_InitMaterials
 */
 void R_InitMaterials( void ) {
 	tr.defaultMaterial = declManager->FindMaterial( "_default", false );
+
 	if ( !tr.defaultMaterial ) {
 		common->FatalError( "_default material not found" );
 	}
@@ -2213,7 +2352,6 @@ static void R_SizeUp_f( const idCmdArgs &args ) {
 	}
 }
 
-
 /*
 =================
 R_SizeDown_f
@@ -2229,7 +2367,6 @@ static void R_SizeDown_f( const idCmdArgs &args ) {
 	}
 }
 
-
 /*
 ===============
 TouchGui_f
@@ -2244,7 +2381,6 @@ void R_TouchGui_f( const idCmdArgs &args ) {
 		common->Printf( "USAGE: touchGui <guiName>\n" );
 		return;
 	}
-
 	common->Printf( "touchGui %s\n", gui );
 	session->UpdateScreen();
 	uiManager->Touch( gui );
@@ -2265,7 +2401,7 @@ R_InitCommands
 =================
 */
 void R_InitCommands( void ) {
-	cmdSystem->AddCommand( "MakeMegaTexture", idMegaTexture::MakeMegaTexture_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "processes giant images" );
+	cmdSystem->AddCommand( "MakeMegaTexture", idMegaTexture::MakeMegaTexture_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "processes giant images" );
 	cmdSystem->AddCommand( "sizeUp", R_SizeUp_f, CMD_FL_RENDERER, "makes the rendered view larger" );
 	cmdSystem->AddCommand( "sizeDown", R_SizeDown_f, CMD_FL_RENDERER, "makes the rendered view smaller" );
 	cmdSystem->AddCommand( "reloadGuis", R_ReloadGuis_f, CMD_FL_RENDERER, "reloads guis" );
@@ -2273,7 +2409,7 @@ void R_InitCommands( void ) {
 	cmdSystem->AddCommand( "touchGui", R_TouchGui_f, CMD_FL_RENDERER, "touches a gui" );
 	cmdSystem->AddCommand( "screenshot", R_ScreenShot_f, CMD_FL_RENDERER, "takes a screenshot" );
 	cmdSystem->AddCommand( "envshot", R_EnvShot_f, CMD_FL_RENDERER, "takes an environment shot" );
-	cmdSystem->AddCommand( "makeAmbientMap", R_MakeAmbientMap_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "makes an ambient map" );
+	cmdSystem->AddCommand( "makeAmbientMap", R_MakeAmbientMap_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "makes an ambient map" );
 	cmdSystem->AddCommand( "benchmark", R_Benchmark_f, CMD_FL_RENDERER, "benchmark" );
 	cmdSystem->AddCommand( "gfxInfo", GfxInfo_f, CMD_FL_RENDERER, "show graphics info" );
 	cmdSystem->AddCommand( "modulateLights", R_ModulateLights_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "modifies shader parms on all lights" );
@@ -2339,10 +2475,10 @@ idRenderSystemLocal::Init
 */
 void idRenderSystemLocal::Init( void ) {
 	// clear all our internal state
-	viewCount = 1;		// so cleared structures never match viewCount
+	viewCount = 1;	
+	// so cleared structures never match viewCount
 	// we used to memset tr, but now that it is a class, we can't, so
 	// there may be other state we need to reset
-
 	ambientLightVector[0] = 0.5f;
 	ambientLightVector[1] = 0.5f - 0.385f;
 	ambientLightVector[2] = 0.8925f;
@@ -2371,9 +2507,9 @@ void idRenderSystemLocal::Init( void ) {
 	renderModelManager->Init();
 
 	// set the identity space
-	identitySpace.modelMatrix[0*4+0] = 1.0f;
-	identitySpace.modelMatrix[1*4+1] = 1.0f;
-	identitySpace.modelMatrix[2*4+2] = 1.0f;
+	identitySpace.modelMatrix[0 * 4 + 0] = 1.0f;
+	identitySpace.modelMatrix[1 * 4 + 1] = 1.0f;
+	identitySpace.modelMatrix[2 * 4 + 2] = 1.0f;
 
 	origWidth = origHeight = 0; // DG: for resetting width/height in EndFrame()
 }
@@ -2393,7 +2529,6 @@ void idRenderSystemLocal::Shutdown( void ) {
 	if ( glConfig.isInitialized ) {
 		globalImages->PurgeAllImages();
 	}
-
 	renderModelManager->Shutdown();
 
 	idCinematic::ShutdownCinematic( );
@@ -2436,6 +2571,7 @@ idRenderSystemLocal::EndLevelLoad
 void idRenderSystemLocal::EndLevelLoad( void ) {
 	renderModelManager->EndLevelLoad();
 	globalImages->EndLevelLoad();
+
 	if ( r_forceLoadImages.GetBool() ) {
 		RB_ShowImages();
 	}
@@ -2456,6 +2592,7 @@ void idRenderSystemLocal::InitOpenGL( void ) {
 		globalImages->ReloadAllImages();
 
 		err = qglGetError();
+
 		if ( err != GL_NO_ERROR ) {
 			common->Printf( "glGetError() = 0x%x\n", err );
 		}
@@ -2468,7 +2605,6 @@ idRenderSystemLocal::ShutdownOpenGL
 ========================
 */
 void idRenderSystemLocal::ShutdownOpenGL( void ) {
-
 	R_ShutdownFrameData();
 
 	// as the input is tied to the window, it should be shut down when the window
