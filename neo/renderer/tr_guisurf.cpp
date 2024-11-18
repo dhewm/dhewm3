@@ -169,7 +169,7 @@ void R_RenderGuiSurf( idUserInterface *gui, drawSurf_t *drawSurf ) {
 	guiModelMatrix[11] = 0;
 	guiModelMatrix[15] = 1;
 
-	myGlMultMatrix( guiModelMatrix, drawSurf->space->modelMatrix,
+	R_MatrixMultiply( guiModelMatrix, drawSurf->space->modelMatrix,
 			modelMatrix );
 
 	tr.guiRecursionLevel++;

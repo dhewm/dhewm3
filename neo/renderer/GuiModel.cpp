@@ -216,7 +216,7 @@ void idGuiModel::EmitToCurrentView( float modelMatrix[16], bool depthHack ) {
 		worldMVM = tr.lockSurfacesRealViewDef.worldSpace.modelViewMatrix;
 	}
 
-	myGlMultMatrix( modelMatrix, worldMVM, modelViewMatrix );
+	R_MatrixMultiply( modelMatrix, worldMVM, modelViewMatrix );
 
 	for ( int i = 0 ; i < surfaces.Num() ; i++ ) {
 		EmitSurface( &surfaces[i], modelMatrix, modelViewMatrix, depthHack );

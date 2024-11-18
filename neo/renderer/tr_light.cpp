@@ -164,9 +164,7 @@ void R_CreateVertexProgramShadowCache( srfTriangles_t *tri ) {
 		return;
 	}
 
-	// DG: use Mem_MallocA() instead of _alloca16() to avoid stack overflows with big models
-	bool tempOnStack;
-	shadowCache_t *temp = (shadowCache_t *)Mem_MallocA( tri->numVerts * 2 * sizeof( shadowCache_t ), tempOnStack );
+	shadowCache_t *temp = (shadowCache_t *)_alloca16( tri->numVerts * 2 * sizeof( shadowCache_t ) );
 
 #if 1
 
@@ -191,7 +189,6 @@ void R_CreateVertexProgramShadowCache( srfTriangles_t *tri ) {
 #endif
 
 	vertexCache.Alloc( temp, tri->numVerts * 2 * sizeof( shadowCache_t ), &tri->shadowCache );
-	Mem_FreeA( temp, tempOnStack );
 }
 
 /*
@@ -407,7 +404,7 @@ viewEntity_t *R_SetEntityDefViewEntity( idRenderEntityLocal *def ) {
 
 	// we may not have a viewDef if we are just creating shadows at entity creation time
 	if ( tr.viewDef ) {
-		myGlMultMatrix( vModel->modelMatrix, tr.viewDef->worldSpace.modelViewMatrix, vModel->modelViewMatrix );
+		R_MatrixMultiply( vModel->modelMatrix, tr.viewDef->worldSpace.modelViewMatrix, vModel->modelViewMatrix );
 
 		vModel->next = tr.viewDef->viewEntitys;
 		tr.viewDef->viewEntitys = vModel;
@@ -1041,6 +1038,7 @@ void R_AddLightSurfaces( void ) {
 			// if we have been purged, re-upload the shadowVertexes
 			if ( !tri->shadowCache ) {
 				R_CreatePrivateShadowCache( tri );
+
 				if ( !tri->shadowCache ) {
 					continue;
 				}
@@ -1052,10 +1050,10 @@ void R_AddLightSurfaces( void ) {
 			if ( !tri->indexCache && r_useIndexBuffers.GetBool() ) {
 				vertexCache.Alloc( tri->indexes, tri->numIndexes * sizeof( tri->indexes[0] ), &tri->indexCache, true );
 			}
+
 			if ( tri->indexCache ) {
 				vertexCache.Touch( tri->indexCache );
 			}
-
 			R_LinkLightSurf( &vLight->globalShadows, tri, NULL, light, NULL, vLight->scissorRect, true /* FIXME? */ );
 		}
 	}
@@ -1638,12 +1636,12 @@ void R_RemoveUnecessaryViewLights( void ) {
 			if ( !vLight->lightShader->LightCastsShadows() ) {
 				continue;
 			}
-
 			surfRect.Clear();
 
 			for ( surf = vLight->globalInteractions ; surf ; surf = surf->nextOnLight ) {
 				surfRect.Union( surf->scissorRect );
 			}
+
 			for ( surf = vLight->localShadows ; surf ; surf = surf->nextOnLight ) {
 				const_cast<drawSurf_t *>(surf)->scissorRect.Intersect( surfRect );
 			}
@@ -1651,6 +1649,7 @@ void R_RemoveUnecessaryViewLights( void ) {
 			for ( surf = vLight->localInteractions ; surf ; surf = surf->nextOnLight ) {
 				surfRect.Union( surf->scissorRect );
 			}
+
 			for ( surf = vLight->globalShadows ; surf ; surf = surf->nextOnLight ) {
 				const_cast<drawSurf_t *>(surf)->scissorRect.Intersect( surfRect );
 			}
@@ -1658,7 +1657,6 @@ void R_RemoveUnecessaryViewLights( void ) {
 			for ( surf = vLight->translucentInteractions ; surf ; surf = surf->nextOnLight ) {
 				surfRect.Union( surf->scissorRect );
 			}
-
 			vLight->scissorRect.Intersect( surfRect );
 		}
 	}

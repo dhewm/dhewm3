@@ -29,14 +29,18 @@ If you have questions concerning this license or the applicable additional terms
 #if defined(__ppc__) && defined(__APPLE__)
 #include <vecLib/vecLib.h>
 #endif
+
 #if defined(__GNUC__) && defined(__SSE2__)
 #include <xmmintrin.h>
+#endif
+
+#if defined(_MSC_VER)
+#include <intrin.h>
 #endif
 
 #include "sys/platform.h"
 #include "framework/Session.h"
 #include "renderer/RenderWorld_local.h"
-
 #include "renderer/tr_local.h"
 
 //====================================================================
@@ -49,7 +53,8 @@ idScreenRect::Clear
 void idScreenRect::Clear() {
 	x1 = y1 = 32000;
 	x2 = y2 = -32000;
-	zmin = 0.0f; zmax = 1.0f;
+	zmin = 0.0f;
+	zmax = 1.0f;
 }
 
 /*
@@ -64,12 +69,15 @@ void idScreenRect::AddPoint( float x, float y ) {
 	if ( ix < x1 ) {
 		x1 = ix;
 	}
+
 	if ( ix > x2 ) {
 		x2 = ix;
 	}
+
 	if ( iy < y1 ) {
 		y1 = iy;
 	}
+
 	if ( iy > y2 ) {
 		y2 = iy;
 	}
@@ -96,12 +104,15 @@ void idScreenRect::Intersect( const idScreenRect &rect ) {
 	if ( rect.x1 > x1 ) {
 		x1 = rect.x1;
 	}
+
 	if ( rect.x2 < x2 ) {
 		x2 = rect.x2;
 	}
+
 	if ( rect.y1 > y1 ) {
 		y1 = rect.y1;
 	}
+
 	if ( rect.y2 < y2 ) {
 		y2 = rect.y2;
 	}
@@ -116,12 +127,15 @@ void idScreenRect::Union( const idScreenRect &rect ) {
 	if ( rect.x1 < x1 ) {
 		x1 = rect.x1;
 	}
+
 	if ( rect.x2 > x2 ) {
 		x2 = rect.x2;
 	}
+
 	if ( rect.y1 < y1 ) {
 		y1 = rect.y1;
 	}
+
 	if ( rect.y2 > y2 ) {
 		y2 = rect.y2;
 	}
@@ -162,7 +176,6 @@ idScreenRect R_ScreenRectFromViewFrustumBounds( const idBounds &bounds ) {
 		R_TransformEyeZToWin( -bounds[0].x, tr.viewDef->projectionMatrix, screenRect.zmin );
 		R_TransformEyeZToWin( -bounds[1].x, tr.viewDef->projectionMatrix, screenRect.zmax );
 	}
-
 	return screenRect;
 }
 
@@ -202,7 +215,6 @@ void R_ToggleSmpFrame( void ) {
 	for ( block = frame->memory ; block ; block = block->next ) {
 		block->used = 0;
 	}
-
 	R_ClearCommandChain();
 }
 
@@ -222,10 +234,10 @@ void R_ShutdownFrameData( void ) {
 
 	// free any current data
 	frame = frameData;
+
 	if ( !frame ) {
 		return;
 	}
-
 	R_FreeDeferredTriSurfs( frame );
 
 	frameMemoryBlock_t *nextBlock;
@@ -249,10 +261,11 @@ void R_InitFrameData( void ) {
 
 	R_ShutdownFrameData();
 
-	frameData = (frameData_t *)Mem_ClearedAlloc( sizeof( *frameData ));
+	frameData = ( frameData_t * )Mem_ClearedAlloc( sizeof( *frameData ) );
 	frame = frameData;
 	size = MEMORY_BLOCK_SIZE;
-	block = (frameMemoryBlock_t *)Mem_Alloc( size + sizeof( *block ) );
+	block = ( frameMemoryBlock_t * )Mem_Alloc( size + sizeof( *block ) );
+
 	if ( !block ) {
 		common->FatalError( "R_InitFrameData: Mem_Alloc() failed" );
 	}
@@ -277,8 +290,10 @@ int R_CountFrameData( void ) {
 
 	count = 0;
 	frame = frameData;
-	for ( block = frame->memory ; block ; block=block->next ) {
+
+	for ( block = frame->memory ; block ; block = block->next ) {
 		count += block->used;
+
 		if ( block == frame->alloc ) {
 			break;
 		}
@@ -288,7 +303,6 @@ int R_CountFrameData( void ) {
 	if ( count > frame->memoryHighwater ) {
 		frame->memoryHighwater = count;
 	}
-
 	return count;
 }
 
@@ -366,7 +380,8 @@ void *R_FrameAlloc( int bytes ) {
 	frameMemoryBlock_t	*block;
 	void			*buf;
 
-	bytes = (bytes+16)&~15;
+	bytes = ( bytes + 16 ) & ~15;
+
 	// see if it can be satisfied in the current block
 	frame = frameData;
 	block = frame->alloc;
@@ -379,13 +394,15 @@ void *R_FrameAlloc( int bytes ) {
 
 	// advance to the next memory block if available
 	block = block->next;
+
 	// create a new block if we are at the end of
 	// the chain
 	if ( !block ) {
 		int		size;
 
 		size = MEMORY_BLOCK_SIZE;
-		block = (frameMemoryBlock_t *)Mem_Alloc( size + sizeof( *block ) );
+		block = ( frameMemoryBlock_t * )Mem_Alloc( size + sizeof( *block ) );
+
 		if ( !block ) {
 			common->FatalError( "R_FrameAlloc: Mem_Alloc() failed" );
 		}
@@ -397,12 +414,9 @@ void *R_FrameAlloc( int bytes ) {
 
 	// we could fix this if we needed to...
 	if ( bytes > block->size ) {
-		common->FatalError( "R_FrameAlloc of %i exceeded MEMORY_BLOCK_SIZE",
-			bytes );
+		common->FatalError( "R_FrameAlloc of %i exceeded MEMORY_BLOCK_SIZE", bytes );
 	}
-
 	frame->alloc = block;
-
 	block->used = bytes;
 
 	return block->base;
@@ -414,9 +428,7 @@ R_ClearedFrameAlloc
 ==================
 */
 void *R_ClearedFrameAlloc( int bytes ) {
-	void	*r;
-
-	r = R_FrameAlloc( bytes );
+	void *r = R_FrameAlloc( bytes );
 	SIMDProcessor->Memset( r, 0, bytes );
 	return r;
 }
@@ -436,8 +448,6 @@ to both alloc and free.
 */
 void R_FrameFree( void *data ) {
 }
-
-
 
 //==========================================================================
 
@@ -463,59 +473,37 @@ void R_AxisToModelMatrix( const idMat3 &axis, const idVec3 &origin, float modelM
 	modelMatrix[15] = 1;
 }
 
-
 // FIXME: these assume no skewing or scaling transforms
-
 void R_LocalPointToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
-#if defined(__GNUC__) && defined(__SSE2__)
-	__m128 m0, m1, m2, m3;
-	__m128 in0, in1, in2;
-	float i0,i1,i2;
-	i0 = in[0];
-	i1 = in[1];
-	i2 = in[2];
+	int cpuid = idLib::sys->GetProcessorId();
 
-	m0 = _mm_loadu_ps(&modelMatrix[0]);
-	m1 = _mm_loadu_ps(&modelMatrix[4]);
-	m2 = _mm_loadu_ps(&modelMatrix[8]);
-	m3 = _mm_loadu_ps(&modelMatrix[12]);
-
-	in0 = _mm_load1_ps(&i0);
-	in1 = _mm_load1_ps(&i1);
-	in2 = _mm_load1_ps(&i2);
-
-	m0 = _mm_mul_ps(m0, in0);
-	m1 = _mm_mul_ps(m1, in1);
-	m2 = _mm_mul_ps(m2, in2);
-
-	m0 = _mm_add_ps(m0, m1);
-	m0 = _mm_add_ps(m0, m2);
-	m0 = _mm_add_ps(m0, m3);
-
-	_mm_store_ss(&out[0], m0);
-	m1 = (__m128) _mm_shuffle_epi32((__m128i)m0, 0x55);
-	_mm_store_ss(&out[1], m1);
-	m2 = _mm_movehl_ps(m2, m0);
-	_mm_store_ss(&out[2], m2);
-#else
-	out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4]
-		+ in[2] * modelMatrix[8] + modelMatrix[12];
-	out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5]
-		+ in[2] * modelMatrix[9] + modelMatrix[13];
-	out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6]
-		+ in[2] * modelMatrix[10] + modelMatrix[14];
-#endif
+	// a more general approach here, bonus also supports SSE instead of minimum SSE2
+	if ( cpuid & CPUID_SSE ) {
+		__m128 row0 = _mm_loadu_ps( &modelMatrix[0] );
+		__m128 row1 = _mm_loadu_ps( &modelMatrix[4] );
+		__m128 row2 = _mm_loadu_ps( &modelMatrix[8] );
+		__m128 row3 = _mm_loadu_ps( &modelMatrix[12] );
+		__m128 xxxx = _mm_set1_ps( in.x );
+		__m128 yyyy = _mm_set1_ps( in.y );
+		__m128 zzzz = _mm_set1_ps( in.z );
+		__m128 res = _mm_add_ps( _mm_add_ps( _mm_mul_ps( row0, xxxx ), _mm_mul_ps( row1, yyyy ) ),
+		                         _mm_add_ps( _mm_mul_ps( row2, zzzz ), row3 ) );
+		// unaligned float x 3 store
+		_mm_storel_pi( ( __m64 * )&out[0], res );
+		_mm_store_ss( &out[2], _mm_movehl_ps( res, res ) );
+	} else {
+		// fall back to non SSE
+		out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4] + in[2] * modelMatrix[8] + modelMatrix[12];
+		out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5] + in[2] * modelMatrix[9] + modelMatrix[13];
+		out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6] + in[2] * modelMatrix[10] + modelMatrix[14];
+	}
 }
 
 void R_PointTimesMatrix( const float modelMatrix[16], const idVec4 &in, idVec4 &out ) {
-	out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4]
-		+ in[2] * modelMatrix[8] + modelMatrix[12];
-	out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5]
-		+ in[2] * modelMatrix[9] + modelMatrix[13];
-	out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6]
-		+ in[2] * modelMatrix[10] + modelMatrix[14];
-	out[3] = in[0] * modelMatrix[3] + in[1] * modelMatrix[7]
-		+ in[2] * modelMatrix[11] + modelMatrix[15];
+	out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4] + in[2] * modelMatrix[8] + modelMatrix[12];
+	out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5] + in[2] * modelMatrix[9] + modelMatrix[13];
+	out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6] + in[2] * modelMatrix[10] + modelMatrix[14];
+	out[3] = in[0] * modelMatrix[3] + in[1] * modelMatrix[7] + in[2] * modelMatrix[11] + modelMatrix[15];
 }
 
 void R_GlobalPointToLocal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
@@ -529,12 +517,9 @@ void R_GlobalPointToLocal( const float modelMatrix[16], const idVec3 &in, idVec3
 }
 
 void R_LocalVectorToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
-	out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4]
-		+ in[2] * modelMatrix[8];
-	out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5]
-		+ in[2] * modelMatrix[9];
-	out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6]
-		+ in[2] * modelMatrix[10];
+	out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4] + in[2] * modelMatrix[8];
+	out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5] + in[2] * modelMatrix[9];
+	out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6] + in[2] * modelMatrix[10];
 }
 
 void R_GlobalVectorToLocal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
@@ -547,6 +532,7 @@ void R_GlobalPlaneToLocal( const float modelMatrix[16], const idPlane &in, idPla
 	out[0] = DotProduct( in, &modelMatrix[0] );
 	out[1] = DotProduct( in, &modelMatrix[4] );
 	out[2] = DotProduct( in, &modelMatrix[8] );
+
 	out[3] = in[3] + modelMatrix[12] * in[0] + modelMatrix[13] * in[1] + modelMatrix[14] * in[2];
 }
 
@@ -599,16 +585,16 @@ bool R_RadiusCullLocalBox( const idBounds &bounds, const float modelMatrix[16], 
 
 	R_LocalPointToGlobal( modelMatrix, localOrigin, worldOrigin );
 
-	worldRadius = (bounds[0] - localOrigin).Length();	// FIXME: won't be correct for scaled objects
+	worldRadius = ( bounds[0] - localOrigin ).Length();	// FIXME: won't be correct for scaled objects
 
 	for ( i = 0 ; i < numPlanes ; i++ ) {
 		frust = planes + i;
 		d = frust->Distance( worldOrigin );
+
 		if ( d > worldRadius ) {
 			return true;	// culled
 		}
 	}
-
 	return false;		// no culled
 }
 
@@ -635,9 +621,9 @@ bool R_CornerCullLocalBox( const idBounds &bounds, const float modelMatrix[16], 
 
 	// transform into world space
 	for ( i = 0 ; i < 8 ; i++ ) {
-		v[0] = bounds[i&1][0];
-		v[1] = bounds[(i>>1)&1][1];
-		v[2] = bounds[(i>>2)&1][2];
+		v[0] = bounds[i & 1][0];
+		v[1] = bounds[( i >> 1 ) & 1][1];
+		v[2] = bounds[( i >> 2 ) & 1][2];
 
 		R_LocalPointToGlobal( modelMatrix, v, transformed[i] );
 	}
@@ -645,19 +631,21 @@ bool R_CornerCullLocalBox( const idBounds &bounds, const float modelMatrix[16], 
 	// check against frustum planes
 	for ( i = 0 ; i < numPlanes ; i++ ) {
 		frust = planes + i;
+
 		for ( j = 0 ; j < 8 ; j++ ) {
 			dists[j] = frust->Distance( transformed[j] );
+
 			if ( dists[j] < 0 ) {
 				break;
 			}
 		}
+
 		if ( j == 8 ) {
 			// all points were behind one of the planes
 			tr.pc.c_box_cull_out++;
 			return true;
 		}
 	}
-
 	tr.pc.c_box_cull_in++;
 
 	return false;		// not culled
@@ -688,18 +676,18 @@ void R_TransformModelToClip( const idVec3 &src, const float *modelMatrix, const 
 
 	for ( i = 0 ; i < 4 ; i++ ) {
 		eye[i] =
-			src[0] * modelMatrix[ i + 0 * 4 ] +
-			src[1] * modelMatrix[ i + 1 * 4 ] +
-			src[2] * modelMatrix[ i + 2 * 4 ] +
-			1 * modelMatrix[ i + 3 * 4 ];
+		    src[0] * modelMatrix[ i + 0 * 4 ] +
+		    src[1] * modelMatrix[ i + 1 * 4 ] +
+		    src[2] * modelMatrix[ i + 2 * 4 ] +
+		    1 * modelMatrix[ i + 3 * 4 ];
 	}
 
 	for ( i = 0 ; i < 4 ; i++ ) {
 		dst[i] =
-			eye[0] * projectionMatrix[ i + 0 * 4 ] +
-			eye[1] * projectionMatrix[ i + 1 * 4 ] +
-			eye[2] * projectionMatrix[ i + 2 * 4 ] +
-			eye[3] * projectionMatrix[ i + 3 * 4 ];
+		    eye[0] * projectionMatrix[ i + 0 * 4 ] +
+		    eye[1] * projectionMatrix[ i + 1 * 4 ] +
+		    eye[2] * projectionMatrix[ i + 2 * 4 ] +
+		    eye[3] * projectionMatrix[ i + 3 * 4 ];
 	}
 }
 
@@ -717,44 +705,38 @@ void R_GlobalToNormalizedDeviceCoordinates( const idVec3 &global, idVec3 &ndc ) 
 
 	// _D3XP added work on primaryView when no viewDef
 	if ( !tr.viewDef ) {
-
 		for ( i = 0 ; i < 4 ; i ++ ) {
 			view[i] =
-				global[0] * tr.primaryView->worldSpace.modelViewMatrix[ i + 0 * 4 ] +
-				global[1] * tr.primaryView->worldSpace.modelViewMatrix[ i + 1 * 4 ] +
-				global[2] * tr.primaryView->worldSpace.modelViewMatrix[ i + 2 * 4 ] +
-					tr.primaryView->worldSpace.modelViewMatrix[ i + 3 * 4 ];
+			    global[0] * tr.primaryView->worldSpace.modelViewMatrix[ i + 0 * 4 ] +
+			    global[1] * tr.primaryView->worldSpace.modelViewMatrix[ i + 1 * 4 ] +
+			    global[2] * tr.primaryView->worldSpace.modelViewMatrix[ i + 2 * 4 ] +
+			    tr.primaryView->worldSpace.modelViewMatrix[ i + 3 * 4 ];
 		}
 
 		for ( i = 0 ; i < 4 ; i ++ ) {
 			clip[i] =
-				view[0] * tr.primaryView->projectionMatrix[ i + 0 * 4 ] +
-				view[1] * tr.primaryView->projectionMatrix[ i + 1 * 4 ] +
-				view[2] * tr.primaryView->projectionMatrix[ i + 2 * 4 ] +
-				view[3] * tr.primaryView->projectionMatrix[ i + 3 * 4 ];
+			    view[0] * tr.primaryView->projectionMatrix[ i + 0 * 4 ] +
+			    view[1] * tr.primaryView->projectionMatrix[ i + 1 * 4 ] +
+			    view[2] * tr.primaryView->projectionMatrix[ i + 2 * 4 ] +
+			    view[3] * tr.primaryView->projectionMatrix[ i + 3 * 4 ];
 		}
-
 	} else {
-
 		for ( i = 0 ; i < 4 ; i ++ ) {
 			view[i] =
-				global[0] * tr.viewDef->worldSpace.modelViewMatrix[ i + 0 * 4 ] +
-				global[1] * tr.viewDef->worldSpace.modelViewMatrix[ i + 1 * 4 ] +
-				global[2] * tr.viewDef->worldSpace.modelViewMatrix[ i + 2 * 4 ] +
-				tr.viewDef->worldSpace.modelViewMatrix[ i + 3 * 4 ];
+			    global[0] * tr.viewDef->worldSpace.modelViewMatrix[ i + 0 * 4 ] +
+			    global[1] * tr.viewDef->worldSpace.modelViewMatrix[ i + 1 * 4 ] +
+			    global[2] * tr.viewDef->worldSpace.modelViewMatrix[ i + 2 * 4 ] +
+			    tr.viewDef->worldSpace.modelViewMatrix[ i + 3 * 4 ];
 		}
-
 
 		for ( i = 0 ; i < 4 ; i ++ ) {
 			clip[i] =
-				view[0] * tr.viewDef->projectionMatrix[ i + 0 * 4 ] +
-				view[1] * tr.viewDef->projectionMatrix[ i + 1 * 4 ] +
-				view[2] * tr.viewDef->projectionMatrix[ i + 2 * 4 ] +
-				view[3] * tr.viewDef->projectionMatrix[ i + 3 * 4 ];
+			    view[0] * tr.viewDef->projectionMatrix[ i + 0 * 4 ] +
+			    view[1] * tr.viewDef->projectionMatrix[ i + 1 * 4 ] +
+			    view[2] * tr.viewDef->projectionMatrix[ i + 2 * 4 ] +
+			    view[3] * tr.viewDef->projectionMatrix[ i + 3 * 4 ];
 		}
-
 	}
-
 	ndc[0] = clip[0] / clip[3];
 	ndc[1] = clip[1] / clip[3];
 	ndc[2] = ( clip[2] + clip[3] ) / ( 2 * clip[3] );
@@ -773,43 +755,51 @@ void R_TransformClipToDevice( const idPlane &clip, const viewDef_t *view, idVec3
 	normalized[2] = clip[2] / clip[3];
 }
 
-
 /*
 ==========================
-myGlMultMatrix
+R_MatrixMultiply
+
+Changed name to be more in line with RBDoom
 ==========================
 */
-void myGlMultMatrix( const float a[16], const float b[16], float out[16] ) {
-#if 0
-	int		i, j;
+void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
+	int cpuid = idLib::sys->GetProcessorId();
 
-	for ( i = 0 ; i < 4 ; i++ ) {
-		for ( j = 0 ; j < 4 ; j++ ) {
-			out[ i * 4 + j ] =
-				a [ i * 4 + 0 ] * b [ 0 * 4 + j ]
-				+ a [ i * 4 + 1 ] * b [ 1 * 4 + j ]
-				+ a [ i * 4 + 2 ] * b [ 2 * 4 + j ]
-				+ a [ i * 4 + 3 ] * b [ 3 * 4 + j ];
+	/* fast path use sse */
+	if ( cpuid & CPUID_SSE ) {
+		__m128 B0x = _mm_loadu_ps( &b[0] );
+		__m128 B1x = _mm_loadu_ps( &b[4] );
+		__m128 B2x = _mm_loadu_ps( &b[8] );
+		__m128 B3x = _mm_loadu_ps( &b[12] );
+
+		for ( int i = 0; i < 4; i++ ) {
+			__m128 Ai0 = _mm_set1_ps( a[4 * i + 0] );
+			__m128 Ai1 = _mm_set1_ps( a[4 * i + 1] );
+			__m128 Ai2 = _mm_set1_ps( a[4 * i + 2] );
+			__m128 Ai3 = _mm_set1_ps( a[4 * i + 3] );
+			__m128 Rix = _mm_add_ps( _mm_add_ps( _mm_mul_ps( Ai0, B0x ), _mm_mul_ps( Ai1, B1x ) ),
+			                         _mm_add_ps( _mm_mul_ps( Ai2, B2x ), _mm_mul_ps( Ai3, B3x ) ) );
+			_mm_storeu_ps( &out[4 * i], Rix );
 		}
+	} else {
+		/* fallback to matrix */
+		out[0 * 4 + 0] = a[0 * 4 + 0] * b[0 * 4 + 0] + a[0 * 4 + 1] * b[1 * 4 + 0] + a[0 * 4 + 2] * b[2 * 4 + 0] + a[0 * 4 + 3] * b[3 * 4 + 0];
+		out[0 * 4 + 1] = a[0 * 4 + 0] * b[0 * 4 + 1] + a[0 * 4 + 1] * b[1 * 4 + 1] + a[0 * 4 + 2] * b[2 * 4 + 1] + a[0 * 4 + 3] * b[3 * 4 + 1];
+		out[0 * 4 + 2] = a[0 * 4 + 0] * b[0 * 4 + 2] + a[0 * 4 + 1] * b[1 * 4 + 2] + a[0 * 4 + 2] * b[2 * 4 + 2] + a[0 * 4 + 3] * b[3 * 4 + 2];
+		out[0 * 4 + 3] = a[0 * 4 + 0] * b[0 * 4 + 3] + a[0 * 4 + 1] * b[1 * 4 + 3] + a[0 * 4 + 2] * b[2 * 4 + 3] + a[0 * 4 + 3] * b[3 * 4 + 3];
+		out[1 * 4 + 0] = a[1 * 4 + 0] * b[0 * 4 + 0] + a[1 * 4 + 1] * b[1 * 4 + 0] + a[1 * 4 + 2] * b[2 * 4 + 0] + a[1 * 4 + 3] * b[3 * 4 + 0];
+		out[1 * 4 + 1] = a[1 * 4 + 0] * b[0 * 4 + 1] + a[1 * 4 + 1] * b[1 * 4 + 1] + a[1 * 4 + 2] * b[2 * 4 + 1] + a[1 * 4 + 3] * b[3 * 4 + 1];
+		out[1 * 4 + 2] = a[1 * 4 + 0] * b[0 * 4 + 2] + a[1 * 4 + 1] * b[1 * 4 + 2] + a[1 * 4 + 2] * b[2 * 4 + 2] + a[1 * 4 + 3] * b[3 * 4 + 2];
+		out[1 * 4 + 3] = a[1 * 4 + 0] * b[0 * 4 + 3] + a[1 * 4 + 1] * b[1 * 4 + 3] + a[1 * 4 + 2] * b[2 * 4 + 3] + a[1 * 4 + 3] * b[3 * 4 + 3];
+		out[2 * 4 + 0] = a[2 * 4 + 0] * b[0 * 4 + 0] + a[2 * 4 + 1] * b[1 * 4 + 0] + a[2 * 4 + 2] * b[2 * 4 + 0] + a[2 * 4 + 3] * b[3 * 4 + 0];
+		out[2 * 4 + 1] = a[2 * 4 + 0] * b[0 * 4 + 1] + a[2 * 4 + 1] * b[1 * 4 + 1] + a[2 * 4 + 2] * b[2 * 4 + 1] + a[2 * 4 + 3] * b[3 * 4 + 1];
+		out[2 * 4 + 2] = a[2 * 4 + 0] * b[0 * 4 + 2] + a[2 * 4 + 1] * b[1 * 4 + 2] + a[2 * 4 + 2] * b[2 * 4 + 2] + a[2 * 4 + 3] * b[3 * 4 + 2];
+		out[2 * 4 + 3] = a[2 * 4 + 0] * b[0 * 4 + 3] + a[2 * 4 + 1] * b[1 * 4 + 3] + a[2 * 4 + 2] * b[2 * 4 + 3] + a[2 * 4 + 3] * b[3 * 4 + 3];
+		out[3 * 4 + 0] = a[3 * 4 + 0] * b[0 * 4 + 0] + a[3 * 4 + 1] * b[1 * 4 + 0] + a[3 * 4 + 2] * b[2 * 4 + 0] + a[3 * 4 + 3] * b[3 * 4 + 0];
+		out[3 * 4 + 1] = a[3 * 4 + 0] * b[0 * 4 + 1] + a[3 * 4 + 1] * b[1 * 4 + 1] + a[3 * 4 + 2] * b[2 * 4 + 1] + a[3 * 4 + 3] * b[3 * 4 + 1];
+		out[3 * 4 + 2] = a[3 * 4 + 0] * b[0 * 4 + 2] + a[3 * 4 + 1] * b[1 * 4 + 2] + a[3 * 4 + 2] * b[2 * 4 + 2] + a[3 * 4 + 3] * b[3 * 4 + 2];
+		out[3 * 4 + 3] = a[3 * 4 + 0] * b[0 * 4 + 3] + a[3 * 4 + 1] * b[1 * 4 + 3] + a[3 * 4 + 2] * b[2 * 4 + 3] + a[3 * 4 + 3] * b[3 * 4 + 3];
 	}
-#else
-	out[0*4+0] = a[0*4+0]*b[0*4+0] + a[0*4+1]*b[1*4+0] + a[0*4+2]*b[2*4+0] + a[0*4+3]*b[3*4+0];
-	out[0*4+1] = a[0*4+0]*b[0*4+1] + a[0*4+1]*b[1*4+1] + a[0*4+2]*b[2*4+1] + a[0*4+3]*b[3*4+1];
-	out[0*4+2] = a[0*4+0]*b[0*4+2] + a[0*4+1]*b[1*4+2] + a[0*4+2]*b[2*4+2] + a[0*4+3]*b[3*4+2];
-	out[0*4+3] = a[0*4+0]*b[0*4+3] + a[0*4+1]*b[1*4+3] + a[0*4+2]*b[2*4+3] + a[0*4+3]*b[3*4+3];
-	out[1*4+0] = a[1*4+0]*b[0*4+0] + a[1*4+1]*b[1*4+0] + a[1*4+2]*b[2*4+0] + a[1*4+3]*b[3*4+0];
-	out[1*4+1] = a[1*4+0]*b[0*4+1] + a[1*4+1]*b[1*4+1] + a[1*4+2]*b[2*4+1] + a[1*4+3]*b[3*4+1];
-	out[1*4+2] = a[1*4+0]*b[0*4+2] + a[1*4+1]*b[1*4+2] + a[1*4+2]*b[2*4+2] + a[1*4+3]*b[3*4+2];
-	out[1*4+3] = a[1*4+0]*b[0*4+3] + a[1*4+1]*b[1*4+3] + a[1*4+2]*b[2*4+3] + a[1*4+3]*b[3*4+3];
-	out[2*4+0] = a[2*4+0]*b[0*4+0] + a[2*4+1]*b[1*4+0] + a[2*4+2]*b[2*4+0] + a[2*4+3]*b[3*4+0];
-	out[2*4+1] = a[2*4+0]*b[0*4+1] + a[2*4+1]*b[1*4+1] + a[2*4+2]*b[2*4+1] + a[2*4+3]*b[3*4+1];
-	out[2*4+2] = a[2*4+0]*b[0*4+2] + a[2*4+1]*b[1*4+2] + a[2*4+2]*b[2*4+2] + a[2*4+3]*b[3*4+2];
-	out[2*4+3] = a[2*4+0]*b[0*4+3] + a[2*4+1]*b[1*4+3] + a[2*4+2]*b[2*4+3] + a[2*4+3]*b[3*4+3];
-	out[3*4+0] = a[3*4+0]*b[0*4+0] + a[3*4+1]*b[1*4+0] + a[3*4+2]*b[2*4+0] + a[3*4+3]*b[3*4+0];
-	out[3*4+1] = a[3*4+0]*b[0*4+1] + a[3*4+1]*b[1*4+1] + a[3*4+2]*b[2*4+1] + a[3*4+3]*b[3*4+1];
-	out[3*4+2] = a[3*4+0]*b[0*4+2] + a[3*4+1]*b[1*4+2] + a[3*4+2]*b[2*4+2] + a[3*4+3]*b[3*4+2];
-	out[3*4+3] = a[3*4+0]*b[0*4+3] + a[3*4+1]*b[1*4+3] + a[3*4+2]*b[2*4+3] + a[3*4+3]*b[3*4+3];
-#endif
 }
 
 /*
@@ -822,7 +812,7 @@ void R_TransposeGLMatrix( const float in[16], float out[16] ) {
 
 	for ( i = 0 ; i < 4 ; i++ ) {
 		for ( j = 0 ; j < 4 ; j++ ) {
-			out[i*4+j] = in[j*4+i];
+			out[i * 4 + j] = in[j * 4 + i];
 		}
 	}
 }
@@ -835,9 +825,9 @@ Sets up the world to view matrix for a given viewParm
 =================
 */
 void R_SetViewMatrix( viewDef_t *viewDef ) {
-	idVec3	origin;
-	viewEntity_t *world;
-	float	viewerMatrix[16];
+	idVec3			origin;
+	viewEntity_t	*world;
+	float			viewerMatrix[16];
 	static float	s_flipMatrix[16] = {
 		// convert from our coordinate system (looking down X)
 		// to OpenGL's coordinate system (looking down -Z)
@@ -849,12 +839,12 @@ void R_SetViewMatrix( viewDef_t *viewDef ) {
 
 	world = &viewDef->worldSpace;
 
-	memset( world, 0, sizeof(*world) );
+	memset( world, 0, sizeof( *world ) );
 
 	// the model matrix is an identity
-	world->modelMatrix[0*4+0] = 1;
-	world->modelMatrix[1*4+1] = 1;
-	world->modelMatrix[2*4+2] = 1;
+	world->modelMatrix[0 * 4 + 0] = 1;
+	world->modelMatrix[1 * 4 + 1] = 1;
+	world->modelMatrix[2 * 4 + 2] = 1;
 
 	// transform by the camera placement
 	origin = viewDef->renderView.vieworg;
@@ -881,7 +871,7 @@ void R_SetViewMatrix( viewDef_t *viewDef ) {
 
 	// convert from our coordinate system (looking down X)
 	// to OpenGL's coordinate system (looking down -Z)
-	myGlMultMatrix( viewerMatrix, s_flipMatrix, world->modelViewMatrix );
+	R_MatrixMultiply( viewerMatrix, s_flipMatrix, world->modelViewMatrix );
 }
 
 /*
@@ -891,7 +881,7 @@ R_SetupProjection
 This uses the "infinite far z" trick
 ===============
 */
-void R_SetupProjection( viewDef_t * viewDef ) {
+void R_SetupProjection( viewDef_t *viewDef ) {
 	float	xmin, xmax, ymin, ymax;
 	float	width, height;
 	float	zNear;
@@ -912,10 +902,10 @@ void R_SetupProjection( viewDef_t * viewDef ) {
 	// set up projection matrix
 	//
 	zNear	= r_znear.GetFloat();
+
 	if ( viewDef->renderView.cramZNear ) {
 		zNear *= 0.25;
 	}
-
 	ymax = zNear * tan( viewDef->renderView.fov_y * idMath::PI / 360.0f );
 	ymin = -ymax;
 
@@ -965,7 +955,7 @@ FIXME: derive from modelview matrix times projection matrix
 =================
 */
 //static
-void R_SetupViewFrustum( viewDef_t* viewDef ) {
+void R_SetupViewFrustum( viewDef_t *viewDef ) {
 	int		i;
 	float	xs, xc;
 	float	ang;
@@ -992,17 +982,17 @@ void R_SetupViewFrustum( viewDef_t* viewDef ) {
 	}
 
 	// eventually, plane five will be the rear clipping plane for fog
-
 	float dNear, dFar, dLeft, dUp;
 
 	dNear = r_znear.GetFloat();
+
 	if ( viewDef->renderView.cramZNear ) {
 		dNear *= 0.25f;
 	}
-
 	dFar = MAX_WORLD_SIZE;
 	dLeft = dFar * tan( DEG2RAD( viewDef->renderView.fov_x * 0.5f ) );
 	dUp = dFar * tan( DEG2RAD( viewDef->renderView.fov_y * 0.5f ) );
+
 	viewDef->viewFrustum.SetOrigin( viewDef->renderView.vieworg );
 	viewDef->viewFrustum.SetAxis( viewDef->renderView.viewaxis );
 	viewDef->viewFrustum.SetSize( dNear, dFar, dLeft, dUp );
@@ -1018,9 +1008,11 @@ static void R_ConstrainViewFrustum( void ) {
 
 	// constrain the view frustum to the total bounds of all visible lights and visible entities
 	bounds.Clear();
+
 	for ( viewLight_t *vLight = tr.viewDef->viewLights; vLight; vLight = vLight->next ) {
 		bounds.AddBounds( vLight->lightDef->frustumTris->bounds );
 	}
+
 	for ( viewEntity_t *vEntity = tr.viewDef->viewEntitys; vEntity; vEntity = vEntity->next ) {
 		bounds.AddBounds( vEntity->entityDef->referenceBounds );
 	}
@@ -1049,18 +1041,18 @@ R_QsortSurfaces
 static int R_QsortSurfaces( const void *a, const void *b ) {
 	const drawSurf_t	*ea, *eb;
 
-	ea = *(drawSurf_t **)a;
-	eb = *(drawSurf_t **)b;
+	ea = *( drawSurf_t ** )a;
+	eb = *( drawSurf_t ** )b;
 
 	if ( ea->sort < eb->sort ) {
 		return -1;
 	}
+
 	if ( ea->sort > eb->sort ) {
 		return 1;
 	}
 	return 0;
 }
-
 
 /*
 =================
@@ -1069,18 +1061,10 @@ R_SortDrawSurfs
 */
 static void R_SortDrawSurfs( void ) {
 	// sort the drawsurfs by sort type, then orientation, then shader
-	qsort( tr.viewDef->drawSurfs, tr.viewDef->numDrawSurfs, sizeof( tr.viewDef->drawSurfs[0] ),
-		R_QsortSurfaces );
+	qsort( tr.viewDef->drawSurfs, tr.viewDef->numDrawSurfs, sizeof( tr.viewDef->drawSurfs[0] ), R_QsortSurfaces );
 }
 
-
-
-//========================================================================
-
-
 //==============================================================================
-
-
 
 /*
 ================
@@ -1093,12 +1077,11 @@ Parms will typically be allocated with R_FrameAlloc
 ================
 */
 void R_RenderView( viewDef_t *parms ) {
-	viewDef_t		*oldView;
+	viewDef_t *oldView;
 
 	if ( parms->renderView.width <= 0 || parms->renderView.height <= 0 ) {
 		return;
 	}
-
 	tr.viewCount++;
 
 	// save view in case we are a subview
@@ -1121,7 +1104,7 @@ void R_RenderView( viewDef_t *parms ) {
 
 	// identify all the visible portalAreas, and the entityDefs and
 	// lightDefs that are in them and pass culling.
-	static_cast<idRenderWorldLocal *>(parms->renderWorld)->FindViewLightsAndEntities();
+	static_cast<idRenderWorldLocal *>( parms->renderWorld )->FindViewLightsAndEntities();
 
 	// constrain the view frustum to the view lights and entities
 	R_ConstrainViewFrustum();
@@ -1152,7 +1135,7 @@ void R_RenderView( viewDef_t *parms ) {
 
 	// write everything needed to the demo file
 	if ( session->writeDemo ) {
-		static_cast<idRenderWorldLocal *>(parms->renderWorld)->WriteVisibleDefs( tr.viewDef );
+		static_cast<idRenderWorldLocal *>( parms->renderWorld )->WriteVisibleDefs( tr.viewDef );
 	}
 
 	// add the rendering commands for this viewDef

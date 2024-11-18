@@ -1294,9 +1294,11 @@ void RB_BakeTextureMatrixIntoTexgen( idPlane lightProject[3], const float textur
 
 DEFAULT GLSL *SHADER
 
+Be Extremely vary of formatting here (breaks the shaders)...
 ===========================================================================
 */
 
+// TODO: add gamma / brightness shader
 #define GLSL_VERSION_ATTRIBS "#version 130\n"
 
 #define GLSL_INPUT_ATTRIBS                                                                                             \
@@ -1484,7 +1486,7 @@ typedef enum {
 	PP_COLOR_MODULATE,
 	PP_COLOR_ADD, // 17
 
-	PP_LIGHT_FALLOFF_TQ = 20,	// only for NV programs - DG: unused
+	PP_LIGHT_FALLOFF_TQ = 20, // only for NV programs - DG: unused
 	PP_GAMMA_BRIGHTNESS = 21, // DG: for gamma in shader: { r_brightness, r_brightness, r_brightness, 1/r_gamma }
 	// DG: for soft particles from TDM: reciprocal of _currentDepth size.
 	//     Lets us convert a screen position to a texcoord in _currentDepth
