@@ -475,6 +475,7 @@ void R_AxisToModelMatrix( const idMat3 &axis, const idVec3 &origin, float modelM
 
 // FIXME: these assume no skewing or scaling transforms
 void R_LocalPointToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
+#if !( defined(MACOS_X) || defined(__APPLE__) )
     int cpuid = idLib::sys->GetProcessorId();
 
     // a more general approach here, bonus also supports SSE instead of minimum SSE2
@@ -491,12 +492,15 @@ void R_LocalPointToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3
         // unaligned float x 3 store
         _mm_storel_pi( ( __m64 * )&out[0], res );
         _mm_store_ss( &out[2], _mm_movehl_ps( res, res ) );
-    } else {
+    } else
+#else
+    {
         // fall back to non SSE
         out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4] + in[2] * modelMatrix[8] + modelMatrix[12];
         out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5] + in[2] * modelMatrix[9] + modelMatrix[13];
         out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6] + in[2] * modelMatrix[10] + modelMatrix[14];
     }
+#endif
 }
 
 void R_PointTimesMatrix( const float modelMatrix[16], const idVec4 &in, idVec4 &out ) {
@@ -763,6 +767,7 @@ Changed name to be more in line with RBDoom
 ==========================
 */
 void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
+#if !( defined(MACOS_X) || defined(__APPLE__) )
     int cpuid = idLib::sys->GetProcessorId();
 
     /* fast path use sse */
@@ -781,7 +786,9 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
                                      _mm_add_ps( _mm_mul_ps( Ai2, B2x ), _mm_mul_ps( Ai3, B3x ) ) );
             _mm_storeu_ps( &out[4 * i], Rix );
         }
-    } else {
+    } else
+#else
+    {
         /* fallback to matrix */
         out[0 * 4 + 0] = a[0 * 4 + 0] * b[0 * 4 + 0] + a[0 * 4 + 1] * b[1 * 4 + 0] + a[0 * 4 + 2] * b[2 * 4 + 0] + a[0 * 4 + 3] * b[3 * 4 + 0];
         out[0 * 4 + 1] = a[0 * 4 + 0] * b[0 * 4 + 1] + a[0 * 4 + 1] * b[1 * 4 + 1] + a[0 * 4 + 2] * b[2 * 4 + 1] + a[0 * 4 + 3] * b[3 * 4 + 1];
@@ -800,6 +807,7 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
         out[3 * 4 + 2] = a[3 * 4 + 0] * b[0 * 4 + 2] + a[3 * 4 + 1] * b[1 * 4 + 2] + a[3 * 4 + 2] * b[2 * 4 + 2] + a[3 * 4 + 3] * b[3 * 4 + 2];
         out[3 * 4 + 3] = a[3 * 4 + 0] * b[0 * 4 + 3] + a[3 * 4 + 1] * b[1 * 4 + 3] + a[3 * 4 + 2] * b[2 * 4 + 3] + a[3 * 4 + 3] * b[3 * 4 + 3];
     }
+#endif
 }
 
 /*
