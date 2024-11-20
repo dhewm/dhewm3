@@ -744,7 +744,7 @@ void R_LoadARBProgram( int progIndex ) {
               // and clamping values > 1 to 1 is ok because when writing to result.color
               // it's clamped anyway and pow(base, exp) is always >= 1 for base >= 1
               "MUL_SAT dhewm3tmpres.xyz, program.env[21], dhewm3tmpres;\n"  // first multiply with brightness
-              "POW result.color.x, dhewm3tmpres.x, program.env[21].w;\n"    // then do pow(dhewm3tmpres.xyz, vec3(1/gamma))
+              "POW result.color.x, dhewm3tmpres.x, program.env[21].w;\n"    // then do pow(dhewm3tmpres.xyz, vec3(1.0f / gamma))
               "POW result.color.y, dhewm3tmpres.y, program.env[21].w;\n"    // (apparently POW only supports scalars, not whole vectors)
               "POW result.color.z, dhewm3tmpres.z, program.env[21].w;\n"
               "MOV result.color.w, dhewm3tmpres.w;\n"                       // alpha remains unmodified
@@ -1030,7 +1030,7 @@ glsltable_t interactionAttribs[] = {
     { 8, "attrTexCoords" },
     { 9, "attrTangents0" },
     { 10, "attrTangents1" },
-    { 11, "attrNormal" }
+    { 11, "attrNormal" },
 };
 
 /*
@@ -1120,11 +1120,11 @@ static GLuint GL_CreateGLSLProgram( GLchar *vssrc, GLchar *fssrc, glsltable_t *a
         return INVALID_PROGRAM;
     }
 
-    // delete shader sources
+    // flag shader sources for deletion.
     qglDeleteShader( vs );
     qglDeleteShader( fs );
 
-    // Always detach shaders after a successful link.
+    // Always detach shaders from programs after a successful link.
     qglDetachShader( progid, vs );
     qglDetachShader( progid, fs );
 
@@ -1143,7 +1143,7 @@ sampleruniforms_t rb_interactionsamplers[] = {
     { "lightFalloffImage", 2 },
     { "lightProjectImage", 3 },
     { "diffuseImage", 4 },
-    { "specularImage", 5 }
+    { "specularImage", 5 },
 };
 
 /*
@@ -1226,20 +1226,23 @@ void R_ReloadARBPrograms_f( const idCmdArgs &args ) {
     // load GLSL interaction programs if availiable ( Replaces ARB Interaction Programs )
     if ( r_useGLSL.GetBool() ) {
 
+        // let users know if enabled
+        common->Printf( "----- Will use GLSL for Interaction Passes (Overrides ARB Interaction). -----\n" );
+
         // backup shader gamma value
         bool previousGamma = r_gammaInShader.GetBool();
 
-        // disable shader gamma in GLSL if enabled
+        // disable shader gamma in GLSL if it was enabled
         if ( previousGamma ) {
             r_gammaInShader.SetBool( false );
         }
 
         // try to load from file, use internal shader if not available.
-        GLchar *vs = GL_GetGLSLFromFile( "interaction.vsh" );
-        GLchar *fs = GL_GetGLSLFromFile( "interaction.fsh" );
+        GLchar *vs = GL_GetGLSLFromFile( const_cast<GLchar *>( "interaction.vsh" ) );
+        GLchar *fs = GL_GetGLSLFromFile( const_cast<GLchar *>( "interaction.fsh" ) );
 
         // replace ARB interaction shaders with GLSL counterparts, it is possible to use external GLSL shaders as
-        // well.
+        // well (Revelator: the internal shader defines are const char * so use a const cast to get around it otherwise gcc bugs out).
         rb_glsl_interaction_program = GL_CreateGLSLProgram( ( vs != NULL ) ? vs : const_cast<GLchar *>( interaction_vs ), ( fs != NULL ) ? fs : const_cast<GLchar *>( interaction_fs ), interactionAttribs,
                                                             sizeof( interactionAttribs ) / sizeof( interactionAttribs[0] ) );
 
@@ -1263,9 +1266,12 @@ void R_ReloadARBPrograms_f( const idCmdArgs &args ) {
             // no shit sherlock turn it off if it fails.
             r_useGLSL.SetBool( false );
 
-            // and set shader gamma back to previous value
-            r_gammaInShader.SetBool( previousGamma );
+            // and set shader gamma back to previous value if it was enabled to begin with
+			if ( previousGamma ) {
+				r_gammaInShader.SetBool( previousGamma );
+			}
         }
+        common->Printf( "-------------------------------\n" );
     }
     common->Printf( "-------------------------------\n" );
 }

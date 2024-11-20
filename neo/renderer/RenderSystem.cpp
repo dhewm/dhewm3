@@ -134,8 +134,7 @@ Called by R_EndFrame each frame
 ====================
 */
 static void R_IssueRenderCommands( void ) {
-	if ( frameData->cmdHead->commandId == RC_NOP &&
-	    !frameData->cmdHead->next ) {
+	if ( frameData->cmdHead->commandId == RC_NOP && !frameData->cmdHead->next ) {
 		// nothing to issue
 		return;
 	}
@@ -324,9 +323,8 @@ DrawStretchPic
 =============
 */
 void idRenderSystemLocal::DrawStretchPic( const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *material,
-        bool clip, float min_x, float min_y, float max_x, float max_y ) {
-	guiModel->DrawStretchPic( verts, indexes, vertCount, indexCount, material,
-	                          clip, min_x, min_y, max_x, max_y );
+                                          bool clip, float min_x, float min_y, float max_x, float max_y ) {
+	guiModel->DrawStretchPic( verts, indexes, vertCount, indexCount, material, clip, min_x, min_y, max_x, max_y );
 }
 
 /*
@@ -465,7 +463,6 @@ void idRenderSystemLocal::DrawBigChar( int x, int y, int ch, const idMaterial *m
 	if ( y < -BIGCHAR_HEIGHT ) {
 		return;
 	}
-
 	row = ch >> 4;
 	col = ch & 15;
 
@@ -797,7 +794,7 @@ so if you specify a power of two size for a texture copy, it may be shrunk
 down, but still valid.
 ================
 */
-void	idRenderSystemLocal::CropRenderSize( int width, int height, bool makePowerOfTwo, bool forceDimensions ) {
+void idRenderSystemLocal::CropRenderSize( int width, int height, bool makePowerOfTwo, bool forceDimensions ) {
 	if ( !glConfig.isInitialized ) {
 		return;
 	}
@@ -829,7 +826,7 @@ void	idRenderSystemLocal::CropRenderSize( int width, int height, bool makePowerO
 	renderView.width = width;
 	renderView.height = height;
 
-	idScreenRect	r;
+	idScreenRect r;
 	RenderViewToViewport( &renderView, &r );
 
 	width = r.x2 - r.x1 + 1;
@@ -847,8 +844,7 @@ void	idRenderSystemLocal::CropRenderSize( int width, int height, bool makePowerO
 		height = RoundDownToPowerOfTwo( height );
 		// FIXME: megascreenshots with offset viewports don't work right with this yet
 	}
-
-	renderCrop_t	*rc = &renderCrops[currentRenderCrop];
+	renderCrop_t *rc = &renderCrops[currentRenderCrop];
 
 	// we might want to clip these to the crop window instead
 	while ( width > glConfig.vidWidth ) {
@@ -1022,6 +1018,7 @@ idRenderSystemLocal::UploadImage
 */
 bool idRenderSystemLocal::UploadImage( const char *imageName, const byte *data, int width, int height ) {
 	idImage *image = globalImages->GetImage( imageName );
+
 	if ( !image ) {
 		return false;
 	}

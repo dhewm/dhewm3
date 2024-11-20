@@ -48,7 +48,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "stb_image_write.h"
 
 // functions that are not called every frame
-
 glconfig_t	glConfig;
 
 const char *r_rendererArgs[] = { "best", "arb2", NULL };
@@ -239,8 +238,7 @@ idCVar r_windowResizable( "r_windowResizable", "1", CVAR_RENDERER | CVAR_ARCHIVE
 idCVar r_vidRestartAlwaysFull( "r_vidRestartAlwaysFull", 0, CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Always do a full vid_restart (ignore 'partial' argument), e.g. when changing window size" );
 
 // DG: for soft particles (ported from TDM)
-idCVar r_enableDepthCapture( "r_enableDepthCapture", "-1", CVAR_RENDERER | CVAR_INTEGER,
-                             "enable capturing depth buffer to texture. -1: enable automatically (if soft particles are enabled), 0: disable, 1: enable", -1, 1 ); // #3877
+idCVar r_enableDepthCapture( "r_enableDepthCapture", "-1", CVAR_RENDERER | CVAR_INTEGER, "enable capturing depth buffer to texture. -1: enable automatically (if soft particles are enabled), 0: disable, 1: enable", -1, 1 ); // #3877
 idCVar r_useSoftParticles( "r_useSoftParticles", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Soften particle transitions when player walks through them or they cross solid geometry. Needs r_enableDepthCapture. Can slow down rendering!" ); // #3878
 
 idCVar r_glDebugContext( "r_glDebugContext", "0", CVAR_RENDERER | CVAR_BOOL, "Enable OpenGL Debug context - requires vid_restart, needs SDL2" );
@@ -655,8 +653,10 @@ static void R_CheckPortableExtensions( void ) {
 	}
 
 	// check for minimum set
-	if ( !glConfig.multitextureAvailable || !glConfig.textureEnvCombineAvailable || !glConfig.cubeMapAvailable
-	        || !glConfig.envDot3Available ) {
+	if ( !glConfig.multitextureAvailable || 
+		!glConfig.textureEnvCombineAvailable || 
+		!glConfig.cubeMapAvailable || 
+		!glConfig.envDot3Available ) {
 		common->Error( "%s", common->GetLanguageDict()->GetString( "#str_06780" ) );
 	}
 
@@ -923,7 +923,7 @@ void R_InitOpenGL( void ) {
 	}
 
 	// load qgl function pointers
-#define QGLPROC(name, rettype, args) \
+#define QGLPROC( name, rettype, args ) \
 	q##name = ( rettype( APIENTRYP )args ) GLimp_ExtensionPointer( #name ); \
 	if ( !q##name ) \
 		common->FatalError( "Unable to initialize OpenGL (%s)", #name );

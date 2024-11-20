@@ -1588,13 +1588,12 @@ void idRenderWorldLocal::PushVolumeIntoTree_r( idRenderEntityLocal *def, idRende
 		if ( def ) {
 			AddEntityRefToArea( def, area );
 		}
+
 		if ( light ) {
 			AddLightRefToArea( light, area );
 		}
-
 		return;
 	}
-
 	node = areaNodes + nodeNum;
 
 	// if we know that all possible children nodes only touch an area
