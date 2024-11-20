@@ -84,11 +84,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef __MINGW32__
 #undef _alloca // in mingw _alloca is a #define
 // NOTE: Do *not* use __builtin_alloca_with_align(), unlike regular alloca it frees at end of block instead of end of function !
-#define _alloca16( x )				( (void *) ( (assert( ( x )<ID_MAX_ALLOCA_SIZE ) ), ( ( ( ( uintptr_t )__builtin_alloca( ( x ) + 15 ) ) + 15 ) & ~15 ) ) )
+#define _alloca16( x )				( ( void * ) ( ( assert( ( x )<ID_MAX_ALLOCA_SIZE ) ), ( ( ( ( uintptr_t )__builtin_alloca( ( x ) + 15 ) ) + 15 ) & ~15 ) ) )
 #define _alloca( x )				( (assert( ( x )<ID_MAX_ALLOCA_SIZE ) ), __builtin_alloca( ( x ) ) )
 #else
-#define _alloca16( x )				( (void *) ( (assert( ( x )<ID_MAX_ALLOCA_SIZE ) ), ( ( ( ( uintptr_t )_alloca( ( x ) + 15 ) ) + 15 ) & ~15 ) ) )
-#define _alloca( x )				( (void *) ( (assert( ( x )<ID_MAX_ALLOCA_SIZE ) ), _alloca( ( x ) ) ) )
+#define _alloca16( x )				( ( void * ) ( ( assert( ( x ) < ID_MAX_ALLOCA_SIZE ) ), ( ( ( ( uintptr_t )_alloca( ( x ) + 15 ) ) + 15 ) & ~15 ) ) )
+#define _alloca( x )				( ( void * ) ( ( assert( ( x ) < ID_MAX_ALLOCA_SIZE ) ), _alloca( ( x ) ) ) )
 #endif
 
 #define PATHSEPERATOR_STR			"\\"
@@ -184,11 +184,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef	__GNUC__
 // NOTE: Do *not* use __builtin_alloca_with_align(), unlike regular alloca it frees at end of block instead of end of function !
-#define _alloca16( x )				( ( {assert( ( x )<ID_MAX_ALLOCA_SIZE ); } ), ( ( void * )( ( ( ( uintptr_t )__builtin_alloca( ( x ) + 15 ) ) + 15 ) & ~15 ) ) )
-#define _alloca( x )				( ( {assert( ( x )<ID_MAX_ALLOCA_SIZE ); } ), __builtin_alloca( (x) ) )
+#define _alloca16( x )				( ( { assert( ( x ) < ID_MAX_ALLOCA_SIZE ); } ), ( ( void * )( ( ( ( uintptr_t )__builtin_alloca( ( x ) + 15 ) ) + 15 ) & ~15 ) ) )
+#define _alloca( x )				( ( { assert( ( x ) < ID_MAX_ALLOCA_SIZE ); } ), __builtin_alloca( (x) ) )
 #else
-#define _alloca( x )				( ( {assert( ( x )<ID_MAX_ALLOCA_SIZE ); } ), alloca( ( x ) ) )
-#define _alloca16( x )				( ( {assert( ( x )<ID_MAX_ALLOCA_SIZE ); } ), ( ( void * )( ( ( ( uintptr_t )alloca( ( x )+15 ) ) + 15 ) & ~15 ) ) )
+#define _alloca( x )				( ( { assert( ( x ) < ID_MAX_ALLOCA_SIZE ); } ), alloca( ( x ) ) )
+#define _alloca16( x )				( ( { assert( ( x ) < ID_MAX_ALLOCA_SIZE ); } ), ( ( void * )( ( ( ( uintptr_t )alloca( ( x )+15 ) ) + 15 ) & ~15 ) ) )
 #endif
 
 #ifdef GAME_DLL
