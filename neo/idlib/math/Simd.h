@@ -201,6 +201,7 @@ public:
 	// plane culling
 	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon ) = 0;
 	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon ) = 0;
+
 };
 
 // pointer to SIMD processor

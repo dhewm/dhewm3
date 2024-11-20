@@ -72,6 +72,9 @@ void idSIMD::Init( void ) {
 /*
 ============
 idSIMD::InitProcessor
+
+Darkmod has a cvar to force specific cpu optimizations
+but it requires a lot more code so i just use this simpler version.
 ============
 */
 void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {

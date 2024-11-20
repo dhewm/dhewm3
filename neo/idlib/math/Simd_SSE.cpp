@@ -676,7 +676,7 @@ void VPCALL idSIMD_SSE::CullByFrustum( idDrawVert *verts, const int numVerts, co
 		int mask_lo14 = _mm_movemask_ps( _mm_cmplt_ps( d14, eps ) );
 		int mask_lo56 = _mm_movemask_ps( _mm_cmplt_ps( d56, eps ) );
 		int mask_lo = mask_lo14 | mask_lo56 << 4;
-		pointCull[j] = mask_lo & mask6;
+		pointCull[j] = ( mask_lo & mask6 ); // gcc compiler warning
 	}
 }
 
@@ -729,7 +729,7 @@ void VPCALL idSIMD_SSE::CullByFrustum2( idDrawVert *verts, const int numVerts, c
 		int mask_hi56 = _mm_movemask_ps( _mm_cmpgt_ps( d56, eps ) );
 		int mask_lo = mask_lo14 | mask_lo56 << 4;
 		int mask_hi = mask_hi14 | mask_hi56 << 4;
-		pointCull[j] = mask_lo & mask6 | ( mask_hi & mask6 ) << 6;
+		pointCull[j] = ( ( mask_lo & mask6 ) | ( mask_hi & mask6 ) << 6 ); // gcc compiler warning
 	}
 }
 
@@ -18296,7 +18296,7 @@ void VPCALL idSIMD_SSE::CullByFrustum( idDrawVert *verts, const int numVerts, co
 		int mask_lo14 = _mm_movemask_ps( _mm_cmplt_ps( d14, eps ) );
 		int mask_lo56 = _mm_movemask_ps( _mm_cmplt_ps( d56, eps ) );
 		int mask_lo = mask_lo14 | mask_lo56 << 4;
-		pointCull[j] = mask_lo & mask6;
+		pointCull[j] = ( mask_lo & mask6 ); // gcc compiler warning
 	}
 }
 
@@ -18349,7 +18349,7 @@ void VPCALL idSIMD_SSE::CullByFrustum2( idDrawVert *verts, const int numVerts, c
 		int mask_hi56 = _mm_movemask_ps( _mm_cmpgt_ps( d56, eps ) );
 		int mask_lo = mask_lo14 | mask_lo56 << 4;
 		int mask_hi = mask_hi14 | mask_hi56 << 4;
-		pointCull[j] = mask_lo & mask6 | ( mask_hi & mask6 ) << 6;
+		pointCull[j] = ( ( mask_lo & mask6 ) | ( mask_hi & mask6 ) << 6 ); // gcc compiler warning
 	}
 }
 
@@ -18412,7 +18412,7 @@ void VPCALL idSIMD_SSE::CullByFrustum( idDrawVert *verts, const int numVerts, co
 		int mask_lo14 = _mm_movemask_ps( _mm_cmplt_ps( d14, eps ) );
 		int mask_lo56 = _mm_movemask_ps( _mm_cmplt_ps( d56, eps ) );
 		int mask_lo = mask_lo14 | mask_lo56 << 4;
-		pointCull[j] = mask_lo & mask6;
+		pointCull[j] = ( mask_lo & mask6 ); // gcc compiler warning
 	}
 }
 
@@ -18465,7 +18465,7 @@ void VPCALL idSIMD_SSE::CullByFrustum2( idDrawVert *verts, const int numVerts, c
 		int mask_hi56 = _mm_movemask_ps( _mm_cmpgt_ps( d56, eps ) );
 		int mask_lo = mask_lo14 | mask_lo56 << 4;
 		int mask_hi = mask_hi14 | mask_hi56 << 4;
-		pointCull[j] = mask_lo & mask6 | ( mask_hi & mask6 ) << 6;
+		pointCull[j] = ( ( mask_lo & mask6 ) | ( mask_hi & mask6 ) << 6 ); // gcc compiler warning
 	}
 }
 

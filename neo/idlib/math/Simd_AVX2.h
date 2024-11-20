@@ -36,7 +36,7 @@ public:
 	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
 	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
 
-#endif  /* _MSC_VER */
+#endif
 };
 
 #endif /* !__MATH_SIMD_AVX2_H__ */
