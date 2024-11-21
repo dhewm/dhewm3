@@ -275,8 +275,8 @@ static inline bool SDL_HasDAZ( void ) {
         FXSAVE[eax]
     }
 #endif
-    DWORD dwMask = *( DWORD * )&FXArea[28];             // Read the MXCSR Mask
-    return ( ( dwMask & MXCSR_DAZ ) == MXCSR_DAZ );     // Return if the DAZ bit is set
+    unsigned int dwMask = *( unsigned int * )&FXArea[28]; // Read the MXCSR Mask
+    return ( ( dwMask & MXCSR_DAZ ) == MXCSR_DAZ );       // Return if the DAZ bit is set
 }
 
 /*
