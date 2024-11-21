@@ -26,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+// atleast ppc seems to have totally different intrinsics
 #if defined(__ppc__) && defined(__APPLE__)
 #include <vecLib/vecLib.h>
 #endif
@@ -35,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #if defined(_MSC_VER)
-#include <intrin.h>
+#include <xmmintrin.h>
 #endif
 
 #include "sys/platform.h"
@@ -473,9 +474,9 @@ void R_AxisToModelMatrix( const idMat3 &axis, const idVec3 &origin, float modelM
     modelMatrix[15] = 1;
 }
 
-// FIXME: these assume no skewing or scaling transforms
+// FIXME: these assume no skewing or scaling transforms (disabled SSE intrinsics on MAC ppc)
 void R_LocalPointToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3 &out ) {
-#if !( defined(MACOS_X) || defined(__APPLE__) )
+#if !( defined(__ppc__) || defined(MACOS_X) || defined(__APPLE__) )
     int cpuid = idLib::sys->GetProcessorId();
 
     // a more general approach here, bonus also supports SSE instead of minimum SSE2
@@ -487,19 +488,23 @@ void R_LocalPointToGlobal( const float modelMatrix[16], const idVec3 &in, idVec3
         __m128 xxxx = _mm_set1_ps( in.x );
         __m128 yyyy = _mm_set1_ps( in.y );
         __m128 zzzz = _mm_set1_ps( in.z );
-        __m128 res = _mm_add_ps( _mm_add_ps( _mm_mul_ps( row0, xxxx ), _mm_mul_ps( row1, yyyy ) ),
+        __m128 res = _mm_add_ps( _mm_add_ps( _mm_mul_ps( row0, xxxx ),
+                                             _mm_mul_ps( row1, yyyy ) ),
                                  _mm_add_ps( _mm_mul_ps( row2, zzzz ), row3 ) );
         // unaligned float x 3 store
         _mm_storel_pi( ( __m64 * )&out[0], res );
         _mm_store_ss( &out[2], _mm_movehl_ps( res, res ) );
-    } else
-#else
-    {
+    } else {
         // fall back to non SSE
         out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4] + in[2] * modelMatrix[8] + modelMatrix[12];
         out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5] + in[2] * modelMatrix[9] + modelMatrix[13];
         out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6] + in[2] * modelMatrix[10] + modelMatrix[14];
     }
+#else
+    // fall back to non SSE on mac
+    out[0] = in[0] * modelMatrix[0] + in[1] * modelMatrix[4] + in[2] * modelMatrix[8] + modelMatrix[12];
+    out[1] = in[0] * modelMatrix[1] + in[1] * modelMatrix[5] + in[2] * modelMatrix[9] + modelMatrix[13];
+    out[2] = in[0] * modelMatrix[2] + in[1] * modelMatrix[6] + in[2] * modelMatrix[10] + modelMatrix[14];
 #endif
 }
 
@@ -763,11 +768,11 @@ void R_TransformClipToDevice( const idPlane &clip, const viewDef_t *view, idVec3
 ==========================
 R_MatrixMultiply
 
-Changed name to be more in line with RBDoom
+Changed name to be more in line with RBDoom (disabled SSE intrinsics on MAC ppc)
 ==========================
 */
 void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
-#if !( defined(MACOS_X) || defined(__APPLE__) )
+#if !( defined(__ppc__) || defined(MACOS_X) || defined(__APPLE__) )
     int cpuid = idLib::sys->GetProcessorId();
 
     /* fast path use sse */
@@ -782,14 +787,14 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
             __m128 Ai1 = _mm_set1_ps( a[4 * i + 1] );
             __m128 Ai2 = _mm_set1_ps( a[4 * i + 2] );
             __m128 Ai3 = _mm_set1_ps( a[4 * i + 3] );
-            __m128 Rix = _mm_add_ps( _mm_add_ps( _mm_mul_ps( Ai0, B0x ), _mm_mul_ps( Ai1, B1x ) ),
-                                     _mm_add_ps( _mm_mul_ps( Ai2, B2x ), _mm_mul_ps( Ai3, B3x ) ) );
+            __m128 Rix = _mm_add_ps( _mm_add_ps( _mm_mul_ps( Ai0, B0x ),
+                                                 _mm_mul_ps( Ai1, B1x ) ),
+                                     _mm_add_ps( _mm_mul_ps( Ai2, B2x ),
+                                                 _mm_mul_ps( Ai3, B3x ) ) );
             _mm_storeu_ps( &out[4 * i], Rix );
         }
-    } else
-#else
-    {
-        /* fallback to matrix */
+    } else {
+        /* fallback to non SSE matrix */
         out[0 * 4 + 0] = a[0 * 4 + 0] * b[0 * 4 + 0] + a[0 * 4 + 1] * b[1 * 4 + 0] + a[0 * 4 + 2] * b[2 * 4 + 0] + a[0 * 4 + 3] * b[3 * 4 + 0];
         out[0 * 4 + 1] = a[0 * 4 + 0] * b[0 * 4 + 1] + a[0 * 4 + 1] * b[1 * 4 + 1] + a[0 * 4 + 2] * b[2 * 4 + 1] + a[0 * 4 + 3] * b[3 * 4 + 1];
         out[0 * 4 + 2] = a[0 * 4 + 0] * b[0 * 4 + 2] + a[0 * 4 + 1] * b[1 * 4 + 2] + a[0 * 4 + 2] * b[2 * 4 + 2] + a[0 * 4 + 3] * b[3 * 4 + 2];
@@ -807,6 +812,24 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
         out[3 * 4 + 2] = a[3 * 4 + 0] * b[0 * 4 + 2] + a[3 * 4 + 1] * b[1 * 4 + 2] + a[3 * 4 + 2] * b[2 * 4 + 2] + a[3 * 4 + 3] * b[3 * 4 + 2];
         out[3 * 4 + 3] = a[3 * 4 + 0] * b[0 * 4 + 3] + a[3 * 4 + 1] * b[1 * 4 + 3] + a[3 * 4 + 2] * b[2 * 4 + 3] + a[3 * 4 + 3] * b[3 * 4 + 3];
     }
+#else
+	/* fallback to non SSE matrix on mac */
+	out[0 * 4 + 0] = a[0 * 4 + 0] * b[0 * 4 + 0] + a[0 * 4 + 1] * b[1 * 4 + 0] + a[0 * 4 + 2] * b[2 * 4 + 0] + a[0 * 4 + 3] * b[3 * 4 + 0];
+	out[0 * 4 + 1] = a[0 * 4 + 0] * b[0 * 4 + 1] + a[0 * 4 + 1] * b[1 * 4 + 1] + a[0 * 4 + 2] * b[2 * 4 + 1] + a[0 * 4 + 3] * b[3 * 4 + 1];
+	out[0 * 4 + 2] = a[0 * 4 + 0] * b[0 * 4 + 2] + a[0 * 4 + 1] * b[1 * 4 + 2] + a[0 * 4 + 2] * b[2 * 4 + 2] + a[0 * 4 + 3] * b[3 * 4 + 2];
+	out[0 * 4 + 3] = a[0 * 4 + 0] * b[0 * 4 + 3] + a[0 * 4 + 1] * b[1 * 4 + 3] + a[0 * 4 + 2] * b[2 * 4 + 3] + a[0 * 4 + 3] * b[3 * 4 + 3];
+	out[1 * 4 + 0] = a[1 * 4 + 0] * b[0 * 4 + 0] + a[1 * 4 + 1] * b[1 * 4 + 0] + a[1 * 4 + 2] * b[2 * 4 + 0] + a[1 * 4 + 3] * b[3 * 4 + 0];
+	out[1 * 4 + 1] = a[1 * 4 + 0] * b[0 * 4 + 1] + a[1 * 4 + 1] * b[1 * 4 + 1] + a[1 * 4 + 2] * b[2 * 4 + 1] + a[1 * 4 + 3] * b[3 * 4 + 1];
+	out[1 * 4 + 2] = a[1 * 4 + 0] * b[0 * 4 + 2] + a[1 * 4 + 1] * b[1 * 4 + 2] + a[1 * 4 + 2] * b[2 * 4 + 2] + a[1 * 4 + 3] * b[3 * 4 + 2];
+	out[1 * 4 + 3] = a[1 * 4 + 0] * b[0 * 4 + 3] + a[1 * 4 + 1] * b[1 * 4 + 3] + a[1 * 4 + 2] * b[2 * 4 + 3] + a[1 * 4 + 3] * b[3 * 4 + 3];
+	out[2 * 4 + 0] = a[2 * 4 + 0] * b[0 * 4 + 0] + a[2 * 4 + 1] * b[1 * 4 + 0] + a[2 * 4 + 2] * b[2 * 4 + 0] + a[2 * 4 + 3] * b[3 * 4 + 0];
+	out[2 * 4 + 1] = a[2 * 4 + 0] * b[0 * 4 + 1] + a[2 * 4 + 1] * b[1 * 4 + 1] + a[2 * 4 + 2] * b[2 * 4 + 1] + a[2 * 4 + 3] * b[3 * 4 + 1];
+	out[2 * 4 + 2] = a[2 * 4 + 0] * b[0 * 4 + 2] + a[2 * 4 + 1] * b[1 * 4 + 2] + a[2 * 4 + 2] * b[2 * 4 + 2] + a[2 * 4 + 3] * b[3 * 4 + 2];
+	out[2 * 4 + 3] = a[2 * 4 + 0] * b[0 * 4 + 3] + a[2 * 4 + 1] * b[1 * 4 + 3] + a[2 * 4 + 2] * b[2 * 4 + 3] + a[2 * 4 + 3] * b[3 * 4 + 3];
+	out[3 * 4 + 0] = a[3 * 4 + 0] * b[0 * 4 + 0] + a[3 * 4 + 1] * b[1 * 4 + 0] + a[3 * 4 + 2] * b[2 * 4 + 0] + a[3 * 4 + 3] * b[3 * 4 + 0];
+	out[3 * 4 + 1] = a[3 * 4 + 0] * b[0 * 4 + 1] + a[3 * 4 + 1] * b[1 * 4 + 1] + a[3 * 4 + 2] * b[2 * 4 + 1] + a[3 * 4 + 3] * b[3 * 4 + 1];
+	out[3 * 4 + 2] = a[3 * 4 + 0] * b[0 * 4 + 2] + a[3 * 4 + 1] * b[1 * 4 + 2] + a[3 * 4 + 2] * b[2 * 4 + 2] + a[3 * 4 + 3] * b[3 * 4 + 2];
+	out[3 * 4 + 3] = a[3 * 4 + 0] * b[0 * 4 + 3] + a[3 * 4 + 1] * b[1 * 4 + 3] + a[3 * 4 + 2] * b[2 * 4 + 3] + a[3 * 4 + 3] * b[3 * 4 + 3];
 #endif
 }
 
