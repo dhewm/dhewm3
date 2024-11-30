@@ -17,13 +17,6 @@
 
 #include "sys_imgui.h"
 
-#ifdef D3_SDL_X11
-#include <dlfcn.h>
-#include <SDL_syswm.h>
-//char *XGetDefault(Display* display, const char*	program, const char* option)
-typedef char* (*MY_XGETDEFAULTFUN)(Display*, const char*, const char*);
-#endif
-
 #include "../libs/imgui/backends/imgui_impl_opengl2.h"
 
 #if SDL_VERSION_ATLEAST(3, 0, 0)
@@ -170,48 +163,6 @@ void ShowWarningOverlay( const char* text )
 	warningOverlayStartPos = ImGui::GetMousePos();
 }
 
-#if SDL_MAJOR_VERSION == 2 // not used with SDL3
-static float GetDefaultDPI()
-{
-	SDL_Window* win = sdlWindow;
-	float dpi = -1.0f;
-#ifdef D3_SDL_X11
-	SDL_SysWMinfo wmInfo = {};
-	SDL_VERSION(&wmInfo.version)
-	if(SDL_GetWindowWMInfo(win, &wmInfo) && wmInfo.subsystem == SDL_SYSWM_X11) {
-		Display* display = wmInfo.info.x11.display;
-
-		static void* libX11 = NULL;
-		if(libX11 == NULL) {
-			libX11 = dlopen("libX11.so.6", RTLD_LAZY);
-		}
-		if(libX11 == NULL) {
-			libX11 = dlopen("libX11.so", RTLD_LAZY);
-		}
-		if(libX11 != NULL) {
-			MY_XGETDEFAULTFUN my_xgetdefault = (MY_XGETDEFAULTFUN)dlsym(libX11, "XGetDefault");
-			if(my_xgetdefault != NULL) {
-				//char *XGetDefault(Display* display, const char*	program, const char* option)
-				const char* dpiStr = my_xgetdefault(display, "Xft", "dpi");
-				printf("XX dpistr = '%s'\n", dpiStr);
-				if(dpiStr != NULL) {
-					dpi = atof(dpiStr);
-				}
-			}
-		}
-	}
-	if (dpi == -1.0f)
-#endif
-	{
-		int winIdx = SDL_GetWindowDisplayIndex( win );
-		if (winIdx >= 0) {
-			SDL_GetDisplayDPI(winIdx, NULL, &dpi, NULL);
-		}
-	}
-	return dpi;
-}
-#endif // SDL2-only
-
 static float GetDefaultScale()
 {
 	if ( glConfig.winWidth != glConfig.vidWidth ) {
@@ -222,9 +173,15 @@ static float GetDefaultScale()
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 	float ret = SDL_GetWindowDisplayScale( sdlWindow );
 #else
+	float dpi = 0.0f;
+	int winIdx = SDL_GetWindowDisplayIndex( win );
+	SDL_GetDisplayDPI((winIdx >= 0) ? winIdx : 0, NULL, &dpi, NULL);
 	// TODO: different reference DPI on mac? also, doesn't work that well on my laptop..
-	float ret = GetDefaultDPI() / 96.0f;
+	float ret = dpi / 96.0f;
 #endif
+	if ( ret <= 0.0f ) {
+		return 1.0f;
+	}
 	ret = round(ret*2.0)*0.5; // round to .0 or .5
 	return ret;
 }

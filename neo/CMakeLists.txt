@@ -285,19 +285,6 @@ if(NOT WIN32)
 	else()
 		message(WARNING "libbacktrace wasn't found. It's not required but recommended, because it provides useful backtraces if dhewm3 crashes")
 	endif()
-	
-	# check if our SDL2 supports X11 in SDL_syswm so we can use it for DPI scaling ImGui
-	if(SDL2) # TODO: SDL3? Or just kick this feature?
-		set(CMAKE_REQUIRED_LIBRARIES SDL2)
-		check_c_source_compiles( "#include <SDL_syswm.h>
-		int main() { SDL_SysWMinfo wmInfo = {}; wmInfo.info.x11.display = NULL; return 0; }" HAVE_SDL_X11)
-		unset(CMAKE_REQUIRED_LIBRARIES)
-		
-		if(HAVE_SDL_X11)
-			message(STATUS "This SDL2 has X11 support")
-			add_definitions(-DD3_SDL_X11)
-		endif()
-	endif()
 endif() # NOT WIN32
 
 # check if this is some kind of clang (Clang, AppleClang, whatever)
