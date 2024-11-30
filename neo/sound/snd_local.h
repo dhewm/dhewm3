@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 // because the implemenations are in openal_stub.cpp
 // this is ensured by defining AL_LIBTYPE_STATIC before including the AL headers
 #define AL_LIBTYPE_STATIC
+#define AL_DISABLE_NOEXCEPT
 #endif
 
 #include <AL/al.h>
