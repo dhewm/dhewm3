@@ -174,7 +174,7 @@ static float GetDefaultScale()
 	float ret = SDL_GetWindowDisplayScale( sdlWindow );
 #else
 	float dpi = 0.0f;
-	int winIdx = SDL_GetWindowDisplayIndex( win );
+	int winIdx = SDL_GetWindowDisplayIndex( sdlWindow );
 	SDL_GetDisplayDPI((winIdx >= 0) ? winIdx : 0, NULL, &dpi, NULL);
 	// TODO: different reference DPI on mac? also, doesn't work that well on my laptop..
 	float ret = dpi / 96.0f;
