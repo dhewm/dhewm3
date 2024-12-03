@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 	#endif
 #endif
 
+#define GL_GLEXT_PROTOTYPES
+
 #ifdef D3_SDL3
   #include <SDL3/SDL_opengl.h>
 #else // SDL1.2 or SDL2
@@ -76,6 +78,60 @@ extern	void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLf
 extern	void ( APIENTRY * qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
 extern	void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 extern	void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
+
+// ARB_MapBufferRange
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC qglFlushMappedBufferRange;
+extern PFNGLMAPBUFFERRANGEPROC qglMapBufferRange;
+
+// ARB_shading_language_100
+extern PFNGLUNIFORM1FPROC qglUniform1f;
+extern PFNGLUNIFORM1FVPROC qglUniform1fv;
+extern PFNGLUNIFORM1IPROC qglUniform1i;
+extern PFNGLUNIFORM1IVPROC qglUniform1iv;
+extern PFNGLUNIFORM2FPROC qglUniform2f;
+extern PFNGLUNIFORM2FVPROC qglUniform2fv;
+extern PFNGLUNIFORM2IPROC qglUniform2i;
+extern PFNGLUNIFORM2IVPROC qglUniform2iv;
+extern PFNGLUNIFORM3FPROC qglUniform3f;
+extern PFNGLUNIFORM3FVPROC qglUniform3fv;
+extern PFNGLUNIFORM3IPROC qglUniform3i;
+extern PFNGLUNIFORM3IVPROC qglUniform3iv;
+extern PFNGLUNIFORM4FPROC qglUniform4f;
+extern PFNGLUNIFORM4FVPROC qglUniform4fv;
+extern PFNGLUNIFORM4IPROC qglUniform4i;
+extern PFNGLUNIFORM4IVPROC qglUniform4iv;
+extern PFNGLUNIFORMMATRIX2FVPROC qglUniformMatrix2fv;
+extern PFNGLUNIFORMMATRIX3FVPROC qglUniformMatrix3fv;
+extern PFNGLUNIFORMMATRIX4FVPROC qglUniformMatrix4fv;
+extern PFNGLUNIFORMMATRIX2X3FVPROC qglUniformMatrix2x3fv;
+extern PFNGLUNIFORMMATRIX2X4FVPROC qglUniformMatrix2x4fv;
+extern PFNGLUNIFORMMATRIX3X2FVPROC qglUniformMatrix3x2fv;
+extern PFNGLUNIFORMMATRIX3X4FVPROC qglUniformMatrix3x4fv;
+extern PFNGLUNIFORMMATRIX4X2FVPROC qglUniformMatrix4x2fv;
+extern PFNGLUNIFORMMATRIX4X3FVPROC qglUniformMatrix4x3fv;
+
+extern PFNGLISPROGRAMPROC qglIsProgram;
+extern PFNGLCREATEPROGRAMPROC qglCreateProgram;
+extern PFNGLVALIDATEPROGRAMPROC qglValidateProgram;
+extern PFNGLLINKPROGRAMPROC qglLinkProgram;
+
+extern PFNGLISSHADERPROC qglIsShader;
+extern PFNGLSHADERSOURCEPROC qglShaderSource;
+extern PFNGLCREATESHADERPROC qglCreateShader;
+extern PFNGLATTACHSHADERPROC qglAttachShader;
+extern PFNGLBINDATTRIBLOCATIONPROC qglBindAttribLocation;
+extern PFNGLCOMPILESHADERPROC qglCompileShader;
+extern PFNGLDETACHSHADERPROC qglDetachShader;
+extern PFNGLDELETESHADERPROC qglDeleteShader;
+
+extern PFNGLGETPROGRAMINFOLOGPROC qglGetProgramInfoLog;
+extern PFNGLGETPROGRAMIVPROC qglGetProgramiv;
+extern PFNGLGETSHADERINFOLOGPROC qglGetShaderInfoLog;
+extern PFNGLGETSHADERSOURCEPROC qglGetShaderSource;
+extern PFNGLGETSHADERIVPROC qglGetShaderiv;
+extern PFNGLGETUNIFORMLOCATIONPROC qglGetUniformLocation;
+extern PFNGLGETUNIFORMFVPROC qglGetUniformfv;
+extern PFNGLGETUNIFORMIVPROC qglGetUniformiv;
 
 // ARB_vertex_buffer_object
 extern PFNGLBINDBUFFERARBPROC qglBindBufferARB;

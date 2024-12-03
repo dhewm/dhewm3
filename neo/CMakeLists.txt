@@ -367,6 +367,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	endif()
 
 	# TODO fix these warnings
+	add_compile_options(-Wno-unused-variable)
 	add_compile_options(-Wno-sign-compare)
 	add_compile_options(-Wno-switch)
 
@@ -783,6 +784,8 @@ set(src_idlib
 	idlib/math/Rotation.cpp
 	idlib/math/Simd.cpp
 	idlib/math/Simd_Generic.cpp
+	idlib/math/Simd_AVX.cpp
+	idlib/math/Simd_AVX2.cpp
 	idlib/math/Simd_AltiVec.cpp
 	idlib/math/Simd_MMX.cpp
 	idlib/math/Simd_3DNow.cpp

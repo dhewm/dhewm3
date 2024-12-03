@@ -29,10 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_sdl.h"
 
 #if 0 // TODO: was there a reason not to include full SDL.h?
-  #include <SDL_version.h>
-  #include <SDL_mutex.h>
-  #include <SDL_thread.h>
-  #include <SDL_timer.h>
+#include <SDL_version.h>
+#include <SDL_mutex.h>
+#include <SDL_thread.h>
+#include <SDL_timer.h>
 #endif
 
 #include "sys/platform.h"
@@ -41,24 +41,24 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_public.h"
 
 #if SDL_MAJOR_VERSION < 2
-  // SDL1.2 doesn't have SDL_threadID but uses Uint32.
-  // this typedef helps using the same code for SDL1.2 and SDL2
-  typedef Uint32 SDL_threadID;
+// SDL1.2 doesn't have SDL_threadID but uses Uint32.
+// this typedef helps using the same code for SDL1.2 and SDL2
+typedef Uint32 SDL_threadID;
 #elif SDL_MAJOR_VERSION >= 3
-  // backwards-compat with SDL2
-  #define SDL_mutex SDL_Mutex
-  #define SDL_cond SDL_Condition
-  #define SDL_threadID SDL_ThreadID
-  #define SDL_CreateCond SDL_CreateCondition
-  #define SDL_DestroyCond SDL_DestroyCondition
-  #define SDL_CondWait SDL_WaitCondition
-  #define SDL_CondSignal SDL_SignalCondition
+// backwards-compat with SDL2
+#define SDL_mutex SDL_Mutex
+#define SDL_cond SDL_Condition
+#define SDL_threadID SDL_ThreadID
+#define SDL_CreateCond SDL_CreateCondition
+#define SDL_DestroyCond SDL_DestroyCondition
+#define SDL_CondWait SDL_WaitCondition
+#define SDL_CondSignal SDL_SignalCondition
 #endif
 
 #if __cplusplus >= 201103
-  // xthreadinfo::threadId doesn't use SDL_threadID directly so we don't drag SDL headers into sys_public.h
-  // but we should still make sure that the type fits (in SDL1.2 it's Uint32, in SDL2 it's unsigned long)
-  static_assert( sizeof(SDL_threadID) <= sizeof(xthreadInfo::threadId), "xthreadInfo::threadId has unsuitable type!" );
+// xthreadinfo::threadId doesn't use SDL_threadID directly so we don't drag SDL headers into sys_public.h
+// but we should still make sure that the type fits (in SDL1.2 it's Uint32, in SDL2 it's unsigned long)
+static_assert( sizeof( SDL_threadID ) <= sizeof( xthreadInfo::threadId ), "xthreadInfo::threadId has unsuitable type!" );
 #endif
 
 static SDL_mutex	*mutex[MAX_CRITICAL_SECTIONS] = { };
@@ -77,8 +77,8 @@ static SDL_threadID mainThreadID = -1;
 Sys_Sleep
 ==============
 */
-void Sys_Sleep(int msec) {
-	SDL_Delay(msec);
+void Sys_Sleep( int msec ) {
+	SDL_Delay( msec );
 }
 
 /*
@@ -100,32 +100,31 @@ void Sys_InitThreads() {
 	mainThreadIDset = true;
 
 	// critical sections
-	for (int i = 0; i < MAX_CRITICAL_SECTIONS; i++) {
+	for ( int i = 0; i < MAX_CRITICAL_SECTIONS; i++ ) {
 		mutex[i] = SDL_CreateMutex();
 
-		if (!mutex[i]) {
-			Sys_Printf("ERROR: SDL_CreateMutex failed\n");
+		if ( !mutex[i] ) {
+			Sys_Printf( "ERROR: SDL_CreateMutex failed\n" );
 			return;
 		}
 	}
 
 	// events
-	for (int i = 0; i < MAX_TRIGGER_EVENTS; i++) {
+	for ( int i = 0; i < MAX_TRIGGER_EVENTS; i++ ) {
 		cond[i] = SDL_CreateCond();
 
-		if (!cond[i]) {
-			Sys_Printf("ERROR: SDL_CreateCond failed\n");
+		if ( !cond[i] ) {
+			Sys_Printf( "ERROR: SDL_CreateCond failed\n" );
 			return;
 		}
-
 		signaled[i] = false;
 		waiting[i] = false;
 	}
 
 	// threads
-	for (int i = 0; i < MAX_THREADS; i++)
+	for ( int i = 0; i < MAX_THREADS; i++ ) {
 		thread[i] = NULL;
-
+	}
 	thread_count = 0;
 }
 
@@ -136,30 +135,30 @@ Sys_ShutdownThreads
 */
 void Sys_ShutdownThreads() {
 	// threads
-	for (int i = 0; i < MAX_THREADS; i++) {
-		if (!thread[i])
+	for ( int i = 0; i < MAX_THREADS; i++ ) {
+		if ( !thread[i] ) {
 			continue;
-
-		Sys_Printf("WARNING: Thread '%s' still running\n", thread[i]->name);
+		}
+		Sys_Printf( "WARNING: Thread '%s' still running\n", thread[i]->name );
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-		// TODO no equivalent in SDL2
+// TODO no equivalent in SDL2
 #else
-		SDL_KillThread(thread[i]->threadHandle);
+		SDL_KillThread( thread[i]->threadHandle );
 #endif
 		thread[i] = NULL;
 	}
 
 	// events
-	for (int i = 0; i < MAX_TRIGGER_EVENTS; i++) {
-		SDL_DestroyCond(cond[i]);
+	for ( int i = 0; i < MAX_TRIGGER_EVENTS; i++ ) {
+		SDL_DestroyCond( cond[i] );
 		cond[i] = NULL;
 		signaled[i] = false;
 		waiting[i] = false;
 	}
 
 	// critical sections
-	for (int i = 0; i < MAX_CRITICAL_SECTIONS; i++) {
-		SDL_DestroyMutex(mutex[i]);
+	for ( int i = 0; i < MAX_CRITICAL_SECTIONS; i++ ) {
+		SDL_DestroyMutex( mutex[i] );
 		mutex[i] = NULL;
 	}
 }
@@ -169,14 +168,15 @@ void Sys_ShutdownThreads() {
 Sys_EnterCriticalSection
 ==================
 */
-void Sys_EnterCriticalSection(int index) {
-	assert(index >= 0 && index < MAX_CRITICAL_SECTIONS);
+void Sys_EnterCriticalSection( int index ) {
+	assert( index >= 0 && index < MAX_CRITICAL_SECTIONS );
 
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-	SDL_LockMutex(mutex[index]); // in SDL3, this returns void and can't fail
+	SDL_LockMutex( mutex[index] ); // in SDL3, this returns void and can't fail
 #else // SDL2 and SDL1.2
-	if (SDL_LockMutex(mutex[index]) != 0)
-		common->Error("ERROR: SDL_LockMutex failed\n");
+	if ( SDL_LockMutex( mutex[index] ) != 0 ) {
+		common->Error( "ERROR: SDL_LockMutex failed\n" );
+	}
 #endif
 }
 
@@ -185,14 +185,15 @@ void Sys_EnterCriticalSection(int index) {
 Sys_LeaveCriticalSection
 ==================
 */
-void Sys_LeaveCriticalSection(int index) {
-	assert(index >= 0 && index < MAX_CRITICAL_SECTIONS);
+void Sys_LeaveCriticalSection( int index ) {
+	assert( index >= 0 && index < MAX_CRITICAL_SECTIONS );
 
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-	SDL_UnlockMutex(mutex[index]); // in SDL3, this returns void and can't fail
+	SDL_UnlockMutex( mutex[index] ); // in SDL3, this returns void and can't fail
 #else // SDL2 and SDL1.2
-	if (SDL_UnlockMutex(mutex[index]) != 0)
-		common->Error("ERROR: SDL_UnlockMutex failed\n");
+	if ( SDL_UnlockMutex( mutex[index] ) != 0 ) {
+		common->Error( "ERROR: SDL_UnlockMutex failed\n" );
+	}
 #endif
 }
 
@@ -214,27 +215,26 @@ the potential for time wasting lock waits is very low
 Sys_WaitForEvent
 ==================
 */
-void Sys_WaitForEvent(int index) {
-	assert(index >= 0 && index < MAX_TRIGGER_EVENTS);
+void Sys_WaitForEvent( int index ) {
+	assert( index >= 0 && index < MAX_TRIGGER_EVENTS );
+	Sys_EnterCriticalSection( CRITICAL_SECTION_SYS );
+	assert( !waiting[index] );	// WaitForEvent from multiple threads? that wouldn't be good
 
-	Sys_EnterCriticalSection(CRITICAL_SECTION_SYS);
-
-	assert(!waiting[index]);	// WaitForEvent from multiple threads? that wouldn't be good
-	if (signaled[index]) {
+	if ( signaled[index] ) {
 		// emulate windows behaviour: signal has been raised already. clear and keep going
 		signaled[index] = false;
 	} else {
 		waiting[index] = true;
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-		SDL_CondWait(cond[index], mutex[CRITICAL_SECTION_SYS]); // in SDL3, this returns void and can't fail
+		SDL_CondWait( cond[index], mutex[CRITICAL_SECTION_SYS] ); // in SDL3, this returns void and can't fail
 #else // SDL2 and SDL1.2
-		if (SDL_CondWait(cond[index], mutex[CRITICAL_SECTION_SYS]) != 0)
-			common->Error("ERROR: SDL_CondWait failed\n");
+		if ( SDL_CondWait( cond[index], mutex[CRITICAL_SECTION_SYS] ) != 0 ) {
+			common->Error( "ERROR: SDL_CondWait failed\n" );
+		}
 #endif
 		waiting[index] = false;
 	}
-
-	Sys_LeaveCriticalSection(CRITICAL_SECTION_SYS);
+	Sys_LeaveCriticalSection( CRITICAL_SECTION_SYS );
 }
 
 /*
@@ -242,24 +242,24 @@ void Sys_WaitForEvent(int index) {
 Sys_TriggerEvent
 ==================
 */
-void Sys_TriggerEvent(int index) {
-	assert(index >= 0 && index < MAX_TRIGGER_EVENTS);
+void Sys_TriggerEvent( int index ) {
+	assert( index >= 0 && index < MAX_TRIGGER_EVENTS );
 
-	Sys_EnterCriticalSection(CRITICAL_SECTION_SYS);
+	Sys_EnterCriticalSection( CRITICAL_SECTION_SYS );
 
-	if (waiting[index]) {
+	if ( waiting[index] ) {
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-		SDL_CondSignal(cond[index]); // in SDL3, this returns void and can't fail
+		SDL_CondSignal( cond[index] ); // in SDL3, this returns void and can't fail
 #else // SDL2 and SDL1.2
-		if (SDL_CondSignal(cond[index]) != 0)
-			common->Error("ERROR: SDL_CondSignal failed\n");
+		if ( SDL_CondSignal( cond[index] ) != 0 ) {
+			common->Error( "ERROR: SDL_CondSignal failed\n" );
+		}
 #endif
 	} else {
 		// emulate windows behaviour: if no thread is waiting, leave the signal on so next wait keeps going
 		signaled[index] = true;
 	}
-
-	Sys_LeaveCriticalSection(CRITICAL_SECTION_SYS);
+	Sys_LeaveCriticalSection( CRITICAL_SECTION_SYS );
 }
 
 /*
@@ -267,30 +267,29 @@ void Sys_TriggerEvent(int index) {
 Sys_CreateThread
 ==================
 */
-void Sys_CreateThread(xthread_t function, void *parms, xthreadInfo& info, const char *name) {
+void Sys_CreateThread( xthread_t function, void *parms, xthreadInfo &info, const char *name ) {
 	Sys_EnterCriticalSection();
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	SDL_Thread *t = SDL_CreateThread(function, name, parms);
+	SDL_Thread *t = SDL_CreateThread( function, name, parms );
 #else
-	SDL_Thread *t = SDL_CreateThread(function, parms);
+	SDL_Thread *t = SDL_CreateThread( function, parms );
 #endif
 
-	if (!t) {
-		common->Error("ERROR: SDL_thread for '%s' failed\n", name);
+	if ( !t ) {
+		common->Error( "ERROR: SDL_thread for '%s' failed\n", name );
 		Sys_LeaveCriticalSection();
 		return;
 	}
-
 	info.name = name;
 	info.threadHandle = t;
-	info.threadId = SDL_GetThreadID(t);
+	info.threadId = SDL_GetThreadID( t );
 
-	if (thread_count < MAX_THREADS)
+	if ( thread_count < MAX_THREADS ) {
 		thread[thread_count++] = &info;
-	else
-		common->DPrintf("WARNING: MAX_THREADS reached\n");
-
+	} else {
+		common->DPrintf( "WARNING: MAX_THREADS reached\n" );
+	}
 	Sys_LeaveCriticalSection();
 }
 
@@ -299,10 +298,10 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadInfo& info, const 
 Sys_DestroyThread
 ==================
 */
-void Sys_DestroyThread(xthreadInfo& info) {
-	assert(info.threadHandle);
+void Sys_DestroyThread( xthreadInfo &info ) {
+	assert( info.threadHandle );
 
-	SDL_WaitThread(info.threadHandle, NULL);
+	SDL_WaitThread( info.threadHandle, NULL );
 
 	info.name = NULL;
 	info.threadHandle = NULL;
@@ -310,21 +309,20 @@ void Sys_DestroyThread(xthreadInfo& info) {
 
 	Sys_EnterCriticalSection();
 
-	for (int i = 0; i < thread_count; i++) {
-		if (&info == thread[i]) {
+	int i, j;
+	for ( i = 0; i < static_cast<int>( thread_count ); i++ ) {
+		if ( &info == thread[i] ) {
 			thread[i] = NULL;
 
-			int j;
-			for (j = i + 1; j < thread_count; j++)
+			for ( j = i + 1; j < static_cast<int>( thread_count ); j++ ) {
 				thread[j - 1] = thread[j];
-
+			}
 			thread[j - 1] = NULL;
 			thread_count--;
 
 			break;
 		}
 	}
-
 	Sys_LeaveCriticalSection( );
 }
 
@@ -334,18 +332,18 @@ Sys_GetThreadName
 find the name of the calling thread
 ==================
 */
-const char *Sys_GetThreadName(int *index) {
+const char *Sys_GetThreadName( int *index ) {
 	const char *name;
 
 	Sys_EnterCriticalSection();
 
 	SDL_threadID id = SDL_ThreadID();
 
-	for (int i = 0; i < thread_count; i++) {
-		if (id == thread[i]->threadId) {
-			if (index)
+	for ( int i = 0; i < static_cast<int>( thread_count ); i++ ) {
+		if ( id == thread[i]->threadId ) {
+			if ( index ) {
 				*index = i;
-
+			}
 			name = thread[i]->name;
 
 			Sys_LeaveCriticalSection();
@@ -354,9 +352,9 @@ const char *Sys_GetThreadName(int *index) {
 		}
 	}
 
-	if (index)
+	if ( index ) {
 		*index = -1;
-
+	}
 	Sys_LeaveCriticalSection();
 
 	return "main";
@@ -370,8 +368,10 @@ returns true if the current thread is the main thread
 ==================
 */
 bool Sys_IsMainThread() {
-	if ( mainThreadIDset )
+	if ( mainThreadIDset ) {
 		return SDL_ThreadID() == mainThreadID;
+	}
+
 	// if this is called before mainThreadID is set, we haven't created
 	// any threads yet so it should be the main thread
 	return true;

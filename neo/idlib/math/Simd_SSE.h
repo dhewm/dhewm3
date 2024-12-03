@@ -45,13 +45,17 @@ public:
 	using idSIMD_MMX::Dot;
 	using idSIMD_MMX::MinMax;
 
-	virtual const char * VPCALL GetName( void ) const;
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idDrawVert *src,	const int count );
+	virtual const char *VPCALL GetName( void ) const;
+
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idDrawVert *src,	const int count );
 	virtual	void VPCALL MinMax( idVec3 &min,		idVec3 &max,			const idDrawVert *src,	const int *indexes,		const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idPlane *src,		const int count );
 
+	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
+	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
+
 #elif defined(_MSC_VER) && defined(_M_IX86)
-	virtual const char * VPCALL GetName( void ) const;
+	virtual const char *VPCALL GetName( void ) const;
 
 	virtual void VPCALL Add( float *dst,			const float constant,	const float *src,		const int count );
 	virtual void VPCALL Add( float *dst,			const float *src0,		const float *src1,		const int count );
@@ -69,9 +73,9 @@ public:
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idVec3 *src,		const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idPlane *src,		const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idDrawVert *src,	const int count );
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idVec3 *src,		const int count );
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idPlane *src,		const int count );
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idDrawVert *src,	const int count );
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idVec3 *src,		const int count );
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idPlane *src,		const int count );
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idDrawVert *src,	const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 *src0,		const idVec3 *src1,		const int count );
 	virtual void VPCALL Dot( float &dot,			const float *src1,		const float *src2,		const int count );
 
@@ -143,7 +147,19 @@ public:
 	virtual void VPCALL MixSoundSixSpeakerStereo( float *mixBuffer, const float *samples, const int numSamples, const float lastV[6], const float currentV[6] );
 	virtual void VPCALL MixedSoundToSamples( short *samples, const float *mixBuffer, const int numSamples );
 
-#endif
+	// revelator: we got tree of these and all are the same but some compilers choke on not having guards, yeah not a beauty contest luckily
+	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
+	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
+
+// Revelator: these work whether in gcc clang or msvc x86 or x64 (no inline assembly used)
+#elif defined(_MSC_VER) && defined(_M_X64)
+
+	virtual const char *VPCALL GetName( void ) const;
+
+	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
+	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
+
+#endif  /* _MSC_VER */
 };
 
 #endif /* !__MATH_SIMD_SSE_H__ */

@@ -41,6 +41,12 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+enum glVendor_t {
+	glvAny,
+	glvAMD,
+	glvIntel,
+	glvNVIDIA,
+};
 
 // Contains variables specific to the OpenGL configuration being run right now.
 // These are constant once the OpenGL subsystem is initialized.
@@ -51,7 +57,7 @@ typedef struct glconfig_s {
 	const char			*extensions_string;
 
 	float				glVersion;				// atof( version_string )
-
+	glVendor_t			vendor;
 
 	int					maxTextureSize;			// queried from GL
 	int					maxTextureUnits;
@@ -72,9 +78,11 @@ typedef struct glconfig_s {
 	bool				envDot3Available;
 	bool				texture3DAvailable;
 	bool				sharedTexturePaletteAvailable;
-	bool				ARBVertexBufferObjectAvailable;
 	bool				ARBVertexProgramAvailable;
 	bool				ARBFragmentProgramAvailable;
+	bool				ARBMapBufferRangeAvailable;
+	bool				ARBShadingLanguageAvailable;
+	bool				ARBVertexBufferObjectAvailable;
 	bool				twoSidedStencilAvailable;
 	bool				textureNonPowerOfTwoAvailable;
 	bool				depthBoundsTestAvailable;

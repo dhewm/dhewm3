@@ -122,10 +122,9 @@ const char *Sys_TimeStampToStr( ID_TIME_T timeStamp ) {
 	static char timeString[MAX_STRING_CHARS];
 	timeString[0] = '\0';
 
-	tm*	time = localtime( &timeStamp );
-	idStr out;
-
-	idStr lang = cvarSystem->GetCVarString( "sys_lang" );
+	tm		*time = localtime( &timeStamp );
+	idStr	out;
+	idStr	lang = cvarSystem->GetCVarString( "sys_lang" );
 	if ( lang.Icmp( "english" ) == 0 ) {
 		// english gets "month/day/year  hour:min" + "am" or "pm"
 		out = va( "%02d", time->tm_mon + 1 );
@@ -134,6 +133,7 @@ const char *Sys_TimeStampToStr( ID_TIME_T timeStamp ) {
 		out += "/";
 		out += va( "%d", time->tm_year + 1900 );
 		out += "\t";
+
 		if ( time->tm_hour > 12 ) {
 			out += va( "%02d", time->tm_hour - 12 );
 		} else if ( time->tm_hour == 0 ) {
@@ -143,6 +143,7 @@ const char *Sys_TimeStampToStr( ID_TIME_T timeStamp ) {
 		}
 		out += ":";
 		out +=va( "%02d", time->tm_min );
+
 		if ( time->tm_hour >= 12 ) {
 			out += "pm";
 		} else {

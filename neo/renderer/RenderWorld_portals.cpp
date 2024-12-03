@@ -740,8 +740,8 @@ void idRenderWorldLocal::AddAreaLightRefs( int areaNum, const portalStack_t *ps 
 		// check for being closed off behind a door
 		// a light that doesn't cast shadows will still light even if it is behind a door
 		if ( r_useLightCulling.GetInteger() >= 3 &&
-				!light->parms.noShadows && light->lightShader->LightCastsShadows()
-					&& light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ] ) {
+			!light->parms.noShadows && light->lightShader->LightCastsShadows() && 
+			light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ] ) {
 			continue;
 		}
 
@@ -751,7 +751,6 @@ void idRenderWorldLocal::AddAreaLightRefs( int areaNum, const portalStack_t *ps 
 			// still be visible through others
 			continue;
 		}
-
 		vLight = R_SetLightDefViewLight( light );
 
 		// expand the scissor rect

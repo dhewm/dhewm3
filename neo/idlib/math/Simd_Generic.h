@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 
 class idSIMD_Generic : public idSIMDProcessor {
 public:
-	virtual const char * VPCALL GetName( void ) const;
+	virtual const char *VPCALL GetName( void ) const;
 
 	virtual void VPCALL Add( float *dst,			const float constant,	const float *src,		const int count );
 	virtual void VPCALL Add( float *dst,			const float *src0,		const float *src1,		const int count );
@@ -59,9 +59,9 @@ public:
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idVec3 *src,		const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idPlane *src,		const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 &constant,	const idDrawVert *src,	const int count );
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idVec3 *src,		const int count );
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idPlane *src,		const int count );
-	virtual void VPCALL Dot( float *dst,			const idPlane &constant,const idDrawVert *src,	const int count );
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idVec3 *src,		const int count );
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idPlane *src,		const int count );
+	virtual void VPCALL Dot( float *dst,			const idPlane &constant, const idDrawVert *src,	const int count );
 	virtual void VPCALL Dot( float *dst,			const idVec3 *src0,		const idVec3 *src1,		const int count );
 	virtual void VPCALL Dot( float &dot,			const float *src1,		const float *src2,		const int count );
 
@@ -128,12 +128,15 @@ public:
 	virtual int  VPCALL CreateVertexProgramShadowCache( idVec4 *vertexCache, const idDrawVert *verts, const int numVerts );
 
 	virtual void VPCALL UpSamplePCMTo44kHz( float *dest, const short *pcm, const int numSamples, const int kHz, const int numChannels );
-	virtual void VPCALL UpSampleOGGTo44kHz( float *dest, const float * const *ogg, const int numSamples, const int kHz, const int numChannels );
+	virtual void VPCALL UpSampleOGGTo44kHz( float *dest, const float *const *ogg, const int numSamples, const int kHz, const int numChannels );
 	virtual void VPCALL MixSoundTwoSpeakerMono( float *mixBuffer, const float *samples, const int numSamples, const float lastV[2], const float currentV[2] );
 	virtual void VPCALL MixSoundTwoSpeakerStereo( float *mixBuffer, const float *samples, const int numSamples, const float lastV[2], const float currentV[2] );
 	virtual void VPCALL MixSoundSixSpeakerMono( float *mixBuffer, const float *samples, const int numSamples, const float lastV[6], const float currentV[6] );
 	virtual void VPCALL MixSoundSixSpeakerStereo( float *mixBuffer, const float *samples, const int numSamples, const float lastV[6], const float currentV[6] );
 	virtual void VPCALL MixedSoundToSamples( short *samples, const float *mixBuffer, const int numSamples );
+
+	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon );
+	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon );
 };
 
 #endif /* !__MATH_SIMD_GENERIC_H__ */

@@ -125,7 +125,6 @@ typedef struct
 	unsigned int dwReserved2[3];
 } ddsFileHeader_t;
 
-
 // increasing numeric values imply more information is stored
 typedef enum {
 	TD_SPECULAR,			// may be compressed, and always zeros the alpha channel

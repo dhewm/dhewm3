@@ -32,15 +32,21 @@ If you have questions concerning this license or the applicable additional terms
 class idStr;
 
 typedef enum {
-	CPUID_NONE							= 0x00000,
-	CPUID_UNSUPPORTED					= 0x00001,	// unsupported (386/486)
-	CPUID_GENERIC						= 0x00002,	// unrecognized processor
-	CPUID_MMX							= 0x00010,	// Multi Media Extensions
-	CPUID_3DNOW							= 0x00020,	// 3DNow!
-	CPUID_SSE							= 0x00040,	// Streaming SIMD Extensions
-	CPUID_SSE2							= 0x00080,	// Streaming SIMD Extensions 2
-	CPUID_SSE3							= 0x00100,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
-	CPUID_ALTIVEC						= 0x00200,	// AltiVec
+	CPUID_NONE							= 0x00000,	// unsupported (386/486)
+	CPUID_GENERIC						= 0x00001,	// unrecognized processor
+	CPUID_INTEL							= 0x00002,	// Intel
+	CPUID_AMD							= 0x00004,	// AMD
+	CPUID_MMX							= 0x00008,	// Multi Media Extensions
+	CPUID_3DNOW							= 0x00010,	// 3DNow!
+	CPUID_SSE							= 0x00020,	// Streaming SIMD Extensions
+	CPUID_SSE2							= 0x00040,	// Streaming SIMD Extensions 2
+	CPUID_SSE3							= 0x00080,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
+	CPUID_SSE41							= 0x00100,	// Streaming SIMD Extentions 4.1 (Penryn)
+	CPUID_AVX							= 0x00200,	// AVX extenstions (SandyBridge)
+	CPUID_AVX2							= 0x00400,	// AVX2 extenstions (Haswell)
+	CPUID_FMA3							= 0x00800,	// FMA3 instruction (Haswell)
+	CPUID_DAZ							= 0x01000,	// Denormals-Are-Zero mode (denormal source operands are set to zero)
+	CPUID_ALTIVEC						= 0x02000,	// AltiVec
 } cpuidSimd_t;
 
 typedef enum {
@@ -136,7 +142,6 @@ enum sysPath_t {
 
 template<class type> class idList;		// for Sys_ListFiles
 
-
 void			Sys_Init( void );
 void			Sys_Shutdown( void );
 void			Sys_Error( const char *error, ...);
@@ -170,10 +175,10 @@ int				Sys_GetProcessorId( void );
 void			Sys_FPU_SetPrecision();
 
 // sets Flush-To-Zero mode
-void			Sys_FPU_SetFTZ( bool enable );
+void			Sys_FPU_SetFTZ( bool enable = false );
 
 // sets Denormals-Are-Zero mode
-void			Sys_FPU_SetDAZ( bool enable );
+void			Sys_FPU_SetDAZ( bool enable = false );
 
 // returns amount of system ram
 int				Sys_GetSystemRam( void );
