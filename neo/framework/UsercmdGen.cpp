@@ -677,8 +677,17 @@ void idUsercmdGenLocal::MouseMove( void ) {
 	historyCounter++;
 
 	if ( idMath::Fabs( mx ) > 1000 || idMath::Fabs( my ) > 1000 ) {
-		Sys_DebugPrintf( "idUsercmdGenLocal::MouseMove: Ignoring ridiculous mouse delta.\n" );
-		mx = my = 0;
+		// DG: This caused problems with High-DPI mice - there those values can legitimately happen.
+		//     If it turns out that spurious big values happen for other reasons, we'll
+		//     need a smarter check. Leaving the Sys_DebugPrintf() here to make detecting
+		//     those cases easier, but added a static bool so High DPI mice don't spam the log.
+		static bool warningShown = false;
+		if ( !warningShown ) {
+			warningShown = true;
+			Sys_DebugPrintf( "idUsercmdGenLocal::MouseMove: Detected ridiculous mouse delta (expected with High DPI mice, though!).\n" );
+		}
+
+		//mx = my = 0;
 	}
 
 	mx *= sensitivity.GetFloat();

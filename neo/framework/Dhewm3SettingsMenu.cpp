@@ -1546,7 +1546,7 @@ static void DrawOptions(CVarOption options[], int numOptions)
 static CVarOption controlOptions[] = {
 
 	CVarOption("Mouse Settings"),
-	CVarOption("sensitivity", "Sensitivity", OT_FLOAT, 1.0f, 30.0f),
+	CVarOption("sensitivity", "Sensitivity", OT_FLOAT, 0.01f, 30.0f),
 	CVarOption("m_smooth", "Smoothing Samples", OT_INT, 1, 8),
 	CVarOption("in_nograb", "Don't grab Mouse Cursor (for debugging/testing)", OT_BOOL),
 	CVarOption("m_invertLook", [](idCVar& cvar) {
