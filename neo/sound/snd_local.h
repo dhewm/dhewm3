@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 // because the implemenations are in openal_stub.cpp
 // this is ensured by defining AL_LIBTYPE_STATIC before including the AL headers
 #define AL_LIBTYPE_STATIC
+// newer versions of openal-soft set the noexcept attribute to functions, older ones didn't
+// just disable that so the stub functions continue to match the prototypes in the header
 #define AL_DISABLE_NOEXCEPT
 #endif
 

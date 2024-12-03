@@ -9,6 +9,14 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 
 * Enable/disable Soft Particles when **loading** a graphics quality preset (only enabled in Ultra preset,
   though you can still configure it independently as before; #604)
+* Support SDL3 (SDL2 and, to some degree, SDL1.2 are also still supported)
+* Fix bugs on 64bit Big Endian platforms (#472, #625)
+* Fixes for high-poly models (use heap allocation instead of `alloca()` for big buffers; #528)
+* Fix building dhewm3ded with newer OpenAL Soft headers (#633)
+* Fix a crash (assertion) on start with ImGui if `SDL_GetWindowDisplayIndex()`
+  or `SDL_GetDisplayDPI()` failed and the `imgui_scale` CVar was set to the default value of `-1`
+  (setting it to `1` worked around the bug; #632)
+* Updated Dear ImGui to 1.91.4
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------
@@ -230,7 +238,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   (it did so if one of the paths, like `fs_cdpath`, was empty)
 * Don't use translation in Autosave filenames (#305)
     - In the Spanish translation all the Alpha Lab autosaves got the same name,
-      now the autosave name is based on the mapename instead which is distinct
+      now the autosave name is based on the mapname instead which is distinct
 
 
 1.5.0 (2018-12-15)
