@@ -1668,6 +1668,9 @@ bool idActor::StartRagdoll( void ) {
 		return true;
 	}
 
+	// dezo2, modified entity mass (must be here, mass is zeroed in StartFromCurrentPose)
+	float mass_mod = GetPhysics()->GetMass() * idMath::Pow( gameLocal.gameTicScale, 2.0f );
+
 	// disable the monster bounding box
 	GetPhysics()->DisableClip();
 
@@ -1701,6 +1704,9 @@ bool idActor::StartRagdoll( void ) {
 	idAFEntity_Base::DropAFs( this, "death", NULL );
 
 	RemoveAttachments();
+
+	// dezo2, use modified entity mass to reduce ragdoll movement at high FPS
+	GetPhysics()->SetMass( mass_mod );
 
 	return true;
 }

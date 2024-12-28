@@ -779,7 +779,8 @@ void idPhysics_Player::NoclipMove( void ) {
 
 	// friction
 	speed = current.velocity.Length();
-	if ( speed < 20.0f ) {
+	// DG: adjust this for framerate
+	if ( speed < 20.0f / gameLocal.gameTicScale ) {
 		current.velocity = vec3_origin;
 	}
 	else {
