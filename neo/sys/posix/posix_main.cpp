@@ -53,6 +53,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_sdl.h"
 
 
+#ifdef __APPLE__ // for clock_get_time() in Sys_MillisecondsPrecise()
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #define					COMMAND_HISTORY 64
 
 static int				input_hide = 0;
@@ -415,6 +420,177 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 	return 1000 * 1024;
 }
 
+// ---------- Time Stuff -------------
+
+// D3_CpuPause() abstracts a CPU pause instruction, to make busy waits a bit less power-hungry
+// (code taken from Yamagi Quake II)
+#ifdef SDL_CPUPauseInstruction
+  #define D3_CpuPause() SDL_CPUPauseInstruction()
+#elif defined(__GNUC__)
+  #if (__i386 || __x86_64__)
+    #define D3_CpuPause() asm volatile("pause")
+  #elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
+    #define D3_CpuPause() asm volatile("yield")
+  #elif defined(__powerpc__) || defined(__powerpc64__)
+    #define D3_CpuPause() asm volatile("or 27,27,27")
+  #elif defined(__riscv) && __riscv_xlen == 64
+    #define D3_CpuPause() asm volatile(".insn i 0x0F, 0, x0, x0, 0x010");
+  #endif
+#endif
+
+#ifndef D3_CpuPause
+  #warning "No D3_CpuPause implementation for this platform/architecture! Will busy-wait sometimes!"
+  // TODO: something that prevents the loop from being optimized away?
+  //#define D3_CpuPause()
+#endif
+
+
+#ifdef __APPLE__
+  static mach_timespec_t first;
+#else
+  static struct timespec first;
+
+  #ifdef _POSIX_MONOTONIC_CLOCK
+    #define D3_GETTIME_CLOCK CLOCK_MONOTONIC
+  #else
+    #define D3_GETTIME_CLOCK CLOCK_REALTIME
+  #endif
+#endif
+
+static size_t pauseLoopsPer5usec = 100; // set in initTime()
+
+static void Posix_InitTime() {
+#ifdef __APPLE__
+	// OSX didn't have clock_gettime() until recently, so use Mach's clock_get_time()
+	// instead. fortunately its mach_timespec_t seems identical to POSIX struct timespec
+	// so lots of code can be shared
+	clock_serv_t cclock;
+	mach_timespec_t now;
+
+	host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+	clock_get_time(cclock, &now);
+	mach_port_deallocate(mach_task_self(), cclock);
+
+#else // not __APPLE__ - other Unix-likes will hopefully support clock_gettime()
+	struct timespec now;
+	clock_gettime(D3_GETTIME_CLOCK, &now);
+#endif
+
+	long nsec = now.tv_nsec;
+	long long sec = now.tv_sec;
+	// set back first by 1.5ms so neither Sys_MillisecondsPrecise() nor Sys_Milliseconds()
+	// (which calls Sys_MillisecondsPrecise()) will ever return 0 or even a negative value
+	nsec -= 1500000;
+	if(nsec < 0)
+	{
+		nsec += 1000000000ll; // 1s in ns => definitely positive now
+		--sec;
+	}
+
+	first.tv_sec = sec;
+	first.tv_nsec = nsec;
+
+	double before = Sys_MillisecondsPrecise();
+	for ( int i=0; i<1000; ++i ) {
+		// volatile so the call doesn't get optimized away
+		volatile double x = Sys_MillisecondsPrecise();
+		(void)x;
+	}
+	double after = Sys_MillisecondsPrecise();
+	double callDiff = after - before;
+
+#ifdef D3_CpuPause
+	// figure out how long D3_CpuPause() instructions take
+	before = Sys_MillisecondsPrecise();
+	for( int i=0; i < 1000000; ++i ) {
+		// call it 4 times per loop, so the ratio between pause and loop-instructions is better
+		D3_CpuPause(); D3_CpuPause(); D3_CpuPause(); D3_CpuPause();
+	}
+	after = Sys_MillisecondsPrecise();
+	double diff = after - before;
+	double onePauseIterTime = diff / 1000000.0;
+	if ( onePauseIterTime > 0.00000001 ) {
+		double loopsPer10usec = 0.005 / onePauseIterTime;
+		pauseLoopsPer5usec = loopsPer10usec;
+		printf( "Posix_InitTime(): A call to Sys_MillisecondsPrecise() takes about %g nsec; 1mio pause loops took %g ms => pauseLoopsPer5usec = %zd\n",
+		        callDiff*1000.0, diff, pauseLoopsPer5usec );
+		if ( pauseLoopsPer5usec == 0 )
+			pauseLoopsPer5usec = 1;
+	} else {
+		assert( 0 && "apparently 1mio pause loops are so fast we can't even measure it?!" );
+		pauseLoopsPer5usec = 1000000;
+	}
+	// Note: Due to CPU frequency scaling this is not super precise, but it should be within
+	//   an order of magnitude of the real current value, I think, which should suffice for our purposes
+#else
+	printf( "Posix_InitTime(): A call to Sys_MillisecondsPrecise() takes about %g nsecs\n", callDiff*1000.0 );
+#endif
+}
+
+/*
+=======================
+Sys_MillisecondsPrecise
+=======================
+*/
+double Sys_MillisecondsPrecise() {
+#ifdef __APPLE__
+	// OSX didn't have clock_gettime() until recently, so use Mach's clock_get_time()
+	// instead. fortunately its mach_timespec_t seems identical to POSIX struct timespec
+	// so lots of code can be shared
+	clock_serv_t cclock;
+	mach_timespec_t now;
+
+	host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+	clock_get_time(cclock, &now);
+	mach_port_deallocate(mach_task_self(), cclock);
+
+#else // not __APPLE__ - other Unix-likes will hopefully support clock_gettime()
+	struct timespec now;
+	clock_gettime(D3_GETTIME_CLOCK, &now);
+#endif
+
+	long long sec = now.tv_sec - first.tv_sec;
+	long long nsec = now.tv_nsec - first.tv_nsec;
+
+	double ret = sec * 1000.0;
+	ret += double(nsec) * 0.000001;
+	return ret;
+}
+
+
+
+/*
+=====================
+Sys_SleepUntilPrecise
+=====================
+*/
+void Sys_SleepUntilPrecise( double targetTimeMS ) {
+	double msec = targetTimeMS - Sys_MillisecondsPrecise();
+	if ( msec < 0.01 ) // don't bother for less than 10usec
+		return;
+
+	// at least on Linux, usleep() is pretty precise, so use it for everything but the last 100usec (*micro*seconds)
+	// if it isn't on other platforms, set a different value here with an #ifdef
+	static const double sleepThreshold = 0.100;
+
+	if ( msec > sleepThreshold ) {
+		useconds_t usec = (msec - sleepThreshold) * 1000.0;
+		// yes, usleep() is deprecated, I don't care, nanosleep() is more painful to use
+		usleep( usec );
+	}
+
+	// wait for the remaining time with a busy loop, as that has higher precision
+	do {
+#ifdef D3_CpuPause
+		for ( size_t i=0; i < pauseLoopsPer5usec; ++i ) {
+			// call it 4 times per loop, so the ratio between pause and loop-instructions is better
+			D3_CpuPause(); D3_CpuPause(); D3_CpuPause(); D3_CpuPause();
+		}
+#endif
+
+		msec = targetTimeMS - Sys_MillisecondsPrecise();
+	} while ( msec >= 0.01 );
+}
 
 // ----------- lots of signal handling stuff ------------
 
@@ -630,6 +806,8 @@ static bool createPathRecursive(char* path)
 
 void Posix_InitSignalHandlers( void )
 {
+	Posix_InitTime(); // the base time for Sys_MillisecondsPrecise() should be set very early
+
 #ifdef D3_HAVE_LIBBACKTRACE
 	// can't use idStr here and thus can't use Sys_GetPath(PATH_EXE) => added Posix_GetExePath()
 	const char* exePath = Posix_GetExePath();

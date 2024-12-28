@@ -87,7 +87,7 @@ Sys_Milliseconds
 ================
 */
 unsigned int Sys_Milliseconds() {
-	return SDL_GetTicks();
+	return (unsigned int)Sys_MillisecondsPrecise();
 }
 
 /*

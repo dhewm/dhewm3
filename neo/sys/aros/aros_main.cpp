@@ -923,6 +923,60 @@ void idSysLocal::OpenURL( const char *url, bool quit ) {
     AROS_OpenURL( url );
 }
 
+
+
+// DG: apparently AROS supports clock_gettime(), so use that for Sys_MillisecondsPrecise()
+static struct timespec first;
+static void AROS_initTime() {
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+
+	long nsec = now.tv_nsec;
+	long long sec = now.tv_sec;
+	// set back first by 1.5ms so neither Sys_MillisecondsPrecise() nor Sys_Milliseconds()
+	// (which calls Sys_MillisecondsPrecise()) will ever return 0 or even a negative value
+	nsec -= 1500000;
+	if(nsec < 0)
+	{
+		nsec += 1000000000ll; // 1s in ns => definitely positive now
+		--sec;
+	}
+
+	first.tv_sec = sec;
+	first.tv_nsec = nsec;
+}
+
+/*
+=======================
+Sys_MillisecondsPrecise
+=======================
+*/
+double Sys_MillisecondsPrecise() {
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+
+	long long sec = now.tv_sec - first.tv_sec;
+	long long nsec = now.tv_nsec - first.tv_nsec;
+
+	double ret = sec * 1000.0;
+	ret += double(nsec) * 0.000001;
+	return ret;
+}
+
+void Sys_SleepUntilPrecise( double targetTimeMS ) {
+	// TODO: I know nothing about how precise AROS' sleep implementation is,
+	//       and apparently even their clock_gettime() implementation only has milliseconds resolution
+	//       (https://aros.sourceforge.io/documentation/developers/autodocs/posixc.php#clock-gettime)
+	//       So I'm keeping this extremely simple.
+	//       See POSIX implementation for an actually precise implementation (that requires precise clock_gettime())
+	double now = Sys_MillisecondsPrecise();
+	double msToWait = targetTimeMS - now;
+	if ( msToWait > 0.1 ) {
+		unsigned long usec = msToWait * 1000;
+		usleep( usec - 100 ); // sleep 100usec less so we don't oversleep that much
+	}
+}
+
 /*
 ===============
 main
@@ -930,6 +984,8 @@ main
 */
 int main(int argc, char **argv) {
     bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+
+    AROS_initTime();
 
     AROS_EarlyInit( );
 
