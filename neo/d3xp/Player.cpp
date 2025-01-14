@@ -3228,12 +3228,21 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 		if ( cursor && weapon.GetEntity()->ShowCrosshair() ) {
 
 #ifdef _D3XP
+			bool wantScaleTo43 = true; // DG: for fixing scaling of grabber cursor
 			if ( weapon.GetEntity()->GetGrabberState() == 1 || weapon.GetEntity()->GetGrabberState() == 2 ) {
 				cursor->SetStateString( "grabbercursor", "1" );
 				cursor->SetStateString( "combatcursor", "0" );
+				// DG: while the grabbercursor is active, the cursor must not be scaled because
+				//     (unlike with the regular crosshair) that distorts it when not using 4:3
+				wantScaleTo43 = false;
 			} else {
 				cursor->SetStateString( "grabbercursor", "0" );
 				cursor->SetStateString( "combatcursor", "1" );
+			}
+			// DG: update scaleto43 state if necessary
+			if ( cursor->GetStateBool( "scaleto43" ) != wantScaleTo43 ) {
+				cursor->SetStateBool( "scaleto43", wantScaleTo43 );
+				cursor->StateChanged( gameLocal.realClientTime );
 			}
 #endif
 

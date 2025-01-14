@@ -14,13 +14,14 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Fixes for high-poly models (use heap allocation instead of `alloca()` for big buffers; #528)
 * Fix building dhewm3ded with newer OpenAL Soft headers (#633)
 * Better support for High-DPI mice:
-  - Don't ignore mouse input on fast movement ("ridiculous mouse delta"), #616
+  - Don't ignore mouse input on fast movement ("ridiculous mouse delta"; #616)
   - Allow setting sensitivity to values `< 1` in the dhewm3 settings menu to allow sane speeds
     for looking around with High-DPI mice (otherwise it might be way too fast)
 * Fix a crash (assertion) on start with ImGui if `SDL_GetWindowDisplayIndex()`
   or `SDL_GetDisplayDPI()` failed and the `imgui_scale` CVar was set to the default value of `-1`
   (setting it to `1` worked around the bug; #632)
 * Updated Dear ImGui to 1.91.4
+* Fix scaling of Grabber cursor in Resurrection of Evil in non-4:3 resolutions (#637)
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------
