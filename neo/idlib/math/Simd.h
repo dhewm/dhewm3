@@ -45,11 +45,10 @@ If you have questions concerning this license or the applicable additional terms
 class idSIMD {
 public:
 	static void			Init( void );
-	static void			InitProcessor( const char *module, bool forceGeneric );
+	static void			InitProcessor( const char *module, bool forceGeneric = false );
 	static void			Shutdown( void );
 	static void			Test_f( const class idCmdArgs &args );
 };
-
 
 /*
 ===============================================================================
@@ -94,11 +93,10 @@ typedef enum {
 	SPEAKER_BACKRIGHT
 } speakerLabel;
 
-
 class idSIMDProcessor {
 public:
 									idSIMDProcessor( void ) { cpuid = CPUID_NONE; }
-	virtual							~idSIMDProcessor() { };
+	virtual							~idSIMDProcessor() {};
 
 	int								cpuid;
 
@@ -199,6 +197,11 @@ public:
 	virtual void VPCALL MixSoundSixSpeakerMono( float *mixBuffer, const float *samples, const int numSamples, const float lastV[6], const float currentV[6] ) = 0;
 	virtual void VPCALL MixSoundSixSpeakerStereo( float *mixBuffer, const float *samples, const int numSamples, const float lastV[6], const float currentV[6] ) = 0;
 	virtual void VPCALL MixedSoundToSamples( short *samples, const float *mixBuffer, const int numSamples ) = 0;
+
+	// plane culling
+	virtual void VPCALL CullByFrustum( idDrawVert *verts, const int numVerts, const idPlane frustum[6], byte *pointCull, float epsilon ) = 0;
+	virtual void VPCALL CullByFrustum2( idDrawVert *verts, const int numVerts, const idPlane frustum[6], unsigned short *pointCull, float epsilon ) = 0;
+
 };
 
 // pointer to SIMD processor

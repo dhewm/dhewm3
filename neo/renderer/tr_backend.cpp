@@ -44,10 +44,10 @@ may touch, including the editor.
 ======================
 */
 void RB_SetDefaultGLState( void ) {
-	int		i;
+	int	tmu;
 
 	qglClearDepth( 1.0f );
-	qglColor4f (1,1,1,1);
+	qglColor4f( 1, 1, 1, 1 );
 
 	// the vertex array is always enabled
 	qglEnableClientState( GL_VERTEX_ARRAY );
@@ -70,7 +70,7 @@ void RB_SetDefaultGLState( void ) {
 	qglDisable( GL_LINE_STIPPLE );
 	qglDisable( GL_STENCIL_TEST );
 
-	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	qglDepthMask( GL_TRUE );
 	qglDepthFunc( GL_ALWAYS );
 
@@ -81,8 +81,8 @@ void RB_SetDefaultGLState( void ) {
 		qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	}
 
-	for ( i = glConfig.maxTextureUnits - 1 ; i >= 0 ; i-- ) {
-		GL_SelectTexture( i );
+	for ( tmu = glConfig.maxTextureUnits - 1 ; tmu >= 0 ; tmu-- ) {
+		GL_SelectTexture( tmu );
 
 		// object linear texgen is our default
 		qglTexGenf( GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR );
@@ -92,21 +92,18 @@ void RB_SetDefaultGLState( void ) {
 
 		GL_TexEnv( GL_MODULATE );
 		qglDisable( GL_TEXTURE_2D );
+
 		if ( glConfig.texture3DAvailable ) {
 			qglDisable( GL_TEXTURE_3D );
 		}
+
 		if ( glConfig.cubeMapAvailable ) {
 			qglDisable( GL_TEXTURE_CUBE_MAP_EXT );
 		}
 	}
 }
 
-
-
-
 //=============================================================================
-
-
 
 /*
 ====================
@@ -118,17 +115,15 @@ void GL_SelectTexture( int unit ) {
 		return;
 	}
 
-	if ( unit < 0 || (unit >= glConfig.maxTextureUnits && unit >= glConfig.maxTextureImageUnits) ) {
+	if ( unit < 0 || ( unit >= glConfig.maxTextureUnits && unit >= glConfig.maxTextureImageUnits ) ) {
 		common->Warning( "GL_SelectTexture: unit = %i", unit );
 		return;
 	}
-
 	qglActiveTextureARB( GL_TEXTURE0_ARB + unit );
 	qglClientActiveTextureARB( GL_TEXTURE0_ARB + unit );
 
 	backEnd.glState.currenttmu = unit;
 }
-
 
 /*
 ====================
@@ -164,7 +159,6 @@ void GL_Cull( int cullType ) {
 			}
 		}
 	}
-
 	backEnd.glState.faceCulling = cullType;
 }
 
@@ -177,10 +171,10 @@ void GL_TexEnv( int env ) {
 	tmu_t	*tmu;
 
 	tmu = &backEnd.glState.tmu[backEnd.glState.currenttmu];
+
 	if ( env == tmu->texEnv ) {
 		return;
 	}
-
 	tmu->texEnv = env;
 
 	switch ( env ) {
@@ -226,6 +220,7 @@ void GL_State( int stateBits ) {
 		backEnd.glState.forceGlState = false;
 	} else {
 		diff = stateBits ^ backEnd.glState.glStateBits;
+
 		if ( !diff ) {
 			return;
 		}
@@ -243,7 +238,6 @@ void GL_State( int stateBits ) {
 			qglDepthFunc( GL_LEQUAL );
 		}
 	}
-
 
 	//
 	// check blend bits
@@ -315,7 +309,6 @@ void GL_State( int stateBits ) {
 			common->Error( "GL_State: invalid dst blend state bits\n" );
 			break;
 		}
-
 		qglBlendFunc( srcFactor, dstFactor );
 	}
 
@@ -333,8 +326,8 @@ void GL_State( int stateBits ) {
 	//
 	// check colormask
 	//
-	if ( diff & (GLS_REDMASK|GLS_GREENMASK|GLS_BLUEMASK|GLS_ALPHAMASK) ) {
-		GLboolean		r, g, b, a;
+	if ( diff & ( GLS_REDMASK | GLS_GREENMASK | GLS_BLUEMASK | GLS_ALPHAMASK ) ) {
+		GLboolean r, g, b, a;
 		r = ( stateBits & GLS_REDMASK ) ? 0 : 1;
 		g = ( stateBits & GLS_GREENMASK ) ? 0 : 1;
 		b = ( stateBits & GLS_BLUEMASK ) ? 0 : 1;
@@ -378,12 +371,32 @@ void GL_State( int stateBits ) {
 			break;
 		}
 	}
-
 	backEnd.glState.glStateBits = stateBits;
 }
 
+/*
+============================================================================
 
+DEPTH BOUNDS TESTING
 
+============================================================================
+*/
+
+DepthBoundsTest::DepthBoundsTest( const idScreenRect &scissorRect ) {
+	if ( !glConfig.depthBoundsTestAvailable || !r_useDepthBoundsTest.GetBool() ) {
+		return;
+	}
+	assert( scissorRect.zmin <= scissorRect.zmax );
+	qglEnable( GL_DEPTH_BOUNDS_TEST_EXT );
+	qglDepthBoundsEXT( scissorRect.zmin, scissorRect.zmax );
+}
+
+DepthBoundsTest::~DepthBoundsTest() {
+	if ( !glConfig.depthBoundsTestAvailable || !r_useDepthBoundsTest.GetBool() ) {
+		return;
+	}
+	qglDisable( GL_DEPTH_BOUNDS_TEST_EXT );
+}
 
 /*
 ============================================================================
@@ -403,6 +416,7 @@ This is not used by the normal game paths, just by some tools
 void RB_SetGL2D( void ) {
 	// set 2D virtual screen size
 	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
+
 	if ( r_useScissor.GetBool() ) {
 		qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	}
@@ -413,8 +427,8 @@ void RB_SetGL2D( void ) {
 	qglLoadIdentity();
 
 	GL_State( GLS_DEPTHFUNC_ALWAYS |
-			  GLS_SRCBLEND_SRC_ALPHA |
-			  GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
+	          GLS_SRCBLEND_SRC_ALPHA |
+	          GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
 
 	GL_Cull( CT_TWO_SIDED );
 
@@ -422,20 +436,16 @@ void RB_SetGL2D( void ) {
 	qglDisable( GL_STENCIL_TEST );
 }
 
-
-
 /*
 =============
 RB_SetBuffer
-
 =============
 */
 static void	RB_SetBuffer( const void *data ) {
 	const setBufferCommand_t	*cmd;
 
 	// see which draw buffer we want to render the frame to
-
-	cmd = (const setBufferCommand_t *)data;
+	cmd = ( const setBufferCommand_t * )data;
 
 	backEnd.frameCount = cmd->frameCount;
 
@@ -488,7 +498,6 @@ void RB_ShowImages( void ) {
 		if ( image->texnum == idImage::TEXTURE_NOT_LOADED && image->partialImage == NULL ) {
 			continue;
 		}
-
 		w = glConfig.vidWidth / 20;
 		h = glConfig.vidHeight / 15;
 		x = i % 20 * w;
@@ -499,9 +508,8 @@ void RB_ShowImages( void ) {
 			w *= image->uploadWidth / 512.0f;
 			h *= image->uploadHeight / 512.0f;
 		}
-
 		image->Bind();
-		qglBegin (GL_QUADS);
+		qglBegin( GL_QUADS );
 		qglTexCoord2f( 0, 0 );
 		qglVertex2f( x, y );
 		qglTexCoord2f( 1, 0 );
@@ -512,18 +520,15 @@ void RB_ShowImages( void ) {
 		qglVertex2f( x, y + h );
 		qglEnd();
 	}
-
 	qglFinish();
 
 	end = Sys_Milliseconds();
 	common->Printf( "%i msec to draw all images\n", end - start );
 }
 
-
 /*
 =============
 RB_SwapBuffers
-
 =============
 */
 const void	RB_SwapBuffers( const void *data ) {
@@ -531,34 +536,38 @@ const void	RB_SwapBuffers( const void *data ) {
 	if ( r_showImages.GetInteger() != 0 ) {
 		RB_ShowImages();
 	}
-
 	D3::ImGuiHooks::EndFrame();
 
 	int fillAlpha = r_fillWindowAlphaChan.GetInteger();
-	if ( fillAlpha == 1 || (fillAlpha == -1 && glConfig.shouldFillWindowAlpha) )
-	{
+
+	if ( fillAlpha == 1 || ( fillAlpha == -1 && glConfig.shouldFillWindowAlpha ) ) {
 		// make sure the whole alpha chan of the (default) framebuffer is opaque.
 		// at least Wayland needs this, see also the big comment in GLimp_Init()
-
 		bool blendEnabled = qglIsEnabled( GL_BLEND );
-		if ( !blendEnabled )
+
+		if ( !blendEnabled ) {
 			qglEnable( GL_BLEND );
-
-		// TODO: GL_DEPTH_TEST ? (should be disabled, if it needs changing at all)
-
+		}
 		bool scissorEnabled = qglIsEnabled( GL_SCISSOR_TEST );
-		if( scissorEnabled )
+
+		if ( scissorEnabled ) {
 			qglDisable( GL_SCISSOR_TEST );
-
+		}
 		bool tex2Denabled = qglIsEnabled( GL_TEXTURE_2D );
-		if( tex2Denabled )
-			qglDisable( GL_TEXTURE_2D );
 
+		if ( tex2Denabled ) {
+			qglDisable( GL_TEXTURE_2D );
+		}
+		bool depthTestEnabled = qglIsEnabled( GL_DEPTH_BOUNDS_TEST_EXT );
+
+		// possibly reduntdant the RAII depthbounds test auto disables anyway
+		if ( depthTestEnabled ) {
+			qglDisable( GL_DEPTH_BOUNDS_TEST_EXT );
+		}
 		qglDisable( GL_VERTEX_PROGRAM_ARB );
 		qglDisable( GL_FRAGMENT_PROGRAM_ARB );
 
 		qglBlendEquation( GL_FUNC_ADD );
-
 		qglBlendFunc( GL_ONE, GL_ONE );
 
 		// setup transform matrices so we can easily/reliably draw a fullscreen quad
@@ -572,17 +581,18 @@ const void	RB_SwapBuffers( const void *data ) {
 		qglOrtho( 0, 1, 0, 1, -1, 1 );
 
 		// draw screen-sized quad with color (0.0, 0.0, 0.0, 1.0)
-		const float x=0, y=0, w=1, h=1;
+		const float x = 0, y = 0, w = 1, h = 1;
 		qglColor4f( 0.0f, 0.0f, 0.0f, 1.0f );
+
 		// debug values:
 		//const float x = 0.1, y = 0.1, w = 0.8, h = 0.8;
 		//qglColor4f( 0.0f, 0.0f, 0.5f, 1.0f );
 
 		qglBegin( GL_QUADS );
-			qglVertex2f( x,   y   ); // ( 0,0 );
-			qglVertex2f( x,   y+h ); // ( 0,1 );
-			qglVertex2f( x+w, y+h ); // ( 1,1 );
-			qglVertex2f( x+w, y   ); // ( 1,0 );
+		qglVertex2f( x,   y );   // ( 0,0 );
+		qglVertex2f( x,   y + h ); // ( 0,1 );
+		qglVertex2f( x + w, y + h ); // ( 1,1 );
+		qglVertex2f( x + w, y ); // ( 1,0 );
 		qglEnd();
 
 		// restore previous transform matrix states
@@ -592,12 +602,18 @@ const void	RB_SwapBuffers( const void *data ) {
 
 		// restore default or previous states
 		qglBlendEquation( GL_FUNC_ADD );
-		if ( !blendEnabled )
+
+		if ( !blendEnabled ) {
 			qglDisable( GL_BLEND );
-		if( tex2Denabled )
+		}
+
+		if ( tex2Denabled ) {
 			qglEnable( GL_TEXTURE_2D );
-		if( scissorEnabled )
+		}
+
+		if ( scissorEnabled ) {
 			qglEnable( GL_SCISSOR_TEST );
+		}
 	}
 
 	// force a gl sync if requested
@@ -621,13 +637,13 @@ Copy part of the current framebuffer to an image
 const void	RB_CopyRender( const void *data ) {
 	const copyRenderCommand_t	*cmd;
 
-	cmd = (const copyRenderCommand_t *)data;
+	cmd = ( const copyRenderCommand_t * )data;
 
 	if ( r_skipCopyTexture.GetBool() ) {
 		return;
 	}
 
-	if (cmd->image) {
+	if ( cmd->image ) {
 		cmd->image->CopyFramebuffer( cmd->x, cmd->y, cmd->imageWidth, cmd->imageHeight, false );
 	}
 }
@@ -640,7 +656,7 @@ This function will be called syncronously if running without
 smp extensions, or asyncronously by another thread.
 ====================
 */
-int		backEndStartTime, backEndFinishTime;
+int	backEndStartTime, backEndFinishTime;
 void RB_ExecuteBackEndCommands( const emptyCommand_t *cmds ) {
 	// r_debugRenderToTexture
 	int	c_draw3d = 0, c_draw2d = 0, c_setBuffers = 0, c_swapBuffers = 0, c_copyRenders = 0;
@@ -648,7 +664,6 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t *cmds ) {
 	if ( cmds->commandId == RC_NOP && !cmds->next ) {
 		return;
 	}
-
 	backEndStartTime = Sys_Milliseconds();
 
 	// needed for editor rendering
@@ -657,16 +672,15 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t *cmds ) {
 	// upload any image loads that have completed
 	globalImages->CompleteBackgroundImageLoads();
 
-	for ( ; cmds ; cmds = (const emptyCommand_t *)cmds->next ) {
+	for ( ; cmds ; cmds = ( const emptyCommand_t * )cmds->next ) {
 		switch ( cmds->commandId ) {
 		case RC_NOP:
 			break;
 		case RC_DRAW_VIEW:
 			RB_DrawView( cmds );
-			if ( ((const drawSurfsCommand_t *)cmds)->viewDef->viewEntitys ) {
+			if ( ( ( const drawSurfsCommand_t * )cmds )->viewDef->viewEntitys ) {
 				c_draw3d++;
-			}
-			else {
+			} else {
 				c_draw2d++;
 			}
 			break;

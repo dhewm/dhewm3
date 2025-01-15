@@ -72,7 +72,7 @@ extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& style, const ImG
 namespace D3 {
 namespace ImGuiHooks {
 
-#include "proggyvector_font_base85.h"
+#include "proggyvector_font.h"
 
 static SDL_Window* sdlWindow = NULL;
 ImGuiContext* imguiCtx = NULL;
@@ -212,6 +212,7 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	imguiCtx = ImGui::CreateContext();
+
 	if ( imguiCtx == NULL ) {
 		common->Warning( "Failed to create ImGui Context!\n" );
 		return false;
@@ -227,14 +228,13 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 
 	SetImGuiStyle( Style::Dhewm3 );
 	userStyle = ImGui::GetStyle(); // set dhewm3 style as default, in case the user style is missing values
+
 	if ( DG::ReadImGuiStyle( userStyle, GetUserStyleFilename() ) && imgui_style.GetInteger() == 2 ) {
 		ImGui::GetStyle() = userStyle;
 	} else if ( imgui_style.GetInteger() == 1 ) {
 		ImGui::GetStyle() = ImGuiStyle();
 		ImGui::StyleColorsDark();
 	}
-
-
 	imgui_scale.SetModified(); // so NewFrame() will load the scaled font
 
 	// Setup Platform/Renderer backends
@@ -322,7 +322,7 @@ void NewFrame()
 		strcpy( fontCfg.Name, "ProggyVector" );
 		float fontSize = 18.0f * GetScale();
 		float fontSizeInt = roundf( fontSize ); // font sizes are supposed to be rounded to integers
-		io.Fonts->AddFontFromMemoryCompressedBase85TTF(ProggyVector_compressed_data_base85, fontSizeInt, &fontCfg);
+		ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size, fontSizeInt, nullptr);
 	}
 
 	// Start the Dear ImGui frame

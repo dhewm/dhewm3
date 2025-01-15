@@ -582,9 +582,10 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 	if ( r_useInteractionScissors.GetInteger() == -2 ) {
 		draw_segments( viewDef, out_segs, colorGreen );
 	}
-
 	idBounds outbounds;
+
 	outbounds.Clear();
+
 	for( unsigned int i = 0; i < out_segs.size(); i++ ) {
 
 		idVec4 v;
@@ -593,7 +594,6 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 		if( v.w <= 0.0f ) {
 			return lightDef->viewLight->scissorRect;
 		}
-
 		idVec3 rv(v.x, v.y, v.z);
 		rv /= v.w;
 
@@ -604,16 +604,18 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 	if ( outbounds[0].x < -1.0f ) {
 		outbounds[0].x = -1.0f;
 	}
+
 	if ( outbounds[1].x > 1.0f ) {
 		outbounds[1].x = 1.0f;
 	}
+
 	if ( outbounds[0].y < -1.0f ) {
 		outbounds[0].y = -1.0f;
 	}
+
 	if ( outbounds[1].y > 1.0f ) {
 		outbounds[1].y = 1.0f;
 	}
-
 	float w2 = ( viewDef->viewport.x2 - viewDef->viewport.x1 + 1 ) / 2.0f;
 	float x = viewDef->viewport.x1;
 	float h2 = ( viewDef->viewport.y2 - viewDef->viewport.y1 + 1 ) / 2.0f;
@@ -632,6 +634,5 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal * lightDef,
 	if ( r_useInteractionScissors.GetInteger() == -2 && !rect.IsEmpty() ) {
 		viewDef->renderWorld->DebugScreenRect( colorYellow, rect, viewDef );
 	}
-
 	return rect;
 }
