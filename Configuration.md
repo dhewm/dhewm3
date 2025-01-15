@@ -179,6 +179,11 @@ This can be configured with the following CVars:
 
 ## Other CVars added in dhewm3
 
+- `com_disableAutoSaves` if set to `1`, no Autosaves are created when starting a level, and when
+  restarting a level no attempt to load one will be made. Defaults to `0` (Autosaves *are* created)
+- `com_numQuicksaves` how many Quicksaves to keep - when creating a Quicksave, the oldest one gets
+  overwritten. Defaults to `4`
+
 - `g_hitEffect` if set to `1` (the default), mess up player camera when taking damage.
    Set to `0` if you don't like that effect.
 

@@ -186,6 +186,7 @@ public:
 	static idCVar		com_wipeSeconds;
 	static idCVar		com_guid;
 	static idCVar		com_numQuicksaves;
+	static idCVar		com_disableAutoSaves;
 
 	static idCVar		gui_configServerRate;
 

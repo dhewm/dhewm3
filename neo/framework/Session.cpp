@@ -60,6 +60,8 @@ idCVar	idSessionLocal::com_guid( "com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CV
 
 idCVar	idSessionLocal::com_numQuicksaves( "com_numQuicksaves", "4", CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_INTEGER,
                                            "number of quicksaves to keep before overwriting the oldest", 1, 99 );
+idCVar	idSessionLocal::com_disableAutoSaves( "com_disableAutoSaves", "0", CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_BOOL,
+                                              "Don't create Autosaves when entering a new map" );
 
 idSessionLocal		sessLocal;
 idSession			*session = &sessLocal;
@@ -1246,8 +1248,8 @@ void idSessionLocal::MoveToNewMap( const char *mapName ) {
 
 	ExecuteMapChange();
 
-	if ( !mapSpawnData.serverInfo.GetBool("devmap") ) {
-		// Autosave at the beginning of the level
+	if ( !com_disableAutoSaves.GetBool() && !mapSpawnData.serverInfo.GetBool("devmap") ) {
+		// Autosave at the beginning of the level - DG: unless disabled with "com_disableAutoSaves 1"
 
 		// DG: set an explicit savename to avoid problems with autosave names
 		//     (they were translated which caused problems like all alpha labs parts

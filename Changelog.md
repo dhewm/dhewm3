@@ -22,6 +22,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   (setting it to `1` worked around the bug; #632)
 * Updated Dear ImGui to 1.91.4
 * Fix scaling of Grabber cursor in Resurrection of Evil in non-4:3 resolutions (#637)
+* Add `com_disableAutoSaves` CVar: If set to `1`, Autosaves (when starting a level) are disabled (#620)
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------
