@@ -1191,6 +1191,11 @@ void GLimp_GrabInput(int flags) {
 	SDL_ShowCursor( (flags & GRAB_HIDECURSOR) ? SDL_DISABLE : SDL_ENABLE );
 	SDL_SetRelativeMouseMode( (flags & GRAB_RELATIVEMOUSE) ? SDL_TRUE : SDL_FALSE );
 	SDL_SetWindowGrab( window, (flags & GRAB_GRABMOUSE) ? SDL_TRUE : SDL_FALSE );
+	if (flags & GRAB_ENABLETEXTINPUT) {
+		SDL_StartTextInput();
+	} else {
+		SDL_StopTextInput();
+	}
 #else
 	SDL_ShowCursor( (flags & GRAB_HIDECURSOR) ? SDL_DISABLE : SDL_ENABLE );
 	// ignore GRAB_GRABMOUSE, SDL1.2 doesn't support grabbing without relative mode
