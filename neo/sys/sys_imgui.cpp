@@ -72,7 +72,14 @@ extern ImGuiTextBuffer WriteImGuiStyleToCode( const ImGuiStyle& style, const ImG
 namespace D3 {
 namespace ImGuiHooks {
 
-#include "proggyvector_font_base85.h"
+#ifdef _MSC_VER
+  // Visual C++ (at least up to some 2019 version) doesn't support string literals
+  // with more than 65535 bytes, so the base85-encoded version won't work here..
+  // this alternative doesn't work with Big Endian, but that's not overly relevant for Windows.
+  #include "proggyvector_font.h"
+#else // proper compilers that support longer string literals
+  #include "proggyvector_font_base85.h"
+#endif
 
 static SDL_Window* sdlWindow = NULL;
 ImGuiContext* imguiCtx = NULL;
@@ -322,7 +329,14 @@ void NewFrame()
 		strcpy( fontCfg.Name, "ProggyVector" );
 		float fontSize = 18.0f * GetScale();
 		float fontSizeInt = roundf( fontSize ); // font sizes are supposed to be rounded to integers
+#ifdef _MSC_VER
+		// because Visual C++ (at least up to 2019) doesn't support the long string literal
+		// of the base85-encoded font, use the alternative compression instead
+		// (this is incompatible with Big Endian, so keep on using Base85 for other platforms)
+		io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size, fontSizeInt, nullptr);
+#else // better compilers
 		io.Fonts->AddFontFromMemoryCompressedBase85TTF(ProggyVector_compressed_data_base85, fontSizeInt, &fontCfg);
+#endif
 	}
 
 	// Start the Dear ImGui frame
