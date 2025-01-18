@@ -1282,6 +1282,10 @@ void idWindow::Redraw(float x, float y) {
 	if (!cst_hudAdjustAspect.GetBool() || cstAnchor == idDeviceContext::CST_ANCHOR_NONE) {
 		dc->SetSize(forceAspectWidth, forceAspectHeight);
 	} else {
+		// DG: if this Window uses anchors, it already is aspect-ratio-aware
+		//     so a potentially active menuscalefix must be disabled
+		//    (else it's "fixed" twice => wrong ratio in other direction)
+		dc->SetMenuScaleFix(false);
 		dc->CstSetSize(cstAnchor, cstAnchorTo, cstAnchorFactor);
 	}
 	//#modified-fva; END

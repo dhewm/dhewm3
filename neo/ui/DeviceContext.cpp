@@ -291,17 +291,20 @@ void idDeviceContext::SetMenuScaleFix(bool enable) {
 	}
 }
 
-// FIXME: CSTD3 comments this out
+// DG: Note: not sure if AdjustCoords() works entirely as it should, but it seems
+//     good enough for the idRenderWindow with the mars globe in the main menu
 void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h) {
-
+	// TODO: not sure about cst_*Offset
 	if (x) {
 		*x *= xScale;
+		*x += cst_xOffset; // DG: for CstDoom3 anchored windows
 
 		*x *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
 		*x += fixOffsetForMenu.x;
 	}
 	if (y) {
 		*y *= yScale;
+		*y += cst_yOffset; // DG: for CstDoom3 anchored windows
 
 		*y *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
 		*y += fixOffsetForMenu.y;
@@ -318,24 +321,10 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h) {
 	}
 }
 
-// DG: same as AdjustCoords, but ignore fixupMenus because for the cursor that must be handled seperately
-void idDeviceContext::AdjustCursorCoords(float *x, float *y, float *w, float *h) {
-	if (x) {
-		*x *= xScale;
-	}
-	if (y) {
-		*y *= yScale;
-	}
-	if (w) {
-		*w *= xScale;
-	}
-	if (h) {
-		*h *= yScale;
-	}
-}
-
-// fva's cst: added _cstAdjustCoords arg
-void idDeviceContext::DrawStretchPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *shader, bool _cstAdjustCoords) {
+// fva/DG: added adjustCoords argument for CstDoom3 anchored GUIs and our old
+//         scale-menus-to-4:3-fix, it basically replaces calling AdjustCoords(&x, &y, &w, &h)
+//         before calling this
+void idDeviceContext::DrawStretchPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *shader, bool adjustCoords) {
 	idDrawVert verts[4];
 	glIndex_t indexes[6];
 	indexes[0] = 3;
@@ -418,15 +407,14 @@ void idDeviceContext::DrawStretchPic(float x, float y, float w, float h, float s
 	}
 
 	//#modified-fva; BEGIN
-	if (_cstAdjustCoords) {
-		verts[0].xyz[0] = verts[0].xyz[0] * xScale + cst_xOffset;
-		verts[0].xyz[1] = verts[0].xyz[1] * yScale + cst_yOffset;
-		verts[1].xyz[0] = verts[1].xyz[0] * xScale + cst_xOffset;
-		verts[1].xyz[1] = verts[1].xyz[1] * yScale + cst_yOffset;
-		verts[2].xyz[0] = verts[2].xyz[0] * xScale + cst_xOffset;
-		verts[2].xyz[1] = verts[2].xyz[1] * yScale + cst_yOffset;
-		verts[3].xyz[0] = verts[3].xyz[0] * xScale + cst_xOffset;
-		verts[3].xyz[1] = verts[3].xyz[1] * yScale + cst_yOffset;
+	if (adjustCoords) {
+		for( int i=0; i<4; ++i) {
+			// Note: if cstAdjustCoords == false; cst_*Offset is 0, so that doesn't require special handling
+			float x = verts[i].xyz[0] * xScale + cst_xOffset;
+			float y = verts[i].xyz[1] * yScale + cst_yOffset;
+			verts[i].xyz[0] = x * fixScaleForMenu.x + fixOffsetForMenu.x;
+			verts[i].xyz[1] = y * fixScaleForMenu.y + fixOffsetForMenu.y;
+		}
 	}
 	//#modified-fva; END
 
@@ -483,7 +471,7 @@ void idDeviceContext::DrawMaterial(float x, float y, float w, float h, const idM
 
 	DrawStretchPic( x, y, w, h, s0, t0, s1, t1, mat);
 	*/
-	DrawStretchPic(x, y, w, h, s0, t0, s1, t1, mat, cstAdjustCoords);
+	DrawStretchPic(x, y, w, h, s0, t0, s1, t1, mat, true);
 	//#modified-fva; END
 }
 
@@ -535,12 +523,14 @@ void idDeviceContext::DrawMaterialRotated(float x, float y, float w, float h, co
 
 	DrawStretchPicRotated( x, y, w, h, s0, t0, s1, t1, mat, angle);
 	*/
-	DrawStretchPicRotated(x, y, w, h, s0, t0, s1, t1, mat, angle, cstAdjustCoords);
+	DrawStretchPicRotated(x, y, w, h, s0, t0, s1, t1, mat, angle, true);
 	//#modified-fva; END
 }
 
-// fva's cst: added _cstAdjustCoords arg
-void idDeviceContext::DrawStretchPicRotated(float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *shader, float angle, bool _cstAdjustCoords) {
+// fva/DG: added adjustCoords argument for CstDoom3 anchored GUIs and our old
+//         scale-menus-to-4:3-fix, it basically replaces calling AdjustCoords(&x, &y, &w, &h)
+//         before calling this
+void idDeviceContext::DrawStretchPicRotated(float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *shader, float angle, bool adjustCoords) {
 
 	idDrawVert verts[4];
 	glIndex_t indexes[6];
@@ -651,15 +641,14 @@ void idDeviceContext::DrawStretchPicRotated(float x, float y, float w, float h, 
 	}
 
 	//#modified-fva; BEGIN
-	if (_cstAdjustCoords) {
-		verts[0].xyz[0] = verts[0].xyz[0] * xScale + cst_xOffset;
-		verts[0].xyz[1] = verts[0].xyz[1] * yScale + cst_yOffset;
-		verts[1].xyz[0] = verts[1].xyz[0] * xScale + cst_xOffset;
-		verts[1].xyz[1] = verts[1].xyz[1] * yScale + cst_yOffset;
-		verts[2].xyz[0] = verts[2].xyz[0] * xScale + cst_xOffset;
-		verts[2].xyz[1] = verts[2].xyz[1] * yScale + cst_yOffset;
-		verts[3].xyz[0] = verts[3].xyz[0] * xScale + cst_xOffset;
-		verts[3].xyz[1] = verts[3].xyz[1] * yScale + cst_yOffset;
+	if (adjustCoords) {
+		for( int i=0; i<4; ++i) {
+			// Note: if cstAdjustCoords == false; cst_*Offset is 0, so that doesn't require special handling
+			float x = verts[i].xyz[0] * xScale + cst_xOffset;
+			float y = verts[i].xyz[1] * yScale + cst_yOffset;
+			verts[i].xyz[0] = x * fixScaleForMenu.x + fixOffsetForMenu.x;
+			verts[i].xyz[1] = y * fixScaleForMenu.y + fixOffsetForMenu.y;
+		}
 	}
 	//#modified-fva; END
 
@@ -683,7 +672,7 @@ void idDeviceContext::DrawFilledRect( float x, float y, float w, float h, const 
 	AdjustCoords(&x, &y, &w, &h);
 	DrawStretchPic( x, y, w, h, 0, 0, 0, 0, whiteImage);
 	*/
-	DrawStretchPic(x, y, w, h, 0, 0, 0, 0, whiteImage, cstAdjustCoords);
+	DrawStretchPic(x, y, w, h, 0, 0, 0, 0, whiteImage, true);
 	//#modified-fva; END
 }
 
@@ -708,10 +697,10 @@ void idDeviceContext::DrawRect( float x, float y, float w, float h, float size, 
 	DrawStretchPic( x, y, w, size, 0, 0, 0, 0, whiteImage );
 	DrawStretchPic( x, y + h - size, w, size, 0, 0, 0, 0, whiteImage );
 	*/
-	DrawStretchPic(x, y + size, size, h - 2.0f * size, 0, 0, 0, 0, whiteImage, cstAdjustCoords);
-	DrawStretchPic(x + w - size, y + size, size, h - 2.0f * size, 0, 0, 0, 0, whiteImage, cstAdjustCoords);
-	DrawStretchPic(x, y, w, size, 0, 0, 0, 0, whiteImage, cstAdjustCoords);
-	DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0, whiteImage, cstAdjustCoords);
+	DrawStretchPic(x, y + size, size, h - 2.0f * size, 0, 0, 0, 0, whiteImage, true);
+	DrawStretchPic(x + w - size, y + size, size, h - 2.0f * size, 0, 0, 0, 0, whiteImage, true);
+	DrawStretchPic(x, y, w, size, 0, 0, 0, 0, whiteImage, true);
+	DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0, whiteImage, true);
 	//#modified-fva; END
 }
 
@@ -752,16 +741,25 @@ void idDeviceContext::DrawCursor(float *x, float *y, float size) {
 
 	renderSystem->SetColor(colorWhite);
 
-	// DG: I use this instead of plain AdjustCursorCoords and the following lines
-	//     to scale menus and other fullscreen GUIs to 4:3 aspect ratio
-	// FIXME: how could this ever work with xScale = 0 or yScale = 0 ?!
-	//AdjustCursorCoords(x, y, &size, &size);
+	// DG: originally, this just called AdjustCoords() and then DrawStretchPic().
+	//     It had to be adjusted to scale menus and other fullscreen GUIs to 4:3 aspect ratio
+	//     and for the CstDoom3 anchored GUIs, so all that is now done here
+
+	// the following block used to be Adjust(Cursor)Coords()
+	// (no point in keeping that function when it's only used here)
+	*x *= xScale;
+	*y *= yScale;
+	size *= xScale;
+	// TODO: not sure if scaling it by both is the right thing to do..
+	//   but OTOH, probably one of them is always 1, at least when not using an anchor
+	//   (and why would a cursor use an anchor)
+	size *= yScale;
+
+	// the *actual* sizes used (but not set to *x and *y) need to apply the menu fixes
 	float sizeW = size * fixScaleForMenu.x;
 	float sizeH = size * fixScaleForMenu.y;
 	float fixedX = *x * fixScaleForMenu.x + fixOffsetForMenu.x;
 	float fixedY = *y * fixScaleForMenu.y + fixOffsetForMenu.y;
-
-	// FIXME: CSTD3 just comments the AdjustCoords() call out and uses *x and *y instead of fixedX/Y
 
 	DrawStretchPic(fixedX, fixedY, sizeW, sizeH, 0, 0, 1, 1, cursorImages[cursor]);
 }
@@ -784,7 +782,7 @@ void idDeviceContext::PaintChar(float x,float y,float width,float height,float s
 	AdjustCoords(&x, &y, &w, &h);
 	DrawStretchPic(x, y, w, h, s, t, s2, t2, hShader);
 	*/
-	DrawStretchPic(x, y, w, h, s, t, s2, t2, hShader, cstAdjustCoords);
+	DrawStretchPic(x, y, w, h, s, t, s2, t2, hShader, true);
 	//#modified-fva; END
 }
 
