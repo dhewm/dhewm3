@@ -1090,10 +1090,22 @@ static void redirect_output(void)
 		}
 		if (_stat(myGamesPath, &st) == -1) {
 			/* if My Documents/My Games/ doesn't exist, create it */
-			_mkdir(myGamesPath);
+			if( _mkdir(myGamesPath) != 0 && errno != EEXIST ) {
+				char msg[2048];
+				D3_snprintfC99( msg, sizeof(msg), "Failed to create '%s',\n error number is %d (%s).\nPermission problem?",
+				                myGamesPath, errno, strerror(errno) );
+				MessageBox( NULL, msg, "Can't create 'My Games' directory!", MB_OK | MB_ICONERROR );
+				exit(1);
+			}
 		}
-
-		_mkdir(path); /* create My Documents/My Games/dhewm3/ */
+		/* create My Documents/My Games/dhewm3/ */
+		if( _mkdir(path) != 0 && errno != EEXIST ) {
+			char msg[2048];
+			D3_snprintfC99( msg, sizeof(msg), "Failed to create '%s'\n(for savegames, configs and logs),\n error number is %d (%s)\nIs Documents/My Games/ write protected?",
+			                path, errno, strerror(errno) );
+			MessageBox( NULL, msg, "Can't create 'My Games/dhewm3' directory!", MB_OK | MB_ICONERROR );
+			exit(1);
+		}
 	}
 
 	FILE *newfp;
@@ -1127,6 +1139,12 @@ static void redirect_output(void)
 		newfp = fopen(stdoutPath, TEXT("w"));
 		if ( newfp ) {
 			*stdout = *newfp;
+		} else {
+			char msg[2048];
+			D3_snprintfC99( msg, sizeof(msg), "Failed to create '%s',\n error number is %d (%s)\nIs Documents/My Games/dhewm3/\n or dhewm3log.txt write protected?",
+			                stdoutPath, errno, strerror(errno) );
+			MessageBox( NULL, msg, "Can't create dhewm3log.txt!", MB_OK | MB_ICONERROR );
+			exit(1);
 		}
 #endif
 	}
@@ -1142,6 +1160,12 @@ static void redirect_output(void)
 		newfp = fopen(stderrPath, TEXT("w"));
 		if ( newfp ) {
 			*stderr = *newfp;
+		} else {
+			char msg[2048];
+			D3_snprintfC99( msg, sizeof(msg), "Failed to create '%s',\n error number is %d (%s)\nIs Documents/My Games/dhewm3/ write protected?",
+				stdoutPath, errno, strerror(errno) );
+			MessageBox( NULL, msg, "Can't create stderr.txt!", MB_OK | MB_ICONERROR );
+			exit(1);
 		}
 #endif
 	}
