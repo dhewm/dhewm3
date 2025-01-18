@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "sys/platform.h"
+#include "framework/Session.h"
 #include "ui/DeviceContext.h"
 #include "ui/Window.h"
 #include "ui/UserInterfaceLocal.h"
@@ -476,11 +477,14 @@ void idSimpleWindow::ReadFromSaveGame( idFile *savefile ) {
 	shear.ReadFromSaveGame( savefile );
 	backGroundName.ReadFromSaveGame( savefile );
 
-	//#modified-fva; BEGIN // FIXME: savegame version?
-	cstAnchor.ReadFromSaveGame(savefile);
-	cstAnchorTo.ReadFromSaveGame(savefile);
-	cstAnchorFactor.ReadFromSaveGame(savefile);
-	savefile->Read(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	//#modified-fva; BEGIN
+	// TODO: why does this have to be read from the savegame anyway, does it change?
+	if ( session->GetSaveGameVersion() >= 18 ) {
+		cstAnchor.ReadFromSaveGame(savefile);
+		cstAnchorTo.ReadFromSaveGame(savefile);
+		cstAnchorFactor.ReadFromSaveGame(savefile);
+		savefile->Read(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	} // else keep default values, I guess
 	//#modified-fva; END
 
 	int stringLen;

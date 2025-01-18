@@ -3782,11 +3782,14 @@ void idWindow::ReadFromSaveGame( idFile *savefile ) {
 		hideCursor = false;
 	}
 
-	//#modified-fva; BEGIN // FIXME: savegame version?
-	cstAnchor.ReadFromSaveGame(savefile);
-	cstAnchorTo.ReadFromSaveGame(savefile);
-	cstAnchorFactor.ReadFromSaveGame(savefile);
-	savefile->Read(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	//#modified-fva; BEGIN
+	// TODO: why does this have to be read from the savegame anyway, does it change?
+	if ( session->GetSaveGameVersion() >= 18 ) {
+		cstAnchor.ReadFromSaveGame(savefile);
+		cstAnchorTo.ReadFromSaveGame(savefile);
+		cstAnchorFactor.ReadFromSaveGame(savefile);
+		savefile->Read(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	} // else keep default values, I guess
 	//#modified-fva; END
 
 	// Defined Vars
