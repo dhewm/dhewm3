@@ -952,7 +952,8 @@ void idSoundEmitterLocal::StopSound( const s_channelType channel ) {
 		chan->ALStop();
 
 		// if this was an onDemand sound, purge the sample now
-		if ( chan->leadinSample->onDemand ) {
+		// Note: if sound is disabled (s_noSound 1), leadinSample can be NULL
+		if ( chan->leadinSample && chan->leadinSample->onDemand ) {
 			chan->leadinSample->PurgeSoundSample();
 		}
 

@@ -2148,10 +2148,13 @@ float idSoundWorldLocal::FindAmplitude( idSoundEmitterLocal *sound, const int lo
 				sourceBuffer[j] = j & 1 ? 32767.0f : -32767.0f;
 			}
 		} else {
-			int offset = (localTime - localTriggerTimes);	// offset in samples
-			int size = ( looping ? chan->soundShader->entries[0]->LengthIn44kHzSamples() : chan->leadinSample->LengthIn44kHzSamples() );
-			short *amplitudeData = (short *)( looping ? chan->soundShader->entries[0]->amplitudeData : chan->leadinSample->amplitudeData );
+			idSoundSample* sample = looping ? chan->soundShader->entries[0] : chan->leadinSample;
+			if ( sample == NULL ) // DG: this happens if sound is disabled (s_noSound 1)
+				continue;
 
+			int offset = (localTime - localTriggerTimes);	// offset in samples
+			int size = sample->LengthIn44kHzSamples();
+			short *amplitudeData = (short *)( sample->amplitudeData );
 			if ( amplitudeData ) {
 				// when the amplitudeData is present use that fill a dummy sourceBuffer
 				// this is to allow for amplitude based effect on hardware audio solutions
