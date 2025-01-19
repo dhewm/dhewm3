@@ -706,6 +706,16 @@ void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void (*DrawInterac
 		return;
 	}
 
+	// DG: support lights nospecular parm, if desired by mapper and/or user
+	int noSpecVar = r_supportNoSpecular.GetInteger();
+	bool allowNoSpecular = (noSpecVar == 1);
+	if ( noSpecVar == -1 ) {
+		// r_supportNoSpecular -1 only allows nospecular if the map enables
+		// it in the worldspawn by setting "allow_nospecular" "1"
+		// the value of that is saved in tr.allowNoSpecular by idRenderSystemLocal::EndLevelLoad()
+		allowNoSpecular = tr.allowNoSpecular;
+	}
+
 	// change the matrix and light projection vectors if needed
 	if ( surf->space != backEnd.currentSpace ) {
 		backEnd.currentSpace = surf->space;
@@ -823,13 +833,18 @@ void RB_CreateSingleDrawInteractions( const drawSurf_t *surf, void (*DrawInterac
 					if ( inter.specularImage ) {
 						RB_SubmittInteraction( &inter, DrawInteraction );
 					}
-					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.specularImage,
-											inter.specularMatrix, inter.specularColor.ToFloatPtr() );
-					inter.specularColor[0] *= lightColor[0];
-					inter.specularColor[1] *= lightColor[1];
-					inter.specularColor[2] *= lightColor[2];
-					inter.specularColor[3] *= lightColor[3];
-					inter.vertexColor = surfaceStage->vertexColor;
+// jmarshall - add no specular support(great for fill lighting).
+					if ( !allowNoSpecular || !vLight->lightDef->parms.noSpecular )
+					{
+						R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.specularImage,
+												inter.specularMatrix, inter.specularColor.ToFloatPtr() );
+						inter.specularColor[0] *= lightColor[0];
+						inter.specularColor[1] *= lightColor[1];
+						inter.specularColor[2] *= lightColor[2];
+						inter.specularColor[3] *= lightColor[3];
+						inter.vertexColor = surfaceStage->vertexColor;
+					}
+// jmarshall end
 					break;
 				}
 			}

@@ -491,6 +491,9 @@ bool idRenderWorldLocal::InitFromMap( const char *name ) {
 		return true;
 	}
 
+	// DG: this must be set to false somewhere as a default, here feels safe
+	//     (it will be properly set in idRenderSystemLocal::EndLevelLoad())
+	tr.allowNoSpecular = false;
 
 	// load it
 	filename = name;
