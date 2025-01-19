@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 
 #include "framework/GameCallbacks_local.h"
+#include "framework/Game.h"
 
 // Vista OpenGL wrapper check
 #ifdef _WIN32
@@ -170,6 +171,13 @@ idCVar r_singleArea( "r_singleArea", "0", CVAR_RENDERER | CVAR_BOOL, "only draw 
 idCVar r_forceLoadImages( "r_forceLoadImages", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "draw all images to screen after registration" );
 idCVar r_orderIndexes( "r_orderIndexes", "1", CVAR_RENDERER | CVAR_BOOL, "perform index reorganization to optimize vertex use" );
 idCVar r_lightAllBackFaces( "r_lightAllBackFaces", "0", CVAR_RENDERER | CVAR_BOOL, "light all the back faces, even when they would be shadowed" );
+
+// DG: added this to support "nospecular" param of lights
+// NOTE: if you're developing a standalone game, you'll probably want to use "1" as default value
+idCVar r_supportNoSpecular( "r_supportNoSpecular", "-1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE,
+		"Support 'nospecular' parm on lights. Vanilla Doom3 didn't, so the original maps are probably "
+		"expecting it to not do anything. -1: Only support in maps that have have \"allow_nospecular\" \"1\" set in worldspawn (default), "
+		"0: never respect 'nospecular' parm 1: support 'nospecular' in all maps", -1, 1 );
 
 // visual debugging info
 idCVar r_showPortals( "r_showPortals", "0", CVAR_RENDERER | CVAR_BOOL, "draw portal outlines in color based on passed / not passed" );
@@ -2330,6 +2338,7 @@ void idRenderSystemLocal::Clear( void ) {
 	guiModel = NULL;
 	demoGuiModel = NULL;
 	takingScreenshot = false;
+	allowNoSpecular = false;
 }
 
 /*
@@ -2438,6 +2447,23 @@ void idRenderSystemLocal::EndLevelLoad( void ) {
 	globalImages->EndLevelLoad();
 	if ( r_forceLoadImages.GetBool() ) {
 		RB_ShowImages();
+	}
+	// DG: check if the levels worldspawn has "allow_nospecular" set, which tells us that
+	//     the map author wants "nospecular" parms of lights to be respected by the renderer
+	//     (Vanilla Doom3 didn't, even though some official levels have it set, so to not
+	//      change the look of the original game it must be enabled in the worldspawn of new maps)
+	//     See also the r_supportNoSpecular CVar (the allowNoSpecular set here only makes
+	//     a difference if r_supportNoSpecular is -1, which is the default)
+	allowNoSpecular = false;
+	if ( gameEdit != NULL ) {
+		idEntity* ent = gameEdit->FindEntity( "world" ); // the worldspawn always called "world"
+		const idDict* ws = gameEdit->EntityGetSpawnArgs( ent );
+		if ( ws != NULL ) {
+			allowNoSpecular = ws->GetBool( "allow_nospecular", "0" );
+			if ( allowNoSpecular ) {
+				common->Printf( "This map allows lights to use the 'nospecular' parm on lights\n" );
+			}
+		}
 	}
 }
 
