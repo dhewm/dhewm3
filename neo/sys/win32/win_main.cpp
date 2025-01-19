@@ -1163,7 +1163,7 @@ static void redirect_output(void)
 		} else {
 			char msg[2048];
 			D3_snprintfC99( msg, sizeof(msg), "Failed to create '%s',\n error number is %d (%s)\nIs Documents/My Games/dhewm3/ write protected?",
-				stdoutPath, errno, strerror(errno) );
+			                stderrPath, errno, strerror(errno) );
 			MessageBox( NULL, msg, "Can't create stderr.txt!", MB_OK | MB_ICONERROR );
 			exit(1);
 		}
