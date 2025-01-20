@@ -485,6 +485,11 @@ void CEntityDlg::DelProp() {
 			Entity_UpdateCurveData( b->owner );
 		}
 	} else {
+		// DG: update tr_allowNoSpecular if the user has removed the worldspawn's allow_nospecular value
+		if ( (editEntity->eclass->nShowFlags & ECLASS_WORLDSPAWN) && stricmp(key, "allow_nospecular") == 0 ) {
+			tr.allowNoSpecular = false;
+		}
+
 		DeleteKey(editEntity, key);
 		Entity_UpdateCurveData( editEntity );
 	}
@@ -634,6 +639,10 @@ void CEntityDlg::AddProp() {
 		} else {
 			if ( ! ( ( isModel || isOrigin ) && ( editEntity->eclass->nShowFlags & ECLASS_WORLDSPAWN ) ) ) {
 				SetKeyValue(editEntity, Key, Value);
+			}
+			// DG: update tr_allowNoSpecular if the user has changed the worldspawn's allow_nospecular value
+			if ( (editEntity->eclass->nShowFlags & ECLASS_WORLDSPAWN) && stricmp(Key, "allow_nospecular") == 0 ) {
+				tr.allowNoSpecular = !Value.IsEmpty() && atoi(Value) != 0;
 			}
 		}
 
