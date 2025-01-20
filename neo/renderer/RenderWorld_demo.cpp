@@ -108,27 +108,41 @@ bool		idRenderWorldLocal::ProcessDemoCommand( idDemoFile *readDemo, renderView_t
 
 	switch( (demoCommand_t)dc ) {
 	case DC_LOADMAP:
+	{
 		// read the initial data
 		demoHeader_t	header;
 
 		readDemo->ReadInt( header.version );
+		// the internal version value got replaced by DS_VERSION at toplevel
+		// DG: bumped version to 5 for nospecular support, still support old demos though.
+		if ( header.version != 4 && header.version != 5 ) {
+			common->Error( "Demo version mismatch.\n" );
+		}
+
 		readDemo->ReadInt( header.sizeofRenderEntity );
 		readDemo->ReadInt( header.sizeofRenderLight );
+		// DG: set allowNoSpecular from demo, if it's v5 (otherwise default to false)
+		//     when loading a normal map, this is "allow_nospecular" in the worldspawn
+		int allowNoSpecular = 0;
+		if ( header.version == 5 ) {
+			readDemo->ReadInt( allowNoSpecular );
+		}
+
 		for ( int i = 0; i < 256; i++ )
 			readDemo->ReadChar( header.mapname[i] );
-		// the internal version value got replaced by DS_VERSION at toplevel
-		if ( header.version != 4 ) {
-				common->Error( "Demo version mismatch.\n" );
-		}
 
 		if ( r_showDemo.GetBool() ) {
 			common->Printf( "DC_LOADMAP: %s\n", header.mapname );
 		}
 		InitFromMap( header.mapname );
 
+		// DG: must be set after InitFromMap(), because that sets it to false as a default
+		tr.allowNoSpecular = (allowNoSpecular != 0);
+
 		newMap = true;		// we will need to set demoTimeOffset
 
 		break;
+	}
 
 	case DC_RENDERVIEW:
 		readDemo->ReadInt( renderView->viewID );
@@ -281,12 +295,13 @@ void	idRenderWorldLocal::WriteLoadMap() {
 	//     so it's good if the ones behind the actual name are *all* \0
 	strncpy( header.mapname, mapName.c_str(), sizeof( header.mapname ) - 1 );
 	header.mapname[sizeof( header.mapname ) - 1] = '\0'; // make sure the last chars is also \0
-	header.version = 4;
+	header.version = 5; // DG: bumped to 5 for nospecular support
 	header.sizeofRenderEntity = sizeof( renderEntity_t );
 	header.sizeofRenderLight = sizeof( renderLight_t );
 	session->writeDemo->WriteInt( header.version );
 	session->writeDemo->WriteInt( header.sizeofRenderEntity );
 	session->writeDemo->WriteInt( header.sizeofRenderLight );
+	session->writeDemo->WriteInt( tr.allowNoSpecular ); // DG: added for nospecular support
 	for ( int i = 0; i < 256; i++ )
 		session->writeDemo->WriteChar( header.mapname[i] );
 
