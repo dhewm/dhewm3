@@ -23,6 +23,11 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Updated Dear ImGui to 1.91.4
 * Fix scaling of Grabber cursor in Resurrection of Evil in non-4:3 resolutions (#637)
 * Add `com_disableAutoSaves` CVar: If set to `1`, Autosaves (when starting a level) are disabled (#620)
+* Add support for "nospecular" parm of lights, enabled by setting `"allow_nospecular" "1"` in a maps
+  worldspawn, or by setting the `r_allowNoSpecular` CVar to `1`.  
+  Note that this required changing the format of demos. dhewm3 can still play old demos, but ones
+  recorded with current dhewm3 are not compatible with older dhewm3 versions, original Doom3 or
+  other source ports (unless they do the same change).
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------

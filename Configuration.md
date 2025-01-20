@@ -225,6 +225,11 @@ This can be configured with the following CVars:
 - `r_useCarmacksReverse` Use Z-Fail ("Carmack's Reverse") when rendering shadows (default `1`)
 - `r_useStencilOpSeparate` Use glStencilOpSeparate() (if available) when rendering shadow (default `1`)
 - `r_scaleMenusTo43` Render full-screen menus in 4:3 by adding black bars on the left/right if necessary (default `1`)
+- `r_supportNoSpecular` Allow using the "nospecular" parm of lights under certain circumstances. If set to:
+    - `0` "nospecular" will always be ignored, as it's the case in Vanilla Doom3
+    - `1` "nospecular" is always used, even in old maps where it changes what they look like
+    - `-1` (the default) "nospecular" is only used in (new) maps that explicitly enable it
+      by setting `"allow_nospecular" "1"` in the worldspawn, existing maps continue to ignore it
 - `r_glDebugContext` Enable OpenGL debug context and printing warnings/errors from the graphics driver.  
   Changing that CVar requires a `vid_restart` (or set it as startup argument)
 
