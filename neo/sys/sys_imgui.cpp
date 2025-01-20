@@ -307,6 +307,14 @@ void Shutdown()
 // => ProcessEvent() has already been called (probably multiple times)
 void NewFrame()
 {
+	// it can happen that NewFrame() is called without EndFrame() having been called
+	// after the last NewFrame() call, for example when D3Radiant is active and in
+	// idSessionLocal::UpdateScreen() Sys_IsWindowVisible() returns false.
+	// In that case, end the previous frame here so it's ended at all.
+	if ( haveNewFrame ) {
+		EndFrame();
+	}
+
 	// even if all windows are closed, still run a few frames
 	// so ImGui also recognizes internally that all windows are closed
 	// and e.g. ImGuiCond_Appearing works as intended
