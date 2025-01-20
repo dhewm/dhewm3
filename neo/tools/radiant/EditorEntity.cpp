@@ -613,6 +613,11 @@ entity_t *Entity_PostParse(entity_t *ent, brush_t *pList) {
 	}
 
 	if (e->nShowFlags & ECLASS_WORLDSPAWN) {
+		// DG: this makes sure that tr.allowNoSpecular is set appropriately when loading a map
+		const char* noSpecVal = ValueForKey(ent, "allow_nospecular");
+		tr.allowNoSpecular = noSpecVal && *noSpecVal && atoi(noSpecVal) != 0;
+		common->Printf("This map does%s support 'nospecular' lights\n", tr.allowNoSpecular ? "" : " not");
+
 		ent->origin.Zero();
 		needsOrigin = false;
 		ent->epairs.Delete( "model" );
