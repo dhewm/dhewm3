@@ -55,7 +55,7 @@ bool idWindow::registerIsTemporary[MAX_EXPRESSION_REGISTERS];		// statics to ass
 idCVar idWindow::gui_debug( "gui_debug", "0", CVAR_GUI | CVAR_BOOL, "" );
 idCVar idWindow::gui_edit( "gui_edit", "0", CVAR_GUI | CVAR_BOOL, "" );
 //#modified-fva; BEGIN
-idCVar cst_hudAdjustAspect("cst_hudAdjustAspect", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "adjust the HUD's aspect when the screen aspect ratio isn't 4:3");
+idCVar cst_hudAdjustAspect("cst_hudAdjustAspect", "1", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "adjust the HUD's aspect when the screen aspect ratio isn't 4:3");
 //#modified-fva; END
 
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
