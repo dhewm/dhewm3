@@ -1969,6 +1969,25 @@ static void DrawVideoOptionsMenu()
 	// options that take effect immediately, just by modifying their CVar:
 
 	DrawOptions( videoOptionsImmediately, IM_ARRAYSIZE(videoOptionsImmediately) );
+
+	ImGui::Separator();
+
+	if ( ImGui::TreeNode("OpenGL Info") ) {
+		ImGui::BeginDisabled();
+
+		ImGui::Text( "OpenGL vendor: %s", glConfig.vendor_string );
+		ImGui::Text( "OpenGL renderer: %s", glConfig.renderer_string );
+		ImGui::Text( "OpenGL version: %s", glConfig.version_string );
+
+		if ( glConfig.glDebugOutputAvailable && glConfig.haveDebugContext ) {
+			ImGui::Text( "    using an OpenGL debug context to show warnings from the OpenGL driver" );
+		}
+
+		ImGui::EndDisabled();
+		ImGui::TreePop();
+	} else {
+		AddTooltip( "Click to show information about the currently used Graphics Card (GPU)" );
+	}
 }
 
 static idStrList alDevices;

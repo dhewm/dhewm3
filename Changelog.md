@@ -28,6 +28,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   Note that this required changing the format of demos. dhewm3 can still play old demos, but ones
   recorded with current dhewm3 are not compatible with older dhewm3 versions, original Doom3 or
   other source ports (unless they do the same change).
+* Make sure macOS doesn't show popups for key-alternatives when pressing a key for longer while ingame
+* Windows: Show error MessageBox if dhewm3log.txt can't be created on startup (#544)
+* Running a timedemo with sound disabled (`s_noSound 1`) doesn't crash anymore (#163)
+* Show some OpenGL/GPU information in the *Video Options* tab of the *dhewm3 Settings Menu*
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------
