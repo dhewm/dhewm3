@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "sys/platform.h"
+#include "framework/Session.h"
 #include "ui/DeviceContext.h"
 #include "ui/Window.h"
 #include "ui/UserInterfaceLocal.h"
@@ -77,6 +78,13 @@ idSimpleWindow::idSimpleWindow(idWindow *win) {
 
 	hideCursor = win->hideCursor;
 
+	//#modified-fva; BEGIN
+	cstAnchor = win->cstAnchor;
+	cstAnchorTo = win->cstAnchorTo;
+	cstAnchorFactor = win->cstAnchorFactor;
+	cstNoClipBackground = win->cstNoClipBackground;
+	//#modified-fva; END
+
 	idWindow *parent = win->GetParent();
 	if (parent) {
 		if (text.NeedsUpdate()) {
@@ -112,6 +120,18 @@ idSimpleWindow::idSimpleWindow(idWindow *win) {
 		if (backGroundName.NeedsUpdate()) {
 			parent->AddUpdateVar(&backGroundName);
 		}
+
+		//#modified-fva; BEGIN
+		if (cstAnchor.NeedsUpdate()) {
+			parent->AddUpdateVar(&cstAnchor);
+		}
+		if (cstAnchorTo.NeedsUpdate()) {
+			parent->AddUpdateVar(&cstAnchorTo);
+		}
+		if (cstAnchorFactor.NeedsUpdate()) {
+			parent->AddUpdateVar(&cstAnchorFactor);
+		}
+		//#modified-fva; END
 	}
 }
 
@@ -223,14 +243,41 @@ void idSimpleWindow::Redraw(float x, float y) {
 
 	CalcClientRect(0, 0);
 	dc->SetFont(fontNum);
+
+	//#modified-fva; BEGIN
+	if (mParent && mParent->cstAnchor != idDeviceContext::CST_ANCHOR_NONE) {
+		cstAnchor = mParent->cstAnchor;
+		cstAnchorTo = mParent->cstAnchorTo;
+		cstAnchorFactor = mParent->cstAnchorFactor;
+	}
+	extern idCVar cst_hudAdjustAspect;
+	if (!cst_hudAdjustAspect.GetBool() || cstAnchor == idDeviceContext::CST_ANCHOR_NONE) {
+		if (mParent) {
+			dc->SetSize(mParent->forceAspectWidth, mParent->forceAspectHeight);
+		} else {
+			dc->SetSize(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+		}
+	} else {
+		dc->CstSetSize(cstAnchor, cstAnchorTo, cstAnchorFactor);
+	}
+	//#modified-fva; END
+
 	drawRect.Offset(x, y);
 	clientRect.Offset(x, y);
 	textRect.Offset(x, y);
 	SetupTransforms(x, y);
-	if ( flags & WIN_NOCLIP ) {
+	// fva's cst: added cstNoClipBackground
+	if ((flags & WIN_NOCLIP) || cstNoClipBackground) {
 		dc->EnableClipping( false );
 	}
 	DrawBackground(drawRect);
+
+	//#modified-fva; BEGIN
+	if (!(flags & WIN_NOCLIP) && cstNoClipBackground) {
+		dc->EnableClipping(true);
+	}
+	//#modified-fva; END
+
 	DrawBorderAndCaption(drawRect);
 	if ( textShadow ) {
 		idStr shadowText = text;
@@ -283,6 +330,12 @@ intptr_t idSimpleWindow::GetWinVarOffset( idWinVar *wv, drawWin_t* owner) {
 		ret = (ptrdiff_t)&this->rotate - (ptrdiff_t)this;
 	}
 
+	//#modified-fva; BEGIN
+	if (wv == &cstAnchorFactor) {
+		ret = (ptrdiff_t)&this->cstAnchorFactor - (ptrdiff_t)this;
+	}
+	//#modified-fva; END
+
 	if ( ret != -1 ) {
 		owner->simp = this;
 	}
@@ -324,6 +377,17 @@ idWinVar *idSimpleWindow::GetWinVarByName(const char *_name) {
 	if (idStr::Icmp(_name, "text") == 0) {
 		retVar = &text;
 	}
+
+	//#modified-fva; BEGIN
+	if (idStr::Icmp(_name, "cstAnchor") == 0) {
+		retVar = &cstAnchor;
+	} else if (idStr::Icmp(_name, "cstAnchorTo") == 0) {
+		retVar = &cstAnchorTo;
+	} else if (idStr::Icmp(_name, "cstAnchorFactor") == 0) {
+		retVar = &cstAnchorFactor;
+	}
+	//#modified-fva; END
+
 	return retVar;
 }
 
@@ -359,6 +423,13 @@ void idSimpleWindow::WriteToSaveGame( idFile *savefile ) {
 	rotate.WriteToSaveGame( savefile );
 	shear.WriteToSaveGame( savefile );
 	backGroundName.WriteToSaveGame( savefile );
+	
+	//#modified-fva; BEGIN // FIXME: savegame version?
+	cstAnchor.WriteToSaveGame(savefile);
+	cstAnchorTo.WriteToSaveGame(savefile);
+	cstAnchorFactor.WriteToSaveGame(savefile);
+	savefile->Write(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	//#modified-fva; END
 
 	int stringLen;
 
@@ -405,6 +476,16 @@ void idSimpleWindow::ReadFromSaveGame( idFile *savefile ) {
 	rotate.ReadFromSaveGame( savefile );
 	shear.ReadFromSaveGame( savefile );
 	backGroundName.ReadFromSaveGame( savefile );
+
+	//#modified-fva; BEGIN
+	// TODO: why does this have to be read from the savegame anyway, does it change?
+	if ( session->GetSaveGameVersion() >= 18 ) {
+		cstAnchor.ReadFromSaveGame(savefile);
+		cstAnchorTo.ReadFromSaveGame(savefile);
+		cstAnchorFactor.ReadFromSaveGame(savefile);
+		savefile->Read(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	} // else keep default values, I guess
+	//#modified-fva; END
 
 	int stringLen;
 

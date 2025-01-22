@@ -93,7 +93,8 @@ If you have questions concerning this license or the applicable additional terms
 // NOTE: a seperate core savegame version and game savegame version could be useful
 // 16: Doom v1.1
 // 17: Doom v1.2 / D3XP. Can still read old v16 with defaults for new data
-#define SAVEGAME_VERSION				17
+// 18: dhewm3 with CstDoom3 anchored window support - can still read v16 and v17, unless gamedata changed
+#define SAVEGAME_VERSION				18
 
 // <= Doom v1.1: 1. no DS_VERSION token ( default )
 // Doom v1.2: 2

@@ -452,6 +452,13 @@ protected:
 	idRegisterList regList;
 
 	idWinBool	hideCursor;
+
+	//#modified-fva; BEGIN
+	idWinInt	cstAnchor;
+	idWinInt	cstAnchorTo;		// for anchor transitions
+	idWinFloat	cstAnchorFactor;	// for anchor transitions
+	bool		cstNoClipBackground;
+	//#modified-fva; END
 };
 
 ID_INLINE void idWindow::AddDefinedVar( idWinVar* var ) {

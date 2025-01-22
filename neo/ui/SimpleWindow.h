@@ -98,6 +98,13 @@ protected:
 	idWindow *		mParent;
 
 	idWinBool	hideCursor;
+
+	//#modified-fva; BEGIN
+	idWinInt	cstAnchor;
+	idWinInt	cstAnchorTo;		// for anchor transitions
+	idWinFloat	cstAnchorFactor;	// for anchor transitions
+	bool		cstNoClipBackground;
+	//#modified-fva; END
 };
 
 #endif /* !__SIMPLEWIN_H__ */

@@ -58,10 +58,12 @@ public:
 	void				DrawFilledRect(float x, float y, float width, float height, const idVec4 &color);
 	int					DrawText(const char *text, float textScale, int textAlign, idVec4 color, idRectangle rectDraw, bool wrap, int cursor = -1, bool calcOnly = false, idList<int> *breaks = NULL, int limit = 0 );
 	void				DrawMaterialRect( float x, float y, float w, float h, float size, const idMaterial *mat, const idVec4 &color);
-	void				DrawStretchPic(float x, float y, float w, float h, float s0, float t0, float s1, float t1, const idMaterial *mat);
+	// fva/DG: added adjustCoords argument for CstDoom3 anchored GUIs and our old scale-menus-to-4:3-fix
+	void				DrawStretchPic(float x, float y, float w, float h, float s0, float t0, float s1, float t1, const idMaterial *mat, bool adjustCoords = false);
 
 	void				DrawMaterialRotated(float x, float y, float w, float h, const idMaterial *mat, const idVec4 &color, float scalex = 1.0, float scaley = 1.0, float angle = 0.0f);
-	void				DrawStretchPicRotated(float x, float y, float w, float h, float s0, float t0, float s1, float t1, const idMaterial *mat, float angle = 0.0f);
+	// fva/DG: added adjustCoords argument for CstDoom3 anchored GUIs and our old scale-menus-to-4:3-fix
+	void				DrawStretchPicRotated(float x, float y, float w, float h, float s0, float t0, float s1, float t1, const idMaterial *mat, float angle = 0.0f, bool adjustCoords = false);
 
 	int					CharWidth( const char c, float scale );
 	int					TextWidth(const char *text, float scale, int limit);
@@ -76,13 +78,17 @@ public:
 
 	void				SetSize(float width, float height);
 
+	//#modified-fva; BEGIN
+	void				CstSetSize(int anchor, int anchorTo, float factor);
+	//#modified-fva; END
+
 	const idMaterial	*GetScrollBarImage(int index);
 
 	void				DrawCursor(float *x, float *y, float size);
 	void				SetCursor(int n);
-
+	// DG: Note: not sure if AdjustCoords() works entirely as it should, but it seems
+	//     good enough for the idRenderWindow with the mars globe in the main menu
 	void				AdjustCoords(float *x, float *y, float *w, float *h);
-	void				AdjustCursorCoords(float *x, float *y, float *w, float *h); // DG: added for "render menus as 4:3" hack
 	bool				ClippedCoords(float *x, float *y, float *w, float *h);
 	bool				ClippedCoords(float *x, float *y, float *w, float *h, float *s1, float *t1, float *s2, float *t2);
 
@@ -128,6 +134,27 @@ public:
 		SCROLLBAR_COUNT
 	};
 
+	//#modified-fva; BEGIN
+	enum {
+		CST_ANCHOR_NONE = -1,
+		CST_ANCHOR_TOP_LEFT,
+		CST_ANCHOR_TOP_CENTER,
+		CST_ANCHOR_TOP_RIGHT,
+		CST_ANCHOR_CENTER_LEFT,
+		CST_ANCHOR_CENTER_CENTER,
+		CST_ANCHOR_CENTER_RIGHT,
+		CST_ANCHOR_BOTTOM_LEFT,
+		CST_ANCHOR_BOTTOM_CENTER,
+		CST_ANCHOR_BOTTOM_RIGHT,
+		CST_ANCHOR_TOP,
+		CST_ANCHOR_VCENTER,
+		CST_ANCHOR_BOTTOM,
+		CST_ANCHOR_LEFT,
+		CST_ANCHOR_HCENTER,
+		CST_ANCHOR_RIGHT
+	};
+	//#modified-fva; END
+
 	static idVec4 colorPurple;
 	static idVec4 colorOrange;
 	static idVec4 colorYellow;
@@ -152,6 +179,12 @@ private:
 	idStr				fontName;
 	float				xScale;
 	float				yScale;
+
+	//#modified-fva; BEGIN
+	float				cst_xOffset;
+	float				cst_yOffset;
+	bool				cstAdjustCoords;
+	//#modified-fva; END
 
 	float				vidHeight;
 	float				vidWidth;

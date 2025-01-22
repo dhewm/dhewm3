@@ -54,6 +54,9 @@ bool idWindow::registerIsTemporary[MAX_EXPRESSION_REGISTERS];		// statics to ass
 
 idCVar idWindow::gui_debug( "gui_debug", "0", CVAR_GUI | CVAR_BOOL, "" );
 idCVar idWindow::gui_edit( "gui_edit", "0", CVAR_GUI | CVAR_BOOL, "" );
+//#modified-fva; BEGIN
+idCVar cst_hudAdjustAspect("cst_hudAdjustAspect", "1", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "adjust the HUD's aspect when the screen aspect ratio isn't 4:3");
+//#modified-fva; END
 
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 extern idCVar r_scaleMenusTo43;
@@ -80,6 +83,15 @@ const idRegEntry idWindow::RegisterVars[] = {
 	{ "choices", idRegister::STRING },
 	{ "choiceVar", idRegister::STRING },
 	{ "bind", idRegister::STRING },
+	//#modified-fva; BEGIN - FIXME: why not at the end of the list?
+	{ "cstLayer", idRegister::INT },
+	{ "cstPseudoBit", idRegister::INT },
+	{ "cstResetScrollbar", idRegister::BOOL },
+	{ "cstWriteTop", idRegister::BOOL },
+	{ "cstAnchor", idRegister::INT },
+	{ "cstAnchorTo", idRegister::INT },
+	{ "cstAnchorFactor", idRegister::FLOAT },
+	//#modified-fva; END
 	{ "modelRotate", idRegister::VEC4 },
 	{ "modelOrigin", idRegister::VEC4 },
 	{ "lightOrigin", idRegister::VEC4 },
@@ -154,6 +166,13 @@ void idWindow::CommonInit() {
 	}
 
 	hideCursor = false;
+
+	//#modified-fva; BEGIN
+	cstAnchor = idDeviceContext::CST_ANCHOR_NONE;
+	cstAnchorTo = idDeviceContext::CST_ANCHOR_NONE;
+	cstAnchorFactor = 0.0f;
+	cstNoClipBackground = false;
+	//#modified-fva; END
 }
 
 /*
@@ -1247,10 +1266,29 @@ void idWindow::Redraw(float x, float y) {
 	CalcClientRect(0, 0);
 
 	SetFont();
+
+	//#modified-fva; BEGIN
+	/*
 	//if (flags & WIN_DESKTOP) {
 		// see if this window forces a new aspect ratio
 		dc->SetSize(forceAspectWidth, forceAspectHeight);
 	//}
+	*/
+	if (parent && parent->cstAnchor != idDeviceContext::CST_ANCHOR_NONE) {
+		cstAnchor = parent->cstAnchor;
+		cstAnchorTo = parent->cstAnchorTo;
+		cstAnchorFactor = parent->cstAnchorFactor;
+	}
+	if (!cst_hudAdjustAspect.GetBool() || cstAnchor == idDeviceContext::CST_ANCHOR_NONE) {
+		dc->SetSize(forceAspectWidth, forceAspectHeight);
+	} else {
+		// DG: if this Window uses anchors, it already is aspect-ratio-aware
+		//     so a potentially active menuscalefix must be disabled
+		//    (else it's "fixed" twice => wrong ratio in other direction)
+		dc->SetMenuScaleFix(false);
+		dc->CstSetSize(cstAnchor, cstAnchorTo, cstAnchorFactor);
+	}
+	//#modified-fva; END
 
 	//FIXME: go to screen coord tracking
 	drawRect.Offset(x, y);
@@ -1265,7 +1303,19 @@ void idWindow::Redraw(float x, float y) {
 	dc->GetTransformInfo( oldOrg, oldTrans );
 
 	SetupTransforms(x, y);
+	//#modified-fva; BEGIN
+	if (cstNoClipBackground) {
+		dc->EnableClipping(false);
+	}
+	//#modified-fva; END
+
 	DrawBackground(drawRect);
+
+	//#modified-fva; BEGIN
+	if (cstNoClipBackground) {
+		dc->EnableClipping(true);
+	}
+	//#modified-fva; END
 	DrawBorderAndCaption(drawRect);
 
 	if ( !( flags & WIN_NOCLIP) ) {
@@ -1328,6 +1378,15 @@ void idWindow::SetDC(idDeviceContext *d) {
 	//if (flags & WIN_DESKTOP) {
 		dc->SetSize(forceAspectWidth, forceAspectHeight);
 	//}
+
+	//#modified-fva; BEGIN
+	if (parent && parent->cstAnchor != idDeviceContext::CST_ANCHOR_NONE) {
+		cstAnchor = parent->cstAnchor;
+		cstAnchorTo = parent->cstAnchorTo;
+		cstAnchorFactor = parent->cstAnchorFactor;
+	}
+	//#modified-fva; END
+
 	int c = children.Num();
 	for (int i = 0; i < c; i++) {
 		children[i]->SetDC(d);
@@ -1774,6 +1833,12 @@ intptr_t idWindow::GetWinVarOffset( idWinVar *wv, drawWin_t* owner) {
 		ret = (ptrdiff_t)&this->rotate - (ptrdiff_t)this;
 	}
 
+	//#modified-fva; BEGIN
+	if (wv == &cstAnchorFactor) {
+		ret = (ptrdiff_t)&this->cstAnchorFactor - (ptrdiff_t)this;
+	}
+	//#modified-fva; END
+
 	if ( ret != -1 ) {
 		owner->win = this;
 		return ret;
@@ -1807,7 +1872,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t** o
 
 	if (idStr::Icmp(_name, "notime") == 0) {
 		retVar = &noTime;
-	}
+	} // FIXME: why does all this code not use "else if"?!
 	if (idStr::Icmp(_name, "background") == 0) {
 		retVar = &backGroundName;
 	}
@@ -1850,6 +1915,15 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t** o
 	if (idStr::Icmp(_name, "hidecursor") == 0) {
 		retVar = &hideCursor;
 	}
+	//#modified-fva; BEGIN
+	if (idStr::Icmp(_name, "cstAnchor") == 0) {
+		retVar = &cstAnchor;
+	} else if (idStr::Icmp(_name, "cstAnchorTo") == 0) {
+		retVar = &cstAnchorTo;
+	} else if (idStr::Icmp(_name, "cstAnchorFactor") == 0) {
+		retVar = &cstAnchorFactor;
+	}
+	//#modified-fva; END
 
 	idStr key = _name;
 	bool guiVar = (key.Find(VAR_GUIPREFIX) >= 0);
@@ -2075,6 +2149,14 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src) {
 		fontNum = dc->FindFont( fontStr );
 		return true;
 	}
+
+	//#modified-fva; BEGIN
+	if (idStr::Icmp(_name, "cstNoClipBackground") == 0) {
+		cstNoClipBackground = src->ParseBool();
+		return true;
+	}
+	//#modified-fva; END
+
 	return false;
 }
 
@@ -3543,6 +3625,13 @@ void idWindow::WriteToSaveGame( idFile *savefile ) {
 	backGroundName.WriteToSaveGame( savefile );
 	hideCursor.WriteToSaveGame(savefile);
 
+	//#modified-fva; BEGIN // FIXME: savegame version?
+	cstAnchor.WriteToSaveGame(savefile);
+	cstAnchorTo.WriteToSaveGame(savefile);
+	cstAnchorFactor.WriteToSaveGame(savefile);
+	savefile->Write(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	//#modified-fva; END
+
 	// Defined Vars
 	for ( i = 0; i < definedVars.Num(); i++ ) {
 		definedVars[i]->WriteToSaveGame( savefile );
@@ -3693,6 +3782,16 @@ void idWindow::ReadFromSaveGame( idFile *savefile ) {
 		hideCursor = false;
 	}
 
+	//#modified-fva; BEGIN
+	// TODO: why does this have to be read from the savegame anyway, does it change?
+	if ( session->GetSaveGameVersion() >= 18 ) {
+		cstAnchor.ReadFromSaveGame(savefile);
+		cstAnchorTo.ReadFromSaveGame(savefile);
+		cstAnchorFactor.ReadFromSaveGame(savefile);
+		savefile->Read(&cstNoClipBackground, sizeof(cstNoClipBackground));
+	} // else keep default values, I guess
+	//#modified-fva; END
+
 	// Defined Vars
 	for ( i = 0; i < definedVars.Num(); i++ ) {
 		definedVars[i]->ReadFromSaveGame( savefile );
@@ -3825,6 +3924,11 @@ void idWindow::FixupTransitions() {
 				} else if ( transitions[i].offset == (ptrdiff_t)&this->rotate - (ptrdiff_t)this ) {
 					transitions[i].data = &dw->win->rotate;
 				}
+				//#modified-fva; BEGIN
+				else if ( transitions[i].offset == (ptrdiff_t)&this->cstAnchorFactor - (ptrdiff_t)this ) {
+					transitions[i].data = &dw->win->cstAnchorFactor;
+				}
+				//#modified-fva; END
 			} else {
 				if ( transitions[i].offset == (ptrdiff_t)&this->rect - (ptrdiff_t)this ) {
 					transitions[i].data = &dw->simp->rect;
@@ -3841,6 +3945,11 @@ void idWindow::FixupTransitions() {
 				} else if ( transitions[i].offset == (ptrdiff_t)&this->rotate - (ptrdiff_t)this ) {
 					transitions[i].data = &dw->simp->rotate;
 				}
+				//#modified-fva; BEGIN
+				else if ( transitions[i].offset == (ptrdiff_t)&this->cstAnchorFactor - (ptrdiff_t)this ) {
+					transitions[i].data = &dw->simp->cstAnchorFactor;
+				}
+				//#modified-fva; END
 			}
 		}
 		if ( transitions[i].data == NULL ) {
