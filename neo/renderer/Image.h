@@ -409,8 +409,10 @@ public:
 	idImage *			fogImage;					// increasing alpha is denser fog
 	idImage *			fogEnterImage;				// adjust fogImage alpha based on terminator plane
 	idImage *			cinematicImage;
-	idImage *			scratchImage;
-	idImage *			scratchImage2;
+
+	unsigned			nextScratchImage;
+	idImage *			scratchImages[8];	// DG: replacing scratchImage(2) with an array of scratch images
+	idImage *			scratchImage;		// but keep original "_scratch" around, it's used by gamecode
 	idImage *			accumImage;
 	idImage *			currentRenderImage;			// for SS_POST_PROCESS shaders
 	idImage *			scratchCubeMapImage;
@@ -426,6 +428,14 @@ public:
 	idImage *			AllocImage( const char *name );
 	void				SetNormalPalette();
 	void				ChangeTextureFilter();
+
+	// Get a (hopefully) unused scratch image, used for rendering subviews like mirrors etc
+	// it just cycles through the scratch images.. we used to have only two so I guess the
+	// chance of using (overwriting) one that's already in use is slim enough..
+	idImage *			GetNextScratchImage()
+	{
+		return scratchImages[ nextScratchImage++ % ( sizeof(scratchImages)/sizeof(scratchImages[0]) ) ];
+	}
 
 	idList<idImage*>	images;
 	idStrList			ddsList;

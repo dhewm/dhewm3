@@ -1468,7 +1468,7 @@ idImage *idImageManager::ImageFromFunction( const char *_name, void (*generatorF
 	idImage	*image;
 	int	hash;
 
-	if ( !name ) {
+	if ( !_name ) {
 		common->FatalError( "idImageManager::ImageFromFunction: NULL name" );
 	}
 
@@ -2001,8 +2001,17 @@ void idImageManager::Init() {
 	// cinematicImage is used for cinematic drawing
 	// scratchImage is used for screen wipes/doublevision etc..
 	cinematicImage = ImageFromFunction("_cinematic", R_RGBA8Image );
+
+	// DG: to allow mirrors mirroring mirrors or cameras filming mirrors or similar nonsense,
+	//     I added multiple scratchImages used by subviews (instead of just _scratch and _scratch2)
+	nextScratchImage = 0;
+	for( int i=0; i < sizeof(scratchImages)/sizeof(scratchImages[0]); ++i ) {
+		idStr scratchName = idStr::Format("_scratch%d", i);
+		scratchImages[i] = ImageFromFunction(scratchName, R_RGBA8Image );
+	}
+	// keeping _scratch around, it's used by gamecode
 	scratchImage = ImageFromFunction("_scratch", R_RGBA8Image );
-	scratchImage2 = ImageFromFunction("_scratch2", R_RGBA8Image );
+
 	accumImage = ImageFromFunction("_accum", R_RGBA8Image );
 	scratchCubeMapImage = ImageFromFunction("_scratchCubeMap", makeNormalizeVectorCubeMap );
 	currentRenderImage = ImageFromFunction("_currentRender", R_RGBA8Image );
