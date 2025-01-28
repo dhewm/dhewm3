@@ -29,110 +29,92 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DIALOGPDAEDITOR_H__
 #define __DIALOGPDAEDITOR_H__
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
 /////////////////////////////////////////////////////////////////////////////
 // CCDialogPDAEditor dialog
 
-class CDialogPDAEditor : public CDialog {
+class CDialogPDAEditor : public wxDialog {
 public:
-							CDialogPDAEditor(CWnd* pParent = NULL);   // standard constructor
+							CDialogPDAEditor(wxWindow* pParent = NULL);   // standard constructor
 
-	//{{AFX_VIRTUAL(CDialogPDAEditor)
-	virtual BOOL			OnInitDialog();
-	virtual void			DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-protected:
-	//{{AFX_MSG(CDialogPDAEditor)
-	afx_msg void			OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
-	afx_msg void			OnMove( int x, int y );
-	afx_msg void			OnDestroy();
-
-	afx_msg void			OnSelChangePDA();
-
-	afx_msg void			OnBtnClickedSave();
-	afx_msg void			OnBtnClickedRandom();
-
-	afx_msg void			OnBtnClickedPDAAdd();
-	afx_msg void			OnBtnClickedPDADel();
-
-	afx_msg void			OnBtnClickedEmailAdd();
-	afx_msg void			OnBtnClickedEmailEdit();
-	afx_msg void			OnBtnClickedEmailDel();
-
-	afx_msg void			OnBtnClickedAudioAdd();
-	afx_msg void			OnBtnClickedAudioEdit();
-	afx_msg void			OnBtnClickedAudioDel();
-
-	afx_msg void			OnBtnClickedVideoAdd();
-	afx_msg void			OnBtnClickedVideoEdit();
-	afx_msg void			OnBtnClickedVideoDel();
-	//}}AFX_MSG
-
-	DECLARE_MESSAGE_MAP()
+	void			InitControlsFromDialog();
 
 private:
-	//{{AFX_DATA(CDialogPDAEditor)
-	enum					{ IDD = IDD_DIALOG_PDA_EDITOR };
-	CListBox				pdaList;
-	CListBox				emailList;
-	CListBox				audioList;
-	CListBox				videoList;
 
-	CString					fullName;
-	CString					shortName;
-	CString					post;
-	CString					title;
-	CString					security;
-	CString					idnum;
+	void			OnInitDialogFunction( wxInitDialogEvent& event );
 
-	CButton					saveButton;
-	//}}AFX_DATA
+	void			OnActivate( wxActivateEvent &event );
+	void			OnMove( wxMouseEvent &event );
+	void			OnCloseDialogFunction( wxCommandEvent &event );
+
+	void			OnSelChangePDA( wxCommandEvent &event );
+
+	void			OnBtnClickedSave(wxCommandEvent &event );
+	void			OnBtnClickedRandom(wxCommandEvent &event );
+
+	void			OnBtnClickedPDAAdd( wxCommandEvent &event );
+	void			OnBtnClickedPDADel( wxCommandEvent &event );
+
+	void			OnBtnClickedEmailAdd( wxCommandEvent &event );
+	void			OnBtnClickedEmailEdit( wxCommandEvent &event );
+	void			OnBtnClickedEmailDel( wxCommandEvent &event );
+
+	void			OnBtnClickedAudioAdd( wxCommandEvent &event );
+	void			OnBtnClickedAudioEdit( wxCommandEvent &event );
+	void			OnBtnClickedAudioDel( wxCommandEvent &event );
+
+	void			OnBtnClickedVideoAdd( wxCommandEvent &event );
+	void			OnBtnClickedVideoEdit( wxCommandEvent &event );
+	void			OnBtnClickedVideoDel( wxCommandEvent &event );
+
+	wxDECLARE_EVENT_TABLE();
 
 private:
-	virtual BOOL			PreTranslateMessage(MSG* pMsg);
+	wxListBox *				pdaList;
+	wxListBox *				emailList;
+	wxListBox *				audioList;
+	wxListBox *				videoList;
+
+	wxTextCtrl *			editFullname;
+	wxTextCtrl *			editShortname;
+	wxTextCtrl *			editPost;
+	wxTextCtrl *			editTitle;
+	wxTextCtrl *			editSecurity;
+	wxTextCtrl *			editIdnum;
+
+	wxButton *				saveButton;
+
+private:
 
 	void PopulatePDAList();
 };
 
-class CDialogPDAEditEmail : public CDialog {
+class CDialogPDAEditEmail : public wxDialog {
 public:
-							CDialogPDAEditEmail(CWnd* pParent = NULL);   // standard constructor
+							CDialogPDAEditEmail( wxWindow* pParent = NULL );   // standard constructor
 
-	//{{AFX_VIRTUAL(CDialogPDAEditEmail)
-	virtual BOOL			OnInitDialog();
-	virtual void			DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-	void SetName( CString &name );
+	void SetName( wxString &name );
 	void SetEmail( const idDeclEmail *email );
 
-	CString GetDeclText();
-
-protected:
-	//{{AFX_MSG(CDialogPDAEditEmail)
-	//}}AFX_MSG
-
-	DECLARE_MESSAGE_MAP()
+	wxString GetDeclText();
 
 private:
-	//{{AFX_DATA(CDialogPDAEditEmail)
-	enum					{ IDD = IDD_DIALOG_PDA_EDIT_EMAIL };
+	wxDECLARE_EVENT_TABLE();
 
-	CString					to;
-	CString					from;
-	CString					date;
-	CString					subject;
-	CString					body;
+	void					OnInitDialogFunction( wxInitDialogEvent& event );
 
-	CString					name;
-	//}}AFX_DATA
+	wxTextCtrl *			editTo;
+	wxTextCtrl *			editFrom;
+	wxTextCtrl *			editDate;
+	wxTextCtrl *			editSubject;
+	wxTextCtrl *			editBody;
+
+	wxString				to;
+	wxString				from;
+	wxString				date;
+	wxString				subject;
+	wxString				body;
+
+	wxString				name;
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif /* !__DIALOGPDAEDITOR_H__ */

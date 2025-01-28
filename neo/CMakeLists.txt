@@ -178,6 +178,13 @@ if(DHEWM3LIBS)
 	set(ENV{OPENALDIR} ${DHEWM3LIBS})
 	set(ENV{SDLDIR} ${DHEWM3LIBS})
 	set(ENV{SDL2DIR} ${DHEWM3LIBS})
+
+	if(TOOLS)
+		SET(wxWidgets_ROOT_DIR ${DHEWM3LIBS}/wxWidgets)
+		SET(wxWidgets_LIB_DIR ${DHEWM3LIBS}/wxWidgets/lib/vc14x_dll)
+		SET(wxWidgets_LIBRARIES ${DHEWM3LIBS}/wxWidgets/lib)
+		SET(wxWidgets_INCLUDE_DIRS ${DHEWM3LIBS}/wxWidgets/include)
+	endif()
 endif()
 
 if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION LESS 8 ))
@@ -1050,8 +1057,8 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 	file(GLOB src_particleeditor "tools/particle/*.cpp")
 	add_globbed_headers(src_particleeditor "tools/particle")
 	# PDA editor
-	file(GLOB src_pdaeditor "tools/pda/*.cpp")
-	add_globbed_headers(src_pdaeditor "tools/pda")
+	#file(GLOB src_pdaeditor "tools/pda/*.cpp")
+	#add_globbed_headers(src_pdaeditor "tools/pda")
 	# Radiant ( Map editor )
 	file(GLOB src_map_editor "tools/radiant/*.cpp")
 	add_globbed_headers(src_map_editor "tools/radiant")
@@ -1090,7 +1097,6 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 		${src_gui_editor}
 		${src_materialeditor}
 		${src_particleeditor}
-		${src_pdaeditor}
 		${src_map_editor}
 		${src_script_editor}
 		${src_sound_editor}
@@ -1107,6 +1113,17 @@ else()
 	)
 endif()
 
+file(GLOB src_pdaeditor "tools/pda/*.cpp")
+add_globbed_headers(src_pdaeditor "tools/pda")
+
+# Locate wxWidgets
+find_package(wxWidgets REQUIRED
+				COMPONENTS base core stc adv gl xrc aui)
+#include(${wxWidgets_USE_FILE})
+add_library(tools STATIC ${src_pdaeditor})
+target_include_directories(tools PRIVATE ${wxWidgets_INCLUDE_DIRS})
+set_target_properties(tools PROPERTIES COMPILE_DEFINITIONS "${TOOLS_DEFINES}")
+target_link_libraries(tools PRIVATE wxWidgets::wxWidgets)
 
 if(AROS)
 	set(DHEWM3BINARY "ADoom3")
@@ -1280,6 +1297,7 @@ endif()
 		${CURL_LIBRARY}
 		${SDLx_LIBRARY}
 		${sys_libs}
+		tools
 	)
 
 	if(NOT APPLE AND NOT WIN32)
@@ -1314,6 +1332,7 @@ endif()
 		${CURL_LIBRARY}
 		${SDLx_LIBRARY}
 		${sys_libs}
+		tools
 	)
 
 	if(NOT APPLE AND NOT WIN32)
@@ -1341,9 +1360,9 @@ if(BASE AND NOT HARDLINK_GAME)
 	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	if (AROS)
-		target_link_libraries(base idlib dll)
+		target_link_libraries(base idlib tools dll)
 	else()
-		target_link_libraries(base idlib)
+		target_link_libraries(base idlib tools)
 	endif()
 
 	if(NOT APPLE AND NOT WIN32)
@@ -1369,9 +1388,9 @@ if(D3XP AND NOT HARDLINK_GAME)
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	if (AROS)
-		target_link_libraries(d3xp idlib dll)
+		target_link_libraries(d3xp idlib tools dll)
 	else()
-		target_link_libraries(d3xp idlib)
+		target_link_libraries(d3xp idlib tools)
 	endif()
 
 	if(NOT APPLE AND NOT WIN32)

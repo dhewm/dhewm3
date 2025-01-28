@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
+  <object class="wxDialog" name="PDAEditor">
+    <style>wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxSYSTEM_MENU</style>
+    <font>
+      <style>normal</style>
+      <weight>normal</weight>
+      <family>teletype</family>
+      <underlined>0</underlined>
+    </font>
+    <title>PDA Editor</title>
+    <centered>1</centered>
+    <object class="wxBoxSizer" name="bSizer2">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxBoxSizer" name="bSizer19">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxBoxSizer" name="bSizer3">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxStaticText" name="m_staticText9">
+                  <label>PDAs:</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALL|wxEXPAND</flag>
+                <border>5</border>
+                <option>1</option>
+                <object class="wxListBox" name="listPDAs">
+                  <size>400,-1</size>
+                  <style>wxLB_ALWAYS_SB|wxLB_SINGLE</style>
+                  <content/>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxBoxSizer" name="bSizer4">
+                  <orient>wxHORIZONTAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>5</border>
+                    <option>0</option>
+                    <object class="wxButton" name="pdaAdd">
+                      <label>Add</label>
+                      <default>0</default>
+                      <auth_needed>0</auth_needed>
+                      <markup>0</markup>
+                      <bitmap/>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>5</border>
+                    <option>0</option>
+                    <object class="wxButton" name="pdaDel">
+                      <label>Del</label>
+                      <default>0</default>
+                      <auth_needed>0</auth_needed>
+                      <markup>0</markup>
+                      <bitmap/>
+                    </object>
+                  </object>
+                </object>
+              </object>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxBoxSizer" name="bSizer5">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                <flag>wxEXPAND</flag>
+                <border>5</border>
+                <option>1</option>
+                <object class="wxBoxSizer" name="bSizer6">
+                  <orient>wxVERTICAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxEXPAND</flag>
+                    <border>5</border>
+                    <option>1</option>
+                    <object class="wxFlexGridSizer" name="fgSizer1">
+                      <vgap>0</vgap>
+                      <hgap>0</hgap>
+                      <growablerows></growablerows>
+                      <growablecols></growablecols>
+                      <rows>6</rows>
+                      <cols>2</cols>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxStaticText" name="m_staticText10">
+                          <label>Full Name:</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxTextCtrl" name="editFullname">
+                          <size>300,-1</size>
+                          <value></value>
+                          <maxlength>0</maxlength>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxStaticText" name="m_staticText11">
+                          <label>Short Name:</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxTextCtrl" name="editShortname">
+                          <size>300,-1</size>
+                          <value></value>
+                          <maxlength>0</maxlength>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxStaticText" name="m_staticText12">
+                          <label>Title:</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxTextCtrl" name="editTitle">
+                          <size>300,-1</size>
+                          <value></value>
+                          <maxlength>0</maxlength>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxStaticText" name="m_staticText13">
+                          <label>Post (Location):</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxTextCtrl" name="editPost">
+                          <size>300,-1</size>
+                          <value></value>
+                          <maxlength>0</maxlength>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxStaticText" name="m_staticText14">
+                          <label>Security Level:</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxTextCtrl" name="editSecurity">
+                          <size>300,-1</size>
+                          <value></value>
+                          <maxlength>0</maxlength>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxStaticText" name="m_staticText15">
+                          <label>ID number:</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxEXPAND</flag>
+                        <border>5</border>
+                        <option>1</option>
+                        <object class="wxBoxSizer" name="bSizer7">
+                          <orient>wxHORIZONTAL</orient>
+                          <object class="sizeritem">
+                            <flag>wxALL|wxEXPAND</flag>
+                            <border>5</border>
+                            <option>1</option>
+                            <object class="wxTextCtrl" name="editIdnum">
+                              <size>250,-1</size>
+                              <value></value>
+                              <maxlength>0</maxlength>
+                            </object>
+                          </object>
+                          <object class="sizeritem">
+                            <flag>wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+                            <border>5</border>
+                            <option>0</option>
+                            <object class="wxButton" name="randomid">
+                              <size>50,-1</size>
+                              <label>Rand</label>
+                              <default>0</default>
+                              <auth_needed>0</auth_needed>
+                              <markup>0</markup>
+                              <bitmap/>
+                            </object>
+                          </object>
+                        </object>
+                      </object>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxEXPAND</flag>
+                    <border>5</border>
+                    <option>1</option>
+                    <object class="wxStaticBoxSizer" name="sbSizer1">
+                      <orient>wxVERTICAL</orient>
+                      <label>Audio Logs</label>
+                      <object class="sizeritem">
+                        <flag>wxALL|wxEXPAND</flag>
+                        <border>5</border>
+                        <option>1</option>
+                        <object class="wxListBox" name="listAudio">
+                          <size>400,-1</size>
+                          <style>wxLB_ALWAYS_SB|wxLB_SINGLE</style>
+                          <content/>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxBoxSizer" name="bSizer11">
+                          <orient>wxHORIZONTAL</orient>
+                          <object class="sizeritem">
+                            <flag>wxALL</flag>
+                            <border>5</border>
+                            <option>0</option>
+                            <object class="wxButton" name="audioAdd">
+                              <label>Add...</label>
+                              <default>0</default>
+                              <auth_needed>0</auth_needed>
+                              <markup>0</markup>
+                              <bitmap/>
+                            </object>
+                          </object>
+                          <object class="sizeritem">
+                            <flag>wxALL</flag>
+                            <border>5</border>
+                            <option>0</option>
+                            <object class="wxButton" name="audioEdit">
+                              <label>Edit...</label>
+                              <default>0</default>
+                              <auth_needed>0</auth_needed>
+                              <markup>0</markup>
+                              <bitmap/>
+                            </object>
+                          </object>
+                          <object class="sizeritem">
+                            <flag>wxALL</flag>
+                            <border>5</border>
+                            <option>0</option>
+                            <object class="wxButton" name="audioDelete">
+                              <label>Delete...</label>
+                              <default>0</default>
+                              <auth_needed>0</auth_needed>
+                              <markup>0</markup>
+                              <bitmap/>
+                            </object>
+                          </object>
+                        </object>
+                      </object>
+                    </object>
+                  </object>
+                </object>
+              </object>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxBoxSizer" name="bSizer13">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                <flag>wxEXPAND</flag>
+                <border>5</border>
+                <option>1</option>
+                <object class="wxStaticBoxSizer" name="sbSizer2">
+                  <orient>wxVERTICAL</orient>
+                  <label>Email</label>
+                  <object class="sizeritem">
+                    <flag>wxALL|wxEXPAND</flag>
+                    <border>5</border>
+                    <option>1</option>
+                    <object class="wxListBox" name="listEmail">
+                      <size>400,-1</size>
+                      <style>wxLB_ALWAYS_SB|wxLB_SINGLE</style>
+                      <content/>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALIGN_CENTER</flag>
+                    <border>5</border>
+                    <option>0</option>
+                    <object class="wxBoxSizer" name="bSizer14">
+                      <orient>wxHORIZONTAL</orient>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxButton" name="emailAdd">
+                          <label>Add...</label>
+                          <default>0</default>
+                          <auth_needed>0</auth_needed>
+                          <markup>0</markup>
+                          <bitmap/>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxButton" name="emailEdit">
+                          <label>Edit...</label>
+                          <default>0</default>
+                          <auth_needed>0</auth_needed>
+                          <markup>0</markup>
+                          <bitmap/>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxButton" name="emailDelete">
+                          <label>Delete...</label>
+                          <default>0</default>
+                          <auth_needed>0</auth_needed>
+                          <markup>0</markup>
+                          <bitmap/>
+                        </object>
+                      </object>
+                    </object>
+                  </object>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxEXPAND</flag>
+                <border>5</border>
+                <option>1</option>
+                <object class="wxStaticBoxSizer" name="sbSizer3">
+                  <orient>wxVERTICAL</orient>
+                  <label>Videos</label>
+                  <object class="sizeritem">
+                    <flag>wxALL|wxEXPAND</flag>
+                    <border>5</border>
+                    <option>1</option>
+                    <object class="wxListBox" name="listVideo">
+                      <size>400,-1</size>
+                      <style>wxLB_ALWAYS_SB|wxLB_SINGLE</style>
+                      <content/>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALIGN_CENTER</flag>
+                    <border>5</border>
+                    <option>0</option>
+                    <object class="wxBoxSizer" name="bSizer15">
+                      <orient>wxHORIZONTAL</orient>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxButton" name="videoAdd">
+                          <label>Add...</label>
+                          <default>0</default>
+                          <auth_needed>0</auth_needed>
+                          <markup>0</markup>
+                          <bitmap/>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxButton" name="videoEdit">
+                          <label>Edit...</label>
+                          <default>0</default>
+                          <auth_needed>0</auth_needed>
+                          <markup>0</markup>
+                          <bitmap/>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALL</flag>
+                        <border>5</border>
+                        <option>0</option>
+                        <object class="wxButton" name="videoDelete">
+                          <label>Delete...</label>
+                          <default>0</default>
+                          <auth_needed>0</auth_needed>
+                          <markup>0</markup>
+                          <bitmap/>
+                        </object>
+                      </object>
+                    </object>
+                  </object>
+                </object>
+              </object>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_RIGHT</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxBoxSizer" name="bSizer20">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxButton" name="save">
+              <label>Save</label>
+              <default>0</default>
+              <auth_needed>0</auth_needed>
+              <markup>0</markup>
+              <bitmap/>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxButton" name="close">
+              <label>Close</label>
+              <default>0</default>
+              <auth_needed>0</auth_needed>
+              <markup>0</markup>
+              <bitmap/>
+            </object>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxDialog" name="PDAAdd">
+    <style>wxCAPTION|wxDEFAULT_DIALOG_STYLE</style>
+    <title></title>
+    <centered>1</centered>
+    <object class="wxBoxSizer" name="bSizer17">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxFlexGridSizer" name="fgSizer3">
+          <vgap>0</vgap>
+          <hgap>0</hgap>
+          <growablerows></growablerows>
+          <growablecols></growablecols>
+          <rows>0</rows>
+          <cols>2</cols>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="staticText">
+              <label>New PDA name:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxTextCtrl" name="editName">
+              <tooltip>(mapname__lastname)</tooltip>
+              <value></value>
+              <maxlength>0</maxlength>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_RIGHT|wxALL</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxStaticText" name="m_staticText22">
+          <label>(mapname__lastname)</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxStdDialogButtonSizer" name="m_sdbSizer2">
+          <object class="button">
+            <object class="wxButton" name="wxID_OK"/>
+          </object>
+          <object class="button">
+            <object class="wxButton" name="wxID_CANCEL"/>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxDialog" name="PDAEditEmail">
+    <style>wxDEFAULT_DIALOG_STYLE</style>
+    <title>EMail Editor</title>
+    <centered>1</centered>
+    <object class="wxBoxSizer" name="bSizer18">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxFlexGridSizer" name="fgSizer4">
+          <vgap>0</vgap>
+          <hgap>0</hgap>
+          <growablerows></growablerows>
+          <growablecols></growablecols>
+          <rows>0</rows>
+          <cols>2</cols>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="m_staticText18">
+              <label>To:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxTextCtrl" name="editTo">
+              <value></value>
+              <maxlength>0</maxlength>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="staticTextFrom">
+              <label>From:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxTextCtrl" name="editFrom">
+              <value></value>
+              <maxlength>0</maxlength>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="staticTextDate">
+              <label>Date:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxTextCtrl" name="editDate">
+              <value></value>
+              <maxlength>0</maxlength>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="staticTextSubject">
+              <label>Subject:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxTextCtrl" name="editSubject">
+              <value></value>
+              <maxlength>0</maxlength>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxTextCtrl" name="editBody">
+          <style>wxTE_MULTILINE</style>
+          <value></value>
+          <maxlength>0</maxlength>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxStdDialogButtonSizer" name="m_sdbSizer3">
+          <object class="button">
+            <object class="wxButton" name="wxID_OK"/>
+          </object>
+          <object class="button">
+            <object class="wxButton" name="wxID_CANCEL"/>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+</resource>
