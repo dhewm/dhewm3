@@ -36,6 +36,86 @@ HOW TO UPDATE?
 - Please report any issue!
 
 -----------------------------------------------------------------------
+ VERSION 1.91.8 WIP (In Progress)
+-----------------------------------------------------------------------
+
+Breaking changes:
+
+- ColorEdit, ColorPicker: redesigned how alpha is displayed in the preview square. (#8335, #1578, #346)
+   - Removed ImGuiColorEditFlags_AlphaPreview (made value 0): it is now the default behavior.
+   - Prior to 1.91.8: alpha was made opaque in the preview by default _unless_ using ImGuiColorEditFlags_AlphaPreview.
+   - We now display the preview as transparent by default. You can use ImGuiColorEditFlags_AlphaOpaque to use old behavior.
+   - The new flags may be combined better and allow finer controls:
+     - ImGuiColorEditFlags_AlphaOpaque: disable alpha in the preview, but alpha value still editable.
+     - ImGuiColorEditFlags_AlphaNoBg: disable rendering a checkerboard background behind transparent color.
+     - ImGuiColorEditFlags_AlphaPreviewHalf: display half opaque / half transparent preview.
+- Backends: SDLGPU3: Renamed ImGui_ImplSDLGPU3_InitInfo::GpuDevice to Device
+  for consistency. (#8163, #7998, #7988)
+
+Other changes:
+
+- imgui_freetype: fixed issue where glyph advances would incorrectly be
+  snapped to pixels. Effectively it would only be noticeable when hinting
+  is disabled with ImGuiFreeTypeBuilderFlags_NoHinting, as hinting itself
+  snaps glyph advances.
+- Inputs: added IsMouseReleasedWithDelay() helper. (#8337, #8320)
+  Use if you absolutely need to distinguish single-click from double-clicks
+  by introducing a delay. This is a very rarely used UI idiom, but some apps
+  use this: e.g. MS Explorer single-click on an icon triggers a rename.
+  Generally use with 'delay >= io.MouseDoubleClickTime' + combine with a
+  'io.MouseClickedLastCount == 1' check.
+- Windows: legacy SetWindowFontScale() is properly inherited by nested child
+  windows. Note that an upcoming major release should make this obsolete,
+  but in the meanwhile it works better now. (#2701, #8138, #1018)
+- Windows, Style: Fixed small rendering issues with menu bar, resize grip and
+  scrollbar when using thick border sizes. (#8267, #7887)
+- Windows: Fixed IsItemXXXX() functions not working on append-version of EndChild(). (#8350)
+  Also made some of the fields accessible after BeginChild() to match Begin() logic.
+- Tables, Menus: Fixed using BeginTable() in menu layer (any menu bar). (#8355)
+  It previously overrode the current layer back to main layer, which caused an issue
+  with MainMenuBar attempted to release focus when leaving the menu layer.
+- ColorEdit, ColorPicker: Fixed alpha preview broken in 1.91.7. (#8336, #8241). [@PathogenDavid]
+- Tabs, Style: reworked selected overline rendering to better accommodate
+  for rounded tabs. Reduced default thickness (style.TabBarOverlineSize),
+  increased default rounding (style.TabRounding). (#8334) [@Kian738, @ocornut]
+  styles as the current look is not right (but ImGuiCol_TabSelectedOverline stays the same).
+- Debug Tools: Tweaked font preview.
+- ImDrawList: texture baked storage for thick line reduced from ~64x64 to ~32x32. (#3245)
+- Fonts: IndexLookup[] table hold 16-bit values even in ImWchar32 mode,
+  as it accounts for number of glyphs in same font. This is favorable to
+  CalcTextSize() calls touching less memory.
+- Fonts: OversampleH/OversampleV defaults to 0 for automatic selection.
+   - OversampleH == 0 --> use 1 or 2 depending on font size and use of PixelSnapH.
+   - OversampleV == 0 --> always use 1.
+  This also
+- ImFontAtlas: made calling ClearFonts() call ClearInputData(), as calling
+  one without the other is never correct. (#8174, #6556, #6336, #4723)
+- Examples: DirectX12: Reduced number of frame in flight from 3 to 2 in
+  provided example, to reduce latency.
+- Backends+Examples: Vulkan: better handle VK_SUBOPTIMAL_KHR being returned by
+  vkAcquireNextImageKHR() or vkQueuePresentKHR(). (#7825, #7831) [@NostraMagister]
+- Backends: SDL2: removed assert preventing using ImGui_ImplSDL2_SetGamepadMode()
+  with ImGui_ImplSDL2_GamepadMode_Manual and an empty array. (#8329)
+- Backends: SDL3: removed assert preventing using ImGui_ImplSDL3_SetGamepadMode()
+  with ImGui_ImplSDL3_GamepadMode_Manual and an empty array. (#8329)
+- Backends: SDLGPU3: Exposed ImGui_ImplSDLGPU3_CreateDeviceObjects()/_DestroyDeviceObjects().
+  Removed return value from ImGui_ImplSDLGPU3_CreateFontsTexture(). (#8163, #7998, #7988)
+- Backends: SDL_Renderer2/3: Use endian-dependent RGBA32 texture format, to match
+  SDL_Color. (#8327) [@dkosmari]
+- Backends: DirectX12: Texture upload use the command queue provided in
+  ImGui_ImplDX12_InitInfo instead of creating its own.
+- Backends: OSX: Removed notification observer when shutting down. (#8331) [@jrachele]
+
+Docking+Viewports Branch:
+
+- Docking: Fixed an issue in 1.91.7 where using legacy ImGuiWindowFlags_NavFlattened
+  flag (instead of ImGuiChildFlags_NavFlattened) in docking branch would conflict
+  with internal docking flags. (#8357) [@DanielGibson]
+- Backends: SDL3: new viewport windows are created with the SDL_WINDOW_HIDDEN flag
+  before calling SDL_ShowWindow(). (#8328) [@PathogenDavid]
+
+
+-----------------------------------------------------------------------
  VERSION 1.91.7 (Released 2025-01-14)
 -----------------------------------------------------------------------
 
@@ -79,6 +159,8 @@ Other changes:
   the label (not only the highlight/frame) also spans all columns. This is
   useful for table rows where you know nothing else is submitted. (#8318, #3565)
   Obviously best used with ImGuiTableFlags_NoBordersInBodyUntilResize.
+- Selectable: Fixed horizontal label alignment when combined with using
+  ImGuiSelectableFlags_SpanAllColumns. (#8338)
 - Drags: Added ImGuiSliderFlags_NoSpeedTweaks flag to disable keyboard
   modifiers altering the tweak speed. Useful if you want to alter tweak speed
   yourself based on your own logic. (#8223)
@@ -93,7 +175,7 @@ Other changes:
 - Demo: Added label edition to Property Editor demo + fix an ID issue. (#8266) [@moritz-h]
 - Misc: Fixed misc/cpp/imgui_stdlib.h/.cpp not supporting IMGUI_DISABLE. (#8294) [@juur]
 - Misc: Fixed MinGW builds not using UTF-8 friendly _wfopen(). (#8300)
-- Backends: SDL_GPU for SDL3: Added backend for SDL_GPU! (#8163, #7998, #7988) [@DeltaW0x].
+- Backends: SDLGPU3 for SDL3: Added backend for SDL_GPU! (#8163, #7998, #7988) [@DeltaW0x].
 - Backends: SDL3: Added ImGui_ImplSDL3_InitForSDLGPU() for consistency, even
   though it is currently not doing anything particular. (#8163, #7998, #7988)
 - Backends: Allegro5: Avoid calling al_set_mouse_cursor() repeatedly since it appears
