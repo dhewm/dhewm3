@@ -11,7 +11,7 @@
 
 // Implemented features:
 //  [X] Renderer: User texture binding. Use 'WGPUTextureView' as ImTextureID. Read the FAQ about ImTextureID!
-//  [X] Renderer: Large meshes support (64k+ vertices) with 16-bit indices.
+//  [X] Renderer: Large meshes support (64k+ vertices) even with 16-bit indices (ImGuiBackendFlags_RendererHasVtxOffset).
 //  [X] Renderer: Expose selected render state for draw callbacks to use. Access in '(ImGui_ImplXXXX_RenderState*)GetPlatformIO().Renderer_RenderState'.
 
 // You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
@@ -52,8 +52,8 @@ IMGUI_IMPL_API void ImGui_ImplWGPU_NewFrame();
 IMGUI_IMPL_API void ImGui_ImplWGPU_RenderDrawData(ImDrawData* draw_data, WGPURenderPassEncoder pass_encoder);
 
 // Use if you want to reset your rendering device without losing Dear ImGui state.
-IMGUI_IMPL_API void ImGui_ImplWGPU_InvalidateDeviceObjects();
 IMGUI_IMPL_API bool ImGui_ImplWGPU_CreateDeviceObjects();
+IMGUI_IMPL_API void ImGui_ImplWGPU_InvalidateDeviceObjects();
 
 // [BETA] Selected render state data shared with callbacks.
 // This is temporarily stored in GetPlatformIO().Renderer_RenderState during the ImGui_ImplWGPU_RenderDrawData() call.

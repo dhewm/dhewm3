@@ -29,7 +29,6 @@
 
 //---- Don't define obsolete functions/enums/behaviors. Consider enabling from time to time after updating to clean your code of obsolete function/names.
 //#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-//#define IMGUI_DISABLE_OBSOLETE_KEYIO                      // 1.87+ disable legacy io.KeyMap[]+io.KeysDown[] in favor io.AddKeyEvent(). This is automatically done by IMGUI_DISABLE_OBSOLETE_FUNCTIONS.
 
 //---- Disable all of Dear ImGui or don't implement standard windows/tools.
 // It is very strongly recommended to NOT disable the demo windows and debug tool during development. They are extremely useful in day to day work. Please read comments in imgui_demo.cpp.
@@ -49,6 +48,7 @@
 //#define IMGUI_DISABLE_FILE_FUNCTIONS                      // Don't implement ImFileOpen/ImFileClose/ImFileRead/ImFileWrite and ImFileHandle at all (replace them with dummies)
 //#define IMGUI_DISABLE_DEFAULT_FILE_FUNCTIONS              // Don't implement ImFileOpen/ImFileClose/ImFileRead/ImFileWrite and ImFileHandle so you can implement them yourself if you don't want to link with fopen/fclose/fread/fwrite. This will also disable the LogToTTY() function.
 //#define IMGUI_DISABLE_DEFAULT_ALLOCATORS                  // Don't implement default allocators calling malloc()/free() to avoid linking with them. You will need to call ImGui::SetAllocatorFunctions().
+//#define IMGUI_DISABLE_DEFAULT_FONT                        // Disable default embedded font (ProggyClean.ttf), remove ~9.5 KB from output binary. AddFontDefault() will assert.
 //#define IMGUI_DISABLE_SSE                                 // Disable use of SSE intrinsics even if available
 
 //---- Enable Test Engine / Automation features.
@@ -59,8 +59,11 @@
 //#define IMGUI_INCLUDE_IMGUI_USER_H
 //#define IMGUI_USER_H_FILENAME         "my_folder/my_imgui_user.h"
 
-//---- Pack colors to BGRA8 instead of RGBA8 (to avoid converting from one to another)
+//---- Pack vertex colors as BGRA8 instead of RGBA8 (to avoid converting from one to another). Need dedicated backend support.
 //#define IMGUI_USE_BGRA_PACKED_COLOR
+
+//---- Use legacy CRC32-adler tables (used before 1.91.6), in order to preserve old .ini data that you cannot afford to invalidate.
+//#define IMGUI_USE_LEGACY_CRC32_ADLER
 
 //---- Use 32-bit for ImWchar (default is 16-bit) to support Unicode planes 1-16. (e.g. point beyond 0xFFFF like emoticons, dingbats, symbols, shapes, ancient languages, etc...)
 //#define IMGUI_USE_WCHAR32
@@ -137,13 +140,3 @@ namespace ImGui
     void MyFunction(const char* name, MyMatrix44* mtx);
 }
 */
-
-// DG: on Big Endian systems the order of color channels in an uint32 color is inverted.
-//     this seems to be the official way to support Big Endian platforms in ImGUI:
-#if D3_IS_BIG_ENDIAN
-  #define IM_COL32_R_SHIFT    24
-  #define IM_COL32_G_SHIFT    16
-  #define IM_COL32_B_SHIFT    8
-  #define IM_COL32_A_SHIFT    0
-  #define IM_COL32_A_MASK     0x000000FF
-#endif
