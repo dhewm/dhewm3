@@ -40,6 +40,8 @@
 #include "renderer/tr_local.h" // glconfig
 #include "ui/DeviceContext.h"
 
+#include "tools/edit_public.h"
+
 extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
 extern void Com_OpenCloseDhewm3SettingsMenu( bool open ); // ditto
 
@@ -377,6 +379,8 @@ void NewFrame()
 		if(!show_demo_window)
 			CloseWindow(D3_ImGuiWin_Demo);
 	}
+
+	ImGuiTools::DrawToolWindows();
 }
 
 bool keybindModeEnabled = false;

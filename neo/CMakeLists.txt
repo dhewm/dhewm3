@@ -830,6 +830,12 @@ set(src_imgui ${src_imgui}
 	sys/sys_imgui.h
 	sys/sys_imgui.cpp
 	sys/imgui_savestyle.cpp
+	
+	tools/imgui/ImGuiTools.cpp
+	tools/imgui/util/ImGui_IdWidgets.h
+	tools/imgui/util/ImGui_IdWidgets.cpp
+	tools/imgui/lighteditor/LightEditor.h
+	tools/imgui/lighteditor/LightEditor.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)

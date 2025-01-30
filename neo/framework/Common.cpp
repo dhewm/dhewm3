@@ -984,6 +984,18 @@ idCommonLocal::InitTool
 =================
 */
 void idCommonLocal::InitTool( const toolFlag_t tool, const idDict *dict ) {
+#ifndef IMGUI_DISABLE
+	if ( tool & EDITOR_SOUND ) {
+		//SoundEditorInit( dict );
+	} else if ( tool & EDITOR_LIGHT ) {
+		ImGuiTools::LightEditorInit( dict );
+	} else if ( tool & EDITOR_PARTICLE ) {
+		//ParticleEditorInit( dict );
+	} else if ( tool & EDITOR_AF ) {
+		ImGuiTools::AfEditorInit(); // TODO: dict ?
+	}
+#endif
+
 #ifdef ID_ALLOW_TOOLS
 	if ( tool & EDITOR_SOUND ) {
 		SoundEditorInit( dict );
