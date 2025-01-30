@@ -101,7 +101,7 @@ private:
 	idList<idStr>		textureNames;
 	int					currentTextureIndex;
 	idImage*			currentTexture;
-	const idMaterial*	currentTextureMaterial;
+	//const idMaterial*	currentTextureMaterial; // DG: that was rbd3bfg-specific
 
 #if 0 // DG: dhewm3 doesn't have Quake lightstyles
 	// RB: light style support

@@ -380,7 +380,9 @@ void NewFrame()
 			CloseWindow(D3_ImGuiWin_Demo);
 	}
 
-	ImGuiTools::DrawToolWindows();
+	if (openImguiWindows & D3_ImGuiWin_AnyEditor) {
+		ImGuiTools::DrawToolWindows();
+	}
 }
 
 bool keybindModeEnabled = false;

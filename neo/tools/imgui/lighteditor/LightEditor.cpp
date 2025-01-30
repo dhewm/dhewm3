@@ -317,22 +317,9 @@ void LightEditor::Init( const idDict* dict, idEntity* light )
 
 		gameEdit->EntityGetOrigin( light, entityPos );
 
-		/*
 		const char* name = dict->GetString( "name", NULL );
-		if( name )
-		{
-			entityName = name;
-			title.Format( "Light Editor: %s at (%s)", name, entityPos.ToString() );
-		}
-		else
-		{
-			//idassert( 0 && "LightEditor::Init(): Given entity has no 'name' property?!" );
-			entityName = ""; // TODO: generate name or handle gracefully or something?
-			title.Format( "Light Editor: <unnamed> light at (%s)", entityPos.ToString() );
-		}
-		*/
-
-		title = "Light Editor";
+		entityName = name ? name :  gameEdit->GetUniqueEntityName( "light" );
+		title = idStr::Format( "Light Editor: %s at (%s)###LightEditor", entityName.c_str(), entityPos.ToString() );
 
 		currentTextureIndex = 0;
 		currentTexture = NULL;
@@ -375,7 +362,7 @@ void LightEditor::Reset()
 	lightEntity = NULL;
 	currentTextureIndex = 0;
 	currentTexture = NULL;
-	currentTextureMaterial = NULL;
+	//currentTextureMaterial = NULL;
 	//currentStyleIndex = 0;
 }
 
@@ -474,7 +461,8 @@ void LightEditor::LoadCurrentTexture()
 		if( mat != NULL )
 		{
 			currentTexture = GetLightEditorImage( mat );
-			if( currentTexture )
+#if 0 // DG: this is some hack in rbd3bfg, see their commit 329d822d3228f108
+			if( currentTexture ) // FIXME: we don't actually use currentTextureMaterial here
 			{
 				// RB: create extra 2D material of the image for UI rendering
 
@@ -484,6 +472,7 @@ void LightEditor::LoadCurrentTexture()
 
 				currentTextureMaterial = declManager->FindMaterial( uiName, true );
 			}
+#endif
 		}
 	}
 }
@@ -758,7 +747,7 @@ void LightEditor::Draw()
 			LoadCurrentTexture();
 		}
 
-		if( currentTextureMaterial != nullptr && currentTexture != nullptr )
+		if( /*currentTextureMaterial != nullptr &&*/ currentTexture != nullptr )
 		{
 			ImVec2 size( currentTexture->uploadWidth, currentTexture->uploadHeight );
 
@@ -811,6 +800,7 @@ void LightEditor::Draw()
 	{
 		isShown = showTool;
 		impl::SetReleaseToolMouse( false );
+		D3::ImGuiHooks::CloseWindow( D3::ImGuiHooks::D3_ImGuiWin_LightEditor );
 	}
 }
 

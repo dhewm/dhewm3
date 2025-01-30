@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "idlib/CmdArgs.h"
 
+#include "sys/sys_imgui.h"
+
 // TODO #include "afeditor/AfEditor.h"
 #include "lighteditor/LightEditor.h"
 
@@ -155,11 +157,14 @@ void LightEditorInit( const idDict* dict )
 	impl::SetReleaseToolMouse( true );
 
 	LightEditor::ReInit( dict, ent );
+
+	D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_LightEditor );
 }
 
 void AfEditorInit() // TODO: why no passed spawnargs?
 {
 	/* TODO
+	D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_AfEditor );
 	AfEditor::Instance().ShowIt( true );
 	impl::SetReleaseToolMouse( true );
 	*/
