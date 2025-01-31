@@ -74,4 +74,9 @@ bool DragVec3fitLabel( const char* label, idVec3& v, float v_speed = 1.0f,
 					   float v_min = 0.0f, float v_max = 0.0f,
 					   const char* display_format = "%.1f", float power = 1.0f );
 
+
+bool InputTextStr( const char* label, idStr* str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr );
+
+bool InputTextMultilineStr( const char* label, idStr* str, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr );
+
 } //namespace ImGui

@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // TODO #include "afeditor/AfEditor.h"
 #include "lighteditor/LightEditor.h"
-
+#include "pdaeditor/PDAEditor.h"
 
 static bool releaseMouse = false;
 
@@ -135,6 +135,10 @@ void DrawToolWindows()
 	{
 		AfEditor::Instance().Draw();
 	}*/
+	else if ( PDAEditor::Instance().IsShown() )
+	{
+		PDAEditor::Instance().Draw();
+	}
 }
 
 void LightEditorInit( const idDict* dict )
@@ -168,6 +172,15 @@ void AfEditorInit() // TODO: why no passed spawnargs?
 	AfEditor::Instance().ShowIt( true );
 	impl::SetReleaseToolMouse( true );
 	*/
+}
+
+void PDAEditorInit(const idDict* dict)
+{
+	PDAEditor::Instance().Reset();
+	PDAEditor::Instance().ShowIt( true );
+	impl::SetReleaseToolMouse( true );
+
+	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_PDAEditor);
 }
 
 } //namespace ImGuiTools

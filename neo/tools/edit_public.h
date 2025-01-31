@@ -71,6 +71,9 @@ void	LightEditorInit( const idDict* dict );
 
 void	AfEditorInit();
 
+// in-game PDA Editor
+void	PDAEditorInit( const idDict* spawnArgs );
+
 }
 
 

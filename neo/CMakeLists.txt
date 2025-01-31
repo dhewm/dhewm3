@@ -836,6 +836,8 @@ set(src_imgui ${src_imgui}
 	tools/imgui/util/ImGui_IdWidgets.cpp
 	tools/imgui/lighteditor/LightEditor.h
 	tools/imgui/lighteditor/LightEditor.cpp
+	tools/imgui/pdaeditor/PDAEditor.h
+	tools/imgui/pdaeditor/PDAEditor.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)

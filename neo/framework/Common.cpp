@@ -993,6 +993,8 @@ void idCommonLocal::InitTool( const toolFlag_t tool, const idDict *dict ) {
 		//ParticleEditorInit( dict );
 	} else if ( tool & EDITOR_AF ) {
 		ImGuiTools::AfEditorInit(); // TODO: dict ?
+	} else if ( tool & EDITOR_PDA ) {
+		ImGuiTools::PDAEditorInit( dict );
 	}
 #endif
 
@@ -1311,7 +1313,7 @@ Com_EditPDAs_f
 ==================
 */
 static void Com_EditPDAs_f( const idCmdArgs &args ) {
-	PDAEditorInit( NULL );
+	ImGuiTools::PDAEditorInit( NULL );
 }
 #endif // ID_ALLOW_TOOLS
 
