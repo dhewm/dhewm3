@@ -84,7 +84,7 @@ void PDAEditor::Draw() {
 
 	showTool = isShown;
 
-	if ( ImGui::Begin( windowTitle, &showTool ) ) //, ImGuiWindowFlags_ShowBorders ) )
+	if ( ImGui::Begin( "PDA Editor", &showTool, ImGuiWindowFlags_AlwaysAutoResize)) //, ImGuiWindowFlags_ShowBorders ) )
 	{
 		if ( ImGui::BeginTable( "table", 3 ) )
 		{
