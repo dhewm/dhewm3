@@ -225,11 +225,7 @@ void LightInfo::ToDict( idDict* e )
 			e->Set( "light_center", DELETE_VAL );
 		}
 
-		if( lightType == LIGHT_SUN )
-		{
-			e->Set( "parallel", "1" );
-			e->Set( "style", DELETE_VAL );
-		}
+		e->Set( "parallel", ( lightType == LIGHT_SUN ) ? "1" : DELETE_VAL );
 
 		// get rid of all the projected light specific stuff
 		e->Set( "light_target", DELETE_VAL );
@@ -366,24 +362,11 @@ void LightEditor::Reset()
 	//currentStyleIndex = 0;
 }
 
-#if 0 // TODO
-namespace
-{
-class idSort_textureNames : public idSort_Quick< idStr, idSort_textureNames >
-{
-public:
-	int Compare( const idStr& a, const idStr& b ) const
-	{
-		return a.Icmp( b );
-	}
-};
-} //anon. namespace
-#endif
-
 static idImage* GetLightEditorImage( const idMaterial* mat )
 {
-	// TODO: see idMaterial::GetLightEditorImage() in rbd3bfg
-	return mat->GetEditorImage();
+	// this is similar to what the original light editor does; rbd3bfg iterates through all stages to find a non-null image
+	idImage* ret = (mat->GetNumStages() > 0) ? mat->GetStage(0)->texture.image : NULL;
+	return ret ? ret : mat->GetEditorImage();
 }
 
 void LightEditor::LoadLightTextures()
@@ -407,16 +390,16 @@ void LightEditor::LoadLightTextures()
 			if( material != NULL )
 			{
 				// check if the material has textures or is just a leftover from the development
-#if 0 // TODO: handle all this, none of the called functions are available..
 				idImage* editorImage = GetLightEditorImage( mat );
 				if( editorImage->texnum == idImage::TEXTURE_NOT_LOADED )
 				{
-					//editorImage->DeferredLoadImage();
-					// TODO: editorImage->StartBackgroundImageLoad(); ?
+					//editorImage->DeferredLoadImage(); // this is BFG-specific
+
+					// TODO: use this instead? otherwise defaulted isn't set
+					editorImage->ActuallyLoadImage( true, true );
 				}
 
 				if( !editorImage->defaulted )
-#endif
 				{
 					textureNames.Append( matName );
 				}
@@ -424,7 +407,7 @@ void LightEditor::LoadLightTextures()
 		}
 	}
 
-	// FIXME: sort textureNames.SortWithTemplate( idSort_textureNames() );
+	textureNames.Sort(); // FIXME: this is ugly, get a proper sort function?
 }
 
 // static
@@ -650,8 +633,10 @@ void LightEditor::Draw()
 		changes |= ImGui::RadioButton( "Point Light", &lightSelectionRadioBtn, 0 );
 		ImGui::SameLine();
 		changes |= ImGui::RadioButton( "Spot Light", &lightSelectionRadioBtn, 1 );
+		ImGui::SetItemTooltip( "aka Projected Light" );
 		ImGui::SameLine();
 		changes |= ImGui::RadioButton( "Sun Light", &lightSelectionRadioBtn, 2 );
+		ImGui::SetItemTooltip( "Parallel Point Light" );
 
 		ImGui::Indent();
 
@@ -662,11 +647,15 @@ void LightEditor::Draw()
 			if( lightSelectionRadioBtn == LIGHT_POINT && lightSelectionRadioBtn != cur.lightType )
 			{
 				cur.DefaultPoint();
+				currentTextureIndex = 0; // cur.DefaultPoint() resets cur.strTexture to "", so sync this here
+				currentTexture = NULL;
 				changes = true;
 			}
 			else if( lightSelectionRadioBtn == LIGHT_SUN && lightSelectionRadioBtn != cur.lightType )
 			{
 				cur.DefaultSun();
+				currentTextureIndex = 0; // cur.DefaultPoint() resets cur.strTexture to "", so sync this here
+				currentTexture = NULL;
 				changes = true;
 			}
 
@@ -691,7 +680,7 @@ void LightEditor::Draw()
 
 			ImGui::Spacing();
 
-			//changes |= ImGui::Checkbox( "Parallel", &cur.isParallel );
+			//changes |= ImGui::Checkbox( "Parallel", &cur.isParallel ); // now handled as "sun"
 
 			//ImGui::Spacing();
 
@@ -709,6 +698,8 @@ void LightEditor::Draw()
 			if( cur.lightType != lightSelectionRadioBtn )
 			{
 				cur.DefaultProjected();
+				currentTextureIndex = 0; // cur.DefaultPoint() resets cur.strTexture to "", so sync this here
+				currentTexture = NULL;
 				changes = true;
 			}
 
