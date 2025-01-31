@@ -86,208 +86,210 @@ void PDAEditor::Draw() {
 
 	if ( ImGui::Begin( windowTitle, &showTool ) ) //, ImGuiWindowFlags_ShowBorders ) )
 	{
-		ImGui::PushID( "pda" );
-		ImGui::BeginGroup();
-		ImGui::Text( "PDAs:" );
-		if ( ImGui::BeginListBox( "##PDAList", ImVec2( 300, 200 ) ) ) {
-			num = pdaList.Num();
-			for ( i = 0; i < num; i++ ) {
-				ImGui::PushID( i );
+		if ( ImGui::BeginTable( "table", 3 ) )
+		{
+			ImGui::PushID( "pda" );
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text( "PDAs:" );
+			if ( ImGui::BeginListBox( "##PDAList", ImVec2( 300, 200 ) ) ) {
+				num = pdaList.Num();
+				for ( i = 0; i < num; i++ ) {
+					ImGui::PushID( i );
 
-				selected = ( i == pdaListSel );
+					selected = ( i == pdaListSel );
 
-				if ( ImGui::Selectable( pdaList[i].c_str(), selected ) ) {
-					OnSelChangePDA( i );
+					if ( ImGui::Selectable( pdaList[i].c_str(), selected ) ) {
+						OnSelChangePDA( i );
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+
+					ImGui::PopID();
 				}
-
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
-
-				ImGui::PopID();
+				ImGui::EndListBox();
 			}
-			ImGui::EndListBox();
-		}
-		if ( ImGui::Button( "Add" ) ) {
-			OnBtnClickedPDAAdd();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Del" ) ) {
-			OnBtnClickedPDADel();
-		}
-
-		if ( ImGui::BeginPopupModal( "PDAAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-			bool accepted = addPDADlg.Draw();
-
-			if ( accepted ) {
-				addPDADlg.name.ToLower();
-				idDecl* decl = declManager->CreateNewDecl( DECL_PDA, addPDADlg.name, "newpdas/" + addPDADlg.name + ".pda" );
-				decl->ReplaceSourceFileText();
-				decl->Invalidate();
-				PopulatePDAList();
-				int index = pdaList.FindIndex( addPDADlg.name );
-				OnSelChangePDA( index );
+			if ( ImGui::Button( "Add" ) ) {
+				OnBtnClickedPDAAdd();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Del" ) ) {
+				OnBtnClickedPDADel();
 			}
 
-			ImGui::EndPopup();
-		}
+			if ( ImGui::BeginPopupModal( "PDAAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted = addPDADlg.Draw();
 
-		ImGui::PopID();
-		ImGui::EndGroup();
-
-		ImGui::SameLine( 320 );
-		ImGui::BeginGroup();
-		ImGui::PushID( "pdaEdit" );
-		ImGui::SetNextItemWidth( 300 );
-		if ( ImGui::InputTextStr( "Full Name", &fullName ) ) {
-
-		}
-		ImGui::SetNextItemWidth( 300 );
-		if ( ImGui::InputTextStr( "Short Name", &shortName ) ) {
-
-		}
-		ImGui::SetNextItemWidth( 300 );
-		if ( ImGui::InputTextStr( "Title", &title ) ) {
-
-		}
-		ImGui::SetNextItemWidth( 300 );
-		if ( ImGui::InputTextStr( "Post (Location)", &post ) ) {
-
-		}
-		ImGui::SetNextItemWidth( 300 );
-		if ( ImGui::InputTextStr( "Security Level", &security ) ) {
-
-		}
-		ImGui::SetNextItemWidth( 50 );
-		if ( ImGui::Button( "Rand" ) ) {
-			OnBtnClickedRandom();
-		}
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth( 255 );
-		if ( ImGui::InputTextStr( "ID number", &idnum ) ) {
-
-		}
-		ImGui::PopID();
-
-		ImGui::PushID( "audio" );
-		ImGui::Dummy( ImVec2(0, 20) );
-		ImGui::Text( "Audio Logs:" );
-		if (ImGui::BeginListBox( "##audioList", ImVec2( 300, 200 ) ) ) {
-			num = audioList.Num();
-			for ( i = 0; i < num; i++ ) {
-				ImGui::PushID( i );
-
-				selected = ( i == audioListSel );
-				if ( ImGui::Selectable( audioList[i].c_str(), selected ) ) {
-					audioListSel = i;
+				if ( accepted ) {
+					addPDADlg.name.ToLower();
+					idDecl* decl = declManager->CreateNewDecl( DECL_PDA, addPDADlg.name, "newpdas/" + addPDADlg.name + ".pda" );
+					decl->ReplaceSourceFileText();
+					decl->Invalidate();
+					PopulatePDAList();
+					int index = pdaList.FindIndex( addPDADlg.name );
+					OnSelChangePDA( index );
 				}
 
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
-
-				ImGui::PopID();
-			}
-			ImGui::EndListBox();
-		}
-		if ( ImGui::Button( "Add..." ) ) {
-			OnBtnClickedAudioAdd();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Edit..." ) ) {
-			OnBtnClickedAudioEdit();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Delete..." ) ) {
-			OnBtnClickedAudioDel();
-		}
-		ImGui::PopID();
-		ImGui::EndGroup();
-
-		ImGui::SameLine( 750 );
-		ImGui::BeginGroup();
-		ImGui::PushID( "email" );
-		ImGui::Text( "Email" );
-		if ( ImGui::BeginListBox( "##emailList", ImVec2( 300, 200 ) ) ) {
-			num = emailList.Num();
-			for ( i = 0; i < num; i++ ) {
-				ImGui::PushID( i );
-
-				selected = ( i == emailListSel );
-				if ( ImGui::Selectable( emailList[i].c_str(), selected ) ) {
-					emailListSel = i;
-				}
-
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
-
-				ImGui::PopID();
-			}
-			ImGui::EndListBox();
-		}
-		if ( ImGui::Button( "Add..." ) ) {
-			OnBtnClickedEmailAdd();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Edit..." ) ) {
-			OnBtnClickedEmailEdit();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Delete..." ) ) {
-			OnBtnClickedEmailDel();
-		}
-		if ( ImGui::BeginPopupModal( "EmailAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-			bool accepted;
-
-			accepted = editEmailDlg.Draw();
-			if ( accepted ) {
-				OnEmailAdd();
+				ImGui::EndPopup();
 			}
 
-			ImGui::EndPopup();
-		}
-		if ( ImGui::BeginPopupModal( "EmailEdit", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-			bool accepted = editEmailDlg.Draw();
+			ImGui::PopID();
 
-			if ( accepted ) {
-				OnEmailEdit();
+			ImGui::TableSetColumnIndex(1);
+			ImGui::PushID( "pdaEdit" );
+			ImGui::SetNextItemWidth( 300 );
+			if ( ImGui::InputTextStr( "Full Name", &fullName ) ) {
+
 			}
+			ImGui::SetNextItemWidth( 300 );
+			if ( ImGui::InputTextStr( "Short Name", &shortName ) ) {
 
-			ImGui::EndPopup();
-		}
-		ImGui::PopID();
+			}
+			ImGui::SetNextItemWidth( 300 );
+			if ( ImGui::InputTextStr( "Title", &title ) ) {
 
-		ImGui::PushID("video");
-		ImGui::Dummy(ImVec2(0, 20));
-		ImGui::Text("Videos");
-		if ( ImGui::BeginListBox( "##videoList", ImVec2( 300, 200 ) ) ) {
-			num = videoList.Num();
-			for ( i = 0; i < num; i++ ) {
-				selected = ( i == videoListSel );
-				if ( ImGui::Selectable( videoList[i].c_str(), selected ) ) {
-					videoListSel = i;
+			}
+			ImGui::SetNextItemWidth( 300 );
+			if ( ImGui::InputTextStr( "Post (Location)", &post ) ) {
+
+			}
+			ImGui::SetNextItemWidth( 300 );
+			if ( ImGui::InputTextStr( "Security Level", &security ) ) {
+
+			}
+			ImGui::SetNextItemWidth( 50 );
+			if ( ImGui::Button( "Rand" ) ) {
+				OnBtnClickedRandom();
+			}
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth( 255 );
+			if ( ImGui::InputTextStr( "ID number", &idnum ) ) {
+
+			}
+			ImGui::PopID();
+
+			ImGui::PushID( "audio" );
+			ImGui::Dummy( ImVec2(0, 20) );
+			ImGui::Text( "Audio Logs:" );
+			if (ImGui::BeginListBox( "##audioList", ImVec2( 300, 200 ) ) ) {
+				num = audioList.Num();
+				for ( i = 0; i < num; i++ ) {
+					ImGui::PushID( i );
+
+					selected = ( i == audioListSel );
+					if ( ImGui::Selectable( audioList[i].c_str(), selected ) ) {
+						audioListSel = i;
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::EndListBox();
+			}
+			if ( ImGui::Button( "Add..." ) ) {
+				OnBtnClickedAudioAdd();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Edit..." ) ) {
+				OnBtnClickedAudioEdit();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Delete..." ) ) {
+				OnBtnClickedAudioDel();
+			}
+			ImGui::PopID();
+
+			ImGui::TableSetColumnIndex(2);
+			ImGui::PushID( "email" );
+			ImGui::Text( "Email" );
+			if ( ImGui::BeginListBox( "##emailList", ImVec2( 300, 200 ) ) ) {
+				num = emailList.Num();
+				for ( i = 0; i < num; i++ ) {
+					ImGui::PushID( i );
+
+					selected = ( i == emailListSel );
+					if ( ImGui::Selectable( emailList[i].c_str(), selected ) ) {
+						emailListSel = i;
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::EndListBox();
+			}
+			if ( ImGui::Button( "Add..." ) ) {
+				OnBtnClickedEmailAdd();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Edit..." ) ) {
+				OnBtnClickedEmailEdit();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Delete..." ) ) {
+				OnBtnClickedEmailDel();
+			}
+			if ( ImGui::BeginPopupModal( "EmailAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted;
+
+				accepted = editEmailDlg.Draw();
+				if ( accepted ) {
+					OnEmailAdd();
 				}
 
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
+				ImGui::EndPopup();
 			}
-			ImGui::EndListBox();
+			if ( ImGui::BeginPopupModal( "EmailEdit", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted = editEmailDlg.Draw();
+
+				if ( accepted ) {
+					OnEmailEdit();
+				}
+
+				ImGui::EndPopup();
+			}
+			ImGui::PopID();
+
+			ImGui::PushID("video");
+			ImGui::Dummy(ImVec2(0, 20));
+			ImGui::Text("Videos");
+			if ( ImGui::BeginListBox( "##videoList", ImVec2( 300, 200 ) ) ) {
+				num = videoList.Num();
+				for ( i = 0; i < num; i++ ) {
+					selected = ( i == videoListSel );
+					if ( ImGui::Selectable( videoList[i].c_str(), selected ) ) {
+						videoListSel = i;
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndListBox();
+			}
+			if ( ImGui::Button( "Add..." ) ) {
+				OnBtnClickedVideoAdd();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Edit..." ) ) {
+				OnBtnClickedVideoEdit();
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "Delete..." ) ) {
+				OnBtnClickedVideoDel();
+			}
+			ImGui::PopID();
+
+			ImGui::EndTable();
 		}
-		if ( ImGui::Button( "Add..." ) ) {
-			OnBtnClickedVideoAdd();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Edit..." ) ) {
-			OnBtnClickedVideoEdit();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Delete..." ) ) {
-			OnBtnClickedVideoDel();
-		}
-		ImGui::PopID();
-		ImGui::EndGroup();
+
 		ImGui::BeginDisabled( !saveButtonEnabled );
 		if ( ImGui::Button( "Save" ) ) {
 			OnBtnClickedSave();
