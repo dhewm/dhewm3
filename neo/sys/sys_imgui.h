@@ -68,6 +68,10 @@ extern void SetScale( float scale );
 // disappears after a few seconds or when a key is pressed or the mouse is moved
 extern void ShowWarningOverlay( const char* text );
 
+// show a little overlay-window at the upper left of the screen showing the given text
+// disappears after a few seconds or when a key is pressed or the mouse is moved
+extern void ShowInfoOverlay( const char* text );
+
 enum Style {
 	Dhewm3,
 	ImGui_Default,

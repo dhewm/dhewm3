@@ -1240,17 +1240,25 @@ static void PrintMemInfo_f( const idCmdArgs &args ) {
 	fileSystem->CloseFile( f );
 }
 
-#ifdef ID_ALLOW_TOOLS
+
 /*
 ==================
 Com_EditLights_f
 ==================
 */
 static void Com_EditLights_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	D3::ImGuiHooks::ShowInfoOverlay( "Shoot a light to open it in the Light Editor" );
+	cvarSystem->SetCVarInteger( "g_editEntityMode", 1 );
+#elif defined(ID_ALLOW_TOOLS)
 	LightEditorInit( NULL );
 	cvarSystem->SetCVarInteger( "g_editEntityMode", 1 );
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
 }
 
+#ifdef ID_ALLOW_TOOLS
 /*
 ==================
 Com_EditSounds_f
@@ -2343,10 +2351,10 @@ void idCommonLocal::InitCommands( void ) {
 	cmdSystem->AddCommand( "roq", RoQFileEncode_f, CMD_FL_TOOL, "encodes a roq file" );
 #endif
 
-#ifdef ID_ALLOW_TOOLS
 	// editors
-	cmdSystem->AddCommand( "editor", Com_Editor_f, CMD_FL_TOOL, "launches the level editor Radiant" );
 	cmdSystem->AddCommand( "editLights", Com_EditLights_f, CMD_FL_TOOL, "launches the in-game Light Editor" );
+#ifdef ID_ALLOW_TOOLS
+	cmdSystem->AddCommand( "editor", Com_Editor_f, CMD_FL_TOOL, "launches the level editor Radiant" );
 	cmdSystem->AddCommand( "editSounds", Com_EditSounds_f, CMD_FL_TOOL, "launches the in-game Sound Editor" );
 	cmdSystem->AddCommand( "editDecls", Com_EditDecls_f, CMD_FL_TOOL, "launches the in-game Declaration Editor" );
 	cmdSystem->AddCommand( "editAFs", Com_EditAFs_f, CMD_FL_TOOL, "launches the in-game Articulated Figure Editor" );

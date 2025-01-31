@@ -172,6 +172,12 @@ void ShowWarningOverlay( const char* text )
 	warningOverlayStartPos = ImGui::GetMousePos();
 }
 
+void ShowInfoOverlay( const char* text )
+{
+	// TODO: implement similar to ShowWarningOverlay()
+	common->Printf( "%s\n", text );
+}
+
 static float GetDefaultScale()
 {
 	if ( glConfig.winWidth != glConfig.vidWidth ) {
