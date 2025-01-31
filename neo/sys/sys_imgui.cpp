@@ -172,10 +172,55 @@ void ShowWarningOverlay( const char* text )
 	warningOverlayStartPos = ImGui::GetMousePos();
 }
 
+static idStr infoOverlayText;
+static double infoOverlayStartTime = -100.0;
+static ImVec2 infoOverlayStartPos;
+static bool infoOverlayOpen = false;
+
+static void UpdateInfoOverlay()
+{
+	if ( !infoOverlayOpen ) {
+		return;
+	}
+
+	if ( ImGui::GetTime() - infoOverlayStartTime > 4.0f ) {
+		infoOverlayOpen = false;
+		return;
+	}
+
+	// also hide if a key was pressed or maybe even if the mouse was moved (too much)
+	ImVec2 mdv = ImGui::GetMousePos() - infoOverlayStartPos; // Mouse Delta Vector
+	float mouseDelta = sqrtf( mdv.x * mdv.x + mdv.y * mdv.y );
+	const float fontSize = ImGui::GetFontSize();
+	if ( mouseDelta > fontSize * 10.0f ) {
+		infoOverlayStartTime = -100.0f;
+		infoOverlayOpen = false;
+		return;
+	}
+
+	ImVec2 pos = ImGui::GetMainViewport()->WorkPos;
+	pos.x += fontSize;
+	pos.y += fontSize;
+	ImGui::SetNextWindowPos( pos, ImGuiCond_Always ); //, ImVec2(0.5f, 0.5f) );
+	ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4(0.4f, 0.4f, 0.4f, 0.6f) );
+
+	int winFlags = ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize;
+	ImGui::Begin("InfoOverlay", NULL, winFlags);
+
+	ImGui::TextUnformatted( infoOverlayText.c_str() );
+
+	ImGui::End();
+
+	ImGui::PopStyleColor(); // WindowBg
+}
+
 void ShowInfoOverlay( const char* text )
 {
-	// TODO: implement similar to ShowWarningOverlay()
-	common->Printf( "%s\n", text );
+	infoOverlayText = text;
+	infoOverlayStartTime = ImGui::GetTime();
+	infoOverlayStartPos = ImGui::GetMousePos();
+	infoOverlayOpen = true;
 }
 
 static float GetDefaultScale()
@@ -333,7 +378,7 @@ void NewFrame()
 	// so ImGui also recognizes internally that all windows are closed
 	// and e.g. ImGuiCond_Appearing works as intended
 	static int framesAfterAllWindowsClosed = 0;
-	if ( openImguiWindows == 0 ) {
+	if ( openImguiWindows == 0 && !infoOverlayOpen ) {
 		if ( framesAfterAllWindowsClosed > 1 )
 			return;
 		else
@@ -374,6 +419,7 @@ void NewFrame()
 	haveNewFrame = true;
 
 	UpdateWarningOverlay();
+	UpdateInfoOverlay();
 
 	if (openImguiWindows & D3_ImGuiWin_Settings) {
 		Com_DrawDhewm3SettingsMenu();
