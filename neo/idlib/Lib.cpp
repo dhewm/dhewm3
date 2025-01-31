@@ -540,6 +540,10 @@ void AssertFailed( const char *file, int line, const char *expression ) {
 #ifdef _MSC_VER
 	__debugbreak();
 	_exit(1);
+#elif defined(__clang__)
+    // More appropriate than __builtin_trap, indeed it does trigger SIGILL
+    // but SIGTRAP instead. only clang supports for now (so far).
+    __builtin_debugtrap();
 #elif defined(__unix__)
 	// __builtin_trap() causes an illegal instruction which is kinda ugly.
 	// especially if you'd like to be able to continue after the assertion during debugging
