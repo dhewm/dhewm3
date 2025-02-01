@@ -1286,10 +1286,20 @@ int SDL_main(int argc, char *argv[]) {
 				MaterialEditorRun();
 			}
 			else {
+#ifdef IMGUI_DISABLE // DG: unless ImGui is disabled, the ImGui-based versions are used instead
 				if ( com_editors & EDITOR_LIGHT ) {
 					// in-game Light Editor
 					LightEditorRun();
 				}
+				if ( com_editors & EDITOR_AF ) {
+					// in-game Articulated Figure Editor
+					AFEditorRun();
+				}
+				if ( com_editors & EDITOR_PDA ) {
+					// in-game PDA Editor
+					PDAEditorRun();
+				}
+#endif
 				if ( com_editors & EDITOR_SOUND ) {
 					// in-game Sound Editor
 					SoundEditorRun();
@@ -1298,10 +1308,7 @@ int SDL_main(int argc, char *argv[]) {
 					// in-game Declaration Browser
 					DeclBrowserRun();
 				}
-				if ( com_editors & EDITOR_AF ) {
-					// in-game Articulated Figure Editor
-					AFEditorRun();
-				}
+
 				if ( com_editors & EDITOR_PARTICLE ) {
 					// in-game Particle Editor
 					ParticleEditorRun();
@@ -1310,12 +1317,6 @@ int SDL_main(int argc, char *argv[]) {
 					// in-game Script Editor
 					ScriptEditorRun();
 				}
-				/*
-				if ( com_editors & EDITOR_PDA ) {
-					// in-game PDA Editor
-					PDAEditorRun();
-				}
-				*/
 			}
 		}
 #endif
