@@ -55,6 +55,9 @@ static int contentMappingFlags[5] =
 	CONTENTS_MONSTERCLIP
 };
 
+namespace ImGuiTools
+{
+
 MultiSelectWidget::MultiSelectWidget( const char** aNames, int* contentMapping, int aNumEntries )
 	: names( aNames )
 	, contentMapping( contentMapping )
@@ -132,6 +135,9 @@ MultiSelectWidget MakePhysicsContentsSelector()
 {
 	return MultiSelectWidget( bodyContentsNames, contentMappingFlags, 5 );
 }
+
+} //namespace ImGuiTools
+
 
 
 // our custom ImGui functions

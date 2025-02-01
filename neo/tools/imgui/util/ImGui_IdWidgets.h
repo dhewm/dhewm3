@@ -32,7 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_imgui.h"
 
 #include "idlib/Str.h"
-// FIXME: put this in a namespace
+
+namespace ImGuiTools
+{
 
 /**
 * Holds a list of booleans that correspond to a list of names. This
@@ -63,6 +65,13 @@ bool StringListItemGetter( void* data, int index, const char** outText );
 
 MultiSelectWidget MakePhysicsContentsSelector();
 
+} //namespace ImGuiTools
+
+
+// #####################################
+// Some ImGui Widgets (functions) that
+//   we put in the ImGui namespace
+// #####################################
 
 class idVec3;
 
