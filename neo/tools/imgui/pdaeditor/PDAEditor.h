@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../edit_public.h"
 
 class idDeclEmail;
+class idDeclAudio;
+class idDeclVideo;
 
 namespace ImGuiTools
 {
@@ -73,6 +75,50 @@ private:
 	idStr					name;
 };
 
+class DialogPDAEditAudio {
+public:
+	DialogPDAEditAudio();
+
+	void					Reset();
+	bool					Draw();
+
+	void					SetName( idStr &name );
+	idStr &					GetName();
+	void					SetAudio( const idDeclAudio *audio );
+
+	idStr					GetDeclText();
+
+private:
+	idStr					wave;
+	idStr					audioName;
+	idStr					info;
+	idStr					preview;
+
+	idStr					name;
+};
+
+class DialogPDAEditVideo {
+public:
+	DialogPDAEditVideo();
+
+	void					Reset();
+	bool					Draw();
+
+	void					SetName( idStr &name );
+	idStr &					GetName();
+	void					SetVideo( const idDeclVideo *video );
+
+	idStr					GetDeclText();
+
+private:
+	idStr					preview;
+	idStr					video;
+	idStr					videoName;
+	idStr					info;
+	idStr					audio;
+
+	idStr					name;
+};
 
 class PDAEditor {
 public:
@@ -111,11 +157,15 @@ protected:
 	void					OnBtnClickedEmailDel();
 
 	void					OnBtnClickedAudioAdd();
+	void					OnAudioAdd();
 	void					OnBtnClickedAudioEdit();
+	void					OnAudioEdit();
 	void					OnBtnClickedAudioDel();
 
 	void					OnBtnClickedVideoAdd();
+	void					OnVideoAdd();
 	void					OnBtnClickedVideoEdit();
+	void					OnVideoEdit();
 	void					OnBtnClickedVideoDel();
 
 private:
@@ -142,6 +192,8 @@ private:
 
 	DialogPDAAdd			addPDADlg;
 	DialogPDAEditEmail		editEmailDlg;
+	DialogPDAEditAudio		editAudioDlg;
+	DialogPDAEditVideo		editVideoDlg;
 
 private:
 	void PopulatePDAList();

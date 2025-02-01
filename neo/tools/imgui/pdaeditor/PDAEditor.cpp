@@ -37,16 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Game.h"
 #include "framework/DeclPDA.h"
 
-#ifdef ID_DEBUG_MEMORY
-#undef new
-#undef DEBUG_NEW
-#define DEBUG_NEW new
-#endif
-
 namespace ImGuiTools {
 
 /////////////////////////////////////////////////////////////////////////////
-// CCDialogPDAEditor dialog
+// PDAEditor
 
 PDAEditor& PDAEditor::Instance()
 {
@@ -71,8 +65,9 @@ void PDAEditor::Reset() {
 	windowTitle = "PDA Editor";
 
 	addPDADlg.Reset();
-
 	editEmailDlg.Reset();
+	editAudioDlg.Reset();
+	editVideoDlg.Reset();
 
 	PopulatePDAList();
 }
@@ -131,6 +126,34 @@ void PDAEditor::Draw() {
 					PopulatePDAList();
 					int index = pdaList.FindIndex( addPDADlg.name );
 					OnSelChangePDA( index );
+				}
+
+				ImGui::EndPopup();
+			}
+
+			if ( ImGui::BeginPopupModal( "PDADel", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				int index;
+
+				index = pdaListSel;
+				assert( index >= 0 );
+
+				idStr &name = pdaList[ index ];
+
+				ImGui::Text("Are you sure you want to delete PDA %s?", name.c_str() );
+
+				if ( ImGui::Button( "OK" ) ) {
+					ImGui::CloseCurrentPopup();
+
+					const idDeclPDA* pda = dynamic_cast< const idDeclPDA * >( declManager->DeclByIndex( DECL_PDA, index ) );
+					if ( pda ) {
+						// FIXME: doesn't work, we need to delete the decl object itself somehow
+						//fileSystem->RemoveFile( pda->GetFileName() );
+						//PopulatePDAList();
+					}
+				}
+				ImGui::SameLine();
+				if ( ImGui::Button( "Cancel" ) ) {
+					ImGui::CloseCurrentPopup();
 				}
 
 				ImGui::EndPopup();
@@ -202,6 +225,25 @@ void PDAEditor::Draw() {
 			ImGui::SameLine();
 			if ( ImGui::Button( "Delete..." ) ) {
 				OnBtnClickedAudioDel();
+			}
+			if ( ImGui::BeginPopupModal( "AudioAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted;
+
+				accepted = editAudioDlg.Draw();
+				if ( accepted ) {
+					OnAudioAdd();
+				}
+
+				ImGui::EndPopup();
+			}
+			if ( ImGui::BeginPopupModal( "AudioEdit", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted = editAudioDlg.Draw();
+
+				if ( accepted ) {
+					OnAudioEdit();
+				}
+
+				ImGui::EndPopup();
 			}
 			ImGui::PopID();
 
@@ -285,6 +327,26 @@ void PDAEditor::Draw() {
 			ImGui::SameLine();
 			if ( ImGui::Button( "Delete..." ) ) {
 				OnBtnClickedVideoDel();
+			}
+
+			if ( ImGui::BeginPopupModal( "VideoAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted;
+
+				accepted = editVideoDlg.Draw();
+				if ( accepted ) {
+					OnVideoAdd();
+				}
+
+				ImGui::EndPopup();
+			}
+			if ( ImGui::BeginPopupModal( "VideoEdit", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+				bool accepted = editVideoDlg.Draw();
+
+				if ( accepted ) {
+					OnVideoEdit();
+				}
+
+				ImGui::EndPopup();
 			}
 			ImGui::PopID();
 
@@ -474,10 +536,12 @@ bool DialogPDAAdd::Draw() {
 	bool isAccepted = false;
 	if ( ImGui::Button( "OK" ) ) {
 		isAccepted = true;
+		ImGui::CloseCurrentPopup();
 	}
 	ImGui::SameLine();
 	if ( ImGui::Button( "Cancel" ) ) {
 		isAccepted = false;
+		ImGui::CloseCurrentPopup();
 	}
 	return isAccepted;
 }
@@ -496,6 +560,7 @@ void PDAEditor::OnBtnClickedPDAAdd()
 
 void PDAEditor::OnBtnClickedPDADel()
 {
+	ImGui::OpenPopup( "PDADel" );
 }
 
 void PDAEditor::OnBtnClickedEmailAdd()
@@ -609,10 +674,106 @@ void PDAEditor::OnBtnClickedEmailDel()
 
 void PDAEditor::OnBtnClickedAudioAdd()
 {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA *>( declManager->DeclByIndex( DECL_PDA, index ) );
+
+	if ( pda ) {
+		idStr name;
+
+		// Search for an unused name
+		int newIndex = pda->GetNumAudios();
+		do {
+			name = idStr::Format("%s_audio_%d", pda->GetName(), newIndex++);
+		} while ( declManager->FindType(DECL_AUDIO, name, false) != NULL );
+
+		editAudioDlg.Reset();
+		editAudioDlg.SetName( name );
+		ImGui::OpenPopup( "AudioAdd" );
+	}
+}
+
+void PDAEditor::OnAudioAdd()
+{
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA*>( declManager->DeclByIndex( DECL_PDA, index ) );
+	if ( !pda ) {
+		return;
+	}
+
+	idStr &name = editAudioDlg.GetName();
+	idDeclEmail *email = static_cast<idDeclEmail *>( declManager->CreateNewDecl( DECL_AUDIO, name, pda->GetFileName() ) );
+	email->SetText( editAudioDlg.GetDeclText() );
+	email->ReplaceSourceFileText();
+	email->Invalidate();
+
+	pda->AddAudio( name );
+
+	// Get it again to reparse
+	const idDeclAudio *audioConst = static_cast<const idDeclAudio *>( declManager->FindType( DECL_AUDIO, name ) );
+	audioList.Append( audioConst->GetAudioName() );
+
+	// Save the pda to include this audio in the list
+	// This has a side-effect of saving any other changes, but I don't really care right now
+	OnBtnClickedSave();
 }
 
 void PDAEditor::OnBtnClickedAudioEdit()
 {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA *>( declManager->DeclByIndex( DECL_PDA, index ) );
+
+	if ( !pda ) {
+		return;
+	}
+
+	index = audioListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	editAudioDlg.SetAudio( pda->GetAudioByIndex( index ) );
+	ImGui::OpenPopup( "AudioEdit" );
+}
+
+void PDAEditor::OnAudioEdit() {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA*>( declManager->DeclByIndex( DECL_PDA, index ) );
+
+	if ( !pda ) {
+		return;
+	}
+
+	index = audioListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	idDeclAudio *audio = const_cast<idDeclAudio *>( pda->GetAudioByIndex( index ) );
+	audio->SetText( editAudioDlg.GetDeclText() );
+	audio->ReplaceSourceFileText();
+	audio->Invalidate();
+
+	// Get it again to reparse
+	audio = const_cast<idDeclAudio *>( pda->GetAudioByIndex( index ) );
+
+	audioList.RemoveIndex( index );
+	audioList.Insert( audio->GetAudioName(), index );
 }
 
 void PDAEditor::OnBtnClickedAudioDel()
@@ -621,10 +782,105 @@ void PDAEditor::OnBtnClickedAudioDel()
 
 void PDAEditor::OnBtnClickedVideoAdd()
 {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA *>( declManager->DeclByIndex( DECL_PDA, index ) );
+
+	if ( pda ) {
+		idStr name;
+
+		// Search for an unused name
+		int newIndex = pda->GetNumVideos();
+		do {
+			name = idStr::Format("%s_video_%d", pda->GetName(), newIndex++);
+		} while ( declManager->FindType(DECL_VIDEO, name, false) != NULL );
+
+		editVideoDlg.Reset();
+		editVideoDlg.SetName( name );
+		ImGui::OpenPopup( "VideoAdd" );
+	}
+}
+
+void PDAEditor::OnVideoAdd() {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA*>( declManager->DeclByIndex( DECL_PDA, index ) );
+	if ( !pda ) {
+		return;
+	}
+
+	idStr &name = editVideoDlg.GetName();
+	idDeclVideo *video = static_cast<idDeclVideo *>( declManager->CreateNewDecl( DECL_VIDEO, name, pda->GetFileName() ) );
+	video->SetText( editVideoDlg.GetDeclText() );
+	video->ReplaceSourceFileText();
+	video->Invalidate();
+
+	pda->AddVideo( name );
+
+	// Get it again to reparse
+	const idDeclVideo *videoConst = static_cast<const idDeclVideo *>( declManager->FindType( DECL_VIDEO, name ) );
+	videoList.Append( videoConst->GetVideoName() );
+
+	// Save the pda to include this video in the list
+	// This has a side-effect of saving any other changes, but I don't really care right now
+	OnBtnClickedSave();
 }
 
 void PDAEditor::OnBtnClickedVideoEdit()
 {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA *>( declManager->DeclByIndex( DECL_PDA, index ) );
+
+	if ( !pda ) {
+		return;
+	}
+
+	index = videoListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	editVideoDlg.SetVideo( pda->GetVideoByIndex( index ) );
+	ImGui::OpenPopup( "VideoEdit" );
+}
+
+void PDAEditor::OnVideoEdit() {
+	int index = pdaListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	const idDeclPDA *pda = dynamic_cast<const idDeclPDA*>( declManager->DeclByIndex( DECL_PDA, index ) );
+
+	if ( !pda ) {
+		return;
+	}
+
+	index = videoListSel;
+	if ( index < 0 ) {
+		return;
+	}
+
+	idDeclVideo *video = const_cast<idDeclVideo *>( pda->GetVideoByIndex( index ) );
+	video->SetText( editVideoDlg.GetDeclText() );
+	video->ReplaceSourceFileText();
+	video->Invalidate();
+
+	// Get it again to reparse
+	video = const_cast<idDeclVideo *>( pda->GetVideoByIndex( index ) );
+
+	videoList.RemoveIndex( index );
+	videoList.Insert( video->GetVideoName(), index );
 }
 
 void PDAEditor::OnBtnClickedVideoDel()
@@ -662,8 +918,63 @@ bool DialogPDAEditEmail::Draw()
 	return isAccepted;
 }
 
+DialogPDAEditAudio::DialogPDAEditAudio()
+{
+	Reset();
+}
+
+bool DialogPDAEditAudio::Draw()
+{
+	ImGui::InputTextStr("Wave", &wave);
+	ImGui::InputTextStr("Audio Name", &audioName);
+	ImGui::InputTextMultilineStr("Info", &info);
+	ImGui::InputTextStr("Preview", &preview);
+
+	bool isAccepted = false;
+
+	if ( ImGui::Button( "OK" ) ) {
+		isAccepted = true;
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::SameLine();
+	if ( ImGui::Button( "Cancel" ) ) {
+		isAccepted = false;
+		ImGui::CloseCurrentPopup();
+	}
+
+	return isAccepted;
+}
+
+DialogPDAEditVideo::DialogPDAEditVideo()
+{
+	Reset();
+}
+
+bool DialogPDAEditVideo::Draw()
+{
+	ImGui::InputTextStr("Video Name", &videoName);
+	ImGui::InputTextMultilineStr("Info", &info);
+	ImGui::InputTextStr("Roq", &video);
+	ImGui::InputTextStr("Wave", &audio);
+	ImGui::InputTextStr("Preview", &preview);
+
+	bool isAccepted = false;
+
+	if ( ImGui::Button("OK" ) ) {
+		isAccepted = true;
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::SameLine();
+	if ( ImGui::Button( "Cancel" ) ) {
+		isAccepted = false;
+		ImGui::CloseCurrentPopup();
+	}
+
+	return isAccepted;
+}
+
 /////////////////////////////////////////////////////////////////////////////
-// CDialogPDAEditor message handlers
+// DialogPDAEditEmail message handlers
 
 void DialogPDAEditEmail::Reset()
 {
@@ -712,6 +1023,110 @@ idStr DialogPDAEditEmail::GetDeclText()
 	declText += "\ttext {\n";
 	declText += "\"" + mungedBody + "\"\n";
 	declText += "\t}\n";
+	declText += "}";
+
+	return declText;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// DialogPDAEditAudio message handlers
+
+void DialogPDAEditAudio::Reset()
+{
+	wave.Clear();
+	audioName.Clear();
+	info.Clear();
+	preview.Clear();
+
+	name.Clear();
+}
+
+void DialogPDAEditAudio::SetName(idStr& _name)
+{
+	name = _name;
+}
+
+idStr &DialogPDAEditAudio::GetName()
+{
+	return name;
+}
+
+void DialogPDAEditAudio::SetAudio( const idDeclAudio *_audio )
+{
+	wave = _audio->GetWave();
+	audioName = _audio->GetAudioName();
+	info = _audio->GetInfo();
+	preview = _audio->GetPreview();
+
+	name = _audio->GetName();
+}
+
+idStr DialogPDAEditAudio::GetDeclText()
+{
+	idStr escapedInfo = info;
+	escapedInfo.Replace("\n", "\\n");
+
+	idStr declText;
+
+	declText += "\n";
+	declText += "audio " + name + " {\n";
+	declText += "\tname     \t\t\"" + audioName + "\"\n";
+	declText += "\tinfo   \t\t\"" + escapedInfo + "\"\n";
+	declText += "\tpreview   \t\t\"" + preview + "\"\n";
+	declText += "\taudio\t\t\"" + wave + "\"\n";
+	declText += "}";
+
+	return declText;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// DialogPDAEditVideo message handlers
+
+void DialogPDAEditVideo::Reset()
+{
+	preview.Clear();
+	video.Clear();
+	videoName.Clear();
+	info.Clear();
+	audio.Clear();
+
+	name.Clear();
+}
+
+void DialogPDAEditVideo::SetName(idStr& _name)
+{
+	name = _name;
+}
+
+idStr& DialogPDAEditVideo::GetName()
+{
+	return name;
+}
+
+void DialogPDAEditVideo::SetVideo(const idDeclVideo* _video)
+{
+	video = _video->GetRoq();
+	audio = _video->GetWave();
+	videoName = _video->GetVideoName();
+	info = _video->GetInfo();
+	preview = _video->GetPreview();
+
+	name = _video->GetName();
+}
+
+idStr DialogPDAEditVideo::GetDeclText()
+{
+	idStr escapedInfo = info;
+	escapedInfo.Replace("\n", "\\n");
+
+	idStr declText;
+	declText += "\n";
+	declText += "video " + name + " {\n";
+	declText += "\tname     \t\t\"" + videoName + "\"\n";
+	declText += "\tinfo   \t\t\"" + escapedInfo + "\"\n";
+	declText += "\tvideo   \t\t\"" + video + "\"\n";
+	declText += "\taudio\t\t\"" + audio + "\"\n";
+	declText += "\tpreview\t\t\"" + preview + "\"\n";
 	declText += "}";
 
 	return declText;
