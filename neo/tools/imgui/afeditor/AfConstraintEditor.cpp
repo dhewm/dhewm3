@@ -45,18 +45,6 @@ static const char* constraintTypeNames[] =
 	"Spring"
 };
 
-static const char* anchorTypeNames[] =
-{
-	"joint",
-	"coorindates"
-};
-
-static const char* jointPointTypeNames[] =
-{
-	"bone",
-	"angles"
-};
-
 static const char* afVecTypeNames[] =
 {
 	"coordinates",
@@ -75,7 +63,6 @@ static const char* constraintLimitTypeNames[] =
 namespace ImGuiTools
 {
 
-static bool BodyItemGetter( void* data, int index, const char** out );
 static bool ConstraintLimitTypeGetter( void* data, int index, const char** out );
 
 AfConstraintEditor::AfConstraintEditor( idDeclAF* newDecl, idDeclAF_Constraint* newConstraint )
@@ -378,18 +365,6 @@ void AfConstraintEditor::InitJointLists()
 		const char* jointName = model->GetJointName( ( jointHandle_t )i );
 		joints[joints.Append( jointName )].ToLower();
 	}
-}
-
-static bool BodyItemGetter( void* data, int index, const char** out )
-{
-	idDeclAF* decl = reinterpret_cast<idDeclAF*>( data );
-	if( index < 0 || index >= decl->bodies.Num() )
-	{
-		return false;
-	}
-	idDeclAF_Body* body = decl->bodies[index];
-	*out = body->name.c_str();
-	return true;
 }
 
 bool ConstraintLimitTypeGetter( void* data, int index, const char** out )

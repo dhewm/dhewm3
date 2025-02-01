@@ -34,98 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/FileSystem.h"
 #include "framework/Game.h"
 
-
-namespace
-{
-static bool isShown = false;
-
-static idDeclAF emptyDecl;
-static idDeclAF_Body emptyBody;
-static idDeclAF_Constraint emptyConstraint;
-
-static int linearTolerance = 10;
-static int angularTolerance = 10;
-static idStr currentBody; // was idStrStatic<256>
-static int bodyLength = 8;
-static int bodyWidth = 16;
-static int bodyHeight = 20;
-
-static const char* bodyTypeNames[] =
-{
-	"box",
-	"octahedron",
-	"dedecahedron",
-	"cylinder",
-	"cone",
-	"bone",
-	"polygon",
-	"polygonvolume",
-	"custom"
-};
-
-int positionType = 0;
-static const char* positionTypeNames[3] =
-{
-	"coordinates",
-	"bone center",
-	"joint"
-};
-
-bool bodyContentsSelected[5] =
-{
-	false,
-	false,
-	false,
-	false,
-};
-
-MultiSelectWidget w1 = MakePhysicsContentsSelector();
-MultiSelectWidget w2 = MakePhysicsContentsSelector();
-
-int modifyJointType = 0;
-static const char* modifyJointsNames[3] =
-{
-	"orientation",
-	"position",
-	"both"
-};
-
-int constraintType = 2;
-static const char* constraintTypeNames[DECLAF_CONSTRAINT_SPRING] =
-{
-	"fixed",
-	"ballandsocket",
-	"universal",
-	"hinge",
-	"slider",
-	"spring"
-};
-
-int constraintLimitType = 1;
-static const char* constraintLimitTypeNames[3] =
-{
-	"none",
-	"cone",
-	"pyramid"
-};
-
-int shaft1 = 1;
-int shaft2 = 1;
-int limitOrientation = 1;
-static const char* jointPointTypeNames[2] =
-{
-	"bone",
-	"angles"
-};
-
-int anchorType = 0;
-static const char* anchorTypeNames[2] =
-{
-	"joint",
-	"coorindates"
-};
-}
-
 namespace ImGuiTools
 {
 
@@ -165,7 +73,6 @@ void AfEditor::Init()
 void AfEditor::Draw()
 {
 	bool showTool = isShown;
-	//static char buff[256];
 
 	if( ImGui::Begin( "AF Editor", &showTool, ImGuiWindowFlags_MenuBar ) )
 	{
