@@ -27,12 +27,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
-
 #include "AfConstraintEditor.h"
 
-#include "../imgui/BFGimgui.h"
+#include "framework/Game.h"
+#include "renderer/Model.h"
+
+#define ARRAY_COUNT IM_ARRAYSIZE
 
 static const char* constraintTypeNames[] =
 {
@@ -104,7 +104,7 @@ bool AfConstraintEditor::Do()
 
 	bool changed = false;
 
-	ImGui::InputText( "##rename", &renameConstraint );
+	ImGui::InputTextStr( "##rename", &renameConstraint );
 
 	ImGui::SameLine();
 

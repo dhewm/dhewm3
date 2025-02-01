@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_imgui.h"
 
-// TODO #include "afeditor/AfEditor.h"
+#include "afeditor/AfEditor.h"
 #include "lighteditor/LightEditor.h"
 #include "pdaeditor/PDAEditor.h"
 
@@ -130,11 +130,10 @@ void DrawToolWindows()
 	{
 		LightEditor::Instance().Draw();
 	}
-	/* TODO
 	else if( AfEditor::Instance().IsShown() )
 	{
 		AfEditor::Instance().Draw();
-	}*/
+	}
 	else if ( PDAEditor::Instance().IsShown() )
 	{
 		PDAEditor::Instance().Draw();
@@ -167,11 +166,9 @@ void LightEditorInit( const idDict* dict )
 
 void AfEditorInit() // TODO: why no passed spawnargs?
 {
-	/* TODO
 	D3::ImGuiHooks::OpenWindow( D3::ImGuiHooks::D3_ImGuiWin_AfEditor );
 	AfEditor::Instance().ShowIt( true );
 	impl::SetReleaseToolMouse( true );
-	*/
 }
 
 void PDAEditorInit(const idDict* dict)

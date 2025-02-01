@@ -27,40 +27,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
-
 #include "AfEditor.h"
 
-#include "../imgui/BFGimgui.h"
-#include "../framework/DeclAF.h"
+#include "../util/ImGui_IdWidgets.h"
 
-#include "../util/Imgui_IdWidgets.h"
+#include "framework/FileSystem.h"
+#include "framework/Game.h"
 
-extern idCVar af_useLinearTime;
-extern idCVar af_useImpulseFriction;
-extern idCVar af_useJointImpulseFriction;
-extern idCVar af_useSymmetry;
-extern idCVar af_skipSelfCollision;
-extern idCVar af_skipLimits;
-extern idCVar af_skipFriction;
-extern idCVar af_forceFriction;
-extern idCVar af_maxLinearVelocity;
-extern idCVar af_showTimings;
-extern idCVar af_showConstraints;
-extern idCVar af_showConstraintNames;
-extern idCVar af_showConstrainedBodies;
-extern idCVar af_showPrimaryOnly;
-extern idCVar af_showTrees;
-extern idCVar af_showLimits;
-extern idCVar af_showBodies;
-extern idCVar af_showBodyNames;
-extern idCVar af_showMass;
-extern idCVar af_showTotalMass;
-extern idCVar af_showInertia;
-extern idCVar af_showVelocity;
-extern idCVar af_showActive;
-extern idCVar af_testSolid;
 
 namespace
 {
@@ -72,7 +45,7 @@ static idDeclAF_Constraint emptyConstraint;
 
 static int linearTolerance = 10;
 static int angularTolerance = 10;
-static idStrStatic<256> currentBody;
+static idStr currentBody; // was idStrStatic<256>
 static int bodyLength = 8;
 static int bodyWidth = 16;
 static int bodyHeight = 20;
@@ -159,7 +132,7 @@ namespace ImGuiTools
 static bool BodyItemGetter( void* data, int index, const char** items );
 static bool ConstraintItemGetter( void* data, int index, const char** items );
 
-static bool CVarCheckBox( const char* label, idCVar* cvar );
+static bool CVarCheckBox( const char* label, const char* cvarname );
 
 AfEditor::AfEditor()
 	: isShown( false )
@@ -181,8 +154,8 @@ AfEditor::~AfEditor()
 	{
 		delete propertyEditor;
 	}
-	bodyEditors.DeleteContents();
-	constraintEditors.DeleteContents();
+	bodyEditors.DeleteContents( true );
+	constraintEditors.DeleteContents( true );
 }
 
 void AfEditor::Init()
@@ -192,7 +165,7 @@ void AfEditor::Init()
 void AfEditor::Draw()
 {
 	bool showTool = isShown;
-	static char buff[256];
+	//static char buff[256];
 
 	if( ImGui::Begin( "AF Editor", &showTool, ImGuiWindowFlags_MenuBar ) )
 	{
@@ -266,7 +239,7 @@ void AfEditor::Draw()
 			ImGui::SameLine();
 			ImGui::SmallButton( "New File" );
 
-			ImGui::InputText( "AF Name", &fileName );
+			ImGui::InputTextStr( "AF Name", &fileName );
 			if( ImGui::Button( "Create" ) )
 			{
 				idStr afName = fileName;
@@ -343,14 +316,16 @@ void AfEditor::Draw()
 			{
 				if( ImGui::BeginTabItem( "View" ) )
 				{
-					CVarCheckBox( "Show Bodies", &af_showBodies );
-					CVarCheckBox( "Show Body Names", &af_showBodyNames );
-					CVarCheckBox( "Show Constraints", &af_showConstraints );
-					CVarCheckBox( "Show Constraint Names", &af_showConstraintNames );
-					CVarCheckBox( "Show Limits", &af_showLimits );
-					CVarCheckBox( "Show Active ", &af_showActive );
-					CVarCheckBox( "Show Trees", &af_showTrees );
-					CVarCheckBox( "Show Mass", &af_showMass );
+					// the CVars must be fetched by name because they're from the Game DLL
+					// TODO: alternatively, the cvars could be fetched in Init() and kept around
+					CVarCheckBox( "Show Bodies", "af_showBodies" );
+					CVarCheckBox( "Show Body Names", "af_showBodyNames" );
+					CVarCheckBox( "Show Constraints", "af_showConstraints" );
+					CVarCheckBox( "Show Constraint Names", "af_showConstraintNames" );
+					CVarCheckBox( "Show Limits", "af_showLimits" );
+					CVarCheckBox( "Show Active ", "af_showActive" );
+					CVarCheckBox( "Show Trees", "af_showTrees" );
+					CVarCheckBox( "Show Mass", "af_showMass" );
 					ImGui::EndTabItem();
 				}
 
@@ -561,7 +536,7 @@ void AfEditor::Draw()
 			}
 			catch( idException& exception )
 			{
-				common->DWarning( "AfEditor exception %s", exception.GetError() );
+				common->DWarning( "AfEditor exception %s", exception.error );
 			}
 		}
 	}
@@ -572,6 +547,7 @@ void AfEditor::Draw()
 		// TODO: do the same as when pressing cancel?
 		isShown = showTool;
 		impl::SetReleaseToolMouse( false );
+		D3::ImGuiHooks::CloseWindow( D3::ImGuiHooks::D3_ImGuiWin_AfEditor );
 	}
 }
 
@@ -582,8 +558,8 @@ void AfEditor::OnNewDecl( idDeclAF* newDecl )
 	{
 		delete propertyEditor;
 	}
-	bodyEditors.DeleteContents();
-	constraintEditors.DeleteContents();
+	bodyEditors.DeleteContents( true );
+	constraintEditors.DeleteContents( true );
 
 	propertyEditor = new AfPropertyEditor( newDecl );
 
@@ -665,13 +641,17 @@ bool ConstraintItemGetter( void* data, int index, const char** items )
 	return true;
 }
 
-static bool CVarCheckBox( const char* label, idCVar* cvar )
+static bool CVarCheckBox( const char* label, const char* cvarName )
 {
-	bool value = cvar->GetBool();
-	if( ImGui::Checkbox( label, &value ) )
+	idCVar* cvar = cvarSystem->Find( cvarName );
+	if( cvar != NULL )
 	{
-		cvar->SetBool( value );
-		return true;
+		bool value = cvar->GetBool();
+		if( ImGui::Checkbox( label, &value ) )
+		{
+			cvar->SetBool( value );
+			return true;
+		}
 	}
 	return false;
 }

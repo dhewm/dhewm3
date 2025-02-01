@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma once
 
+#include "sys/sys_imgui.h"
+
+#include "idlib/Str.h"
 // FIXME: put this in a namespace
 
 /**

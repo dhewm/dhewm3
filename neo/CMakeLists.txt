@@ -834,6 +834,16 @@ set(src_imgui ${src_imgui}
 	tools/imgui/ImGuiTools.cpp
 	tools/imgui/util/ImGui_IdWidgets.h
 	tools/imgui/util/ImGui_IdWidgets.cpp
+
+	tools/imgui/afeditor/AfEditor.h
+	tools/imgui/afeditor/AfEditor.cpp
+	tools/imgui/afeditor/AfBodyEditor.h
+	tools/imgui/afeditor/AfBodyEditor.cpp
+	tools/imgui/afeditor/AfConstraintEditor.h
+	tools/imgui/afeditor/AfConstraintEditor.cpp
+	tools/imgui/afeditor/AfPropertyEditor.h
+	tools/imgui/afeditor/AfPropertyEditor.cpp
+
 	tools/imgui/lighteditor/LightEditor.h
 	tools/imgui/lighteditor/LightEditor.cpp
 	tools/imgui/pdaeditor/PDAEditor.h

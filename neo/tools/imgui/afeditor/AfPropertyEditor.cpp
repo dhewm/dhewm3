@@ -27,12 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
-
 #include "AfPropertyEditor.h"
-
-#include "../imgui/BFGimgui.h"
 
 namespace ImGuiTools
 {
@@ -65,7 +60,7 @@ bool AfPropertyEditor::Do()
 			decl->model = modelDefs[currentModel];
 			changed = true;
 		}
-		ImGui::InputText( "Skin", &decl->skin, ImGuiInputTextFlags_CharsNoBlank );
+		ImGui::InputTextStr( "Skin", &decl->skin, ImGuiInputTextFlags_CharsNoBlank );
 	}
 
 	if( ImGui::CollapsingHeader( "Default Collision Detection" ) )

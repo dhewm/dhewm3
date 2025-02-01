@@ -30,7 +30,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef EDITOR_TOOLS_AFPROPERTYEDITOR_H_
 #define EDITOR_TOOLS_AFPROPERTYEDITOR_H_
 
-#include "../util/Imgui_IdWidgets.h"
+#include "../util/ImGui_IdWidgets.h"
+
+#include "framework/DeclAF.h"
+#include "idlib/containers/StrList.h"
 
 namespace ImGuiTools
 {

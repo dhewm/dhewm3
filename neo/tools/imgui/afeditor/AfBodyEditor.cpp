@@ -27,12 +27,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
-
 #include "AfBodyEditor.h"
 
-#include "../imgui/BFGimgui.h"
+#include "framework/Game.h"
+#include "idlib/geometry/TraceModel.h"
+#include "renderer/Model.h"
+
+#define ARRAY_COUNT IM_ARRAYSIZE
 
 static const char* bodyTypeNames[] =
 {
@@ -91,7 +92,7 @@ bool AfBodyEditor::Do()
 
 	bool changed = false;
 
-	ImGui::InputText( "##rename", &renameBody );
+	ImGui::InputTextStr( "##rename", &renameBody );
 	ImGui::SameLine();
 	if( ImGui::Button( "Rename" ) )
 	{
@@ -136,7 +137,7 @@ bool AfBodyEditor::Do()
 			changed = true;
 		}
 		changed = ImGui::Combo( "Modify", ( int* )&body->jointMod, modifyJointsNames, ARRAY_COUNT( modifyJointsNames ) ) || changed;
-		changed = ImGui::InputText( "Contained Joints", &body->containedJoints ) || changed;
+		changed = ImGui::InputTextStr( "Contained Joints", &body->containedJoints ) || changed;
 	}
 
 	ImGui::PopID();

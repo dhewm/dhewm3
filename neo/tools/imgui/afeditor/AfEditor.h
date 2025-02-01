@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "AfConstraintEditor.h"
 #include "AfPropertyEditor.h"
 
+#include "framework/DeclAF.h"
+
 namespace ImGuiTools
 {
 

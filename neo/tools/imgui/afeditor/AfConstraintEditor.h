@@ -29,7 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma once
 
-#include "../util/Imgui_IdWidgets.h"
+#include "../util/ImGui_IdWidgets.h"
+
+#include "framework/DeclAF.h"
+#include "idlib/containers/StrList.h"
 
 namespace ImGuiTools
 {

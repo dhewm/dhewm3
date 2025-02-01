@@ -1260,6 +1260,22 @@ static void Com_EditLights_f( const idCmdArgs &args ) {
 #endif
 }
 
+/*
+==================
+Com_EditAFs_f
+==================
+*/
+static void Com_EditAFs_f( const idCmdArgs &args ) {
+	// TODO: cvarSystem->SetCVarInteger( "g_editEntityMode", 3 ); ?
+#ifndef IMGUI_DISABLE
+	ImGuiTools::AfEditorInit();
+#elif defined(ID_ALLOW_TOOLS)
+	AFEditorInit( NULL );
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
+}
+
 #ifdef ID_ALLOW_TOOLS
 /*
 ==================
@@ -1278,15 +1294,6 @@ Com_EditDecls_f
 */
 static void Com_EditDecls_f( const idCmdArgs &args ) {
 	DeclBrowserInit( NULL );
-}
-
-/*
-==================
-Com_EditAFs_f
-==================
-*/
-static void Com_EditAFs_f( const idCmdArgs &args ) {
-	AFEditorInit( NULL );
 }
 
 /*
@@ -2355,11 +2362,11 @@ void idCommonLocal::InitCommands( void ) {
 
 	// editors
 	cmdSystem->AddCommand( "editLights", Com_EditLights_f, CMD_FL_TOOL, "launches the in-game Light Editor" );
+	cmdSystem->AddCommand( "editAFs", Com_EditAFs_f, CMD_FL_TOOL, "launches the in-game Articulated Figure Editor" );
 #ifdef ID_ALLOW_TOOLS
 	cmdSystem->AddCommand( "editor", Com_Editor_f, CMD_FL_TOOL, "launches the level editor Radiant" );
 	cmdSystem->AddCommand( "editSounds", Com_EditSounds_f, CMD_FL_TOOL, "launches the in-game Sound Editor" );
 	cmdSystem->AddCommand( "editDecls", Com_EditDecls_f, CMD_FL_TOOL, "launches the in-game Declaration Editor" );
-	cmdSystem->AddCommand( "editAFs", Com_EditAFs_f, CMD_FL_TOOL, "launches the in-game Articulated Figure Editor" );
 	cmdSystem->AddCommand( "editParticles", Com_EditParticles_f, CMD_FL_TOOL, "launches the in-game Particle Editor" );
 	cmdSystem->AddCommand( "editScripts", Com_EditScripts_f, CMD_FL_TOOL, "launches the in-game Script Editor" );
 	cmdSystem->AddCommand( "editGUIs", Com_EditGUIs_f, CMD_FL_TOOL, "launches the GUI Editor" );
