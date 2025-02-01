@@ -110,10 +110,13 @@ void PDAEditor::Draw() {
 			if ( ImGui::Button( "Add" ) ) {
 				OnBtnClickedPDAAdd();
 			}
+			/*
+			* FIXME: decl manager does not support deletion
 			ImGui::SameLine();
 			if ( ImGui::Button( "Del" ) ) {
 				OnBtnClickedPDADel();
 			}
+			*/
 
 			if ( ImGui::BeginPopupModal( "PDAAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
 				bool accepted = addPDADlg.Draw();
@@ -131,6 +134,8 @@ void PDAEditor::Draw() {
 				ImGui::EndPopup();
 			}
 
+			/*
+			* FIXME: decl manager does not support deletion
 			if ( ImGui::BeginPopupModal( "PDADel", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
 				int index;
 
@@ -158,6 +163,7 @@ void PDAEditor::Draw() {
 
 				ImGui::EndPopup();
 			}
+			*/
 
 			ImGui::PopID();
 
@@ -215,17 +221,20 @@ void PDAEditor::Draw() {
 				}
 				ImGui::EndListBox();
 			}
-			if ( ImGui::Button( "Add..." ) ) {
+			if ( ImGui::Button( "Add" ) ) {
 				OnBtnClickedAudioAdd();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "Edit..." ) ) {
+			if ( ImGui::Button( "Edit" ) ) {
 				OnBtnClickedAudioEdit();
 			}
+			/*
+			* FIXME: decl manager does not support deletion
 			ImGui::SameLine();
-			if ( ImGui::Button( "Delete..." ) ) {
+			if ( ImGui::Button( "Delete" ) ) {
 				OnBtnClickedAudioDel();
 			}
+			*/
 			if ( ImGui::BeginPopupModal( "AudioAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
 				bool accepted;
 
@@ -268,17 +277,20 @@ void PDAEditor::Draw() {
 				}
 				ImGui::EndListBox();
 			}
-			if ( ImGui::Button( "Add..." ) ) {
+			if ( ImGui::Button( "Add" ) ) {
 				OnBtnClickedEmailAdd();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "Edit..." ) ) {
+			if ( ImGui::Button( "Edit" ) ) {
 				OnBtnClickedEmailEdit();
 			}
+			/*
+			* FIXME: decl manager does not support deletion
 			ImGui::SameLine();
-			if ( ImGui::Button( "Delete..." ) ) {
+			if ( ImGui::Button( "Delete" ) ) {
 				OnBtnClickedEmailDel();
 			}
+			*/
 			if ( ImGui::BeginPopupModal( "EmailAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
 				bool accepted;
 
@@ -317,17 +329,20 @@ void PDAEditor::Draw() {
 				}
 				ImGui::EndListBox();
 			}
-			if ( ImGui::Button( "Add..." ) ) {
+			if ( ImGui::Button( "Add" ) ) {
 				OnBtnClickedVideoAdd();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "Edit..." ) ) {
+			if ( ImGui::Button( "Edit" ) ) {
 				OnBtnClickedVideoEdit();
 			}
+			/*
+			* FIXME: decl manager does not support deletion
 			ImGui::SameLine();
-			if ( ImGui::Button( "Delete..." ) ) {
+			if ( ImGui::Button( "Delete" ) ) {
 				OnBtnClickedVideoDel();
 			}
+			*/
 
 			if ( ImGui::BeginPopupModal( "VideoAdd", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
 				bool accepted;
