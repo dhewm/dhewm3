@@ -1262,6 +1262,21 @@ static void Com_EditLights_f( const idCmdArgs &args ) {
 
 /*
 ==================
+Com_EditPDAs_f
+==================
+*/
+static void Com_EditPDAs_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::PDAEditorInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
+	PDAEditorInit( NULL );
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
+}
+
+/*
+==================
 Com_EditAFs_f
 ==================
 */
@@ -1314,14 +1329,6 @@ static void Com_EditScripts_f( const idCmdArgs &args ) {
 	ScriptEditorInit( NULL );
 }
 
-/*
-==================
-Com_EditPDAs_f
-==================
-*/
-static void Com_EditPDAs_f( const idCmdArgs &args ) {
-	ImGuiTools::PDAEditorInit( NULL );
-}
 #endif // ID_ALLOW_TOOLS
 
 /*
@@ -2362,6 +2369,7 @@ void idCommonLocal::InitCommands( void ) {
 
 	// editors
 	cmdSystem->AddCommand( "editLights", Com_EditLights_f, CMD_FL_TOOL, "launches the in-game Light Editor" );
+	cmdSystem->AddCommand( "editPDAs", Com_EditPDAs_f, CMD_FL_TOOL, "launches the in-game PDA Editor" );
 	cmdSystem->AddCommand( "editAFs", Com_EditAFs_f, CMD_FL_TOOL, "launches the in-game Articulated Figure Editor" );
 #ifdef ID_ALLOW_TOOLS
 	cmdSystem->AddCommand( "editor", Com_Editor_f, CMD_FL_TOOL, "launches the level editor Radiant" );
@@ -2370,7 +2378,6 @@ void idCommonLocal::InitCommands( void ) {
 	cmdSystem->AddCommand( "editParticles", Com_EditParticles_f, CMD_FL_TOOL, "launches the in-game Particle Editor" );
 	cmdSystem->AddCommand( "editScripts", Com_EditScripts_f, CMD_FL_TOOL, "launches the in-game Script Editor" );
 	cmdSystem->AddCommand( "editGUIs", Com_EditGUIs_f, CMD_FL_TOOL, "launches the GUI Editor" );
-	cmdSystem->AddCommand( "editPDAs", Com_EditPDAs_f, CMD_FL_TOOL, "launches the in-game PDA Editor" );
 	cmdSystem->AddCommand( "debugger", Com_ScriptDebugger_f, CMD_FL_TOOL, "launches the Script Debugger" );
 
 	//BSM Nerve: Add support for the material editor
