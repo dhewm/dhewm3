@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_imgui.h"
 
 #include "idlib/Str.h"
+#include "idlib/containers/List.h"
 
 namespace ImGuiTools
 {
@@ -90,5 +91,9 @@ bool DragVec3fitLabel( const char* label, idVec3& v, float v_speed = 1.0f,
 bool InputTextStr( const char* label, idStr* str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr );
 
 bool InputTextMultilineStr( const char* label, idStr* str, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr );
+
+bool InputDialogName( const char *text, const char *label, idStr *str );
+
+bool InputMessageBox( const char *text, const char* label, bool allowCancel = false );
 
 } //namespace ImGui

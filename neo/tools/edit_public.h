@@ -74,6 +74,8 @@ void	AfEditorInit();
 // in-game PDA Editor
 void	PDAEditorInit( const idDict* spawnArgs );
 
+void	ParticleEditorInit( const idDict* spawnArgs );
+
 }
 
 

@@ -995,6 +995,8 @@ void idCommonLocal::InitTool( const toolFlag_t tool, const idDict *dict ) {
 		ImGuiTools::AfEditorInit(); // TODO: dict ?
 	} else if ( tool & EDITOR_PDA ) {
 		ImGuiTools::PDAEditorInit( dict );
+	} else if ( tool & EDITOR_PARTICLE ) {
+		ImGuiTools::ParticleEditorInit( dict );
 	}
 #endif
 
@@ -1291,6 +1293,22 @@ static void Com_EditAFs_f( const idCmdArgs &args ) {
 #endif
 }
 
+/*
+==================
+Com_EditParticles_f
+==================
+*/
+static void Com_EditParticles_f(const idCmdArgs& args) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::ParticleEditorInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
+	ParticleEditorInit(NULL);
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
+}
+
+
 #ifdef ID_ALLOW_TOOLS
 /*
 ==================
@@ -1309,15 +1327,6 @@ Com_EditDecls_f
 */
 static void Com_EditDecls_f( const idCmdArgs &args ) {
 	DeclBrowserInit( NULL );
-}
-
-/*
-==================
-Com_EditParticles_f
-==================
-*/
-static void Com_EditParticles_f( const idCmdArgs &args ) {
-	ParticleEditorInit( NULL );
 }
 
 /*

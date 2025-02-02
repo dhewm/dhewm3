@@ -848,6 +848,8 @@ set(src_imgui ${src_imgui}
 	tools/imgui/lighteditor/LightEditor.cpp
 	tools/imgui/pdaeditor/PDAEditor.h
 	tools/imgui/pdaeditor/PDAEditor.cpp
+	tools/imgui/particleeditor/ParticleEditor.h
+	tools/imgui/particleeditor/ParticleEditor.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)

@@ -254,3 +254,57 @@ bool ImGui::InputTextMultilineStr( const char *label, idStr *str, const ImVec2 &
 
 	return result;
 }
+
+bool ImGui::InputDialogName( const char *text, const char *label, idStr *str ) {
+	bool accepted = false;
+
+	ImGui::OpenPopup( label );
+
+	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextUnformatted( text );
+		if ( ImGui::InputTextStr( "Name", str ) ) {
+			// nop
+		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			accepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel")) {
+			accepted = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
+
+bool ImGui::InputMessageBox( const char *text, const char* label, bool allowCancel ) {
+	bool accepted = false;
+
+	ImGui::OpenPopup( label );
+
+	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextUnformatted( text );
+
+		if ( ImGui::Button( "OK" ) ) {
+			accepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		if ( allowCancel ) {
+			ImGui::SameLine();
+			if ( ImGui::Button( "Cancel" ) ) {
+				accepted = false;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
+
