@@ -329,11 +329,18 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 		endif ()
 	endif ()
 
+	if(cpu STREQUAL "e2k" AND CMAKE_COMPILER_IS_GNUCC)
+		# O3 on E2K mcst-lcc approximately equal to O2 at X86/ARM gcc
+		set(OPT_LEVEL "-O3")
+	else()
+		set(OPT_LEVEL "-O2")
+	endif()
+
 	set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0")
 	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
 	set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELEASE "-O2 -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb -O2 -fno-math-errno -fno-trapping-math  -ffinite-math-only -fno-omit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELEASE "${OPT_LEVEL} -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb ${OPT_LEVEL} -fno-math-errno -fno-trapping-math  -ffinite-math-only -fno-omit-frame-pointer")
 	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
 
 	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
