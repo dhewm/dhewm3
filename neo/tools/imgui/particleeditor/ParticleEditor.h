@@ -37,11 +37,6 @@ class idParticleStage;
 namespace ImGuiTools
 {
 
-class ColorPicker {
-public:
-	bool Draw( const char *label, float *r, float *g, float *b, float *a );
-};
-
 class RangeSlider {
 public:
 	bool Draw( const char *label, float itemWidth, float sliderWidth );
@@ -120,9 +115,9 @@ protected:
 	void		OnCbnSelchangeComboPath();
 	void		OnLbnSelchangeListStages();
 	void		OnBnClickedButtonBrowsematerial();
-	void		OnBnClickedButtonBrowsecolor();
-	void		OnBnClickedButtonBrowsefadecolor();
-	void		OnBnClickedButtonBrowseEntitycolor();
+	void		ButtonColor();
+	void		ButtonFadeColor();
+	void		ButtonEntityColor();
 	void		OnBnClickedRadioRect();
 	void		OnBnClickedRadioSphere();
 	void		OnBnClickedRadioCylinder();
@@ -164,19 +159,12 @@ private:
 
 	bool				buttonSaveParticleEntitiesEnabled;
 
-	ColorPicker			colorPickerDlg;
+	ColorPicker			colorDlg;
+	ColorPicker			fadeColorDlg;
+	ColorPicker			entityColorDlg;
 
 	// edit controls
 	bool				editControlsEnabled;
-	bool				buttonXDNEnabled;
-	bool				buttonXUPEnabled;
-	bool				buttonYUPEnabled;
-	bool				buttonYDNEnabled;
-	bool				buttonZUPEnabled;
-	bool				buttonZDNEnabled;
-	bool				buttonDropEmitterEnabled;
-	bool				buttonVectorEnabled;
-	bool				buttonBrowseColorEntityEnabled;
 
 	// stage controls
 	bool				stageControlsEnabled;
@@ -268,12 +256,12 @@ private:
 	idStr				depthHack;
 	idStr				matName;
 	int					animFrames;
-	int					animRate;
-	idStr				color;
-	idStr				fadeColor;
+	float				animRate;
+	idVec4				color;
+	idVec4				fadeColor;
 	float				timeOffset;
 	float				deadTime;
-	idStr				offset;
+	float				offset[3];
 	float				xSize;
 	float				ySize;
 	float				zSize;
@@ -303,7 +291,7 @@ private:
 
 private:
 	void				EnumParticles();
-	void				AddStage();
+	void				AddStage( bool clone );
 	void				RemoveStage();
 	void				ShowStage();
 	void				HideStage();
@@ -316,14 +304,11 @@ private:
 	void				UpdateControlInfo();
 	void				SetParticleView();
 	void				UpdateParticleData();
-	//CToolTipCtrl		toolTipCtrl;
 	void				SetSelectedModel( const char *val );
 	void				EnableStageControls();
 	void				EnableEditControls();
 	void				UpdateSelectedOrigin( float x, float y, float z );
 	bool				mapModified;
-protected:
-	virtual void OnOK();
 };
 
 }

@@ -136,6 +136,49 @@ MultiSelectWidget MakePhysicsContentsSelector()
 	return MultiSelectWidget( bodyContentsNames, contentMappingFlags, 5 );
 }
 
+ColorPicker::ColorPicker( const char *_label ) {
+	label = _label;
+	color.Set( 0, 0, 0, 1.0f );
+}
+
+bool ColorPicker::Button( const idVec4 &_color ) {
+	ImVec4 col = ImVec4( _color.x, _color.y, _color.z, _color.w );
+
+	if ( ImGui::ColorButton( label, col ) ) {
+		oldColor = _color;
+		ImGui::OpenPopup( label );
+		return true;
+	}
+
+	return false;
+}
+
+bool ColorPicker::Draw() {
+	idStr realLabel;
+	bool isAccepted = false;
+
+	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		realLabel = label;
+		realLabel += "Picker";
+
+		bool changed = ImGui::ColorPicker4( realLabel.c_str(), color.ToFloatPtr(), ImGuiColorEditFlags_AlphaBar, oldColor.ToFloatPtr());
+
+		if ( ImGui::Button( "OK" ) ) {
+			isAccepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			isAccepted = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return isAccepted;
+}
+
 } //namespace ImGuiTools
 
 

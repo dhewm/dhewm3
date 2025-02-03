@@ -26,10 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "../util/ImGui_IdWidgets.h"
+
 #include "ParticleEditor.h"
 
 #include "sys/sys_imgui.h"
-#include "../util/ImGui_IdWidgets.h"
 
 #include "idlib/math/Vector.h"
 #include "idlib/math/Quat.h"
@@ -42,38 +43,14 @@ If you have questions concerning this license or the applicable additional terms
 namespace ImGuiTools
 {
 
-bool ColorPicker::Draw( const char *label, float *r, float *g, float *b, float *a ) {
-	idStr realLabel;
-	float rgba_ref[4] = { *r, *g, *b, *a };
-	float rgba[4] = { *r, *g, *b, *a };
-	bool isAccepted = false;
-
-	realLabel = label;
-	realLabel += "Popup";
-
-	ImGui::OpenPopup( realLabel.c_str() );
-
-	if ( ImGui::BeginPopupModal( realLabel.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		realLabel = label;
-		realLabel += "Picker";
-
-		bool changed = ImGui::ColorPicker4( realLabel.c_str(), rgba, ImGuiColorEditFlags_AlphaBar, rgba_ref );
-
-		if ( ImGui::Button( "OK" ) ) {
-			isAccepted = true;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Cancel" ) ) {
-			isAccepted = false;
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::EndPopup();
-	}
-
-	return isAccepted;
-}
+const char *customPathValues[] = {
+	"standard",
+	"helix",
+	"flies",
+	"spherical",
+	"drip",
+	NULL
+};
 
 bool RangeSlider::Draw( const char *label, float itemWidth, float sliderWidth ) {
 	float v = GetValue();
@@ -109,6 +86,9 @@ ParticleEditor& ParticleEditor::Instance()
 }
 
 ParticleEditor::ParticleEditor()
+	: colorDlg( "Color" )
+	, fadeColorDlg( "Fade Color" )
+	, entityColorDlg( "Entity Color" )
 {
 	isShown = false;
 }
@@ -122,6 +102,8 @@ void ParticleEditor::Draw()
 	showTool = isShown;
 
 	if ( ImGui::Begin( "Particle Editor", &showTool, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		HelpMarker( "Select a particle system to edit" );
+
 		if ( ImGui::BeginCombo( "Particle", comboPreviewValue ) ) {
 			num = comboParticle.Num();
 			for ( i = 0; i < num; i++ ) {
@@ -144,7 +126,9 @@ void ParticleEditor::Draw()
 		ButtonNew();
 
 		ImGui::SameLine();
-		if ( ImGui::Button( "Save" ) ) {
+		bool savePressed = ImGui::Button( "Save" );
+		ImGui::SetItemTooltip( "Save the current particle system" );
+		if ( savePressed ) {
 			OnBnClickedButtonSave();
 		}
 
@@ -163,19 +147,33 @@ void ParticleEditor::Draw()
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 
-			if ( ImGui::Button( "+" ) ) {
-				AddStage();
+			bool addStagePressed = ImGui::Button( "+" );
+			ImGui::SetItemTooltip( "Add a new generic stage" );
+			if ( addStagePressed ) {
+				AddStage( false );
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "-" ) ) {
+			bool cloneStagePressed = ImGui::Button( "C" );
+			ImGui::SetItemTooltip( "Clone the selected stage" );
+			if ( cloneStagePressed ) {
+				AddStage( true );
+			}
+			ImGui::SameLine();
+			bool removeStagePressed = ImGui::Button( "-" );
+			ImGui::SetItemTooltip( "Remove the selected stage" );
+			if ( removeStagePressed ) {
 				RemoveStage();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "H" ) ) {
+			bool hideStagePressed = ImGui::Button( "H" );
+			ImGui::SetItemTooltip( "Hide the selected stage" );
+			if ( hideStagePressed ) {
 				HideStage();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "S" ) ) {
+			bool showStagePressed = ImGui::Button( "S" );
+			ImGui::SetItemTooltip( "Show the selected stage" );
+			if ( showStagePressed ) {
 				ShowStage();
 			}
 
@@ -212,27 +210,25 @@ void ParticleEditor::Draw()
 			if ( ImGui::Button( "...###BrowseMaterial" ) ) {
 				OnBnClickedButtonBrowsematerial();
 			}
-			ImGui::SetNextItemWidth(50);
-			if ( ImGui::InputInt( "Anim Frames", &animFrames, ImGuiInputTextFlags_CharsDecimal ) ) {
+			ImGui::SetNextItemWidth(70);
+			if ( ImGui::InputInt( "Anim Frames", &animFrames, 0 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
 			ImGui::SameLine();
-			ImGui::SetNextItemWidth(50);
-			if ( ImGui::InputInt( "Anim Rate", &animRate, ImGuiInputTextFlags_CharsDecimal) ) {
+			ImGui::SetNextItemWidth(70);
+			if ( ImGui::InputFloat( "Anim Rate", &animRate ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
 
-			/*
-			* color
-			* fadecolor
-			* entity color checkbox
-			*/
-			//OnBnClickedButtonBrowsecolor
-			//OnBnClickedButtonBrowsefadecolor
-			//OnBnClickedEntityColor
+			ButtonColor();
 
+			ButtonFadeColor();
+
+			if ( ImGui::Checkbox( "Entity Color", &entityColor ) ) {
+				OnBnClickedEntityColor();
+			}
 			
 			if ( sliderFadeIn.Draw( "Fade In %", 50, 150 ) ) {
 				DlgVarsToCurStage();
@@ -254,16 +250,22 @@ void ParticleEditor::Draw()
 			ImGui::EndTable();
 		}
 
-		if ( sliderCount.Draw( "Count", 50, 300 ) ) {
+		bool countPressed = sliderCount.Draw( "Count", 50, 300 );
+		ImGui::SetItemTooltip( "How many particles there are (at any moment)" );
+		if ( countPressed ) {
 			DlgVarsToCurStage();
 			CurStageToDlgVars();
 		}
-		if ( sliderTime.Draw( "Time", 50, 300 ) ) {
+		bool timePressed = sliderTime.Draw( "Time", 50, 300 );
+		ImGui::SetItemTooltip( "How long one cycle of the effect will last in seconds" );
+		if ( timePressed ) {
 			DlgVarsToCurStage();
 			CurStageToDlgVars();
 		}
 		ImGui::SetNextItemWidth(50);
-		if ( ImGui::InputFloat( "Cycles", &cycles ) ) {
+		bool cyclesPressed = ImGui::InputFloat( "Cycles", &cycles );
+		ImGui::SetItemTooltip( "Determines how many times the particle effect will repeat (0 = infinite, 1 = single time)" );
+		if ( cyclesPressed ) {
 			DlgVarsToCurStage();
 			CurStageToDlgVars();
 		}
@@ -311,8 +313,8 @@ void ParticleEditor::Draw()
 					OnBnClickedRadioSphere();
 				}
 				ImGui::TextUnformatted( "Offset" );
-				ImGui::SetNextItemWidth( 70 );
-				if ( ImGui::InputTextStr( "###Offset", &offset ) ) {
+				ImGui::SetNextItemWidth( 100 );
+				if ( ImGui::InputFloat3( "###Offset", offset ) ) {
 					DlgVarsToCurStage();
 					CurStageToDlgVars();
 				}
@@ -334,10 +336,12 @@ void ParticleEditor::Draw()
 					CurStageToDlgVars();
 				}
 				ImGui::SetNextItemWidth( 70 );
+				ImGui::BeginDisabled( !editRingOffsetEnabled );
 				if ( ImGui::InputFloat( "Ring", &ringOffset ) ) {
 					DlgVarsToCurStage();
 					CurStageToDlgVars();
 				}
+				ImGui::EndDisabled();
 
 				ImGui::EndTable();
 			}
@@ -363,11 +367,15 @@ void ParticleEditor::Draw()
 
 				ImGui::TableSetColumnIndex( 1 );
 				ImGui::SetNextItemWidth( 70 );
-				if ( ImGui::RadioButton( "View", orientation == 0 ) ) {
+				bool radioViewPressed = ImGui::RadioButton( "View", orientation == 0 );
+				ImGui::SetItemTooltip( "Render particle aligned to the viewer" );
+				if ( radioViewPressed ) {
 					OnBnClickedRadioView();
 				}
 				ImGui::SetNextItemWidth( 70 );
-				if ( ImGui::RadioButton( "Aimed", orientation == 1 ) ) {
+				bool radioAimedPressed = ImGui::RadioButton( "Aimed", orientation == 1 );
+				ImGui::SetItemTooltip( "Stretch every particle along its movement direction, drawing a trail behind particle" );
+				if ( radioAimedPressed ) {
 					OnBnClickedRadioAimed();
 				}
 
@@ -397,14 +405,22 @@ void ParticleEditor::Draw()
 				}
 
 				ImGui::TableSetColumnIndex( 2 );
-				if ( ImGui::InputFloat( "Trails", &trails ) ) {
+				ImGui::BeginDisabled( !editOrientationParm1Enabled );
+				bool trailsPressed = ImGui::InputFloat( "Trails", &trails );
+				ImGui::SetItemTooltip( "Set to 0 for straight trail. Set to > 0 for curved trails." );
+				if ( trailsPressed ) {
 					DlgVarsToCurStage();
 					CurStageToDlgVars();
 				}
-				if ( ImGui::InputFloat( "Time", &trailTime ) ) {
+				ImGui::EndDisabled();
+				ImGui::BeginDisabled( !editOrientationParm2Enabled );
+				bool trailTimePressed = ImGui::InputFloat( "Time", &trailTime );
+				ImGui::SetItemTooltip( "The duration in seconds of the trail" );
+				if ( trailTimePressed ) {
 					DlgVarsToCurStage();
 					CurStageToDlgVars();
 				}
+				ImGui::EndDisabled();
 
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex( 0 );
@@ -479,8 +495,20 @@ void ParticleEditor::Draw()
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex( 0 );
-			if ( ImGui::InputTextStr( "Custom Path", &customPath ) ) {
-				OnCbnSelchangeComboPath();
+			if ( ImGui::BeginCombo( "Custom Path", customPath.c_str() ) ) {
+				for ( i = 0; customPathValues[i]; i++ ) {
+					ImGui::PushID(0);
+					bool selected = ( customPath == customPathValues[i]);
+					if ( ImGui::Selectable( customPathValues[i], selected)) {
+						customPath = customPathValues[i];
+						OnCbnSelchangeComboPath();
+					}
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+					ImGui::PopID();
+				}
+				ImGui::EndCombo();
 			}
 
 			ImGui::TableSetColumnIndex( 1 );
@@ -503,26 +531,38 @@ void ParticleEditor::Draw()
 			ImGui::TableSetColumnIndex( 0 );
 			ImGui::SeparatorText( "Doom Stuff" );
 
-			if ( ImGui::Button( "T" ) ) {
+			bool testModel = ImGui::Button( "T" );
+			ImGui::SetItemTooltip( "Show the selected particle as a testmodel" );
+			if ( testModel ) {
 				OnBnClickedTestModel();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "I" ) ) {
+			bool impact = ImGui::Button( "I" );
+			ImGui::SetItemTooltip( "Show the selected particle on projectile impact" );
+			if ( impact ) {
 				OnBnClickedImpact();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "M" ) ) {
+			bool muzzle = ImGui::Button( "M" );
+			ImGui::SetItemTooltip( "Show the selected particle as muzzle smoke" );
+			if ( muzzle ) {
 				OnBnClickedMuzzle();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "F" ) ) {
+			bool flight = ImGui::Button( "F ");
+			ImGui::SetItemTooltip( "Show the selected particle as projectile flight smoke" );
+			if ( flight ) {
 				OnBnClickedFlight();
 			}
 			ImGui::SameLine();
-			if ( ImGui::Button( "S" ) ) {
+			bool selectedEntity = ImGui::Button( "S" );
+			ImGui::SetItemTooltip( "Show the selected particle on the selected entity" );
+			if ( selectedEntity ) {
 				OnBnClickedSelected();
 			}
-			if ( ImGui::Button( "Switch to DOOM" ) ) {
+			bool switchToDoom = ImGui::Button( "Switch to DOOM" );
+			ImGui::SetItemTooltip( "Force focus to DOOM" );
+			if ( switchToDoom ) {
 				OnBnClickedDoom();
 			}
 			
@@ -536,7 +576,7 @@ void ParticleEditor::Draw()
 					OnBnClickedParticleMode();
 				}
 				ImGui::BeginDisabled( !editControlsEnabled );
-				if (ImGui::Button("Drop")) {
+				if ( ImGui::Button( "Drop" ) ) {
 					OnBtnDrop();
 				}
 
@@ -591,11 +631,11 @@ void ParticleEditor::Draw()
 				}
 				
 				ImGui::TableSetColumnIndex( 4 );
-				if ( ImGui::Button( "Color" ) ) {
-					OnBnClickedButtonBrowseEntitycolor();
-				}
+				ButtonEntityColor();
 
-				if ( ImGui::Button( "Save .MAP" ) ) {
+				bool saveMap = ImGui::Button( "Save .MAP" );
+				ImGui::SetItemTooltip( "Save the current map with any updated particle emitter entities" );
+				if ( saveMap ) {
 					OnBnClickedButtonSaveParticles();
 				}
 				ImGui::EndDisabled();
@@ -702,78 +742,77 @@ void ParticleEditor::OnBnClickedButtonBrowsematerial() {
 	}*/
 }
 
-void ParticleEditor::OnBnClickedButtonBrowsecolor() {
-	float r, g, b;
-	float ob;
-	idParticleStage *ps = GetCurStage();
-	if ( ps == NULL ) {
-		return;
-	}
-	r = ps->color.x;
-	g = ps->color.y;
-	b = ps->color.z;
-	ob = 1.0f;
+void ParticleEditor::ButtonColor() {
+	colorDlg.Button( color );
+	ImGui::SetItemTooltip( "Color that the material will be multiplied by" );
+	ImGui::SameLine();
+	ImGui::TextUnformatted( "Color" );
 
-	if ( colorPickerDlg.Draw( "##Browsecolor", &r, &g, &b, &ob ) ) {
-		color.Format( "%f %f %f %f", (float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, 1.0f );
-		DlgVarsToCurStage();
-		CurStageToDlgVars();
+	if ( colorDlg.Draw() ) {
+		idParticleStage *ps = GetCurStage();
+		if ( ps ) {
+			color = colorDlg.GetColor();
+			color.w = 1.0f;
+			DlgVarsToCurStage();
+			CurStageToDlgVars();
+		}
 	}
 }
 
-void ParticleEditor::OnBnClickedButtonBrowseEntitycolor() {
-	float r, g, b;
-	float ob;
+void ParticleEditor::ButtonEntityColor() {
 	idList<idEntity*> list;
 	idDict dict2;
 	idStr str;
 	list.SetNum( 128 );
 	int count = gameEdit->GetSelectedEntities( list.Ptr(), list.Num() );
 	list.SetNum( count );
+	idVec3 selectedEntityColor = vec3_origin;
 
 	if ( count ) {
 		const idDict *dict = gameEdit->EntityGetSpawnArgs( list[0] );
 		if ( dict ) {
-			idVec3 clr = dict->GetVector( "_color", "1 1 1" );
-			r = clr.x;
-			g = clr.y;
-			b = clr.z;
-			ob = 1.0f;
-			if ( colorPickerDlg.Draw( "###browseEntitycolor", &r, &g, &b, &ob ) ) {
-				for ( int i = 0; i < count; i++ ) {
-					dict = gameEdit->EntityGetSpawnArgs( list[i] );
-					const char *name = dict->GetString( "name" );
-					idEntity *ent = gameEdit->FindEntity( name );
-					if ( ent ) {
-						gameEdit->EntitySetColor( ent, idVec3( r, g, b ) );
-						str = va( "%f %f %f", r, g, b );
-						dict2.Clear();
-						dict2.Set( "_color", str );
-						gameEdit->EntityChangeSpawnArgs( ent, &dict2 );
-						gameEdit->MapSetEntityKeyVal( name, "_color",  str );
-					}
+			selectedEntityColor = dict->GetVector( "_color", "1 1 1" );
+		}
+	}
+
+	entityColorDlg.Button( idVec4( selectedEntityColor.x, selectedEntityColor.y, selectedEntityColor.z, 1.0f ) );
+	
+	if ( entityColorDlg.Draw() ) {
+		if ( count ) {
+			idVec3 clr = entityColorDlg.GetColor().ToVec3();
+
+			for ( int i = 0; i < count; i++ ) {
+				const idDict *dict = gameEdit->EntityGetSpawnArgs( list[i] );
+				const char *name = dict->GetString( "name" );
+				idEntity *ent = gameEdit->FindEntity( name );
+				if ( ent ) {
+					gameEdit->EntitySetColor( ent, clr );
+					str = va( "%f %f %f", clr.x, clr.y, clr.z );
+					dict2.Clear();
+					dict2.Set( "_color", str );
+					gameEdit->EntityChangeSpawnArgs( ent, &dict2 );
+					gameEdit->MapSetEntityKeyVal( name, "_color",  str );
 				}
 			}
+			buttonSaveParticleEntitiesEnabled = true;
 		}
-		buttonSaveParticleEntitiesEnabled = true;
 	}
 }
 
-void ParticleEditor::OnBnClickedButtonBrowsefadecolor() {
-	float r, g, b;
-	float ob;
-	idParticleStage *ps = GetCurStage();
-	if ( ps == NULL ) {
-		return;
-	}
-	r = ps->fadeColor.x;
-	g = ps->fadeColor.y;
-	b = ps->fadeColor.z;
-	ob = 1.0f;
-	if ( colorPickerDlg.Draw( "###Browsefadecolor", &r, &g, &b, &ob ) ) {
-		fadeColor.Format( "%f %f %f %f", r, g, b, 1.0f );
-		DlgVarsToCurStage();
-		CurStageToDlgVars();
+void ParticleEditor::ButtonFadeColor() {
+	fadeColorDlg.Button( fadeColor );
+	ImGui::SetItemTooltip( "Material will be multiplied by the color of a fully faded out particle" );
+	ImGui::SameLine();
+	ImGui::TextUnformatted( "Fade Color" );
+
+	if ( fadeColorDlg.Draw() ) {
+		idParticleStage *ps = GetCurStage();
+		if ( ps ) {
+			fadeColor = fadeColorDlg.GetColor();
+			fadeColor.w = 1.0f;
+			DlgVarsToCurStage();
+			CurStageToDlgVars();
+		}
 	}
 }
 
@@ -1036,13 +1075,12 @@ void ParticleEditor::OnBnClickedWorldGravity() {
 }
 
 void ParticleEditor::OnBnClickedEntityColor() {
-	entityColor = !entityColor;
 	DlgVarsToCurStage();
 	CurStageToDlgVars();
 }
 
 
-void ParticleEditor::AddStage() {
+void ParticleEditor::AddStage( bool clone ) {
 
 	idDeclParticle *idp = GetCurParticle();
 	if ( idp == NULL ) {
@@ -1051,7 +1089,7 @@ void ParticleEditor::AddStage() {
 
 	idParticleStage *stage = new idParticleStage;
 
-	if ( ( GetAsyncKeyState(VK_CONTROL) & 0x8000 ) ) {
+	if ( clone ) {
 		idParticleStage *source = GetCurStage();
 		if ( source == NULL ) {
 			delete stage;
@@ -1141,19 +1179,21 @@ idParticleStage *ParticleEditor::GetCurStage() {
 }
 
 void ParticleEditor::ClearDlgVars() {
-	matName = "";
-	color = "";
-	fadeColor = "";
-	offset = "";
+	matName.Clear();
+	color = idVec4(0, 0, 0, 1);
+	fadeColor = idVec4(0, 0, 0, 1);
+	offset[0] = 0;
+	offset[1] = 0;
+	offset[2] = 0;
 	direction = 1;
 	orientation = 1;
 	distribution = 1;
-	customPath = "";
-	customParms = "";
-	worldGravity = FALSE;
-	entityColor = FALSE;
-	randomDistribution = TRUE;
-	customDesc = "";
+	customPath.Clear();
+	customParms.Clear();
+	worldGravity = false;
+	entityColor = false;
+	randomDistribution = true;
+	customDesc.Clear();
 }
 
 void ParticleEditor::CurStageToDlgVars() {
@@ -1173,18 +1213,26 @@ void ParticleEditor::CurStageToDlgVars() {
 	matName = ps->material->GetName();
 	animFrames = ps->animationFrames;
 	animRate = ps->animationRate;
-	color = ps->color.ToString();
-	fadeColor = ps->fadeColor.ToString();
+	color.x = ps->color.x;
+	color.y = ps->color.y;
+	color.z = ps->color.z;
+	color.w = ps->color.w;
+	fadeColor.x = ps->fadeColor.x;
+	fadeColor.y = ps->fadeColor.y;
+	fadeColor.z = ps->fadeColor.z;
+	fadeColor.w = ps->fadeColor.w;
 	sliderFadeIn.SetValuePos( ps->fadeInFraction );
 	sliderFadeOut.SetValuePos( ps->fadeOutFraction );
 	sliderFadeFraction.SetValuePos( ps->fadeIndexFraction );
-	sliderCount.SetPos( ps->totalParticles );
+	sliderCount.SetValuePos( ps->totalParticles );
 	sliderTime.SetValuePos( ps->particleLife );
 	timeOffset = ps->timeOffset;
 	deadTime = ps->deadTime;
 	sliderGravity.SetValuePos( ps->gravity );
 	sliderBunching.SetValuePos( ps->spawnBunching );
-	offset = ps->offset.ToString( 0 );
+	offset[0] = ps->offset.x;
+	offset[1] = ps->offset.y;
+	offset[2] = ps->offset.z;
 	xSize = ps->distributionParms[0];
 	ySize = ps->distributionParms[1];
 	zSize = ps->distributionParms[2];
@@ -1205,8 +1253,8 @@ void ParticleEditor::CurStageToDlgVars() {
 	trailTime = ps->orientationParms[1];
 	cycles = ps->cycles;
 	customPath = ps->GetCustomPathName();
-	customParms = "";
 	customDesc = ps->GetCustomPathDesc();
+	customParms.Clear();
 	if ( ps->customPathType != PPATH_STANDARD ) {
 		for ( int i = 0; i < ps->NumCustomPathParms(); i++ ) {
 			customParms += va( "%.1f ", ps->customPathParms[i] );
@@ -1235,8 +1283,14 @@ void ParticleEditor::DlgVarsToCurStage() {
 	ps->material = declManager->FindMaterial( matName );
 	ps->animationFrames = animFrames;
 	ps->animationRate = animRate;
-	sscanf( color, "%f %f %f %f", &ps->color.x, &ps->color.y, &ps->color.z, &ps->color.w );
-	sscanf( fadeColor, "%f %f %f %f", &ps->fadeColor.x, &ps->fadeColor.y, &ps->fadeColor.z, &ps->fadeColor.w );
+	ps->color.x = color.x;
+	ps->color.y = color.y;
+	ps->color.z = color.z;
+	ps->color.w = color.w;
+	ps->fadeColor.x = fadeColor.x;
+	ps->fadeColor.y = fadeColor.y;
+	ps->fadeColor.z = fadeColor.z;
+	ps->fadeColor.w = fadeColor.w;
 	ps->fadeInFraction = sliderFadeIn.GetValue();
 	ps->fadeOutFraction = sliderFadeOut.GetValue();
 	ps->fadeIndexFraction = sliderFadeFraction.GetValue();
@@ -1246,7 +1300,9 @@ void ParticleEditor::DlgVarsToCurStage() {
 	ps->deadTime = deadTime;
 	ps->gravity = sliderGravity.GetValue();
 	ps->spawnBunching = sliderBunching.GetValue();
-	sscanf( offset, "%f %f %f", &ps->offset.x, &ps->offset.y, &ps->offset.z );
+	ps->offset.x = offset[0];
+	ps->offset.y = offset[1];
+	ps->offset.z = offset[2];
 	ps->distributionParms[0] = xSize;
 	ps->distributionParms[1] = ySize;
 	ps->distributionParms[2] = zSize;
@@ -1277,8 +1333,8 @@ void ParticleEditor::DlgVarsToCurStage() {
 
 	ps->initialAngle = initialAngle;
 	ps->boundsExpansion = boundsExpansion;
-	ps->randomDistribution = ( randomDistribution != false );
-	ps->entityColor = ( entityColor == true );
+	ps->randomDistribution = randomDistribution;
+	ps->entityColor = entityColor;
 
 }
 
@@ -1300,7 +1356,11 @@ void ParticleEditor::OnLbnSelchangeListStages() {
 void ParticleEditor::ButtonNew() {
 	idStr fileName;
 
-	if ( !ImGui::Button( "New" ) ) {
+	bool pressed = ImGui::Button( "New" );
+
+	ImGui::SetItemTooltip( "Create a new particle system" );
+
+	if ( !pressed ) {
 		return;
 	}
 
@@ -1414,34 +1474,11 @@ void ParticleEditor::Reset()
 	EnumParticles();
 	SetParticleView();
 
-	/*
-	toolTipCtrl.Create( this );
-	toolTipCtrl.Activate( TRUE );
-
-	CWnd* wnd = GetWindow( GW_CHILD );
-	CString str;
-	while ( wnd ) {
-		if ( str.LoadString( wnd->GetDlgCtrlID() ) ) {
-			toolTipCtrl.AddTool( wnd, str );
-		}
-		wnd = wnd->GetWindow( GW_HWNDNEXT );
-	}
-	*/
-
 	buttonSaveParticleEntitiesEnabled = false;
 	EnableEditControls();
 
 	//vectorControl.SetVectorChangingCallback( VectorCallBack );
 }
-
-/*
-BOOL ParticleEditor::PreTranslateMessage(MSG *pMsg) {
-	if ( pMsg->message >= WM_MOUSEFIRST && pMsg->message <= WM_MOUSELAST ) {
-		toolTipCtrl.RelayEvent( pMsg );
-	}
-	return CDialog::PreTranslateMessage(pMsg);
-}
-*/
 
 void ParticleEditor::EnableStageControls() {
 	idParticleStage *stage = GetCurStage();
@@ -1565,13 +1602,6 @@ void ParticleEditor::OnBtnDrop()
 	}
 
 	gameEdit->MapAddEntity( &args );
-}
-
-void ParticleEditor::OnOK()
-{
-	// never return on OK as windows will map this at times when you don't want
-	// ENTER closing the dialog
-	// CDialog::OnOK();
 }
 
 }

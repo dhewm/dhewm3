@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "idlib/Str.h"
 #include "idlib/containers/List.h"
+#include "idlib/math/Vector.h"
 
 namespace ImGuiTools
 {
@@ -65,6 +66,24 @@ void HelpMarker( const char* desc );
 bool StringListItemGetter( void* data, int index, const char** outText );
 
 MultiSelectWidget MakePhysicsContentsSelector();
+
+class ColorPicker {
+public:
+				ColorPicker( const char *label );
+
+	bool		Button( const idVec4 &_color );
+	bool		Draw();
+
+	ID_INLINE const idVec4&		GetColor() { return color; }
+	ID_INLINE void				SetColor( idVec4 &c ) {
+		color = oldColor = c;
+	}
+
+private:
+	const char *		label;
+	idVec4				color;
+	idVec4				oldColor;
+};
 
 } //namespace ImGuiTools
 
