@@ -118,23 +118,8 @@ protected:
 	void		ButtonColor();
 	void		ButtonFadeColor();
 	void		ButtonEntityColor();
-	void		OnBnClickedRadioRect();
-	void		OnBnClickedRadioSphere();
-	void		OnBnClickedRadioCylinder();
-	void		OnBnClickedRadioCone();
-	void		OnBnClickedRadioOutward();
-	void		OnBnClickedRadioView();
-	void		OnBnClickedRadioAimed();
-	void		OnBnClickedRadioX();
-	void		OnBnClickedRadioY();
-	void		OnBnClickedRadioZ();
-	void		OnBnClickedCheckOneshot();
-	void		ButtonNew();
 	void		OnBnClickedButtonSave();
-	void		ButtonSaveAs();
 	void		OnBnClickedButtonSaveParticles();
-	void		OnBnClickedWorldGravity();
-	void		OnBnClickedEntityColor();
 	void		OnBnClickedTestModel();
 	void		OnBnClickedImpact();
 	void		OnBnClickedMuzzle();
@@ -155,6 +140,10 @@ protected:
 private:
 	bool				isShown;
 
+	int					fileSelection;
+	idList<idStr>		prtFiles;
+	idStr				fileName;
+
 	idStr				inFileText;
 
 	bool				buttonSaveParticleEntitiesEnabled;
@@ -162,6 +151,10 @@ private:
 	ColorPicker			colorDlg;
 	ColorPicker			fadeColorDlg;
 	ColorPicker			entityColorDlg;
+
+	int					materialDeclSelection;
+	idList<idStr>		materialDecls;
+	idStr				materialDeclName;
 
 	// edit controls
 	bool				editControlsEnabled;
@@ -231,6 +224,7 @@ private:
 	bool				comboCustomPathEnabled;
 	bool				checkEntityColorEnabled;
 	
+	bool				shouldPopulate;
 	idList<idStr>		comboParticle;
 	int					comboParticleSel;
 	idList<idStr>		listStages;

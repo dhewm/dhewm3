@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/Heap.h"
 #include "idlib/containers/StrList.h"
 #include "ImGui_IdWidgets.h"
+
 #include "renderer/Material.h"
 
 static const char* bodyContentsNames[5] =
@@ -350,4 +351,3 @@ bool ImGui::InputMessageBox( const char *text, const char* label, bool allowCanc
 
 	return accepted;
 }
-

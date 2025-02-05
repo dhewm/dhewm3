@@ -43,7 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 namespace ImGuiTools
 {
 
-const char *customPathValues[] = {
+static const char *customPathValues[] = {
 	"standard",
 	"helix",
 	"flies",
@@ -89,6 +89,9 @@ ParticleEditor::ParticleEditor()
 	: colorDlg( "Color" )
 	, fadeColorDlg( "Fade Color" )
 	, entityColorDlg( "Entity Color" )
+	, fileSelection(0)
+	, materialDeclSelection(0)
+	, shouldPopulate(false)
 {
 	isShown = false;
 }
@@ -96,40 +99,144 @@ ParticleEditor::ParticleEditor()
 void ParticleEditor::Draw()
 {
 	int i, num;
-	const char* comboPreviewValue = comboParticleSel >= 0 ? comboParticle[comboParticleSel].c_str() : nullptr;
 	bool showTool;
+	bool clickedNew = false, openedParticleBrowser = false;
 
 	showTool = isShown;
 
-	if ( ImGui::Begin( "Particle Editor", &showTool, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		HelpMarker( "Select a particle system to edit" );
+	if ( ImGui::Begin( "Particle Editor", &showTool, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar ) ) {
+		impl::SetReleaseToolMouse( true );
 
-		if ( ImGui::BeginCombo( "Particle", comboPreviewValue ) ) {
-			num = comboParticle.Num();
-			for ( i = 0; i < num; i++ ) {
-				ImGui::PushID(i);
-				bool selected = ( comboParticleSel == i );
-
-				if ( ImGui::Selectable( comboParticle[i].c_str(), selected ) ) {
-					comboParticleSel = i;
-					OnCbnSelchangeComboParticles();
+		if( ImGui::BeginMenuBar() )
+		{
+			if( ImGui::BeginMenu( "File" ) )
+			{
+				if( ImGui::MenuItem( "New", "Ctrl+N" ) )
+				{
+					clickedNew = true;
 				}
 
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
+				if( ImGui::MenuItem( "Open..", "Ctrl+O" ) )
+				{
+					shouldPopulate = true;
+					openedParticleBrowser = true;
 				}
-				ImGui::PopID();
+
+				if( ImGui::MenuItem( "Save", "Ctrl+S" ) )
+				{
+					OnBnClickedButtonSave();
+				}
+
+				if( ImGui::MenuItem( "Close", "Ctrl+W" ) )
+				{
+					showTool = false;
+				}
+
+				ImGui::EndMenu();
 			}
-			ImGui::EndCombo();
+			ImGui::EndMenuBar();
 		}
-		ImGui::SameLine();
-		ButtonNew();
 
-		ImGui::SameLine();
-		bool savePressed = ImGui::Button( "Save" );
-		ImGui::SetItemTooltip( "Save the current particle system" );
-		if ( savePressed ) {
-			OnBnClickedButtonSave();
+		if( clickedNew )
+		{
+			ImGui::OpenPopup( "New Particle System" );
+		}
+
+		if( ImGui::BeginPopupModal( "New Particle System" ) )
+		{
+			if( prtFiles.Num() == 0 )
+			{
+				idFileList* files = fileSystem->ListFiles( "particles", ".prt", true, true );
+				for( int i = 0; i < files->GetNumFiles(); i++ )
+				{
+					prtFiles.Append( files->GetFile( i ) );
+				}
+				fileSystem->FreeFileList( files );
+			}
+
+			ImGui::BeginListBox( "##prtFileSelect" );
+			for( int i = 0; i < prtFiles.Num(); i++ )
+			{
+				if( ImGui::ListBox( "Files", &fileSelection, StringListItemGetter, &prtFiles, prtFiles.Num() ) )
+				{
+					fileName = prtFiles[fileSelection];
+				}
+			}
+			ImGui::EndListBox();
+
+			ImGui::SameLine();
+			ImGui::SmallButton( "New File" );
+
+			ImGui::InputTextStr( "Particle System Name", &fileName );
+			if( ImGui::Button( "Create" ) )
+			{
+				idStr prtName = fileName;
+				prtName.StripPath();
+				prtName.StripFileExtension();
+
+				if( !prtName.IsEmpty() )
+				{
+					idDeclParticle *newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, prtName.c_str(), false ) ) );
+					if( !newDecl )
+					{
+						// create it
+						newDecl = static_cast<idDeclParticle*>( declManager->CreateNewDecl( DECL_PARTICLE, prtName.c_str(), fileName.c_str() ) );
+					}
+
+					comboParticleSel = comboParticle.Append( prtName );
+
+					OnCbnSelchangeComboParticles();
+
+					ImGui::CloseCurrentPopup();
+				}
+			}
+
+			ImGui::SameLine();
+			if( ImGui::Button( "Close" ) )
+			{
+				prtFiles.Clear();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		if( openedParticleBrowser )
+		{
+			ImGui::OpenPopup( "Particle System Browser" );
+		}
+
+		if( ImGui::BeginPopup( "Particle System Browser" ) )
+		{
+			if ( shouldPopulate ) {
+				EnumParticles();
+				shouldPopulate = false;
+			}
+			if( comboParticle.Num() > 0 )
+			{
+				ImGui::Combo( "Particle Systems", &comboParticleSel, &StringListItemGetter, &comboParticle, comboParticle.Num() );
+				if( ImGui::Button( "Select" ) )
+				{
+					idDeclParticle* newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, comboParticle[comboParticleSel], false ) ) );
+					if( newDecl )
+					{
+						OnCbnSelchangeComboParticles();
+					}
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			else
+			{
+				ImGui::Text( "There are no particle systems!" );
+			}
+
+			ImGui::SameLine();
+
+			if( ImGui::Button( "Close" ) )
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 
 		ImGui::TextUnformatted( inFileText.c_str() );
@@ -139,8 +246,6 @@ void ParticleEditor::Draw()
 			CurStageToDlgVars();
 			DlgVarsToCurStage();
 		}
-		ImGui::SameLine();
-		ButtonSaveAs();
 
 		ImGui::Text( "Stages" );
 		if ( ImGui::BeginTable( "stagesTable", 2 ) ) {
@@ -208,8 +313,9 @@ void ParticleEditor::Draw()
 			}
 			ImGui::SameLine();
 			if ( ImGui::Button( "...###BrowseMaterial" ) ) {
-				OnBnClickedButtonBrowsematerial();
+				ImGui::OpenPopup("Select Material");
 			}
+			OnBnClickedButtonBrowsematerial();
 			ImGui::SetNextItemWidth(70);
 			if ( ImGui::InputInt( "Anim Frames", &animFrames, 0 ) ) {
 				DlgVarsToCurStage();
@@ -227,7 +333,8 @@ void ParticleEditor::Draw()
 			ButtonFadeColor();
 
 			if ( ImGui::Checkbox( "Entity Color", &entityColor ) ) {
-				OnBnClickedEntityColor();
+				DlgVarsToCurStage();
+				CurStageToDlgVars();
 			}
 			
 			if ( sliderFadeIn.Draw( "Fade In %", 50, 150 ) ) {
@@ -283,7 +390,8 @@ void ParticleEditor::Draw()
 		}
 
 		if ( ImGui::Checkbox( "World gravity", &worldGravity ) ) {
-			OnBnClickedWorldGravity();
+			DlgVarsToCurStage();
+			CurStageToDlgVars();
 		}
 		ImGui::SameLine();
 		if ( sliderGravity.Draw( "Gravity", 50, 300 ) ) {
@@ -302,15 +410,24 @@ void ParticleEditor::Draw()
 				ImGui::TableSetColumnIndex( 0 );
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Rect", distribution == 0 ) ) {
-					OnBnClickedRadioRect();
+					distribution = 0;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Cylinder", distribution == 1 ) ) {
-					OnBnClickedRadioCylinder();
+					distribution = 1;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Sphere", distribution == 2 ) ) {
-					OnBnClickedRadioSphere();
+					distribution = 2;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::TextUnformatted( "Offset" );
 				ImGui::SetNextItemWidth( 100 );
@@ -358,11 +475,17 @@ void ParticleEditor::Draw()
 				ImGui::TableSetColumnIndex( 0 );
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Cone", direction == 0 ) ) {
-					OnBnClickedRadioCone();
+					direction = 0;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Outward", direction == 1 ) ) {
-					OnBnClickedRadioOutward();
+					direction = 1;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 
 				ImGui::TableSetColumnIndex( 1 );
@@ -370,13 +493,19 @@ void ParticleEditor::Draw()
 				bool radioViewPressed = ImGui::RadioButton( "View", orientation == 0 );
 				ImGui::SetItemTooltip( "Render particle aligned to the viewer" );
 				if ( radioViewPressed ) {
-					OnBnClickedRadioView();
+					orientation = 0;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::SetNextItemWidth( 70 );
 				bool radioAimedPressed = ImGui::RadioButton( "Aimed", orientation == 1 );
 				ImGui::SetItemTooltip( "Stretch every particle along its movement direction, drawing a trail behind particle" );
 				if ( radioAimedPressed ) {
-					OnBnClickedRadioAimed();
+					orientation = 1;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 
 				ImGui::TableSetColumnIndex( 2 );
@@ -393,15 +522,24 @@ void ParticleEditor::Draw()
 				ImGui::TableSetColumnIndex( 1 );
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "X", orientation == 2 ) ) {
-					OnBnClickedRadioX();
+					orientation = 2;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Y", orientation == 3 ) ) {
-					OnBnClickedRadioY();
+					orientation = 3;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 				ImGui::SetNextItemWidth( 70 );
 				if ( ImGui::RadioButton( "Z", orientation == 4 ) ) {
-					OnBnClickedRadioZ();
+					orientation = 4;
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+					UpdateControlInfo();
 				}
 
 				ImGui::TableSetColumnIndex( 2 );
@@ -534,31 +672,36 @@ void ParticleEditor::Draw()
 			bool testModel = ImGui::Button( "T" );
 			ImGui::SetItemTooltip( "Show the selected particle as a testmodel" );
 			if ( testModel ) {
-				OnBnClickedTestModel();
+				visualization = TESTMODEL;
+				SetParticleView();
 			}
 			ImGui::SameLine();
 			bool impact = ImGui::Button( "I" );
 			ImGui::SetItemTooltip( "Show the selected particle on projectile impact" );
 			if ( impact ) {
-				OnBnClickedImpact();
+				visualization = IMPACT;
+				SetParticleView();
 			}
 			ImGui::SameLine();
 			bool muzzle = ImGui::Button( "M" );
 			ImGui::SetItemTooltip( "Show the selected particle as muzzle smoke" );
 			if ( muzzle ) {
-				OnBnClickedMuzzle();
+				visualization = MUZZLE;
+				SetParticleView();
 			}
 			ImGui::SameLine();
 			bool flight = ImGui::Button( "F ");
 			ImGui::SetItemTooltip( "Show the selected particle as projectile flight smoke" );
 			if ( flight ) {
-				OnBnClickedFlight();
+				visualization = FLIGHT;
+				SetParticleView();
 			}
 			ImGui::SameLine();
 			bool selectedEntity = ImGui::Button( "S" );
 			ImGui::SetItemTooltip( "Show the selected particle on the selected entity" );
 			if ( selectedEntity ) {
-				OnBnClickedSelected();
+				visualization = SELECTED;
+				SetParticleView();
 			}
 			bool switchToDoom = ImGui::Button( "Switch to DOOM" );
 			ImGui::SetItemTooltip( "Force focus to DOOM" );
@@ -651,8 +794,8 @@ void ParticleEditor::Draw()
 	if ( isShown && !showTool )
 	{
 		isShown = showTool;
-		impl::SetReleaseToolMouse(false);
-		D3::ImGuiHooks::CloseWindow(D3::ImGuiHooks::D3_ImGuiWin_ParticleEditor);
+		impl::SetReleaseToolMouse( false );
+		D3::ImGuiHooks::CloseWindow( D3::ImGuiHooks::D3_ImGuiWin_ParticleEditor );
 	}
 }
 
@@ -663,83 +806,61 @@ void ParticleEditor::OnBnClickedParticleMode() {
 	EnableEditControls();
 }
 
-
-void ParticleEditor::ButtonSaveAs() {
-	idDeclParticle *idp = GetCurParticle();
-
-	if ( ImGui::Button( "Save As" ) ) {
-		ImGui::OpenPopup( "New Particle" );
-	}
-
-	bool accepted = false;
-	idStr name;
-
-	if ( ImGui::BeginPopupModal( "New Particle", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		ImGui::InputTextStr( "Name", &name );
-		if ( ImGui::Button( "OK" ) ) {
-			accepted = true;
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Cancel" ) ) {
-			accepted = false;
-		}
-		ImGui::EndPopup();
-	}
-
-	if ( idp && accepted ) {
-		if ( declManager->FindType( DECL_PARTICLE, name, false ) ) {
-			ImGui::OpenPopup( "Particle exists" );
-			if ( ImGui::BeginPopupModal( "Particle exists" ) ) {
-				ImGui::TextUnformatted("Particle already exists!");
-				ImGui::EndPopup();
-			}
-			return;
-		}
-
-		ImGui::OpenPopup( "Name###SaveAs" );
-
-		idStr fileName;
-		if ( ImGui::InputDialogName( "New particle", "Name", &fileName ) ) {
-			idStr particleName = fileName;
-			particleName.StripPath();
-			particleName.StripFileExtension();
-
-			idDeclParticle *decl = dynamic_cast<idDeclParticle*>( declManager->CreateNewDecl( DECL_PARTICLE, particleName, fileName ) );
-			if ( decl ) {
-				decl->stages.DeleteContents( true );
-				decl->depthHack = idp->depthHack;
-				for ( int i = 0; i < idp->stages.Num(); i++ ) {
-					idParticleStage *stage = new idParticleStage();
-					*stage = *idp->stages[i];
-					decl->stages.Append( stage );
-				}
-				int index = comboParticle.Append( particleName );
-				comboParticleSel = index;
-
-				OnBnClickedButtonSave();
-				OnCbnSelchangeComboParticles();
-				OnBnClickedButtonUpdate();
-			}
-		}
-	}
-}
-
-
 void ParticleEditor::OnBnClickedButtonSaveParticles() {
 	cmdSystem->BufferCommandText( CMD_EXEC_NOW, "saveParticles" );
 	buttonSaveParticleEntitiesEnabled = false;
 }
 
 void ParticleEditor::OnBnClickedButtonBrowsematerial() {
-	// FIXME: port this
-	/*CPreviewDlg matDlg(this);
-	matDlg.SetMode(CPreviewDlg::MATERIALS, "particles" );
-	matDlg.SetDisablePreview( true );
-	if ( matDlg.DoModal() == IDOK ) {
-		matName = matDlg.mediaName;
-		DlgVarsToCurStage();
-		CurStageToDlgVars();
-	}*/
+	if( ImGui::BeginPopupModal( "Select Material" ) )
+	{
+		if( materialDecls.Num() == 0 )
+		{
+			int num = declManager->GetNumDecls( DECL_MATERIAL );
+
+			materialDecls.Clear();
+			materialDecls.Resize( num );
+
+			for( int i = 0; i < num; i++ )
+			{
+				materialDecls.Append( declManager->DeclByIndex( DECL_MATERIAL, i )->GetName() );
+			}
+		}
+
+		ImGui::BeginListBox( "##materialDeclSelect" );
+		for( int i = 0; i < materialDecls.Num(); i++ )
+		{
+			if( ImGui::ListBox( "Materials", &materialDeclSelection, StringListItemGetter, &materialDecls, materialDecls.Num() ) )
+			{
+				materialDeclName = materialDecls[materialDeclSelection];
+			}
+		}
+		ImGui::EndListBox();
+
+		/*
+		ImGui::SameLine();
+		ImGui::SmallButton( "New Material" );
+		*/
+
+		ImGui::InputTextStr( "Material Name", &materialDeclName );
+		if( ImGui::Button( "Select" ) )
+		{
+			matName = materialDeclName;
+			DlgVarsToCurStage();
+			CurStageToDlgVars();
+
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+		if( ImGui::Button( "Close" ) )
+		{
+			materialDecls.Clear();
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
 }
 
 void ParticleEditor::ButtonColor() {
@@ -898,104 +1019,8 @@ void ParticleEditor::UpdateControlInfo() {
 	sliderAspectTo.SetValuePos( ps->aspect.to );
 }
 
-void ParticleEditor::OnBnClickedRadioRect() {
-	distribution = 0;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioSphere() {
-	distribution = 2;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioCylinder() {
-	distribution = 1;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioCone() {
-	direction = 0;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioOutward() {
-	direction = 1;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioView() {
-	orientation = 0;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioAimed() {
-	orientation = 1;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioX() {
-	orientation = 2;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioY() {
-	orientation = 3;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
-void ParticleEditor::OnBnClickedRadioZ() {
-	orientation = 4;
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-	UpdateControlInfo();
-}
-
 void ParticleEditor::OnBnClickedDoom() {
 	//::SetFocus(win32.hWnd);
-}
-
-
-void ParticleEditor::OnBnClickedTestModel() {
-	visualization = TESTMODEL;
-	SetParticleView();
-}
-
-void ParticleEditor::OnBnClickedImpact() {
-	visualization = IMPACT;
-	SetParticleView();
-}
-
-void ParticleEditor::OnBnClickedMuzzle(){
-	visualization = MUZZLE;
-	SetParticleView();
-}
-
-void ParticleEditor::OnBnClickedFlight() {
-	visualization = FLIGHT;
-	SetParticleView();
-}
-
-void ParticleEditor::OnBnClickedSelected() {
-	visualization = SELECTED;
-	SetParticleView();
 }
 
 void ParticleEditor::SetParticleVisualization( int i ) {
@@ -1067,18 +1092,6 @@ void ParticleEditor::SetSelectedModel( const char *val ) {
 		buttonSaveParticleEntitiesEnabled = true;
 	}
 }
-
-
-void ParticleEditor::OnBnClickedWorldGravity() {
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-}
-
-void ParticleEditor::OnBnClickedEntityColor() {
-	DlgVarsToCurStage();
-	CurStageToDlgVars();
-}
-
 
 void ParticleEditor::AddStage( bool clone ) {
 
@@ -1351,41 +1364,6 @@ void ParticleEditor::ShowCurrentStage() {
 void ParticleEditor::OnLbnSelchangeListStages() {
 	ShowCurrentStage();
 	EnableStageControls();
-}
-
-void ParticleEditor::ButtonNew() {
-	idStr fileName;
-
-	bool pressed = ImGui::Button( "New" );
-
-	ImGui::SetItemTooltip( "Create a new particle system" );
-
-	if ( !pressed ) {
-		return;
-	}
-
-	if ( ImGui::InputDialogName( "New Particle", "Name", &fileName ) ) {
-
-		idStr particleName = fileName;
-		particleName.StripPath();
-		particleName.StripFileExtension();
-
-		if( !particleName.IsEmpty() )
-		{
-			idDeclParticle *newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, particleName.c_str(), false ) ) );
-			if ( !newDecl ) {
-				// create it
-				newDecl = static_cast<idDeclParticle*>( declManager->CreateNewDecl( DECL_PARTICLE, particleName.c_str(), fileName.c_str() ) );
-			}
-
-			int index = comboParticle.Append( particleName );
-			comboParticleSel = index;
-
-			OnCbnSelchangeComboParticles();
-
-			ImGui::CloseCurrentPopup();
-		}
-	}
 }
 
 void ParticleEditor::OnBnClickedButtonSave() {
