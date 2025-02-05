@@ -439,6 +439,11 @@ void NewFrame()
 
 bool keybindModeEnabled = false;
 
+// this is true if the right mouse button is pressed while an ImGui window is open
+// but the cursor is not over a window.
+// used to allow looking around when a tool or the settings menu is open
+static bool rmbPressed = false;
+
 // called with every SDL event by Sys_GetEvent()
 // returns true if ImGui has handled the event (so it shouldn't be handled by D3)
 bool ProcessEvent(const void* sdlEvent)
@@ -447,13 +452,29 @@ bool ProcessEvent(const void* sdlEvent)
 		return false;
 
 	const SDL_Event* ev = (const SDL_Event*)sdlEvent;
+	ImGuiIO& io = ImGui::GetIO();
+
+	// allow looking and moving around while right mouse button is pressed, even if
+	// an ImGui window is open (unless the cursor is currently over an ImGui window)
+	if ( !io.WantCaptureMouse && (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_RMASK) )
+	{
+		// prevent the hidden cursor from interacting with ImGui windows
+		io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+		rmbPressed = true;
+		return false;
+	}
+
+	// if right mouse button isn't pressed anymore, restore ability to use the mouse in ImGui windows
+	io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+	rmbPressed = false;
+
 	// ImGui_ImplSDL2_ProcessEvent() doc says:
 	//   You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 	//   - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
 	//   - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
 	//   Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-
 	bool imguiUsedEvent = ImGui_ImplSDLx_ProcessEvent( ev );
+
 	if ( keybindModeEnabled ) {
 		// in keybind mode, all input events are passed to Doom3 so it can translate them
 		// to internal events and we can access and use them to create a new binding
@@ -477,8 +498,6 @@ bool ProcessEvent(const void* sdlEvent)
 			hadKeyDownEvent = true;
 	}
 	if( imguiUsedEvent ) {
-		ImGuiIO& io = ImGui::GetIO();
-
 		if ( io.WantCaptureMouse ) {
 			switch( ev->type ) {
 				case SDL_MOUSEMOTION:
@@ -499,9 +518,9 @@ bool ProcessEvent(const void* sdlEvent)
 				case SDL_KEYDOWN:
 				//case SDL_KEYUP: NOTE: see above why key up events are passed to the engine
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-					if ( ev->key.key < SDLK_F1 || ev->key.key > SDLK_F12) {
+					if ( ev->key.key < SDLK_F1 || ev->key.key > SDLK_F12 ) {
 #else
-					if ( ev->key.keysym.sym < SDLK_F1 || ev->key.keysym.sym > SDLK_F12) {
+					if ( ev->key.keysym.sym < SDLK_F1 || ev->key.keysym.sym > SDLK_F12 ) {
 #endif
 						// F1 - F12 are passed to the engine so its shortcuts
 						// (like quickload or screenshot) still work
@@ -525,27 +544,21 @@ void SetKeyBindMode( bool enable )
 
 bool ShouldShowCursor()
 {
+	if ( openImguiWindows == 0 ) {
+		return false; // no open ImGui window => no ImGui cursor
+	}
 	if ( sessLocal.GetActiveMenu() == nullptr ) {
-		// when ingame, render the ImGui/SDL/system cursor if an ImGui window is open
-		// because dhewm3 does *not* render its own cursor outside ImGui windows.
-		// additionally, only show it if an ImGui window has focus - this allows you
-		// to click outside the ImGui window to give Doom3 focus and look around.
-		// You can get focus on the ImGui window again by clicking while the invisible
-		//  cursor is over the window (things in it still get highlighted), or by
-		// opening the main (Esc) or by opening the Dhewm3 Settings window (F10, usually),
-		// which will either open it focused or give an ImGui window focus if it
-		// was open but unfocused.
-		// TODO: Might be nice to have a keyboard shortcut to give focus to any open
-		//       ImGui window, maybe Pause?
-		return openImguiWindows != 0 && ImGui::IsWindowFocused( ImGuiFocusedFlags_AnyWindow );
+		// we're ingame
+		// if one of our ImGui windows is open (tool or settings menu), usually the
+		// cursor is shown and all events go to ImGui (no moving around the world)
+		// UNLESS the right mouse button is pressed (outside of an ImGui window)
+		// so you still have a way to look around the world when needed
+		return !rmbPressed;
 	} else {
 		// if we're in a menu (probably main menu), dhewm3 renders a cursor for it,
 		// so only show the ImGui cursor when the mouse cursor is over an ImGui window
 		// or in one of the black bars where Doom3's cursor isn't rendered in
 		// non 4:3 resolutions
-		if ( openImguiWindows == 0 ) {
-			return false; // no open ImGui window => no ImGui cursor
-		}
 		if ( ImGui::GetIO().WantCaptureMouse ) {
 			return true; // over an ImGui window => definitely want ImGui cursor
 		}
