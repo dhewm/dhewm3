@@ -86,10 +86,10 @@ ParticleEditor& ParticleEditor::Instance()
 }
 
 ParticleEditor::ParticleEditor()
-	: colorDlg( "Color" )
+	: fileSelection(0)
+	, colorDlg( "Color" )
 	, fadeColorDlg( "Fade Color" )
 	, entityColorDlg( "Entity Color" )
-	, fileSelection(0)
 	, materialDeclSelection(0)
 	, shouldPopulate(false)
 {
@@ -1185,7 +1185,7 @@ idParticleStage *ParticleEditor::GetCurStage() {
 	idDeclParticle *idp = GetCurParticle();
 	int sel = listStagesSel;
 	int index = listStagesItemData.First( sel );
-	if ( idp == NULL || sel == LB_ERR || index >= idp->stages.Num() ) {
+	if ( idp == NULL || sel == -1 || index >= idp->stages.Num() ) {
 		return NULL;
 	}
 	return idp->stages[index];

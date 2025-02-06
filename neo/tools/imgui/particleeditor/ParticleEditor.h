@@ -135,7 +135,6 @@ protected:
 	void		OnBtnZup();
 	void		OnBtnZdn();
 	void		OnBtnDrop();
-	//void		OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 private:
 	bool				isShown;
