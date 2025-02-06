@@ -2413,11 +2413,12 @@ static void InitDhewm3SettingsMenu()
 	const ImGuiStyle& style = ImGui::GetStyle();
 	float defaultWidth = ImGui::CalcTextSize( "Control BindingsControl OptionsVideo OptionsAudio OptionsGame OptionsOther Options" ).x;
 	defaultWidth += 2.0f * style.WindowPadding.x + 12.0f * style.FramePadding.x + 5.0f * style.ItemInnerSpacing.x;
-	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-	settingsMenuDefaultSize.x = fminf( defaultWidth, displaySize.x * 0.8f );
-	settingsMenuDefaultSize.y = displaySize.y * 0.95f;
-
-	settingsMenuDefaultPos = displaySize * 0.025f;
+	ImGuiViewport* mainViewPort = ImGui::GetMainViewport();
+	ImVec2 viewPortSize = mainViewPort->Size;
+	settingsMenuDefaultSize.x = fminf( defaultWidth, viewPortSize.x * 0.8f );
+	settingsMenuDefaultSize.y = viewPortSize.y * 0.95f;
+	// NOTE: in ImGui's docking branch, positions are in global (screen/OS) coordinates
+	settingsMenuDefaultPos = mainViewPort->Pos + viewPortSize * 0.025f;
 	d3settingsWinInitialized = true;
 }
 
