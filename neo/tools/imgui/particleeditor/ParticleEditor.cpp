@@ -90,6 +90,7 @@ ParticleEditor::ParticleEditor()
 	, colorDlg( "Color" )
 	, fadeColorDlg( "Fade Color" )
 	, entityColorDlg( "Entity Color" )
+	, particleDropDlg()
 	, materialDeclSelection(0)
 	, shouldPopulate(false)
 {
@@ -720,8 +721,10 @@ void ParticleEditor::Draw()
 				}
 				ImGui::BeginDisabled( !editControlsEnabled );
 				if ( ImGui::Button( "Drop" ) ) {
-					OnBtnDrop();
+					idDeclParticle *idp = GetCurParticle();
+					particleDropDlg.Start( idp );
 				}
+				particleDropDlg.Draw();
 
 				ImGui::TableSetColumnIndex( 1 );
 				if ( ImGui::BeginTable( "entityPosTableXY", 3, ImGuiTableFlags_SizingFixedSame ) ) {
@@ -1523,14 +1526,23 @@ void ParticleEditor::OnBtnZdn()
 	UpdateSelectedOrigin(0, 0, -8);
 }
 
-void ParticleEditor::OnBtnDrop()
+ParticleDrop::ParticleDrop()
+	: classname( "" )
+	, org( 0.0f, 0.0f, 0.0f )
+	, args()
+	, viewAngles( 0.0f, 0.0f, 0.0f )
+	, errorText( "" )
+	, name( "" )
+	, state( DONE )
 {
-	idStr		classname;
-	idStr		key;
-	idStr		value;
-	idVec3		org;
-	idDict		args;
-	idAngles	viewAngles;
+
+}
+
+void ParticleDrop::Start( idDeclParticle *idp )
+{
+	if ( !idp ) {
+		return;
+	}
 
 	if ( !gameEdit->PlayerIsValid() ) {
 		return;
@@ -1540,46 +1552,82 @@ void ParticleEditor::OnBtnDrop()
 	gameEdit->PlayerGetEyePosition( org );
 
 	org += idAngles( 0, viewAngles.yaw, 0 ).ToForward() * 80 + idVec3( 0, 0, 1 );
-	args.Set("origin", org.ToString());
-	args.Set("classname", "func_emitter");
-	args.Set("angle", va( "%f", viewAngles.yaw + 180 ));
+	args.Clear();
+	args.Set( "origin", org.ToString() );
+	args.Set( "classname", "func_emitter");
+	args.Set( "angle", va( "%f", viewAngles.yaw + 180 ) );
 
-	idDeclParticle *idp = GetCurParticle();
 	if ( idp == NULL ) {
 		return;
 	}
+
 	idStr str = idp->GetName();
 	str.SetFileExtension( ".prt" );
 
-	args.Set("model", str);
+	args.Set( "model", str );
 
-	idStr name = gameEdit->GetUniqueEntityName( "func_emitter" );
-	bool nameValid = false;
-	
-	while (!nameValid) {
-		if ( ImGui::InputDialogName( "Name particle", "Name", &name ) ) {
-			idEntity *gameEnt = gameEdit->FindEntity( name );
-			if ( gameEnt ) {
-				if ( !ImGui::InputMessageBox( "Please choose another name", "Duplicate Entity Name!", true ) ) {
-					return;
-				}
-			} else {
-				nameValid = true;
-			}
+	name = gameEdit->GetUniqueEntityName( "func_emitter" );
+	state = NAME;
+	errorText.Clear();
+
+	ImGui::OpenPopup( "Name particle" );
+}
+
+void ParticleDrop::Draw()
+{
+	if ( state == DONE ) {
+		return;
+	}
+
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( "Name particle", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+
+		if ( ImGui::InputTextStr( "Name", &name ) ) {
+			// nop
 		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			accepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			canceled = true;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	if ( canceled ) {
+		state = DONE;
+		return;
+	}
+	if ( !accepted ) {
+		return;
+	}
+
+	idEntity *gameEnt = gameEdit->FindEntity( name );
+	if ( gameEnt ) {
+		errorText = "Please choose another name";
+		return;
 	}
 
 	args.Set( "name", name.c_str() );
 
 	idEntity *ent = NULL;
 	gameEdit->SpawnEntityDef( args, &ent );
-	if (ent) {
+	if ( ent ) {
 		gameEdit->EntityUpdateChangeableSpawnArgs( ent, NULL );
 		gameEdit->ClearEntitySelection();
 		gameEdit->AddSelectedEntity( ent );
 	}
 
 	gameEdit->MapAddEntity( &args );
+	state = DONE;
 }
 
 }

@@ -302,8 +302,6 @@ bool ImGui::InputTextMultilineStr( const char *label, idStr *str, const ImVec2 &
 bool ImGui::InputDialogName( const char *text, const char *label, idStr *str ) {
 	bool accepted = false;
 
-	ImGui::OpenPopup( label );
-
 	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
 		ImGui::TextUnformatted( text );
 		if ( ImGui::InputTextStr( "Name", str ) ) {

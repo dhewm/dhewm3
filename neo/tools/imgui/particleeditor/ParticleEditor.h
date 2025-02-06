@@ -87,6 +87,26 @@ private:
 	int min, max;
 };
 
+class ParticleDrop {
+public:
+						ParticleDrop();
+
+	void				Start( idDeclParticle *curParticle );
+	void				Draw();
+
+private:
+	idStr				classname;
+	idVec3				org;
+	idDict				args;
+	idAngles			viewAngles;
+
+	enum state_t { DONE = 0, NAME };
+
+	idStr				errorText;
+	idStr				name;
+	state_t				state;
+};
+
 class ParticleEditor {
 
 public:
@@ -134,7 +154,6 @@ protected:
 	void		OnBtnXup();
 	void		OnBtnZup();
 	void		OnBtnZdn();
-	void		OnBtnDrop();
 
 private:
 	bool				isShown;
@@ -150,6 +169,7 @@ private:
 	ColorPicker			colorDlg;
 	ColorPicker			fadeColorDlg;
 	ColorPicker			entityColorDlg;
+	ParticleDrop		particleDropDlg;
 
 	int					materialDeclSelection;
 	idList<idStr>		materialDecls;
