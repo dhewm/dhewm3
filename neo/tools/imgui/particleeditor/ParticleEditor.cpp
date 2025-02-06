@@ -270,6 +270,7 @@ void ParticleEditor::Draw()
 			if ( removeStagePressed ) {
 				RemoveStage();
 			}
+			RemoveStageThink();
 			ImGui::SameLine();
 			bool hideStagePressed = ImGui::Button( "H" );
 			ImGui::SetItemTooltip( "Hide the selected stage" );
@@ -1129,7 +1130,39 @@ void ParticleEditor::RemoveStage() {
 		return;
 	}
 
-	if ( !ImGui::InputMessageBox( "Are you sure you want to remove this stage?", "Remove Stage", true ) ) {
+	ImGui::OpenPopup( "Remove stage?" );
+}
+
+void ParticleEditor::RemoveStageThink()
+{
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( "Remove stage?", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "Are you sure you want to remove this stage?" );
+
+		if ( ImGui::Button( "OK" ) ) {
+			accepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			canceled = true;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	if ( canceled ) {
+		return;
+	}
+	if ( !accepted ) {
+		return;
+	}
+
+	idDeclParticle *idp = GetCurParticle();
+	if ( idp == NULL ) {
 		return;
 	}
 
@@ -1137,15 +1170,11 @@ void ParticleEditor::RemoveStage() {
 	if ( index >= 0 ) {
 		int newIndex = listStagesItemData.First( index );
 		if ( newIndex >= 0 && newIndex < idp->stages.Num() ) {
-			idp->stages.RemoveIndex( newIndex );
-			index += ( index >= 1 ) ? -1 : 1;
-			newIndex = comboParticle.FindIndex( idp->GetName() );
-			EnumParticles();
-			if ( newIndex >= 0 ) {
-				comboParticleSel = newIndex;
-			}
-			OnCbnSelchangeComboParticles();
+			listStages.RemoveIndex( index );
+			listStagesItemData.Remove( index, newIndex );
 			listStagesSel = index;
+			idp->stages.RemoveIndex( newIndex );
+			OnCbnSelchangeComboParticles();
 			ShowCurrentStage();
 		}
 	}
@@ -1188,7 +1217,7 @@ idParticleStage *ParticleEditor::GetCurStage() {
 	idDeclParticle *idp = GetCurParticle();
 	int sel = listStagesSel;
 	int index = listStagesItemData.First( sel );
-	if ( idp == NULL || sel == -1 || index >= idp->stages.Num() ) {
+	if ( idp == NULL || index < 0 || index >= idp->stages.Num() ) {
 		return NULL;
 	}
 	return idp->stages[index];

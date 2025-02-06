@@ -306,6 +306,7 @@ private:
 	void				EnumParticles();
 	void				AddStage( bool clone );
 	void				RemoveStage();
+	void				RemoveStageThink();
 	void				ShowStage();
 	void				HideStage();
 	idDeclParticle *	GetCurParticle();
