@@ -665,6 +665,11 @@ void idExplodable::Event_Explode( idEntity *activator ) {
 
   idSpring
 
+  Enhancements (like Save/Restore functions) taken from FraggingFree by IvanTheB
+
+  https://github.com/IvanTheB/fraggingfree-dhewm3-sdk
+  https://www.moddb.com/mods/fragging-free
+
 ===============================================================================
 */
 
@@ -674,35 +679,56 @@ END_CLASS
 
 /*
 ================
+idSpring::idSpring
+================
+*/
+idSpring::idSpring( void ){
+	ent1 = NULL;
+	ent2  = NULL;
+	id1 = 0;
+	id2 = 0;
+	p1 = vec3_origin;
+	p2 = vec3_origin;
+	enabled = false;
+}
+
+/*
+================
 idSpring::Think
 ================
 */
 void idSpring::Think( void ) {
-	idVec3 start, end, origin;
-	idMat3 axis;
-
 	// run physics
 	RunPhysics();
 
 	if ( thinkFlags & TH_THINK ) {
-		// evaluate force
-		spring.Evaluate( gameLocal.time );
+		if ( enabled && ent1.GetEntity() && ent2.GetEntity()  ) {
+			// evaluate force
+			spring.Evaluate( gameLocal.time );
 
-		start = p1;
-		if ( ent1->GetPhysics() ) {
-			axis = ent1->GetPhysics()->GetAxis();
-			origin = ent1->GetPhysics()->GetOrigin();
-			start = origin + start * axis;
+			if ( g_debugMover.GetBool() ) { //ivan
+				idVec3 start, end, origin;
+				idMat3 axis;
+
+				start = p1;
+				if ( ent1.GetEntity()->GetPhysics() ) {
+					axis = ent1.GetEntity()->GetPhysics()->GetAxis();
+					origin = ent1.GetEntity()->GetPhysics()->GetOrigin();
+					start = origin + start * axis;
+				}
+
+				end = p2;
+				if ( ent2.GetEntity()->GetPhysics() ) {
+					axis = ent2.GetEntity()->GetPhysics()->GetAxis();
+					origin = ent2.GetEntity()->GetPhysics()->GetOrigin();
+					end = origin + p2 * axis;
+				}
+
+				gameRenderWorld->DebugLine( idVec4(1, 1, 0, 1), start, end, 0, true );
+			}
+		} else {
+			BecomeInactive( TH_THINK );
 		}
-
-		end = p2;
-		if ( ent2->GetPhysics() ) {
-			axis = ent2->GetPhysics()->GetAxis();
-			origin = ent2->GetPhysics()->GetOrigin();
-			end = origin + p2 * axis;
-		}
-
-		gameRenderWorld->DebugLine( idVec4(1, 1, 0, 1), start, end, 0, true );
 	}
 
 	Present();
@@ -721,8 +747,8 @@ void idSpring::Event_LinkSpring( void ) {
 
 	if ( name1.Length() ) {
 		ent1 = gameLocal.FindEntity( name1 );
-		if ( !ent1 ) {
-			gameLocal.Error( "idSpring '%s' at (%s): cannot find first entity '%s'", name.c_str(), GetPhysics()->GetOrigin().ToString(0), name1.c_str() );
+		if ( !ent1.GetEntity() ) {
+			gameLocal.Warning( "idSpring '%s' at (%s): cannot find first entity '%s'", name.c_str(), GetPhysics()->GetOrigin().ToString(0), name1.c_str() );
 		}
 	}
 	else {
@@ -731,15 +757,20 @@ void idSpring::Event_LinkSpring( void ) {
 
 	if ( name2.Length() ) {
 		ent2 = gameLocal.FindEntity( name2 );
-		if ( !ent2 ) {
-			gameLocal.Error( "idSpring '%s' at (%s): cannot find second entity '%s'", name.c_str(), GetPhysics()->GetOrigin().ToString(0), name2.c_str() );
+		if ( !ent2.GetEntity() ) {
+			gameLocal.Warning( "idSpring '%s' at (%s): cannot find second entity '%s'", name.c_str(), GetPhysics()->GetOrigin().ToString(0), name2.c_str() );
 		}
 	}
 	else {
 		ent2 = gameLocal.entities[ENTITYNUM_WORLD];
 	}
-	spring.SetPosition( ent1->GetPhysics(), id1, p1, ent2->GetPhysics(), id2, p2 );
-	BecomeActive( TH_THINK );
+
+	if ( ent1.GetEntity() && ent2.GetEntity() ) {
+		spring.SetPosition( ent1.GetEntity()->GetPhysics(), id1, p1, ent2.GetEntity()->GetPhysics(), id2, p2 );
+		if( enabled ){
+			BecomeActive( TH_THINK );
+		}
+	}
 }
 
 /*
@@ -748,8 +779,10 @@ idSpring::Spawn
 ================
 */
 void idSpring::Spawn( void ) {
-	float Kstretch, damping, restLength;
+	float Kstretch, Kcompress, damping, restLength, maxLength;
+	bool pullEnt1 = true;
 
+	enabled = !spawnArgs.GetBool( "start_off" );
 	spawnArgs.GetInt( "id1", "0", id1 );
 	spawnArgs.GetInt( "id2", "0", id2 );
 	spawnArgs.GetVector( "point1", "0 0 0", p1 );
@@ -757,13 +790,68 @@ void idSpring::Spawn( void ) {
 	spawnArgs.GetFloat( "constant", "100.0f", Kstretch );
 	spawnArgs.GetFloat( "damping", "10.0f", damping );
 	spawnArgs.GetFloat( "restlength", "0.0f", restLength );
+	spawnArgs.GetFloat( "maxLength", "200.0f", maxLength );
+	// DG: added compress and pullEntity1 so the corresponding parameter of idForce_Spring can be set
+	spawnArgs.GetFloat( "compress", "0.0f", Kcompress );
+	spawnArgs.GetBool( "pullEnt1", "1", pullEnt1 );
 
-	spring.InitSpring( Kstretch, 0.0f, damping, restLength );
+	spring.InitSpring( Kstretch, Kcompress, damping, restLength, maxLength, pullEnt1 );
 
 	ent1 = ent2 = NULL;
 
 	PostEventMS( &EV_PostSpawn, 0 );
 }
+
+/*
+===============
+idSpring::Activate
+================
+*/
+void idSpring::Event_Activate( idEntity *activator ) {
+	enabled = !enabled;
+	if ( enabled ) {
+		BecomeActive( TH_THINK );
+	} else {
+		BecomeInactive( TH_THINK );
+	}
+}
+
+/*
+================
+idSpring::Save
+================
+*/
+void idSpring::Save( idSaveGame *savefile ) const {
+	ent1.Save( savefile );
+	ent2.Save( savefile );
+	savefile->WriteInt( id1 );
+	savefile->WriteInt( id2 );
+	savefile->WriteVec3( p1 );
+	savefile->WriteVec3( p2 );
+	savefile->WriteBool( enabled );
+
+	savefile->WriteStaticObject( spring );
+}
+
+/*
+================
+idSpring::Restore
+================
+*/
+void idSpring::Restore( idRestoreGame *savefile ) {
+	ent1.Restore( savefile );
+	ent2.Restore( savefile );
+	savefile->ReadInt( id1 );
+	savefile->ReadInt( id2 );
+	savefile->ReadVec3( p1 );
+	savefile->ReadVec3( p2 );
+	savefile->ReadBool( enabled );
+
+	savefile->ReadStaticObject( spring );
+
+	PostEventMS( &EV_PostSpawn, 0 ); //initialize the spring asap but not now!
+}
+
 
 /*
 ===============================================================================
