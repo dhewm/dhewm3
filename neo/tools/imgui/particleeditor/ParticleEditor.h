@@ -107,6 +107,27 @@ private:
 	state_t				state;
 };
 
+class ParticleNew {
+public:
+						ParticleNew();
+
+	void				Start();
+	bool				Draw();
+
+	ID_INLINE idDeclParticle* GetParticle() { return dp; }
+
+private:
+	enum state_t { DONE = 0, NAME };
+
+	int					fileSelection;
+	idList<idStr>		prtFiles;
+	idStr				fileName;
+	idStr				name;
+	idStr				errorText;
+	idDeclParticle *	dp;
+	state_t				state;
+};
+
 class ParticleEditor {
 
 public:
@@ -158,9 +179,7 @@ protected:
 private:
 	bool				isShown;
 
-	int					fileSelection;
-	idList<idStr>		prtFiles;
-	idStr				fileName;
+	ParticleNew			particleNewDlg;
 
 	idStr				inFileText;
 

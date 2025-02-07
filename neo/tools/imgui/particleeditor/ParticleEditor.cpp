@@ -79,6 +79,125 @@ bool RangeSlider::Draw( const char *label, float itemWidth, float sliderWidth ) 
 	return changed;
 }
 
+ParticleNew::ParticleNew()
+	: fileSelection(-1)
+	, prtFiles()
+	, fileName( "" )
+	, name( "" )
+	, errorText( "" )
+	, dp( NULL )
+	, state(DONE)
+{
+}
+
+void ParticleNew::Start() {
+	prtFiles.Clear();
+
+	idFileList* files = fileSystem->ListFiles( "particles", ".prt", true, true );
+	for( int i = 0; i < files->GetNumFiles(); i++ )
+	{
+		idStr file = files->GetFile( i );
+
+		file.StripPath();
+		file.StripFileExtension();
+
+		prtFiles.Append( file );
+	}
+	fileSystem->FreeFileList( files );
+
+	fileSelection = -1;
+	fileName.Clear();
+	errorText.Clear();
+	dp = NULL;
+	state = NAME;
+
+	ImGui::OpenPopup( "New Particle System" );
+}
+
+bool ParticleNew::Draw() {
+	if ( state == DONE ) {
+		return false;
+	}
+
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( "New Particle System", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+
+		if ( ImGui::InputTextStr( "File Name", &fileName ) ) {
+			// nop
+		}
+
+		if ( ImGui::BeginListBox( "Files##prtFileSelect" ) ) {
+			for( int i = 0; i < prtFiles.Num(); i++ )
+			{
+				if ( fileName.Length() && prtFiles[i].Find( fileName.c_str(), false ) == -1 ) {
+					continue;
+				}
+
+				bool selected = ( i == fileSelection );
+
+				ImGui::PushID( i );
+				if ( ImGui::Selectable( prtFiles[i].c_str(), selected ) ) {
+					fileSelection = i;
+					fileName = prtFiles[fileSelection];
+				}
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+				ImGui::PopID();
+			}
+				
+			ImGui::EndListBox();
+		}
+
+		if ( ImGui::InputTextStr( "Name", &name ) ) {
+			// nop
+		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			errorText.Clear();
+
+			if ( name.IsEmpty() ) {
+				errorText += "Please enter a name\n";
+				accepted = false;
+			}
+
+			idDeclParticle *newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, name.c_str(), false ) ) );
+			if( newDecl ) {
+				errorText += idStr::Format( "Particle System %s already exists in %s. Please select a different name\n", name.c_str(), newDecl->GetFileName() );
+				accepted = false;
+			}
+
+			if ( errorText.IsEmpty() ) {
+				idStr fullName;
+
+				fullName = "particles/";
+				fullName += fileName;
+				fullName += ".prt";
+
+				// create it
+				dp = static_cast<idDeclParticle*>( declManager->CreateNewDecl( DECL_PARTICLE, name.c_str(), fullName.c_str() ) );
+				state = DONE;
+
+				accepted = true;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			accepted = false;
+			state = DONE;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
+
 ParticleEditor& ParticleEditor::Instance()
 {
 	static ParticleEditor instance;
@@ -86,7 +205,7 @@ ParticleEditor& ParticleEditor::Instance()
 }
 
 ParticleEditor::ParticleEditor()
-	: fileSelection(0)
+	: particleNewDlg()
 	, colorDlg( "Color" )
 	, fadeColorDlg( "Fade Color" )
 	, entityColorDlg( "Entity Color" )
@@ -138,68 +257,18 @@ void ParticleEditor::Draw()
 			ImGui::EndMenuBar();
 		}
 
-		if( clickedNew )
-		{
-			ImGui::OpenPopup( "New Particle System" );
+		if ( clickedNew ) {
+			particleNewDlg.Start();
 		}
 
-		if( ImGui::BeginPopupModal( "New Particle System" ) )
-		{
-			if( prtFiles.Num() == 0 )
-			{
-				idFileList* files = fileSystem->ListFiles( "particles", ".prt", true, true );
-				for( int i = 0; i < files->GetNumFiles(); i++ )
-				{
-					prtFiles.Append( files->GetFile( i ) );
-				}
-				fileSystem->FreeFileList( files );
+		if ( particleNewDlg.Draw() ) {
+			idDeclParticle* dp = particleNewDlg.GetParticle();
+
+			if ( dp ) {
+				comboParticleSel = comboParticle.Append( dp->GetName() );
+
+				OnCbnSelchangeComboParticles();
 			}
-
-			ImGui::BeginListBox( "##prtFileSelect" );
-			for( int i = 0; i < prtFiles.Num(); i++ )
-			{
-				if( ImGui::ListBox( "Files", &fileSelection, StringListItemGetter, &prtFiles, prtFiles.Num() ) )
-				{
-					fileName = prtFiles[fileSelection];
-				}
-			}
-			ImGui::EndListBox();
-
-			ImGui::SameLine();
-			ImGui::SmallButton( "New File" );
-
-			ImGui::InputTextStr( "Particle System Name", &fileName );
-			if( ImGui::Button( "Create" ) )
-			{
-				idStr prtName = fileName;
-				prtName.StripPath();
-				prtName.StripFileExtension();
-
-				if( !prtName.IsEmpty() )
-				{
-					idDeclParticle *newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, prtName.c_str(), false ) ) );
-					if( !newDecl )
-					{
-						// create it
-						newDecl = static_cast<idDeclParticle*>( declManager->CreateNewDecl( DECL_PARTICLE, prtName.c_str(), fileName.c_str() ) );
-					}
-
-					comboParticleSel = comboParticle.Append( prtName );
-
-					OnCbnSelchangeComboParticles();
-
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			ImGui::SameLine();
-			if( ImGui::Button( "Close" ) )
-			{
-				prtFiles.Clear();
-				ImGui::CloseCurrentPopup();
-			}
-
-			ImGui::EndPopup();
 		}
 
 		if( openedParticleBrowser )
