@@ -79,225 +79,6 @@ bool RangeSlider::Draw( const char *label, float itemWidth, float sliderWidth ) 
 	return changed;
 }
 
-ParticleNew::ParticleNew()
-	: fileSelection(-1)
-	, prtFiles()
-	, fileName( "" )
-	, name( "" )
-	, errorText( "" )
-	, dp( NULL )
-	, state(DONE)
-{
-}
-
-void ParticleNew::Start() {
-	prtFiles.Clear();
-
-	idFileList* files = fileSystem->ListFiles( "particles", ".prt", true, true );
-	for( int i = 0; i < files->GetNumFiles(); i++ )
-	{
-		idStr file = files->GetFile( i );
-
-		file.StripPath();
-		file.StripFileExtension();
-
-		prtFiles.Append( file );
-	}
-	fileSystem->FreeFileList( files );
-
-	fileSelection = -1;
-	fileName.Clear();
-	name.Clear();
-	errorText.Clear();
-	dp = NULL;
-	state = NAME;
-
-	ImGui::OpenPopup( "New Particle System" );
-}
-
-bool ParticleNew::Draw() {
-	if ( state == DONE ) {
-		return false;
-	}
-
-	bool accepted = false;
-	bool canceled = false;
-
-	if ( ImGui::BeginPopupModal( "New Particle System", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
-
-		if ( ImGui::InputTextStr( "File Name", &fileName ) ) {
-			// nop
-		}
-
-		if ( ImGui::BeginListBox( "Files##prtFileSelect" ) ) {
-			for( int i = 0; i < prtFiles.Num(); i++ )
-			{
-				if ( fileName.Length() && prtFiles[i].Find( fileName.c_str(), false ) == -1 ) {
-					continue;
-				}
-
-				bool selected = ( i == fileSelection );
-
-				ImGui::PushID( i );
-				if ( ImGui::Selectable( prtFiles[i].c_str(), selected ) ) {
-					fileSelection = i;
-					fileName = prtFiles[fileSelection];
-				}
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
-				ImGui::PopID();
-			}
-				
-			ImGui::EndListBox();
-		}
-
-		if ( ImGui::InputTextStr( "Name", &name ) ) {
-			// nop
-		}
-
-		if ( ImGui::Button( "OK" ) ) {
-			errorText.Clear();
-
-			if ( name.IsEmpty() ) {
-				errorText += "Please enter a name\n";
-				accepted = false;
-			}
-
-			idDeclParticle *newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, name.c_str(), false ) ) );
-			if( newDecl ) {
-				errorText += idStr::Format( "Particle System %s already exists in %s. Please select a different name\n", name.c_str(), newDecl->GetFileName() );
-				accepted = false;
-			}
-
-			if ( errorText.IsEmpty() ) {
-				idStr fullName;
-
-				fullName = "particles/";
-				fullName += fileName;
-				fullName += ".prt";
-
-				// create it
-				dp = static_cast<idDeclParticle*>( declManager->CreateNewDecl( DECL_PARTICLE, name.c_str(), fullName.c_str() ) );
-				state = DONE;
-
-				accepted = true;
-				ImGui::CloseCurrentPopup();
-			}
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Cancel" ) ) {
-			accepted = false;
-			state = DONE;
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::EndPopup();
-	}
-
-	return accepted;
-}
-
-ParticleSelect::ParticleSelect()
-	: comboParticleSel(-1)
-	, comboParticle()
-	, name( "" )
-	, errorText( "" )
-	, dp( NULL )
-	, state(DONE)
-{
-}
-
-void ParticleSelect::Start() {
-	comboParticle.Clear();
-	for ( int i = 0; i < declManager->GetNumDecls( DECL_PARTICLE ); i++ ) {
-		const idDecl *idp = declManager->DeclByIndex( DECL_PARTICLE, i );
-		comboParticle.Append( idp->GetName() );
-	}
-	comboParticleSel = 0;
-
-	name.Clear();
-	errorText.Clear();
-	dp = NULL;
-	state = NAME;
-
-	ImGui::OpenPopup( "Particle System Browser" );
-}
-
-bool ParticleSelect::Draw() {
-	if ( state == DONE ) {
-		return false;
-	}
-
-	bool accepted = false;
-	bool canceled = false;
-
-	if ( ImGui::BeginPopupModal( "Particle System Browser", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
-
-		if ( ImGui::InputTextStr( "Name", &name ) ) {
-			// nop
-		}
-
-		if ( ImGui::BeginListBox( "Particle Systems##prtSystemSelect" ) ) {
-			for( int i = 0; i < comboParticle.Num(); i++ )
-			{
-				if ( name.Length() && comboParticle[i].Find( name.c_str(), false ) == -1 ) {
-					continue;
-				}
-
-				bool selected = ( i == comboParticleSel );
-
-				ImGui::PushID( i );
-				if ( ImGui::Selectable( comboParticle[i].c_str(), selected ) ) {
-					comboParticleSel = i;
-					name = comboParticle[comboParticleSel];
-				}
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
-				ImGui::PopID();
-			}
-				
-			ImGui::EndListBox();
-		}
-
-		if ( ImGui::Button( "OK" ) ) {
-			errorText.Clear();
-
-			if ( name.IsEmpty() ) {
-				errorText += "Please enter a name or select a particle system from the list\n";
-				accepted = false;
-			}
-
-			idDeclParticle *decl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, name.c_str(), false ) ) );
-			if( !decl ) {
-				errorText += idStr::Format( "Particle System %s does not exist. Please select a different particle system\n", name.c_str() );
-				accepted = false;
-			}
-
-			if ( errorText.IsEmpty() ) {
-				dp = decl;
-				state = DONE;
-
-				accepted = true;
-				ImGui::CloseCurrentPopup();
-			}
-		}
-		ImGui::SameLine();
-		if ( ImGui::Button( "Cancel" ) ) {
-			accepted = false;
-			state = DONE;
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::EndPopup();
-	}
-
-	return accepted;
-}
-
 ParticleEditor& ParticleEditor::Instance()
 {
 	static ParticleEditor instance;
@@ -305,13 +86,13 @@ ParticleEditor& ParticleEditor::Instance()
 }
 
 ParticleEditor::ParticleEditor()
-	: particleNewDlg()
-	, particleSelectDlg()
+	: particleNewDlg( DECL_PARTICLE, "particles/", ".prt", "New Particle System" )
+	, particleSelectDlg( DECL_PARTICLE, "Select Particle System" )
+	, materialSelectDlg( DECL_MATERIAL, "Select Material" )
 	, colorDlg( "Color" )
 	, fadeColorDlg( "Fade Color" )
 	, entityColorDlg( "Entity Color" )
 	, particleDropDlg()
-	, materialDeclSelection(0)
 {
 	isShown = false;
 }
@@ -361,17 +142,17 @@ void ParticleEditor::Draw()
 		}
 
 		if ( particleNewDlg.Draw() ) {
-			idDeclParticle *dp = particleNewDlg.GetParticle();
+			idDeclParticle *dp = static_cast<idDeclParticle*>( particleNewDlg.GetDecl() );
 
 			SetCurParticle( dp );
 		}
 
-		if ( clickedSelect) {
-			particleSelectDlg.Start();
+		if ( clickedSelect ) {
+			particleSelectDlg.Start( NULL );
 		}
 
 		if ( particleSelectDlg.Draw() ) {
-			idDeclParticle *dp = particleSelectDlg.GetParticle();
+			idDeclParticle *dp = static_cast<idDeclParticle*>( particleSelectDlg.GetDecl() );
 
 			SetCurParticle( dp );
 		}
@@ -451,9 +232,16 @@ void ParticleEditor::Draw()
 			}
 			ImGui::SameLine();
 			if ( ImGui::Button( "...###BrowseMaterial" ) ) {
-				ImGui::OpenPopup("Select Material");
+				materialSelectDlg.Start( matName.c_str() );
 			}
-			OnBnClickedButtonBrowsematerial();
+			if ( materialSelectDlg.Draw() ) {
+				idMaterial *material = static_cast<idMaterial *>( materialSelectDlg.GetDecl() );
+				if ( material ) {
+					matName = material->GetName();
+					DlgVarsToCurStage();
+					CurStageToDlgVars();
+				}
+			}
 			ImGui::SetNextItemWidth(70);
 			if ( ImGui::InputInt( "Anim Frames", &animFrames, 0 ) ) {
 				DlgVarsToCurStage();
@@ -949,58 +737,6 @@ void ParticleEditor::OnBnClickedParticleMode() {
 void ParticleEditor::OnBnClickedButtonSaveParticles() {
 	cmdSystem->BufferCommandText( CMD_EXEC_NOW, "saveParticles" );
 	buttonSaveParticleEntitiesEnabled = false;
-}
-
-void ParticleEditor::OnBnClickedButtonBrowsematerial() {
-	if( ImGui::BeginPopupModal( "Select Material" ) )
-	{
-		if( materialDecls.Num() == 0 )
-		{
-			int num = declManager->GetNumDecls( DECL_MATERIAL );
-
-			materialDecls.Clear();
-			materialDecls.Resize( num );
-
-			for( int i = 0; i < num; i++ )
-			{
-				materialDecls.Append( declManager->DeclByIndex( DECL_MATERIAL, i )->GetName() );
-			}
-		}
-
-		ImGui::BeginListBox( "##materialDeclSelect" );
-		for( int i = 0; i < materialDecls.Num(); i++ )
-		{
-			if( ImGui::ListBox( "Materials", &materialDeclSelection, StringListItemGetter, &materialDecls, materialDecls.Num() ) )
-			{
-				materialDeclName = materialDecls[materialDeclSelection];
-			}
-		}
-		ImGui::EndListBox();
-
-		/*
-		ImGui::SameLine();
-		ImGui::SmallButton( "New Material" );
-		*/
-
-		ImGui::InputTextStr( "Material Name", &materialDeclName );
-		if( ImGui::Button( "Select" ) )
-		{
-			matName = materialDeclName;
-			DlgVarsToCurStage();
-			CurStageToDlgVars();
-
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::SameLine();
-		if( ImGui::Button( "Close" ) )
-		{
-			materialDecls.Clear();
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::EndPopup();
-	}
 }
 
 void ParticleEditor::ButtonColor() {

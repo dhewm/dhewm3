@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/containers/List.h"
 #include "idlib/math/Vector.h"
 
+#include "framework/Game.h"
+
 namespace ImGuiTools
 {
 
@@ -83,6 +85,53 @@ private:
 	const char *		label;
 	idVec4				color;
 	idVec4				oldColor;
+};
+
+class DeclNew {
+public:
+						DeclNew( declType_t declType, const char *directory, const char *extension, const char *label );
+
+	void				Start();
+	bool				Draw();
+
+	ID_INLINE idDecl* GetDecl() { return dp; }
+
+private:
+	enum state_t { DONE = 0, NAME };
+
+	declType_t			declType;
+	const char *		directory;
+	const char *		extension;
+	const char *		label;
+	int					fileSelection;
+	idList<idStr>		files;
+	idStr				fileName;
+	idStr				name;
+	idStr				errorText;
+	idDecl *			dp;
+	state_t				state;
+};
+
+class DeclSelect {
+public:
+						DeclSelect( declType_t declType, const char *label );
+
+	void				Start( const char *name );
+	bool				Draw();
+
+	ID_INLINE idDecl*	GetDecl() { return dp; }
+
+private:
+	enum state_t { DONE = 0, NAME };
+
+	declType_t			declType;
+	const char *		label;
+	int					listSel;
+	idList<idStr>		list;
+	idStr				name;
+	idStr				errorText;
+	idDecl *			dp;
+	state_t				state;
 };
 
 } //namespace ImGuiTools

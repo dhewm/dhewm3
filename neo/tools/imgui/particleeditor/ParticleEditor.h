@@ -107,47 +107,6 @@ private:
 	state_t				state;
 };
 
-class ParticleNew {
-public:
-						ParticleNew();
-
-	void				Start();
-	bool				Draw();
-
-	ID_INLINE idDeclParticle* GetParticle() { return dp; }
-
-private:
-	enum state_t { DONE = 0, NAME };
-
-	int					fileSelection;
-	idList<idStr>		prtFiles;
-	idStr				fileName;
-	idStr				name;
-	idStr				errorText;
-	idDeclParticle *	dp;
-	state_t				state;
-};
-
-class ParticleSelect {
-public:
-						ParticleSelect();
-
-	void				Start();
-	bool				Draw();
-
-	ID_INLINE idDeclParticle* GetParticle() { return dp; }
-
-private:
-	enum state_t { DONE = 0, NAME };
-
-	int					comboParticleSel;
-	idList<idStr>		comboParticle;
-	idStr				name;
-	idStr				errorText;
-	idDeclParticle *	dp;
-	state_t				state;
-};
-
 class ParticleEditor {
 
 public:
@@ -172,10 +131,8 @@ public:
 	}
 
 private:
-	void		OnCbnSelchangeComboParticles();
 	void		OnCbnSelchangeComboPath();
 	void		OnLbnSelchangeListStages();
-	void		OnBnClickedButtonBrowsematerial();
 	void		ButtonColor();
 	void		ButtonFadeColor();
 	void		ButtonEntityColor();
@@ -199,8 +156,9 @@ private:
 private:
 	bool				isShown;
 
-	ParticleNew			particleNewDlg;
-	ParticleSelect		particleSelectDlg;
+	DeclNew				particleNewDlg;
+	DeclSelect			particleSelectDlg;
+	DeclSelect			materialSelectDlg;
 
 	idStr				inFileText;
 
@@ -210,10 +168,6 @@ private:
 	ColorPicker			fadeColorDlg;
 	ColorPicker			entityColorDlg;
 	ParticleDrop		particleDropDlg;
-
-	int					materialDeclSelection;
-	idList<idStr>		materialDecls;
-	idStr				materialDeclName;
 
 	idDeclParticle *	curParticle;
 

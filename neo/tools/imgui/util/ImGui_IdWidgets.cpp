@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/containers/StrList.h"
 #include "ImGui_IdWidgets.h"
 
+#include "framework/FileSystem.h"
+
 #include "renderer/Material.h"
 
 static const char* bodyContentsNames[5] =
@@ -178,6 +180,236 @@ bool ColorPicker::Draw() {
 	}
 
 	return isAccepted;
+}
+
+DeclNew::DeclNew( declType_t _declType, const char *_directory, const char *_extension, const char *_label )
+	: declType(_declType)
+	, directory(_directory)
+	, extension(_extension)
+	, label(_label)
+	, fileSelection(-1)
+	, files()
+	, fileName( "" )
+	, name( "" )
+	, errorText( "" )
+	, dp( NULL )
+	, state(DONE)
+{
+}
+
+void DeclNew::Start() {
+	files.Clear();
+
+	idFileList* names = fileSystem->ListFiles( directory, extension, true, true );
+	for( int i = 0; i < names->GetNumFiles(); i++ )
+	{
+		idStr file = names->GetFile( i );
+
+		file.StripPath();
+		file.StripFileExtension();
+
+		files.Append( file );
+	}
+	fileSystem->FreeFileList( names );
+
+	fileSelection = -1;
+	fileName.Clear();
+	name.Clear();
+	errorText.Clear();
+	dp = NULL;
+	state = NAME;
+
+	ImGui::OpenPopup( label );
+}
+
+bool DeclNew::Draw() {
+	if ( state == DONE ) {
+		return false;
+	}
+
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+
+		if ( ImGui::InputTextStr( "File Name", &fileName ) ) {
+			// nop
+		}
+
+		if ( ImGui::BeginListBox( "Files##prtFileSelect" ) ) {
+			for( int i = 0; i < files.Num(); i++ )
+			{
+				if ( fileName.Length() && files[i].Find( fileName.c_str(), false ) == -1 ) {
+					continue;
+				}
+
+				bool selected = ( i == fileSelection );
+
+				ImGui::PushID( i );
+				if ( ImGui::Selectable( files[i].c_str(), selected ) ) {
+					fileSelection = i;
+					fileName = files[fileSelection];
+				}
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+				ImGui::PopID();
+			}
+				
+			ImGui::EndListBox();
+		}
+
+		if ( ImGui::InputTextStr( "Name", &name ) ) {
+			// nop
+		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			errorText.Clear();
+
+			if ( name.IsEmpty() ) {
+				errorText += "Please enter a name\n";
+				accepted = false;
+			}
+
+			idDecl *newDecl = const_cast<idDecl*>( declManager->FindType( declType, name.c_str(), false ) );
+			if( newDecl ) {
+				errorText += idStr::Format( "Decl %s already exists in %s. Please select a different name\n", name.c_str(), newDecl->GetFileName() );
+				accepted = false;
+			}
+
+			if ( errorText.IsEmpty() ) {
+				idStr fullName;
+
+				fullName = directory;
+				fullName += fileName;
+				fullName += extension;
+
+				// create it
+				dp = declManager->CreateNewDecl( declType, name.c_str(), fullName.c_str() );
+				state = DONE;
+
+				accepted = true;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			accepted = false;
+			state = DONE;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
+
+DeclSelect::DeclSelect( declType_t _declType, const char *_label )
+	: declType(_declType)
+	, label(_label)
+	, listSel(-1)
+	, list()
+	, name( "" )
+	, errorText( "" )
+	, dp( NULL )
+	, state(DONE)
+{
+}
+
+void DeclSelect::Start( const char *_name ) {
+	list.Clear();
+	for ( int i = 0; i < declManager->GetNumDecls( declType ); i++ ) {
+		const idDecl *idp = declManager->DeclByIndex( declType, i );
+		list.Append( idp->GetName() );
+	}
+	if ( _name ) {
+		name = _name;
+		listSel = list.FindIndex( name );
+	} else {
+		name.Clear();
+		listSel = -1;
+	}
+	
+	errorText.Clear();
+	dp = NULL;
+	state = NAME;
+
+	ImGui::OpenPopup( label );
+}
+
+bool DeclSelect::Draw() {
+	if ( state == DONE ) {
+		return false;
+	}
+
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+
+		if ( ImGui::InputTextStr( "Name", &name ) ) {
+			// nop
+		}
+
+		if ( ImGui::BeginListBox( "Decls##prtSystemSelect" ) ) {
+			for( int i = 0; i < list.Num(); i++ )
+			{
+				if ( name.Length() && list[i].Find( name.c_str(), false ) == -1 ) {
+					continue;
+				}
+
+				bool selected = ( i == listSel );
+
+				ImGui::PushID( i );
+				if ( ImGui::Selectable( list[i].c_str(), selected ) ) {
+					listSel = i;
+					name = list[listSel];
+				}
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+				ImGui::PopID();
+			}
+				
+			ImGui::EndListBox();
+		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			errorText.Clear();
+
+			if ( name.IsEmpty() ) {
+				errorText += "Please enter a name or select a decl from the list\n";
+				accepted = false;
+			}
+
+			idDecl *decl = const_cast<idDecl*>( declManager->FindType( declType, name.c_str(), false ) );
+			if( !decl ) {
+				errorText += idStr::Format( "Decl %s does not exist. Please select a different decl\n", name.c_str() );
+				accepted = false;
+			}
+
+			if ( errorText.IsEmpty() ) {
+				dp = decl;
+				state = DONE;
+
+				accepted = true;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			accepted = false;
+			state = DONE;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
 }
 
 } //namespace ImGuiTools
