@@ -997,6 +997,8 @@ void idCommonLocal::InitTool( const toolFlag_t tool, const idDict *dict ) {
 		ImGuiTools::PDAEditorInit( dict );
 	} else if ( tool & EDITOR_PARTICLE ) {
 		ImGuiTools::ParticleEditorInit( dict );
+	} else if ( tool & EDITOR_SCRIPT ) {
+		ImGuiTools::ScriptEditorInit( dict );
 	}
 #endif
 
@@ -1335,7 +1337,13 @@ Com_EditScripts_f
 ==================
 */
 static void Com_EditScripts_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::ScriptEditorInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
 	ScriptEditorInit( NULL );
+#else
+	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
+#endif
 }
 
 #endif // ID_ALLOW_TOOLS

@@ -67,14 +67,16 @@ bool	AreEditorsActive();
 
 void	DrawToolWindows();
 
-void	LightEditorInit( const idDict* dict );
+void	LightEditorInit( const idDict *dict );
 
 void	AfEditorInit();
 
 // in-game PDA Editor
-void	PDAEditorInit( const idDict* spawnArgs );
+void	PDAEditorInit( const idDict *spawnArgs );
 
-void	ParticleEditorInit( const idDict* spawnArgs );
+void	ParticleEditorInit( const idDict *spawnArgs );
+
+void	ScriptEditorInit( const idDict *spawnArgs );
 
 }
 

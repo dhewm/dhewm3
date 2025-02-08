@@ -176,69 +176,10 @@ private:
 
 	// stage controls
 	bool				stageControlsEnabled;
-	bool				editMaterialEnabled;
-	bool				buttonBrowseMaterialEnabled;
-	bool				editAnimFramesEnabled;
-	bool				editAnimRateEnabled;
-	bool				editColorEnabled;
-	bool				buttonBrowseColorEnabled;
-	bool				editFadeColorEnabled;
-	bool				buttonBrowseFadeColorEnabled;
-	bool				editFadeInEnabled;
-	bool				sliderFadeInEnabled;
-	bool				editFadeOutEnabled;
-	bool				editFadeFractionEnabled;
-	bool				sliderFadeOutEnabled;
-	bool				sliderFadeFractionEnabled;
-	bool				editBunchingEnabled;
-	bool				sliderBunchingEnabled;
-	bool				editCountEnabled;
-	bool				sliderCountEnabled;
-	bool				editTimeEnabled;
-	bool				sliderTimeEnabled;
-	bool				editCyclesEnabled;
-	bool				editTimeOffsetEnabled;
-	bool				editDeadTimeEnabled;
-	bool				checkWorldGravityEnabled;
-	bool				editGravityEnabled;
-	bool				sliderGravityEnabled;
-	bool				radioRectEnabled;
-	bool				radioCylinderEnabled;
-	bool				radioSphereEnabled;
-	bool				editOffsetEnabled;
-	bool				editXSizeEnabled;
-	bool				editYSizeEnabled;
-	bool				editZSizeEnabled;
 	bool				editRingOffsetEnabled;
-	bool				radioConeEnabled;
-	bool				radioOutwardEnabled;
-	bool				editDirectionParmEnabled;
-	bool				radioAimedEnabled;
-	bool				radioViewEnabled;
-	bool				radioXEnabled;
-	bool				radioYEnabled;
-	bool				radioZEnabled;
 	bool				editOrientationParm1Enabled;
 	bool				editOrientationParm2Enabled;
-	bool				sliderSpeedFromEnabled;
-	bool				editSpeedFromEnabled;
-	bool				editSpeedToEnabled;
-	bool				sliderSpeedToEnabled;
-	bool				sliderRotationFromEnabled;
-	bool				editRotationFromEnabled;
-	bool				editRotationToEnabled;
-	bool				sliderRotationToEnabled;
-	bool				sliderSizeFromEnabled;
-	bool				editSizeFromEnabled;
-	bool				editSizeToEnabled;
-	bool				sliderSizeToEnabled;
-	bool				sliderAspectFromEnabled;
-	bool				editAspectFromEnabled;
-	bool				editAspectToEnabled;
-	bool				editSliderAspectToEnabled;
-	bool				comboCustomPathEnabled;
-	bool				checkEntityColorEnabled;
-	
+
 	idList<idStr>		listStages;
 	idHashIndex			listStagesItemData;
 	int					listStagesSel;
@@ -295,6 +236,8 @@ private:
 
 	int					visualization;
 
+	bool				mapModified;
+
 private:
 	void				AddStage( bool clone );
 	void				RemoveStage();
@@ -315,7 +258,6 @@ private:
 	void				EnableStageControls();
 	void				EnableEditControls();
 	void				UpdateSelectedOrigin( float x, float y, float z );
-	bool				mapModified;
 };
 
 }

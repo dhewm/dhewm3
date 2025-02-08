@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "lighteditor/LightEditor.h"
 #include "pdaeditor/PDAEditor.h"
 #include "particleeditor/ParticleEditor.h"
+#include "scripteditor/ScriptEditor.h"
 
 static bool releaseMouse = false;
 
@@ -143,6 +144,10 @@ void DrawToolWindows()
 	{
 		ParticleEditor::Instance().Draw();
 	}
+	else if ( ScriptEditor::Instance().IsShown() )
+	{
+		ScriptEditor::Instance().Draw();
+	}
 }
 
 void LightEditorInit( const idDict* dict )
@@ -202,6 +207,16 @@ void ParticleEditorInit(const idDict* spawnArgs)
 	cvarSystem->SetCVarBool("r_useCachedDynamicModels", false);
 
 	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_ParticleEditor);
+}
+
+void ScriptEditorInit(const idDict* spawnArgs)
+{
+	ScriptEditor::Instance().Reset();
+	ScriptEditor::Instance().ShowIt( true );
+
+	impl::SetReleaseToolMouse(true);
+
+	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_ScriptEditor);
 }
 
 } //namespace ImGuiTools
