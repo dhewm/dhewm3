@@ -128,6 +128,26 @@ private:
 	state_t				state;
 };
 
+class ParticleSelect {
+public:
+						ParticleSelect();
+
+	void				Start();
+	bool				Draw();
+
+	ID_INLINE idDeclParticle* GetParticle() { return dp; }
+
+private:
+	enum state_t { DONE = 0, NAME };
+
+	int					comboParticleSel;
+	idList<idStr>		comboParticle;
+	idStr				name;
+	idStr				errorText;
+	idDeclParticle *	dp;
+	state_t				state;
+};
+
 class ParticleEditor {
 
 public:
@@ -151,7 +171,7 @@ public:
 		return isShown;
 	}
 
-protected:
+private:
 	void		OnCbnSelchangeComboParticles();
 	void		OnCbnSelchangeComboPath();
 	void		OnLbnSelchangeListStages();
@@ -180,6 +200,7 @@ private:
 	bool				isShown;
 
 	ParticleNew			particleNewDlg;
+	ParticleSelect		particleSelectDlg;
 
 	idStr				inFileText;
 
@@ -193,6 +214,8 @@ private:
 	int					materialDeclSelection;
 	idList<idStr>		materialDecls;
 	idStr				materialDeclName;
+
+	idDeclParticle *	curParticle;
 
 	// edit controls
 	bool				editControlsEnabled;
@@ -262,9 +285,6 @@ private:
 	bool				comboCustomPathEnabled;
 	bool				checkEntityColorEnabled;
 	
-	bool				shouldPopulate;
-	idList<idStr>		comboParticle;
-	int					comboParticleSel;
 	idList<idStr>		listStages;
 	idHashIndex			listStagesItemData;
 	int					listStagesSel;
@@ -322,12 +342,12 @@ private:
 	int					visualization;
 
 private:
-	void				EnumParticles();
 	void				AddStage( bool clone );
 	void				RemoveStage();
 	void				RemoveStageThink();
 	void				ShowStage();
 	void				HideStage();
+	void				SetCurParticle( idDeclParticle *dp );
 	idDeclParticle *	GetCurParticle();
 	idParticleStage *	GetCurStage();
 	void				ClearDlgVars();

@@ -107,6 +107,7 @@ void ParticleNew::Start() {
 
 	fileSelection = -1;
 	fileName.Clear();
+	name.Clear();
 	errorText.Clear();
 	dp = NULL;
 	state = NAME;
@@ -198,6 +199,105 @@ bool ParticleNew::Draw() {
 	return accepted;
 }
 
+ParticleSelect::ParticleSelect()
+	: comboParticleSel(-1)
+	, comboParticle()
+	, name( "" )
+	, errorText( "" )
+	, dp( NULL )
+	, state(DONE)
+{
+}
+
+void ParticleSelect::Start() {
+	comboParticle.Clear();
+	for ( int i = 0; i < declManager->GetNumDecls( DECL_PARTICLE ); i++ ) {
+		const idDecl *idp = declManager->DeclByIndex( DECL_PARTICLE, i );
+		comboParticle.Append( idp->GetName() );
+	}
+	comboParticleSel = 0;
+
+	name.Clear();
+	errorText.Clear();
+	dp = NULL;
+	state = NAME;
+
+	ImGui::OpenPopup( "Particle System Browser" );
+}
+
+bool ParticleSelect::Draw() {
+	if ( state == DONE ) {
+		return false;
+	}
+
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( "Particle System Browser", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+
+		if ( ImGui::InputTextStr( "Name", &name ) ) {
+			// nop
+		}
+
+		if ( ImGui::BeginListBox( "Particle Systems##prtSystemSelect" ) ) {
+			for( int i = 0; i < comboParticle.Num(); i++ )
+			{
+				if ( name.Length() && comboParticle[i].Find( name.c_str(), false ) == -1 ) {
+					continue;
+				}
+
+				bool selected = ( i == comboParticleSel );
+
+				ImGui::PushID( i );
+				if ( ImGui::Selectable( comboParticle[i].c_str(), selected ) ) {
+					comboParticleSel = i;
+					name = comboParticle[comboParticleSel];
+				}
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+				ImGui::PopID();
+			}
+				
+			ImGui::EndListBox();
+		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			errorText.Clear();
+
+			if ( name.IsEmpty() ) {
+				errorText += "Please enter a name or select a particle system from the list\n";
+				accepted = false;
+			}
+
+			idDeclParticle *decl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, name.c_str(), false ) ) );
+			if( !decl ) {
+				errorText += idStr::Format( "Particle System %s does not exist. Please select a different particle system\n", name.c_str() );
+				accepted = false;
+			}
+
+			if ( errorText.IsEmpty() ) {
+				dp = decl;
+				state = DONE;
+
+				accepted = true;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			accepted = false;
+			state = DONE;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
+
 ParticleEditor& ParticleEditor::Instance()
 {
 	static ParticleEditor instance;
@@ -206,12 +306,12 @@ ParticleEditor& ParticleEditor::Instance()
 
 ParticleEditor::ParticleEditor()
 	: particleNewDlg()
+	, particleSelectDlg()
 	, colorDlg( "Color" )
 	, fadeColorDlg( "Fade Color" )
 	, entityColorDlg( "Entity Color" )
 	, particleDropDlg()
 	, materialDeclSelection(0)
-	, shouldPopulate(false)
 {
 	isShown = false;
 }
@@ -220,7 +320,7 @@ void ParticleEditor::Draw()
 {
 	int i, num;
 	bool showTool;
-	bool clickedNew = false, openedParticleBrowser = false;
+	bool clickedNew = false, clickedSelect = false;
 
 	showTool = isShown;
 
@@ -238,8 +338,7 @@ void ParticleEditor::Draw()
 
 				if( ImGui::MenuItem( "Open..", "Ctrl+O" ) )
 				{
-					shouldPopulate = true;
-					openedParticleBrowser = true;
+					clickedSelect = true;
 				}
 
 				if( ImGui::MenuItem( "Save", "Ctrl+S" ) )
@@ -262,51 +361,19 @@ void ParticleEditor::Draw()
 		}
 
 		if ( particleNewDlg.Draw() ) {
-			idDeclParticle* dp = particleNewDlg.GetParticle();
+			idDeclParticle *dp = particleNewDlg.GetParticle();
 
-			if ( dp ) {
-				comboParticleSel = comboParticle.Append( dp->GetName() );
-
-				OnCbnSelchangeComboParticles();
-			}
+			SetCurParticle( dp );
 		}
 
-		if( openedParticleBrowser )
-		{
-			ImGui::OpenPopup( "Particle System Browser" );
+		if ( clickedSelect) {
+			particleSelectDlg.Start();
 		}
 
-		if( ImGui::BeginPopup( "Particle System Browser" ) )
-		{
-			if ( shouldPopulate ) {
-				EnumParticles();
-				shouldPopulate = false;
-			}
-			if( comboParticle.Num() > 0 )
-			{
-				ImGui::Combo( "Particle Systems", &comboParticleSel, &StringListItemGetter, &comboParticle, comboParticle.Num() );
-				if( ImGui::Button( "Select" ) )
-				{
-					idDeclParticle* newDecl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, comboParticle[comboParticleSel], false ) ) );
-					if( newDecl )
-					{
-						OnCbnSelchangeComboParticles();
-					}
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			else
-			{
-				ImGui::Text( "There are no particle systems!" );
-			}
+		if ( particleSelectDlg.Draw() ) {
+			idDeclParticle *dp = particleSelectDlg.GetParticle();
 
-			ImGui::SameLine();
-
-			if( ImGui::Button( "Close" ) )
-			{
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
+			SetCurParticle( dp );
 		}
 
 		ImGui::TextUnformatted( inFileText.c_str() );
@@ -1016,19 +1083,18 @@ void ParticleEditor::OnBnClickedButtonUpdate() {
 }
 
 void ParticleEditor::SelectParticle( const char *name ) {
-	int index = comboParticle.FindIndex( name );
-	if ( index >= 0 ) {
-		comboParticleSel = index;
-		UpdateParticleData();
-	}
+	idDeclParticle *decl = static_cast<idDeclParticle*>( const_cast<idDecl*>( declManager->FindType( DECL_PARTICLE, name, false ) ) );
+	
+	SetCurParticle( decl );
+}
+
+void ParticleEditor::SetCurParticle( idDeclParticle *dp ) {
+	curParticle = dp;
+	UpdateParticleData();
 }
 
 idDeclParticle *ParticleEditor::GetCurParticle() {
-	int index = comboParticleSel;
-	if ( index < 0 ) {
-		return NULL;
-	}
-	return static_cast<idDeclParticle *>( const_cast<idDecl *>( declManager->DeclByIndex( DECL_PARTICLE, index ) ) );
+	return curParticle;
 }
 
 void ParticleEditor::UpdateParticleData() {
@@ -1049,15 +1115,10 @@ void ParticleEditor::UpdateParticleData() {
 	}
 	listStagesSel = 0;
 	OnLbnSelchangeListStages();
-	inFileText = idStr::Format( "Particle file: %s", idp->GetFileName() );
+	inFileText = idStr::Format( "%s (%s)", idp->GetName(), idp->GetFileName() );
 
 	SetParticleView();
 }
-
-void ParticleEditor::OnCbnSelchangeComboParticles() {
-	UpdateParticleData();
-}
-
 
 void ParticleEditor::OnCbnSelchangeComboPath() {
 	DlgVarsToCurStage();
@@ -1243,7 +1304,7 @@ void ParticleEditor::RemoveStageThink()
 			listStagesItemData.Remove( index, newIndex );
 			listStagesSel = index;
 			idp->stages.RemoveIndex( newIndex );
-			OnCbnSelchangeComboParticles();
+			UpdateParticleData();
 			ShowCurrentStage();
 		}
 	}
@@ -1476,16 +1537,6 @@ void ParticleEditor::OnBnClickedButtonSave() {
 	idp->Save();
 }
 
-void ParticleEditor::EnumParticles() {
-	comboParticle.Clear();
-	for ( int i = 0; i < declManager->GetNumDecls( DECL_PARTICLE ); i++ ) {
-		const idDecl *idp = declManager->DeclByIndex( DECL_PARTICLE, i );
-		comboParticle.Append( idp->GetName() );
-	}
-	comboParticleSel = 0;
-	OnCbnSelchangeComboParticles();
-}
-
 /*void VectorCallBack(idQuat rotation) {
 	ParticleEditor::Instance().SetVectorControlUpdate( rotation );
 }*/
@@ -1550,7 +1601,7 @@ void ParticleEditor::Reset()
 	sliderFadeFraction.SetRange( 0, 20 );
 	sliderFadeFraction.SetValueRange( 0.0f, 1.0f );
 
-	EnumParticles();
+	UpdateParticleData();
 	SetParticleView();
 
 	buttonSaveParticleEntitiesEnabled = false;
