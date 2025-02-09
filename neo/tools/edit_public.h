@@ -78,6 +78,8 @@ void	ParticleEditorInit( const idDict *spawnArgs );
 
 void	ScriptEditorInit( const idDict *spawnArgs );
 
+void	DeclBrowserInit( const idDict* spawnArgs );
+
 }
 
 

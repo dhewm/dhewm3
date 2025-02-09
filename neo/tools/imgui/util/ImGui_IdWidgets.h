@@ -87,9 +87,9 @@ private:
 	idVec4				oldColor;
 };
 
-class DeclNew {
+class DeclNewSelect {
 public:
-						DeclNew( declType_t declType, const char *directory, const char *extension, const char *label );
+						DeclNewSelect( declType_t declType, const char *directory, const char *extension, const char *label );
 
 	void				Start();
 	bool				Draw();

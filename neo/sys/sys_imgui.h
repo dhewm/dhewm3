@@ -16,9 +16,15 @@ enum D3ImGuiWindow {
 	D3_ImGuiWin_AfEditor    = 8, // new AF Editor
 	D3_ImGuiWin_PDAEditor	= 16, // new PDA Editor
 	D3_ImGuiWin_ParticleEditor = 32, // new Particle Editor
-	D3_ImGuiWin_ScriptEditor = 64, // next should be 128, then 256, etc so a bitmask can be used
+	D3_ImGuiWin_ScriptEditor = 64, // new Script Editor
+	D3_ImGuiWin_DeclBrowser = 128, // next should be 256, then 512, etc so a bitmask can be used
 
-	D3_ImGuiWin_AnyEditor = D3_ImGuiWin_LightEditor | D3_ImGuiWin_AfEditor | D3_ImGuiWin_PDAEditor | D3_ImGuiWin_ParticleEditor | D3_ImGuiWin_ScriptEditor // to decide whether to call DrawToolWindows()
+	D3_ImGuiWin_AnyEditor = D3_ImGuiWin_LightEditor
+		| D3_ImGuiWin_AfEditor
+		| D3_ImGuiWin_PDAEditor
+		| D3_ImGuiWin_ParticleEditor
+		| D3_ImGuiWin_ScriptEditor
+		| D3_ImGuiWin_DeclBrowser // to decide whether to call DrawToolWindows()
 };
 
 #ifndef IMGUI_DISABLE

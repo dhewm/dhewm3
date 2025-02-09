@@ -42,6 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "pdaeditor/PDAEditor.h"
 #include "particleeditor/ParticleEditor.h"
 #include "scripteditor/ScriptEditor.h"
+#include "decleditor/DeclBrowser.h"
 
 static bool releaseMouse = false;
 
@@ -148,6 +149,9 @@ void DrawToolWindows()
 	{
 		ScriptEditor::Instance().Draw();
 	}
+	else if ( DeclBrowser::Instance().IsShown() ) {
+		DeclBrowser::Instance().Draw();
+	}
 }
 
 void LightEditorInit( const idDict* dict )
@@ -217,6 +221,16 @@ void ScriptEditorInit(const idDict* spawnArgs)
 	impl::SetReleaseToolMouse(true);
 
 	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_ScriptEditor);
+}
+
+void DeclBrowserInit(const idDict* spawnArgs)
+{
+	DeclBrowser::Instance().Reset();
+	DeclBrowser::Instance().ShowIt( true );
+
+	impl::SetReleaseToolMouse(true);
+
+	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_DeclBrowser);
 }
 
 } //namespace ImGuiTools

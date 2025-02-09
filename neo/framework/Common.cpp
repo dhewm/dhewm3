@@ -990,15 +990,15 @@ void idCommonLocal::InitTool( const toolFlag_t tool, const idDict *dict ) {
 	} else if ( tool & EDITOR_LIGHT ) {
 		ImGuiTools::LightEditorInit( dict );
 	} else if ( tool & EDITOR_PARTICLE ) {
-		//ParticleEditorInit( dict );
+		ImGuiTools::ParticleEditorInit( dict );
 	} else if ( tool & EDITOR_AF ) {
 		ImGuiTools::AfEditorInit(); // TODO: dict ?
 	} else if ( tool & EDITOR_PDA ) {
 		ImGuiTools::PDAEditorInit( dict );
-	} else if ( tool & EDITOR_PARTICLE ) {
-		ImGuiTools::ParticleEditorInit( dict );
 	} else if ( tool & EDITOR_SCRIPT ) {
 		ImGuiTools::ScriptEditorInit( dict );
+	} else if ( tool & EDITOR_DECL ) {
+		ImGuiTools::DeclBrowserInit( dict );
 	}
 #endif
 
@@ -1328,7 +1328,13 @@ Com_EditDecls_f
 ==================
 */
 static void Com_EditDecls_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::DeclBrowserInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
 	DeclBrowserInit( NULL );
+#else
+	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
+#endif
 }
 
 /*

@@ -156,7 +156,7 @@ private:
 private:
 	bool				isShown;
 
-	DeclNew				particleNewDlg;
+	DeclNewSelect		particleNewDlg;
 	DeclSelect			particleSelectDlg;
 	DeclSelect			materialSelectDlg;
 

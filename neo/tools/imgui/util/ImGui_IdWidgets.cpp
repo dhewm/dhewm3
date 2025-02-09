@@ -182,7 +182,7 @@ bool ColorPicker::Draw() {
 	return isAccepted;
 }
 
-DeclNew::DeclNew( declType_t _declType, const char *_directory, const char *_extension, const char *_label )
+DeclNewSelect::DeclNewSelect( declType_t _declType, const char *_directory, const char *_extension, const char *_label )
 	: declType(_declType)
 	, directory(_directory)
 	, extension(_extension)
@@ -197,7 +197,7 @@ DeclNew::DeclNew( declType_t _declType, const char *_directory, const char *_ext
 {
 }
 
-void DeclNew::Start() {
+void DeclNewSelect::Start() {
 	files.Clear();
 
 	idFileList* names = fileSystem->ListFiles( directory, extension, true, true );
@@ -222,7 +222,7 @@ void DeclNew::Start() {
 	ImGui::OpenPopup( label );
 }
 
-bool DeclNew::Draw() {
+bool DeclNewSelect::Draw() {
 	if ( state == DONE ) {
 		return false;
 	}
@@ -321,7 +321,7 @@ DeclSelect::DeclSelect( declType_t _declType, const char *_label )
 void DeclSelect::Start( const char *_name ) {
 	list.Clear();
 	for ( int i = 0; i < declManager->GetNumDecls( declType ); i++ ) {
-		const idDecl *idp = declManager->DeclByIndex( declType, i );
+		const idDecl *idp = declManager->DeclByIndex( declType, i, false );
 		list.Append( idp->GetName() );
 	}
 	if ( _name ) {

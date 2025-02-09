@@ -852,6 +852,15 @@ set(src_imgui ${src_imgui}
 	tools/imgui/particleeditor/ParticleEditor.cpp
 	tools/imgui/scripteditor/ScriptEditor.h
 	tools/imgui/scripteditor/ScriptEditor.cpp
+
+	tools/imgui/decleditor/PathTreeCtrl.h
+	tools/imgui/decleditor/PathTreeCtrl.cpp
+	tools/imgui/decleditor/DeclBrowser.h
+	tools/imgui/decleditor/DeclBrowser.cpp
+	tools/imgui/decleditor/DeclEditor.h
+	tools/imgui/decleditor/DeclEditor.cpp
+	tools/imgui/decleditor/DeclNew.h
+	tools/imgui/decleditor/DeclNew.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)
