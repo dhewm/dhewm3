@@ -28,8 +28,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../util/ImGui_IdWidgets.h"
 
-#include "DeclBrowser.h"
+#include "PathTreeCtrl.h"
 #include "DeclEditor.h"
+#include "DeclBrowser.h"
 
 namespace ImGuiTools {
 

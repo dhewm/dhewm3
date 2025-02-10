@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../edit_public.h"
 
 #include "PathTreeCtrl.h"
+#include "DeclNew.h"
 
 namespace ImGuiTools {
 
@@ -45,6 +46,8 @@ public:
 
 	void				ReloadDeclarations( void );
 	bool				CompareDecl( PathTreeNode *item, const char *name ) const;
+	bool				OnToolTipNotify( PathTreeNode *item, idStr &tooltipText ) const;
+	void				OnTreeSelChanged();
 
 	void				Reset();
 	void				Draw();
@@ -57,15 +60,12 @@ public:
 	}
 
 private:
-	//bool				OnToolTipNotify( UINT id, NMHDR *pNMHDR, LRESULT *pResult );
-	void				OnTreeSelChanged();
 	void				OnTreeDblclk();
 	void				OnBnClickedFind();
 	void				OnBnClickedEdit();
 	void				OnBnClickedNew();
+	void				OnBnClickedNewAccepted();
 	void				OnBnClickedReload();
-	void				OnBnClickedOk();
-	void				OnBnClickedCancel();
 
 private:
 	bool				isShown;
@@ -81,16 +81,13 @@ private:
 	bool				reloadButtonEnabled;
 	bool				cancelButtonEnabled;
 
-	//static toolTip_t	toolTips[];
 
-	//CRect				initialRect;
 	PathTreeCtrl		baseDeclTree;
 	int					numListedDecls;
 	idStr				findNameString;
 	idStr				findTextString;
 
-	//TCHAR *				m_pchTip;
-	//WCHAR *				m_pwchTip;
+	DeclNew				declNewDlg;
 
 private:
 	void				AddDeclTypeToTree( declType_t type, const char *root, PathTreeCtrl &tree );

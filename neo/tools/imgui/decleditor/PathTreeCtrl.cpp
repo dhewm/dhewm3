@@ -71,6 +71,10 @@ void PathTreeCtrl::SelectItem( PathTreeNode *item ) {
 }
 
 PathTreeNode *PathTreeCtrl::InsertItem( const idStr &name, PathTreeNode *parent, PathTreeNode *after ) {
+	if ( !parent && name.IsEmpty() ) {
+		// do not insert the root node again
+		return root;
+	}
 	PathTreeNode *newNode = nodeAllocator.Alloc();
 	int id = numNodes++;
 	newNode->Init( id );
@@ -96,12 +100,12 @@ int PathTreeCtrl::GetItemData( PathTreeNode *item ) const {
 	return item->GetItem();
 }
 
-void PathTreeCtrl::Draw() {
+void PathTreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data ) {
 	PathTreeNode *parentNode = GetRootItem();
 	PathTreeNode *node;
 
 	for ( node = GetChildItem( parentNode ) ; node ; node = GetNextSiblingItem( node ) ) {
-		DrawNode( node );
+		DrawNode( node, tooltip, selected, data );
 	}
 }
 
@@ -275,9 +279,10 @@ int PathTreeCtrl::SearchTree( treeItemCompare_t compare, void *data, PathTreeCtr
 	return numItems;
 }
 
-void PathTreeCtrl::DrawNode( PathTreeNode *node ) {
+void PathTreeCtrl::DrawNode( PathTreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data ) {
 	PathTreeNode		*item;
 	ImGuiTreeNodeFlags	flags = 0;
+	idStr				tooltipText;
 
 	if ( node == selectedItem ) {
 		flags |= ImGuiTreeNodeFlags_Selected;
@@ -290,10 +295,19 @@ void PathTreeCtrl::DrawNode( PathTreeNode *node ) {
 	if ( ImGui::TreeNodeEx( ( const void * )node->GetID(), flags, "%s", node->GetLabel().c_str() ) ) {
 		if ( ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() ) {
 			SelectItem( node );
+			selected( data );
+		}
+		if ( ImGui::IsItemHovered() ) {
+			tooltipText.Clear();
+			if ( tooltip( data, node, tooltipText ) ) {
+                ImGui::BeginTooltip();
+				ImGui::TextUnformatted( tooltipText.c_str() );
+                ImGui::EndTooltip();
+			}
 		}
 		
 		for ( item = GetChildItem( node ); item; item = GetNextSiblingItem( item ) ) {
-			DrawNode( item );
+			DrawNode( item, tooltip, selected, data );
 		}
 
 		if ( GetChildItem( node ) ) {

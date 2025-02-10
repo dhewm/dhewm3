@@ -1310,18 +1310,6 @@ static void Com_EditParticles_f(const idCmdArgs& args) {
 #endif
 }
 
-
-#ifdef ID_ALLOW_TOOLS
-/*
-==================
-Com_EditSounds_f
-==================
-*/
-static void Com_EditSounds_f( const idCmdArgs &args ) {
-	SoundEditorInit( NULL );
-	cvarSystem->SetCVarInteger( "g_editEntityMode", 2 );
-}
-
 /*
 ==================
 Com_EditDecls_f
@@ -1350,6 +1338,17 @@ static void Com_EditScripts_f( const idCmdArgs &args ) {
 #else
 	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
 #endif
+}
+
+#ifdef ID_ALLOW_TOOLS
+/*
+==================
+Com_EditSounds_f
+==================
+*/
+static void Com_EditSounds_f( const idCmdArgs &args ) {
+	SoundEditorInit( NULL );
+	cvarSystem->SetCVarInteger( "g_editEntityMode", 2 );
 }
 
 #endif // ID_ALLOW_TOOLS

@@ -46,8 +46,15 @@ namespace ImGuiTools {
 class PathTreeNode {
 public:
 	PathTreeNode()
+		: label()
+		, item(0)
+		, node()
+		, id(-1)
 	{
-		Init(0);
+		
+	}
+	~PathTreeNode() {
+		Shutdown();
 	}
 
 	void Init(int _id)
@@ -61,30 +68,26 @@ public:
 	void Shutdown()
 	{
 		node.RemoveFromHierarchy();
-		label.FreeData();
+		label.Clear();
 		id = 0;
 	}
 
-	~PathTreeNode() {
-
-	}
-
-	ID_INLINE int		GetItem() {
+	ID_INLINE int					GetItem() {
 		return item;
 	}
-	ID_INLINE void		SetItem( int _item ) {
+	ID_INLINE void					SetItem( int _item ) {
 		item = _item;
 	}
-	ID_INLINE void		SetLabel( const char *_label ) {
+	ID_INLINE void					SetLabel( const char *_label ) {
 		label = _label;
 	}
-	ID_INLINE idStr &	GetLabel() {
+	ID_INLINE idStr &				GetLabel() {
 		return label;
 	}
 	ID_INLINE idHierarchy<PathTreeNode>& GetNode() {
 		return node;
 	}
-	ID_INLINE int		GetID() {
+	ID_INLINE int				GetID() {
 		return id;
 	}
 
@@ -128,14 +131,20 @@ ID_INLINE void idPathTreeStack::Push( PathTreeNode *item, const char *name ) {
 }
 
 typedef bool (*treeItemCompare_t)( void *data, PathTreeNode *item, const char *name );
+typedef bool (*treeItemTooltip_t)( void *data, PathTreeNode *item, idStr &tooltipText );
+typedef void (*treeItemSelected_t)( void *data );
 
 class PathTreeCtrl {
 public:
 	PathTreeCtrl()
 		: nodeAllocator()
 		, root()
-		, selectedItem(NULL) {
+		, selectedItem(NULL)
+		, numNodes(0)
+	{
 		root = nodeAllocator.Alloc();
+		root->Init(0);
+		numNodes++;
 	}
 	~PathTreeCtrl() {
 		DeleteAllItems();
@@ -153,7 +162,7 @@ public:
 	PathTreeNode *					GetSelectedItem() const;
 	void							SelectItem( PathTreeNode *item );
 
-	void							Draw();
+	void							Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data );
 
 	PathTreeNode *					FindItem( const idStr &pathName );
 	PathTreeNode *					InsertPathIntoTree( const idStr &pathName, const int id );
@@ -161,7 +170,7 @@ public:
 	int								SearchTree( treeItemCompare_t compare, void *data, PathTreeCtrl &result );
 
 private:
-	void							DrawNode( PathTreeNode *item );
+	void							DrawNode( PathTreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data );
 	void							DeleteAllItemsOfNode( PathTreeNode *item );
 
 	idBlockAlloc<PathTreeNode,256>	nodeAllocator;

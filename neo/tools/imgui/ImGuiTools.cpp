@@ -220,6 +220,11 @@ void ScriptEditorInit(const idDict* spawnArgs)
 
 	impl::SetReleaseToolMouse(true);
 
+	if ( spawnArgs ) {
+		const char *str = spawnArgs->GetString( "script" );
+		ScriptEditor::Instance().OpenFile( str );
+	}
+
 	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_ScriptEditor);
 }
 

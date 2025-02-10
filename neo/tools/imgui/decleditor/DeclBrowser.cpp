@@ -32,9 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/FileSystem.h"
 
 #include "PathTreeCtrl.h"
-#include "DeclBrowser.h"
-#include "DeclEditor.h"
 #include "DeclNew.h"
+#include "DeclEditor.h"
+#include "DeclBrowser.h"
 
 const int DECLTYPE_SHIFT			= 24;
 const int DECLINDEX_MASK			= ( 1 << DECLTYPE_SHIFT ) - 1;
@@ -47,20 +47,12 @@ const int DECLTYPE_GUI				= 127;
 
 namespace ImGuiTools {
 
-/*
-toolTip_t DialogDeclBrowser::toolTips[] = {
-	{ IDC_DECLBROWSER_TREE, "decl browser" },
-	{ IDC_DECLBROWSER_EDIT_SEARCH_NAMES, "search for declarations with matching name, use meta characters: *, ? and [abc...]" },
-	{ IDC_DECLBROWSER_EDIT_SEARCH_TEXT, "search for declarations containing text" },
-	{ IDC_DECLBROWSER_BUTTON_FIND, "find declarations matching the search strings" },
-	{ IDC_DECLBROWSER_BUTTON_EDIT, "edit selected declaration" },
-	{ IDC_DECLBROWSER_BUTTON_NEW, "create new declaration" },
-	{ IDC_DECLBROWSER_BUTTON_RELOAD, "reload declarations" },
-	{ IDOK, "ok" },
-	{ IDCANCEL, "cancel" },
-	{ 0, NULL }
-};
-*/
+bool DeclBrowserOnToolTipNotify( void *data, PathTreeNode *item, idStr &tooltipText ) {
+	return reinterpret_cast<DeclBrowser *>(data)->OnToolTipNotify( item, tooltipText );
+}
+void DeclBrowserOnTreeSelChanged( void *data ) {
+	reinterpret_cast<DeclBrowser *>(data)->OnTreeSelChanged();
+}
 
 /*
 ================
@@ -84,6 +76,7 @@ DeclBrowser::DeclBrowser()
 	, numListedDecls(0)
 	, findNameString()
 	, findTextString()
+	, declNewDlg()
 {
 }
 
@@ -106,34 +99,44 @@ void DeclBrowser::Draw() {
 		impl::SetReleaseToolMouse( true );
 
 		if ( ImGui::BeginChild( "Decl Tree", ImVec2( 300, 400 ) ) ) {
-			declTree.Draw();
+			ImGui::SetItemTooltip( "decl browser" );
+			declTree.Draw( DeclBrowserOnToolTipNotify, DeclBrowserOnTreeSelChanged, this );
 			ImGui::EndChild();
 		}
 
 		if ( ImGui::InputTextStr( "Search names", &findNameEdit ) ) {
 		}
+		ImGui::SetItemTooltip( "search for declarations with matching name, use meta characters: *, ? and [abc...]" );
 		if ( ImGui::InputTextStr( "Search text", &findTextEdit ) ) {
 		}
+		ImGui::SetItemTooltip( "search for declarations containing text" );
 		if ( ImGui::Button( "Find" ) ) {
 			OnBnClickedFind();
 		}
+		ImGui::SetItemTooltip( "find declarations matching the search strings" );
 		ImGui::SameLine();
 		if ( ImGui::Button( "Edit" ) ) {
 			OnBnClickedEdit();
 		}
+		ImGui::SetItemTooltip( "edit selected declaration" );
 		ImGui::SameLine();
 		if ( ImGui::Button( "New" ) ) {
 			OnBnClickedNew();
 		}
+		ImGui::SetItemTooltip( "create new declaration" );
 		ImGui::SameLine();
 		if ( ImGui::Button( "Reload" ) ) {
 			ReloadDeclarations();
 		}
+		ImGui::SetItemTooltip( "reload declarations" );
 		ImGui::SameLine();
 		if ( ImGui::Button( "Close" ) ) {
 			showTool = false;
 		}
 
+		if ( declNewDlg.Draw() ) {
+			OnBnClickedNewAccepted();
+		}
 	}
 	ImGui::End();
 
@@ -265,7 +268,7 @@ void DeclBrowser::GetDeclName( PathTreeNode *item, idStr &typeName, idStr &declN
 	idStr itemName;
 
 	declName.Clear();
-	for( parent = declTree.GetParentItem( item ); parent; parent = declTree.GetParentItem( parent ) ) {
+	for( parent = declTree.GetParentItem( item ); parent && parent != declTree.GetRootItem(); parent = declTree.GetParentItem( parent ) ) {
 		itemName = declTree.GetItemText( item );
 		declName = itemName + "/" + declName;
 		item = parent;
@@ -283,6 +286,10 @@ const idDecl *DeclBrowser::GetDeclFromTreeItem( PathTreeNode *item ) const {
 	int id, index;
 	declType_t type;
 	const idDecl *decl;
+
+	if ( !item ) {
+		return NULL;
+	}
 
 	if ( declTree.GetChildItem( item ) ) {
 		return NULL;
@@ -336,33 +343,28 @@ void DeclBrowser::EditSelected( void ) const {
 		case DECL_AF: {
 			decl = declManager->DeclByIndex( type, index, false );
 			spawnArgs.Set( "articulatedFigure", decl->GetName() );
-			//AFEditorInit( &spawnArgs );
+			ImGuiTools::AfEditorInit(); // TODO: pass spawnArgs
 			break;
 		}
 		case DECL_PARTICLE: {
 			decl = declManager->DeclByIndex( type, index, false );
 			spawnArgs.Set( "model", decl->GetName() );
-			//ParticleEditorInit( &spawnArgs );
+			ImGuiTools::ParticleEditorInit( &spawnArgs );
 			break;
 		}
 		case DECL_PDA: {
 			decl = declManager->DeclByIndex( type, index, false );
 			spawnArgs.Set( "pda", decl->GetName() );
-			//PDAEditorInit( &spawnArgs );
+			ImGuiTools::PDAEditorInit( &spawnArgs );
 			break;
 		}
 		case DECLTYPE_SCRIPT:
 		case DECLTYPE_GUI: {
 			idStr typeName, declName;
 			GetDeclName( item, typeName, declName );
-			/*
-			ScriptEditor* scriptEditor;
-			scriptEditor = new ScriptEditor;
-			scriptEditor->Create( IDD_DIALOG_SCRIPTEDITOR, GetParent() );
-			scriptEditor->OpenFile( typeName + "/" + declName + ( ( type == DECLTYPE_SCRIPT ) ? ".script" : ".gui" ) );
-			scriptEditor->ShowWindow( SW_SHOW );
-			scriptEditor->SetFocus();
-			*/
+			idStr fileName = typeName + "/" + declName + ( ( type == DECLTYPE_SCRIPT ) ? ".script" : ".gui" );
+			spawnArgs.Set( "script", fileName );
+			ImGuiTools::ScriptEditorInit( &spawnArgs );
 			break;
 		}
 		default: {
@@ -442,10 +444,6 @@ DeclBrowser::Reset
 */
 void DeclBrowser::Reset()  {
 
-	//GetClientRect( initialRect );
-
-	//baseDeclTree.Create( 0, initialRect, this, IDC_DECLBROWSER_BASE_TREE );
-
 	InitBaseDeclTree();
 
 	findNameString = "*";
@@ -469,82 +467,28 @@ void DeclBrowser::ReloadDeclarations( void ) {
 	OnBnClickedFind();
 }
 
-/*
-BEGIN_MESSAGE_MAP(DialogDeclBrowser, CDialog)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipNotify)
-	ON_WM_DESTROY()
-	ON_WM_ACTIVATE()
-	ON_WM_MOVE()
-	ON_WM_SIZE()
-	ON_WM_SIZING()
-	ON_WM_SETFOCUS()
-	ON_NOTIFY(TVN_SELCHANGED, IDC_DECLBROWSER_TREE, OnTreeSelChanged)
-	ON_NOTIFY(NM_DBLCLK, IDC_DECLBROWSER_TREE, OnTreeDblclk)
-	ON_BN_CLICKED(IDC_DECLBROWSER_BUTTON_FIND, OnBnClickedFind)
-	ON_BN_CLICKED(IDC_DECLBROWSER_BUTTON_EDIT, OnBnClickedEdit)
-	ON_BN_CLICKED(IDC_DECLBROWSER_BUTTON_NEW, OnBnClickedNew)
-	ON_BN_CLICKED(IDC_DECLBROWSER_BUTTON_RELOAD, OnBnClickedReload)
-	ON_BN_CLICKED(IDOK, OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
-END_MESSAGE_MAP()
-*/
-
 // DeclBrowser message handlers
 
 /*
 ================
-DialogDeclBrowser::OnToolTipNotify
+DeclBrowser::OnToolTipNotify
 ================
-*//*
-BOOL DialogDeclBrowser::OnToolTipNotify( UINT id, NMHDR *pNMHDR, LRESULT *pResult ) {
-	// need to handle both ANSI and UNICODE versions of the message
-#ifdef _UNICODE
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-#else
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-#endif
-
-	if ( pNMHDR->hwndFrom == declTree.GetSafeHwnd() ) {
-		CString toolTip;
-		const idDecl *decl = GetDeclFromTreeItem( (HTREEITEM) pNMHDR->idFrom );
+*/
+bool DeclBrowser::OnToolTipNotify( PathTreeNode *item, idStr &tooltipText ) const {
+	if ( item ) {
+		const idDecl *decl = GetDeclFromTreeItem( item );
 
 		if ( !decl ) {
-			return FALSE;
+			return false;
 		}
 
-		toolTip = va( "%s, line: %d", decl->GetFileName(), decl->GetLineNum() );
+		tooltipText = va( "%s, line: %d", decl->GetFileName(), decl->GetLineNum() );
 
-#ifndef _UNICODE
-		if( pNMHDR->code == TTN_NEEDTEXTA ) {
-			delete m_pchTip;
-			m_pchTip = new TCHAR[toolTip.GetLength() + 2];
-			lstrcpyn( m_pchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTW->lpszText = (WCHAR*)m_pchTip;
-		} else {
-			delete m_pwchTip;
-			m_pwchTip = new WCHAR[toolTip.GetLength() + 2];
-			_mbstowcsz( m_pwchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTW->lpszText = (WCHAR*)m_pwchTip;
-		}
-#else
-		if( pNMHDR->code == TTN_NEEDTEXTA ) {
-			delete m_pchTip;
-			m_pchTip = new TCHAR[toolTip.GetLength() + 2];
-			_wcstombsz( m_pchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTA->lpszText = (LPTSTR)m_pchTip;
-		} else {
-			delete m_pwchTip;
-			m_pwchTip = new WCHAR[toolTip.GetLength() + 2];
-			lstrcpyn( m_pwchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTA->lpszText = (LPTSTR) m_pwchTip;
-		}
-#endif
-		return TRUE;
+		return true;
 	}
 
-	return DefaultOnToolTipNotify( toolTips, id, pNMHDR, pResult );
-}*/
+	return false;
+}
 
 /*
 ================
@@ -615,37 +559,36 @@ void DeclBrowser::OnBnClickedNew() {
 	PathTreeNode *item;
 	idStr typeName, declName;
 	const idDecl *decl;
-	DeclNew newDeclDlg;
 
-	newDeclDlg.SetDeclTree( &baseDeclTree );
+	declNewDlg.SetDeclTree( &baseDeclTree );
 
 	item = declTree.GetSelectedItem();
 	if ( item ) {
 		GetDeclName( item, typeName, declName );
-		newDeclDlg.SetDefaultType( typeName );
-		newDeclDlg.SetDefaultName( declName );
+		declNewDlg.SetDefaultType( typeName );
+		declNewDlg.SetDefaultName( declName );
 	}
 
 	decl = GetSelectedDecl();
 	if ( decl ) {
-		newDeclDlg.SetDefaultFile( decl->GetFileName() );
+		declNewDlg.SetDefaultFile( decl->GetFileName() );
 	}
-	/*
-	if ( newDeclDlg.DoModal() != IDOK ) {
-		return;
-	}
-	*/
-	decl = newDeclDlg.GetNewDecl();
+
+	declNewDlg.Start();
+}
+
+void DeclBrowser::OnBnClickedNewAccepted() {
+	const idDecl *decl = declNewDlg.GetNewDecl();
 
 	if ( decl ) {
-		declName = declManager->GetDeclNameFromType( decl->GetType() );
+		idStr declName = declManager->GetDeclNameFromType( decl->GetType() );
 		declName += "/";
 		declName += decl->GetName();
 
 		int id = GetIdFromTypeAndIndex( decl->GetType(), decl->Index() );
 
 		baseDeclTree.InsertPathIntoTree( declName, id );
-		item = declTree.InsertPathIntoTree( declName, id );
+		PathTreeNode *item = declTree.InsertPathIntoTree( declName, id );
 		declTree.SelectItem( item );
 
 		EditSelected();
@@ -662,28 +605,6 @@ void DeclBrowser::OnBnClickedReload() {
 	declManager->Reload( false );
 
 	ReloadDeclarations();
-}
-
-/*
-================
-DeclBrowser::OnBnClickedOk
-================
-*/
-void DeclBrowser::OnBnClickedOk() {
-	// with a modeless dialog once it is closed and re-activated windows seems
-	// to enjoy mapping ENTER back to the default button ( OK ) even if you have
-	// it NOT set as the default.. in this case use cancel button exit and ignore
-	// default IDOK handling.
-	// OnOK();
-}
-
-/*
-================
-DeclBrowser::OnBnClickedCancel
-================
-*/
-void DeclBrowser::OnBnClickedCancel() {
-	//OnCancel();
 }
 
 }

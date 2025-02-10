@@ -30,50 +30,31 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "framework/FileSystem.h"
 
-#include "DeclBrowser.h"
+#include "PathTreeCtrl.h"
 #include "DeclNew.h"
+#include "DeclBrowser.h"
 
 namespace ImGuiTools {
 
 /*
-toolTip_t DialogDeclNew::toolTips[] = {
-	{ IDC_DECLNEW_COMBO_NEW_TYPE, "select the declaration type to create" },
-	{ IDC_DECLNEW_EDIT_NEW_NAME, "enter a name for the new declaration" },
-	{ IDC_DECLNEW_EDIT_NEW_FILE, "enter the name of the file to add the declaration to" },
-	{ IDC_DECLNEW_BUTTON_NEW_FILE, "select existing file to add the declaration to" },
-	{ IDOK, "create new declaration" },
-	{ IDCANCEL, "cancel" },
-	{ 0, NULL }
-};*/
-
-
-/*
 ================
-DeclNew::DialogDeclNew
+DeclNew::DeclNew
 ================
 */
 DeclNew::DeclNew()
-	: declTree(NULL)
+	: typeList()
+	, typeListSel(-1)
+	, nameEdit()
+	, fileEdit()
+	, errorText()
+	, declTree(NULL)
+	, defaultType()
+	, defaultName()
 	, newDecl(NULL)
+	, state(DONE)
+	, selectDlg( DECL_AF, "af", ".af", "AFs" )
 {
 }
-
-/*
-================
-DeclNew::DoDataExchange
-================
-*//*
-void DialogDeclNew::DoDataExchange(CDataExchange* pDX) {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(DialogDeclNew)
-	DDX_Control(pDX, IDC_DECLNEW_COMBO_NEW_TYPE, typeList);
-	DDX_Control(pDX, IDC_DECLNEW_EDIT_NEW_NAME, nameEdit);
-	DDX_Control(pDX, IDC_DECLNEW_EDIT_NEW_FILE, fileEdit);
-	DDX_Control(pDX, IDC_DECLNEW_BUTTON_NEW_FILE, fileButton);
-	DDX_Control(pDX, IDOK, okButton);
-	DDX_Control(pDX, IDCANCEL, cancelButton);
-	//}}AFX_DATA_MAP
-}*/
 
 /*
 ================
@@ -87,6 +68,7 @@ void DeclNew::InitTypeList( void ) {
 	for ( i = 0; i < declManager->GetNumDeclTypes(); i++ ) {
 		typeList.Append( declManager->GetDeclNameFromType( (declType_t)i ) );
 	}
+	typeListSel = -1;
 }
 
 /*
@@ -95,26 +77,98 @@ DeclNew::Reset
 ================
 */
 void DeclNew::Reset()  {
-
 	InitTypeList();
 
-	//SetSafeComboBoxSelection( &typeList, defaultType.c_str(), -1 );
+	typeListSel = typeList.FindIndex( defaultType );
 	nameEdit = defaultName;
 	fileEdit = defaultFile;
+	newDecl = NULL;
+	state = DONE;
 }
 
-/*
-BEGIN_MESSAGE_MAP(DialogDeclNew, CDialog)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipNotify)
-	ON_WM_DESTROY()
-	ON_WM_ACTIVATE()
-	ON_WM_SETFOCUS()
-	ON_BN_CLICKED(IDC_DECLNEW_BUTTON_NEW_FILE, OnBnClickedFile)
-	ON_BN_CLICKED(IDOK, OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
-END_MESSAGE_MAP()
-*/
+void DeclNew::Start() {
+	Reset();
+
+	state = NAME;
+
+	ImGui::OpenPopup("New Declaration");
+}
+
+bool DeclNew::Draw() {
+	if ( state == DONE ) {
+		return false;
+	}
+
+	bool accepted = false;
+	bool canceled = false;
+
+	if ( ImGui::BeginPopupModal( "New Declaration", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+
+		const char *previewValue = typeListSel == -1 ? NULL : typeList[typeListSel].c_str();
+
+		if ( ImGui::BeginCombo( "Type##typeListSelect", previewValue ) ) {
+			ImGui::SetItemTooltip( "select the declaration type to create" );
+
+			for ( int i = 0; i < typeList.Num(); i++ ) {
+				bool selected = ( i == typeListSel );
+
+				ImGui::PushID( i );
+				if ( ImGui::Selectable( typeList[i].c_str(), selected ) ) {
+					typeListSel = i;
+				}
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+				ImGui::PopID();
+			}
+
+			ImGui::EndCombo();
+		}
+
+		if ( ImGui::InputTextStr( "Name", &nameEdit ) ) {
+
+		}
+		ImGui::SetItemTooltip( "enter a name for the new declaration" );
+		if ( ImGui::InputTextStr( "File", &fileEdit ) ) {
+
+		}
+		ImGui::SetItemTooltip( "enter the name of the file to add the declaration to" );
+		ImGui::SameLine();
+		if ( ImGui::Button( "..." ) ) {
+			//selectDlg.Start();
+			OnBnClickedFile();
+		}
+		ImGui::SetItemTooltip( "select existing file to add the declaration to" );
+
+		if ( selectDlg.Draw() ) {
+			// accepted
+			//fileEdit = fileSystem->OSPathToRelativePath( dlgFile.m_ofn.lpstrFile );
+			fileEdit = selectDlg.GetDecl()->GetFileName();
+		}
+
+		if ( ImGui::Button( "OK" ) ) {
+			OnBnClickedOk();
+			if ( newDecl ) {
+				accepted = true;
+				state = DONE;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		ImGui::SetItemTooltip( "create new declaration" );
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			accepted = false;
+			state = DONE;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SetItemTooltip( "cancel" );
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
 
 // DeclNew message handlers
 
@@ -126,16 +180,17 @@ DeclNew::OnBnClickedFile
 void DeclNew::OnBnClickedFile() {
 	idStr typeName, folder, ext;
 	idStr path;
-	const char *errorTitle = "Error selecting file.";
 
-	if ( 1/*GetSafeComboBoxSelection(&typeList, typeName, -1) == -1*/) {
-		//MessageBox( "Select a declaration type first.", errorTitle, MB_OK );
+	errorText.Clear();
+
+	if ( typeListSel == -1 ) {
+		errorText = "Select a declaration type first.";
 		return;
 	}
 
 	declType_t type = declManager->GetDeclTypeFromName( typeName );
 	if ( type >= declManager->GetNumDeclTypes() ) {
-		//MessageBox( "Unknown declaration type.", errorTitle, MB_OK | MB_ICONERROR );
+		errorText = "Unknown declaration type.";
 		return;
 	}
 
@@ -156,12 +211,7 @@ void DeclNew::OnBnClickedFile() {
 	path = fileSystem->RelativePathToOSPath( folder );
 	path += "\\*";
 
-	/*
-	CFileDialog dlgFile( TRUE, "decl", path, 0, ext, this );
-	if ( dlgFile.DoModal() == IDOK ) {
-		path = fileSystem->OSPathToRelativePath( dlgFile.m_ofn.lpstrFile );
-		fileEdit = path;
-	}*/
+	selectDlg.Start();
 }
 
 /*
@@ -171,38 +221,40 @@ DeclNew::OnBnClickedOk
 */
 void DeclNew::OnBnClickedOk() {
 	idStr typeName, declName, fileName;
-	const char *errorTitle = "Error creating declaration.";
+
+	errorText.Clear();
 
 	if ( !declTree ) {
-		//MessageBox( "No declaration tree available.", errorTitle, MB_OK | MB_ICONERROR );
+		errorText = "No declaration tree available.";
 		return;
 	}
 
-	if ( 1/*GetSafeComboBoxSelection(&typeList, typeName, -1) == -1*/) {
-		//MessageBox( "No declaration type selected.", errorTitle, MB_OK | MB_ICONERROR );
+	if ( typeListSel == -1 ) {
+		errorText = "No declaration type selected.";
 		return;
 	}
+	typeName = typeList[typeListSel];
 
 	declName = nameEdit;
 	if ( declName.Length() == 0 ) {
-		//MessageBox( "No declaration name specified.", errorTitle, MB_OK | MB_ICONERROR );
+		errorText = "No declaration name specified.";
 		return;
 	}
 
 	fileName = fileEdit;
 	if ( fileName.Length() == 0 ) {
-		//MessageBox( "No file name specified.", errorTitle, MB_OK | MB_ICONERROR );
+		errorText = "No file name specified.";
 		return;
 	}
 
 	if ( declTree->FindItem( idStr( typeName + "/" + declName ) ) ) {
-		//MessageBox( "Declaration already exists.", errorTitle, MB_OK | MB_ICONERROR );
+		errorText = "Declaration already exists.";
 		return;
 	}
 
 	declType_t type = declManager->GetDeclTypeFromName( typeName );
 	if ( type >= declManager->GetNumDeclTypes() ) {
-		//MessageBox( "Unknown declaration type.", errorTitle, MB_OK | MB_ICONERROR );
+		errorText = "Unknown declaration type.";
 		return;
 	}
 

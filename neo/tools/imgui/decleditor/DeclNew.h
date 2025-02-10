@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace ImGuiTools {
 
-// DialogDeclNew dialog
+// DeclNew dialog
 
 class DeclNew {
 
@@ -45,6 +45,8 @@ public:
 	idDecl *			GetNewDecl( void ) const { return newDecl; }
 
 	void				Reset();
+	void				Start();
+	bool				Draw();
 
 private:
 	void				OnBnClickedFile();
@@ -52,21 +54,23 @@ private:
 	void				OnBnClickedCancel();
 
 private:
+	enum state_t { DONE = 0, NAME };
 
 	idStrList			typeList;
+	int					typeListSel;
 	idStr				nameEdit;
 	idStr				fileEdit;
-	bool				fileButtonEnabled;
-	bool				okButtonEnabled;
-	bool				cancelButtonEnabled;
 
-	//static toolTip_t	toolTips[];
+	idStr				errorText;
 
 	PathTreeCtrl *		declTree;
 	idStr				defaultType;
 	idStr				defaultName;
 	idStr				defaultFile;
 	idDecl *			newDecl;
+	state_t				state;
+
+	DeclNewSelect		selectDlg;
 
 private:
 	void				InitTypeList( void );
