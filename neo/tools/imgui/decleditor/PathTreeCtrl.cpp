@@ -254,7 +254,9 @@ int PathTreeCtrl::SearchTree( treeItemCompare_t compare, void *data, PathTreeCtr
 	while( searchStack.Num() > 0 ) {
 
 		for ( child = GetChildItem( item ); child; child = GetChildItem( child ) ) {
-			searchStack.Push( item, GetItemText( item ) );
+			if ( item != GetRootItem() ) {
+				searchStack.Push( item, GetItemText( item ) );
+			}
 			item = child;
 		}
 
