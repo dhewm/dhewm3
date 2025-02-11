@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../edit_public.h"
 
+class TextEditor;
+
 namespace ImGuiTools
 {
 
@@ -77,7 +79,7 @@ private:
 	bool				isShown;
 	idStr				windowText;
 	idStr				statusBarText;
-	idStr				scriptEdit;
+	TextEditor *		scriptEdit;
 	bool				okButtonEnabled;
 	bool				cancelButtonEnabled;
 	/*

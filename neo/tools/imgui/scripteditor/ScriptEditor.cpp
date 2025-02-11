@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "../../libs/ImGuiColorTextEdit/TextEditor.h"
+
 #include "../util/ImGui_IdWidgets.h"
 
 #include "ScriptEditor.h"
@@ -70,7 +72,7 @@ ScriptEditor::ScriptEditor()
 	: isShown( false )
 	, windowText()
 	, statusBarText( "Script Editor" )
-	, scriptEdit()
+	, scriptEdit(NULL)
 	, okButtonEnabled( false )
 	, cancelButtonEnabled( true )
 	, findStr()
@@ -81,12 +83,14 @@ ScriptEditor::ScriptEditor()
 	, fileName()
 	, firstLine( 0 )
 {
+	scriptEdit = new TextEditor();
 }
 
 void ScriptEditor::Reset() {
 	windowText = "Script Editor";
 	statusBarText.Clear();
-	scriptEdit.Clear();
+	scriptEdit->SetText( std::string( "" ) );
+	scriptEdit->SetTabSize( TAB_SIZE );
 	okButtonEnabled = false;
 	cancelButtonEnabled = true;
 	findStr.Clear();
@@ -96,6 +100,8 @@ void ScriptEditor::Reset() {
 	searchForward = true;
 	fileName.Clear();
 	firstLine = 0;
+
+	UpdateStatusBar();
 }
 
 void ScriptEditor::Draw()
@@ -142,7 +148,8 @@ void ScriptEditor::Draw()
 		if (clickedSelect) {
 		}
 
-		ImGui::InputTextMultilineStr( "Text", &scriptEdit, ImVec2( 500, 500 ) );
+		scriptEdit->Render( "Text", false, ImVec2( 800, 600 ) );
+		UpdateStatusBar();
 
 		ImGui::BeginDisabled( !okButtonEnabled );
 		if ( ImGui::Button( "OK" ) ) {
@@ -155,6 +162,8 @@ void ScriptEditor::Draw()
 			showTool = false;
 		}
 		ImGui::EndDisabled();
+
+		ImGui::TextUnformatted( statusBarText.c_str() );
 	}
 	ImGui::End();
 
@@ -186,10 +195,10 @@ ScriptEditor::UpdateStatusBar
 ================
 */
 void ScriptEditor::UpdateStatusBar( void ) {
-	//int line, column, character;
+	int line, column;
 
-	//scriptEdit.GetCursorPos( line, column, character );
-	//statusBarText = idStr::Format( "Line: %d, Column: %d, Character: %d", line, column, character );
+	scriptEdit->GetCursorPosition( line, column );
+	statusBarText = idStr::Format( "Line: %d, Column: %d", line, column );
 }
 
 /*
@@ -300,12 +309,13 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 
 	//scriptEdit.Init();
 	//scriptEdit.AllowPathNames( false );
-	scriptEdit.Clear();
+	scriptEdit->SetText(std::string(""));
 
 	idStr( fileName ).ExtractFileExtension( extension );
 
 	if ( extension.Icmp( "script" ) == 0 ) {
 		InitScriptEvents();
+		scriptEdit->SetLanguageDefinition( TextEditor::LanguageDefinitionId::Cpp );
 		/*
 		scriptEdit.SetCaseSensitive( true );
 		scriptEdit.LoadKeyWordsFromFile( "editors/script.def" );
@@ -318,6 +328,7 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 		scriptEdit.SetStringColor(SRE_COLOR_DARK_CYAN, SRE_COLOR_LIGHT_BROWN);
 		scriptEdit.LoadKeyWordsFromFile( "editors/gui.def" );
 		*/
+		scriptEdit->SetLanguageDefinition( TextEditor::LanguageDefinitionId::Json );
 	}
 
 	if ( fileSystem->ReadFile( fileName, &buffer ) == -1 ) {
@@ -328,12 +339,7 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 
 	this->fileName = fileName;
 
-	// clean up new-line crapola
-	scriptText.Replace( "\r", "" );
-	scriptText.Replace( "\n", "\r" );
-	scriptText.Replace( "\v", "\r" );
-
-	scriptEdit = scriptText;
+	scriptEdit->SetText( scriptText.c_str() );
 
 	for( const char *ptr = scriptText.c_str(); *ptr; ptr++ ) {
 		if ( *ptr == '\r' ) {
@@ -391,6 +397,7 @@ bool ScriptEditor::OnInitDialog()  {
 	//statusBar.CreateEx( SBARS_SIZEGRIP, WS_CHILD | WS_VISIBLE | CBRS_BOTTOM, initialRect, this, AFX_IDW_STATUS_BAR );
 
 	//scriptEdit.LimitText( 1024 * 1024 );
+	scriptEdit->SetTabSize( TAB_SIZE );
 
 	//GetClientRect( initialRect );
 
@@ -591,12 +598,7 @@ void ScriptEditor::OnBnClickedOk() {
 
 	common->Printf( "Writing \'%s\'...\n", fileName.c_str() );
 
-	scriptText = scriptEdit; // scriptEdit.GetText( scriptText );
-
-	// clean up new-line crapola
-	scriptText.Replace( "\n", "" );
-	scriptText.Replace( "\r", "\r\n" );
-	scriptText.Replace( "\v", "\r\n" );
+	scriptText = scriptEdit->GetText().c_str();
 
 	if ( fileSystem->WriteFile( fileName, scriptText, scriptText.Length(), "fs_devpath" ) == -1 ) {
 		//MessageBox( va( "Couldn't save: %s", fileName.c_str() ), va( "Error saving: %s", fileName.c_str() ), MB_OK | MB_ICONERROR );

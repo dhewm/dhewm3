@@ -826,6 +826,10 @@ set(src_imgui ${src_imgui}
 	libs/imgui/imgui_widgets.cpp
 	
 	libs/imgui/imgui_demo.cpp
+
+	libs/ImGuiColorTextEdit/TextEditor.h
+	libs/ImGuiColorTextEdit/LanguageDefinitions.cpp
+	libs/ImGuiColorTextEdit/TextEditor.cpp
 	
 	sys/sys_imgui.h
 	sys/sys_imgui.cpp
@@ -1295,6 +1299,7 @@ if(CORE)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_imgui} ${src_editor_tools})
 
 	target_include_directories(${DHEWM3BINARY} PRIVATE "${CMAKE_SOURCE_DIR}/libs/imgui")
+	target_include_directories(${DHEWM3BINARY} PRIVATE "${CMAKE_SOURCE_DIR}/libs/zep/include")
 
 if(HARDLINK_GAME)
 	set_target_properties(${DHEWM3BINARY} PROPERTIES COMPILE_DEFINITIONS "${TOOLS_DEFINES}")
