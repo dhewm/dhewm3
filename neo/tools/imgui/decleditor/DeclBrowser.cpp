@@ -77,6 +77,7 @@ DeclBrowser::DeclBrowser()
 	, findNameString()
 	, findTextString()
 	, declNewDlg()
+	, declEditorDlg()
 {
 }
 
@@ -136,6 +137,10 @@ void DeclBrowser::Draw() {
 
 		if ( declNewDlg.Draw() ) {
 			OnBnClickedNewAccepted();
+		}
+
+		if ( declEditorDlg.Draw() ) {
+			// nothing to do
 		}
 	}
 	ImGui::End();
@@ -322,7 +327,7 @@ const idDecl *DeclBrowser::GetSelectedDecl( void ) const {
 DeclBrowser::EditSelected
 ================
 */
-void DeclBrowser::EditSelected( void ) const {
+void DeclBrowser::EditSelected( void ) {
 	int id, index;
 	idDict spawnArgs;
 	const idDecl *decl;
@@ -369,14 +374,8 @@ void DeclBrowser::EditSelected( void ) const {
 		}
 		default: {
 			decl = declManager->DeclByIndex( type, index, false );
-			/*
-			DeclEditor *declEditor;
-			declEditor = new DeclEditor;
-			declEditor->Create( IDD_DIALOG_DECLEDITOR, GetParent() );
-			declEditor->LoadDecl( const_cast<idDecl *>( decl ) );
-			declEditor->ShowWindow( SW_SHOW );
-			declEditor->SetFocus();
-			*/
+			
+			declEditorDlg.Start( const_cast<idDecl *>( decl ) );
 			break;
 		}
 	}

@@ -35,12 +35,12 @@ namespace ImGuiTools {
 
 class DeclEditor {
 public:
-						DeclEditor();   // standard constructor
+							DeclEditor();   // standard constructor
 
-	void				LoadDecl( idDecl *decl );
-	void				Reset();
+	void					Reset();
+	void					Start(idDecl* decl);
 
-	void					Draw();
+	bool					Draw();
 
 	void					ShowIt(bool show) {
 		isShown = show;
@@ -55,10 +55,10 @@ private:
 	void				OnEditFindNext();
 	void				OnEditReplace();
 	//void				OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
-	//void				OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	//void				OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	void				OnBnClickedTest();
-	void				OnBnClickedOk();
+	bool				OnBnClickedOk();
+	void				OnBnClickedOkAccepted();
 	void				OnBnClickedCancel();
 
 private:
@@ -69,13 +69,10 @@ private:
 	bool				testButtonEnabled;
 	bool				okButtonEnabled;
 	bool				cancelButtonEnabled;
+	idStr				errorText;
 
-	//static toolTip_t	toolTips[];
-	/*
-	HACCEL				m_hAccel;
-	CRect				initialRect;
-	CFindReplaceDialog *findDlg;
-	*/
+	//CFindReplaceDialog *findDlg;
+
 	idStr				findStr;
 	idStr				replaceStr;
 	bool				matchCase;

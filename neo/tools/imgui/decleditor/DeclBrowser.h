@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "PathTreeCtrl.h"
 #include "DeclNew.h"
+#include "DeclEditor.h"
 
 namespace ImGuiTools {
 
@@ -88,6 +89,7 @@ private:
 	idStr				findTextString;
 
 	DeclNew				declNewDlg;
+	DeclEditor			declEditorDlg;
 
 private:
 	void				AddDeclTypeToTree( declType_t type, const char *root, PathTreeCtrl &tree );
@@ -98,7 +100,7 @@ private:
 	void				GetDeclName( PathTreeNode *item, idStr &typeName, idStr &declName ) const;
 	const idDecl *		GetDeclFromTreeItem( PathTreeNode *item ) const;
 	const idDecl *		GetSelectedDecl( void ) const;
-	void				EditSelected( void ) const;
+	void				EditSelected( void );
 };
 
 }

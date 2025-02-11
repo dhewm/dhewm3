@@ -53,8 +53,19 @@ DeclEditor::DeclEditor
 ================
 */
 DeclEditor::DeclEditor()
-	: matchCase(false)
+	: isShown(false)
+	, windowText()
+	, statusBarText()
+	, declEdit()
+	, testButtonEnabled(false)
+	, okButtonEnabled(false)
+	, cancelButtonEnabled(true)
+	, errorText()
+	, findStr()
+	, replaceStr()
+	, matchCase(false)
 	, matchWholeWords(false)
+	, searchForward(true)
 	, decl(NULL)
 	, firstLine(0)
 {
@@ -70,6 +81,8 @@ bool DeclEditor::TestDecl( const idStr &declText ) {
 	idToken token;
 	int indent;
 
+	errorText.Clear();
+
 	src.LoadMemory( declText, declText.Length(), "decl text" );
 
 	indent = 0;
@@ -82,11 +95,11 @@ bool DeclEditor::TestDecl( const idStr &declText ) {
 	}
 
 	if ( indent < 0 ) {
-		//MessageBox( "Missing opening brace!", va( "Error saving %s", decl->GetFileName() ), MB_OK | MB_ICONERROR );
+		errorText = "Missing opening brace!";
 		return false;
 	}
 	if ( indent > 0 ) {
-		//MessageBox( "Missing closing brace!", va( "Error saving %s", decl->GetFileName() ), MB_OK | MB_ICONERROR );
+		errorText = "Missing closing brace!";
 		return false;
 	}
 	return true;
@@ -108,10 +121,27 @@ void DeclEditor::UpdateStatusBar( void ) {
 
 /*
 ================
-DeclEditor::LoadDecl
+DeclEditor::Reset
 ================
 */
-void DeclEditor::LoadDecl( idDecl *decl ) {
+void DeclEditor::Reset() {
+
+	//declEdit.Init();
+	windowText.Clear();
+	declEdit.Clear();
+
+	testButtonEnabled = false;
+	okButtonEnabled = false;
+
+	UpdateStatusBar();
+}
+
+/*
+================
+DeclEditor::Start
+================
+*/
+void DeclEditor::Start( idDecl *decl ) {
 	int numLines = 0;
 	int numCharsPerLine = 0;
 	int maxCharsPerLine = 0;
@@ -119,6 +149,8 @@ void DeclEditor::LoadDecl( idDecl *decl ) {
 	//CRect rect;
 
 	this->decl = decl;
+
+	ShowIt( true );
 
 	switch( decl->GetType() ) {
 		case DECL_ENTITYDEF:
@@ -160,14 +192,7 @@ void DeclEditor::LoadDecl( idDecl *decl ) {
 	decl->GetText( localDeclText );
 	declText = localDeclText;
 
-	// clean up new-line crapola
-	declText.Replace( "\r", "" );
-	declText.Replace( "\n", "\r" );
-	declText.Replace( "\v", "\r" );
-	declText.StripLeading( '\r' );
-	declText.Append( "\r" );
-
-	//declEdit.SetText( declText );
+	declEdit = declText;
 
 	for( const char *ptr = declText.c_str(); *ptr; ptr++ ) {
 		if ( *ptr == '\r' ) {
@@ -211,48 +236,75 @@ void DeclEditor::LoadDecl( idDecl *decl ) {
 	UpdateStatusBar();
 
 	//declEdit.SetFocus();
+
+	ImGui::OpenPopup( "Declaration Editor" );
 }
 
-/*
-================
-DeclEditor::Reset
-================
-*/
-void DeclEditor::Reset()  {
+bool DeclEditor::Draw() {
+	bool accepted = false;
 
-	//declEdit.Init();
-	windowText.Clear();
-	declEdit.Clear();
+	if ( !isShown ) {
+		return false;
+	}
 
-	testButtonEnabled = false;
-	okButtonEnabled = false;
+	if ( ImGui::BeginPopup( "Declaration Editor" ) ) {
 
-	UpdateStatusBar();
+		if ( ImGui::InputTextMultilineStr( "Text", &declEdit, ImVec2( 500, 500 ) ) ) {
+			testButtonEnabled = true;
+			okButtonEnabled = true;
+		}
+
+		ImGui::BeginDisabled( !testButtonEnabled );
+		if ( ImGui::Button( "Test" ) ) {
+			OnBnClickedTest();
+		}
+		ImGui::EndDisabled();
+
+		ImGui::BeginDisabled( !okButtonEnabled );
+		if ( ImGui::Button( "Save" ) ) {
+			if ( OnBnClickedOk() ) {
+				accepted = true;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		bool subPopupAccepted = false;
+		if ( ImGui::BeginPopup( "Warning saving" ) ) {
+			ImGui::TextUnformatted( va( "Declaration file %s has been modified outside of the editor.\r\nReload declarations and save?", decl->GetFileName() ) );
+
+			if ( ImGui::Button( "OK" ) ) {
+				OnBnClickedOkAccepted();
+				subPopupAccepted = true;
+				ImGui::CloseCurrentPopup();
+			}
+			if ( ImGui::Button( "Cancel" ) ) {
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+		if ( subPopupAccepted ) {
+			accepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled( !cancelButtonEnabled );
+		if ( ImGui::Button( "Cancel" ) ) {
+			OnBnClickedCancel();
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndDisabled();
+
+		ImGui::EndPopup();
+	}
+
+	if ( accepted )
+	{
+		isShown = false;
+	}
+
+	return accepted;
 }
-
-
-/*
-BEGIN_MESSAGE_MAP(DialogDeclEditor, CDialog)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipNotify)
-	ON_WM_DESTROY()
-	ON_WM_ACTIVATE()
-	ON_WM_MOVE()
-	ON_WM_SIZE()
-	ON_WM_SIZING()
-	ON_WM_SETFOCUS()
-	ON_COMMAND(ID_EDIT_FIND, OnEditFind)
-	ON_COMMAND(ID_EDIT_REPLACE, OnEditReplace)
-	ON_COMMAND(ID_DECLEDITOR_FIND_NEXT, OnEditFindNext)
-	ON_COMMAND(ID_DECLEDITOR_GOTOLINE, OnEditGoToLine)
-	ON_REGISTERED_MESSAGE(FindDialogMessage, OnFindDialogMessage)
-	ON_NOTIFY(EN_CHANGE, IDC_DECLEDITOR_EDIT_TEXT, OnEnChangeEdit)
-	ON_NOTIFY(EN_MSGFILTER, IDC_DECLEDITOR_EDIT_TEXT, OnEnInputEdit)
-	ON_BN_CLICKED(IDC_DECLEDITOR_BUTTON_TEST, OnBnClickedTest)
-	ON_BN_CLICKED(IDOK, OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
-END_MESSAGE_MAP()
-*/
 
 // DeclEditor message handlers
 
@@ -381,16 +433,6 @@ LRESULT DeclEditor::OnFindDialogMessage( WPARAM wParam, LPARAM lParam ) {
 
 /*
 ================
-DeclEditor::OnEnChangeEdit
-================
-*//*
-void DeclEditor::OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult ) {
-	testButtonEnabled = true;
-	okButtonEnabled = true;
-}*/
-
-/*
-================
 DeclEditor::OnEnInputEdit
 ================
 *//*
@@ -416,14 +458,6 @@ void DeclEditor::OnBnClickedTest() {
 
 		declText = declEdit; //declEdit.GetText( declText );
 
-		// clean up new-line crapola
-		declText.Replace( "\n", "" );
-		declText.Replace( "\r", "\r\n" );
-		declText.Replace( "\v", "\r\n" );
-		declText.StripLeading( "\r\n" );
-		declText.Insert( "\r\n\r\n", 0 );
-		declText.StripTrailing( "\r\n" );
-
 		if ( !TestDecl( declText ) ) {
 			return;
 		}
@@ -446,47 +480,52 @@ void DeclEditor::OnBnClickedTest() {
 DeclEditor::OnBnClickedOk
 ================
 */
-void DeclEditor::OnBnClickedOk() {
+bool DeclEditor::OnBnClickedOk() {
 	idStr declText;
 
 	if ( decl ) {
 
 		declText = declEdit; // declEdit.GetText( declText );
 
-		// clean up new-line crapola
-		declText.Replace( "\n", "" );
-		declText.Replace( "\r", "\r\n" );
-		declText.Replace( "\v", "\r\n" );
-		declText.StripLeading( "\r\n" );
-		declText.Insert( "\r\n\r\n", 0 );
-		declText.StripTrailing( "\r\n" );
-
 		if ( !TestDecl( declText ) ) {
-			return;
+			return false;
 		}
 
 		if ( decl->SourceFileChanged() ) {
-			/*
-			if ( MessageBox( va( "Declaration file %s has been modified outside of the editor.\r\nReload declarations and save?", decl->GetFileName() ),
-							va( "Warning saving: %s", decl->GetFileName() ), MB_OKCANCEL | MB_ICONERROR ) != IDOK ) {
-				return;
-			}
-			*/
-			declManager->Reload( false );
-			DeclBrowser::Instance().ReloadDeclarations();
+			ImGui::OpenPopup( "Warning saving" );
+			return false;
 		}
 
 		decl->SetText( declText );
 		if ( !decl->ReplaceSourceFileText() ) {
-			/*
-			MessageBox( va( "Couldn't save: %s.\r\nMake sure the declaration file is not read-only.", decl->GetFileName() ),
-						va( "Error saving: %s", decl->GetFileName() ), MB_OK | MB_ICONERROR );
-			*/
-			return;
+			errorText = va( "Couldn't save: %s.\r\nMake sure the declaration file is not read-only.", decl->GetFileName() );
+			return false;
 		}
 		decl->Invalidate();
 	}
 
+	okButtonEnabled = false;
+	return true;
+}
+
+void DeclEditor::OnBnClickedOkAccepted() {
+	idStr declText;
+
+	if ( decl ) {
+
+		declText = declEdit; // declEdit.GetText( declText );
+
+		declManager->Reload( false );
+		DeclBrowser::Instance().ReloadDeclarations();
+
+		decl->SetText( declText );
+		if ( !decl->ReplaceSourceFileText() ) {
+			errorText = va( "Couldn't save: %s.\r\nMake sure the declaration file is not read-only.", decl->GetFileName() );
+			return;
+		}
+		decl->Invalidate();
+	}
+	
 	okButtonEnabled = false;
 }
 
