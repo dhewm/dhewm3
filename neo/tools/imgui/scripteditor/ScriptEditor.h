@@ -67,9 +67,9 @@ protected:
 	void		OnEditFind();
 	void		OnEditFindNext();
 	void		OnEditReplace();
-	LRESULT		OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
-	void		OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
-	void		OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
+	//LRESULT		OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
+	//void		OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
+	//void		OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	void		OnBnClickedOk();
 	void		OnBnClickedCancel();
 

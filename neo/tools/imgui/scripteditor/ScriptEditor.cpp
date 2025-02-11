@@ -561,10 +561,10 @@ LRESULT ScriptEditor::OnFindDialogMessage( WPARAM wParam, LPARAM lParam ) {
 ================
 DialogScriptEditor::OnEnChangeEdit
 ================
-*/
+*//*
 void ScriptEditor::OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult ) {
 	okButtonEnabled = true;
-}
+}*/
 
 /*
 ================
