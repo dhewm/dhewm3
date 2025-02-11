@@ -133,23 +133,23 @@ void DrawToolWindows()
 	{
 		LightEditor::Instance().Draw();
 	}
-	else if( AfEditor::Instance().IsShown() )
+	if( AfEditor::Instance().IsShown() )
 	{
 		AfEditor::Instance().Draw();
 	}
-	else if ( PDAEditor::Instance().IsShown() )
+	if ( PDAEditor::Instance().IsShown() )
 	{
 		PDAEditor::Instance().Draw();
 	}
-	else if ( ParticleEditor::Instance().IsShown() )
+	if ( ParticleEditor::Instance().IsShown() )
 	{
 		ParticleEditor::Instance().Draw();
 	}
-	else if ( ScriptEditor::Instance().IsShown() )
+	if ( ScriptEditor::Instance().IsShown() )
 	{
 		ScriptEditor::Instance().Draw();
 	}
-	else if ( DeclBrowser::Instance().IsShown() ) {
+	if ( DeclBrowser::Instance().IsShown() ) {
 		DeclBrowser::Instance().Draw();
 	}
 }

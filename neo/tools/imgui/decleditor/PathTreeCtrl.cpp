@@ -122,7 +122,7 @@ PathTreeNode *PathTreeCtrl::FindItem( const idStr &pathName ) {
 	PathTreeNode *item, *parentItem;
 
 	parentItem = NULL;
-	item = GetRootItem();
+	item = GetChildItem( GetRootItem() );
 
 	lastSlash = pathName.Last( '/' );
 
