@@ -294,7 +294,7 @@ void PathTreeCtrl::DrawNode( PathTreeNode *node,  treeItemTooltip_t tooltip, tre
 		flags |= ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	}
 
-	if ( ImGui::TreeNodeEx( ( const void * )node->GetID(), flags, "%s", node->GetLabel().c_str() ) ) {
+	if ( ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() ) ) {
 		if ( ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() ) {
 			SelectItem( node );
 			selected( data );
