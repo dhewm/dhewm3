@@ -46,7 +46,7 @@ public:
 
 	static ScriptEditor& Instance();
 
-	void				OpenFile( const char *fileName );
+	void					OpenFile( const char *fileName );
 
 	void					Reset();
 	void					Draw();
@@ -57,12 +57,6 @@ public:
 	bool					IsShown() {
 		return isShown;
 	}
-
-	//{{AFX_VIRTUAL(DialogScriptEditor)
-	bool				OnInitDialog();
-	//virtual void		DoDataExchange( CDataExchange* pDX );    // DDX/DDV support
-	//virtual BOOL		PreTranslateMessage( MSG* pMsg );
-	//}}AFX_VIRTUAL
 
 protected:
 	void		OnEditGoToLine();
@@ -82,16 +76,11 @@ private:
 	TextEditor *		scriptEdit;
 	bool				okButtonEnabled;
 	bool				cancelButtonEnabled;
+	idStr				errorText;
 	/*
-	CButton				okButton;
-	CButton				cancelButton;
-	
-	static toolTip_t	toolTips[];
-	
-	HACCEL				m_hAccel;
-	CRect				initialRect;
 	CFindReplaceDialog *findDlg;
 	*/
+	GoToLineDialog		gotoDlg;
 	idStr				findStr;
 	idStr				replaceStr;
 	bool				matchCase;

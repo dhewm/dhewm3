@@ -412,6 +412,73 @@ bool DeclSelect::Draw() {
 	return accepted;
 }
 
+GoToLineDialog::GoToLineDialog()
+	: numberEdit(0)
+	, firstLine(0)
+	, lastLine(0)
+	, waiting(false)
+	, valid(false)
+	, caption()
+{
+}
+
+void GoToLineDialog::Start( int _firstLine, int _lastLine, int _line ) {
+	firstLine = _firstLine;
+	lastLine = _lastLine;
+	numberEdit = _line;
+	valid = ( idMath::ClampInt( firstLine, lastLine, numberEdit ) == numberEdit );
+	waiting = true;
+	caption = va( "Line number (%d - %d)", firstLine, lastLine );
+	ImGui::OpenPopup( "Go To Line" );
+}
+
+bool GoToLineDialog::Draw() {
+	bool accepted = false;
+
+	if ( ImGui::BeginPopup( "Go To Line" ) ) {
+		if ( ImGui::InputInt( caption.c_str(), &numberEdit, 0, 0 ) ) {
+			valid = ( idMath::ClampInt( firstLine, lastLine, numberEdit ) == numberEdit );
+		}
+
+		ImGui::BeginDisabled( !valid );
+		if ( ImGui::Button( "OK" ) ) {
+			waiting = false;
+			accepted = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		if ( ImGui::Button( "Cancel" ) ) {
+			waiting = false;
+			accepted = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	return accepted;
+}
+
+/*
+class GoToLineDialog {
+public:
+	GoToLineDialog();
+
+	void				Start(int firstLine, int lastLine);
+	ID_INLINE int		GetLine() const { return line; }
+	bool				Draw();
+
+private:
+
+	int					numberEdit;
+	int					firstLine;
+	int					lastLine;
+	int					line;
+	bool				accepted;
+};
+*/
+
 } //namespace ImGuiTools
 
 

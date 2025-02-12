@@ -134,6 +134,24 @@ private:
 	state_t				state;
 };
 
+class GoToLineDialog {
+public:
+						GoToLineDialog();
+
+	void				Start( int firstLine, int lastLine, int line );
+	ID_INLINE int		GetLine() const { return numberEdit; }
+	bool				Draw();
+
+private:
+
+	int					numberEdit;
+	int					firstLine;
+	int					lastLine;
+	bool				waiting;
+	bool				valid;
+	idStr				caption;
+};
+
 } //namespace ImGuiTools
 
 
