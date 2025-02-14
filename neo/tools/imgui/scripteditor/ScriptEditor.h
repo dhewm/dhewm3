@@ -38,13 +38,10 @@ namespace ImGuiTools
 
 class ScriptEditor {
 
-	//DECLARE_DYNAMIC(DialogScriptEditor)
-
 public:
-						ScriptEditor();   // standard constructor
-	//virtual				~DialogScriptEditor();
+							ScriptEditor();   // standard constructor
 
-	static ScriptEditor& Instance();
+	static ScriptEditor&	Instance();
 
 	void					OpenFile( const char *fileName );
 
@@ -63,7 +60,7 @@ protected:
 	void		OnEditFind();
 	void		OnEditFindNext();
 	void		OnEditReplace();
-	//LRESULT		OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
+	void		OnFindDialogMessage( FindReplaceDialog::command_t command );
 	//void		OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	//void		OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	void		OnBnClickedOk();
@@ -74,12 +71,12 @@ private:
 	idStr				windowText;
 	idStr				statusBarText;
 	TextEditor *		scriptEdit;
+	ImVec2				scriptEditPos;
+	ImVec2				scriptEditSize;
 	bool				okButtonEnabled;
 	bool				cancelButtonEnabled;
 	idStr				errorText;
-	/*
-	CFindReplaceDialog *findDlg;
-	*/
+	FindReplaceDialog	findDlg;
 	GoToLineDialog		gotoDlg;
 	idStr				findStr;
 	idStr				replaceStr;

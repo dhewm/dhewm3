@@ -140,7 +140,7 @@ public:
 
 	void				Start( int firstLine, int lastLine, int line );
 	ID_INLINE int		GetLine() const { return numberEdit; }
-	bool				Draw();
+	bool				Draw( const ImVec2 &pos, const ImVec2 &size );
 
 private:
 
@@ -150,6 +150,30 @@ private:
 	bool				waiting;
 	bool				valid;
 	idStr				caption;
+};
+
+class FindReplaceDialog {
+public:
+								FindReplaceDialog();
+
+	enum command_t { NONE, DONE, FIND_NEXT, FIND_PREV, FIND_ALL, REPLACE_NEXT, REPLACE_ALL };
+
+	void						Start( idStr &selection, bool replacement );
+	command_t					Draw( const ImVec2 &pos, const ImVec2 &size );
+
+	ID_INLINE const idStr &	GetReplaceString() const { return replace; };		// get replacement string
+	ID_INLINE const idStr &	GetFindString() const { return find; };				// get find string
+	ID_INLINE bool			MatchCase() const { return matchCase; };			// true if matching case
+	ID_INLINE bool			MatchWholeWord() const { return matchWhole; };		// true if matching whole words only
+
+private:
+	idStr					replace;
+	idStr					find;
+	bool					matchCase;
+	bool					matchWhole;
+	bool					replacement;
+	bool					valid;
+	bool					visible;
 };
 
 } //namespace ImGuiTools
@@ -181,5 +205,7 @@ bool InputTextMultilineStr( const char* label, idStr* str, const ImVec2& size = 
 bool InputDialogName( const char *text, const char *label, idStr *str );
 
 bool InputMessageBox( const char *text, const char* label, bool allowCancel = false );
+
+bool ToggleButton( const char *label, bool *value, const ImVec2 &size );
 
 } //namespace ImGui

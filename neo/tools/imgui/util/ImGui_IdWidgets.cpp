@@ -432,10 +432,34 @@ void GoToLineDialog::Start( int _firstLine, int _lastLine, int _line ) {
 	ImGui::OpenPopup( "Go To Line" );
 }
 
-bool GoToLineDialog::Draw() {
+bool GoToLineDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
 	bool accepted = false;
 
+	ImGuiStyle& style = ImGui::GetStyle();
+	float fieldWidth = 250.0f;
+
+	float captionWidth = ImGui::CalcTextSize( caption.c_str() ).x;
+
+	float windowHeight =
+		style.ChildBorderSize * 2.0f +
+		style.WindowPadding.y * 2.0f +
+		ImGui::GetFrameHeight() * 2.0f +
+		style.ItemSpacing.y;
+
+	float windowWidth =
+		style.ChildBorderSize * 2.0f +
+		style.WindowPadding.x * 2.0f +
+		fieldWidth + style.ItemSpacing.x +
+		captionWidth;
+
+	// TODO: this seems off, the dialog should be centered
+	ImGui::SetNextWindowPos(ImVec2(
+		pos.x + (size.x - windowWidth)*0.5f,
+		pos.y + (size.y - windowHeight)*0.5f));
+	ImGui::SetNextWindowSize( ImVec2( windowWidth, windowHeight ) );
+
 	if ( ImGui::BeginPopup( "Go To Line" ) ) {
+		ImGui::SetNextItemWidth( fieldWidth );
 		if ( ImGui::InputInt( caption.c_str(), &numberEdit, 0, 0 ) ) {
 			valid = ( idMath::ClampInt( firstLine, lastLine, numberEdit ) == numberEdit );
 		}
@@ -460,24 +484,128 @@ bool GoToLineDialog::Draw() {
 	return accepted;
 }
 
-/*
-class GoToLineDialog {
-public:
-	GoToLineDialog();
+FindReplaceDialog::FindReplaceDialog()
+	: replace()
+	, find()
+	, matchCase(false)
+	, matchWhole(false)
+	, replacement(false)
+	, valid(false)
+	, visible(false)
+{
+}
 
-	void				Start(int firstLine, int lastLine);
-	ID_INLINE int		GetLine() const { return line; }
-	bool				Draw();
+void FindReplaceDialog::Start( idStr &selection, bool _replacement ) {
+	if ( selection.Length() ) {
+		find = selection;
+	}
+	replace.Clear();
+	replacement = _replacement;
+	valid = ( find.Length() > 0 );
+	visible = true;
+}
 
-private:
+FindReplaceDialog::command_t FindReplaceDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
+	command_t command = command_t::NONE;
 
-	int					numberEdit;
-	int					firstLine;
-	int					lastLine;
-	int					line;
-	bool				accepted;
-};
-*/
+	if ( !visible ) {
+		return command;
+	}
+
+	ImGuiStyle &style = ImGui::GetStyle();
+	float fieldWidth = 250.0f;
+
+	float replaceWidth = ImGui::CalcTextSize(" Next ").x + style.FramePadding.x * 2.0f;
+	float replaceAllWidth = ImGui::CalcTextSize(" All ").x + style.FramePadding.x * 2.0f;
+	float optionWidth = ImGui::CalcTextSize("Aa").x + style.FramePadding.x * 2.0f;
+
+	float windowHeight =
+		style.ChildBorderSize * 3.0f +
+		style.WindowPadding.y * 3.0f +
+		ImGui::GetFrameHeight() * 3.0f +
+		style.ItemSpacing.y;
+
+	float windowWidth =
+		style.ChildBorderSize * 2.0f +
+		style.WindowPadding.x * 2.0f +
+		fieldWidth + style.ItemSpacing.x +
+		replaceWidth + style.ItemSpacing.x +
+		replaceAllWidth + style.ItemSpacing.x;
+
+	ImVec2 oldCursorPos = ImGui::GetCursorPos();
+
+	ImGui::SetCursorPos(ImVec2(
+		pos.x + size.x - windowWidth - style.ScrollbarSize - style.ItemSpacing.x,
+		pos.y + style.ItemSpacing.y * 2.0f));
+
+	if ( ImGui::BeginChild( "Find/Replace", ImVec2( windowWidth, windowHeight ), ImGuiChildFlags_Borders ) ) {
+
+		ImGui::SetNextItemWidth( fieldWidth );
+
+		if ( ImGui::InputTextStr( "###Find", &find ) ) {
+			valid = ( find.Length() > 0 );
+		}
+		ImGui::SetItemTooltip( "Search term" );
+		ImGui::SameLine();
+
+		ImGui::BeginDisabled( !valid );
+		if ( ImGui::ArrowButton( "Next", ImGuiDir_Down ) ) {
+			command = command_t::FIND_NEXT;
+		}
+		ImGui::SetItemTooltip( "Find next occurrence" );
+		ImGui::SameLine();
+		if ( ImGui::ArrowButton( "Prev", ImGuiDir_Up ) ) {
+			command = command_t::FIND_PREV;
+		}
+		ImGui::SetItemTooltip( "Find previous occurrence" );
+		ImGui::EndDisabled();
+
+		ImGui::SameLine();
+
+		if ( ImGui::ToggleButton( "R", &replacement, ImVec2( optionWidth, 0.0f ) ) ) {
+
+		}
+		ImGui::SetItemTooltip( "Toggle to switch between find and replace modes" );
+
+		ImGui::SameLine();
+
+		if ( ImGui::Button( "x", ImVec2( optionWidth, 0.0f ) ) ) {
+			visible = false;
+		}
+
+		ImGui::SetNextItemWidth( fieldWidth );
+		ImGui::BeginDisabled( !replacement );
+		if ( ImGui::InputTextStr( "###Replace with", &replace ) ) {
+		}
+		ImGui::SetItemTooltip( "Replacement term" );
+		ImGui::SameLine();
+		if ( ImGui::Button( "Next###ReplaceNext" ) ) {
+			command = command_t::REPLACE_NEXT;
+		}
+		ImGui::SetItemTooltip( "Replace Next" );
+		ImGui::SameLine();
+		if ( ImGui::Button( "All" ) ) {
+			command = command_t::REPLACE_ALL;
+		}
+		ImGui::SetItemTooltip("Replace All");
+		ImGui::EndDisabled();
+
+		if ( ImGui::ToggleButton( "Aa", &matchCase, ImVec2( optionWidth, 0.0f ) ) ) {
+		}
+		ImGui::SetItemTooltip( "Match case" );
+
+		ImGui::SameLine();
+
+		if ( ImGui::ToggleButton( "[]", &matchWhole, ImVec2( optionWidth, 0.0f ) ) ) {
+		}
+		ImGui::SetItemTooltip( "Match whole word" );
+	}
+	ImGui::EndChild();
+
+	ImGui::SetCursorPos( oldCursorPos );
+
+	return command;
+}
 
 } //namespace ImGuiTools
 
@@ -647,4 +775,31 @@ bool ImGui::InputMessageBox( const char *text, const char* label, bool allowCanc
 	}
 
 	return accepted;
+}
+
+// NOTE: this code is adapted from https://github.com/goossens/ObjectTalk/blob/62977f72389a2bbdde4d2535faadad46ab2920a1/gfx/framework/OtUi.cpp#L202
+bool ImGui::ToggleButton( const char *label, bool *value, const ImVec2 &size ) {
+	bool		changed = false;
+	ImVec4		*colors = ImGui::GetStyle().Colors;
+
+	if ( *value ) {
+		ImGui::PushStyleColor( ImGuiCol_Button, colors[ImGuiCol_ButtonActive] );
+		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, colors[ImGuiCol_ButtonActive] );
+		ImGui::PushStyleColor( ImGuiCol_ButtonActive, colors[ImGuiCol_TableBorderLight] );
+	} else {
+		ImGui::PushStyleColor( ImGuiCol_Button, colors[ImGuiCol_TableBorderLight] );
+		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, colors[ImGuiCol_TableBorderLight] );
+		ImGui::PushStyleColor( ImGuiCol_ButtonActive, colors[ImGuiCol_ButtonActive] );
+	}
+
+	ImGui::Button( label, size );
+
+	if ( ImGui::IsItemClicked( ImGuiMouseButton_Left ) ) {
+		*value = !*value;
+		changed = true;
+	}
+
+	ImGui::PopStyleColor( 3 );
+
+	return changed;
 }

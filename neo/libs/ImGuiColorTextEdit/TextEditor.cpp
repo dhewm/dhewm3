@@ -1765,6 +1765,168 @@ void TextEditor::MoveEnd(bool aSelect)
 	}
 }
 
+bool TextEditor::SubstringMatch(const char *find, size_t findLen, bool matchCase, bool matchWholeWords, const TextEditor::Line line, int lineNum, size_t i)
+{
+	bool found = true;
+
+	if (i + findLen >= line.size())
+	{
+		return false;
+	}
+
+	if (matchCase)
+	{
+		for (std::size_t j = 0; j < findLen; j++)
+		{
+			if (line[i + j].mChar != find[j])
+			{
+				found = false;
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (std::size_t j = 0; j < findLen; j++)
+		{			
+			if (std::tolower(line[i + j].mChar) != std::tolower(find[j])) {
+				found = false;
+				break;
+			}
+		}
+	}
+
+	if (found && matchWholeWords)
+	{
+		if (i > 0)
+		{
+			int preIndex = GetCharacterIndex(Coordinates(lineNum, i - 1));
+			Char c = line[preIndex].mChar;
+
+			if (isalnum(c) || c == '_')
+			{
+				found = false;
+			}
+		}
+		if (i + findLen < line.size())
+		{
+			int postIndex = i + findLen;
+			Char c = line[postIndex].mChar;
+
+			if (isalnum(c) || c == '_')
+			{
+				found = false;
+			}
+		}
+	}
+
+	return found;
+}
+
+bool TextEditor::FindNext(const char* find, bool matchCase, bool matchWholeWords, bool searchForward)
+{
+	Coordinates rangeStart, rangeEnd;
+	Coordinates pos;
+
+	if (!find || find[0] == '\0')
+	{
+		return false;
+	}
+
+	if (searchForward)
+	{
+		rangeStart = mState.mSelectionEnd;
+		rangeEnd = Coordinates((int)mLines.size() - 1, 0);
+	}
+	else
+	{
+		rangeStart = Coordinates(0, 0);
+		rangeEnd = mState.mSelectionStart;
+	}
+
+	bool found = false;
+
+	size_t findLen = std::strlen(find);
+
+	if (searchForward)
+	{
+		pos = rangeStart;
+		while (!found && pos < rangeEnd)
+		{
+			auto& line = mLines[pos.mLine];
+			int lineCol = GetLineMaxColumn(pos.mLine);
+
+			if (lineCol >= findLen)
+			{
+				for (int i = pos.mColumn; i <= lineCol - findLen; i++)
+				{
+					int index = GetCharacterIndex(Coordinates(pos.mLine, i));
+
+					found = SubstringMatch(find, findLen, matchCase, matchWholeWords, line, pos.mLine, index);
+
+					if (found)
+					{
+						// found it
+						int column = GetCharacterColumn(pos.mLine, index);
+						pos = Coordinates(pos.mLine, column);
+						break;
+					}
+				}
+			}
+			if (found)
+			{
+				break;
+			}
+			pos = Coordinates(pos.mLine + 1, 0);
+		}
+	}
+	else
+	{
+		pos = rangeEnd;
+		while (!found && pos > rangeStart)
+		{
+			auto& line = mLines[pos.mLine];
+			int lineCol = GetLineMaxColumn(pos.mLine);
+
+			if (lineCol >= findLen)
+			{
+				for (int i = pos.mColumn - findLen; i >= 0; i--)
+				{
+					int index = GetCharacterIndex(Coordinates(pos.mLine, i));
+
+					found = SubstringMatch(find, findLen, matchCase, matchWholeWords, line, pos.mLine, index);
+
+					if (found)
+					{
+						int column = GetCharacterColumn(pos.mLine, index);
+						pos = Coordinates(pos.mLine, column);
+						break;
+					}
+				}
+			}
+
+			if (found)
+			{
+				break;
+			}
+			if (pos.mLine == 0)
+			{
+				break;
+			}
+			pos = Coordinates(pos.mLine - 1, GetLineMaxColumn(pos.mLine - 1));
+		}
+	}
+
+	if (found)
+	{
+		SetCursorPosition(pos);
+		SetSelection(pos, Coordinates(pos.mLine, pos.mColumn + findLen));
+		EnsureCursorVisible();
+	}
+
+	return found;
+}
+
 void TextEditor::Delete()
 {
 	assert(!mReadOnly);

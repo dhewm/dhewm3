@@ -245,12 +245,16 @@ public:
 	void MoveHome(bool aSelect = false);
 	void MoveEnd(bool aSelect = false);
 
+	bool SubstringMatch(const char* find, size_t findLen, bool matchCase, bool matchWholeWords, const TextEditor::Line line, int lineNum, size_t index);
+	bool FindNext(const char *str, bool matchCase, bool matchWholeWords, bool searchForward);
+
 	void SetSelectionStart(const Coordinates& aPosition);
 	void SetSelectionEnd(const Coordinates& aPosition);
 	void SetSelection(const Coordinates& aStart, const Coordinates& aEnd, SelectionMode aMode = SelectionMode::Normal);
 	void SelectWordUnderCursor();
 	void SelectAll();
 	bool HasSelection() const;
+	void DeleteSelection();
 
 	void Copy();
 	void Cut();
@@ -347,7 +351,6 @@ private:
 	Line& InsertLine(int aIndex);
 	void EnterCharacter(ImWchar aChar, bool aShift);
 	void Backspace();
-	void DeleteSelection();
 	std::string GetWordUnderCursor() const;
 	std::string GetWordAt(const Coordinates& aCoords) const;
 	ImU32 GetGlyphColor(const Glyph& aGlyph) const;

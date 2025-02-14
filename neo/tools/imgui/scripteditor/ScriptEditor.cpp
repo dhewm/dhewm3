@@ -72,10 +72,13 @@ ScriptEditor::ScriptEditor()
 	: isShown( false )
 	, windowText()
 	, statusBarText( "Script Editor" )
-	, scriptEdit(NULL)
+	, scriptEdit( NULL )
+	, scriptEditPos( 0.0f, 0.0f )
+	, scriptEditSize( 400.0f, 400.0f )
 	, okButtonEnabled( false )
 	, cancelButtonEnabled( true )
 	, errorText()
+	, findDlg()
 	, gotoDlg()
 	, findStr()
 	, replaceStr()
@@ -158,7 +161,10 @@ void ScriptEditor::Draw()
 		if (clickedSelect) {
 		}
 
-		scriptEdit->Render( "Text", ImVec2( 800, 600 ), false );
+		scriptEditPos = ImGui::GetCursorPos();
+		scriptEditSize = ImVec2( 800, 600 );
+
+		scriptEdit->Render( "Text", scriptEditSize, false );
 		if ( !scriptEdit->IsSaved() ) {
 			okButtonEnabled = true;
 		}
@@ -176,15 +182,27 @@ void ScriptEditor::Draw()
 		}
 		ImGui::EndDisabled();
 		ImGui::SameLine();
-		if (ImGui::Button("Go to")) {
+		if ( ImGui::Button( "Go to" ) ) {
 			OnEditGoToLine();
 		}
+		if ( ImGui::Button( "Find" ) ) {
+			idStr selText = scriptEdit->GetSelectedText().c_str();
 
-		if ( gotoDlg.Draw() ) {
+			findDlg.Start( selText, false );
+		}
+		if ( ImGui::Button( "Replace" ) ) {
+			idStr selText = scriptEdit->GetSelectedText().c_str();
+
+			findDlg.Start( selText, true );
+		}
+
+		if ( gotoDlg.Draw( scriptEditPos, scriptEditSize ) ) {
 			TextEditor::Coordinates coords( gotoDlg.GetLine() - 1 - firstLine, 0 );
 
 			scriptEdit->SetCursorPosition( coords );
 		}
+		FindReplaceDialog::command_t findReplaceResult = findDlg.Draw( scriptEditPos, scriptEditSize );
+		OnFindDialogMessage( findReplaceResult );
 
 		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 		ImGui::TextUnformatted( statusBarText.c_str() );
@@ -456,14 +474,8 @@ ScriptEditor::OnEditFindNext
 ================
 */
 void ScriptEditor::OnEditFindNext() {
-	
-	if ( searchForward ) {
-		//scriptEdit->( findStr.c_str(), findStr.Length(), matchCase ); // TODO: implement whole word match
-	} else {
-		// TODO: implement search backward
-	}
+	scriptEdit->FindNext( findStr.c_str(), matchCase, matchWholeWords, searchForward );
 }
-
 /*
 ================
 ScriptEditor::OnEditReplace
@@ -471,8 +483,7 @@ ScriptEditor::OnEditReplace
 */
 void ScriptEditor::OnEditReplace() {
 	/*
-	* TODO: get selected text?
-	idStr selText = scriptEdit->GetSelText();
+	idStr selText = scriptEdit->GetSelectedText().c_str();
 	if ( selText.Length() ) {
 		findStr = selText;
 	}
@@ -489,53 +500,60 @@ void ScriptEditor::OnEditReplace() {
 ================
 ScriptEditor::OnFindDialogMessage
 ================
-*//*
-LRESULT ScriptEditor::OnFindDialogMessage( WPARAM wParam, LPARAM lParam ) {
-	if ( findDlg == NULL ) {
-		return 0;
-	}
-
-	if ( findDlg->IsTerminating() ) {
-		findDlg = NULL;
-		return 0;
-	}
-
-	if( findDlg->FindNext() ) {
-		findStr = findDlg->GetFindString();
-		matchCase = findDlg->MatchCase() != FALSE;
-		matchWholeWords = findDlg->MatchWholeWord() != FALSE;
-		searchForward = findDlg->SearchDown() != FALSE;
-
+*/
+void ScriptEditor::OnFindDialogMessage( FindReplaceDialog::command_t command ) {
+	switch ( command ) {
+	case FindReplaceDialog::command_t::FIND_NEXT:
+	case FindReplaceDialog::command_t::FIND_PREV:
+	{
+		findStr = findDlg.GetFindString();
+		matchCase = findDlg.MatchCase();
+		matchWholeWords = findDlg.MatchWholeWord();
+		searchForward = ( command == FindReplaceDialog::command_t::FIND_NEXT );
 		OnEditFindNext();
+		break;
 	}
+	case FindReplaceDialog::command_t::FIND_ALL:
+		break;
+	case FindReplaceDialog::command_t::REPLACE_NEXT:
+	{
+		replaceStr = findDlg.GetReplaceString();
+		idStr selection = scriptEdit->GetSelectedText().c_str();
 
-	if ( findDlg->ReplaceCurrent() ) {
-		long selStart, selEnd;
-
-		replaceStr = findDlg->GetReplaceString();
-
-		scriptEdit.GetSel( selStart, selEnd );
-		if ( selEnd > selStart ) {
-			scriptEdit.ReplaceSel( replaceStr, TRUE );
+		if ( selection.Length() && selection == findStr ) {
+			scriptEdit->DeleteSelection();
+			scriptEdit->InsertText( replaceStr.c_str() );
 		}
+
+		findStr = findDlg.GetFindString();
+		matchCase = findDlg.MatchCase();
+		matchWholeWords = findDlg.MatchWholeWord();
+		searchForward = true;
+		OnEditFindNext();
+		break;
 	}
+	case FindReplaceDialog::command_t::REPLACE_ALL:
+	{
+		replaceStr = findDlg.GetReplaceString();
+		findStr = findDlg.GetFindString();
+		matchCase = findDlg.MatchCase();
+		matchWholeWords = findDlg.MatchWholeWord();
 
-	if ( findDlg->ReplaceAll() ) {
-		replaceStr = findDlg->GetReplaceString();
-		findStr = findDlg->GetFindString();
-		matchCase = findDlg->MatchCase() != FALSE;
-		matchWholeWords = findDlg->MatchWholeWord() != FALSE;
-
-		int numReplaces = scriptEdit.ReplaceAll( findStr, replaceStr, matchCase, matchWholeWords );
-		if ( numReplaces == 0 ) {
-			AfxMessageBox( "The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0 );
-		} else {
-			AfxMessageBox( va( "Replaced %d occurances.", numReplaces ), MB_OK | MB_ICONINFORMATION, 0 );
+		/*int numReplaces = scriptEdit->ReplaceAll(findStr, replaceStr, matchCase, matchWholeWords);
+		if (numReplaces == 0) {
+			AfxMessageBox("The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0);
 		}
+		else {
+			AfxMessageBox(va("Replaced %d occurances.", numReplaces), MB_OK | MB_ICONINFORMATION, 0);
+		}*/
+		break;
 	}
-
-	return 0;
-}*/
+	case FindReplaceDialog::command_t::NONE:
+	case FindReplaceDialog::command_t::DONE:
+	default:
+		break;
+	}
+}
 
 /*
 ================
