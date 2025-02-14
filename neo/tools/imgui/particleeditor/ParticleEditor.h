@@ -39,7 +39,7 @@ namespace ImGuiTools
 
 class RangeSlider {
 public:
-	bool Draw( const char *label, float itemWidth, float sliderWidth );
+	bool Draw( const char *label, float sliderWidth );
 
 	void SetRange( int _min, int _max ) {
 		min = _min;

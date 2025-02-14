@@ -52,23 +52,10 @@ static const char *customPathValues[] = {
 	NULL
 };
 
-bool RangeSlider::Draw( const char *label, float itemWidth, float sliderWidth ) {
+bool RangeSlider::Draw( const char *label, float sliderWidth ) {
 	float v = GetValue();
-	idStr realLabel;
 	bool changed = false;
-
-	realLabel += "##Input";
-	realLabel += label;
-
-	ImGui::SetNextItemWidth( itemWidth );
-	if ( ImGui::InputFloat( realLabel.c_str(), &v ) ) {
-		SetValuePos( v );
-		changed = true;
-	}
-	ImGui::SameLine();
-
-	realLabel.Clear();
-	realLabel += label;
+	idStr realLabel = label;
 	realLabel += "##Slider";
 	ImGui::SetNextItemWidth( sliderWidth );
 	if ( ImGui::SliderFloat( realLabel.c_str(), &v, GetValueLow(), GetValueHigh() ) ) {
@@ -157,16 +144,17 @@ void ParticleEditor::Draw()
 			SetCurParticle( dp );
 		}
 
-		ImGui::TextUnformatted( inFileText.c_str() );
+		ImGui::TextUnformatted( inFileText.IsEmpty() ? "(no file opened)" : inFileText.c_str() );
 		ImGui::SameLine();
 		
+		ImGui::SetNextItemWidth(70);
 		if ( ImGui::InputTextStr( "Depth hack", &depthHack ) ) {
 			CurStageToDlgVars();
 			DlgVarsToCurStage();
 		}
 
 		ImGui::Text( "Stages" );
-		if ( ImGui::BeginTable( "stagesTable", 2 ) ) {
+		if ( ImGui::BeginTable( "stagesTable", 2, ImGuiTableFlags_SizingFixedFit ) ) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 
@@ -200,6 +188,9 @@ void ParticleEditor::Draw()
 			if ( showStagePressed ) {
 				ShowStage();
 			}
+			// some additional space after [S], before the right column
+			ImGui::SameLine( 0, 30 );
+			ImGui::NewLine();
 
 			if ( ImGui::BeginListBox( "##ListStages", ImVec2( 100, 150 ) ) ) {
 				num = listStages.Num();
@@ -225,7 +216,7 @@ void ParticleEditor::Draw()
 			ImGui::BeginDisabled( !stageControlsEnabled );
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::SetNextItemWidth(300);
+			ImGui::SetNextItemWidth(200);
 			if ( ImGui::InputTextStr( "Material", &matName ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
@@ -263,19 +254,19 @@ void ParticleEditor::Draw()
 				CurStageToDlgVars();
 			}
 			
-			if ( sliderFadeIn.Draw( "Fade In %", 50, 150 ) ) {
+			if ( sliderFadeIn.Draw( "Fade In %", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderFadeOut.Draw( "Fade Out %", 50, 150 ) ) {
+			if ( sliderFadeOut.Draw( "Fade Out %", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderFadeFraction.Draw( "Fade Frac", 50, 150 ) ) {
+			if ( sliderFadeFraction.Draw( "Fade Frac", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderBunching.Draw( "Bunching", 50, 150 ) ) {
+			if ( sliderBunching.Draw( "Bunching", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
@@ -283,13 +274,13 @@ void ParticleEditor::Draw()
 			ImGui::EndTable();
 		}
 
-		bool countPressed = sliderCount.Draw( "Count", 50, 300 );
+		bool countPressed = sliderCount.Draw( "Count", 300 );
 		ImGui::SetItemTooltip( "How many particles there are (at any moment)" );
 		if ( countPressed ) {
 			DlgVarsToCurStage();
 			CurStageToDlgVars();
 		}
-		bool timePressed = sliderTime.Draw( "Time", 50, 300 );
+		bool timePressed = sliderTime.Draw( "Time", 300 );
 		ImGui::SetItemTooltip( "How long one cycle of the effect will last in seconds" );
 		if ( timePressed ) {
 			DlgVarsToCurStage();
@@ -320,7 +311,7 @@ void ParticleEditor::Draw()
 			CurStageToDlgVars();
 		}
 		ImGui::SameLine();
-		if ( sliderGravity.Draw( "Gravity", 50, 300 ) ) {
+		if ( sliderGravity.Draw( "Gravity", 300 ) ) {
 			DlgVarsToCurStage();
 			CurStageToDlgVars();
 		}
@@ -395,7 +386,7 @@ void ParticleEditor::Draw()
 
 			ImGui::TableSetColumnIndex( 1 );
 			ImGui::SeparatorText( "Direction / Orientation" );
-			if ( ImGui::BeginTable( "orientationTable", 3, ImGuiTableFlags_SizingStretchSame) ) {
+			if ( ImGui::BeginTable( "orientationTable", 3, ImGuiTableFlags_SizingFixedFit ) ) { // ImGuiTableFlags_SizingStretchSame
 				ImGui::TableNextRow();
 
 				ImGui::TableSetColumnIndex( 0 );
@@ -485,16 +476,13 @@ void ParticleEditor::Draw()
 					CurStageToDlgVars();
 				}
 				ImGui::EndDisabled();
-
-				ImGui::TableNextRow();
-				ImGui::TableSetColumnIndex( 0 );
-				ImGui::SetNextItemWidth( 70 );
-				if ( ImGui::InputFloat( "Initial Angle", &initialAngle ) ) {
-					DlgVarsToCurStage();
-					CurStageToDlgVars();
-				}
-
 				ImGui::EndTable();
+			}
+
+			ImGui::SetNextItemWidth( 70 );
+			if ( ImGui::InputFloat( "Initial Angle", &initialAngle ) ) {
+				DlgVarsToCurStage();
+				CurStageToDlgVars();
 			}
 
 			ImGui::EndTable();
@@ -504,42 +492,42 @@ void ParticleEditor::Draw()
 			ImGui::TableNextRow();
 			
 			ImGui::TableSetColumnIndex( 0 );
-			if ( sliderSpeedFrom.Draw( "Speed From", 75, 150 ) ) {
+			if ( sliderSpeedFrom.Draw( "Speed From", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderSpeedTo.Draw( "Speed To", 75, 150 ) ) {
+			if ( sliderSpeedTo.Draw( "Speed To", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
 
 			ImGui::TableSetColumnIndex( 1 );
-			if ( sliderRotationFrom.Draw( "Rotation From", 75, 150 ) ) {
+			if ( sliderRotationFrom.Draw( "Rotation From", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderRotationTo.Draw( "Rotation To", 75, 150 ) ) {
+			if ( sliderRotationTo.Draw( "Rotation To", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex( 0 );
-			if ( sliderSizeFrom.Draw( "Size From", 75, 150 ) ) {
+			if ( sliderSizeFrom.Draw( "Size From", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderSizeTo.Draw( "Size To", 75, 150 ) ) {
+			if ( sliderSizeTo.Draw( "Size To", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
 
 			ImGui::TableSetColumnIndex(1);
-			if ( sliderAspectFrom.Draw( "Aspect From", 75, 150 ) ) {
+			if ( sliderAspectFrom.Draw( "Aspect From", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
-			if ( sliderAspectTo.Draw( "Aspect To", 75, 150 ) ) {
+			if ( sliderAspectTo.Draw( "Aspect To", 150 ) ) {
 				DlgVarsToCurStage();
 				CurStageToDlgVars();
 			}
@@ -616,7 +604,7 @@ void ParticleEditor::Draw()
 				SetParticleView();
 			}
 			ImGui::SameLine();
-			bool flight = ImGui::Button( "F ");
+			bool flight = ImGui::Button( "F");
 			ImGui::SetItemTooltip( "Show the selected particle as projectile flight smoke" );
 			if ( flight ) {
 				visualization = FLIGHT;
@@ -629,6 +617,7 @@ void ParticleEditor::Draw()
 				visualization = SELECTED;
 				SetParticleView();
 			}
+			ImGui::Spacing();
 			bool switchToDoom = ImGui::Button( "Switch to DOOM" );
 			ImGui::SetItemTooltip( "Force focus to DOOM" );
 			if ( switchToDoom ) {
@@ -637,7 +626,7 @@ void ParticleEditor::Draw()
 			
 			ImGui::TableSetColumnIndex( 1 );
 			ImGui::SeparatorText( "Entity Editing" );
-			if ( ImGui::BeginTable( "entityEditingTable", 5, ImGuiTableFlags_SizingFixedSame ) ) {
+			if ( ImGui::BeginTable( "entityEditingTable", 3, ImGuiTableFlags_SizingFixedSame ) ) {
 				ImGui::TableNextRow();
 
 				ImGui::TableSetColumnIndex( 0 );
@@ -697,21 +686,25 @@ void ParticleEditor::Draw()
 					ImGui::EndTable();
 				}
 
-				ImGui::TableSetColumnIndex( 3 );
-				if ( ImGui::Button( "Vector" ) ) {
-				}
-				
-				ImGui::TableSetColumnIndex( 4 );
-				ButtonEntityColor();
-
-				bool saveMap = ImGui::Button( "Save .MAP" );
-				ImGui::SetItemTooltip( "Save the current map with any updated particle emitter entities" );
-				if ( saveMap ) {
-					OnBnClickedButtonSaveParticles();
-				}
 				ImGui::EndDisabled();
 
 				ImGui::EndTable();
+			}
+
+			ImGui::Spacing();
+			if ( ImGui::Button( "Vector" ) ) { // TODO: what is this for?
+			}
+
+			ImGui::SameLine();
+
+			ButtonEntityColor();
+
+			ImGui::SameLine(0, 60);
+
+			bool saveMap = ImGui::Button( "Save .MAP" );
+			ImGui::SetItemTooltip( "Save the current map with any updated particle emitter entities" );
+			if ( saveMap ) {
+				OnBnClickedButtonSaveParticles();
 			}
 
 			ImGui::EndTable();
@@ -1468,7 +1461,7 @@ void ParticleDrop::Draw()
 	bool canceled = false;
 
 	if ( ImGui::BeginPopupModal( "Name particle", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 
 		if ( ImGui::InputTextStr( "Name", &name ) ) {
 			// nop
