@@ -112,7 +112,6 @@ public:
 	void					SetStringColor( const idVec3 &color, const idVec3 &altColor = vec3_origin );
 	void					SetLiteralColor( const idVec3 &color );
 
-	idVec3					GetForeColor( int charIndex ) const;
 	idVec3					GetBackColor( int charIndex ) const;
 
 	void					GetCursorPos( int &line, int &column, int &character ) const;

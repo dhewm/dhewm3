@@ -321,6 +321,31 @@ void SyntaxRichEditCtrl::SetKeyWords( const keyWord_t kws[] ) {
 		}
 		keyWordHash.Add( hash, i );
 	}
+
+	TextEditor::LanguageDefinition langDef;
+
+	for ( i = 0; i < numKeyWords; i++ ) {
+		if ( keyWords[i].description != '\0' ) {
+			TextEditor::Identifier id;
+			id.mDeclaration = keyWords[i].description;
+			langDef.mIdentifiers.insert( std::make_pair( std::string( keyWords[i].keyWord ), id ) );
+		} else {
+			langDef.mKeywords.insert( std::string( keyWords[i].keyWord ) );
+		}
+	}
+
+	langDef.mTokenize = TextEditor::LanguageDefinition::C().mTokenize;
+
+	langDef.mCommentStart = "/*";
+	langDef.mCommentEnd = "*/";
+	langDef.mSingleLineComment = "//";
+
+	langDef.mCaseSensitive = caseSensitive;
+	langDef.mAutoIndentation = true;
+
+	langDef.mName = "doomscript"; // TODO: change?
+
+	scriptEdit->SetLanguageDefinition( langDef );
 }
 
 /*
@@ -586,28 +611,6 @@ void SyntaxRichEditCtrl::SetColor( int startCharIndex, int endCharIndex, const i
 	range->Release();
 
 	updateSyntaxHighlighting = true;*/
-}
-
-/*
-================
-SyntaxRichEditCtrl::GetForeColor
-================
-*/
-idVec3 SyntaxRichEditCtrl::GetForeColor( int charIndex ) const {
-	/*tom::ITextRange* range;
-	tom::ITextFont *font;
-	long foreColor;
-
-	m_TextDoc->Range( charIndex, charIndex, &range );
-	range->get_Font( &font );
-
-	font->get_BackColor( &foreColor );
-
-	font->Release();
-	range->Release();
-
-	return foreColor;*/
-	return vec3_origin;
 }
 
 /*
