@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLEDITOR_H__
 #define __DECLEDITOR_H__
 
+#include "../util/SyntaxRichEditCtrl.h"
+
 namespace ImGuiTools {
 
 // DeclEditor dialog
@@ -38,7 +40,7 @@ public:
 							DeclEditor();   // standard constructor
 
 	void					Reset();
-	void					Start(idDecl* decl);
+	void					Start( idDecl* decl );
 
 	bool					Draw();
 
@@ -50,12 +52,6 @@ public:
 	}
 
 private:
-	void				OnEditGoToLine();
-	void				OnEditFind();
-	void				OnEditFindNext();
-	void				OnEditReplace();
-	//void				OnFindDialogMessage( WPARAM wParam, LPARAM lParam );
-	//void				OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
 	void				OnBnClickedTest();
 	bool				OnBnClickedOk();
 	void				OnBnClickedOkAccepted();
@@ -65,19 +61,12 @@ private:
 	bool				isShown;
 	idStr				windowText;
 	idStr				statusBarText;
-	idStr				declEdit;
+	SyntaxRichEditCtrl	declEdit;
 	bool				testButtonEnabled;
 	bool				okButtonEnabled;
 	bool				cancelButtonEnabled;
 	idStr				errorText;
 
-	//CFindReplaceDialog *findDlg;
-
-	idStr				findStr;
-	idStr				replaceStr;
-	bool				matchCase;
-	bool				matchWholeWords;
-	bool				searchForward;
 	idDecl *			decl;
 	int					firstLine;
 

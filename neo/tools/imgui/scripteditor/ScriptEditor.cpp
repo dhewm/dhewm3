@@ -38,8 +38,6 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace ImGuiTools {
 
-static const int		TAB_SIZE = 4;
-
 typedef struct scriptEventInfo_s {
 	idStr		name;
 	idStr		parms;
@@ -48,19 +46,7 @@ typedef struct scriptEventInfo_s {
 
 static idList<scriptEventInfo_t> scriptEvents;
 
-// DialogScriptEditor dialog
-/*
-static UINT FindDialogMessage = ::RegisterWindowMessage( FINDMSGSTRING );
-
-toolTip_t DialogScriptEditor::toolTips[] = {
-	{ IDOK, "save" },
-	{ IDCANCEL, "cancel" },
-	{ 0, NULL }
-};
-
-
-IMPLEMENT_DYNAMIC(DialogScriptEditor, CDialog)
-*/
+// ScriptEditor dialog
 
 ScriptEditor& ScriptEditor::Instance()
 {
@@ -71,39 +57,25 @@ ScriptEditor& ScriptEditor::Instance()
 ScriptEditor::ScriptEditor()
 	: isShown( false )
 	, windowText()
+	, errorText()
 	, statusBarText( "Script Editor" )
-	, scriptEdit( NULL )
-	, scriptEditPos( 0.0f, 0.0f )
-	, scriptEditSize( 400.0f, 400.0f )
+	, scriptEdit()
 	, okButtonEnabled( false )
 	, cancelButtonEnabled( true )
-	, errorText()
-	, findDlg()
-	, gotoDlg()
-	, findStr()
-	, replaceStr()
-	, matchCase( false )
-	, matchWholeWords( false )
-	, searchForward( true )
 	, fileName()
 	, firstLine( 0 )
 {
-	scriptEdit = new TextEditor();
+	scriptEdit.Init();
 }
 
 void ScriptEditor::Reset() {
 	windowText = "Script Editor###ScriptEditor";
+	errorText.Clear();
 	statusBarText.Clear();
-	scriptEdit->SetText( std::string( "" ) );
-	scriptEdit->SetTabSize( TAB_SIZE );
+	scriptEdit.SetText( "" );
+	//scriptEdit.SetTabSize( TAB_SIZE );
 	okButtonEnabled = false;
 	cancelButtonEnabled = true;
-	errorText.Clear();
-	findStr.Clear();
-	replaceStr.Clear();
-	matchCase = false;
-	matchWholeWords = false;
-	searchForward = true;
 	fileName.Clear();
 	firstLine = 0;
 
@@ -146,13 +118,14 @@ void ScriptEditor::Draw()
 
 				ImGui::EndMenu();
 			}
+			/*
 			if ( ImGui::BeginMenu( "Edit" ) ) {
 				if ( ImGui::MenuItem( "Go To...", "Ctrl+G" ) ) {
 					OnEditGoToLine();
 				}
 
 				ImGui::EndMenu();
-			}
+			}*/
 			ImGui::EndMenuBar();
 		}
 
@@ -161,13 +134,10 @@ void ScriptEditor::Draw()
 		if (clickedSelect) {
 		}
 
-		scriptEditPos = ImGui::GetCursorPos();
-		scriptEditSize = ImVec2( 800, 600 );
+		scriptEdit.Draw();
+		
+		okButtonEnabled = scriptEdit.IsEdited();
 
-		scriptEdit->Render( "Text", scriptEditSize, false );
-		if ( !scriptEdit->IsSaved() ) {
-			okButtonEnabled = true;
-		}
 		UpdateStatusBar();
 
 		ImGui::BeginDisabled( !okButtonEnabled );
@@ -181,28 +151,6 @@ void ScriptEditor::Draw()
 			showTool = false;
 		}
 		ImGui::EndDisabled();
-		ImGui::SameLine();
-		if ( ImGui::Button( "Go to" ) ) {
-			OnEditGoToLine();
-		}
-		if ( ImGui::Button( "Find" ) ) {
-			idStr selText = scriptEdit->GetSelectedText().c_str();
-
-			findDlg.Start( selText, false );
-		}
-		if ( ImGui::Button( "Replace" ) ) {
-			idStr selText = scriptEdit->GetSelectedText().c_str();
-
-			findDlg.Start( selText, true );
-		}
-
-		if ( gotoDlg.Draw( scriptEditPos, scriptEditSize ) ) {
-			TextEditor::Coordinates coords( gotoDlg.GetLine() - 1 - firstLine, 0 );
-
-			scriptEdit->SetCursorPosition( coords );
-		}
-		FindReplaceDialog::command_t findReplaceResult = findDlg.Draw( scriptEditPos, scriptEditSize );
-		OnFindDialogMessage( findReplaceResult );
 
 		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 		ImGui::TextUnformatted( statusBarText.c_str() );
@@ -219,26 +167,15 @@ void ScriptEditor::Draw()
 
 /*
 ================
-DialogScriptEditor::PreTranslateMessage
-================
-*//*
-BOOL DialogScriptEditor::PreTranslateMessage( MSG* pMsg ) {
-	if ( WM_KEYFIRST <= pMsg->message && pMsg->message <= WM_KEYLAST ) {
-		if ( m_hAccel && ::TranslateAccelerator( m_hWnd, m_hAccel, pMsg ) ) {
-			return TRUE;
-		}
-	}
-	return CWnd::PreTranslateMessage(pMsg);
-}*/
-
-/*
-================
 ScriptEditor::UpdateStatusBar
 ================
 */
 void ScriptEditor::UpdateStatusBar( void ) {
-	TextEditor::Coordinates coords = scriptEdit->GetCursorPosition();
-	statusBarText = idStr::Format( "Line: %d, Column: %d", coords.mLine + 1, coords.mColumn + 1 );
+	int line, column, character;
+
+	scriptEdit.GetCursorPos( line, column, character );
+
+	statusBarText = idStr::Format( "Line: %d, Column: %d", line + 1, column + 1 );
 }
 
 /*
@@ -344,31 +281,30 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 	int numCharsPerLine = 0;
 	int maxCharsPerLine = 0;
 	idStr scriptText, extension;
-	//CRect rect;
 	void *buffer;
 
-	//scriptEdit.Init();
-	//scriptEdit.AllowPathNames( false );
-	scriptEdit->SetText(std::string(""));
+	scriptEdit.AllowPathNames( false );
+	scriptEdit.SetText( "" );
 
 	idStr( fileName ).ExtractFileExtension( extension );
 
 	if ( extension.Icmp( "script" ) == 0 ) {
 		InitScriptEvents();
-		scriptEdit->SetLanguageDefinition( TextEditor::LanguageDefinition::CPlusPlus() );
-		/*
+
 		scriptEdit.SetCaseSensitive( true );
 		scriptEdit.LoadKeyWordsFromFile( "editors/script.def" );
 		scriptEdit.SetObjectMemberCallback( GetScriptEvents );
 		scriptEdit.SetFunctionParmCallback( GetFunctionParms );
 		scriptEdit.SetToolTipCallback( GetToolTip );
-		*/
+
 	} else if ( extension.Icmp( "gui" ) == 0 ) {
-		/*
-		scriptEdit.SetStringColor(SRE_COLOR_DARK_CYAN, SRE_COLOR_LIGHT_BROWN);
+		
+		//scriptEdit.SetStringColor(SRE_COLOR_DARK_CYAN, SRE_COLOR_LIGHT_BROWN);
+		scriptEdit.SetCaseSensitive( false );
 		scriptEdit.LoadKeyWordsFromFile( "editors/gui.def" );
-		*/
-		scriptEdit->SetLanguageDefinition( TextEditor::LanguageDefinition::C() );
+		scriptEdit.SetObjectMemberCallback( NULL );
+		scriptEdit.SetFunctionParmCallback( NULL );
+		scriptEdit.SetToolTipCallback( NULL );
 	}
 
 	if ( fileSystem->ReadFile( fileName, &buffer ) == -1 ) {
@@ -380,7 +316,7 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 
 	this->fileName = fileName;
 
-	scriptEdit->SetText( scriptText.c_str() );
+	scriptEdit.SetText( scriptText.c_str() );
 
 	for( const char *ptr = scriptText.c_str(); *ptr; ptr++ ) {
 		if ( *ptr == '\r' ) {
@@ -397,23 +333,7 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 	}
 
 	windowText = va( "Script Editor (%s)###ScriptEditor", fileName );
-	/*
-	rect.left = initialRect.left;
-	rect.right = rect.left + maxCharsPerLine * FONT_WIDTH + 32;
-	rect.top = initialRect.top;
-	rect.bottom = rect.top + numLines * (FONT_HEIGHT+8) + 24 + 56;
-	if ( rect.right < initialRect.right ) {
-		rect.right = initialRect.right;
-	} else if ( rect.right - rect.left > 1024 ) {
-		rect.right = rect.left + 1024;
-	}
-	if ( rect.bottom < initialRect.bottom ) {
-		rect.bottom = initialRect.bottom;
-	} else if ( rect.bottom - rect.top > 768 ) {
-		rect.bottom = rect.top + 768;
-	}
-	MoveWindow( rect );
-	*/
+
 	okButtonEnabled = false;
 	cancelButtonEnabled = true;
 
@@ -423,161 +343,6 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 }
 
 // ScriptEditor message handlers
-
-#define BORDER_SIZE			0
-#define BUTTON_SPACE		4
-#define TOOLBAR_HEIGHT		24
-
-/*
-================
-ScriptEditor::OnEditGoToLine
-================
-*/
-void ScriptEditor::OnEditGoToLine() {
-	TextEditor::Coordinates coords = scriptEdit->GetCursorPosition();
-
-	gotoDlg.Start( firstLine + 1, firstLine + scriptEdit->GetTotalLines(), coords.mLine + 1 );
-
-	/*DialogGoToLine goToLineDlg;
-
-	goToLineDlg.SetRange( firstLine, firstLine + scriptEdit.GetLineCount() - 1 );
-	if ( goToLineDlg.DoModal() != IDOK ) {
-		return;
-	}
-	scriptEdit.GoToLine( goToLineDlg.GetLine() - firstLine );
-	*/
-}
-
-/*
-================
-ScriptEditor::OnEditFind
-================
-*/
-void ScriptEditor::OnEditFind() {
-	idStr selText = scriptEdit->GetSelectedText().c_str();
-	if ( selText.Length() ) {
-		findStr = selText;
-	}
-
-	/*
-	// create find/replace dialog
-	if ( !findDlg ) {
-		findDlg = new CFindReplaceDialog();  // Must be created on the heap
-		findDlg->Create( TRUE, findStr, "", FR_DOWN, this );
-	}
-	*/
-}
-
-/*
-================
-ScriptEditor::OnEditFindNext
-================
-*/
-void ScriptEditor::OnEditFindNext() {
-	scriptEdit->FindNext( findStr.c_str(), matchCase, matchWholeWords, searchForward );
-}
-/*
-================
-ScriptEditor::OnEditReplace
-================
-*/
-void ScriptEditor::OnEditReplace() {
-	/*
-	idStr selText = scriptEdit->GetSelectedText().c_str();
-	if ( selText.Length() ) {
-		findStr = selText;
-	}
-
-	// create find/replace dialog
-	if ( !findDlg ) {
-		findDlg = new CFindReplaceDialog();  // Must be created on the heap
-		findDlg->Create( FALSE, findStr, "", FR_DOWN, this );
-	}
-	*/
-}
-
-/*
-================
-ScriptEditor::OnFindDialogMessage
-================
-*/
-void ScriptEditor::OnFindDialogMessage( FindReplaceDialog::command_t command ) {
-	switch ( command ) {
-	case FindReplaceDialog::command_t::FIND_NEXT:
-	case FindReplaceDialog::command_t::FIND_PREV:
-	{
-		findStr = findDlg.GetFindString();
-		matchCase = findDlg.MatchCase();
-		matchWholeWords = findDlg.MatchWholeWord();
-		searchForward = ( command == FindReplaceDialog::command_t::FIND_NEXT );
-		OnEditFindNext();
-		break;
-	}
-	case FindReplaceDialog::command_t::FIND_ALL:
-		break;
-	case FindReplaceDialog::command_t::REPLACE_NEXT:
-	{
-		replaceStr = findDlg.GetReplaceString();
-		idStr selection = scriptEdit->GetSelectedText().c_str();
-
-		if ( selection.Length() && selection == findStr ) {
-			scriptEdit->DeleteSelection();
-			scriptEdit->InsertText( replaceStr.c_str() );
-		}
-
-		findStr = findDlg.GetFindString();
-		matchCase = findDlg.MatchCase();
-		matchWholeWords = findDlg.MatchWholeWord();
-		searchForward = true;
-		OnEditFindNext();
-		break;
-	}
-	case FindReplaceDialog::command_t::REPLACE_ALL:
-	{
-		replaceStr = findDlg.GetReplaceString();
-		findStr = findDlg.GetFindString();
-		matchCase = findDlg.MatchCase();
-		matchWholeWords = findDlg.MatchWholeWord();
-
-		/*int numReplaces = scriptEdit->ReplaceAll(findStr, replaceStr, matchCase, matchWholeWords);
-		if (numReplaces == 0) {
-			AfxMessageBox("The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0);
-		}
-		else {
-			AfxMessageBox(va("Replaced %d occurances.", numReplaces), MB_OK | MB_ICONINFORMATION, 0);
-		}*/
-		break;
-	}
-	case FindReplaceDialog::command_t::NONE:
-	case FindReplaceDialog::command_t::DONE:
-	default:
-		break;
-	}
-}
-
-/*
-================
-DialogScriptEditor::OnEnChangeEdit
-================
-*//*
-void ScriptEditor::OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult ) {
-	okButtonEnabled = true;
-}*/
-
-/*
-================
-ScriptEditor::OnEnInputEdit
-================
-*//*
-void ScriptEditor::OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult ) {
-	MSGFILTER *msgFilter = (MSGFILTER *)pNMHDR;
-
-	if ( msgFilter->msg != 512 && msgFilter->msg != 33 ) {
-		UpdateStatusBar();
-	}
-
-	*pResult = 0;
-}*/
 
 /*
 ================
@@ -589,7 +354,7 @@ void ScriptEditor::OnBnClickedOk() {
 
 	common->Printf( "Writing \'%s\'...\n", fileName.c_str() );
 
-	scriptText = scriptEdit->GetText().c_str();
+	scriptEdit.GetText( scriptText );
 
 	if ( fileSystem->WriteFile( fileName, scriptText, scriptText.Length(), "fs_devpath" ) == -1 ) {
 		errorText = va( "Couldn't save: %s", fileName.c_str() );

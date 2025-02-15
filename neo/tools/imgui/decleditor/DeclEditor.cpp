@@ -29,23 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../util/ImGui_IdWidgets.h"
 
 #include "PathTreeCtrl.h"
-#include "DeclEditor.h"
 #include "DeclBrowser.h"
 
 namespace ImGuiTools {
 
-static const int TAB_SIZE = 4;
-
 // DeclEditor dialog
-
-/*
-toolTip_t DialogDeclEditor::toolTips[] = {
-	{ IDC_DECLEDITOR_BUTTON_TEST, "test decl" },
-	{ IDOK, "save decl" },
-	{ IDCANCEL, "cancel" },
-	{ 0, NULL }
-};
-*/
 
 /*
 ================
@@ -61,14 +49,10 @@ DeclEditor::DeclEditor()
 	, okButtonEnabled(false)
 	, cancelButtonEnabled(true)
 	, errorText()
-	, findStr()
-	, replaceStr()
-	, matchCase(false)
-	, matchWholeWords(false)
-	, searchForward(true)
 	, decl(NULL)
 	, firstLine(0)
 {
+	declEdit.Init();
 }
 
 /*
@@ -111,12 +95,12 @@ DeclEditor::UpdateStatusBar
 ================
 */
 void DeclEditor::UpdateStatusBar( void ) {
-	/*int line, column, character;
+	int line, column, character;
 
 	if ( decl ) {
 		declEdit.GetCursorPos( line, column, character );
-		statusBar.SetWindowText( va( "Line: %d, Column: %d, Character: %d", decl->GetLineNum() + line, column, character ) );
-	}*/
+		statusBarText = va( "Line: %d, Column: %d", decl->GetLineNum() + line, column );
+	}
 }
 
 /*
@@ -126,9 +110,7 @@ DeclEditor::Reset
 */
 void DeclEditor::Reset() {
 
-	//declEdit.Init();
 	windowText.Clear();
-	declEdit.Clear();
 
 	testButtonEnabled = false;
 	okButtonEnabled = false;
@@ -146,7 +128,6 @@ void DeclEditor::Start( idDecl *decl ) {
 	int numCharsPerLine = 0;
 	int maxCharsPerLine = 0;
 	idStr declText;
-	//CRect rect;
 
 	this->decl = decl;
 
@@ -155,34 +136,34 @@ void DeclEditor::Start( idDecl *decl ) {
 	switch( decl->GetType() ) {
 		case DECL_ENTITYDEF:
 			//declEdit.SetStringColor( SRE_COLOR_BLUE, SRE_COLOR_DARK_CYAN );
-			//declEdit.LoadKeyWordsFromFile( "editors/entity.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/entity.def" );
 			break;
 		case DECL_MATERIAL:
-			//declEdit.LoadKeyWordsFromFile( "editors/material.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/material.def" );
 			break;
 		case DECL_SKIN:
-			//declEdit.LoadKeyWordsFromFile( "editors/skin.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/skin.def" );
 			break;
 		case DECL_SOUND:
-			//declEdit.LoadKeyWordsFromFile( "editors/sound.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/sound.def" );
 			break;
 		case DECL_FX:
-			//declEdit.LoadKeyWordsFromFile( "editors/fx.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/fx.def" );
 			break;
 		case DECL_PARTICLE:
-			//declEdit.LoadKeyWordsFromFile( "editors/particle.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/particle.def" );
 			break;
 		case DECL_AF:
-			//declEdit.LoadKeyWordsFromFile( "editors/af.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/af.def" );
 			break;
 		case DECL_TABLE:
-			//declEdit.LoadKeyWordsFromFile( "editors/table.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/table.def" );
 			break;
 		case DECL_MODELDEF:
-			//declEdit.LoadKeyWordsFromFile( "editors/model.def" );
+			declEdit.LoadKeyWordsFromFile( "editors/model.def" );
 			break;
 		default:
-			//declEdit.LoadKeyWordsFromFile( va( "editors/%s.def", declManager->GetDeclNameFromType( decl->GetType() ) ) );
+			declEdit.LoadKeyWordsFromFile( va( "editors/%s.def", declManager->GetDeclNameFromType( decl->GetType() ) ) );
 			break;
 	}
 
@@ -192,7 +173,7 @@ void DeclEditor::Start( idDecl *decl ) {
 	decl->GetText( localDeclText );
 	declText = localDeclText;
 
-	declEdit = declText;
+	declEdit.SetText( declText );
 
 	for( const char *ptr = declText.c_str(); *ptr; ptr++ ) {
 		if ( *ptr == '\r' ) {
@@ -209,26 +190,6 @@ void DeclEditor::Start( idDecl *decl ) {
 	}
 
 	windowText = va( "Declaration Editor (%s, line %d)", decl->GetFileName(), decl->GetLineNum() );
-	
-	/*
-	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
-
-	rect.left = initialRect.left;
-	rect.right = rect.left + (maxCharsPerLine * FONT_WIDTH + 32) *scaling_factor;
-	rect.top = initialRect.top;
-	rect.bottom = rect.top + (numLines * (FONT_HEIGHT+8) + 24 + 56)* scaling_factor;
-	if ( rect.right < initialRect.right ) {
-		rect.right = initialRect.right;
-	} else if ( rect.right - rect.left > (1024 * scaling_factor) ) {
-		rect.right = rect.left + (1024 * scaling_factor);
-	}
-	if ( rect.bottom < initialRect.bottom ) {
-		rect.bottom = initialRect.bottom;
-	} else if ( rect.bottom - rect.top > (768 * scaling_factor)  ) {
-		rect.bottom = rect.top + (768 * scaling_factor);
-	}
-	MoveWindow( rect );
-	*/
 
 	testButtonEnabled = false;
 	okButtonEnabled = false;
@@ -249,7 +210,8 @@ bool DeclEditor::Draw() {
 
 	if ( ImGui::BeginPopup( "Declaration Editor" ) ) {
 
-		if ( ImGui::InputTextMultilineStr( "Text", &declEdit, ImVec2( 500, 500 ) ) ) {
+		declEdit.Draw();
+		if ( declEdit.IsEdited() ) {
 			testButtonEnabled = true;
 			okButtonEnabled = true;
 		}
@@ -310,144 +272,6 @@ bool DeclEditor::Draw() {
 
 /*
 ================
-DeclEditor::OnEditGoToLine
-================
-*/
-void DeclEditor::OnEditGoToLine() {
-	/*
-	DialogGoToLine goToLineDlg;
-
-	goToLineDlg.SetRange( firstLine, firstLine + declEdit.GetLineCount() - 1 );
-	if ( goToLineDlg.DoModal() != IDOK ) {
-		return;
-	}
-	declEdit.GoToLine( goToLineDlg.GetLine() - firstLine );
-	*/
-}
-
-/*
-================
-DeclEditor::OnEditFind
-================
-*/
-void DeclEditor::OnEditFind() {
-	/*
-	idStr selText = declEdit.GetSelText();
-	if ( selText.GetLength() ) {
-		findStr = selText;
-	}
-
-	if ( !findDlg ) {
-		// create find/replace dialog
-		findDlg = new CFindReplaceDialog();  // Must be created on the heap
-		findDlg->Create( TRUE, findStr, "", FR_DOWN, this );
-	}*/
-}
-
-/*
-================
-DeclEditor::OnEditFindNext
-================
-*/
-void DeclEditor::OnEditFindNext() {
-	/*
-	if ( declEdit.FindNext( findStr, matchCase, matchWholeWords, searchForward ) ) {
-		declEdit.SetFocus();
-	} else {
-		AfxMessageBox( "The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0 );
-	}
-	*/
-}
-
-/*
-================
-DeclEditor::OnEditReplace
-================
-*/
-void DeclEditor::OnEditReplace() {
-	/*
-	idStr selText = declEdit.GetSelText();
-	if ( selText.GetLength() ) {
-		findStr = selText;
-	}
-
-	// create find/replace dialog
-	if ( !findDlg ) {
-		findDlg = new CFindReplaceDialog();  // Must be created on the heap
-		findDlg->Create( FALSE, findStr, "", FR_DOWN, this );
-	}
-	*/
-}
-
-/*
-================
-DeclEditor::OnFindDialogMessage
-================
-*//*
-LRESULT DeclEditor::OnFindDialogMessage( WPARAM wParam, LPARAM lParam ) {
-	if ( findDlg == NULL ) {
-		return 0;
-	}
-
-	if ( findDlg->IsTerminating() ) {
-		findDlg = NULL;
-		return 0;
-	}
-
-	if( findDlg->FindNext() ) {
-		findStr = findDlg->GetFindString();
-		matchCase = findDlg->MatchCase() != FALSE;
-		matchWholeWords = findDlg->MatchWholeWord() != FALSE;
-		searchForward = findDlg->SearchDown() != FALSE;
-
-		OnEditFindNext();
-	}
-
-	if ( findDlg->ReplaceCurrent() ) {
-		long selStart, selEnd;
-
-		replaceStr = findDlg->GetReplaceString();
-
-		declEdit.GetSel( selStart, selEnd );
-		if ( selEnd > selStart ) {
-			declEdit.ReplaceSel( replaceStr, TRUE );
-		}
-	}
-
-	if ( findDlg->ReplaceAll() ) {
-		replaceStr = findDlg->GetReplaceString();
-		findStr = findDlg->GetFindString();
-		matchCase = findDlg->MatchCase() != FALSE;
-		matchWholeWords = findDlg->MatchWholeWord() != FALSE;
-
-		int numReplaces = declEdit.ReplaceAll( findStr, replaceStr, matchCase, matchWholeWords );
-		if ( numReplaces == 0 ) {
-			AfxMessageBox( "The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0 );
-		} else {
-			AfxMessageBox( va( "Replaced %d occurances.", numReplaces ), MB_OK | MB_ICONINFORMATION, 0 );
-		}
-	}
-
-	return 0;
-}*/
-
-/*
-================
-DeclEditor::OnEnInputEdit
-================
-*//*
-void DeclEditor::OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult ) {
-	MSGFILTER* msgFilter = (MSGFILTER*)pNMHDR;
-
-	if ( msgFilter->msg != 512 && msgFilter->msg != 33 ) {
-		UpdateStatusBar();
-	}
-
-	*pResult = 0;
-}*/
-
-/*
-================
 DeclEditor::OnBnClickedTest
 ================
 */
@@ -456,7 +280,7 @@ void DeclEditor::OnBnClickedTest() {
 
 	if ( decl ) {
 
-		declText = declEdit; //declEdit.GetText( declText );
+		declEdit.GetText( declText );
 
 		if ( !TestDecl( declText ) ) {
 			return;
@@ -485,7 +309,7 @@ bool DeclEditor::OnBnClickedOk() {
 
 	if ( decl ) {
 
-		declText = declEdit; // declEdit.GetText( declText );
+		declEdit.GetText( declText );
 
 		if ( !TestDecl( declText ) ) {
 			return false;
@@ -513,7 +337,7 @@ void DeclEditor::OnBnClickedOkAccepted() {
 
 	if ( decl ) {
 
-		declText = declEdit; // declEdit.GetText( declText );
+		declEdit.GetText( declText );
 
 		declManager->Reload( false );
 		DeclBrowser::Instance().ReloadDeclarations();

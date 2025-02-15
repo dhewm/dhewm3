@@ -30,11 +30,12 @@ If you have questions concerning this license or the applicable additional terms
 #define __SCRIPTEDITOR_H__
 
 #include "../../edit_public.h"
-
-class TextEditor;
+#include "../util/SyntaxRichEditCtrl.h"
 
 namespace ImGuiTools
 {
+
+class SyntaxRichEditCtrl;
 
 class ScriptEditor {
 
@@ -56,35 +57,19 @@ public:
 	}
 
 protected:
-	void		OnEditGoToLine();
-	void		OnEditFind();
-	void		OnEditFindNext();
-	void		OnEditReplace();
-	void		OnFindDialogMessage( FindReplaceDialog::command_t command );
-	//void		OnEnChangeEdit( NMHDR *pNMHDR, LRESULT *pResult );
-	//void		OnEnInputEdit( NMHDR *pNMHDR, LRESULT *pResult );
-	void		OnBnClickedOk();
-	void		OnBnClickedCancel();
+	void					OnBnClickedOk();
+	void					OnBnClickedCancel();
 
 private:
-	bool				isShown;
-	idStr				windowText;
-	idStr				statusBarText;
-	TextEditor *		scriptEdit;
-	ImVec2				scriptEditPos;
-	ImVec2				scriptEditSize;
-	bool				okButtonEnabled;
-	bool				cancelButtonEnabled;
-	idStr				errorText;
-	FindReplaceDialog	findDlg;
-	GoToLineDialog		gotoDlg;
-	idStr				findStr;
-	idStr				replaceStr;
-	bool				matchCase;
-	bool				matchWholeWords;
-	bool				searchForward;
-	idStr				fileName;
-	int					firstLine;
+	bool					isShown;
+	idStr					windowText;
+	idStr					errorText;
+	idStr					statusBarText;
+	SyntaxRichEditCtrl		scriptEdit;
+	bool					okButtonEnabled;
+	bool					cancelButtonEnabled;
+	idStr					fileName;
+	int						firstLine;
 
 private:
 	void				InitScriptEvents( void );

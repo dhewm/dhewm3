@@ -837,6 +837,8 @@ set(src_imgui ${src_imgui}
 	tools/imgui/ImGuiTools.cpp
 	tools/imgui/util/ImGui_IdWidgets.h
 	tools/imgui/util/ImGui_IdWidgets.cpp
+	tools/imgui/util/SyntaxRichEditCtrl.h
+	tools/imgui/util/SyntaxRichEditCtrl.cpp
 
 	tools/imgui/afeditor/AfEditor.h
 	tools/imgui/afeditor/AfEditor.cpp
