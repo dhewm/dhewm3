@@ -48,6 +48,8 @@ TextEditor::TextEditor()
 	, mShowWhitespaces(true)
 	, mStartTime(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())
 	, mLastClick(-1.0f)
+	, mKeyPressData(NULL)
+	, mKeyPressHandler(NULL)
 {
 	SetPalette(GetDarkPalette());
 	SetLanguageDefinition(LanguageDefinition::HLSL());
@@ -58,6 +60,15 @@ TextEditor::TextEditor()
 
 TextEditor::~TextEditor()
 {
+}
+
+void TextEditor::Focus() {
+	mSetFocus = true;
+}
+
+void TextEditor::SetKeyPress(void* data, textEditKeyPress_t keyPress) {
+	mKeyPressData = data;
+	mKeyPressHandler = keyPress;
 }
 
 void TextEditor::SetLanguageDefinition(const LanguageDefinition & aLanguageDef)
@@ -769,6 +780,8 @@ void TextEditor::HandleKeyboardInputs()
 			EnterCharacter('\n', false);
 		else if (!IsReadOnly() && !ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_Tab))
 			EnterCharacter('\t', shift);
+		else if (mKeyPressHandler && !mKeyPressHandler(mKeyPressData, ctrl, shift, alt))
+			return;
 
 		if (!IsReadOnly() && !io.InputQueueCharacters.empty())
 		{
@@ -1123,6 +1136,10 @@ void TextEditor::Render()
 		EnsureCursorVisible();
 		ImGui::SetWindowFocus();
 		mScrollToCursor = false;
+	}
+	if (mSetFocus) {
+		ImGui::SetWindowFocus();
+		mSetFocus = false;
 	}
 }
 

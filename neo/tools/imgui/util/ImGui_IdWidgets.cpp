@@ -418,6 +418,7 @@ GoToLineDialog::GoToLineDialog()
 	, lastLine(0)
 	, waiting(false)
 	, valid(false)
+	, focus(false)
 	, caption()
 {
 }
@@ -428,12 +429,16 @@ void GoToLineDialog::Start( int _firstLine, int _lastLine, int _line ) {
 	numberEdit = _line;
 	valid = ( idMath::ClampInt( firstLine, lastLine, numberEdit ) == numberEdit );
 	waiting = true;
+	focus = true;
 	caption = va( "Line number (%d - %d)", firstLine, lastLine );
-	ImGui::OpenPopup( "Go To Line" );
 }
 
 bool GoToLineDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
 	bool accepted = false;
+	
+	if ( !waiting ) {
+		return accepted;
+	}
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	float fieldWidth = 250.0f;
@@ -452,34 +457,37 @@ bool GoToLineDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
 		fieldWidth + style.ItemSpacing.x +
 		captionWidth;
 
+	ImVec2 oldCursorPos = ImGui::GetCursorPos();
+
 	// TODO: this seems off, the dialog should be centered
-	ImGui::SetNextWindowPos(ImVec2(
+	ImGui::SetCursorPos(ImVec2(
 		pos.x + (size.x - windowWidth)*0.5f,
 		pos.y + (size.y - windowHeight)*0.5f));
-	ImGui::SetNextWindowSize( ImVec2( windowWidth, windowHeight ) );
 
-	if ( ImGui::BeginPopup( "Go To Line" ) ) {
+	if ( ImGui::BeginChild( "Go To Line", ImVec2( windowWidth, windowHeight ), ImGuiChildFlags_Borders ) ) {
 		ImGui::SetNextItemWidth( fieldWidth );
 		if ( ImGui::InputInt( caption.c_str(), &numberEdit, 0, 0 ) ) {
 			valid = ( idMath::ClampInt( firstLine, lastLine, numberEdit ) == numberEdit );
+		}
+		if ( focus ) {
+			ImGui::SetKeyboardFocusHere( -1 );
+			focus = false;
 		}
 
 		ImGui::BeginDisabled( !valid );
 		if ( ImGui::Button( "OK" ) ) {
 			waiting = false;
 			accepted = true;
-			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndDisabled();
 		ImGui::SameLine();
 		if ( ImGui::Button( "Cancel" ) ) {
 			waiting = false;
 			accepted = false;
-			ImGui::CloseCurrentPopup();
 		}
-
-		ImGui::EndPopup();
 	}
+	ImGui::EndChild();
+	ImGui::SetCursorPos( oldCursorPos );
 
 	return accepted;
 }
@@ -492,6 +500,7 @@ FindReplaceDialog::FindReplaceDialog()
 	, replacement(false)
 	, valid(false)
 	, visible(false)
+	, focus(false)
 {
 }
 
@@ -503,6 +512,7 @@ void FindReplaceDialog::Start( idStr &selection, bool _replacement ) {
 	replacement = _replacement;
 	valid = ( find.Length() > 0 );
 	visible = true;
+	focus = true;
 }
 
 FindReplaceDialog::command_t FindReplaceDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
@@ -545,6 +555,10 @@ FindReplaceDialog::command_t FindReplaceDialog::Draw( const ImVec2 &pos, const I
 		if ( ImGui::InputTextStr( "###Find", &find ) ) {
 			valid = ( find.Length() > 0 );
 		}
+		if ( focus ) {
+			ImGui::SetKeyboardFocusHere( -1 );
+			focus = false;
+		}
 		ImGui::SetItemTooltip( "Search term" );
 		ImGui::SameLine();
 
@@ -571,6 +585,7 @@ FindReplaceDialog::command_t FindReplaceDialog::Draw( const ImVec2 &pos, const I
 
 		if ( ImGui::Button( "x", ImVec2( optionWidth, 0.0f ) ) ) {
 			visible = false;
+			command = DONE;
 		}
 
 		ImGui::SetNextItemWidth( fieldWidth );

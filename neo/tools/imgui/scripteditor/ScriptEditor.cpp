@@ -339,7 +339,7 @@ void ScriptEditor::OpenFile( const char *fileName ) {
 
 	UpdateStatusBar();
 
-	//scriptEdit.SetFocus();
+	scriptEdit.SetFocus();
 }
 
 // ScriptEditor message handlers

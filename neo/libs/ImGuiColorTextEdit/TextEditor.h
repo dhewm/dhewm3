@@ -13,6 +13,8 @@
 class TextEditor
 {
 public:
+	typedef bool (*textEditKeyPress_t)(void* data, bool ctrl, bool shift, bool alt);
+
 	enum class PaletteIndex
 	{
 		Default,
@@ -184,6 +186,10 @@ public:
 
 	TextEditor();
 	~TextEditor();
+
+	void Focus();
+
+	void SetKeyPress(void *data, textEditKeyPress_t keyPress);
 
 	void SetLanguageDefinition(const LanguageDefinition& aLanguageDef);
 	const LanguageDefinition& GetLanguageDefinition() const { return mLanguageDefinition; }
@@ -402,4 +408,8 @@ private:
 	bool mMarkedUnsaved;
 	int mUndoIndexFirstEdit;
 	int mUndoIndexLastSave; 
+
+	void* mKeyPressData;
+	textEditKeyPress_t mKeyPressHandler;
+	bool mSetFocus;
 };

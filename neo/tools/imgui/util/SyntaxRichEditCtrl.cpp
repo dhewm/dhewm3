@@ -53,6 +53,10 @@ const COLORREF MULTILINE_COMMENT_BACK_COLOR		= SRE_COLOR_WHITE - 1;
 //#define IDC_LISTBOX_AUTOCOMPLETE		700
 //#define IDC_EDITBOX_FUNCPARMS			701
 
+bool SyntaxRichEditCtrlKeyPress( void* data, bool ctrl, bool shift, bool alt ) {
+	return reinterpret_cast<SyntaxRichEditCtrl*>(data)->OnChar(ctrl, shift, alt);
+}
+
 static keyWord_t defaultKeyWords[] = {
 	{ NULL, vec3_origin, "" }
 };
@@ -86,8 +90,6 @@ SyntaxRichEditCtrl::SyntaxRichEditCtrl( void )
 	: scriptEdit( NULL )
 	, scriptEditPos( 0.0f, 0.0f )
 	, scriptEditSize( 400.0f, 400.0f )
-	, okButtonEnabled( false )
-	, cancelButtonEnabled( true )
 	, errorText()
 	, findDlg()
 	, gotoDlg()
@@ -172,6 +174,7 @@ SyntaxRichEditCtrl::Init
 */
 void SyntaxRichEditCtrl::Init( void ) {
 	scriptEdit = new TextEditor();
+	scriptEdit->SetKeyPress( this, SyntaxRichEditCtrlKeyPress );
 
 	/*
 	// get the Rich Edit ITextDocument to use the wonky TOM interface
@@ -183,6 +186,8 @@ void SyntaxRichEditCtrl::Init( void ) {
 	*/
 
 	InitSyntaxHighlighting();
+
+	SetFocus();
 
 	//SetEventMask( GetEventMask() | ENM_CHANGE | ENM_KEYEVENTS | ENM_MOUSEEVENTS | ENM_PROTECTED );	// ENM_SCROLLEVENTS
 
@@ -209,22 +214,6 @@ void SyntaxRichEditCtrl::Draw()
 	scriptEditSize = ImVec2( 800, 600 );
 
 	scriptEdit->Render( "Text", scriptEditSize, false );
-	if ( !scriptEdit->IsSaved() ) {
-		okButtonEnabled = true;
-	}
-	/*
-	ImGui::BeginDisabled( !okButtonEnabled );
-	if (ImGui::Button("OK")) {
-		OnBnClickedOk();
-	}
-	ImGui::EndDisabled();
-	ImGui::SameLine();
-	ImGui::BeginDisabled( !cancelButtonEnabled );
-	if ( ImGui::Button( "Cancel" ) ) {
-		showTool = false;
-	}
-	ImGui::EndDisabled();
-	ImGui::SameLine();*/
 
 	if ( ImGui::Button( "Go to" ) ) {
 		OnEditGoToLine();
@@ -246,6 +235,7 @@ void SyntaxRichEditCtrl::Draw()
 		TextEditor::Coordinates coords( gotoDlg.GetLine() - 1 - firstLine, 0 );
 
 		scriptEdit->SetCursorPosition( coords );
+		SetFocus();
 	}
 	FindReplaceDialog::command_t findReplaceResult = findDlg.Draw( scriptEditPos, scriptEditSize );
 	OnFindDialogMessage( findReplaceResult );
@@ -528,93 +518,6 @@ void SyntaxRichEditCtrl::EnableKeyWordAutoCompletion( bool enable ) {
 
 /*
 ================
-SyntaxRichEditCtrl::GetVisibleRange
-================
-*//*
-CHARRANGE SyntaxRichEditCtrl::GetVisibleRange( void ) const {
-	RECT rectArea;
-	int firstLine, lastLine;
-	CHARRANGE range;
-
-	firstLine = GetFirstVisibleLine();
-	GetClientRect( &rectArea );
-	lastLine = firstLine + ( rectArea.bottom / ( defaultCharFormat.yHeight / 20 ) );
-
-	if ( lastLine >= GetLineCount() ) {
-		lastLine = GetLineCount() - 1;
-	}
-	range.cpMin = LineIndex( firstLine );
-	if ( range.cpMin < 0 ) {
-		range.cpMin = 0;
-	}
-	range.cpMax = LineIndex( lastLine );
-	if ( range.cpMax == -1 ) {
-		range.cpMax = range.cpMin + LineLength( range.cpMin );
-	} else {
-		range.cpMax += LineLength( range.cpMax );
-	}
-	if ( range.cpMax >= GetTextLength() ) {
-		range.cpMax = GetTextLength() - 1;
-	}
-	return range;
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::SetDefaultFont
-================
-*/
-void SyntaxRichEditCtrl::SetDefaultFont( int startCharIndex, int endCharIndex ) {
-	/*tom::ITextRange* range;
-
-	updateSyntaxHighlighting = false;
-
-	m_TextDoc->Range( startCharIndex, endCharIndex, &range );
-
-	m_TextDoc->Undo( tom::tomSuspend, NULL );
-	range->put_Font( m_DefaultFont );
-	m_TextDoc->Undo( tom::tomResume, NULL );
-
-	range->Release();
-
-	updateSyntaxHighlighting = true;*/
-}
-
-/*
-================
-SyntaxRichEditCtrl::SetColor
-================
-*/
-void SyntaxRichEditCtrl::SetColor( int startCharIndex, int endCharIndex, const idVec3 &foreColor, const idVec3 &backColor, bool bold ) {
-	/*tom::ITextRange* range;
-	tom::ITextFont *font;
-	long prop;
-
-	updateSyntaxHighlighting = false;
-
-	m_TextDoc->Range( startCharIndex, endCharIndex, &range );
-	range->get_Font( &font );
-
-	m_TextDoc->Undo( tom::tomSuspend, &prop );
-	font->put_ForeColor( foreColor );
-	m_TextDoc->Undo( tom::tomResume, &prop );
-
-	m_TextDoc->Undo( tom::tomSuspend, &prop );
-	font->put_BackColor( backColor );
-	m_TextDoc->Undo( tom::tomResume, &prop );
-
-	m_TextDoc->Undo( tom::tomSuspend, &prop );
-	font->put_Bold( bold ? tom::tomTrue : tom::tomFalse );
-	m_TextDoc->Undo( tom::tomResume, &prop );
-
-	font->Release();
-	range->Release();
-
-	updateSyntaxHighlighting = true;*/
-}
-
-/*
-================
 SyntaxRichEditCtrl::GetBackColor
 ================
 */
@@ -633,246 +536,6 @@ idVec3 SyntaxRichEditCtrl::GetBackColor( int charIndex ) const {
 
 	return backColor;*/
 	return vec3_origin;
-}
-
-/*
-================
-SyntaxRichEditCtrl::HighlightSyntax
-
-  Update the syntax highlighting for the given character range.
-================
-*/
-void SyntaxRichEditCtrl::HighlightSyntax( int startCharIndex, int endCharIndex ) {
-	/*int c, t, line, charIndex, textLength, syntaxStart, keyWordLength, keyWordIndex;
-	const char *keyWord;
-	CHARRANGE visRange;
-	CString text;
-
-	// get text length
-	GetTextRange( 0, GetTextLength(), text );
-	textLength = text.GetLength();
-
-	// make sure the indexes are within bounds
-	if ( startCharIndex < 0 ) {
-		startCharIndex = 0;
-	}
-	if ( endCharIndex < 0 ) {
-		endCharIndex = textLength - 1;
-	} else if ( endCharIndex >= textLength ) {
-		endCharIndex = textLength - 1;
-	}
-
-	// move the start index to the beginning of the line
-	for ( ; startCharIndex > 0; startCharIndex-- ) {
-		if ( idStr::CharIsNewLine( text[startCharIndex-1] ) ) {
-			break;
-		}
-	}
-
-	// move the end index to the end of the line
-	for ( ; endCharIndex < textLength - 1; endCharIndex++ ) {
-		if ( idStr::CharIsNewLine( text[endCharIndex+1] ) ) {
-			break;
-		}
-	}
-
-	// get the visible char range
-	visRange = GetVisibleRange();
-
-	// never update beyond the visible range
-	if ( startCharIndex < visRange.cpMin ) {
-		SetColor( startCharIndex, visRange.cpMin - 1, SRE_COLOR_BLACK, INVALID_BACK_COLOR, false );
-		startCharIndex = visRange.cpMin;
-	}
-	if ( visRange.cpMax < endCharIndex ) {
-		SetColor( visRange.cpMax, endCharIndex, SRE_COLOR_BLACK, INVALID_BACK_COLOR, false );
-		endCharIndex = visRange.cpMax;
-		if ( endCharIndex >= textLength ) {
-			endCharIndex = textLength - 1;
-		}
-	}
-
-	// test if the start index is inside a multi-line comment
-	if ( startCharIndex > 0 ) {
-		// multi-line comments have a slightly different background color
-		if ( GetBackColor( startCharIndex-1 ) == MULTILINE_COMMENT_BACK_COLOR ) {
-			for( ; startCharIndex > 0; startCharIndex-- ) {
-				if ( text[startCharIndex] == '/' && text[startCharIndex+1] == '*' ) {
-					break;
-				}
-			}
-		}
-	}
-
-	// test if the end index is inside a multi-line comment
-	if ( endCharIndex < textLength - 1 ) {
-		// multi-line comments have a slightly different background color
-		if ( GetBackColor( endCharIndex+1 ) == MULTILINE_COMMENT_BACK_COLOR ) {
-			for( endCharIndex++; endCharIndex < textLength - 1; endCharIndex++ ) {
-				if ( text[endCharIndex-1] == '*' && text[endCharIndex] == '/' ) {
-					break;
-				}
-			}
-		}
-	}
-
-	line = 0;
-	stringColorLine = -1;
-	stringColorIndex = 0;
-
-	// set the default color
-	SetDefaultFont( startCharIndex, endCharIndex + 1 );
-
-	// syntax based colors
-	for( charIndex = startCharIndex; charIndex <= endCharIndex; charIndex++ ) {
-
-		t = charType[text[charIndex]];
-		switch( t ) {
-			case CT_WHITESPACE: {
-				if ( idStr::CharIsNewLine( text[charIndex] ) ) {
-					line++;
-				}
-				break;
-			}
-			case CT_COMMENT: {
-				c = text[charIndex+1];
-				if ( c == '/' ) {
-					// single line comment
-					syntaxStart = charIndex;
-					for ( charIndex += 2; charIndex < textLength; charIndex++ ) {
-						if ( idStr::CharIsNewLine( text[charIndex] ) ) {
-							break;
-						}
-					}
-					SetColor( syntaxStart, charIndex + 1, singleLineCommentColor, DEFAULT_BACK_COLOR, false );
-				} else if ( c == '*' ) {
-					// multi-line comment
-					syntaxStart = charIndex;
-					for ( charIndex += 2; charIndex < textLength; charIndex++ ) {
-						if ( text[charIndex] == '*' && text[charIndex+1] == '/' ) {
-							break;
-						}
-					}
-					charIndex++;
-					SetColor( syntaxStart, charIndex + 1, multiLineCommentColor, MULTILINE_COMMENT_BACK_COLOR, false );
-				}
-				break;
-			}
-			case CT_STRING: {
-				if ( line != stringColorLine ) {
-					stringColorLine = line;
-					stringColorIndex = 0;
-				}
-				syntaxStart = charIndex;
-				for ( charIndex++; charIndex < textLength; charIndex++ ) {
-					c = text[charIndex];
-					if ( charType[c] == CT_STRING && text[charIndex-1] != '\\' ) {
-						break;
-					}
-					if ( idStr::CharIsNewLine( c ) ) {
-						line++;
-						break;
-					}
-				}
-				SetColor( syntaxStart, charIndex + 1, stringColor[stringColorIndex], DEFAULT_BACK_COLOR, false );
-				stringColorIndex ^= 1;
-				break;
-			}
-			case CT_LITERAL: {
-				syntaxStart = charIndex;
-				for ( charIndex++; charIndex < textLength; charIndex++ ) {
-					c = text[charIndex];
-					if ( charType[c] == CT_LITERAL && text[charIndex-1] != '\\' ) {
-						break;
-					}
-					if ( idStr::CharIsNewLine( c ) ) {
-						line++;
-						break;
-					}
-				}
-				SetColor( syntaxStart, charIndex + 1, literalColor, DEFAULT_BACK_COLOR, false );
-				break;
-			}
-			case CT_NUMBER: {
-				break;
-			}
-			case CT_NAME: {
-				syntaxStart = charIndex;
-				keyWord = ((const char *)text) + charIndex;
-				for ( charIndex++; charIndex < textLength; charIndex++ ) {
-					c = text[charIndex];
-					t = charType[c];
-					if ( t != CT_NAME && t != CT_NUMBER ) {
-						// allow path names
-						if ( !allowPathNames || ( c != '/' && c != '\\' && c != '.' ) ) {
-							break;
-						}
-					}
-				}
-				keyWordLength = charIndex - syntaxStart;
-				keyWordIndex = FindKeyWord( keyWord, keyWordLength );
-				if ( keyWordIndex != -1 ) {
-					SetColor( syntaxStart, syntaxStart + keyWordLength, keyWordColors[keyWordIndex], DEFAULT_BACK_COLOR, false );
-				}
-				break;
-			}
-			case CT_PUNCTUATION: {
-				break;
-			}
-		}
-	}
-
-	// show braced section
-	BracedSectionShow();*/
-}
-
-/*
-================
-SyntaxRichEditCtrl::UpdateVisibleRange
-
-  Updates the visible character range if it is not yet properly highlighted.
-================
-*/
-void SyntaxRichEditCtrl::UpdateVisibleRange( void ) {
-	/*CHARRANGE visRange;
-	tom::ITextRange *range;
-	tom::ITextFont *font;
-	long backColor;
-	bool update = false;
-
-	if ( !updateSyntaxHighlighting ) {
-		return;
-	}
-
-	visRange = GetVisibleRange();
-
-	m_TextDoc->Range( visRange.cpMin, visRange.cpMax, &range );
-	range->get_End( &visRange.cpMax );
-
-	range->get_Font( &font );
-
-	range->SetRange( visRange.cpMin, visRange.cpMin );
-	while( 1 ) {
-		range->get_Start( &visRange.cpMin );
-		if ( visRange.cpMin >= visRange.cpMax ) {
-			break;
-		}
-		font->get_BackColor( &backColor );
-		if ( backColor == INVALID_BACK_COLOR ) {
-			update = true;
-			break;
-		}
-		if ( range->Move( tom::tomCharFormat, 1, NULL ) != S_OK ) {
-			break;
-		}
-	}
-
-	font->Release();
-	range->Release();
-
-	if ( update ) {
-		HighlightSyntax( visRange.cpMin, visRange.cpMax - 1 );
-	}*/
 }
 
 /*
@@ -898,23 +561,6 @@ void SyntaxRichEditCtrl::GetText( idStr &text ) const {
 
 /*
 ================
-SyntaxRichEditCtrl::GetText
-================
-*//*
-void SyntaxRichEditCtrl::GetText( idStr &text, int startCharIndex, int endCharIndex ) const {
-	tom::ITextRange* range;
-	BSTR bstr;
-	USES_CONVERSION;
-
-	m_TextDoc->Range( startCharIndex, endCharIndex, &range );
-	range->get_Text( &bstr );
-	text = W2A( bstr );
-	range->Release();
-	text.StripTrailingOnce( "\r" );		// remove last carriage return which is always added to a tom::ITextRange
-}*/
-
-/*
-================
 SyntaxRichEditCtrl::SetText
 ================
 */
@@ -929,6 +575,15 @@ SyntaxRichEditCtrl::IsEdited
 */
 bool SyntaxRichEditCtrl::IsEdited() const {
 	return scriptEdit->CanUndo();
+}
+
+/*
+================
+SyntaxRichEditCtrl::SetFocus
+================
+*/
+void SyntaxRichEditCtrl::SetFocus() {
+	scriptEdit->Focus();
 }
 
 /*
@@ -1342,7 +997,12 @@ SyntaxRichEditCtrl::OnEditFindNext
 ================
 */
 void SyntaxRichEditCtrl::OnEditFindNext() {
-	scriptEdit->FindNext( findStr.c_str(), matchCase, matchWholeWords, searchForward );
+	if ( scriptEdit->FindNext( findStr.c_str(), matchCase, matchWholeWords, searchForward ) ) {
+		SetFocus();
+	} else {
+		//AfxMessageBox( "The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0 );
+	}
+
 }
 
 /*
@@ -1397,8 +1057,10 @@ void SyntaxRichEditCtrl::OnFindDialogMessage( FindReplaceDialog::command_t comma
 		}*/
 		break;
 	}
-	case FindReplaceDialog::command_t::NONE:
 	case FindReplaceDialog::command_t::DONE:
+		SetFocus();
+		break;
+	case FindReplaceDialog::command_t::NONE:
 	default:
 		break;
 	}
@@ -1564,9 +1226,9 @@ void CSyntaxRichEditCtrl::OnKeyDown( UINT nKey, UINT nRepCnt, UINT nFlags ) {
 ================
 SyntaxRichEditCtrl::OnChar
 ================
-*//*
-void SyntaxRichEditCtrl::OnChar( UINT nChar, UINT nRepCnt, UINT nFlags ) {
-
+*/
+bool SyntaxRichEditCtrl::OnChar( bool ctrl, bool shift, bool alt ) {
+	/*
 	if ( nChar == VK_TAB ) {
 		return;	// tab is handle in OnKeyDown
 	}
@@ -1675,8 +1337,23 @@ void SyntaxRichEditCtrl::OnChar( UINT nChar, UINT nRepCnt, UINT nFlags ) {
 			}
 		}
 		return;
+	}*/
+	bool result = true;
+
+	if ( ctrl && ImGui::IsKeyPressed( ImGuiKey_G ) ) {
+		OnEditGoToLine();
+	} else if ( ctrl && ImGui::IsKeyPressed( ImGuiKey_F ) ) {
+		idStr selText = scriptEdit->GetSelectedText().c_str();
+
+		findDlg.Start( selText, false );
+	} else if ( ctrl && ImGui::IsKeyPressed( ImGuiKey_H ) ) {
+		idStr selText = scriptEdit->GetSelectedText().c_str();
+
+		findDlg.Start( selText, true );
 	}
-}*/
+
+	return result;
+}
 
 /*
 ================

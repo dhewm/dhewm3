@@ -149,6 +149,7 @@ private:
 	int					lastLine;
 	bool				waiting;
 	bool				valid;
+	bool				focus;
 	idStr				caption;
 };
 
@@ -174,6 +175,7 @@ private:
 	bool					replacement;
 	bool					valid;
 	bool					visible;
+	bool					focus;
 };
 
 } //namespace ImGuiTools

@@ -54,31 +54,26 @@ class TextEditor;
 
 namespace ImGuiTools {
 
-static const char*		FONT_NAME = "Courier";
-static const int		FONT_HEIGHT = 10;
-static const int		FONT_WIDTH = 8;
 static const int		TAB_SIZE = 4;
 
-/*
-static const COLORREF	SRE_COLOR_BLACK = RGB(0, 0, 0);
-static const COLORREF	SRE_COLOR_WHITE = RGB(255, 255, 255);
-static const COLORREF	SRE_COLOR_RED = RGB(255, 0, 0);
-static const COLORREF	SRE_COLOR_GREEN = RGB(0, 255, 0);
-static const COLORREF	SRE_COLOR_BLUE = RGB(0, 0, 255);
-static const COLORREF	SRE_COLOR_YELLOW = RGB(255, 255, 0);
-static const COLORREF	SRE_COLOR_MAGENTA = RGB(255, 0, 255);
-static const COLORREF	SRE_COLOR_CYAN = RGB(0, 255, 255);
-static const COLORREF	SRE_COLOR_ORANGE = RGB(255, 128, 0);
-static const COLORREF	SRE_COLOR_PURPLE = RGB(150, 0, 150);
-static const COLORREF	SRE_COLOR_PINK = RGB(186, 102, 123);
-static const COLORREF	SRE_COLOR_GREY = RGB(85, 85, 85);
-static const COLORREF	SRE_COLOR_BROWN = RGB(100, 90, 20);
-static const COLORREF	SRE_COLOR_LIGHT_GREY = RGB(170, 170, 170);
-static const COLORREF	SRE_COLOR_LIGHT_BROWN = RGB(170, 150, 20);
-static const COLORREF	SRE_COLOR_DARK_GREEN = RGB(0, 128, 0);
-static const COLORREF	SRE_COLOR_DARK_CYAN = RGB(0, 150, 150);
-static const COLORREF	SRE_COLOR_DARK_YELLOW = RGB(220, 200, 20);
-*/
+static const idVec3		SRE_COLOR_BLACK	= idVec3(0.0f, 0.0f, 0.0f);
+static const idVec3		SRE_COLOR_WHITE = idVec3(1.0f, 1.0f, 1.0f);
+static const idVec3		SRE_COLOR_RED = idVec3(1.0f, 0.0f, 0.0f);
+static const idVec3		SRE_COLOR_GREEN = idVec3(0.0f, 1.0f, 0.0f);
+static const idVec3		SRE_COLOR_BLUE = idVec3(0.0f, 0.0f, 1.0f);
+static const idVec3		SRE_COLOR_YELLOW = idVec3(1.0f, 1.0f, 0.0f);
+static const idVec3		SRE_COLOR_MAGENTA = idVec3(1.0f, 0.0f, 1.0f);
+static const idVec3		SRE_COLOR_CYAN = idVec3(0.0f, 1.0f, 1.0f);
+static const idVec3		SRE_COLOR_ORANGE = idVec3(1.0f, 0.5f, 0.0f);
+static const idVec3		SRE_COLOR_PURPLE = idVec3(0.59f, 0.0f, 0.59f);
+static const idVec3		SRE_COLOR_PINK = idVec3(0.73f, 0.4f, 0.48f);
+static const idVec3		SRE_COLOR_GREY = idVec3(0.33f, 0.33f, 0.33f);
+static const idVec3		SRE_COLOR_BROWN = idVec3(0.4f, 0.35f, 0.07f);
+static const idVec3		SRE_COLOR_LIGHT_GREY = idVec3(0.66f, 0.66f, 0.66f);
+static const idVec3		SRE_COLOR_LIGHT_BROWN = idVec3(0.66f, 0.59f, 0.08f);
+static const idVec3		SRE_COLOR_DARK_GREEN = idVec3(0.0f, 0.5f, 0.0f);
+static const idVec3		SRE_COLOR_DARK_CYAN = idVec3(0.0f, 0.59f, 0.59f);
+static const idVec3		SRE_COLOR_DARK_YELLOW = idVec3(0.86f, 0.78f, 0.07f);
 
 typedef struct {
 	const char *	keyWord;
@@ -86,9 +81,8 @@ typedef struct {
 	const char *	description;
 } keyWord_t;
 
-typedef bool (*objectMemberCallback_t)(const char* objectName, idStrList& listBox);
-typedef bool (*toolTipCallback_t)(const char* name, idStr& string);
-
+typedef bool ( *objectMemberCallback_t )( const char* objectName, idStrList &listBox );
+typedef bool ( *toolTipCallback_t )( const char* name, idStr &string );
 
 class SyntaxRichEditCtrl {
 public:
@@ -115,19 +109,20 @@ public:
 	idVec3					GetBackColor( int charIndex ) const;
 
 	void					GetCursorPos( int &line, int &column, int &character ) const;
-	//CHARRANGE				GetVisibleRange(void) const;
 
 	void					GetText( idStr &text ) const;
-	//void					GetText( idStr &text, int startCharIndex, int endCharIndex ) const;
 	void					SetText( const char *text );
 
 	bool					IsEdited() const;
 
-private:
+	void					SetFocus();
+
+public:
 	//virtual INT_PTR			OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	bool					OnToolTipNotify();
 	//afx_msg UINT			OnGetDlgCode();
-	//afx_msg void			OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	bool					OnChar( bool ctrl, bool shift, bool alt );
+private:
 	//afx_msg void			OnKeyDown(UINT nKey, UINT nRepCnt, UINT nFlags);
 	//afx_msg void			OnLButtonDown(UINT nFlags, CPoint point);
 	//afx_msg BOOL			OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -148,8 +143,6 @@ private:
 	TextEditor *			scriptEdit;
 	ImVec2					scriptEditPos;
 	ImVec2					scriptEditSize;
-	bool					okButtonEnabled;
-	bool					cancelButtonEnabled;
 	idStr					errorText;
 	FindReplaceDialog		findDlg;
 	GoToLineDialog			gotoDlg;
@@ -195,11 +188,6 @@ private:
 	toolTipCallback_t		GetFunctionParms;
 	toolTipCallback_t		GetToolTip;
 
-	// run-time variables
-	//tom::ITextDocument* m_TextDoc;
-	//tom::ITextFont* m_DefaultFont;
-
-	//CHARRANGE				updateRange;
 	bool					updateSyntaxHighlighting;
 	int						stringColorIndex;
 	int						stringColorLine;
@@ -222,14 +210,9 @@ private:
 private:
 	void					InitSyntaxHighlighting( void );
 	void					SetCharType( int first, int last, int type );
-	void					SetDefaultFont( int startCharIndex, int endCharIndex );
-	void					SetColor( int startCharIndex, int endCharIndex, const idVec3 &foreColor, const idVec3 &backColor, bool bold );
 
 	void					FreeKeyWordsFromFile( void );
 	int						FindKeyWord( const char *keyWord, int length ) const;
-
-	void					HighlightSyntax( int startCharIndex, int endCharIndex );
-	void					UpdateVisibleRange( void );
 
 	bool					GetNameBeforeCurrentSelection( idStr &name, int &charIndex ) const;
 	bool					GetNameForMousePosition( idStr &name ) const;
