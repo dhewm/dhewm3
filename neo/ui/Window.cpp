@@ -1238,7 +1238,7 @@ void idWindow::Redraw(float x, float y) {
 		// only scale desktop windows (will automatically scale its sub-windows)
 		// that EITHER have the scaleto43 flag set OR are fullscreen menus and r_scaleMenusTo43 is 1
 		if( (flags & WIN_SCALETO43) ||
-			((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool()) )
+			( (flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool() && !(flags & WIN_NO_SCALETO43) ) )
 		{
 			fixupFor43 = true;
 			dc->SetMenuScaleFix(true);
@@ -2028,8 +2028,11 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src) {
 	// DG: added this window flag for Windows that should be scaled to 4:3
 	//     (with "empty" bars left/right or above/below)
 	if (idStr::Icmp(_name, "scaleto43") == 0) {
-		if ( src->ParseBool() ) {
+		int scaleTo43 = src->ParseInt();
+		if(scaleTo43 > 0) {
 			flags |= WIN_SCALETO43;
+		} else if(scaleTo43 == 0) {
+			flags |= WIN_NO_SCALETO43;
 		}
 		return true;
 	}

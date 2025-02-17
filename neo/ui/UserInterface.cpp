@@ -563,13 +563,19 @@ void idUserInterfaceLocal::StateChanged( int _time, bool redraw ) {
 		// DG: little hack: allow game DLLs to do
 		//     ui->SetStateBool("scaleto43", true);
 		//     ui->StateChanged(gameLocal.time);
-		//     so we can force cursors.gui (crosshair) to be scaled, for example
-		bool scaleTo43 = false;
-		if(state.GetBool("scaleto43", "0", scaleTo43)) {
-			if(scaleTo43)
+		//     so we can force cursors.gui (crosshair) to be scaled, for example.
+		//     Not sure if/where that's needed, but ui->SetStateBool("scaleto43", false);
+		//     is now also supported to explicitly disable scaling from the code
+		int scaleTo43 = 0;
+		if(state.GetInt("scaleto43", "-1", scaleTo43)) {
+			if(scaleTo43 > 0) {
 				desktop->SetFlag(WIN_SCALETO43);
-			else
+				desktop->ClearFlag(WIN_NO_SCALETO43);
+				// TODO
+			} else if(scaleTo43 == 0) {
 				desktop->ClearFlag(WIN_SCALETO43);
+				desktop->SetFlag(WIN_NO_SCALETO43);
+			} // do nothing for -1, it means that it wasn't set at all
 		}
 		// DG end
 
