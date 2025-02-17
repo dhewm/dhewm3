@@ -108,7 +108,8 @@ public:
 	// DG: this is used for the "make sure menus are rendered as 4:3" hack
 	void				SetMenuScaleFix(bool enable);
 	bool				IsMenuScaleFixActive() const {
-		return fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f;
+		// also using this for cstAdjustCoords, it basically means "you need to call AdjustCoords()
+		return fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f || cstAdjustCoords;
 	}
 
 	enum {
