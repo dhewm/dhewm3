@@ -112,6 +112,9 @@ public:
 		return fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f || cstAdjustCoords;
 	}
 
+	// DG: used in idWindow::Contains(), so it can adjust coordinates
+	static bool			CstGetParams(int anchor, int anchorTo, float anchorFactor, idVec2& out_Scale, idVec2& out_Offset);
+
 	enum {
 		CURSOR_ARROW,
 		CURSOR_HAND,

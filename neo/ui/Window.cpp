@@ -694,6 +694,18 @@ bool idWindow::Contains(const idRectangle &sr, float x, float y) {
 	idRectangle r = sr;
 	r.x += actualX - drawRect.x;
 	r.y += actualY - drawRect.y;
+	// DG: if cstAnchor is used, the coordinates must adjusted
+	if ( cstAnchor != idDeviceContext::CST_ANCHOR_NONE ) {
+		// adjust r like idDeviceContext does for drawing
+		idVec2 scale, offset;
+		if ( idDeviceContext::CstGetParams( cstAnchor, cstAnchorTo, cstAnchorFactor, scale, offset ) ) {
+			r.x = r.x * scale.x + offset.x;
+			r.y = r.y * scale.y + offset.y;
+			r.w *= scale.x;
+			r.h *= scale.y;
+		}
+	}
+
 	return r.Contains(x, y);
 }
 
@@ -706,6 +718,18 @@ bool idWindow::Contains(float x, float y) {
 	idRectangle r = drawRect;
 	r.x = actualX;
 	r.y = actualY;
+	// DG: if cstAnchor is used, the coordinates must adjusted
+	if ( cstAnchor != idDeviceContext::CST_ANCHOR_NONE ) {
+		// adjust r like idDeviceContext does for drawing
+		idVec2 scale, offset;
+		if ( idDeviceContext::CstGetParams( cstAnchor, cstAnchorTo, cstAnchorFactor, scale, offset ) ) {
+			r.x = r.x * scale.x + offset.x;
+			r.y = r.y * scale.y + offset.y;
+			r.w *= scale.x;
+			r.h *= scale.y;
+		}
+	}
+
 	return r.Contains(x, y);
 }
 
