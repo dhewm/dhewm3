@@ -339,6 +339,31 @@ bool idUserInterfaceLocal::InitFromFile( const char *qpath, bool rebuild, bool c
 	return true;
 }
 
+// static
+bool idUserInterface::IsUserInterfaceScaledTo43( const idUserInterface* ui_ )
+{
+	const idUserInterfaceLocal* ui = (const idUserInterfaceLocal*)ui_;
+	if ( ui == NULL ) {
+		assert( 0 && "why do you call this without a ui?!" );
+		return false;
+	}
+	idWindow* win = ui->GetDesktop();
+	if ( win == NULL ) {
+		return false;
+	}
+	int winFlags = win->GetFlags();
+	if ( (winFlags & WIN_MENUGUI) == 0 || !r_scaleMenusTo43.GetBool() ) {
+		// if the window is no fullscreen menu (but an ingame menu or noninteractive like the HUD)
+		// or scaling menus to 4:3 by default (r_scaleMenusTo43) is disabled,
+		// they only get scaled if they explicitly requested it with "scaleto43 1"
+		return (winFlags & WIN_SCALETO43) != 0;
+	} else {
+		// if it's a fullscreen menu and r_scaleMenusTo43 is enabled,
+		// they get scaled to 4:3 unless they explicitly disable it with "scaleto43 0"
+		return (winFlags & WIN_NO_SCALETO43) == 0;
+	}
+}
+
 const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _time, bool *updateVisuals ) {
 
 	time = _time;
@@ -366,7 +391,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 			const float realW = w;
 			const float realH = h;
 
-			if(r_scaleMenusTo43.GetBool()) {
+			if ( IsUserInterfaceScaledTo43(this) ) {
 				// in case we're scaling menus to 4:3, we need to take that into account
 				// when scaling the mouse events.
 				// no, we can't just call uiManagerLocal.dc.GetFixScaleForMenu() or sth like that,
