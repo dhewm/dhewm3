@@ -115,6 +115,17 @@ private:
 	int							time;
 
 	int							refs;
+
+	// DG: used so we can notify GUI scripts about changes in side padding.
+	//  Relevant if they use cstAnchor, so they can know how big padding on the left/right
+	//  or above/below a centered windowDef with full 640x480 size is.
+	//  Then they can adjust the sizes of windowDefs anchored to left/right or upper/lower borders
+	//  to fill up the gap
+	// if force=true, the variables are set no matter if the size has changed or not
+	// returns true if the windowSize has changed and thus the variables were updated, otherwise false
+	bool						MaybeSetPaddingWinVars(bool force=false);
+	int							lastGlWidth;
+	int							lastGlHeight;
 };
 
 class idUserInterfaceManagerLocal : public idUserInterfaceManager {
