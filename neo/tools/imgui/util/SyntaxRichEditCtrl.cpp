@@ -38,7 +38,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_imgui.h"
 
 namespace ImGuiTools {
-	
+
+const int MOUSEWHEEL_DELTA				= 120;
+
 const int AUTOCOMPLETE_WIDTH			= 200;
 const int AUTOCOMPLETE_HEIGHT			= 180;
 const int AUTOCOMPLETE_OFFSET			= 16;
@@ -1046,9 +1048,9 @@ void SyntaxRichEditCtrl::OnMouseWheel( float wheel ) {
 		int sel;
 
 		if ( wheel > 0  ) {
-			sel = Max( 0, autoCompleteListBoxSel - (int)( wheel / WHEEL_DELTA ) );
+			sel = Max( 0, autoCompleteListBoxSel - (int)( wheel / MOUSEWHEEL_DELTA ) );
 		} else {
-			sel = Min( autoCompleteListBoxFiltered.Num() - 1, autoCompleteListBoxSel - (int)( wheel / WHEEL_DELTA ) );
+			sel = Min( autoCompleteListBoxFiltered.Num() - 1, autoCompleteListBoxSel - (int)( wheel / MOUSEWHEEL_DELTA ) );
 		}
 		autoCompleteListBoxSel = sel;
 		return;

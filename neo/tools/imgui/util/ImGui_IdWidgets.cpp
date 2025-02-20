@@ -231,7 +231,7 @@ bool DeclNewSelect::Draw() {
 	bool canceled = false;
 
 	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 
 		if ( ImGui::InputTextStr( "File Name", &fileName ) ) {
 			// nop
@@ -348,7 +348,7 @@ bool DeclSelect::Draw() {
 	bool canceled = false;
 
 	if ( ImGui::BeginPopupModal( label, nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
-		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 
 		if ( ImGui::InputTextStr( "Name", &name ) ) {
 			// nop

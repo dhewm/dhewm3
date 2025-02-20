@@ -103,7 +103,7 @@ bool DeclNew::Draw() {
 	bool canceled = false;
 
 	if ( ImGui::BeginPopupModal( "New Declaration", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), errorText );
+		ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 
 		const char *previewValue = typeListSel == -1 ? NULL : typeList[typeListSel].c_str();
 
