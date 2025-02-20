@@ -178,6 +178,24 @@ private:
 	bool					focus;
 };
 
+class MessageBoxDialog {
+public:
+							MessageBoxDialog();
+
+	void					Start( const char *message, bool choice, bool error );
+	bool					Draw( const ImVec2 &pos, const ImVec2 &size );
+
+	ID_INLINE bool			Result() const { return acked; };
+
+private:
+	idStr					message;
+	bool					choice;
+	bool					error;
+	bool					visible;
+	bool					acked;
+	bool					focus;
+};
+
 } //namespace ImGuiTools
 
 

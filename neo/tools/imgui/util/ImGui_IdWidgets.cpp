@@ -622,6 +622,93 @@ FindReplaceDialog::command_t FindReplaceDialog::Draw( const ImVec2 &pos, const I
 	return command;
 }
 
+MessageBoxDialog::MessageBoxDialog()
+	: message()
+	, choice(false)
+	, error(false)
+	, visible(false)
+	, acked(false)
+	, focus(false)
+{
+}
+
+void MessageBoxDialog::Start( const char *_message, bool _choice, bool _error ) {
+	message = _message;
+	choice = _choice;
+	error = _error;
+	visible = true;
+	acked = false;
+	focus = true;
+}
+
+bool MessageBoxDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
+	if ( !visible ) {
+		return false;
+	}
+
+	ImGuiStyle &style = ImGui::GetStyle();
+
+	ImVec2 textSize = ImGui::CalcTextSize( message.c_str() );
+
+	float windowHeight =
+		style.ChildBorderSize * 2.0f +
+		style.WindowPadding.y * 2.0f +
+		ImGui::GetFrameHeight() * 2.0f +
+		textSize.y;
+
+	float windowWidth =
+		style.ChildBorderSize * 2.0f +
+		style.WindowPadding.x * 2.0f +
+		textSize.x;
+
+	ImVec2 oldCursorPos = ImGui::GetCursorPos();
+
+	bool interacted = false;
+
+	ImGui::SetCursorPos(ImVec2(
+		pos.x + size.x * 0.5f - windowWidth * 0.5f,
+		pos.y + size.y * 0.5f - windowHeight * 0.5f));
+
+	if ( ImGui::BeginChild( "Message", ImVec2( windowWidth, windowHeight ), ImGuiChildFlags_Borders ) ) {
+		if ( error ) {
+			ImGui::TextColored( ImVec4(1, 0, 0, 1), "%s", message.c_str() );
+		} else {
+			ImGui::TextUnformatted( message.c_str() );
+		}
+		
+		if ( focus ) {
+			ImGui::SetKeyboardFocusHere( -1 );
+			focus = false;
+		}
+
+		if ( choice ) {
+			if ( ImGui::Button( "Yes" ) ) {
+				acked = true;
+				interacted = true;
+				visible = false;
+			}
+			ImGui::SameLine();
+			if ( ImGui::Button( "No" ) ) {
+				acked = false;
+				interacted = true;
+				visible = false;
+			}
+		} else {
+			if ( ImGui::Button( "OK" ) ) {
+				visible = false;
+				interacted = true;
+				acked = true;
+			}
+		}
+	}
+	ImGui::EndChild();
+
+	ImGui::SetCursorPos( oldCursorPos );
+
+	return interacted;
+}
+
+
 } //namespace ImGuiTools
 
 

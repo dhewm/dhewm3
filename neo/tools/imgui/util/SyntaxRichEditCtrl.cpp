@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "SyntaxRichEditCtrl.h"
 
 #include "framework/FileSystem.h"
+#include "framework/Game.h"
 
 #include "sys/sys_imgui.h"
 
@@ -53,8 +54,17 @@ const COLORREF MULTILINE_COMMENT_BACK_COLOR		= SRE_COLOR_WHITE - 1;
 //#define IDC_LISTBOX_AUTOCOMPLETE		700
 //#define IDC_EDITBOX_FUNCPARMS			701
 
-bool SyntaxRichEditCtrlKeyPress( void* data, bool ctrl, bool shift, bool alt ) {
-	return reinterpret_cast<SyntaxRichEditCtrl*>(data)->OnChar(ctrl, shift, alt);
+void SyntaxRichEditCtrlKeyPress( void* data, bool ctrl, bool shift, bool alt, int chr ) {
+	reinterpret_cast<SyntaxRichEditCtrl*>(data)->OnChar(ctrl, shift, alt, chr);
+}
+bool SyntaxRichEditCtrlKeyDown( void *data ) {
+	return reinterpret_cast<SyntaxRichEditCtrl*>(data)->OnKeyDown();
+}
+bool SyntaxRichEditMouseButtonDown( void *data ) {
+	return reinterpret_cast<SyntaxRichEditCtrl*>(data)->OnMouseButtonDown();
+}
+bool SyntaxRichEditToolTipNotify( void *data, const char *ident, char *output, size_t outputLength ) {
+	return reinterpret_cast<SyntaxRichEditCtrl*>(data)->OnToolTipNotify( ident, output, outputLength );
 }
 
 static keyWord_t defaultKeyWords[] = {
@@ -93,6 +103,7 @@ SyntaxRichEditCtrl::SyntaxRichEditCtrl( void )
 	, errorText()
 	, findDlg()
 	, gotoDlg()
+	, msgBoxDlg()
 	, findStr()
 	, replaceStr()
 	, matchCase( false )
@@ -113,17 +124,16 @@ SyntaxRichEditCtrl::SyntaxRichEditCtrl( void )
 	stringColorIndex = 0;
 	stringColorLine = -1;
 	autoCompleteStart = -1;
+	autoCompleteLastKeyDownTime = 0;
+	autoCompleteInput.Clear();
+	autoCompleteListBoxPos = ImVec2( 0.0f, 0.0f );
+	autoCompleteListBoxSize = ImVec2( 0.0f, 0.0f );
 	funcParmToolTipStart = -1;
-	bracedSection[0] = -1;
-	bracedSection[1] = -1;
+	funcParmToolTipPos = ImVec2( 0.0f, 0.0f );
+	funcParmToolTipSize = ImVec2( 0.0f, 0.0f );
 	GetObjectMembers = NULL;
 	GetFunctionParms = NULL;
 	GetToolTip = NULL;
-	//mousePoint.x = 0;
-	//mousePoint.y = 0;
-	//keyWordToolTip = NULL;
-	//m_pchTip = NULL;
-	//m_pwchTip = NULL;
 }
 
 /*
@@ -133,9 +143,6 @@ SyntaxRichEditCtrl::~SyntaxRichEditCtrl
 */
 SyntaxRichEditCtrl::~SyntaxRichEditCtrl( void ) {
 	FreeKeyWordsFromFile();
-	//delete m_pchTip;
-	//delete m_pwchTip;
-	//m_DefaultFont->Release();
 }
 
 /*
@@ -174,36 +181,21 @@ SyntaxRichEditCtrl::Init
 */
 void SyntaxRichEditCtrl::Init( void ) {
 	scriptEdit = new TextEditor();
-	scriptEdit->SetKeyPress( this, SyntaxRichEditCtrlKeyPress );
-
-	/*
-	// get the Rich Edit ITextDocument to use the wonky TOM interface
-	IRichEditOle *ire = GetIRichEditOle();
-	IUnknown *iu = (IUnknown *)ire;
-	if ( iu == NULL || iu->QueryInterface( tom::IID_ITextDocument, (void**) &m_TextDoc ) != S_OK ) {
-		m_TextDoc = NULL;
-	}
-	*/
+	scriptEdit->SetHandlers( this, SyntaxRichEditCtrlKeyPress, SyntaxRichEditCtrlKeyDown, SyntaxRichEditMouseButtonDown, SyntaxRichEditToolTipNotify );
 
 	InitSyntaxHighlighting();
 
 	SetFocus();
 
-	//SetEventMask( GetEventMask() | ENM_CHANGE | ENM_KEYEVENTS | ENM_MOUSEEVENTS | ENM_PROTECTED );	// ENM_SCROLLEVENTS
-
-	//EnableToolTips( TRUE );
-	/*
 	// create auto complete list box
-	CRect rect( 0, 0, AUTOCOMPLETE_WIDTH, AUTOCOMPLETE_HEIGHT );
-	autoCompleteListBox.Create( WS_DLGFRAME | WS_VISIBLE | WS_VSCROLL | LBS_SORT | LBS_NOTIFY, rect, this, IDC_LISTBOX_AUTOCOMPLETE );
-	autoCompleteListBox.SetFont( GetParent()->GetFont() );
-	autoCompleteListBox.ShowWindow( FALSE );
-
+	autoCompleteListBoxPos = ImVec2( 0.0f, 0.0f );
+	autoCompleteListBoxSize = ImVec2( AUTOCOMPLETE_WIDTH, AUTOCOMPLETE_HEIGHT );
+	autoCompleteStart = -1;
+	
 	// create function parameter tool tip
-	funcParmToolTip.Create( WS_VISIBLE | WS_BORDER, rect, this, IDC_EDITBOX_FUNCPARMS );
-	funcParmToolTip.SetFont( GetParent()->GetFont() );
-	funcParmToolTip.ShowWindow( FALSE );
-	*/
+	funcParmToolTipPos = ImVec2( 0.0f, 0.0f );
+	funcParmToolTipSize = ImVec2( FUNCPARMTOOLTIP_WIDTH, FUNCPARMTOOLTIP_HEIGHT );
+	funcParmToolTipStart = -1;
 }
 
 void SyntaxRichEditCtrl::Draw()
@@ -239,6 +231,54 @@ void SyntaxRichEditCtrl::Draw()
 	}
 	FindReplaceDialog::command_t findReplaceResult = findDlg.Draw( scriptEditPos, scriptEditSize );
 	OnFindDialogMessage( findReplaceResult );
+
+	if ( msgBoxDlg.Draw( scriptEditPos, scriptEditSize ) ) {
+		SetFocus();
+	}
+
+	if ( autoCompleteStart >= 0 ) {
+		ImVec2 oldCursorPos = ImGui::GetCursorPos();
+		ImVec2 newPos = ImVec2( scriptEditPos.x + autoCompleteListBoxPos.x, scriptEditPos.y + autoCompleteListBoxPos.y );
+
+		ImGui::SetCursorPos( newPos );
+
+		if ( ImGui::BeginChild( "###AutoCompleteListBox", autoCompleteListBoxSize, ImGuiChildFlags_Borders ) ) {
+			for ( int i = 0; i < autoCompleteListBoxFiltered.Num(); i++ ) {
+				bool selected = ( i == autoCompleteListBoxSel );
+
+				ImGui::PushID( i );
+				if ( ImGui::Selectable( autoCompleteListBox[autoCompleteListBoxFiltered[i]].c_str(), selected ) ) {
+					// steal focus back from the auto-complete list box
+					SetFocus();
+
+					// insert text
+					autoCompleteListBoxSel = i;
+					AutoCompleteInsertText();
+					AutoCompleteHide();
+				}
+				ImGui::SetItemKeyOwner( ImGuiKey_MouseWheelY );
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+					ImGui::SetScrollHereY();
+				}
+				ImGui::PopID();
+			}
+		}
+		ImGui::EndChild();
+		ImGui::SetCursorPos( oldCursorPos );
+	}
+	if ( funcParmToolTipStart >= 0 ) {
+		ImVec2 oldCursorPos = ImGui::GetCursorPos();
+		ImVec2 newPos = ImVec2( scriptEditPos.x + funcParmToolTipPos.x, scriptEditPos.y + funcParmToolTipPos.y );
+
+		ImGui::SetCursorPos( newPos );
+
+		if ( ImGui::BeginChild( "###FuncParmToolTip", funcParmToolTipSize ) ) {
+			ImGui::TextUnformatted( funcParmToolTip.c_str() );
+		}
+		ImGui::EndChild();
+		ImGui::SetCursorPos( oldCursorPos );
+	}
 
 	ImGui::TextColored( ImVec4( 1, 0, 0, 1 ), "%s", errorText.c_str() );
 }
@@ -324,7 +364,7 @@ void SyntaxRichEditCtrl::SetKeyWords( const keyWord_t kws[] ) {
 		}
 	}
 
-	langDef.mTokenize = TextEditor::LanguageDefinition::C().mTokenize;
+	langDef.mTokenize = TextEditor::LanguageDefinition::CPlusPlus().mTokenize;
 
 	langDef.mCommentStart = "/*";
 	langDef.mCommentEnd = "*/";
@@ -422,25 +462,6 @@ void SyntaxRichEditCtrl::FreeKeyWordsFromFile( void ) {
 
 /*
 ================
-SyntaxRichEditCtrl::SetDefaultColor
-================
-*/
-void SyntaxRichEditCtrl::SetDefaultColor( const idVec3 &color ) {
-	defaultColor = color;
-}
-
-/*
-================
-SyntaxRichEditCtrl::SetCommentColor
-================
-*/
-void SyntaxRichEditCtrl::SetCommentColor( const idVec3 &color ) {
-	singleLineCommentColor = color;
-	multiLineCommentColor = color;
-}
-
-/*
-================
 SyntaxRichEditCtrl::SetStringColor
 ================
 */
@@ -451,15 +472,6 @@ void SyntaxRichEditCtrl::SetStringColor( const idVec3 &color, const idVec3 &altC
 	} else {
 		stringColor[1] = altColor;
 	}
-}
-
-/*
-================
-SyntaxRichEditCtrl::SetLiteralColor
-================
-*/
-void SyntaxRichEditCtrl::SetLiteralColor( const idVec3 &color ) {
-	literalColor = color;
 }
 
 /*
@@ -518,28 +530,6 @@ void SyntaxRichEditCtrl::EnableKeyWordAutoCompletion( bool enable ) {
 
 /*
 ================
-SyntaxRichEditCtrl::GetBackColor
-================
-*/
-idVec3 SyntaxRichEditCtrl::GetBackColor( int charIndex ) const {
-	/*tom::ITextRange* range;
-	tom::ITextFont *font;
-	long backColor;
-
-	m_TextDoc->Range( charIndex, charIndex, &range );
-	range->get_Font( &font );
-
-	font->get_BackColor( &backColor );
-
-	font->Release();
-	range->Release();
-
-	return backColor;*/
-	return vec3_origin;
-}
-
-/*
-================
 SyntaxRichEditCtrl::GetCursorPos
 ================
 */
@@ -592,18 +582,18 @@ SyntaxRichEditCtrl::AutoCompleteInsertText
 ================
 */
 void SyntaxRichEditCtrl::AutoCompleteInsertText( void ) {
-	/*long selStart, selEnd;
+	TextEditor::Coordinates sel;
 	int index;
 
-	index = autoCompleteListBox.GetCurSel();
-	if ( index >= 0 ) {
-		CString text;
-		autoCompleteListBox.GetText( index, text );
-		GetSel( selStart, selEnd );
-		selStart = autoCompleteStart;
-		SetSel( selStart, selEnd );
-		ReplaceSel( text, TRUE );
-	}*/
+	index = autoCompleteListBoxSel;
+	if ( index >= 0 && index < autoCompleteListBoxFiltered.Num() ) {
+		sel = scriptEdit->GetCursorPosition();
+		idStr text = autoCompleteListBox[autoCompleteListBoxFiltered[index]];
+
+		TextEditor::Coordinates autoCompleteCoords = TextEditor::Coordinates( sel.mLine, autoCompleteStart );
+		scriptEdit->SetSelection( autoCompleteCoords, sel );
+		scriptEdit->ReplaceSelection( text.c_str() );
+	}
 }
 
 /*
@@ -611,17 +601,29 @@ void SyntaxRichEditCtrl::AutoCompleteInsertText( void ) {
 SyntaxRichEditCtrl::AutoCompleteUpdate
 ================
 */
-void SyntaxRichEditCtrl::AutoCompleteUpdate( void ) {
-	/*long selStart, selEnd;
-	int index;
-	idStr text;
+void SyntaxRichEditCtrl::AutoCompleteUpdate() {
+	TextEditor::Coordinates sel, autoCompleteCoords;
+	int index = -1;
 
-	GetSel( selStart, selEnd );
-	GetText( text, autoCompleteStart, selStart );
-	index = autoCompleteListBox.FindString( -1, text );
-	if ( index >= 0 && index < autoCompleteListBox.GetCount() ) {
-		autoCompleteListBox.SetCurSel( index );
-	}*/
+	sel = scriptEdit->GetCursorPosition();
+
+	autoCompleteCoords = TextEditor::Coordinates( sel.mLine, autoCompleteStart );
+	autoCompleteInput = scriptEdit->GetText( autoCompleteCoords, sel ).c_str();
+
+	int i, num;
+
+	num = autoCompleteListBox.Num();
+	autoCompleteListBoxFiltered.Clear();
+	for( i = 0; i < num; i++ ) {
+		if ( !autoCompleteInput.Length() || autoCompleteListBox[ i ].Find( autoCompleteInput.c_str(), false ) >= 0 ) {
+			autoCompleteListBoxFiltered.Append(i);
+			if ( index == -1 ) {
+				index = autoCompleteListBoxFiltered.Num() - 1;
+			}
+		}
+	}
+
+	autoCompleteListBoxSel = index;
 }
 
 /*
@@ -629,25 +631,23 @@ void SyntaxRichEditCtrl::AutoCompleteUpdate( void ) {
 SyntaxRichEditCtrl::AutoCompleteShow
 ================
 */
-void SyntaxRichEditCtrl::AutoCompleteShow( int charIndex ) {
-	/*CPoint point;
-	CRect rect;
+void SyntaxRichEditCtrl::AutoCompleteShow( int columnIndex ) {
+	ImVec2 point;
+	float top, left;
 
-	autoCompleteStart = charIndex;
-	point = PosFromChar( charIndex );
-	GetClientRect( rect );
-	if ( point.y < rect.bottom - AUTOCOMPLETE_OFFSET - AUTOCOMPLETE_HEIGHT ) {
-		rect.top = point.y + AUTOCOMPLETE_OFFSET;
-		rect.bottom = point.y + AUTOCOMPLETE_OFFSET + AUTOCOMPLETE_HEIGHT;
+	autoCompleteStart = columnIndex;
+	point = scriptEdit->GetCursorScreenCoordinates();
+	
+	if ( point.y + AUTOCOMPLETE_HEIGHT + AUTOCOMPLETE_OFFSET < scriptEditSize.y ) {
+		top = point.y + AUTOCOMPLETE_OFFSET;
 	} else {
-		rect.top = point.y - AUTOCOMPLETE_HEIGHT;
-		rect.bottom = point.y;
+		top = point.y - AUTOCOMPLETE_HEIGHT - AUTOCOMPLETE_OFFSET;
 	}
-	rect.left = point.x;
-	rect.right = point.x + AUTOCOMPLETE_WIDTH;
-	autoCompleteListBox.MoveWindow( &rect );
-	autoCompleteListBox.ShowWindow( TRUE );
-	AutoCompleteUpdate();*/
+	left = point.x;
+	autoCompleteListBoxPos = ImVec2( left, top );
+	autoCompleteListBoxSize = ImVec2( AUTOCOMPLETE_WIDTH, AUTOCOMPLETE_HEIGHT );
+	
+	AutoCompleteUpdate();
 }
 
 /*
@@ -656,8 +656,8 @@ SyntaxRichEditCtrl::AutoCompleteHide
 ================
 */
 void SyntaxRichEditCtrl::AutoCompleteHide( void ) {
-	/*autoCompleteStart = -1;
-	autoCompleteListBox.ShowWindow( FALSE );*/
+	autoCompleteStart = -1;
+	autoCompleteInput.Clear();
 }
 
 /*
@@ -666,26 +666,24 @@ SyntaxRichEditCtrl::ToolTipShow
 ================
 */
 void SyntaxRichEditCtrl::ToolTipShow( int charIndex, const char *string ) {
-	/*CPoint point, p1, p2;
-	CRect rect;
+	ImVec2 point;
+	float top, left;
 
 	funcParmToolTipStart = charIndex;
-	funcParmToolTip.SetWindowText( string );
-	p1 = funcParmToolTip.PosFromChar( 0 );
-	p2 = funcParmToolTip.PosFromChar( strlen( string ) - 1 );
-	point = PosFromChar( charIndex );
-	GetClientRect( rect );
-	if ( point.y < rect.bottom - FUNCPARMTOOLTIP_OFFSET - FUNCPARMTOOLTIP_HEIGHT ) {
-		rect.top = point.y + FUNCPARMTOOLTIP_OFFSET;
-		rect.bottom = point.y + FUNCPARMTOOLTIP_OFFSET + FUNCPARMTOOLTIP_HEIGHT;
+	funcParmToolTip = string;
+	// set tooltip size based on text size
+	float sizeX = ImGui::GetFont()->CalcTextSizeA( ImGui::GetFontSize(), FLT_MAX, -1.0f, funcParmToolTip.c_str(), nullptr, nullptr).x;
+	float sizeY = Min( (float)FUNCPARMTOOLTIP_HEIGHT, ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ", nullptr, nullptr).y );
+	point = scriptEdit->GetCursorScreenCoordinates();
+
+	if ( point.y + sizeY + FUNCPARMTOOLTIP_OFFSET < scriptEditSize.y ) {
+		top = point.y + FUNCPARMTOOLTIP_OFFSET;
 	} else {
-		rect.top = point.y - FUNCPARMTOOLTIP_HEIGHT;
-		rect.bottom = point.y;
+		top = point.y - sizeY - FUNCPARMTOOLTIP_OFFSET;
 	}
-	rect.left = point.x;
-	rect.right = point.x + FUNCPARMTOOLTIP_WIDTH + p2.x - p1.x;
-	funcParmToolTip.MoveWindow( &rect );
-	funcParmToolTip.ShowWindow( TRUE );*/
+	left = point.x;
+	funcParmToolTipPos = ImVec2( left, top );
+	funcParmToolTipSize = ImVec2( sizeX, sizeY );
 }
 
 /*
@@ -695,137 +693,6 @@ SyntaxRichEditCtrl::ToolTipHide
 */
 void SyntaxRichEditCtrl::ToolTipHide( void ) {
 	funcParmToolTipStart = -1;
-	//funcParmToolTip.ShowWindow( FALSE );
-}
-
-/*
-================
-SyntaxRichEditCtrl::BracedSectionStart
-================
-*/
-bool SyntaxRichEditCtrl::BracedSectionStart( char braceStartChar, char braceEndChar ) {
-	/*long selStart, selEnd;
-	int brace, i;
-	idStr text;
-
-	GetSel( selStart, selEnd );
-	GetText( text, 0, GetTextLength() );
-
-	for ( brace = 1, i = selStart; i < text.Length(); i++ ) {
-		if ( text[i] == braceStartChar ) {
-			brace++;
-		} else if ( text[i] == braceEndChar ) {
-			brace--;
-			if ( brace == 0 ) {
-				break;
-			}
-		}
-	}
-	if ( brace == 0 ) {
-		bracedSection[0] = selStart - 1;
-		bracedSection[1] = i;
-		BracedSectionShow();
-	}
-
-	return ( brace == 0 );*/
-	return false;
-}
-
-/*
-================
-SyntaxRichEditCtrl::BracedSectionEnd
-================
-*/
-bool SyntaxRichEditCtrl::BracedSectionEnd( char braceStartChar, char braceEndChar ) {
-	/*long selStart, selEnd;
-	int brace, i;
-	idStr text;
-
-	GetSel( selStart, selEnd );
-	GetText( text, 0, GetTextLength() );
-
-	for ( brace = 1, i = Min( selStart-2, (long)text.Length()-1 ); i >= 0; i-- ) {
-		if ( text[i] == braceStartChar ) {
-			brace--;
-			if ( brace == 0 ) {
-				break;
-			}
-		} else if ( text[i] == braceEndChar ) {
-			brace++;
-		}
-	}
-
-	if ( brace == 0 ) {
-		bracedSection[0] = i;
-		bracedSection[1] = selStart - 1;
-		BracedSectionAdjustEndTabs();
-		BracedSectionShow();
-	}
-
-	return ( brace == 0 );*/
-	return false;
-}
-
-/*
-================
-SyntaxRichEditCtrl::BracedSectionAdjustEndTabs
-================
-*/
-void SyntaxRichEditCtrl::BracedSectionAdjustEndTabs( void ) {
-	/*int line, lineIndex, length, column, numTabs, i;
-	char buffer[1024];
-	idStr text;
-
-	line = LineFromChar( bracedSection[0] );
-	length = GetLine( line, buffer, sizeof( buffer ) );
-	for ( numTabs = 0; numTabs < length; numTabs++ ) {
-		if ( !idStr::CharIsTab( buffer[numTabs] ) ) {
-			break;
-		}
-		text.Append( '\t' );
-	}
-
-	line = LineFromChar( bracedSection[1] );
-	lineIndex = LineIndex( line );
-	length = GetLine( line, buffer, sizeof( buffer ) );
-	column = bracedSection[1] - lineIndex;
-	for ( i = 0; i < column; i++ ) {
-		if ( charType[buffer[i]] != CT_WHITESPACE ) {
-			return;
-		}
-	}
-
-	ReplaceText( lineIndex, lineIndex + column, text );
-
-	bracedSection[1] += numTabs - column;
-	SetSel( bracedSection[1]+1, bracedSection[1]+1 );*/
-}
-
-/*
-================
-SyntaxRichEditCtrl::BracedSectionShow
-================
-*/
-void SyntaxRichEditCtrl::BracedSectionShow( void ) {
-	/*for (int i = 0; i < 2; i++) {
-		if ( bracedSection[i] >= 0 ) {
-			SetColor( bracedSection[i], bracedSection[i] + 1, braceHighlightColor, DEFAULT_BACK_COLOR, true );
-		}
-	}*/
-}
-
-/*
-================
-SyntaxRichEditCtrl::BracedSectionHide
-================
-*/
-void SyntaxRichEditCtrl::BracedSectionHide( void ) {
-	/*for (int i = 0; i < 2; i++) {
-		if ( bracedSection[i] >= 0 ) {
-			SetColor( bracedSection[i], bracedSection[i] + 1, defaultColor, DEFAULT_BACK_COLOR, false );
-			bracedSection[i] = -1;
-		}
-	}*/
 }
 
 /*
@@ -834,151 +701,41 @@ SyntaxRichEditCtrl::GetNameBeforeCurrentSelection
 ================
 */
 bool SyntaxRichEditCtrl::GetNameBeforeCurrentSelection( idStr &name, int &charIndex ) const {
-	/*long selStart, selEnd;
-	int line, column, length;
-	char buffer[1024];
+	idStr buffer = scriptEdit->GetWordBeforeCursor().c_str();
 
-	GetSel( selStart, selEnd );
-	charIndex = selStart;
-	line = LineFromChar( selStart );
-	length = GetLine( line, buffer, sizeof( buffer ) );
-	column = selStart - LineIndex( line ) - 1;
-	do {
-		buffer[column--] = '\0';
-	} while( charType[buffer[column]] == CT_WHITESPACE );
-	for ( length = 0; length < column; length++ ) {
-		if ( charType[buffer[column-length-1]] != CT_NAME ) {
-			break;
-		}
-	}
-	if ( length > 0 ) {
-		name = buffer + column - length;
+	if ( buffer.Length() > 0 ) {
+		name = buffer;
+		charIndex = scriptEdit->GetCursorPosition().mColumn;
 		return true;
 	}
-	return false;*/
+
 	return false;
 }
 
 /*
 ================
-SyntaxRichEditCtrl::GetNameForMousePosition
+SyntaxRichEditCtrl::OnToolTipNotify
 ================
 */
-bool SyntaxRichEditCtrl::GetNameForMousePosition( idStr &name ) const {
-	/*int charIndex, startCharIndex, endCharIndex, type;
-	idStr text;
+bool SyntaxRichEditCtrl::OnToolTipNotify( const char *ident, char *toolTip, size_t toolTipSize ) {
+	idStr str;
+	idStr name = ident;
 
-	charIndex = CharFromPos( mousePoint );
+	toolTip[0] = '\0';
+	if ( GetToolTip == NULL || !GetToolTip( name.c_str(), str)) {
 
-	for ( startCharIndex = charIndex; startCharIndex > 0; startCharIndex-- ) {
-		GetText( text, startCharIndex - 1, startCharIndex );
-		type = charType[text[0]];
-		if ( type != CT_NAME && type != CT_NUMBER ) {
-			break;
+		int keyWordIndex = FindKeyWord( name.c_str(), name.Length() );
+
+		if ( keyWordIndex != -1 && keyWords[keyWordIndex].description[0] != '\0' ) {
+			str = keyWords[keyWordIndex].description;
+		} else {
+			str = name.c_str();
 		}
 	}
+	idStr::Copynz( toolTip, str.c_str(), toolTipSize );
 
-	for ( endCharIndex = charIndex; endCharIndex < GetTextLength(); endCharIndex++ ) {
-		GetText( text, endCharIndex, endCharIndex + 1 );
-		type = charType[text[0]];
-		if ( type != CT_NAME && type != CT_NUMBER ) {
-			break;
-		}
-	}
-
-	GetText( name, startCharIndex, endCharIndex );
-
-	return ( endCharIndex > startCharIndex );*/
-	return false;
+	return str.Length() > 0;
 }
-
-/*
-================
-SyntaxRichEditCtrl::OnToolHitTest
-================
-*//*
-INT_PTR SyntaxRichEditCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const {
-	CRichEditCtrl::OnToolHitTest( point, pTI );
-
-	pTI->hwnd = GetSafeHwnd();
-	pTI->uId = (UINT_PTR)GetSafeHwnd();
-	pTI->uFlags |= TTF_IDISHWND;
-	pTI->lpszText = LPSTR_TEXTCALLBACK;
-	pTI->rect = CRect( point, point );
-	pTI->rect.right += 100;
-	pTI->rect.bottom += 20;
-	return pTI->uId;
-}*/
-
-/*
-================
-CSyntaxRichEditCtrl::OnToolTipNotify
-================
-*//*
-BOOL CSyntaxRichEditCtrl::OnToolTipNotify( UINT id, NMHDR *pNMHDR, LRESULT *pResult ) {
-
-#ifdef _UNICODE
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-#else
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-#endif
-
-	*pResult = 0;
-
-	idStr name;
-
-	if ( GetNameForMousePosition( name ) ) {
-		CString toolTip;
-
-		if ( GetToolTip == NULL || !GetToolTip( name, toolTip ) ) {
-
-			int keyWordIndex = FindKeyWord( name, name.Length() );
-
-			if ( keyWordIndex != -1 && keyWords[keyWordIndex].description[0] != '\0' ) {
-				toolTip = keyWords[keyWordIndex].description;
-			} else {
-				toolTip = name.c_str();
-			}
-		}
-
-		AFX_MODULE_THREAD_STATE *state = AfxGetModuleThreadState();
-
-		// set max tool tip width to enable multi-line tool tips using "\r\n" for line breaks
-		state->m_pToolTip->SetMaxTipWidth( 500 );
-
-		// set the number of milliseconds after which the tool tip automatically disappears
-		state->m_pToolTip->SetDelayTime( TTDT_AUTOPOP, 5000 + toolTip.GetLength() * 50 );
-
-#ifndef _UNICODE
-		if( pNMHDR->code == TTN_NEEDTEXTA ) {
-			delete m_pchTip;
-			m_pchTip = new TCHAR[toolTip.GetLength() + 2];
-			lstrcpyn( m_pchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTW->lpszText = (WCHAR*)m_pchTip;
-		} else {
-			delete m_pwchTip;
-			m_pwchTip = new WCHAR[toolTip.GetLength() + 2];
-			_mbstowcsz( m_pwchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTW->lpszText = (WCHAR*)m_pwchTip;
-		}
-#else
-		if( pNMHDR->code == TTN_NEEDTEXTA ) {
-			delete m_pchTip;
-			m_pchTip = new TCHAR[toolTip.GetLength() + 2];
-			_wcstombsz( m_pchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTA->lpszText = (LPTSTR)m_pchTip;
-		} else {
-			delete m_pwchTip;
-			m_pwchTip = new WCHAR[toolTip.GetLength() + 2];
-			lstrcpyn( m_pwchTip, toolTip, toolTip.GetLength() + 1 );
-			pTTTA->lpszText = (LPTSTR) m_pwchTip;
-		}
-#endif
-
-		return TRUE;
-	}
-	return FALSE;
-}*/
 
 /*
 ================
@@ -1000,7 +757,7 @@ void SyntaxRichEditCtrl::OnEditFindNext() {
 	if ( scriptEdit->FindNext( findStr.c_str(), matchCase, matchWholeWords, searchForward ) ) {
 		SetFocus();
 	} else {
-		//AfxMessageBox( "The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0 );
+		msgBoxDlg.Start( "The specified text was not found.", false, false );
 	}
 
 }
@@ -1030,8 +787,7 @@ void SyntaxRichEditCtrl::OnFindDialogMessage( FindReplaceDialog::command_t comma
 		idStr selection = scriptEdit->GetSelectedText().c_str();
 
 		if ( selection.Length() && selection == findStr ) {
-			scriptEdit->DeleteSelection();
-			scriptEdit->InsertText( replaceStr.c_str() );
+			scriptEdit->ReplaceSelection( replaceStr.c_str() );
 		}
 
 		findStr = findDlg.GetFindString();
@@ -1048,13 +804,12 @@ void SyntaxRichEditCtrl::OnFindDialogMessage( FindReplaceDialog::command_t comma
 		matchCase = findDlg.MatchCase();
 		matchWholeWords = findDlg.MatchWholeWord();
 
-		/*int numReplaces = scriptEdit->ReplaceAll(findStr, replaceStr, matchCase, matchWholeWords);
+		int numReplaces = scriptEdit->ReplaceAll( findStr.c_str(), replaceStr.c_str(), matchCase, matchWholeWords );
 		if (numReplaces == 0) {
-			AfxMessageBox("The specified text was not found.", MB_OK | MB_ICONINFORMATION, 0);
+			msgBoxDlg.Start( "The specified text was not found.", false, false );
+		} else {
+			msgBoxDlg.Start( va( "Replaced %d occurances.", numReplaces ), false, false );
 		}
-		else {
-			AfxMessageBox(va("Replaced %d occurances.", numReplaces), MB_OK | MB_ICONINFORMATION, 0);
-		}*/
 		break;
 	}
 	case FindReplaceDialog::command_t::DONE:
@@ -1068,183 +823,126 @@ void SyntaxRichEditCtrl::OnFindDialogMessage( FindReplaceDialog::command_t comma
 
 /*
 ================
-SyntaxRichEditCtrl::OnGetDlgCode
-================
-*//*
-UINT CSyntaxRichEditCtrl::OnGetDlgCode() {
-	// get all keys, including tabs
-	return DLGC_WANTALLKEYS | DLGC_WANTARROWS | DLGC_WANTCHARS | DLGC_WANTMESSAGE | DLGC_WANTTAB;
-}*/
-
-/*
-================
 SyntaxRichEditCtrl::OnKeyDown
 ================
-*//*
-void CSyntaxRichEditCtrl::OnKeyDown( UINT nKey, UINT nRepCnt, UINT nFlags ) {
-
-	if ( m_TextDoc == NULL ) {
-		return;
-	}
+*/
+bool SyntaxRichEditCtrl::OnKeyDown() {
 
 	if ( autoCompleteStart >= 0 ) {
+		int timeEnd = Sys_Milliseconds();
+		int elapsed = timeEnd - autoCompleteLastKeyDownTime;
 		int sel;
+		int keydownTime = 200;
 
-		switch( nKey ) {
-			case VK_UP: {		// up arrow
-				sel = Max( 0, autoCompleteListBox.GetCurSel() - 1 );
-				autoCompleteListBox.SetCurSel( sel );
-				return;
+		if ( ImGui::IsKeyDown( ImGuiKey_UpArrow ) ) {
+			if ( elapsed > keydownTime ) {
+				sel = Max( 0, autoCompleteListBoxSel - 1 );
+				autoCompleteListBoxSel = sel;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_DOWN: {		// down arrow
-				sel = Min( autoCompleteListBox.GetCount() - 1, autoCompleteListBox.GetCurSel() + 1 );
-				autoCompleteListBox.SetCurSel( sel );
-				return;
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_DownArrow ) ) {
+			if ( elapsed > keydownTime ) {
+				sel = Min( autoCompleteListBoxFiltered.Num() - 1, autoCompleteListBoxSel + 1 );
+				autoCompleteListBoxSel = sel;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_PRIOR: {	// page up key
-				sel = Max( 0, autoCompleteListBox.GetCurSel() - 10 );
-				autoCompleteListBox.SetCurSel( sel );
-				return;
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_PageUp ) ) {
+			if ( elapsed > keydownTime ) {
+				sel = Max( 0, autoCompleteListBoxSel - 10 );
+				autoCompleteListBoxSel = sel;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_NEXT: {		// page down key
-				sel = Min( autoCompleteListBox.GetCount() - 1, autoCompleteListBox.GetCurSel() + 10 );
-				autoCompleteListBox.SetCurSel( sel );
-				return;
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_PageDown ) ) {
+			if ( elapsed > keydownTime ) {
+				sel = Min( autoCompleteListBoxFiltered.Num() - 1, autoCompleteListBoxSel + 10 );
+				autoCompleteListBoxSel = sel;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_HOME: {		// home key
-				autoCompleteListBox.SetCurSel( 0 );
-				return;
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_Home ) ) {
+			if ( elapsed > keydownTime ) {
+				autoCompleteListBoxSel = 0;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_END: {
-				autoCompleteListBox.SetCurSel( autoCompleteListBox.GetCount() - 1 );
-				return;
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_End ) ) {
+			if ( elapsed > keydownTime ) {
+				autoCompleteListBoxSel = autoCompleteListBoxFiltered.Num() - 1;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_RETURN:		// enter key
-			case VK_TAB: {		// tab key
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_Enter ) || ImGui::IsKeyDown( ImGuiKey_Tab ) ) {
+			if ( elapsed > keydownTime ) {
 				AutoCompleteInsertText();
 				AutoCompleteHide();
-				return;
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
-			case VK_LEFT:		// left arrow
-			case VK_RIGHT:		// right arrow
-			case VK_INSERT:		// insert key
-			case VK_DELETE: {	// delete key
-				return;
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_Escape ) ) {
+			if ( elapsed > keydownTime ) {
+				AutoCompleteHide();
+				autoCompleteLastKeyDownTime = timeEnd;
 			}
+			return true;
+		}
+		if ( ImGui::IsKeyDown( ImGuiKey_LeftArrow )
+			|| ImGui::IsKeyDown( ImGuiKey_RightArrow )
+			|| ImGui::IsKeyDown( ImGuiKey_Insert )
+			|| ImGui::IsKeyDown( ImGuiKey_Delete ) ) {
+			if ( elapsed > keydownTime ) {
+				autoCompleteLastKeyDownTime = timeEnd;
+			}
+			return true;
 		}
 	}
 
-	BracedSectionHide();
+	if ( ImGui::IsKeyChordPressed( ImGuiKey_ModCtrl | ImGuiKey_G ) ) {
+		OnEditGoToLine();
 
-	switch( nKey ) {
-		case VK_TAB: {		// multi-line tabs
-			long selStart, selEnd;
+		return true;
+	} else if ( ImGui::IsKeyChordPressed( ImGuiKey_ModCtrl | ImGuiKey_F ) ) {
+		idStr selText = scriptEdit->GetSelectedText().c_str();
 
-			GetSel( selStart, selEnd );
+		findDlg.Start( selText, false );
 
-			// if multiple lines are selected add tabs to, or remove tabs from all of them
-			if ( selEnd > selStart ) {
-				CString text;
+		return true;
+	} else if ( ImGui::IsKeyChordPressed( ImGuiKey_ModCtrl | ImGuiKey_H ) ) {
+		idStr selText = scriptEdit->GetSelectedText().c_str();
 
-				text = GetSelText();
+		findDlg.Start( selText, true );
 
-				if ( GetAsyncKeyState( VK_SHIFT ) & 0x8000 ) {
-					if ( idStr::CharIsTab( text[0] ) ) {
-						text.Delete( 0, 1 );
-					}
-					for ( int i = 0; i < text.GetLength() - 2; i++ ) {
-						if ( idStr::CharIsNewLine( text[i] ) ) {
-							do {
-								i++;
-							} while( idStr::CharIsNewLine( text[i] ) );
-							if ( idStr::CharIsTab( text[i] ) ) {
-								text.Delete( i, 1 );
-							}
-						}
-					}
-				} else {
-					text.Insert( 0, '\t' );
-					for ( int i = 0; i < text.GetLength() - 1; i++ ) {
-						if ( idStr::CharIsNewLine( text[i] ) ) {
-							do {
-								i++;
-							} while( idStr::CharIsNewLine( text[i] ) );
-							text.Insert( i, '\t' );
-						}
-					}
-				}
-
-				ReplaceSel( text, TRUE );
-				SetSel( selStart, selStart + text.GetLength() );
-			} else {
-				ReplaceSel( "\t", TRUE );
-			}
-			return;
-		}
-		case VK_RETURN: {	// auto-indentation
-			long selStart, selEnd;
-			int line, length, numTabs, i;
-			char buffer[1024];
-			idStr text;
-
-			GetSel( selStart, selEnd );
-			line = LineFromChar( selStart );
-			length = GetLine( line, buffer, sizeof( buffer ) );
-			for ( numTabs = 0; numTabs < length; numTabs++ ) {
-				if ( !idStr::CharIsTab( buffer[numTabs] ) ) {
-					break;
-				}
-			}
-			bool first = true;
-			for ( i = numTabs; i < length; i++ ) {
-				if ( buffer[i] == '{' ) {
-					numTabs++;
-					first = false;
-				} else if ( buffer[i] == '}' && !first ) {
-					numTabs--;
-				}
-			}
-			text = "\r\n";
-			for ( i = 0; i < numTabs; i++ ) {
-				text.Append( '\t' );
-			}
-			ReplaceSel( text, TRUE );
-			return;
-		}
+		return true;
 	}
 
-	m_TextDoc->Freeze( NULL );
-
-	CRichEditCtrl::OnKeyDown( nKey, nRepCnt, nFlags );
-
-	UpdateVisibleRange();
-
-	m_TextDoc->Unfreeze( NULL );
-}*/
+	return false;
+}
 
 /*
 ================
 SyntaxRichEditCtrl::OnChar
 ================
 */
-bool SyntaxRichEditCtrl::OnChar( bool ctrl, bool shift, bool alt ) {
-	/*
-	if ( nChar == VK_TAB ) {
-		return;	// tab is handle in OnKeyDown
-	}
-
-	CRichEditCtrl::OnChar( nChar, nRepCnt, nFlags );
-
+void SyntaxRichEditCtrl::OnChar( bool ctrl, bool shift, bool alt, int nChar ) {
 	// if the auto-complete list box is up
 	if ( autoCompleteStart >= 0 ) {
-		long selStart, selEnd;
+		TextEditor::Coordinates sel;
 
 		if ( charType[nChar] == CT_NAME ) {
 			AutoCompleteUpdate();
 			return;
-		} else if ( nChar == VK_BACK ) {
-			GetSel( selStart, selEnd );
-			if ( selStart > autoCompleteStart ) {
+		} else if ( nChar == 0x08/*backspace*/) {
+			sel = scriptEdit->GetCursorPosition();
+			if ( sel.mColumn > autoCompleteStart ) {
 				AutoCompleteUpdate();
 			} else {
 				AutoCompleteHide();
@@ -1257,13 +955,13 @@ bool SyntaxRichEditCtrl::OnChar( bool ctrl, bool shift, bool alt ) {
 
 	// if the function parameter tool tip is up
 	if ( funcParmToolTipStart >= 0 ) {
-		long selStart, selEnd;
+		TextEditor::Coordinates sel;
 
-		if ( nChar == ')' || nChar == VK_ESCAPE ) {
+		if ( nChar == ')' || nChar == 0x1b/*escape*/ ) {
 			ToolTipHide();
-		} else if ( nChar == VK_BACK ) {
-			GetSel( selStart, selEnd );
-			if ( selStart < funcParmToolTipStart ) {
+		} else if ( nChar == 0x08/*backspace*/ ) {
+			sel = scriptEdit->GetCursorPosition();
+			if ( sel.mColumn < funcParmToolTipStart ) {
 				ToolTipHide();
 			}
 		}
@@ -1271,276 +969,90 @@ bool SyntaxRichEditCtrl::OnChar( bool ctrl, bool shift, bool alt ) {
 
 	// show keyword auto-completion
 	if ( keyWordAutoCompletion && charType[nChar] == CT_NAME && funcParmToolTipStart < 0 ) {
-		long selStart, selEnd;
+		TextEditor::Coordinates sel;
 		int line, column, length, i;
-		char buffer[1024];
 
-		GetSel( selStart, selEnd );
-		line = LineFromChar( selStart );
-		length = GetLine( line, buffer, sizeof( buffer ) );
-		column = selStart - LineIndex( line );
-		if ( column <= 1 || charType[buffer[column-2]] == CT_WHITESPACE ) {
-			if ( column >= length-1 || charType[buffer[column]] == CT_WHITESPACE ) {
+		sel = scriptEdit->GetCursorPosition();
+		
+		line = sel.mLine;
+		column = sel.mColumn;
+		length = scriptEdit->GetCurrentLineText().length();
+		
+		if ( column <= 1 || scriptEdit->PeekLeftIsWhiteSpace( 2 ) ) {
+			if ( column >= length-1 || scriptEdit->PeekLeftIsWhiteSpace( 0 ) ) {
 
-				autoCompleteListBox.ResetContent();
+				autoCompleteListBox.Clear();
 				for ( i = 0; keyWords[i].keyWord; i++ ) {
-					autoCompleteListBox.AddString( keyWords[i].keyWord );
+					autoCompleteListBox.Append( keyWords[i].keyWord );
 				}
-				AutoCompleteShow( selStart - 1 );
+				autoCompleteListBox.Sort();
+				AutoCompleteShow( sel.mColumn + 1 );
 			}
 		}
 		return;
 	}
 
-	// highlight braced sections
-	if ( nChar == '{' ) {
-		BracedSectionStart( '{', '}' );
-	} else if ( nChar == '}' ) {
-		BracedSectionEnd( '{', '}' );
-	} else if ( nChar == '(' ) {
-		BracedSectionStart( '(', ')' );
-	} else if ( nChar == ')' ) {
-		BracedSectionEnd( '(', ')' );
-	} else if ( nChar == '[' ) {
-		BracedSectionStart( '[', ']' );
-	} else if ( nChar == ']' ) {
-		BracedSectionEnd( '[', ']' );
-	} else if ( nChar == '<' ) {
-		BracedSectionStart( '<', '>' );
-	} else if ( nChar == '>' ) {
-		BracedSectionEnd( '<', '>' );
-	}
-
 	// show object member auto-completion
 	if ( nChar == '.' && GetObjectMembers && funcParmToolTipStart < 0 ) {
 		int charIndex;
-		CString name;
+		idStr name;
 
 		if ( GetNameBeforeCurrentSelection( name, charIndex ) ) {
-			autoCompleteListBox.ResetContent();
+			autoCompleteListBox.Clear();
 			if ( GetObjectMembers( name, autoCompleteListBox ) ) {
 				AutoCompleteShow( charIndex );
 			}
 		}
 		return;
 	}
-
+	
 	// show function parameter tool tip
 	if ( nChar == '(' && GetFunctionParms ) {
 		int charIndex;
-		CString name;
+		idStr name;
 
 		if ( GetNameBeforeCurrentSelection( name, charIndex ) ) {
-			CString parmString;
+			idStr parmString;
 			if ( GetFunctionParms( name, parmString ) ) {
 				ToolTipShow( charIndex, parmString );
 			}
 		}
 		return;
-	}*/
-	bool result = true;
-
-	if ( ctrl && ImGui::IsKeyPressed( ImGuiKey_G ) ) {
-		OnEditGoToLine();
-	} else if ( ctrl && ImGui::IsKeyPressed( ImGuiKey_F ) ) {
-		idStr selText = scriptEdit->GetSelectedText().c_str();
-
-		findDlg.Start( selText, false );
-	} else if ( ctrl && ImGui::IsKeyPressed( ImGuiKey_H ) ) {
-		idStr selText = scriptEdit->GetSelectedText().c_str();
-
-		findDlg.Start( selText, true );
 	}
-
-	return result;
 }
 
 /*
 ================
-SyntaxRichEditCtrl::OnLButtonDown
+SyntaxRichEditCtrl::OnMouseButtonDown
 ================
-*//*
-void SyntaxRichEditCtrl::OnLButtonDown( UINT nFlags, CPoint point ) {
+*/
+bool SyntaxRichEditCtrl::OnMouseButtonDown() {
 
-	if ( autoCompleteStart >= 0 ) {
+	if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) && autoCompleteStart >= 0 ) {
 		AutoCompleteHide();
+		return true;
 	}
 
-	BracedSectionHide();
-
-	CRichEditCtrl::OnLButtonDown( nFlags, point );
-}*/
+	return false;
+}
 
 /*
 ================
 SyntaxRichEditCtrl::OnMouseWheel
 ================
-*//*
-BOOL SyntaxRichEditCtrl::OnMouseWheel( UINT nFlags, short zDelta, CPoint pt ) {
+*/
+void SyntaxRichEditCtrl::OnMouseWheel( float wheel ) {
 	if ( autoCompleteStart >= 0 ) {
 		int sel;
 
-		if ( zDelta > 0  ) {
-			sel = Max( 0, autoCompleteListBox.GetCurSel() - ( zDelta / WHEEL_DELTA ) );
+		if ( wheel > 0  ) {
+			sel = Max( 0, autoCompleteListBoxSel - (int)( wheel / WHEEL_DELTA ) );
 		} else {
-			sel = Min( autoCompleteListBox.GetCount() - 1, autoCompleteListBox.GetCurSel() - ( zDelta / WHEEL_DELTA ) );
+			sel = Min( autoCompleteListBoxFiltered.Num() - 1, autoCompleteListBoxSel - (int)( wheel / WHEEL_DELTA ) );
 		}
-		autoCompleteListBox.SetCurSel( sel );
-		return TRUE;
-	}
-
-	m_TextDoc->Freeze( NULL );
-
-	LineScroll( -3 * ( (int) zDelta ) / WHEEL_DELTA, 0 );
-
-	UpdateVisibleRange();
-
-	m_TextDoc->Unfreeze( NULL );
-
-	return TRUE;
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnMouseMove
-================
-*//*
-void SyntaxRichEditCtrl::OnMouseMove( UINT nFlags, CPoint point ) {
-	CRichEditCtrl::OnMouseMove( nFlags, point );
-
-	if ( point != mousePoint ) {
-		mousePoint = point;
-
-		// remove tool tip and activate the tool tip control, otherwise
-		// tool tips stop working until the mouse moves over another window first
-		AFX_MODULE_THREAD_STATE *state = AfxGetModuleThreadState();
-		state->m_pToolTip->Pop();
-		state->m_pToolTip->Activate( TRUE );
-	}
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnSize
-================
-*//*
-void SyntaxRichEditCtrl::OnSize( UINT nType, int cx, int cy ) {
-	m_TextDoc->Freeze( NULL );
-
-	CRichEditCtrl::OnSize( nType, cx, cy );
-
-	m_TextDoc->Unfreeze( NULL );
-
-	UpdateVisibleRange();
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnVScroll
-================
-*//*
-void SyntaxRichEditCtrl::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar ) {
-	m_TextDoc->Freeze( NULL );
-
-	CRichEditCtrl::OnVScroll( nSBCode, nPos, pScrollBar );
-
-	SetFocus();
-
-	UpdateVisibleRange();
-
-	m_TextDoc->Unfreeze( NULL );
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnProtected
-================
-*//*
-void CSyntaxRichEditCtrl::OnProtected( NMHDR *pNMHDR, LRESULT *pResult ) {
-	ENPROTECTED* pEP = (ENPROTECTED*)pNMHDR;
-
-	*pResult = 0;
-
-	updateRange = pEP->chrg;
-
-	switch( pEP->msg ) {
-		case WM_MOUSEMOVE: {
-			break;
-		}
-		case WM_SETTEXT: {
-			updateRange.cpMin = pEP->chrg.cpMin;
-			updateRange.cpMax = pEP->chrg.cpMin + strlen( (LPCTSTR) pEP->lParam );
-			break;
-		}
-		case WM_CUT: {
-			break;
-		}
-		case WM_COPY: {
-			break;
-		}
-		case WM_PASTE: {
-			break;
-		}
-		case WM_CLEAR: {
-			break;
-		}
-		case WM_UNDO: {
-			break;
-		}
-		default: {
-			break;
-		}
-	}
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnChange
-================
-*//*
-void SyntaxRichEditCtrl::OnChange() {
-	long selStart, selEnd;
-
-	if ( !updateSyntaxHighlighting ) {
+		autoCompleteListBoxSel = sel;
 		return;
 	}
-
-	GetSel( selStart, selEnd );
-	selStart = Min( selStart, updateRange.cpMin );
-	selEnd = Max( selEnd, updateRange.cpMax );
-
-	HighlightSyntax( selStart, selEnd );
-
-	// send EN_CHANGE notification to parent window
-	NMHDR pNMHDR;
-	pNMHDR.hwndFrom = GetSafeHwnd();
-	pNMHDR.idFrom = GetDlgCtrlID();
-	pNMHDR.code = EN_CHANGE;
-	GetParent()->SendMessage( WM_NOTIFY, ( EN_CHANGE << 16 ) | GetDlgCtrlID(), (LPARAM)&pNMHDR );
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnAutoCompleteListBoxChange
-================
-*//*
-void SyntaxRichEditCtrl::OnAutoCompleteListBoxChange() {
-	// steal focus back from the auto-complete list box
-	SetFocus();
-}*/
-
-/*
-================
-SyntaxRichEditCtrl::OnAutoCompleteListBoxDblClk
-================
-*//*
-void SyntaxRichEditCtrl::OnAutoCompleteListBoxDblClk() {
-	// steal focus back from the auto-complete list box
-	SetFocus();
-
-	// insert current auto-complete selection
-	AutoCompleteInsertText();
-	AutoCompleteHide();
-}*/
+}
 
 }

@@ -50,6 +50,11 @@ TextEditor::TextEditor()
 	, mLastClick(-1.0f)
 	, mKeyPressData(NULL)
 	, mKeyPressHandler(NULL)
+	, mKeyDownHandler(NULL)
+	, mMouseButtonDownHandler(NULL)
+	, mGetToolTipHandler(NULL)
+	, mSetFocus(false)
+	, mCursorScreenPos(0.0f, 0.0f)
 {
 	SetPalette(GetDarkPalette());
 	SetLanguageDefinition(LanguageDefinition::HLSL());
@@ -66,9 +71,12 @@ void TextEditor::Focus() {
 	mSetFocus = true;
 }
 
-void TextEditor::SetKeyPress(void* data, textEditKeyPress_t keyPress) {
+void TextEditor::SetHandlers(void* data, textEditKeyPress_t keyPress, textEditKeyDown_t keyDown, textEditMouseButtonDown_t mouseButtonDown, textEditGetToolTip_t getToolTip) {
 	mKeyPressData = data;
 	mKeyPressHandler = keyPress;
+	mKeyDownHandler = keyDown;
+	mMouseButtonDownHandler = mouseButtonDown;
+	mGetToolTipHandler = getToolTip;
 }
 
 void TextEditor::SetLanguageDefinition(const LanguageDefinition & aLanguageDef)
@@ -671,6 +679,16 @@ TextEditor::Line& TextEditor::InsertLine(int aIndex)
 	return result;
 }
 
+std::string TextEditor::GetWordBeforeCursor() const
+{
+	auto c = GetCursorPosition();
+	if (c.mColumn > 2)
+	{
+		c.mColumn -= 2; // remove .
+	}
+	return GetWordAt(c);
+}
+
 std::string TextEditor::GetWordUnderCursor() const
 {
 	auto c = GetCursorPosition();
@@ -730,7 +748,11 @@ void TextEditor::HandleKeyboardInputs()
 		io.WantCaptureKeyboard = true;
 		io.WantTextInput = true;
 
-		if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Z))
+		if (mKeyDownHandler && mKeyDownHandler(mKeyPressData))
+		{
+			// already handled
+		}
+		else if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Z))
 			Undo();
 		else if (!IsReadOnly() && !ctrl && !shift && alt && ImGui::IsKeyPressed(ImGuiKey_Backspace))
 			Undo();
@@ -759,7 +781,14 @@ void TextEditor::HandleKeyboardInputs()
 		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Delete))
 			Delete();
 		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Backspace))
+		{
 			Backspace();
+			if (mKeyPressHandler)
+			{
+				// allow the autosuggest to react to this event
+				mKeyPressHandler(mKeyPressData, ctrl, shift, alt, 0x08);
+			}
+		}
 		else if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Insert))
 			mOverwrite ^= true;
 		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Insert))
@@ -780,8 +809,6 @@ void TextEditor::HandleKeyboardInputs()
 			EnterCharacter('\n', false);
 		else if (!IsReadOnly() && !ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_Tab))
 			EnterCharacter('\t', shift);
-		else if (mKeyPressHandler && !mKeyPressHandler(mKeyPressData, ctrl, shift, alt))
-			return;
 
 		if (!IsReadOnly() && !io.InputQueueCharacters.empty())
 		{
@@ -805,6 +832,11 @@ void TextEditor::HandleMouseInputs()
 
 	if (ImGui::IsWindowHovered())
 	{
+		if (mMouseButtonDownHandler && mMouseButtonDownHandler(mKeyPressData))
+		{
+			return;
+		}
+
 		if (!shift && !alt)
 		{
 			auto click = ImGui::IsMouseClicked(0);
@@ -995,6 +1027,8 @@ void TextEditor::Render()
 				}
 
 				// Render the cursor
+				float cx = TextDistanceToLineStart(mState.mCursorPosition);
+				mCursorScreenPos = ImVec2(textScreenPos.x + cx - cursorScreenPos.x + scrollX, lineStartScreenPos.y - cursorScreenPos.y - scrollY);
 				if (focused)
 				{
 					auto timeEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -1003,7 +1037,6 @@ void TextEditor::Render()
 					{
 						float width = 1.0f;
 						auto cindex = GetCharacterIndex(mState.mCursorPosition);
-						float cx = TextDistanceToLineStart(mState.mCursorPosition);
 
 						if (mOverwrite && cindex < (int)line.size())
 						{
@@ -1107,21 +1140,30 @@ void TextEditor::Render()
 			auto id = GetWordAt(ScreenPosToCoordinates(ImGui::GetMousePos()));
 			if (!id.empty())
 			{
-				auto it = mLanguageDefinition.mIdentifiers.find(id);
-				if (it != mLanguageDefinition.mIdentifiers.end())
-				{
+				char tip[512];
+				if (mGetToolTipHandler && mGetToolTipHandler(mKeyPressData, id.c_str(), tip, sizeof(tip))) {
 					ImGui::BeginTooltip();
-					ImGui::TextUnformatted(it->second.mDeclaration.c_str());
+					ImGui::TextUnformatted(tip);
 					ImGui::EndTooltip();
 				}
 				else
 				{
-					auto pi = mLanguageDefinition.mPreprocIdentifiers.find(id);
-					if (pi != mLanguageDefinition.mPreprocIdentifiers.end())
+					auto it = mLanguageDefinition.mIdentifiers.find(id);
+					if (it != mLanguageDefinition.mIdentifiers.end())
 					{
 						ImGui::BeginTooltip();
-						ImGui::TextUnformatted(pi->second.mDeclaration.c_str());
+						ImGui::TextUnformatted(it->second.mDeclaration.c_str());
 						ImGui::EndTooltip();
+					}
+					else
+					{
+						auto pi = mLanguageDefinition.mPreprocIdentifiers.find(id);
+						if (pi != mLanguageDefinition.mPreprocIdentifiers.end())
+						{
+							ImGui::BeginTooltip();
+							ImGui::TextUnformatted(pi->second.mDeclaration.c_str());
+							ImGui::EndTooltip();
+						}
 					}
 				}
 			}
@@ -1157,7 +1199,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	if (mHandleKeyboardInputs)
 	{
 		HandleKeyboardInputs();
-		ImGui::PushAllowKeyboardFocus(true);
+		ImGui::PushItemFlag(ImGuiItemFlags_NoTabStop, false);
 	}
 
 	if (mHandleMouseInputs)
@@ -1167,7 +1209,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	Render();
 
 	if (mHandleKeyboardInputs)
-		ImGui::PopAllowKeyboardFocus();
+		ImGui::PopItemFlag();
 
 	if (!mIgnoreImGuiChild)
 		ImGui::EndChild();
@@ -1409,6 +1451,16 @@ void TextEditor::EnterCharacter(ImWchar aChar, bool aShift)
 
 	Colorize(coord.mLine - 1, 3);
 	EnsureCursorVisible();
+
+	if (mKeyPressHandler)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto shift = io.KeyShift;
+		auto ctrl = io.ConfigMacOSXBehaviors ? io.KeySuper : io.KeyCtrl;
+		auto alt = io.ConfigMacOSXBehaviors ? io.KeyCtrl : io.KeyAlt;
+
+		mKeyPressHandler(mKeyPressData, ctrl, shift, alt, aChar);
+	}
 }
 
 void TextEditor::SetReadOnly(bool aValue)
@@ -1521,6 +1573,35 @@ void TextEditor::DeleteSelection()
 	SetSelection(mState.mSelectionStart, mState.mSelectionStart);
 	SetCursorPosition(mState.mSelectionStart);
 	Colorize(mState.mSelectionStart.mLine, 1);
+}
+
+void TextEditor::ReplaceSelection(const char *text)
+{
+	if (IsReadOnly())
+		return;
+
+	if (text != nullptr && strlen(text) > 0)
+	{
+		UndoRecord u;
+		u.mBefore = mState;
+
+		if (HasSelection())
+		{
+			u.mRemoved = GetSelectedText();
+			u.mRemovedStart = mState.mSelectionStart;
+			u.mRemovedEnd = mState.mSelectionEnd;
+			DeleteSelection();
+		}
+
+		u.mAdded = text;
+		u.mAddedStart = GetActualCursorCoordinates();
+
+		InsertText(text);
+
+		u.mAddedEnd = GetActualCursorCoordinates();
+		u.mAfter = mState;
+		AddUndo(u);
+	}
 }
 
 void TextEditor::MoveUp(int aAmount, bool aSelect)
@@ -1646,6 +1727,37 @@ void TextEditor::MoveLeft(int aAmount, bool aSelect, bool aWordMode)
 	SetSelection(mInteractiveStart, mInteractiveEnd, aSelect && aWordMode ? SelectionMode::Word : SelectionMode::Normal);
 
 	EnsureCursorVisible();
+}
+
+bool TextEditor::PeekLeftIsWhiteSpace(int aAmount) {
+	if (mLines.empty())
+		return true;
+
+	auto oldPos = mState.mCursorPosition;
+	auto line = mState.mCursorPosition.mLine;
+	auto cindex = GetCharacterIndex(mState.mCursorPosition);
+
+	while (aAmount-- > 0)
+	{
+		if (cindex == 0)
+		{
+			return true;
+		}
+		else
+		{
+			--cindex;
+			if (cindex > 0)
+			{
+				if ((int)mLines.size() > line)
+				{
+					while (cindex > 0 && IsUTFSequence(mLines[line][cindex].mChar))
+						--cindex;
+				}
+			}
+		}
+	}
+
+	return isspace(mLines[line][cindex].mChar);
 }
 
 void TextEditor::MoveRight(int aAmount, bool aSelect, bool aWordMode)
@@ -1942,6 +2054,20 @@ bool TextEditor::FindNext(const char* find, bool matchCase, bool matchWholeWords
 	}
 
 	return found;
+}
+
+int TextEditor::ReplaceAll(const char* find, const char* replace, bool matchCase, bool matchWholeWords) {
+	int replacements;
+
+	replacements = 0;
+	SetCursorPosition(Coordinates(0, 0));
+	while ( FindNext( find, matchCase, matchWholeWords, true ) ) {
+		DeleteSelection();
+		InsertText(replace);
+		replacements++;
+	}
+
+	return replacements;
 }
 
 void TextEditor::Delete()
@@ -2360,12 +2486,16 @@ std::string TextEditor::GetSelectedText() const
 	return GetText(mState.mSelectionStart, mState.mSelectionEnd);
 }
 
-std::string TextEditor::GetCurrentLineText()const
+std::string TextEditor::GetCurrentLineText() const
 {
 	auto lineLength = GetLineMaxColumn(mState.mCursorPosition.mLine);
 	return GetText(
 		Coordinates(mState.mCursorPosition.mLine, 0),
 		Coordinates(mState.mCursorPosition.mLine, lineLength));
+}
+
+ImVec2 TextEditor::GetCursorScreenCoordinates() const {
+	return mCursorScreenPos;
 }
 
 void TextEditor::ProcessInputs()

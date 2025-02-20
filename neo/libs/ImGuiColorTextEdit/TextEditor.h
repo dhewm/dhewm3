@@ -13,7 +13,10 @@
 class TextEditor
 {
 public:
-	typedef bool (*textEditKeyPress_t)(void* data, bool ctrl, bool shift, bool alt);
+	typedef void (*textEditKeyPress_t)(void* data, bool ctrl, bool shift, bool alt, int chr);
+	typedef bool (*textEditKeyDown_t)(void* data);
+	typedef bool (*textEditMouseButtonDown_t)(void* data);
+	typedef bool (*textEditGetToolTip_t)(void* data, const char *identifier, char *tip, size_t tipLength);
 
 	enum class PaletteIndex
 	{
@@ -189,7 +192,7 @@ public:
 
 	void Focus();
 
-	void SetKeyPress(void *data, textEditKeyPress_t keyPress);
+	void SetHandlers(void *data, textEditKeyPress_t keyPress, textEditKeyDown_t keyDown, textEditMouseButtonDown_t mouseButtonDown, textEditGetToolTip_t getTooltip);
 
 	void SetLanguageDefinition(const LanguageDefinition& aLanguageDef);
 	const LanguageDefinition& GetLanguageDefinition() const { return mLanguageDefinition; }
@@ -209,6 +212,8 @@ public:
 
 	std::string GetSelectedText() const;
 	std::string GetCurrentLineText()const;
+
+	ImVec2 GetCursorScreenCoordinates() const;
 
 	int GetTotalLines() const { return (int)mLines.size(); }
 	bool IsOverwrite() const { return mOverwrite; }
@@ -242,9 +247,12 @@ public:
 	void InsertText(const std::string& aValue);
 	void InsertText(const char* aValue);
 
+	std::string GetWordBeforeCursor() const;
+
 	void MoveUp(int aAmount = 1, bool aSelect = false);
 	void MoveDown(int aAmount = 1, bool aSelect = false);
 	void MoveLeft(int aAmount = 1, bool aSelect = false, bool aWordMode = false);
+	bool PeekLeftIsWhiteSpace(int aAmount = 1);
 	void MoveRight(int aAmount = 1, bool aSelect = false, bool aWordMode = false);
 	void MoveTop(bool aSelect = false);
 	void MoveBottom(bool aSelect = false);
@@ -253,6 +261,7 @@ public:
 
 	bool SubstringMatch(const char* find, size_t findLen, bool matchCase, bool matchWholeWords, const TextEditor::Line line, int lineNum, size_t index);
 	bool FindNext(const char *str, bool matchCase, bool matchWholeWords, bool searchForward);
+	int ReplaceAll(const char *find, const char *replace, bool matchCase, bool matchWholeWords);
 
 	void SetSelectionStart(const Coordinates& aPosition);
 	void SetSelectionEnd(const Coordinates& aPosition);
@@ -261,6 +270,7 @@ public:
 	void SelectAll();
 	bool HasSelection() const;
 	void DeleteSelection();
+	void ReplaceSelection(const char* text);
 
 	void Copy();
 	void Cut();
@@ -283,6 +293,8 @@ public:
 	static const Palette& GetDarkPalette();
 	static const Palette& GetLightPalette();
 	static const Palette& GetRetroBluePalette();
+
+	std::string GetText(const Coordinates& aStart, const Coordinates& aEnd) const;
 
 private:
 	typedef std::vector<std::pair<std::regex, PaletteIndex>> RegexList;
@@ -336,7 +348,6 @@ private:
 	float TextDistanceToLineStart(const Coordinates& aFrom) const;
 	void EnsureCursorVisible();
 	int GetPageSize() const;
-	std::string GetText(const Coordinates& aStart, const Coordinates& aEnd) const;
 	Coordinates GetActualCursorCoordinates() const;
 	Coordinates SanitizeCoordinates(const Coordinates& aValue) const;
 	void Advance(Coordinates& aCoordinates) const;
@@ -411,5 +422,10 @@ private:
 
 	void* mKeyPressData;
 	textEditKeyPress_t mKeyPressHandler;
+	textEditKeyDown_t mKeyDownHandler;
+	textEditMouseButtonDown_t mMouseButtonDownHandler;
+	textEditGetToolTip_t mGetToolTipHandler;
+
 	bool mSetFocus;
+	ImVec2 mCursorScreenPos;
 };

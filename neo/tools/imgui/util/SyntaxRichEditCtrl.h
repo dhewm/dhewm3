@@ -101,12 +101,7 @@ public:
 	void					SetFunctionParmCallback( toolTipCallback_t callback );
 	void					SetToolTipCallback( toolTipCallback_t callback );
 
-	void					SetDefaultColor( const idVec3 &color );
-	void					SetCommentColor( const idVec3 &color );
 	void					SetStringColor( const idVec3 &color, const idVec3 &altColor = vec3_origin );
-	void					SetLiteralColor( const idVec3 &color );
-
-	idVec3					GetBackColor( int charIndex ) const;
 
 	void					GetCursorPos( int &line, int &column, int &character ) const;
 
@@ -118,21 +113,12 @@ public:
 	void					SetFocus();
 
 public:
-	//virtual INT_PTR			OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
-	bool					OnToolTipNotify();
-	//afx_msg UINT			OnGetDlgCode();
-	bool					OnChar( bool ctrl, bool shift, bool alt );
+	bool					OnToolTipNotify( const char *ident, char *tooltip, size_t tooltipSize );
+	void					OnChar( bool ctrl, bool shift, bool alt, int nChar );
+	bool					OnKeyDown();
+	bool					OnMouseButtonDown();
 private:
-	//afx_msg void			OnKeyDown(UINT nKey, UINT nRepCnt, UINT nFlags);
-	//afx_msg void			OnLButtonDown(UINT nFlags, CPoint point);
-	//afx_msg BOOL			OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-	//afx_msg void			OnMouseMove(UINT nFlags, CPoint point);
-	//afx_msg void			OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	//afx_msg void			OnSize(UINT nType, int cx, int cy);
-	//afx_msg void			OnProtected(NMHDR* pNMHDR, LRESULT* pResult);
-	//afx_msg void			OnChange();
-	//afx_msg void			OnAutoCompleteListBoxChange();
-	//afx_msg void			OnAutoCompleteListBoxDblClk();
+	void					OnMouseWheel(float wheel);
 
 	void					OnEditGoToLine();
 	void					OnEditFindNext();
@@ -146,6 +132,7 @@ private:
 	idStr					errorText;
 	FindReplaceDialog		findDlg;
 	GoToLineDialog			gotoDlg;
+	MessageBoxDialog		msgBoxDlg;
 	idStr					findStr;
 	idStr					replaceStr;
 	bool					matchCase;
@@ -193,19 +180,18 @@ private:
 	int						stringColorLine;
 
 	int						autoCompleteStart;
+	ImVec2					autoCompleteListBoxPos;
+	ImVec2					autoCompleteListBoxSize;
 	idStrList				autoCompleteListBox;
+	idList<int>				autoCompleteListBoxFiltered;
 	int						autoCompleteListBoxSel;
+	idStr					autoCompleteInput;
+	int						autoCompleteLastKeyDownTime;
 
 	int						funcParmToolTipStart;
+	ImVec2					funcParmToolTipPos;
+	ImVec2					funcParmToolTipSize;
 	idStr					funcParmToolTip;
-
-	int						bracedSection[2];
-	/*
-	CPoint					mousePoint;
-	CToolTipCtrl* keyWordToolTip;
-	TCHAR* m_pchTip;
-	WCHAR* m_pwchTip;
-	*/
 
 private:
 	void					InitSyntaxHighlighting( void );
@@ -215,21 +201,14 @@ private:
 	int						FindKeyWord( const char *keyWord, int length ) const;
 
 	bool					GetNameBeforeCurrentSelection( idStr &name, int &charIndex ) const;
-	bool					GetNameForMousePosition( idStr &name ) const;
 
 	void					AutoCompleteInsertText( void );
 	void					AutoCompleteUpdate( void );
-	void					AutoCompleteShow( int charIndex );
+	void					AutoCompleteShow( int columnIndex );
 	void					AutoCompleteHide( void );
 
 	void					ToolTipShow( int charIndex, const char *string );
 	void					ToolTipHide( void );
-
-	bool					BracedSectionStart( char braceStartChar, char braceEndChar );
-	bool					BracedSectionEnd( char braceStartChar, char braceEndChar );
-	void					BracedSectionAdjustEndTabs( void );
-	void					BracedSectionShow( void );
-	void					BracedSectionHide( void );
 };
 
 }

@@ -118,14 +118,7 @@ void ScriptEditor::Draw()
 
 				ImGui::EndMenu();
 			}
-			/*
-			if ( ImGui::BeginMenu( "Edit" ) ) {
-				if ( ImGui::MenuItem( "Go To...", "Ctrl+G" ) ) {
-					OnEditGoToLine();
-				}
 
-				ImGui::EndMenu();
-			}*/
 			ImGui::EndMenuBar();
 		}
 
