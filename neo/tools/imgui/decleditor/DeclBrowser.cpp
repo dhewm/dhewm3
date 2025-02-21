@@ -50,8 +50,8 @@ namespace ImGuiTools {
 bool DeclBrowserOnToolTipNotify( void *data, PathTreeNode *item, idStr &tooltipText ) {
 	return reinterpret_cast<DeclBrowser *>(data)->OnToolTipNotify( item, tooltipText );
 }
-void DeclBrowserOnTreeSelChanged( void *data ) {
-	reinterpret_cast<DeclBrowser *>(data)->OnTreeSelChanged();
+void DeclBrowserOnTreeSelChanged( void *data, bool doubleClicked ) {
+	reinterpret_cast<DeclBrowser *>(data)->OnTreeSelChanged( doubleClicked );
 }
 
 /*
@@ -494,7 +494,7 @@ bool DeclBrowser::OnToolTipNotify( PathTreeNode *item, idStr &tooltipText ) cons
 DeclBrowser::OnTreeSelChanged
 ================
 */
-void DeclBrowser::OnTreeSelChanged() {
+void DeclBrowser::OnTreeSelChanged( bool doubleClicked ) {
 
 	const idDecl *decl = GetSelectedDecl();
 	if ( decl ) {
@@ -506,6 +506,10 @@ void DeclBrowser::OnTreeSelChanged() {
 		GetDeclName( item, typeName, declName );
 		findNameEdit = va( "%s/%s*", typeName.c_str(), declName.c_str() );
 		statusBarText = va( "%d decls listed", numListedDecls );
+	}
+
+	if ( doubleClicked ) {
+		OnBnClickedEdit();
 	}
 }
 

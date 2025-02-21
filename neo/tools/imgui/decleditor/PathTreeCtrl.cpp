@@ -297,7 +297,11 @@ void PathTreeCtrl::DrawNode( PathTreeNode *node,  treeItemTooltip_t tooltip, tre
 	if ( ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() ) ) {
 		if ( ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() ) {
 			SelectItem( node );
-			selected( data );
+			selected( data, false );
+		}
+		if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) ) {
+			SelectItem( node );
+			selected( data, true );
 		}
 		if ( ImGui::IsItemHovered() ) {
 			tooltipText.Clear();

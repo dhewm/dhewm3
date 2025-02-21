@@ -74,26 +74,6 @@ static keyWord_t defaultKeyWords[] = {
 };
 
 /*
-BEGIN_MESSAGE_MAP(CSyntaxRichEditCtrl, CRichEditCtrl)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipNotify)
-	ON_WM_GETDLGCODE()
-	ON_WM_KEYDOWN()
-	ON_WM_CHAR()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_MOUSEWHEEL()
-	ON_WM_MOUSEMOVE()
-	ON_WM_VSCROLL()
-	ON_WM_SIZE()
-	ON_NOTIFY_REFLECT(EN_PROTECTED, OnProtected)
-	ON_CONTROL_REFLECT(EN_CHANGE, OnChange)
-	ON_LBN_SELCANCEL(IDC_LISTBOX_AUTOCOMPLETE, OnAutoCompleteListBoxChange)
-	ON_LBN_SELCHANGE(IDC_LISTBOX_AUTOCOMPLETE, OnAutoCompleteListBoxChange)
-	ON_LBN_DBLCLK(IDC_LISTBOX_AUTOCOMPLETE, OnAutoCompleteListBoxDblClk)
-END_MESSAGE_MAP()
-*/
-
-/*
 ================
 SyntaxRichEditCtrl::SyntaxRichEditCtrl
 ================
@@ -126,6 +106,7 @@ SyntaxRichEditCtrl::SyntaxRichEditCtrl( void )
 	stringColorIndex = 0;
 	stringColorLine = -1;
 	autoCompleteStart = -1;
+	autoCompleteListBoxSel = -1;
 	autoCompleteLastKeyDownTime = 0;
 	autoCompleteInput.Clear();
 	autoCompleteListBoxPos = ImVec2( 0.0f, 0.0f );
@@ -357,7 +338,7 @@ void SyntaxRichEditCtrl::SetKeyWords( const keyWord_t kws[] ) {
 	TextEditor::LanguageDefinition langDef;
 
 	for ( i = 0; i < numKeyWords; i++ ) {
-		if ( keyWords[i].description != '\0' ) {
+		if ( keyWords[i].description ) {
 			TextEditor::Identifier id;
 			id.mDeclaration = keyWords[i].description;
 			langDef.mIdentifiers.insert( std::make_pair( std::string( keyWords[i].keyWord ), id ) );
@@ -636,6 +617,10 @@ SyntaxRichEditCtrl::AutoCompleteShow
 void SyntaxRichEditCtrl::AutoCompleteShow( int columnIndex ) {
 	ImVec2 point;
 	float top, left;
+
+	if ( !autoCompleteListBox.Num() ) {
+		return;
+	}
 
 	autoCompleteStart = columnIndex;
 	point = scriptEdit->GetCursorScreenCoordinates();

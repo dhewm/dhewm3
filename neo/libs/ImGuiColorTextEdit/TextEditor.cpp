@@ -1975,7 +1975,7 @@ bool TextEditor::FindNext(const char* find, bool matchCase, bool matchWholeWords
 
 	bool found = false;
 
-	size_t findLen = std::strlen(find);
+	size_t findLen = strlen(find);
 
 	if (searchForward)
 	{

@@ -48,7 +48,7 @@ public:
 	void				ReloadDeclarations( void );
 	bool				CompareDecl( PathTreeNode *item, const char *name ) const;
 	bool				OnToolTipNotify( PathTreeNode *item, idStr &tooltipText ) const;
-	void				OnTreeSelChanged();
+	void				OnTreeSelChanged( bool doubleClicked );
 
 	void				Reset();
 	void				Draw();

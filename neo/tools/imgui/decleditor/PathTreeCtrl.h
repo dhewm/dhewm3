@@ -132,7 +132,7 @@ ID_INLINE void idPathTreeStack::Push( PathTreeNode *item, const char *name ) {
 
 typedef bool (*treeItemCompare_t)( void *data, PathTreeNode *item, const char *name );
 typedef bool (*treeItemTooltip_t)( void *data, PathTreeNode *item, idStr &tooltipText );
-typedef void (*treeItemSelected_t)( void *data );
+typedef void (*treeItemSelected_t)( void *data, bool doubleClick );
 
 class PathTreeCtrl {
 public:
