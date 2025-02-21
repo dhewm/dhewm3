@@ -2186,8 +2186,16 @@ void TextEditor::Backspace()
 			//	--cindex;
 
 			u.mRemovedStart = u.mRemovedEnd = GetActualCursorCoordinates();
-			--u.mRemovedStart.mColumn;
-			--mState.mCursorPosition.mColumn;
+			if (line[cindex].mChar == '\t')
+			{
+				u.mRemovedStart.mColumn -= mTabSize;
+				mState.mCursorPosition.mColumn -= mTabSize;
+			}
+			else
+			{
+				--u.mRemovedStart.mColumn;
+				--mState.mCursorPosition.mColumn;
+			}
 
 			while (cindex < line.size() && cend-- > cindex)
 			{
