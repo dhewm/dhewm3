@@ -2070,6 +2070,30 @@ int TextEditor::ReplaceAll(const char* find, const char* replace, bool matchCase
 	return replacements;
 }
 
+static int GetGlyphWidth(const TextEditor::Line& line, int cindex, int maxColumn, int tabSize)
+{
+	if (line[cindex].mChar == '\t')
+	{
+		int c = 0;
+		int i = 0;
+		int charWidth = 0;
+		for (; i < line.size() && i < cindex + 1 && c < maxColumn;)
+		{
+			if (line[i].mChar == '\t')
+				charWidth = ((c / tabSize) * tabSize + tabSize) - c;
+			else
+				charWidth = 1;
+			c += charWidth;
+			i += UTF8CharLength(line[i].mChar);
+		}
+		return charWidth;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
 void TextEditor::Delete()
 {
 	assert(!mReadOnly);
@@ -2186,24 +2210,9 @@ void TextEditor::Backspace()
 			//	--cindex;
 
 			u.mRemovedStart = u.mRemovedEnd = GetActualCursorCoordinates();
-			if (line[cindex].mChar == '\t')
-			{
-				if (pos.mColumn == GetLineMaxColumn(pos.mLine))
-				{
-					u.mRemovedStart.mColumn -= mTabSize - 1;
-					mState.mCursorPosition.mColumn -= mTabSize - 1;
-				}
-				else
-				{
-					u.mRemovedStart.mColumn -= mTabSize;
-					mState.mCursorPosition.mColumn -= mTabSize;
-				}
-			}
-			else
-			{
-				--u.mRemovedStart.mColumn;
-				--mState.mCursorPosition.mColumn;
-			}
+			int width = GetGlyphWidth(line, cindex, mState.mCursorPosition.mColumn, mTabSize);
+			u.mRemovedStart.mColumn -= width;
+			mState.mCursorPosition.mColumn -= width;
 
 			while (cindex < line.size() && cend-- > cindex)
 			{
