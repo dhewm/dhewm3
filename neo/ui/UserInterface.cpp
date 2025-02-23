@@ -531,13 +531,13 @@ void idUserInterfaceLocal::Redraw( int _time ) {
 	if ( !loading && desktop ) {
 		if ( desktop->GetFlags() & WIN_MENUGUI ) {
 			// if the (SDL) window size has changed, calculate and set the
-			// "gui::horPad" and "gui::vertPad" window variables accordingly
-			if ( MaybeSetPaddingWinVars() ) {
+			// "gui::cst*" window register variables accordingly
+			if ( MaybeSetCstWinRegs() ) {
 				// tell the GUI script about it in case it wants to handle the size change in
 				// some way (though usually it's enough to use sth like
-				// `rect 0, 200, "gui::horPad", 100"` and `cstAnchor  CST_ANCHOR_LEFT`
+				// `rect 0, 200, "gui::cstHorPad", 100"` and `cstAnchor  CST_ANCHOR_LEFT`
 				// for a windowDef that should fill part of the left side)
-				HandleNamedEvent( "UpdateWindowSize" );
+				HandleNamedEvent( "CstScreenSizeChange" );
 			}
 		}
 
@@ -645,9 +645,9 @@ const char *idUserInterfaceLocal::Activate(bool activate, int _time) {
 		activateStr = "";
 
 		if ( desktop->GetFlags() & WIN_MENUGUI ) {
-			// DG: calculate and set the "gui::horPad" and "gui::vertPad"
-			//     window variables so the GUI can use them
-			MaybeSetPaddingWinVars(true);
+			// DG: calculate and set the "gui::cst*" window register variables
+			//     so the GUI can use them
+			MaybeSetCstWinRegs(true);
 		}
 		desktop->Activate( activate, activateStr );
 		return activateStr;
@@ -841,7 +841,7 @@ void idUserInterfaceLocal::SetCursor( float x, float y ) {
 }
 
 
-bool idUserInterfaceLocal::MaybeSetPaddingWinVars(bool force) {
+bool idUserInterfaceLocal::MaybeSetCstWinRegs(bool force) {
 	if ( desktop == NULL ) {
 		return false;
 	}
@@ -861,17 +861,22 @@ bool idUserInterfaceLocal::MaybeSetPaddingWinVars(bool force) {
 
 	float horizPadding = 0;
 	float vertPadding = 0;
+	float modWidth = desktopWidth;
+	float modHeight = desktopHeight;
 
 	if (glAspectRatio >= vidAspectRatio) {
-		float modWidth = desktopHeight * glAspectRatio;
+		modWidth = desktopHeight * glAspectRatio;
 		horizPadding = 0.5f * (modWidth - desktopWidth);
 	} else {
-		float modHeight = desktopWidth / glAspectRatio;
+		modHeight = desktopWidth / glAspectRatio;
 		vertPadding = 0.5f * (modHeight - desktopHeight);
 	}
 
-	SetStateFloat( "horPad", horizPadding );
-	SetStateFloat( "vertPad", vertPadding );
+	SetStateFloat( "cstAspectRatio", glAspectRatio );
+	SetStateFloat( "cstWidth", modWidth );
+	SetStateFloat( "cstHeight", modHeight );
+	SetStateFloat( "cstHorPad", horizPadding );
+	SetStateFloat( "cstVertPad", vertPadding );
 
 	return true;
 }

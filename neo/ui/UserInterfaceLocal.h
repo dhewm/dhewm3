@@ -123,7 +123,7 @@ private:
 	//  to fill up the gap
 	// if force=true, the variables are set no matter if the size has changed or not
 	// returns true if the windowSize has changed and thus the variables were updated, otherwise false
-	bool						MaybeSetPaddingWinVars(bool force=false);
+	bool						MaybeSetCstWinRegs(bool force=false);
 	int							lastGlWidth;
 	int							lastGlHeight;
 };
