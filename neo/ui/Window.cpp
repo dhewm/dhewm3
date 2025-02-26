@@ -694,6 +694,18 @@ bool idWindow::Contains(const idRectangle &sr, float x, float y) {
 	idRectangle r = sr;
 	r.x += actualX - drawRect.x;
 	r.y += actualY - drawRect.y;
+	// DG: if cstAnchor is used, the coordinates must adjusted
+	if ( cstAnchor != idDeviceContext::CST_ANCHOR_NONE ) {
+		// adjust r like idDeviceContext does for drawing
+		idVec2 scale, offset;
+		if ( idDeviceContext::CstGetParams( cstAnchor, cstAnchorTo, cstAnchorFactor, scale, offset ) ) {
+			r.x = r.x * scale.x + offset.x;
+			r.y = r.y * scale.y + offset.y;
+			r.w *= scale.x;
+			r.h *= scale.y;
+		}
+	}
+
 	return r.Contains(x, y);
 }
 
@@ -706,6 +718,18 @@ bool idWindow::Contains(float x, float y) {
 	idRectangle r = drawRect;
 	r.x = actualX;
 	r.y = actualY;
+	// DG: if cstAnchor is used, the coordinates must adjusted
+	if ( cstAnchor != idDeviceContext::CST_ANCHOR_NONE ) {
+		// adjust r like idDeviceContext does for drawing
+		idVec2 scale, offset;
+		if ( idDeviceContext::CstGetParams( cstAnchor, cstAnchorTo, cstAnchorFactor, scale, offset ) ) {
+			r.x = r.x * scale.x + offset.x;
+			r.y = r.y * scale.y + offset.y;
+			r.w *= scale.x;
+			r.h *= scale.y;
+		}
+	}
+
 	return r.Contains(x, y);
 }
 
@@ -1136,8 +1160,10 @@ void idWindow::DrawBackground(const idRectangle &drawRect) {
 	if ( background && matColor.w() ) {
 		float scalex, scaley;
 		if ( flags & WIN_NATURALMAT ) {
-			scalex = drawRect.w / background->GetImageWidth();
-			scaley = drawRect.h / background->GetImageHeight();
+			// DG: now also multiplied with matScalex/y, don't see a reason not to support that
+			//     (it allows scaling a tiled background image)
+			scalex = (drawRect.w / background->GetImageWidth()) * matScalex;
+			scaley = (drawRect.h / background->GetImageHeight()) * matScaley;
 		} else {
 			scalex = matScalex;
 			scaley = matScaley;
@@ -1238,7 +1264,7 @@ void idWindow::Redraw(float x, float y) {
 		// only scale desktop windows (will automatically scale its sub-windows)
 		// that EITHER have the scaleto43 flag set OR are fullscreen menus and r_scaleMenusTo43 is 1
 		if( (flags & WIN_SCALETO43) ||
-			((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool()) )
+			( (flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool() && !(flags & WIN_NO_SCALETO43) ) )
 		{
 			fixupFor43 = true;
 			dc->SetMenuScaleFix(true);
@@ -2028,8 +2054,11 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src) {
 	// DG: added this window flag for Windows that should be scaled to 4:3
 	//     (with "empty" bars left/right or above/below)
 	if (idStr::Icmp(_name, "scaleto43") == 0) {
-		if ( src->ParseBool() ) {
+		int scaleTo43 = src->ParseInt();
+		if(scaleTo43 > 0) {
 			flags |= WIN_SCALETO43;
+		} else if(scaleTo43 == 0) {
+			flags |= WIN_NO_SCALETO43;
 		}
 		return true;
 	}

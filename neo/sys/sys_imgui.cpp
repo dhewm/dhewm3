@@ -39,6 +39,7 @@
 #include "renderer/qgl.h"
 #include "renderer/tr_local.h" // glconfig
 #include "ui/DeviceContext.h"
+#include "ui/UserInterface.h"
 
 extern void Com_DrawDhewm3SettingsMenu(); // in framework/dhewm3SettingsMenu.cpp
 extern void Com_OpenCloseDhewm3SettingsMenu( bool open ); // ditto
@@ -487,7 +488,7 @@ bool ShouldShowCursor()
 		}
 		// if scaling Doom3 menus to 4:3 is enabled and the cursor is currently
 		// in a black bar (Doom3 cursor is not drawn there), show the ImGui cursor
-		if ( r_scaleMenusTo43.GetBool() ) {
+		if ( idUserInterface::IsUserInterfaceScaledTo43( sessLocal.GetActiveMenu() ) ) {
 			ImVec2 mousePos = ImGui::GetMousePos();
 			float w = glConfig.winWidth;
 			float h = glConfig.winHeight;

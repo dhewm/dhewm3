@@ -180,8 +180,10 @@ void idSimpleWindow::DrawBackground(const idRectangle &drawRect) {
 		if (matColor.w() > 0) {
 			float scalex, scaley;
 			if ( flags & WIN_NATURALMAT ) {
-				scalex = drawRect.w / background->GetImageWidth();
-				scaley = drawRect.h / background->GetImageHeight();
+				// DG: now also multiplied with matScalex/y, don't see a reason not to support that
+				//     (it allows scaling a tiled background image)
+				scalex = (drawRect.w / background->GetImageWidth()) * matScalex;
+				scaley = (drawRect.h / background->GetImageHeight()) * matScaley;
 			} else {
 				scalex = matScalex;
 				scaley = matScaley;
