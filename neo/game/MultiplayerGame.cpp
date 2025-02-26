@@ -541,7 +541,7 @@ const char *idMultiplayerGame::GameTime() {
 		if ( ms <= 0 ) {
 			strcpy( buff, "WMP --" );
 		} else {
-			sprintf( buff, "WMP %i", s );
+			idStr::snPrintf( buff, sizeof(buff), "WMP %i", s );
 		}
 	} else {
 		int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
@@ -554,14 +554,22 @@ const char *idMultiplayerGame::GameTime() {
 			ms = 0;
 		}
 
-		s = ms / 1000; // => s <= 2 147 483 (INT_MAX / 1000)
-		m = s / 60;  // => m <= 35 791
-		s -= m * 60; // => s < 60
-		t = s / 10;  // => t < 6
-		s -= t * 10; // => s < 10
-		// writing <= 5 for m + 3 bytes for ":ts" + 1 byte for \0 => 16 bytes is enough
+		s = ms / 1000;
+		m = s / 60;
+		s -= m * 60;
+		t = s / 10;
+		s -= t * 10;
 
-		sprintf( buff, "%i:%i%i", m, t, s );
+		// Format time as m:ts (minutes:tens-seconds)
+		// Ensure we never exceed buffer size by using idStr::snPrintf
+		if ( m >= 100 ) {
+			// If minutes exceed 99, just show 99:59
+			idStr::snPrintf( buff, sizeof(buff), "99:59" );
+		} else if ( t > 0 ) {
+			idStr::snPrintf( buff, sizeof(buff), "%i:%i%i", m, t, s );
+		} else {
+			idStr::snPrintf( buff, sizeof(buff), "%i:0%i", m, s );
+		}
 	}
 	return &buff[0];
 }
