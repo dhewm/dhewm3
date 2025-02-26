@@ -1062,8 +1062,11 @@ R_IssueEntityDefCallback
 */
 bool R_IssueEntityDefCallback( idRenderEntityLocal *def ) {
 	bool update;
-	idBounds	oldBounds;
+	idBounds oldBounds;
 	const bool checkBounds = r_checkBounds.GetBool();
+
+	// Initialize oldBounds to avoid the uninitialized variable warning
+	oldBounds.Zero();
 
 	if ( checkBounds ) {
 		oldBounds = def->referenceBounds;
