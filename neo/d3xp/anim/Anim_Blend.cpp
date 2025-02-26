@@ -539,9 +539,6 @@ const char *idAnim::AddFrameCommand( const idDeclModelDef *modelDef, int framenu
 		}
 		fc.type = FC_MUZZLEFLASH;
 		fc.string = new idStr( token );
-	} else if ( token == "muzzle_flash" ) {
-		fc.type = FC_MUZZLEFLASH;
-		fc.string = new idStr( "" );
 	} else if ( token == "create_missile" ) {
 		if( !src.ReadTokenOnLine( &token ) ) {
 			return "Unexpected end of line";
