@@ -341,6 +341,12 @@ class SoundFX_LowpassFast : public SoundFX {
 public:
 	virtual void		ProcessSample( float* in, float* out );
 	void				SetParms( float p1 = 0, float p2 = 0, float p3 = 0 );
+
+	void				Clear() {
+		freq = res = 0.0f;
+		a1 = a2 = a3 = 0.0f;
+		b1 = b2 = 0.0f;
+	}
 };
 
 class SoundFX_Comb : public SoundFX {
