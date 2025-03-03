@@ -65,7 +65,7 @@ const char *ui_skinArgs[]			= { "skins/characters/player/marine_mp", "skins/char
 const char *ui_teamArgs[]			= { "Red", "Blue", NULL };
 
 struct gameVersion_s {
-	gameVersion_s( void ) { sprintf( string, "%s.%d%s %s-%s %s %s", ENGINE_VERSION, BUILD_NUMBER, BUILD_DEBUG, BUILD_OS, BUILD_CPU, ID__DATE__, ID__TIME__ ); }
+	gameVersion_s( void ) { sprintf( string, "%s.%d%s %s-%s %s %s", ENGINE_VERSION, BUILD_NUMBER, BUILD_DEBUG, BUILD_OS, D3_ARCH, ID__DATE__, ID__TIME__ ); }
 	char	string[256];
 } gameVersion;
 
