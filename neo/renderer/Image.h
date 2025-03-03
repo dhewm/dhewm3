@@ -468,7 +468,7 @@ FIXME: make an "imageBlock" type to hold byte*,width,height?
 byte *R_Dropsample( const byte *in, int inwidth, int inheight,
 							int outwidth, int outheight );
 byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,
-							int outwidth, int outheight );
+							int& outwidth, int& outheight );
 byte *R_MipMapWithAlphaSpecularity( const byte *in, int width, int height );
 byte *R_MipMap( const byte *in, int width, int height, bool preserveBorder );
 byte *R_MipMap3D( const byte *in, int width, int height, int depth, bool preserveBorder );

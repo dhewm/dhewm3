@@ -46,7 +46,7 @@ after resampling to the next lower power of two.
 */
 #define	MAX_DIMENSION	4096
 byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,
-							int outwidth, int outheight ) {
+							int& _outwidth, int& _outheight ) {
 	int		i, j;
 	const byte	*inrow, *inrow2;
 	unsigned int	frac, fracstep;
@@ -54,12 +54,14 @@ byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,
 	const byte		*pix1, *pix2, *pix3, *pix4;
 	byte		*out, *out_p;
 
-	if ( outwidth > MAX_DIMENSION ) {
-		outwidth = MAX_DIMENSION;
+	if ( _outwidth > MAX_DIMENSION ) {
+		_outwidth = MAX_DIMENSION;
 	}
-	if ( outheight > MAX_DIMENSION ) {
-		outheight = MAX_DIMENSION;
+	if ( _outheight > MAX_DIMENSION ) {
+		_outheight = MAX_DIMENSION;
 	}
+	int outwidth = _outwidth;
+	int outheight = _outheight;
 
 	out = (byte *)R_StaticAlloc( outwidth * outheight * 4 );
 	out_p = out;
