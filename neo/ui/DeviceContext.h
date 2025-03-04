@@ -108,8 +108,12 @@ public:
 	// DG: this is used for the "make sure menus are rendered as 4:3" hack
 	void				SetMenuScaleFix(bool enable);
 	bool				IsMenuScaleFixActive() const {
-		return fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f;
+		// also using this for cstAdjustCoords, it basically means "you need to call AdjustCoords()
+		return fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f || cstAdjustCoords;
 	}
+
+	// DG: used in idWindow::Contains(), so it can adjust coordinates
+	static bool			CstGetParams(int anchor, int anchorTo, float anchorFactor, idVec2& out_Scale, idVec2& out_Offset);
 
 	enum {
 		CURSOR_ARROW,

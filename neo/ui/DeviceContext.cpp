@@ -747,17 +747,16 @@ void idDeviceContext::DrawCursor(float *x, float *y, float size) {
 
 	// the following block used to be Adjust(Cursor)Coords()
 	// (no point in keeping that function when it's only used here)
-	*x *= xScale;
-	*y *= yScale;
-	size *= xScale;
-	// TODO: not sure if scaling it by both is the right thing to do..
-	//   but OTOH, probably one of them is always 1, at least when not using an anchor
-	//   (and why would a cursor use an anchor)
-	size *= yScale;
 
-	// the *actual* sizes used (but not set to *x and *y) need to apply the menu fixes
-	float sizeW = size * fixScaleForMenu.x;
-	float sizeH = size * fixScaleForMenu.y;
+	// if cstAdjustCoords is used, x and y shouldn't be scaled, otherwise the cursor moves to a window border
+	if ( !cstAdjustCoords ) {
+		*x *= xScale;
+		*y *= yScale;
+	}
+
+	// the *actual* sizes and position used (but not set to *x and *y) need to apply the menu fixes
+	float sizeW = size * fixScaleForMenu.x * xScale;
+	float sizeH = size * fixScaleForMenu.y * yScale;
 	float fixedX = *x * fixScaleForMenu.x + fixOffsetForMenu.x;
 	float fixedY = *y * fixScaleForMenu.y + fixOffsetForMenu.y;
 
@@ -1010,22 +1009,20 @@ static void CstAdjustParmsForAnchor(int anchor, float &_xScale, float &_yScale, 
 	}
 }
 
-
-void idDeviceContext::CstSetSize(int anchor, int anchorTo, float factor) {
-	vidWidth = VIRTUAL_WIDTH;
-	vidHeight = VIRTUAL_HEIGHT;
-	xScale = 1.0f;
-	yScale = 1.0f;
-	cst_xOffset = 0.0f;
-	cst_yOffset = 0.0f;
-	cstAdjustCoords = false;
+// static
+bool idDeviceContext::CstGetParams(int anchor, int anchorTo, float factor, idVec2& out_Scale, idVec2& out_Offset)
+{
+	float xScale = 1.0f;
+	float yScale = 1.0f;
+	out_Offset.Set(0, 0);
 
 	if (!CstGetVidScale(xScale, yScale)) {
-		return;
+		out_Scale.Set(1, 1);
+		return false;
 	}
 
 	if (anchorTo == idDeviceContext::CST_ANCHOR_NONE) {
-		CstAdjustParmsForAnchor(anchor, xScale, yScale, cst_xOffset, cst_yOffset);
+		CstAdjustParmsForAnchor(anchor, xScale, yScale, out_Offset.x, out_Offset.y);
 	} else {
 		float from_xScale = xScale;
 		float from_yScale = yScale;
@@ -1044,10 +1041,24 @@ void idDeviceContext::CstSetSize(int anchor, int anchorTo, float factor) {
 		xScale = from_xScale * (1.0f - factor) + to_xScale * factor;
 		yScale = from_yScale * (1.0f - factor) + to_yScale * factor;
 
-		cst_xOffset = from_xOffset * (1.0f - factor) + to_xOffset * factor;
-		cst_yOffset = from_yOffset * (1.0f - factor) + to_yOffset * factor;
+		out_Offset.x = from_xOffset * (1.0f - factor) + to_xOffset * factor;
+		out_Offset.y = from_yOffset * (1.0f - factor) + to_yOffset * factor;
 	}
-	cstAdjustCoords = true;
+	out_Scale.Set(xScale, yScale);
+	return true;
+}
+
+void idDeviceContext::CstSetSize(int anchor, int anchorTo, float factor) {
+	vidWidth = VIRTUAL_WIDTH;
+	vidHeight = VIRTUAL_HEIGHT;
+
+	idVec2 scale;
+	idVec2 offset;
+	cstAdjustCoords = CstGetParams(anchor, anchorTo, factor, scale, offset);
+	xScale = scale.x;
+	yScale = scale.y;
+	cst_xOffset = offset.x;
+	cst_yOffset = offset.y;
 }
 //#modified-fva; END
 
