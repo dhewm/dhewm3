@@ -833,10 +833,46 @@ set(src_imgui ${src_imgui}
 	libs/imgui/imgui_widgets.cpp
 	
 	libs/imgui/imgui_demo.cpp
-	
+
+	libs/ImGuiColorTextEdit/TextEditor.h
+	libs/ImGuiColorTextEdit/TextEditor.cpp
+
 	sys/sys_imgui.h
 	sys/sys_imgui.cpp
 	sys/imgui_savestyle.cpp
+	
+	tools/imgui/ImGuiTools.cpp
+	tools/imgui/util/ImGui_IdWidgets.h
+	tools/imgui/util/ImGui_IdWidgets.cpp
+	tools/imgui/util/SyntaxRichEditCtrl.h
+	tools/imgui/util/SyntaxRichEditCtrl.cpp
+
+	tools/imgui/afeditor/AfEditor.h
+	tools/imgui/afeditor/AfEditor.cpp
+	tools/imgui/afeditor/AfBodyEditor.h
+	tools/imgui/afeditor/AfBodyEditor.cpp
+	tools/imgui/afeditor/AfConstraintEditor.h
+	tools/imgui/afeditor/AfConstraintEditor.cpp
+	tools/imgui/afeditor/AfPropertyEditor.h
+	tools/imgui/afeditor/AfPropertyEditor.cpp
+
+	tools/imgui/lighteditor/LightEditor.h
+	tools/imgui/lighteditor/LightEditor.cpp
+	tools/imgui/pdaeditor/PDAEditor.h
+	tools/imgui/pdaeditor/PDAEditor.cpp
+	tools/imgui/particleeditor/ParticleEditor.h
+	tools/imgui/particleeditor/ParticleEditor.cpp
+	tools/imgui/scripteditor/ScriptEditor.h
+	tools/imgui/scripteditor/ScriptEditor.cpp
+
+	tools/imgui/decleditor/PathTreeCtrl.h
+	tools/imgui/decleditor/PathTreeCtrl.cpp
+	tools/imgui/decleditor/DeclBrowser.h
+	tools/imgui/decleditor/DeclBrowser.cpp
+	tools/imgui/decleditor/DeclEditor.h
+	tools/imgui/decleditor/DeclEditor.cpp
+	tools/imgui/decleditor/DeclNew.h
+	tools/imgui/decleditor/DeclNew.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)
