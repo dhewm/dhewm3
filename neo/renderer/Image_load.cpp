@@ -38,7 +38,7 @@ PROBLEM: compressed textures may break the zero clamp rule!
 
 static bool FormatIsDXT( int internalFormat ) {
 	if ( internalFormat < GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-	|| internalFormat > GL_COMPRESSED_RGBA_S3TC_DXT5_EXT ) {
+	     || internalFormat > GL_COMPRESSED_RGBA_BPTC_UNORM ) {
 		return false;
 	}
 	return true;
@@ -85,6 +85,8 @@ int idImage::BitsForInternalFormat( int internalFormat ) const {
 	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
 		return 8;
 	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+		return 8;
+	case GL_COMPRESSED_RGBA_BPTC_UNORM:
 		return 8;
 	case GL_RGBA4:
 		return 16;
@@ -1368,7 +1370,7 @@ bool idImage::CheckPrecompressedImage( bool fullLoad ) {
 	}
 
 	int	len = f->Length();
-	if ( len < sizeof( ddsFileHeader_t ) ) {
+	if ( len < sizeof( ddsFileHeader_t ) + 4 ) { // +4 for the magic 'DDS ' fourcc at the beginning
 		fileSystem->CloseFile( f );
 		return false;
 	}
@@ -1392,6 +1394,7 @@ bool idImage::CheckPrecompressedImage( bool fullLoad ) {
 	unsigned int magic = LittleInt( *(unsigned int *)data );
 	ddsFileHeader_t	*_header = (ddsFileHeader_t *)(data + 4);
 	int ddspf_dwFlags = LittleInt( _header->ddspf.dwFlags );
+	unsigned int ddspf_dwFourCC = LittleInt( _header->ddspf.dwFourCC );
 
 	if ( magic != DDS_MAKEFOURCC('D', 'D', 'S', ' ')) {
 		common->Printf( "CheckPrecompressedImage( %s ): magic != 'DDS '\n", imgName.c_str() );
@@ -1401,9 +1404,25 @@ bool idImage::CheckPrecompressedImage( bool fullLoad ) {
 
 	// if we don't support color index textures, we must load the full image
 	// should we just expand the 256 color image to 32 bit for upload?
-	if ( ddspf_dwFlags & DDSF_ID_INDEXCOLOR && !glConfig.sharedTexturePaletteAvailable ) {
+	if ( (ddspf_dwFlags & DDSF_ID_INDEXCOLOR) && !glConfig.sharedTexturePaletteAvailable ) {
 		R_StaticFree( data );
 		return false;
+	}
+
+	// DG: same if this is a BC7 (BPTC) texture but the GPU doesn't support that
+	//     or if it uses the additional DX10 header and is *not* a BC7 texture
+	if ( ddspf_dwFourCC == DDS_MAKEFOURCC( 'D', 'X', '1', '0' ) ) {
+		ddsDXT10addHeader_t *dx10Header = (ddsDXT10addHeader_t *)( data + 4 + sizeof(ddsFileHeader_t) );
+		unsigned int dxgiFormat = LittleInt( dx10Header->dxgiFormat );
+		if ( dxgiFormat != 98 // DXGI_FORMAT_BC7_UNORM
+		     || !glConfig.bptcTextureCompressionAvailable ) {
+			if (dxgiFormat != 98) {
+				common->Warning( "Image file '%s' has unsupported dxgiFormat %d - dhewm3 only supports DXGI_FORMAT_BC7_UNORM (98)!",
+				                 filename, dxgiFormat);
+			}
+			R_StaticFree( data );
+			return false;
+		}
 	}
 
 	// upload all the levels
@@ -1455,6 +1474,7 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 
 	uploadWidth = header->dwWidth;
 	uploadHeight = header->dwHeight;
+	size_t additionalHeaderOffset = 0; // used if the DDS has a DDS_HEADER_DXT10
 	if ( header->ddspf.dwFlags & DDSF_FOURCC ) {
 		switch ( header->ddspf.dwFourCC ) {
 		case DDS_MAKEFOURCC( 'D', 'X', 'T', '1' ):
@@ -1472,6 +1492,12 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 			break;
 		case DDS_MAKEFOURCC( 'R', 'X', 'G', 'B' ):
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			break;
+		case DDS_MAKEFOURCC( 'D', 'X', '1', '0' ): // BC7 aka BPTC
+			additionalHeaderOffset = 20;
+			// Note: this is a bit hacky, but in CheckPrecompressedImage() we made sure
+			//       that only BC7 UNORM is accepted if the FourCC is 'DX10'
+			internalFormat = GL_COMPRESSED_RGBA_BPTC_UNORM;
 			break;
 		default:
 			common->Warning( "Invalid compressed internal format\n" );
@@ -1515,7 +1541,7 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 	int skipMip = 0;
 	GetDownsize( uploadWidth, uploadHeight );
 
-	byte *imagedata = data + sizeof(ddsFileHeader_t) + 4;
+	byte *imagedata = data + sizeof(ddsFileHeader_t) + 4 + additionalHeaderOffset;
 
 	for ( int i = 0 ; i < numMipmaps; i++ ) {
 		int size = 0;
@@ -2139,6 +2165,9 @@ void idImage::Print() const {
 		break;
 	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
 		common->Printf( "DXT5  " );
+		break;
+	case GL_COMPRESSED_RGBA_BPTC_UNORM:
+		common->Printf( "BC7  " );
 		break;
 	case GL_RGBA4:
 		common->Printf( "RGBA4 " );

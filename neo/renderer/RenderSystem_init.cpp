@@ -431,8 +431,12 @@ static void R_CheckPortableExtensions( void ) {
 		glConfig.textureCompressionAvailable = true;
 		qglCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexImage2DARB" );
 		qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImageARB" );
+		if ( R_CheckExtension( "GL_ARB_texture_compression_bptc" ) ) {
+			glConfig.bptcTextureCompressionAvailable = true;
+		}
 	} else {
 		glConfig.textureCompressionAvailable = false;
+		glConfig.bptcTextureCompressionAvailable = false;
 	}
 
 	// GL_EXT_texture_filter_anisotropic
