@@ -1463,7 +1463,7 @@ void Com_ExecMachineSpec_f( const idCmdArgs &args ) {
 		cvarSystem->SetCVarInteger( "s_maxSoundsPerShader", 0, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "image_useNormalCompression", 0, CVAR_ARCHIVE );
 		if ( !nores ) // DG: added optional "nores" argument
-			cvarSystem->SetCVarInteger( "", 4, CVAR_ARCHIVE );
+			cvarSystem->SetCVarInteger( "r_mode", 4, CVAR_ARCHIVE );
 		cvarSystem->SetCVarInteger( "r_multiSamples", 0, CVAR_ARCHIVE );
 	} else if ( com_machineSpec.GetInteger() == 1 ) { // medium
 		cvarSystem->SetCVarString( "image_filter", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
