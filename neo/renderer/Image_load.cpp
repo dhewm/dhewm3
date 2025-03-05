@@ -1536,6 +1536,7 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 
 	int uw = uploadWidth;
 	int uh = uploadHeight;
+	int lastUW = uw, lastUH = uh;
 
 	// We may skip some mip maps if we are downsizing
 	int skipMip = 0;
@@ -1561,6 +1562,8 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 				qglTexImage2D( GL_TEXTURE_2D, i - skipMip, internalFormat, uw, uh, 0, externalFormat, GL_UNSIGNED_BYTE, imagedata );
 			}
 		}
+		lastUW = uw;
+		lastUH = uh;
 
 		imagedata += size;
 		uw /= 2;
@@ -1570,6 +1573,19 @@ void idImage::UploadPrecompressedImage( byte *data, int len ) {
 		}
 		if (uh < 1) {
 			uh = 1;
+		}
+	}
+	// in case the mipmap chain is incomplete (doesn't go down to 1x1 pixel)
+	// the texture may be shown as black unless GL_TEXTURE_MAX_LEVEL is set accordingly
+	if ( lastUW > 1 || lastUH > 1 ) {
+		numMipmaps -= skipMip;
+		if ( numMipmaps == 1 ) {
+			// if there is only one mipmap, just don't use mipmapping for this texture
+			if ( filter == TF_DEFAULT ) {
+				filter = TF_LINEAR;
+			}
+		} else {
+			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMipmaps - 1 );
 		}
 	}
 
