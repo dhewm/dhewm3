@@ -63,6 +63,7 @@ typedef struct glconfig_s {
 
 	bool				multitextureAvailable;
 	bool				textureCompressionAvailable;
+	bool				bptcTextureCompressionAvailable; // DG: for GL_ARB_texture_compression_bptc (BC7)
 	bool				anisotropicAvailable;
 	bool				textureLODBiasAvailable;
 	bool				textureEnvAddAvailable;
