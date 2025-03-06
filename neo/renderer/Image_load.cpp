@@ -37,8 +37,9 @@ PROBLEM: compressed textures may break the zero clamp rule!
 */
 
 static bool FormatIsDXT( int internalFormat ) {
-	if ( internalFormat < GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-	     || internalFormat > GL_COMPRESSED_RGBA_BPTC_UNORM ) {
+	if ( (internalFormat < GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+	       || internalFormat > GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+	    && internalFormat != GL_COMPRESSED_RGBA_BPTC_UNORM ) {
 		return false;
 	}
 	return true;
