@@ -80,6 +80,11 @@ void	ScriptEditorInit( const idDict *spawnArgs );
 
 void	DeclBrowserInit( const idDict* spawnArgs );
 
+void	MaterialEditorInit();
+void	MaterialEditorDraw();
+void	MaterialEditorShutdown();
+void	MaterialEditorPrintConsole( const char* msg );
+
 }
 
 

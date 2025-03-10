@@ -839,6 +839,10 @@ set(src_imgui ${src_imgui}
 	tools/imgui/util/ImGui_IdWidgets.cpp
 	tools/imgui/util/SyntaxRichEditCtrl.h
 	tools/imgui/util/SyntaxRichEditCtrl.cpp
+	tools/imgui/util/TreeCtrl.h
+	tools/imgui/util/TreeCtrl.cpp
+	tools/imgui/util/RegistryOptions.h
+	tools/imgui/util/RegistryOptions.cpp
 
 	tools/imgui/afeditor/AfEditor.h
 	tools/imgui/afeditor/AfEditor.cpp
@@ -866,6 +870,27 @@ set(src_imgui ${src_imgui}
 	tools/imgui/decleditor/DeclEditor.cpp
 	tools/imgui/decleditor/DeclNew.h
 	tools/imgui/decleditor/DeclNew.cpp
+
+	tools/imgui/materialeditor/MaterialEditor.h
+	tools/imgui/materialeditor/MaterialEditor.cpp
+	tools/imgui/materialeditor/MaterialDef.h
+	tools/imgui/materialeditor/MaterialDef.cpp
+	tools/imgui/materialeditor/ConsoleView.h
+	tools/imgui/materialeditor/ConsoleView.cpp
+	tools/imgui/materialeditor/MaterialModifier.h
+	tools/imgui/materialeditor/MaterialModifier.cpp
+	tools/imgui/materialeditor/MaterialDoc.h
+	tools/imgui/materialeditor/MaterialDoc.cpp
+	tools/imgui/materialeditor/MaterialDocManager.h
+	tools/imgui/materialeditor/MaterialDocManager.cpp
+	tools/imgui/materialeditor/MaterialView.h
+	tools/imgui/materialeditor/MaterialView.cpp
+	tools/imgui/materialeditor/MaterialTreeView.h
+	tools/imgui/materialeditor/MaterialTreeView.cpp
+	tools/imgui/materialeditor/MEOptions.h
+	tools/imgui/materialeditor/MEOptions.cpp
+	tools/imgui/materialeditor/MEMainFrame.h
+	tools/imgui/materialeditor/MEMainFrame.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)

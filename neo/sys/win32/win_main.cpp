@@ -1281,12 +1281,12 @@ int SDL_main(int argc, char *argv[]) {
 				// Level Editor
 				RadiantRun();
 			}
-			else if (com_editors & EDITOR_MATERIAL ) {
-				//BSM Nerve: Add support for the material editor
-				MaterialEditorRun();
-			}
 			else {
 #ifdef IMGUI_DISABLE // DG: unless ImGui is disabled, the ImGui-based versions are used instead
+				if ( com_editors & EDITOR_MATERIAL ) {
+					//BSM Nerve: Add support for the material editor
+					MaterialEditorRun();
+				}
 				if ( com_editors & EDITOR_LIGHT ) {
 					// in-game Light Editor
 					LightEditorRun();

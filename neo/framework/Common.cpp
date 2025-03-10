@@ -1192,17 +1192,6 @@ Com_EditGUIs_f
 static void Com_EditGUIs_f( const idCmdArgs &args ) {
 	GUIEditorInit();
 }
-
-/*
-=============
-Com_MaterialEditor_f
-=============
-*/
-static void Com_MaterialEditor_f( const idCmdArgs &args ) {
-	// Turn off sounds
-	soundSystem->SetMute( true );
-	MaterialEditorInit();
-}
 #endif // ID_ALLOW_TOOLS
 
 /*
@@ -1339,6 +1328,24 @@ static void Com_EditScripts_f( const idCmdArgs &args ) {
 	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
 #endif
 }
+
+/*
+=============
+Com_MaterialEditor_f
+=============
+*/
+static void Com_MaterialEditor_f( const idCmdArgs &args ) {
+	// Turn off sounds
+	soundSystem->SetMute( true );
+#ifndef IMGUI_DISABLE
+	ImGuiTools::MaterialEditorInit();
+#elif defined(ID_ALLOW_TOOLS)
+	MaterialEditorInit();
+#else
+	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
+#endif
+}
+
 
 #ifdef ID_ALLOW_TOOLS
 /*

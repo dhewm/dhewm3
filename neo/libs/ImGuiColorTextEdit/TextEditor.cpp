@@ -55,6 +55,8 @@ TextEditor::TextEditor()
 	, mGetToolTipHandler(NULL)
 	, mSetFocus(false)
 	, mCursorScreenPos(0.0f, 0.0f)
+	, mShowLineNumber(true)
+	, mShowCurrentLine(true)
 {
 	SetPalette(GetDarkPalette());
 	SetLanguageDefinition(LanguageDefinition::HLSL());
@@ -941,7 +943,7 @@ void TextEditor::Render()
 	// Deduce mTextStart by evaluating mLines size (global lineMax) plus two spaces as text width
 	char buf[16];
 	snprintf(buf, 16, " %d ", globalLineMax);
-	mTextStart = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, buf, nullptr, nullptr).x + mLeftMargin;
+	mTextStart = (mShowLineNumber ? ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, buf, nullptr, nullptr).x : 0.0f) + mLeftMargin;
 
 	if (!mLines.empty())
 	{
@@ -1012,14 +1014,17 @@ void TextEditor::Render()
 			snprintf(buf, 16, "%d  ", lineNo + 1);
 
 			auto lineNoWidth = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, buf, nullptr, nullptr).x;
-			drawList->AddText(ImVec2(lineStartScreenPos.x + mTextStart - lineNoWidth, lineStartScreenPos.y), mPalette[(int)PaletteIndex::LineNumber], buf);
+			if (mShowLineNumber)
+			{
+				drawList->AddText(ImVec2(lineStartScreenPos.x + mTextStart - lineNoWidth, lineStartScreenPos.y), mPalette[(int)PaletteIndex::LineNumber], buf);
+			}
 
 			if (mState.mCursorPosition.mLine == lineNo)
 			{
 				auto focused = ImGui::IsWindowFocused();
 
 				// Highlight the current line (where the cursor is)
-				if (!HasSelection())
+				if (mShowCurrentLine && !HasSelection())
 				{
 					auto end = ImVec2(start.x + contentSize.x + scrollX, start.y + mCharAdvance.y);
 					drawList->AddRectFilled(start, end, mPalette[(int)(focused ? PaletteIndex::CurrentLineFill : PaletteIndex::CurrentLineFillInactive)]);
@@ -1466,6 +1471,16 @@ void TextEditor::EnterCharacter(ImWchar aChar, bool aShift)
 void TextEditor::SetReadOnly(bool aValue)
 {
 	mReadOnly = aValue;
+}
+
+void TextEditor::SetShowLineNumber(bool aValue)
+{
+	mShowLineNumber = aValue;
+}
+
+void TextEditor::SetShowCurrentLine(bool aValue)
+{
+	mShowCurrentLine = aValue;
 }
 
 void TextEditor::SetColorizerEnable(bool aValue)

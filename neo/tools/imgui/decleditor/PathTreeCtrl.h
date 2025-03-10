@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/Str.h"
 #include "idlib/Heap.h"
 #include "idlib/containers/Hierarchy.h"
+#include "../util/TreeCtrl.h"
 
 namespace ImGuiTools {
 
@@ -43,140 +44,50 @@ namespace ImGuiTools {
 ===============================================================================
 */
 
-class PathTreeNode {
-public:
-	PathTreeNode()
-		: label()
-		, item(0)
-		, node()
-		, id(-1)
-	{
-		
-	}
-	~PathTreeNode() {
-		Shutdown();
-	}
-
-	void Init(int _id)
-	{
-		label.Clear();
-		item = 0;
-		node.SetOwner(this);
-		id = _id;
-	}
-
-	void Shutdown()
-	{
-		node.RemoveFromHierarchy();
-		label.Clear();
-		id = 0;
-	}
-
-	ID_INLINE int					GetItem() {
-		return item;
-	}
-	ID_INLINE void					SetItem( int _item ) {
-		item = _item;
-	}
-	ID_INLINE void					SetLabel( const char *_label ) {
-		label = _label;
-	}
-	ID_INLINE idStr &				GetLabel() {
-		return label;
-	}
-	ID_INLINE idHierarchy<PathTreeNode>& GetNode() {
-		return node;
-	}
-	ID_INLINE int				GetID() {
-		return id;
-	}
-
-private:
-	idStr						label;
-	int							item;
-	idHierarchy<PathTreeNode>	node;
-	int							id;
-};
-
 class idPathTreeStack {
 public:
 						idPathTreeStack( void ) { size = 0; }
 
-	void				PushRoot( PathTreeNode *root );
-	void				Push( PathTreeNode *item, const char *name );
+	void				PushRoot( TreeNode *root );
+	void				Push( TreeNode *item, const char *name );
 	void				Pop( void ) { size--; }
-	PathTreeNode *		TopItem( void ) const { return stackItem[size-1]; }
+	TreeNode *			TopItem( void ) const { return stackItem[size-1]; }
 	const char *		TopName( void ) const { return stackName[size-1]; }
 	int					TopNameLength( void ) const { return stackName[size-1].Length(); }
 	int					Num( void ) const { return size; }
 
 private:
 	int					size;
-	PathTreeNode *		stackItem[128];
+	TreeNode *			stackItem[128];
 	idStr				stackName[128];
 };
 
-ID_INLINE void idPathTreeStack::PushRoot( PathTreeNode *root ) {
+ID_INLINE void idPathTreeStack::PushRoot( TreeNode *root ) {
 	assert( size == 0 );
 	stackItem[size] = root;
 	stackName[size] = "";
 	size++;
 }
 
-ID_INLINE void idPathTreeStack::Push( PathTreeNode *item, const char *name ) {
+ID_INLINE void idPathTreeStack::Push( TreeNode *item, const char *name ) {
 	assert( size < 127 );
 	stackItem[size] = item;
 	stackName[size] = stackName[size-1] + name + "/";
 	size++;
 }
 
-typedef bool (*treeItemCompare_t)( void *data, PathTreeNode *item, const char *name );
-typedef bool (*treeItemTooltip_t)( void *data, PathTreeNode *item, idStr &tooltipText );
-typedef void (*treeItemSelected_t)( void *data, bool doubleClick );
-
-class PathTreeCtrl {
+class PathTreeCtrl : public TreeCtrl {
 public:
 	PathTreeCtrl()
-		: nodeAllocator()
-		, root()
-		, selectedItem(NULL)
-		, numNodes(0)
 	{
-		root = nodeAllocator.Alloc();
-		root->Init(0);
-		numNodes++;
 	}
 	~PathTreeCtrl() {
-		DeleteAllItems();
 	}
 
-	void							DeleteAllItems();
-	PathTreeNode *					GetRootItem() const;
-	idStr&							GetItemText( PathTreeNode *item ) const;
-	PathTreeNode *					GetParentItem( PathTreeNode *item ) const;
-	PathTreeNode *					GetChildItem( PathTreeNode *item ) const;
-	PathTreeNode *					GetNextSiblingItem( PathTreeNode *item ) const;
-	PathTreeNode *					InsertItem( const idStr &name, PathTreeNode *parent = NULL, PathTreeNode *after = NULL );
-	void							SetItemData( PathTreeNode* item, int data );
-	int								GetItemData( PathTreeNode *item ) const;
-	PathTreeNode *					GetSelectedItem() const;
-	void							SelectItem( PathTreeNode *item );
-
-	void							Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data );
-
-	PathTreeNode *					FindItem( const idStr &pathName );
-	PathTreeNode *					InsertPathIntoTree( const idStr &pathName, const int id );
-	PathTreeNode *					AddPathToTree( const idStr &pathName, const int id, idPathTreeStack &stack );
+	TreeNode *						FindItem( const idStr &pathName );
+	TreeNode *						InsertPathIntoTree( const idStr &pathName, const int id );
+	TreeNode *						AddPathToTree( const idStr &pathName, const int id, idPathTreeStack &stack );
 	int								SearchTree( treeItemCompare_t compare, void *data, PathTreeCtrl &result );
-
-private:
-	void							DrawNode( PathTreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data );
-	void							DeleteAllItemsOfNode( PathTreeNode *item );
-
-	idBlockAlloc<PathTreeNode,256>	nodeAllocator;
-	PathTreeNode *					root;
-	PathTreeNode *					selectedItem;
-	int								numNodes;
 };
 
 }

@@ -152,6 +152,7 @@ void DrawToolWindows()
 	if ( DeclBrowser::Instance().IsShown() ) {
 		DeclBrowser::Instance().Draw();
 	}
+	ImGuiTools::MaterialEditorDraw();
 }
 
 void LightEditorInit( const idDict* dict )

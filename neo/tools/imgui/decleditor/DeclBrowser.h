@@ -46,8 +46,8 @@ public:
 	static DeclBrowser&	Instance();
 
 	void				ReloadDeclarations( void );
-	bool				CompareDecl( PathTreeNode *item, const char *name ) const;
-	bool				OnToolTipNotify( PathTreeNode *item, idStr &tooltipText ) const;
+	bool				CompareDecl( TreeNode *item, const char *name ) const;
+	bool				OnToolTipNotify( TreeNode *item, idStr &tooltipText ) const;
 	void				OnTreeSelChanged( bool doubleClicked );
 
 	void				Reset();
@@ -97,8 +97,8 @@ private:
 	void				AddGUIsToTree( PathTreeCtrl &tree );
 	void				InitBaseDeclTree( void );
 
-	void				GetDeclName( PathTreeNode *item, idStr &typeName, idStr &declName ) const;
-	const idDecl *		GetDeclFromTreeItem( PathTreeNode *item ) const;
+	void				GetDeclName( TreeNode *item, idStr &typeName, idStr &declName ) const;
+	const idDecl *		GetDeclFromTreeItem( TreeNode *item ) const;
 	const idDecl *		GetSelectedDecl( void ) const;
 	void				EditSelected( void );
 };

@@ -32,83 +32,6 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace ImGuiTools {
 
-void PathTreeCtrl::DeleteAllItems() {
-	DeleteAllItemsOfNode( root );
-	numNodes = 1;
-}
-
-PathTreeNode *PathTreeCtrl::GetRootItem() const {
-	return const_cast<PathTreeNode *>( root );
-}
-idStr& PathTreeCtrl::GetItemText( PathTreeNode *item ) const {
-	assert( item );
-	return item->GetLabel();
-}
-PathTreeNode *PathTreeCtrl::GetChildItem( PathTreeNode *item ) const {
-	if ( item ) {
-		return item->GetNode().GetChild();
-	}
-	return NULL;
-}
-PathTreeNode *PathTreeCtrl::GetParentItem( PathTreeNode *item ) const {
-	if ( item ) {
-		return item->GetNode().GetParent();
-	}
-	return NULL;
-}
-
-PathTreeNode *PathTreeCtrl::GetNextSiblingItem( PathTreeNode *item ) const {
-	if ( item ) {
-		return item->GetNode().GetSibling();
-	}
-	return NULL;
-}
-PathTreeNode *PathTreeCtrl::GetSelectedItem() const {
-	return selectedItem;
-}
-void PathTreeCtrl::SelectItem( PathTreeNode *item ) {
-	selectedItem = item;
-}
-
-PathTreeNode *PathTreeCtrl::InsertItem( const idStr &name, PathTreeNode *parent, PathTreeNode *after ) {
-	if ( !parent && name.IsEmpty() ) {
-		// do not insert the root node again
-		return root;
-	}
-	PathTreeNode *newNode = nodeAllocator.Alloc();
-	int id = numNodes++;
-	newNode->Init( id );
-	newNode->SetLabel( name );
-	if ( after ) {
-		newNode->GetNode().MakeSiblingAfter( after->GetNode() );
-	} else if ( parent ) {
-		newNode->GetNode().ParentTo( parent->GetNode() );
-	} else {
-		newNode->GetNode().ParentTo( root->GetNode() );
-	}
-
-	return newNode;
-}
-
-void PathTreeCtrl::SetItemData( PathTreeNode *item, int data ) {
-	assert( item );
-	item->SetItem( data );
-}
-
-int PathTreeCtrl::GetItemData( PathTreeNode *item ) const {
-	assert( item );
-	return item->GetItem();
-}
-
-void PathTreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data ) {
-	PathTreeNode *parentNode = GetRootItem();
-	PathTreeNode *node;
-
-	for ( node = GetChildItem( parentNode ) ; node ; node = GetNextSiblingItem( node ) ) {
-		DrawNode( node, tooltip, selected, data );
-	}
-}
-
 /*
 ================
 PathTreeCtrl::FindItem
@@ -116,10 +39,10 @@ PathTreeCtrl::FindItem
 Find the given path in the tree.
 ================
 */
-PathTreeNode *PathTreeCtrl::FindItem( const idStr &pathName ) {
+TreeNode *PathTreeCtrl::FindItem( const idStr &pathName ) {
 	int lastSlash;
 	idStr path, tmpPath, itemName;
-	PathTreeNode *item, *parentItem;
+	TreeNode *item, *parentItem;
 
 	parentItem = NULL;
 	item = GetChildItem( GetRootItem() );
@@ -150,16 +73,16 @@ PathTreeNode *PathTreeCtrl::FindItem( const idStr &pathName ) {
 
 /*
 ================
-PathTreeCtrl::InsertPathIntoTree
+TreeCtrl::InsertPathIntoTree
 
 Inserts a new item going from the root down the tree only creating paths where necessary.
 This is slow and should only be used to insert single items.
 ================
 */
-PathTreeNode *PathTreeCtrl::InsertPathIntoTree( const idStr &pathName, const int id ) {
+TreeNode *PathTreeCtrl::InsertPathIntoTree( const idStr &pathName, const int id ) {
 	int lastSlash;
 	idStr path, tmpPath, itemName;
-	PathTreeNode *item, *parentItem;
+	TreeNode *item, *parentItem;
 
 	parentItem = NULL;
 	item = GetRootItem();
@@ -194,16 +117,16 @@ PathTreeNode *PathTreeCtrl::InsertPathIntoTree( const idStr &pathName, const int
 
 /*
 ================
-PathTreeCtrl::AddPathToTree
+TreeCtrl::AddPathToTree
 
 Adds a new item to the tree.
 Assumes new paths after the current stack path do not yet exist.
 ================
 */
-PathTreeNode *PathTreeCtrl::AddPathToTree( const idStr &pathName, const int id, idPathTreeStack &stack ) {
+TreeNode *PathTreeCtrl::AddPathToTree( const idStr &pathName, const int id, idPathTreeStack &stack ) {
 	int lastSlash;
 	idStr itemName, tmpPath;
-	PathTreeNode *item;
+	TreeNode *item;
 
 	lastSlash = pathName.Last( '/' );
 
@@ -239,7 +162,7 @@ Returns the number of items added to the result tree.
 */
 int PathTreeCtrl::SearchTree( treeItemCompare_t compare, void *data, PathTreeCtrl &result ) {
 	idPathTreeStack stack, searchStack;
-	PathTreeNode *item, *child;
+	TreeNode *item, *child;
 	idStr name;
 	int id, numItems;
 
@@ -279,62 +202,6 @@ int PathTreeCtrl::SearchTree( treeItemCompare_t compare, void *data, PathTreeCtr
 	}
 
 	return numItems;
-}
-
-void PathTreeCtrl::DrawNode( PathTreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data ) {
-	PathTreeNode		*item;
-	ImGuiTreeNodeFlags	flags = 0;
-	idStr				tooltipText;
-
-	if ( node == selectedItem ) {
-		flags |= ImGuiTreeNodeFlags_Selected;
-	}
-	if ( !GetChildItem( node ) ) {
-		flags |= ImGuiTreeNodeFlags_Leaf;
-		flags |= ImGuiTreeNodeFlags_NoTreePushOnOpen;
-	}
-
-	if ( ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() ) ) {
-		if ( ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() ) {
-			SelectItem( node );
-			selected( data, false );
-		}
-		if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) ) {
-			SelectItem( node );
-			selected( data, true );
-		}
-		if ( ImGui::IsItemHovered() ) {
-			tooltipText.Clear();
-			if ( tooltip( data, node, tooltipText ) ) {
-                ImGui::BeginTooltip();
-				ImGui::TextUnformatted( tooltipText.c_str() );
-                ImGui::EndTooltip();
-			}
-		}
-		
-		for ( item = GetChildItem( node ); item; item = GetNextSiblingItem( item ) ) {
-			DrawNode( item, tooltip, selected, data );
-		}
-
-		if ( GetChildItem( node ) ) {
-			ImGui::TreePop();
-		}
-	}
-}
-
-void PathTreeCtrl::DeleteAllItemsOfNode( PathTreeNode *node ) {
-	if ( !node ) {
-		return;
-	}
-
-	PathTreeNode *child = node->GetNode().GetChild();
-	while ( child ) {
-		PathTreeNode *next = child->GetNode().GetSibling();
-		DeleteAllItemsOfNode( child );
-		child->Shutdown();
-		nodeAllocator.Free( child );
-		child = next;
-	}
 }
 
 }

@@ -220,6 +220,10 @@ public:
 
 	void SetReadOnly(bool aValue);
 	bool IsReadOnly() const { return mReadOnly; }
+	void SetShowLineNumber(bool aValue);
+	bool IsShowLineNumber() const { return mShowLineNumber; }
+	void SetShowCurrentLine(bool aValue);
+	bool IsShowCurrentLine() const { return mShowCurrentLine; }
 	bool IsTextChanged() const { return mTextChanged; }
 	bool IsCursorPositionChanged() const { return mCursorPositionChanged; }
 
@@ -428,4 +432,6 @@ private:
 
 	bool mSetFocus;
 	ImVec2 mCursorScreenPos;
+	bool mShowLineNumber;
+	bool mShowCurrentLine;
 };
