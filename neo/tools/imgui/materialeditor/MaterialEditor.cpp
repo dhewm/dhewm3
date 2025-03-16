@@ -121,50 +121,6 @@ void MaterialEditorDraw( void ) {
 		impl::SetReleaseToolMouse( true );
 
 		meMainFrame->Draw();
-
-		/*if (ImGui::BeginChild("Decl Tree", ImVec2(300, 400))) {
-			ImGui::SetItemTooltip( "decl browser" );
-			declTree.Draw( DeclBrowserOnToolTipNotify, DeclBrowserOnTreeSelChanged, this );
-			ImGui::EndChild();
-		}
-
-		if ( ImGui::InputTextStr( "Search names", &findNameEdit ) ) {
-		}
-		ImGui::SetItemTooltip( "search for declarations with matching name, use meta characters: *, ? and [abc...]" );
-		if ( ImGui::InputTextStr( "Search text", &findTextEdit ) ) {
-		}
-		ImGui::SetItemTooltip( "search for declarations containing text" );
-		if ( ImGui::Button( "Find" ) ) {
-			OnBnClickedFind();
-		}
-		ImGui::SetItemTooltip( "find declarations matching the search strings" );
-		ImGui::SameLine();
-		if ( ImGui::Button( "Edit" ) ) {
-			OnBnClickedEdit();
-		}
-		ImGui::SetItemTooltip( "edit selected declaration" );
-		ImGui::SameLine();
-		if ( ImGui::Button( "New" ) ) {
-			OnBnClickedNew();
-		}
-		ImGui::SetItemTooltip( "create new declaration" );
-		ImGui::SameLine();
-		if ( ImGui::Button( "Reload" ) ) {
-			ReloadDeclarations();
-		}
-		ImGui::SetItemTooltip( "reload declarations" );
-		ImGui::SameLine();
-		if ( ImGui::Button( "Close" ) ) {
-			showTool = false;
-		}
-
-		if ( declNewDlg.Draw() ) {
-			OnBnClickedNewAccepted();
-		}
-
-		if ( declEditorDlg.Draw() ) {
-			// nothing to do
-		}*/
 	}
 	ImGui::End();
 

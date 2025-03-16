@@ -30,16 +30,16 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "MaterialEditor.h"
 #include "MaterialTreeView.h"
-//#include "MaterialPropTreeView.h"
-//#include "MaterialPreviewView.h"
-//#include "StageView.h"
-//#include "MaterialPreviewPropView.h"
+#include "MaterialPropTreeView.h"
+#include "MaterialPreviewView.h"
+#include "StageView.h"
+#include "MaterialPreviewPropView.h"
 #include "MEOptions.h"
 #include "ConsoleView.h"
 //#include "FindDialog.h"
 //#include "../common/PropTree/PropTreeView.h"
 #include "MaterialDocManager.h"
-//#include "MaterialEditView.h"
+#include "MaterialEditView.h"
 
 namespace ImGuiTools {
 
@@ -57,7 +57,7 @@ public:
 	void						PrintConsoleMessage(const char *msg);
 
 	bool						PreCreateWindow();
-	bool						OnCreateClient();
+	void						OnCreateClient();
 
 	//Message Handlers
 	int							OnCreate();
@@ -128,16 +128,22 @@ private:
 	CSplitterWnd				m_previewSplitter;
 	CSplitterWnd*				m_materialEditSplitter;
 	*/
+	float						editSplitterWidth;
+	float						editSplitterPos;
+	float						editSplitterHeight;
+	float						previewSplitterWidth;
+	float						previewSplitterPos;
+	float						previewSplitterHeight;
 
 	//Child Views
-	//MaterialTreeView*			m_materialTreeView;
-	//StageView*					m_stageView;
-	//MaterialPropTreeView*		m_materialPropertyView;
-	//MaterialPreviewView*		m_materialPreviewView;
-	//MaterialPreviewPropView*	m_previewPropertyView;
+	MaterialTreeView*			m_materialTreeView;
+	StageView*					m_stageView;
+	MaterialPropTreeView*		m_materialPropertyView;
+	MaterialPreviewView*		m_materialPreviewView;
+	MaterialPreviewPropView*	m_previewPropertyView;
 	ConsoleView*				m_consoleView;
 
-	//MaterialEditView*			m_materialEditView;
+	MaterialEditView*			m_materialEditView;
 
 	//Find Data
 	//FindDialog*					m_find;

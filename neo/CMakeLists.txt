@@ -885,8 +885,18 @@ set(src_imgui ${src_imgui}
 	tools/imgui/materialeditor/MaterialDocManager.cpp
 	tools/imgui/materialeditor/MaterialView.h
 	tools/imgui/materialeditor/MaterialView.cpp
+	tools/imgui/materialeditor/MaterialEditView.h
+	tools/imgui/materialeditor/MaterialEditView.cpp
 	tools/imgui/materialeditor/MaterialTreeView.h
 	tools/imgui/materialeditor/MaterialTreeView.cpp
+	tools/imgui/materialeditor/MaterialPropTreeView.h
+	tools/imgui/materialeditor/MaterialPropTreeView.cpp
+	tools/imgui/materialeditor/MaterialPreviewPropView.h
+	tools/imgui/materialeditor/MaterialPreviewPropView.cpp
+	tools/imgui/materialeditor/MaterialPreviewView.h
+	tools/imgui/materialeditor/MaterialPreviewView.cpp
+	tools/imgui/materialeditor/StageView.h
+	tools/imgui/materialeditor/StageView.cpp
 	tools/imgui/materialeditor/MEOptions.h
 	tools/imgui/materialeditor/MEOptions.cpp
 	tools/imgui/materialeditor/MEMainFrame.h

@@ -108,6 +108,9 @@ public:
 	void					GetText( idStr &text ) const;
 	void					SetText( const char *text );
 
+	void					SetReadOnly( bool readOnly );
+	bool					GetReadOnly();
+
 	bool					IsEdited() const;
 
 	void					SetFocus();

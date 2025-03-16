@@ -98,7 +98,7 @@ namespace ImGuiTools {
 */
 MEMainFrame::MEMainFrame() {
 
-	//currentDoc = NULL;
+	currentDoc = NULL;
 	//m_find = NULL;
 
 	searchData.searched = false;
@@ -138,7 +138,7 @@ bool MEMainFrame::PreCreateWindow() {
 * Called by the MFC framework to allow the window to create any client windows. This method
 * creates all of the spliter windows and registers all of the views with the document manager.
 */
-bool MEMainFrame::OnCreateClient() {
+void MEMainFrame::OnCreateClient() {
 	/*
 	CCreateContext consoleContext;
 	consoleContext.m_pNewViewClass = RUNTIME_CLASS(ConsoleView);
@@ -179,43 +179,52 @@ bool MEMainFrame::OnCreateClient() {
 		TRACE0("Failed to create preview pane\n");
 		return FALSE;
 	}
-
+	*/
 	//Get references to all of the views
-	m_materialTreeView = (MaterialTreeView*)m_editSplitter.GetPane(0, 0);
-	m_previewPropertyView = (MaterialPreviewPropView*)m_previewSplitter.GetPane(0, 0);
-	m_materialPreviewView = (MaterialPreviewView*)m_previewSplitter.GetPane(0, 1);
+	m_materialTreeView = new MaterialTreeView(); //(MaterialTreeView*)m_editSplitter.GetPane(0, 0);
+	m_materialTreeView->OnCreate();
+	m_previewPropertyView = new MaterialPreviewPropView();// (MaterialPreviewPropView*)m_previewSplitter.GetPane(0, 0);
+	m_materialPreviewView = new MaterialPreviewView(); //(MaterialPreviewView*)m_previewSplitter.GetPane(0, 1);
 
-	m_materialEditView = (MaterialEditView*)m_editSplitter.GetPane(0, 1);
+	m_materialEditView = new MaterialEditView(); // (MaterialEditView*)m_editSplitter.GetPane(0, 1);
+	m_materialEditView->OnCreate();
 	m_stageView = m_materialEditView->m_stageView;
 	m_materialPropertyView = m_materialEditView->m_materialPropertyView;
-	m_materialEditSplitter = &m_materialEditView->m_editSplitter;
+	//m_materialEditSplitter = &m_materialEditView->m_editSplitter;
 
 	//Load the splitter positions from the registry
+
+	editSplitterPos = 300;
+	editSplitterWidth = 500 + m_materialEditView->m_editSplitterWidth;
+	editSplitterHeight = 200;
+	previewSplitterPos = 300;
+	previewSplitterPos = 500;
+	previewSplitterHeight = 200;
+
 	int val = options.GetMaterialEditHeight();
 	if(val <= 0)
 		val = 300;
-	m_splitterWnd.SetRowInfo(0, val, 0);
+	//m_splitterWnd.SetRowInfo(0, val, 0);
+	editSplitterHeight = val;
 
 	val = options.GetMaterialTreeWidth();
 	if(val <= 0)
 		val = 300;
-	m_editSplitter.SetColumnInfo(0, val, 0);
-
+	editSplitterPos = val;
+	
 	val = options.GetStageWidth();
 	if(val <= 0)
 		val = 200;
-	m_materialEditSplitter->SetColumnInfo(0, val, 0);
+	m_materialEditView->m_editSplitterPos = val;
 
 	val = options.GetPreviewPropertiesWidth();
 	if(val <= 0)
 		val = 300;
-	m_previewSplitter.SetColumnInfo(0, val, 0);
-	*/
-
+	previewSplitterPos = val;
 
 	//Register the views with the document manager
 	materialDocManager.RegisterMaterialView(this);
-	/*materialDocManager.RegisterMaterialView(m_materialTreeView);
+	materialDocManager.RegisterMaterialView(m_materialTreeView);
 	materialDocManager.RegisterMaterialView(m_stageView);
 	materialDocManager.RegisterMaterialView(m_materialPropertyView);
 	materialDocManager.RegisterMaterialView(m_materialPreviewView);
@@ -227,31 +236,27 @@ bool MEMainFrame::OnCreateClient() {
 	//Let the preview props now about the preview window
 	m_previewPropertyView->RegisterPreviewView(m_materialPreviewView);
 	m_previewPropertyView->InitializePropTree();
-	m_previewPropertyView->GetPropertyTreeCtrl().SetColumn(120);
-	*/
+	//m_previewPropertyView->GetPropertyTreeCtrl().SetColumn(120);
+
 	MaterialDefManager::InitializeMaterialDefLists();
-	/*
+	
 	//Some prop tree initialization
-	//m_materialPropertyView->InitializePropTreeDefs();
+
 	val = options.GetMaterialPropHeadingWidth();
 	if(val <= 0)
 		val = 200;
-	m_materialPropertyView->GetPropertyTreeCtrl().SetColumn(val);
+	//m_materialPropertyView->GetPropertyTreeCtrl().SetColumn(val);
 	m_materialPropertyView->LoadSettings();
-
 
 	val = options.GetPreviewPropHeadingWidth();
 	if(val <= 0)
 		val = 120;
-	m_previewPropertyView->GetPropertyTreeCtrl().SetColumn(val);
-	
-	//Build the material list
-	m_materialTreeView->InitializeMaterialList(true);
-	
-	SetActiveView(m_materialTreeView);
+	//m_previewPropertyView->GetPropertyTreeCtrl().SetColumn(val);
 
-	return CFrameWnd::OnCreateClient(lpcs, pContext);*/
-	return 0;
+	// Build the material list
+	m_materialTreeView->InitializeMaterialList( true );
+	
+	//SetActiveView(m_materialTreeView);
 }
 
 /**
@@ -284,6 +289,9 @@ int MEMainFrame::OnCreate() {
 	//Load the window placement from the options
 	options.GetWindowPlacement ( "mainframe", m_hWnd );
 	*/
+
+	m_stageView = new StageView();
+
 	return 0;
 }
 
@@ -315,9 +323,9 @@ void MEMainFrame::OnDestroy() {
 	options.SetPreviewPropHeadingWidth(cur);
 
 	options.SetWindowPlacement ( "mainframe", m_hWnd );
-	options.Save();
+	options.Save();*/
 
-	m_materialPropertyView->SaveSettings();*/
+	m_materialPropertyView->SaveSettings();
 
 	MaterialDefManager::DestroyMaterialDefLists();
 
@@ -327,10 +335,69 @@ void MEMainFrame::OnDestroy() {
 void MEMainFrame::Draw() {
 	if ( ImGui::BeginTabBar( "MainTabBar" ) ) {
 
-		if (ImGui::BeginTabItem("Editor"))
+		if (ImGui::BeginTabItem( "Editor" ) )
         {
-            ImGui::Text("This is a placeholder");
-            ImGui::EndTabItem();
+			float splitterButtonWidthOrHeight = 8.0f;
+			ImVec2 windowSize = ImVec2( Max( editSplitterWidth, previewSplitterWidth ) + splitterButtonWidthOrHeight, editSplitterHeight + previewSplitterHeight + splitterButtonWidthOrHeight * 2.0f );
+
+			if ( ImGui::BeginChild( "editorSplitters", windowSize ) ) {
+				ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0, 0 ) );
+
+				// m_editSplitter: splitter with 1 row, 2 columns (at cell 0,0 of m_splitterWnd)
+
+				// m_materialTreeView : MaterialTreeView at 0, 0 of m_editSplitter
+					// Size 300, 200
+				if ( m_materialTreeView->Draw( ImVec2( editSplitterPos, editSplitterHeight ) ) ) {
+
+				}
+
+				ImGui::SameLine();
+				ImGui::InvisibleButton( "editSplitter", ImVec2( splitterButtonWidthOrHeight, editSplitterHeight ) );
+				if ( ImGui::IsItemActive() ) {
+					editSplitterPos += ImGui::GetIO().MouseDelta.x;
+				}
+				ImGui::SameLine();
+
+				// m_materialEditView : MaterialEditView at 0, 1 of m_editSplitter
+					// Size 200, 200
+				if ( m_materialEditView->Draw( ImVec2( 0, editSplitterHeight ) ) ) {
+			
+				}
+
+				ImGui::InvisibleButton("editRowHSplitter", ImVec2(-1, splitterButtonWidthOrHeight));
+				if ( ImGui::IsItemActive() ) {
+					editSplitterHeight += ImGui::GetIO().MouseDelta.y;
+				}
+				// m_previewSplitter : splitter with 1 row, 2 columns(at cell 1, 0 of m_splitterWnd)
+					// m_previewPropertyView : MaterialPreviewPropView at 0, 0 of m_previewSplitter
+					// Size 300, 200
+			
+				if ( m_previewPropertyView->Draw( ImVec2( previewSplitterPos, previewSplitterHeight ) ) ) {
+
+				}
+
+				ImGui::SameLine();
+				ImGui::InvisibleButton( "previewSplitter", ImVec2( splitterButtonWidthOrHeight, previewSplitterHeight ) );
+				if ( ImGui::IsItemActive() ) {
+					previewSplitterPos += ImGui::GetIO().MouseDelta.x;
+				}
+				ImGui::SameLine();
+
+				// m_materialPreviewView : MaterialPreviewView at 0, 1 of m_previewSplitter
+					// Size 200, 200
+				if ( m_materialPreviewView->Draw( ImVec2( 0, previewSplitterHeight ) ) ) {
+
+				}
+
+				ImGui::InvisibleButton( "previewRowHSplitter", ImVec2( -1, splitterButtonWidthOrHeight ) );
+				if ( ImGui::IsItemActive() ) {
+					previewSplitterHeight += ImGui::GetIO().MouseDelta.y;
+				}
+
+				ImGui::PopStyleVar();
+			}
+			ImGui::EndChild();
+			ImGui::EndTabItem();
         }
 		if (ImGui::BeginTabItem("Console"))
 		{

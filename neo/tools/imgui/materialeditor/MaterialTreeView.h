@@ -28,6 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef MATERIALTREEVIEW_H_
 #define MATERIALTREEVIEW_H_
 
+#include "../util/ImGui_IdWidgets.h"
+
 #include "idlib/containers/HashTable.h"
 #include "../util/TreeCtrl.h"
 #include "MaterialEditor.h"
@@ -49,10 +51,13 @@ typedef struct {
 class MaterialTreeView : /*public CTreeView,*/ public MaterialView {
 
 public:
+					MaterialTreeView();
 	virtual			~MaterialTreeView();
 
 	void			InitializeMaterialList(bool includeFile = true, const char* filename = NULL);
 	void			BuildMaterialList(bool includeFile = true, const char* filename = NULL);
+
+	bool			Draw( const ImVec2 & size );
 
 	//Material Interface
 	virtual void	MV_OnMaterialChange(MaterialDoc* pMaterial);
@@ -79,9 +84,9 @@ public:
 	TreeNode*		AddFolder(const char* name, TreeNode *parent);
 	void			RenameFolder(TreeNode *item, const char* name);
 
+	int				OnCreate();
 
 private:
-	MaterialTreeView();
 	//DECLARE_DYNCREATE(MaterialTreeView)
 
 	/**
@@ -98,8 +103,9 @@ private:
 	bool			PreTranslateMessage();
 
 	//Window Messages
-	int				OnCreate();
-	void			OnTvnSelchanged( TreeNode *item );
+public:
+	void			OnTvnSelchanged( bool doubleClicked );
+private:
 	bool			OnTvnBeginlabeledit( TreeNode *item );
 	bool			OnTvnEndlabeledit( TreeNode *item, idStr &text );
 	void			OnContextMenu();
@@ -152,9 +158,9 @@ private:
 	TreeCtrl				tree;
 
 	//Hashtables for quick lookups
-	idHashTable<TreeNode>	quickTree;
-	idHashTable<TreeNode>	materialToTree;
-	idHashTable<TreeNode>	fileToTree;
+	idHashTable<TreeNode*>	quickTree;
+	idHashTable<TreeNode*>	materialToTree;
+	idHashTable<TreeNode*>	fileToTree;
 
 
 	//Member variables for renaming folders

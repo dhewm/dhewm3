@@ -44,6 +44,14 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace ImGuiTools {
 
+bool MaterialTreeViewOnToolTipNotify(void* data, TreeNode* item, idStr& tooltipText) {
+	return false;
+}
+void MaterialTreeViewOnTreeSelChanged(void* data, bool doubleClicked) {
+	reinterpret_cast<MaterialTreeView*>(data)->OnTvnSelchanged(doubleClicked);
+}
+
+
 //IMPLEMENT_DYNCREATE(MaterialTreeView, CTreeView)
 /*
 BEGIN_MESSAGE_MAP(MaterialTreeView, CTreeView)
@@ -151,16 +159,31 @@ void MaterialTreeView::BuildMaterialList(bool includeFile, const char* filename)
 	}
 }
 
+bool MaterialTreeView::Draw( const ImVec2 &size ) {
+
+	if ( ImGui::BeginChild( "###MaterialTreeView", size, ImGuiChildFlags_Borders ) ) {
+
+		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, this );
+	}
+	ImGui::EndChild();
+
+	return false;
+}
+
 /**
 * Called when the material has changed but not applied.
 * @param pMaterial The selected material.
 */
 void MaterialTreeView::MV_OnMaterialChange(MaterialDoc* pMaterial) {
+	TreeNode** materialItemptrptr;
+
+	materialItemptrptr = NULL;
 
 	//When a material changes place an asterik next to the material and the file
 	TreeNode* materialItem = NULL;
-	materialToTree.Get(pMaterial->name, &materialItem);
-
+	if (materialToTree.Get(pMaterial->name, &materialItemptrptr)) {
+		materialItem = *materialItemptrptr;
+	}
 
 	if(!materialItem)
 		return;
@@ -170,13 +193,15 @@ void MaterialTreeView::MV_OnMaterialChange(MaterialDoc* pMaterial) {
 
 
 	if(treeWithFile) {
+		TreeNode** fileItemptrptr = NULL;
 		TreeNode* fileItem = NULL;
 		idStr file = pMaterial->renderMaterial->GetFileName();
 
-		//common->Printf("Filename = %s\n", file.c_str());
+		common->Printf("Filename = %s\n", file.c_str());
 
-		if(fileToTree.Get(file, &fileItem)){
-			//common->Printf("Found: %d\n", *fileItem);
+		if(fileToTree.Get(file, &fileItemptrptr)){
+			fileItem = *fileItemptrptr;
+			common->Printf("Found: %d\n", fileItem->GetID());
 			// TODO: implement
 			//tree.SetItemImage(*fileItem, IMAGE_FILE_MOD, IMAGE_FILE_MOD);
 		}
@@ -189,8 +214,11 @@ void MaterialTreeView::MV_OnMaterialChange(MaterialDoc* pMaterial) {
 */
 void MaterialTreeView::MV_OnMaterialApply(MaterialDoc* pMaterial) {
 	//When a material is applied then just change the image to material modified
+	TreeNode** materialItemptrptr = NULL;
 	TreeNode* materialItem = NULL;
-	materialToTree.Get(pMaterial->name, &materialItem);
+	if (materialToTree.Get(pMaterial->name, &materialItemptrptr)) {
+		materialItem = *materialItemptrptr;
+	}
 
 	if(!materialItem)
 		return;
@@ -205,8 +233,12 @@ void MaterialTreeView::MV_OnMaterialApply(MaterialDoc* pMaterial) {
 */
 void MaterialTreeView::MV_OnMaterialSaved(MaterialDoc* pMaterial) {
 	//Remove the asterik
+	TreeNode** materialItemptrptr = NULL;
 	TreeNode* materialItem = NULL;
-	materialToTree.Get(pMaterial->name, &materialItem);
+
+	if (materialToTree.Get(pMaterial->name, &materialItemptrptr)) {
+		materialItem = *materialItemptrptr;
+	}
 
 	//We will get this message for a delete file so the material will not be in the tree
 	if(materialItem) {
@@ -219,10 +251,12 @@ void MaterialTreeView::MV_OnMaterialSaved(MaterialDoc* pMaterial) {
 
 		if(!materialDocManager->IsFileModified(pMaterial->renderMaterial->GetFileName())) {
 
+			TreeNode** fileItemptrptr = NULL;
 			TreeNode* fileItem = NULL;
 			idStr file = pMaterial->renderMaterial->GetFileName();
 
-			if(fileToTree.Get(file, &fileItem)) {
+			if(fileToTree.Get(file, &fileItemptrptr)) {
+				fileItem = *fileItemptrptr;
 				// TODO: implement
 				//tree.SetItemImage(*fileItem, IMAGE_FILE, IMAGE_FILE);
 			}
@@ -253,8 +287,11 @@ void MaterialTreeView::MV_OnMaterialAdd(MaterialDoc* pMaterial) {
 	AddStrList(NULL, &list, treeWithFile);
 
 	//Keep the items sorted
+	TreeNode** itemptrptr = NULL;
 	TreeNode* item = NULL;
-	materialToTree.Get(pMaterial->name, &item);
+	if (materialToTree.Get(pMaterial->name, &itemptrptr)) {
+		item = *itemptrptr;
+	}
 	if(item) {
 		TreeNode *parent = tree.GetParentItem(item);
 		// TODO: implement
@@ -271,8 +308,12 @@ void MaterialTreeView::MV_OnMaterialAdd(MaterialDoc* pMaterial) {
 void MaterialTreeView::MV_OnMaterialDelete(MaterialDoc* pMaterial) {
 
 	//Our doc told us a material has been deleted. Lets find and remove the item from our tree
+	TreeNode** materialItemptrptr = NULL;
 	TreeNode* materialItem = NULL;
-	materialToTree.Get(pMaterial->name, &materialItem);
+
+	if (materialToTree.Get(pMaterial->name, &materialItemptrptr)) {
+		materialItem = *materialItemptrptr;
+	}
 
 	tree.DeleteItem(materialItem);
 
@@ -290,8 +331,11 @@ void MaterialTreeView::MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const ch
 	if(!internalChange) {
 
 		//Delete the old tree item
+		TreeNode** itemptrptr;
 		TreeNode* item = NULL;
-		materialToTree.Get(oldName, &item);
+		if (materialToTree.Get(oldName, &itemptrptr)) {
+			item = *itemptrptr;
+		}
 		TreeNode* tempItem = item;
 		CleanLookupTrees(tempItem);
 		tree.DeleteItem(tempItem);
@@ -315,7 +359,9 @@ void MaterialTreeView::MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const ch
 
 		//Keep the items sorted
 		//item = NULL;
-		materialToTree.Get(pMaterial->name.c_str(), &item);
+		if (materialToTree.Get(pMaterial->name.c_str(), &itemptrptr)) {
+			item = *itemptrptr;
+		}
 		if(item) {
 			TreeNode *parent = tree.GetParentItem(item);
 			tree.SortChildren(parent);
@@ -332,8 +378,11 @@ void MaterialTreeView::MV_OnMaterialNameChanged(MaterialDoc* pMaterial, const ch
 */
 void MaterialTreeView::MV_OnFileReload(const char* filename) {
 
+	TreeNode** fileItemptrptr = NULL;
 	TreeNode* fileItem = NULL;
-	fileToTree.Get(filename, &fileItem);
+	if (fileToTree.Get(filename, &fileItemptrptr)) {
+		fileItem = *fileItemptrptr;
+	}
 
 	TreeNode *item = fileItem;
 
@@ -343,8 +392,11 @@ void MaterialTreeView::MV_OnFileReload(const char* filename) {
 	BuildMaterialList(treeWithFile, filename);
 
 	//Resort the parent to make sure the file is back where it was
+	TreeNode** newItemptrptr = NULL;
 	TreeNode* newItem = NULL;
-	fileToTree.Get(filename, &newItem);
+	if (fileToTree.Get(filename, &newItemptrptr)) {
+		newItem = *newItemptrptr;
+	}
 	if(newItem) {
 		TreeNode *parent = tree.GetParentItem(newItem);
 		tree.SortChildren(parent);
@@ -619,7 +671,7 @@ TreeNode *MaterialTreeView::AddFolder(const char* name, TreeNode* parent) {
 
 	//Build the entire path to this item for the quicktree
 	idStr qt = GetQuicktreePath(newItem);
-	quickTree.Set(qt, *newItem);
+	quickTree.Set(qt, newItem);
 
 	return newItem;
 }
@@ -673,7 +725,8 @@ int MaterialTreeView::OnCreate() {
 /**
 * Changes the selected material when the select tree item changes.
 */
-void MaterialTreeView::OnTvnSelchanged(TreeNode *item) {
+void MaterialTreeView::OnTvnSelchanged(bool doubleClicked) {
+	TreeNode* item = tree.GetSelectedItem();
 
 	if(item) {
 		int type = tree.GetItemData(item);
@@ -747,7 +800,7 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 				//MessageBox("Unable to rename material because it conflicts with another material", "Error");
 			} else {
 				//Add it to our quick lookup
-				materialToTree.Set(material, *item);
+				materialToTree.Set(material, item);
 
 				//Finally make the change
 				internalChange = true;
@@ -1292,7 +1345,7 @@ void MaterialTreeView::RenameMaterial(TreeNode *item, const char* originalName) 
 
 
 	//Add it to our quick lookup
-	materialToTree.Set(materialName, *item);
+	materialToTree.Set(materialName, item);
 
 	//Finally make the change
 	internalChange = true;
@@ -1470,14 +1523,14 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 			qt = root;
 			qt += "/";
 			qt += name;
-			quickTree.Set(qt, *add);
+			quickTree.Set(qt, add);
 			// TODO: fix this
 			//tree.SetItemImage(add, IMAGE_MATERIAL, IMAGE_MATERIAL);
 			tree.SetItemData(add, TYPE_MATERIAL);
 
 			//Add the item to a quick lookup table
 			idStr material = GetMediaPath(add, TYPE_MATERIAL);
-			materialToTree.Set(material, *add);
+			materialToTree.Set(material, add);
 
 			continue;
 		}
@@ -1492,13 +1545,15 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 			index = name.Find('/');
 			if (index >= 0) {
 				TreeNode* newItem = NULL;
+				TreeNode** checkptrptr = NULL;
 				TreeNode *check = NULL;
 				name.Left(index, out);
 				path += out;
 				qt = root;
 				qt += "/";
 				qt += path;
-				if (quickTree.Get(qt, &check)) {
+				if (quickTree.Get(qt, &checkptrptr)) {
+					check = *checkptrptr;
 					newItem = check;
 				}
 
@@ -1514,7 +1569,7 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 					qt = root;
 					qt += "/";
 					qt += path;
-					quickTree.Set(qt, *newItem);
+					quickTree.Set(qt, newItem);
 
 
 					if(!afterFile || thisisfile) {
@@ -1527,7 +1582,7 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 							//Add the item to a quick lookup table
 							idStr file = GetMediaPath(newItem, TYPE_FILE);
 							//common->Printf("Adding fileToTree: %s - %d\n", file.c_str(), newItem);
-							fileToTree.Set(file, *newItem);
+							fileToTree.Set(file, newItem);
 
 						} else {
 							//treeMedia.SetItemImage(newItem, IMAGE_FOLDER, IMAGE_FOLDER);
@@ -1552,14 +1607,14 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 				qt += "/";
 				qt += path;
 				qt += name;
-				quickTree.Set(qt, *add);
+				quickTree.Set(qt, add);
 				//tree.SetItemImage(add, IMAGE_MATERIAL, IMAGE_MATERIAL);
 				tree.SetItemData(add, TYPE_MATERIAL);
 				path = "";
 
 				//Add the item to a quick lookup table
 				idStr material = GetMediaPath(add, TYPE_MATERIAL);
-				materialToTree.Set(material, *add);
+				materialToTree.Set(material, add);
 			}
 		}
 	}
@@ -1576,8 +1631,8 @@ void MaterialTreeView::PopupMenu(TreeNode *item) {
 	CMenu FloatingMenu;
 	VERIFY(FloatingMenu.LoadMenu(IDR_ME_MATERIALTREE_POPUP));
 	CMenu* pPopupMenu = FloatingMenu.GetSubMenu (0);
-
-	DWORD itemType = tree.GetItemData(item);
+	*/
+	int itemType = tree.GetItemData(item);
 
 	//Enable/Disable based on the state
 	MaterialDoc* pDoc = materialDocManager->GetCurrentMaterialDoc();
@@ -1585,90 +1640,92 @@ void MaterialTreeView::PopupMenu(TreeNode *item) {
 
 	//Apply Changes
 	if(pDoc && pDoc->applyWaiting) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_APPLYMATERIAL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYMATERIAL, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_APPLYMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	//Apply File
 	idStr filename;
 	if(GetFileName(item, filename)) {
-		if(materialDocManager->DoesFileNeedApply(filename.c_str()))
-			pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_ENABLED);
-		else
-			pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		if(materialDocManager->DoesFileNeedApply(filename.c_str())) {
+			//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_ENABLED);
+		} else {
+			//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		}
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	//Apply All
 	if(materialDocManager->DoesAnyNeedApply()) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_APPLYALL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYALL, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_APPLYALL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYALL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	//Save Material
 	if(pDoc && pDoc->modified) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_SAVEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_SAVEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	//Save File
 	if(GetFileName(item, filename)) {
-		if(materialDocManager->IsFileModified(filename.c_str()))
-			pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_ENABLED);
-		else
-			pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		if(materialDocManager->IsFileModified(filename.c_str())) {
+			//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_ENABLED);
+		} else {
+			//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		}
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	//Save All
 	if(materialDocManager->IsAnyModified()) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_SAVEALL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEALL, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_SAVEALL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEALL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	if(itemType == TYPE_MATERIAL || itemType == TYPE_MATERIAL_FOLDER) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_RENAMEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-		pPopupMenu->EnableMenuItem(ID_POPUP_DELETEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_RENAMEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_DELETEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_RENAMEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		pPopupMenu->EnableMenuItem(ID_POPUP_DELETEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_RENAMEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_DELETEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	if(itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER || itemType == TYPE_MATERIAL) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_ADDMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-		pPopupMenu->EnableMenuItem(ID_POPUP_ADDFOLDER, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDMATERIAL, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDFOLDER, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_ADDMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		pPopupMenu->EnableMenuItem(ID_POPUP_ADDFOLDER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDFOLDER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	if(itemType == TYPE_MATERIAL) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_CUT, MF_BYCOMMAND | MF_ENABLED);
-		pPopupMenu->EnableMenuItem(ID_POPUP_COPY, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_CUT, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_COPY, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_CUT, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		pPopupMenu->EnableMenuItem(ID_POPUP_COPY, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_CUT, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_COPY, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	if((itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) && materialDocManager->IsCopyMaterial()) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_PASTE, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_PASTE, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_PASTE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_PASTE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
 	if(itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) {
-		pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_ENABLED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_ENABLED);
 	} else {
-		pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 	}
 
-	pPopupMenu->TrackPopupMenu (TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt->x, pt->y, &GetTreeCtrl());*/
+	//pPopupMenu->TrackPopupMenu (TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt->x, pt->y, &GetTreeCtrl());
 }
 
 /**
@@ -1753,7 +1810,7 @@ void MaterialTreeView::BuildLookupTrees(TreeNode *item) {
 
 	//Add my quicktree item
 	idStr qt = GetQuicktreePath(item);
-	quickTree.Set(qt, *item);
+	quickTree.Set(qt, item);
 
 	if(tree.GetChildItem(item)) {
 		TreeNode *childItem = tree.GetChildItem(item);

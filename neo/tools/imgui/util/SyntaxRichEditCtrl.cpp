@@ -543,6 +543,24 @@ void SyntaxRichEditCtrl::SetText( const char *text ) {
 
 /*
 ================
+SyntaxRichEditCtrl::SetReadOnly
+================
+*/
+void SyntaxRichEditCtrl::SetReadOnly( bool readOnly ) {
+	scriptEdit->SetReadOnly( readOnly );
+}
+
+/*
+================
+SyntaxRichEditCtrl::GetReadOnly
+================
+*/
+bool SyntaxRichEditCtrl::GetReadOnly() {
+	return scriptEdit->IsReadOnly();
+}
+
+/*
+================
 SyntaxRichEditCtrl::IsEdited
 ================
 */
