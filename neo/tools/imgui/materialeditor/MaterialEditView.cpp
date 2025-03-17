@@ -54,6 +54,7 @@ MaterialEditView::MaterialEditView() {
 	sourceChanged = false;
 	propsTabSelected = true;
 	textTabSelected = false;
+	tabSel = 0;
 }
 
 /**
@@ -254,6 +255,9 @@ bool MaterialEditView::Draw( const ImVec2 &size ) {
 * the appropriate windows.
 */
 void MaterialEditView::OnTcnSelChange(int sel) {
+	if ( tabSel == sel ) {
+		return;
+	}
 
 	switch(sel) {
 		case 0:
@@ -271,7 +275,10 @@ void MaterialEditView::OnTcnSelChange(int sel) {
 
 			GetMaterialSource();
 			m_textView.SetReadOnly( false );
+
+			break;
 	}
+	tabSel = sel;
 }
 
 /**

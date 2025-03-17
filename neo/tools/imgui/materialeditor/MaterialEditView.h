@@ -90,6 +90,7 @@ protected:
 	idStr	currentMaterialName;
 	bool	propsTabSelected;
 	bool	textTabSelected;
+	int		tabSel;
 };
 
 }
