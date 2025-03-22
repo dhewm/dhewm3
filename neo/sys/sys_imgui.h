@@ -3,7 +3,9 @@
 #ifndef NEO_SYS_SYS_IMGUI_H_
 #define NEO_SYS_SYS_IMGUI_H_
 
+#ifndef IMGUI_DISABLE
 #include "../libs/imgui/imgui.h"
+#endif
 
 namespace D3 {
 namespace ImGuiHooks {
