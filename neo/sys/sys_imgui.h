@@ -3,8 +3,6 @@
 #ifndef NEO_SYS_SYS_IMGUI_H_
 #define NEO_SYS_SYS_IMGUI_H_
 
-#include "../libs/imgui/imgui.h"
-
 namespace D3 {
 namespace ImGuiHooks {
 
@@ -16,6 +14,8 @@ enum D3ImGuiWindow {
 };
 
 #ifndef IMGUI_DISABLE
+
+#include "../libs/imgui/imgui.h"
 
 extern ImGuiContext* imguiCtx; // this is only here so IsImguiEnabled() can use it inline
 
