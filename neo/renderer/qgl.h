@@ -110,6 +110,14 @@ extern PFNGLSTENCILOPSEPARATEPROC qglStencilOpSeparate;
 extern	PFNGLCOMPRESSEDTEXIMAGE2DARBPROC	qglCompressedTexImage2DARB;
 extern	PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	qglGetCompressedTexImageARB;
 
+// ARB_texture_compression_bptc - uses ARB_texture_compression, just adds new constants
+// that might be missing in old OpenGL headers
+#ifndef GL_COMPRESSED_RGBA_BPTC_UNORM_ARB
+  // currently the only one we use, there's also COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB (0x8E8D)
+  // and COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB (0x8E8E) and COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB (0x8E8F)
+  #define GL_COMPRESSED_RGBA_BPTC_UNORM_ARB 0x8E8C
+#endif
+
 // ARB_vertex_program / ARB_fragment_program
 extern PFNGLVERTEXATTRIBPOINTERARBPROC		qglVertexAttribPointerARB;
 extern PFNGLENABLEVERTEXATTRIBARRAYARBPROC	qglEnableVertexAttribArrayARB;

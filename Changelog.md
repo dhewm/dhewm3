@@ -8,7 +8,20 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 ------------------------------------------------------------------------
 
 * Enable/disable Soft Particles when **loading** a graphics quality preset (only enabled in Ultra preset,
-  though you can still configure it independently as before; #604)
+  though you can still configure it independently like before; #604)
+* Support BC7-compressed (BPTC) .dds textures. They offer better quality than the older S3TC/DXT/BC1-3
+  texture compression standard that Doom3 always supported. Mostly relevant for high-res retexturing
+  packs, because they offer similar quality as uncompressed TGAs while being smaller, using only
+  a quarter of the VRAM (TGA: 4 bytes per pixel, BC7: 1 byte per pixel) and loading *significantly*
+  faster because mipmaps are contained and don't have to be generated on load.  
+  If you have such DDS files and want to use them (instead of TGAs), you must set
+  `image_usePrecompressedTextures 1` and `image_useNormalCompression 1`.  
+  If you want to *create* .dds files with BC7 texture data, you can use any common texture compression
+  tool, **except** for **normalmaps**, those must be created with my [**customized bc7enc**](https://github.com/DanielGibson/bc7enc_rdo)
+  with the `-r2a` flag! *(Because Doom3 requires that normalmaps have the red channel moved into the
+  alpha channel, id confusingly called that "RXGB", and AFAIK no other tool supports that for BC7.)*  
+  Just like the old DXT .dds files, they must be in the `dds/` subdirectory of a mod (either directly
+  in the filesystem or in a .pk4).
 * Support SDL3 (SDL2 and, to some degree, SDL1.2 are also still supported)
 * Fix bugs on 64bit Big Endian platforms (#472, #625)
 * Fixes for high-poly models (use heap allocation instead of `alloca()` for big buffers; #528)
