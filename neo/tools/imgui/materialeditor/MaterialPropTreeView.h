@@ -28,10 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef MATERIALPROPTREEVIEW_H_
 #define MATERIALPROPTREEVIEW_H_
 
-//#include "../common/PropTree/PropTreeView.h"
 #include "MaterialView.h"
-
-//#include "../common/registryoptions.h"
 #include "MaterialDef.h"
 
 namespace ImGuiTools {
@@ -48,30 +45,21 @@ public:
 
 	bool				Draw( const ImVec2 &size );
 
-	void				SetPropertyListType(int listType, int stageNum = -1);
+	void				SetPropertyListType( int listType, int stageNum = -1 );
 
 	void				LoadSettings();
 	void				SaveSettings();
 
 	//Material Interface
-	virtual void		MV_OnMaterialChange(MaterialDoc* pMaterial);
+	virtual void		MV_OnMaterialChange( MaterialDoc *pMaterial );
 
-protected:
-	//DECLARE_DYNCREATE(MaterialPropTreeView)
+private:
+	int					DrawGroup( int startGroupNum );
 
-	void				OnPropertyChangeNotification();
-	void				OnPropertyItemExpanding();
-	//DECLARE_MESSAGE_MAP()
-
-	MaterialDef*		FindDefForTreeID(UINT treeID);
-	void				RefreshProperties();
-
-protected:
-
-	MaterialDoc*		currentMaterial;
+	MaterialDoc *		currentMaterial;
 	int					currentListType;
 	int					currentStage;
-	MaterialDefList*	currentPropDefs;
+	MaterialDefList *	currentPropDefs;
 	//rvRegistryOptions	registry;
 	bool				internalChange;
 };
