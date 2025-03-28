@@ -65,7 +65,11 @@ const int WIN_WANTENTER		= 0x01000000;
 
 const int WIN_DESKTOP		= 0x10000000;
 
-const int WIN_SCALETO43		= 0x20000000; // DG: for the "scaleto43" window flag (=> scale window to 4:3 with "empty" bars left/right or above/below)
+// DG: for the "scaleto43" window flag (=> scale window to 4:3 with "empty" bars left/right or above/below)
+const int WIN_SCALETO43		= 0x20000000;
+// DG: if a gui explicitly wants to be stretched despite r_scaleMenusTo43 1 it can set `scaleto43 0`
+//     (useful when using anchors in fullscreen menus)
+const int WIN_NO_SCALETO43	= 0x40000000;
 
 const char CAPTION_HEIGHT[] = "16.0";
 const char SCROLLER_SIZE[] = "16.0";

@@ -251,6 +251,8 @@ idUserInterfaceLocal::idUserInterfaceLocal() {
 	//so the reg eval in gui parsing doesn't get bogus values
 	time = 0;
 	refs = 1;
+	timeStamp = 0;
+	lastGlWidth = lastGlHeight = 0;
 }
 
 idUserInterfaceLocal::~idUserInterfaceLocal() {
@@ -339,6 +341,31 @@ bool idUserInterfaceLocal::InitFromFile( const char *qpath, bool rebuild, bool c
 	return true;
 }
 
+// static
+bool idUserInterface::IsUserInterfaceScaledTo43( const idUserInterface* ui_ )
+{
+	const idUserInterfaceLocal* ui = (const idUserInterfaceLocal*)ui_;
+	if ( ui == NULL ) {
+		assert( 0 && "why do you call this without a ui?!" );
+		return false;
+	}
+	idWindow* win = ui->GetDesktop();
+	if ( win == NULL ) {
+		return false;
+	}
+	int winFlags = win->GetFlags();
+	if ( (winFlags & WIN_MENUGUI) == 0 || !r_scaleMenusTo43.GetBool() ) {
+		// if the window is no fullscreen menu (but an ingame menu or noninteractive like the HUD)
+		// or scaling menus to 4:3 by default (r_scaleMenusTo43) is disabled,
+		// they only get scaled if they explicitly requested it with "scaleto43 1"
+		return (winFlags & WIN_SCALETO43) != 0;
+	} else {
+		// if it's a fullscreen menu and r_scaleMenusTo43 is enabled,
+		// they get scaled to 4:3 unless they explicitly disable it with "scaleto43 0"
+		return (winFlags & WIN_NO_SCALETO43) == 0;
+	}
+}
+
 const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _time, bool *updateVisuals ) {
 
 	time = _time;
@@ -366,7 +393,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 			const float realW = w;
 			const float realH = h;
 
-			if(r_scaleMenusTo43.GetBool()) {
+			if ( IsUserInterfaceScaledTo43(this) ) {
 				// in case we're scaling menus to 4:3, we need to take that into account
 				// when scaling the mouse events.
 				// no, we can't just call uiManagerLocal.dc.GetFixScaleForMenu() or sth like that,
@@ -502,6 +529,18 @@ void idUserInterfaceLocal::Redraw( int _time ) {
 		return;
 	}
 	if ( !loading && desktop ) {
+		if ( desktop->GetFlags() & WIN_MENUGUI ) {
+			// if the (SDL) window size has changed, calculate and set the
+			// "gui::cst*" window register variables accordingly
+			if ( MaybeSetCstWinRegs() ) {
+				// tell the GUI script about it in case it wants to handle the size change in
+				// some way (though usually it's enough to use sth like
+				// `rect 0, 200, "gui::cstHorPad", 100"` and `cstAnchor  CST_ANCHOR_LEFT`
+				// for a windowDef that should fill part of the left side)
+				HandleNamedEvent( "CstScreenSizeChange" );
+			}
+		}
+
 		time = _time;
 		uiManagerLocal.dc.PushClipRect( uiManagerLocal.screenRect );
 		desktop->Redraw( 0, 0 );
@@ -563,13 +602,19 @@ void idUserInterfaceLocal::StateChanged( int _time, bool redraw ) {
 		// DG: little hack: allow game DLLs to do
 		//     ui->SetStateBool("scaleto43", true);
 		//     ui->StateChanged(gameLocal.time);
-		//     so we can force cursors.gui (crosshair) to be scaled, for example
-		bool scaleTo43 = false;
-		if(state.GetBool("scaleto43", "0", scaleTo43)) {
-			if(scaleTo43)
+		//     so we can force cursors.gui (crosshair) to be scaled, for example.
+		//     Not sure if/where that's needed, but ui->SetStateBool("scaleto43", false);
+		//     is now also supported to explicitly disable scaling from the code
+		int scaleTo43 = 0;
+		if(state.GetInt("scaleto43", "-1", scaleTo43)) {
+			if(scaleTo43 > 0) {
 				desktop->SetFlag(WIN_SCALETO43);
-			else
+				desktop->ClearFlag(WIN_NO_SCALETO43);
+				// TODO
+			} else if(scaleTo43 == 0) {
 				desktop->ClearFlag(WIN_SCALETO43);
+				desktop->SetFlag(WIN_NO_SCALETO43);
+			} // do nothing for -1, it means that it wasn't set at all
 		}
 		// DG end
 
@@ -598,6 +643,12 @@ const char *idUserInterfaceLocal::Activate(bool activate, int _time) {
 			Sys_SetInteractiveIngameGuiActive( activate, this );
 		} // DG end
 		activateStr = "";
+
+		if ( desktop->GetFlags() & WIN_MENUGUI ) {
+			// DG: calculate and set the "gui::cst*" window register variables
+			//     so the GUI can use them
+			MaybeSetCstWinRegs(true);
+		}
 		desktop->Activate( activate, activateStr );
 		return activateStr;
 	}
@@ -787,4 +838,45 @@ idUserInterfaceLocal::SetCursor
 void idUserInterfaceLocal::SetCursor( float x, float y ) {
 	cursorX = x;
 	cursorY = y;
+}
+
+
+bool idUserInterfaceLocal::MaybeSetCstWinRegs(bool force) {
+	if ( desktop == NULL ) {
+		return false;
+	}
+	int glWidth, glHeight;
+	renderSystem->GetGLSettings(glWidth, glHeight);
+	if (glWidth <= 0 || glHeight <= 0 || (!force && glWidth == lastGlWidth && glHeight == lastGlHeight) ) {
+		return false;
+	}
+	lastGlWidth = glWidth;
+	lastGlHeight = glHeight;
+
+	float glAspectRatio = (float)glWidth / (float)glHeight;
+	const float vidAspectRatio = (float)VIRTUAL_WIDTH / (float)VIRTUAL_HEIGHT;
+
+	const float desktopWidth  = desktop->forceAspectWidth;
+	const float desktopHeight = desktop->forceAspectHeight;
+
+	float horizPadding = 0;
+	float vertPadding = 0;
+	float modWidth = desktopWidth;
+	float modHeight = desktopHeight;
+
+	if (glAspectRatio >= vidAspectRatio) {
+		modWidth = desktopHeight * glAspectRatio;
+		horizPadding = 0.5f * (modWidth - desktopWidth);
+	} else {
+		modHeight = desktopWidth / glAspectRatio;
+		vertPadding = 0.5f * (modHeight - desktopHeight);
+	}
+
+	SetStateFloat( "cstAspectRatio", glAspectRatio );
+	SetStateFloat( "cstWidth", modWidth );
+	SetStateFloat( "cstHeight", modHeight );
+	SetStateFloat( "cstHorPad", horizPadding );
+	SetStateFloat( "cstVertPad", vertPadding );
+
+	return true;
 }
