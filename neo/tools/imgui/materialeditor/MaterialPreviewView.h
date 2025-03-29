@@ -37,7 +37,41 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace ImGuiTools {
 
-/*
+class idGLDrawable {
+public:
+	idGLDrawable();
+	~idGLDrawable() {};
+	virtual void draw(int x, int y, int w, int h);
+	virtual void setMedia(const char* name) {}
+	virtual void buttonDown(int button, float x, float y);
+	virtual void buttonUp(int button, float x, float y);
+	virtual void mouseMove(float x, float y);
+	virtual int getRealTime() { return realTime; };
+	virtual bool ScreenCoords() {
+		return true;
+	}
+	void SetRealTime(int i) {
+		realTime = i;
+	}
+	virtual void Update() {};
+	float getScale() {
+		return scale;
+	}
+	void setScale(float f) {
+		scale = f;
+	}
+protected:
+	float scale;
+	float xOffset;
+	float yOffset;
+	float zOffset;
+	float pressX;
+	float pressY;
+	bool  handleMove;
+	int button;
+	int realTime;
+};
+
 class idGLDrawableView : public idGLDrawable {
 
 public:
@@ -77,19 +111,19 @@ protected:
 	idRenderModel		*worldModel;
 	const idMaterial	*material;
 
-	bool			showLights;
+	bool				showLights;
 
-	idVec3			viewOrigin;
-	idAngles		viewRotation;
-	float			viewDistance;
+	idVec3				viewOrigin;
+	idAngles			viewRotation;
+	float				viewDistance;
 
-	renderEntity_t	worldEntity;
-	qhandle_t		modelDefHandle;
+	renderEntity_t		worldEntity;
+	qhandle_t			modelDefHandle;
 
-	int				objectId;
-	idStr			customModelName;
+	int					objectId;
+	idStr				customModelName;
 
-	float			globalParms[MAX_GLOBAL_SHADER_PARMS];
+	float				globalParms[MAX_GLOBAL_SHADER_PARMS];
 
 	typedef struct {
 		renderLight_t		renderLight;
@@ -102,8 +136,7 @@ protected:
 	} lightInfo_t;
 
 	idList<lightInfo_t>	viewLights;
-};*/
-
+};
 
 // ==================================================================
 // ==================================================================
@@ -138,18 +171,11 @@ public:
 	void	OnAddLight( void );
 	void	OnDeleteLight( int lightId );
 
-#ifdef _DEBUG
-	//virtual void AssertValid() const;
-	//virtual void Dump(CDumpContext& dc) const;
-#endif
-
 protected:
 	//idGLWidget			renderWindow;
-	//idGLDrawableView	renderedView;
+	idGLDrawableView	renderedView;
 
-	idStr	currentMaterial;
-
-	//DECLARE_MESSAGE_MAP()
+	idStr				currentMaterial;
 
 public:
 	//afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

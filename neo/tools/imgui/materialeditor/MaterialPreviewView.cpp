@@ -28,6 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 #include "tools/edit_gui_common.h"
+#include "../../renderer/tr_local.h"
 
 
 //#include "../radiant/QE3.H"
@@ -42,7 +43,7 @@ namespace ImGuiTools {
 
 MaterialPreviewView::MaterialPreviewView() {
 	// Initialize the rendered material
-	//renderedView.setMedia( "_default" );
+	renderedView.setMedia( "_default" );
 }
 
 MaterialPreviewView::~MaterialPreviewView() {
@@ -59,24 +60,15 @@ END_MESSAGE_MAP()
 
 bool MaterialPreviewView::Draw( const ImVec2 &size ) {
 	ImGui::BeginChild( "MaterialPreviewView", size, ImGuiChildFlags_Borders );
+	
 	ImGui::Text( "MaterialPreviewView" );
+	//ImVec2 pos = ImGui::GetCursorPos();
+	//renderedView.draw( pos.x, pos.y, size.x, size.y );
+
 	ImGui::EndChild();
+
 	return false;
 }
-
-// MaterialPreviewView diagnostics
-
-#ifdef _DEBUG
-/*
-void MaterialPreviewView::AssertValid() const {
-	CView::AssertValid();
-}
-
-void MaterialPreviewView::Dump(CDumpContext& dc) const {
-	CView::Dump(dc);
-}
-*/
-#endif //_DEBUG
 
 // MaterialPreviewView message handlers
 
@@ -119,10 +111,9 @@ void MaterialPreviewView::OnSize(UINT nType, int cx, int cy)
 void MaterialPreviewView::MV_OnMaterialSelectionChange( MaterialDoc *pMaterial )
 {
 	if ( pMaterial && pMaterial->renderMaterial ) {
-		/*
 		currentMaterial = pMaterial->renderMaterial->GetName();
 		renderedView.setMedia( currentMaterial );
-
+		/*
 		renderWindow.Invalidate();
 		renderWindow.RedrawWindow();
 		*/
@@ -131,57 +122,57 @@ void MaterialPreviewView::MV_OnMaterialSelectionChange( MaterialDoc *pMaterial )
 
 void MaterialPreviewView::OnLocalParmChange( int parmNum, float value ) {
 
-	//renderedView.setLocalParm( parmNum, value );
+	renderedView.setLocalParm( parmNum, value );
 }
 
 void MaterialPreviewView::OnGlobalParmChange( int parmNum, float value ) {
 
-	//renderedView.setGlobalParm( parmNum, value );
+	renderedView.setGlobalParm( parmNum, value );
 }
 
 void MaterialPreviewView::OnLightShaderChange( int lightId, idStr shaderName ) {
 
-	//renderedView.setLightShader( lightId, shaderName );
+	renderedView.setLightShader( lightId, shaderName );
 }
 
 void MaterialPreviewView::OnLightColorChange( int lightId, idVec3 &color ) {
 
-	//renderedView.setLightColor( lightId, color );
+	renderedView.setLightColor( lightId, color );
 }
 
 void MaterialPreviewView::OnLightRadiusChange( int lightId, float radius ) {
 
-	//renderedView.setLightRadius( lightId, radius );
+	renderedView.setLightRadius( lightId, radius );
 }
 
 void MaterialPreviewView::OnLightAllowMoveChange( int lightId, bool move ) {
 
-	//renderedView.setLightAllowMove( lightId, move );
+	renderedView.setLightAllowMove( lightId, move );
 }
 
 void MaterialPreviewView::OnAddLight( void ) {
 
-	//renderedView.addLight();
+	renderedView.addLight();
 }
 
 void MaterialPreviewView::OnDeleteLight( int lightId ) {
 
-	//renderedView.deleteLight( lightId );
+	renderedView.deleteLight( lightId );
 }
 
 void MaterialPreviewView::OnModelChange( int modelId ) {
 
-	//renderedView.setObject( modelId );
+	renderedView.setObject( modelId );
 }
 
 void MaterialPreviewView::OnCustomModelChange( idStr modelName ) {
 
-	//renderedView.setCustomModel( modelName );
+	renderedView.setCustomModel( modelName );
 }
 
 void MaterialPreviewView::OnShowLightsChange( bool showLights ) {
 
-	//renderedView.setShowLights( showLights );
+	renderedView.setShowLights( showLights );
 }
 
 /*
@@ -190,9 +181,105 @@ void MaterialPreviewView::OnShowLightsChange( bool showLights ) {
  =============================================================================
  */
 
-/*
-extern bool		Sys_KeyDown(int key);
-extern float	fDiff(float f1, float f2);
+idGLDrawable::idGLDrawable() {
+	scale = 1.0;
+	xOffset = 0.0;
+	yOffset = 0.0;
+	handleMove = false;
+	realTime = 0;
+}
+
+void idGLDrawable::buttonDown( int _button, float x, float y ) {
+	pressX = x;
+	pressY = y;
+	button = _button;
+	if ( button == ImGuiMouseButton_Right ) {
+		handleMove = true;
+	}
+}
+
+void idGLDrawable::buttonUp( int button, float x, float y ) {
+	handleMove = false;
+}
+
+static float fDiff( float f1, float f2 ) {
+	if ( f1 > f2 ) {
+		return f1 - f2;
+	} else {
+		return f2 - f1;
+	}
+}
+
+void idGLDrawable::mouseMove( float x, float y ) {
+	if ( handleMove ) {
+		Update();
+		if ( ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt ) ) {
+			// scale
+			float* px = &x;
+			float* px2 = &pressX;
+
+			if ( fDiff( y, pressY ) > fDiff( x, pressX ) ) {
+				px = &y;
+				px2 = &pressY;
+			}
+
+			if ( *px > *px2 ) {
+				// zoom in
+				scale += 0.1f;
+				if ( scale > 10.0f ) {
+					scale = 10.0f;
+				}
+			} else if (*px < *px2) {
+				// zoom out
+				scale -= 0.1f;
+				if ( scale <= 0.001f ) {
+					scale = 0.001f;
+				}
+			}
+
+			*px2 = *px;
+			//::SetCursorPos(pressX, pressY);
+		}
+		else if ( ImGui::IsKeyDown( ImGuiKey_LeftShift ) || ImGui::IsKeyDown( ImGuiKey_RightShift ) ) {
+			// rotate
+		}
+		else {
+			// origin
+			if ( x != pressX ) {
+				xOffset += ( x - pressX );
+				pressX = x;
+			}
+			if ( y != pressY ) {
+				yOffset -= ( y - pressY );
+				pressY = y;
+			}
+			//::SetCursorPos(pressX, pressY);
+		}
+	}
+}
+
+void idGLDrawable::draw(int x, int y, int w, int h) {
+	GL_State( GLS_DEFAULT );
+	qglViewport( x, y, w, h );
+	qglScissor( x, y, w, h );
+	qglMatrixMode( GL_PROJECTION );
+	qglClearColor( 0.1f, 0.1f, 0.1f, 0.0f );
+	qglClear( GL_COLOR_BUFFER_BIT );
+	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	qglLineWidth( 0.5 );
+	qglColor3f( 1, 1, 1 );
+	globalImages->BindNull();
+	qglBegin(GL_LINE_LOOP);
+	qglColor3f(1, 0, 0);
+	qglVertex2f(x + 3, y + 3);
+	qglColor3f(0, 1, 0);
+	qglVertex2f(x + 3, h - 3);
+	qglColor3f(0, 0, 1);
+	qglVertex2f(w - 3, h - 3);
+	qglColor3f(1, 1, 1);
+	qglVertex2f(w - 3, y + 3);
+	qglEnd();
+}
 
 idGLDrawableView::idGLDrawableView() {
 	material = NULL;
@@ -231,7 +318,7 @@ void idGLDrawableView::ResetView( void ) {
 	gameEdit->ParseSpawnArgsToRenderEntity(&spawnArgs, &worldEntity);
 
 	// load a model and set the current material as its customshader
-	worldModel = renderModelManager->FindModel("models/materialeditor/cube128.ase");
+	worldModel = renderModelManager->FindModel( "models/materialeditor/cube128.ase" );
 	worldEntity.hModel = worldModel;
 
 	// current material
@@ -270,21 +357,21 @@ void idGLDrawableView::buttonDown(int _button, float x, float y) {
 	pressX = x;
 	pressY = y;
 	button = _button;
-	if ( button == MK_RBUTTON || button == MK_LBUTTON || button == MK_MBUTTON ) {
+	if ( button == ImGuiMouseButton_Left || button == ImGuiMouseButton_Right || button == ImGuiMouseButton_Middle ) {
 		handleMove = true;
 	}
 }
 
-void idGLDrawableView::mouseMove(float x, float y) {
+void idGLDrawableView::mouseMove( float x, float y ) {
 	bool doZoom;
 	float sensitivity = 0.5f;
 
-	if (handleMove) {
+	if ( handleMove ) {
 
 		// Left mouse button rotates and zooms the view
-		if (button == MK_LBUTTON) {
-			doZoom = Sys_KeyDown(VK_MENU);
-			if (doZoom) {
+		if ( button == ImGuiMouseButton_Left ) {
+			doZoom = ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt );
+			if ( doZoom ) {
 				if ( y != pressY ) {
 					viewDistance -= ( y - pressY );
 					pressY = y;
@@ -293,23 +380,23 @@ void idGLDrawableView::mouseMove(float x, float y) {
 				float xo = 0.f;
 				float yo = 0.f;
 
-				if (x != pressX) {
-					xo = (x - pressX);
+				if ( x != pressX ) {
+					xo = ( x - pressX );
 					pressX = x;
 				}
-				if (y != pressY) {
-					yo = (y - pressY);
+				if ( y != pressY ) {
+					yo = ( y - pressY );
 					pressY = y;
 				}
 
-				viewRotation.yaw += -(xo * sensitivity);
-				viewRotation.pitch += (yo * sensitivity);
+				viewRotation.yaw += -( xo * sensitivity );
+				viewRotation.pitch += ( yo * sensitivity );
 
 				viewRotation.pitch = idMath::ClampFloat( -89.9f, 89.9f, viewRotation.pitch );
 			}
 
 		// Right mouse button moves lights in the view plane
-		} else if (button == MK_RBUTTON) {
+		} else if ( button == ImGuiMouseButton_Right ) {
 			int		i;
 			float	lightMovement = 0;
 			idVec3	lightForward, lightRight, lightUp;
@@ -318,8 +405,8 @@ void idGLDrawableView::mouseMove(float x, float y) {
 			lightMove.Zero();
 			viewRotation.ToVectors( &lightForward, &lightRight, &lightUp );
 
-			doZoom = Sys_KeyDown(VK_MENU);
-			if (doZoom) {
+			doZoom = ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt );
+			if ( doZoom ) {
 				if ( y != pressY ) {
 					lightMovement = -( y - pressY ) * sensitivity;
 					pressY = y;
@@ -328,14 +415,14 @@ void idGLDrawableView::mouseMove(float x, float y) {
 					lightMove = lightForward * lightMovement;
 				}
 			} else {
-				if (x != pressX) {
+				if ( x != pressX ) {
 					lightMovement = (x - pressX) * sensitivity;
 					pressX = x;
 
 					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
 					lightMove = lightRight * lightMovement;
 				}
-				if (y != pressY) {
+				if ( y != pressY ) {
 					lightMovement = -(y - pressY) * sensitivity;
 					pressY = y;
 
@@ -354,7 +441,7 @@ void idGLDrawableView::mouseMove(float x, float y) {
 			}
 
 		// Middle mouse button moves object up and down
-		} else if ( button == MK_MBUTTON ) {
+		} else if ( button == ImGuiMouseButton_Middle ) {
 			float yo = 0.f;
 
 			if (y != pressY) {
@@ -427,34 +514,34 @@ void idGLDrawableView::UpdateModel( void ) {
 
 	switch( objectId ) {
 		case 0:
-			worldModel = renderModelManager->FindModel("models/materialeditor/cube128.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/cube128.ase" );
 			break;
 		case 1:
-			worldModel = renderModelManager->FindModel("models/materialeditor/box128x64.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/box128x64.ase" );
 			break;
 		case 2:
-			worldModel = renderModelManager->FindModel("models/materialeditor/box128x32.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/box128x32.ase" );
 			break;
 		case 3:
-			worldModel = renderModelManager->FindModel("models/materialeditor/box64x128.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/box64x128.ase" );
 			break;
 		case 4:
-			worldModel = renderModelManager->FindModel("models/materialeditor/box32x128.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/box32x128.ase" );
 			break;
 		case 5:
-			worldModel = renderModelManager->FindModel("models/materialeditor/cylinder_v.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/cylinder_v.ase" );
 			break;
 		case 6:
-			worldModel = renderModelManager->FindModel("models/materialeditor/cylinder_h.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/cylinder_h.ase" );
 			break;
 		case 7:
-			worldModel = renderModelManager->FindModel("models/materialeditor/sphere64.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/sphere64.ase" );
 			break;
 		case -1:
 			worldModel = renderModelManager->FindModel( customModelName.c_str() );
 			break;
 		default:
-			worldModel = renderModelManager->FindModel("models/materialeditor/cube128.ase");
+			worldModel = renderModelManager->FindModel( "models/materialeditor/cube128.ase" );
 			break;
 	};
 
@@ -505,27 +592,27 @@ void idGLDrawableView::drawLights( renderView_t *refdef ) {
 
 		idSphere sphere(vLight->renderLight.origin, 4);
 		session->rw->DebugSphere( lColor, sphere, 0, true );
-		session->rw->DrawText( va( "%d", i+1 ), vLight->renderLight.origin + idVec3(0,0,5), 0.25f, idVec4(1,1,0,1), refdef->viewaxis, 1, 0, true );
+		session->rw->DrawText( va( "%d", i + 1 ), vLight->renderLight.origin + idVec3( 0, 0, 5 ), 0.25f, idVec4( 1, 1, 0, 1 ), refdef->viewaxis, 1, 0, true );
 	}
 }
 
 
-void idGLDrawableView::draw(int x, int y, int w, int h) {
-	int i;
-	renderView_t	refdef;
-	const idMaterial		*mat = material;
+void idGLDrawableView::draw( int x, int y, int w, int h ) {
+	int					i;
+	renderView_t		refdef;
+	const idMaterial	*mat = material;
 
-	if (mat) {
-		qglViewport(x, y, w, h);
-		qglScissor(x, y, w, h);
-		qglMatrixMode(GL_PROJECTION);
+	if ( mat ) {
+		qglViewport( x, y, w, h );
+		qglScissor( x, y, w, h );
+		qglMatrixMode( GL_PROJECTION );
 		qglClearColor( 0.1f, 0.1f, 0.1f, 0.0f );
-		qglClear(GL_COLOR_BUFFER_BIT);
+		qglClear( GL_COLOR_BUFFER_BIT );
 
 		UpdateLights();
 
 		// render it
-		renderSystem->BeginFrame(w, h);
+		renderSystem->BeginFrame( w, h );
 
 		memset( &refdef, 0, sizeof( refdef ) );
 
@@ -562,11 +649,11 @@ void idGLDrawableView::draw(int x, int y, int w, int h) {
 // Interface to PropTree Window
 // ============================
 
-void idGLDrawableView::setMedia(const char *name) {
+void idGLDrawableView::setMedia( const char *name ) {
 	float	ratio = 1;
 
-	if (name && *name) {
-		material = declManager->FindMaterial(name);
+	if ( name && *name ) {
+		material = declManager->FindMaterial( name );
 	} else {
 		material = NULL;
 	}
@@ -615,14 +702,12 @@ void idGLDrawableView::setGlobalParm( int parmNum, float value ) {
 }
 
 void idGLDrawableView::setLightShader( const int lightId, const idStr shaderName ) {
-
 	if ( lightId < viewLights.Num() ) {
 		viewLights[ lightId ].shader = declManager->FindMaterial( shaderName, false );
 	}
 }
 
 void idGLDrawableView::setLightColor( const int lightId, const idVec3 &value ) {
-
 	if ( lightId < viewLights.Num() ) {
 		// Update this lights color
 		viewLights[ lightId ].color = value;
@@ -630,14 +715,12 @@ void idGLDrawableView::setLightColor( const int lightId, const idVec3 &value ) {
 }
 
 void idGLDrawableView::setLightRadius( const int lightId, const float radius ) {
-
 	if ( lightId < viewLights.Num() ) {
 		viewLights[ lightId ].radius = radius;
 	}
 }
 
 void idGLDrawableView::setLightAllowMove( const int lightId, const bool move ) {
-
 	if ( lightId < viewLights.Num() ) {
 		viewLights[ lightId ].allowMove = move;
 	}
@@ -650,7 +733,6 @@ void idGLDrawableView::setObject( int Id ) {
 }
 
 void idGLDrawableView::setCustomModel( const idStr modelName ) {
-
 	if ( modelName.Length() ) {
 		objectId = -1;
 	} else {
@@ -665,7 +747,5 @@ void idGLDrawableView::setCustomModel( const idStr modelName ) {
 void idGLDrawableView::setShowLights( bool _showLights ) {
 	showLights = _showLights;
 }
-
-*/
 
 }
