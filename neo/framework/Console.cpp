@@ -916,8 +916,14 @@ void idConsoleLocal::Print( const char *txt ) {
 
 #ifdef ID_ALLOW_TOOLS
 	RadiantPrint( txt );
+#endif
 
-	if( com_editors & EDITOR_MATERIAL ) {
+#ifndef IMGUI_DISABLE
+	if (com_editors & EDITOR_MATERIAL) {
+		ImGuiTools::MaterialEditorPrintConsole(txt);
+	}
+#elif defined(ID_ALLOW_TOOLS)
+	if (com_editors & EDITOR_MATERIAL) {
 		MaterialEditorPrintConsole(txt);
 	}
 #endif
