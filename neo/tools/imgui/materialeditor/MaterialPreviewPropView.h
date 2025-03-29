@@ -28,17 +28,15 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef MATERIALPREVIEWPROPVIEW_H_
 #define MATERIALPREVIEWPROPVIEW_H_
 
-//#include "../common/PropTree/PropTreeView.h"
 #include "MaterialPreviewView.h"
 
 namespace ImGuiTools {
 
 // MaterialPreviewPropView view
 
-class MaterialPreviewPropView //: public CPropTreeView
+class MaterialPreviewPropView
 {
 public:
-	//DECLARE_DYNCREATE(MaterialPreviewPropView)
 	MaterialPreviewPropView();
 
 	virtual ~MaterialPreviewPropView();
@@ -46,24 +44,40 @@ public:
 	bool Draw( const ImVec2 &size );
 
 public:
-	//virtual void OnDraw(CDC* pDC);      // overridden to draw this view
-
-	//afx_msg void OnPropertyChangeNotification( NMHDR *nmhdr, LRESULT *lresult );
-	//afx_msg void OnPropertyButtonClick( NMHDR *nmhdr, LRESULT *lresult );
-
-#ifdef _DEBUG
-	//virtual void AssertValid() const;
-	//virtual void Dump(CDumpContext& dc) const;
-#endif
-
 	void AddLight( void );
 	void InitializePropTree( void );
 
 	void RegisterPreviewView( MaterialPreviewView *view );
 
 protected:
+	class LightData
+	{
+	public:
+		int			id;
+		int			materialNum;
+		idVec3		color;
+		float		radius;
+		bool		moveable;
 
-	int		numLights;
+		LightData()
+			: id(0)
+			, materialNum(-1)
+			, color(vec3_zero)
+			, radius(1.0f)
+			, moveable(false)
+		{
+		}
+	};
+
+	idStr				customModel;
+	idList<LightData>	lights;
+	idStrList			lightMaterials;
+	int					defaultPointLightIndex;
+	int					modelType;
+	bool				showLights;
+	float				localParms[MAX_ENTITY_SHADER_PARMS];
+	float				globalParms[MAX_GLOBAL_SHADER_PARMS];
+	DeclSelect			customModelSelectDlg; // TODO: replace by file dialog?
 
 	MaterialPreviewView	*materialPreview;
 };
