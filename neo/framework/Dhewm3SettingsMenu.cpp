@@ -1706,8 +1706,9 @@ static int initialMode = 0;
 static int initialCustomVidRes[2];
 static int initialMSAAmode = 0;
 static int qualityPreset = 0;
-static bool initialUsePrecomprTextures = false;
-static int initialUseNormalCompr = false;
+static int initialUsePrecomprTextures = 0;
+static int initialUseCompression = 0;
+static int initialUseNormalCompr = 0;
 
 static void SetVideoStuffFromCVars()
 {
@@ -1737,7 +1738,8 @@ static void SetVideoStuffFromCVars()
 			qualityPreset = 1; // default to medium Quality
 	}
 
-	initialUsePrecomprTextures = globalImages->image_usePrecompressedTextures.GetBool();
+	initialUsePrecomprTextures = globalImages->image_usePrecompressedTextures.GetInteger();
+	initialUseCompression = globalImages->image_useCompression.GetInteger();
 	initialUseNormalCompr = globalImages->image_useNormalCompression.GetInteger();
 }
 
@@ -1759,7 +1761,10 @@ static bool VideoHasResettableChanges()
 	if ( initialMSAAmode != r_multiSamples.GetInteger() ) {
 		return true;
 	}
-	if ( initialUsePrecomprTextures != globalImages->image_usePrecompressedTextures.GetBool() ) {
+	if ( initialUsePrecomprTextures != globalImages->image_usePrecompressedTextures.GetInteger() ) {
+		return true;
+	}
+	if( initialUseCompression != globalImages->image_useCompression.GetInteger() ) {
 		return true;
 	}
 	if ( initialUseNormalCompr != globalImages->image_useNormalCompression.GetInteger() ) {
@@ -1786,12 +1791,14 @@ static bool VideoHasApplyableChanges()
 		return true;
 	}
 
-	if ( initialUsePrecomprTextures != globalImages->image_usePrecompressedTextures.GetBool() ) {
+	if ( initialUsePrecomprTextures != globalImages->image_usePrecompressedTextures.GetInteger() ) {
 		return true;
 	}
 	// Note: value of image_useNormalCompression is only relevant if image_usePrecompressedTextures is enabled
 	if ( initialUsePrecomprTextures
-		 && initialUseNormalCompr != globalImages->image_useNormalCompression.GetInteger() ) {
+	    && (initialUseNormalCompr != globalImages->image_useNormalCompression.GetInteger()
+	       || initialUseCompression != globalImages->image_useCompression.GetInteger()) )
+	{
 		return true;
 	}
 
@@ -1802,8 +1809,9 @@ static bool VideoHasApplyableChanges()
 static void ApplyVideoSettings()
 {
 	const char* cmd = "vid_restart partial\n";
-	if ( initialUsePrecomprTextures != globalImages->image_usePrecompressedTextures.GetBool()
-	    || initialUseNormalCompr != globalImages->image_useNormalCompression.GetInteger() )
+	if ( initialUsePrecomprTextures != globalImages->image_usePrecompressedTextures.GetInteger()
+	    || initialUseNormalCompr != globalImages->image_useNormalCompression.GetInteger()
+	    || initialUseCompression != globalImages->image_useCompression.GetInteger() )
 	{
 		// these need a full restart (=> textures must be reloaded)
 		cmd = "vid_restart\n";
@@ -1821,7 +1829,8 @@ static void VideoResetChanges()
 	r_fullscreenDesktop.SetBool( initialFullscreenDesktop );
 
 	r_multiSamples.SetInteger( initialMSAAmode );
-	globalImages->image_usePrecompressedTextures.SetBool( initialUsePrecomprTextures );
+	globalImages->image_usePrecompressedTextures.SetInteger( initialUsePrecomprTextures );
+	globalImages->image_useCompression.SetInteger( initialUseCompression );
 	globalImages->image_useNormalCompression.SetInteger( initialUseNormalCompr );
 }
 
@@ -1966,9 +1975,11 @@ static void DrawVideoOptionsMenu()
 	}
 	AddCVarOptionTooltips( r_multiSamples, "Note: Not all GPUs/drivers support all modes, esp. not 16x!" );
 
-	bool usePreComprTex = globalImages->image_usePrecompressedTextures.GetBool();
-	if ( ImGui::Checkbox( "Use precompressed textures", &usePreComprTex ) ) {
-		globalImages->image_usePrecompressedTextures.SetBool(usePreComprTex);
+	int usePreComprTex = globalImages->image_usePrecompressedTextures.GetInteger();
+	if ( ImGui::Combo( "Use precompressed (.dds) textures", &usePreComprTex,
+	                   "No, only uncompressed\0Yes, no matter which format\0Only if high quality (BPCT/BC7)\0" ) )
+	{
+		globalImages->image_usePrecompressedTextures.SetInteger(usePreComprTex);
 		// by default I guess people also want compressed normal maps when using this
 		// especially relevant for retexturing packs that only ship BC7 DDS files
 		// (otherwise the lowres TGA normalmaps would be used)
@@ -1977,22 +1988,32 @@ static void DrawVideoOptionsMenu()
 		}
 	}
 	const char* descr = "Use precompressed (.dds) textures. Faster loading, use less VRAM, possibly worse image quality.\n"
-			"May also be used by highres retexturing packs for BC7-compressed textures (there image quality is not impaired)";
+			"May also be used by highres retexturing packs for BC7-compressed textures (there image quality is not noticeably impaired)";
 	AddCVarOptionTooltips( globalImages->image_usePrecompressedTextures, descr );
 
-	ImGui::BeginDisabled( !usePreComprTex );
+	int useCompression = globalImages->image_useCompression.GetInteger();
+	if ( ImGui::Combo( "Compress uncompressed textures on load", &useCompression,
+	                   "Leave uncompressed (best quality)\0Compress with S3TC (aka DXT aka BC1-3)\0Compress with BPCT (BC7)\0" ) )
+	{
+		globalImages->image_useCompression.SetInteger(useCompression);
+	}
+	descr = "When loading non-precompressed textures, compress them so they use less VRAM.\n"
+			"Uncompressed has best quality. BC7 has better quality than S3TC, but may increase loading times";
+	AddCVarOptionTooltips( globalImages->image_useCompression, descr );
+
+	ImGui::BeginDisabled( !usePreComprTex && !useCompression );
 	bool useNormalCompr = globalImages->image_useNormalCompression.GetBool();
-	ImGui::Dummy( ImVec2(16, 0) );
-	ImGui::SameLine();
-	if ( ImGui::Checkbox( "Use precompressed normalmaps", &useNormalCompr ) ) {
+	if ( ImGui::Checkbox( "Use compressed normalmaps", &useNormalCompr ) ) {
 		// image_useNormalCompression 1 is not supported by modern GPUs
 		globalImages->image_useNormalCompression.SetInteger(useNormalCompr ? 2 : 0);
 	}
 	if ( usePreComprTex ) {
-		const char* descr = "Also use precompressed textures for normalmaps";
+		const char* descr = "Also use precompressed textures for normalmaps or compress them on load.\n"
+		                    "Uncompressed often has better quality, but uses more VRAM.\n"
+		                    "When using highres retexturing packs, you should definitely enable this.";
 		AddCVarOptionTooltips( globalImages->image_useNormalCompression, descr );
 	} else {
-		AddTooltip( "Can only be used if precompressed textures are enabled!" );
+		AddTooltip( "Can only be used if (pre)compressed textures are enabled!" );
 	}
 	ImGui::EndDisabled();
 
