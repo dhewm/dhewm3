@@ -44,6 +44,55 @@ If you have questions concerning this license or the applicable additional terms
 class	idProgram;
 class	idInterpreter;
 
+/*
+==========================
+  ImGui-based Tools
+==========================
+*/
+
+namespace ImGuiTools
+{
+
+// things in impl need to be used in at least one other file, but should generally not be used
+namespace impl
+{
+
+	void	SetReleaseToolMouse( bool doRelease );
+
+} //namespace impl
+
+bool	ReleaseMouseForTools();
+
+bool	AreEditorsActive();
+
+void	DrawToolWindows();
+
+void	LightEditorInit( const idDict *dict );
+
+void	AfEditorInit();
+
+// in-game PDA Editor
+void	PDAEditorInit( const idDict *spawnArgs );
+
+void	ParticleEditorInit( const idDict *spawnArgs );
+
+void	ScriptEditorInit( const idDict *spawnArgs );
+
+void	DeclBrowserInit( const idDict* spawnArgs );
+
+void	MaterialEditorInit();
+void	MaterialEditorDraw();
+void	MaterialEditorShutdown();
+void	MaterialEditorPrintConsole( const char* msg );
+
+}
+
+
+/*
+==========================
+  Old MFC-based Tools
+==========================
+*/
 
 // Radiant Level Editor
 void	RadiantInit( void );
