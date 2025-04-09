@@ -15,11 +15,15 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   a quarter of the VRAM (TGA: 4 bytes per pixel, BC7: 1 byte per pixel) and loading *significantly*
   faster because mipmaps are contained and don't have to be generated on load.  
   If you have such DDS files and want to use them (instead of TGAs), you must set
-  `image_usePrecompressedTextures 1` and `image_useNormalCompression 1`.  
+  `image_usePrecompressedTextures 1` and `image_useNormalCompression 2`.  
+  You can also set `image_usePrecompressedTextures 2`, then dhewm3 will only load .dds textures
+  with BC7 data - if it only finds an old one (with S3TC/DXT/BC-13 compression) it will use the 
+  uncompressed TGA textures instead.  
   If you want to *create* .dds files with BC7 texture data, you can use any common texture compression
-  tool, **except** for **normalmaps**, those must be created with my [**customized bc7enc**](https://github.com/DanielGibson/bc7enc_rdo)
-  with the `-r2a` flag! *(Because Doom3 requires that normalmaps have the red channel moved into the
-  alpha channel, id confusingly called that "RXGB", and AFAIK no other tool supports that for BC7.)*  
+  tool, **except** for **normalmaps**, those must be created with my
+  [**customized bc7enc**](https://github.com/DanielGibson/bc7enc_rdo) with the `-r2a` flag!
+  *(Because Doom3 requires that normalmaps have the red channel moved into the alpha channel,
+  id confusingly called that "RXGB", and AFAIK no other tool supports that for BC7.)*  
   Just like the old DXT .dds files, they must be in the `dds/` subdirectory of a mod (either directly
   in the filesystem or in a .pk4).
 * Support SDL3 (SDL2 and, to some degree, SDL1.2 are also still supported)
