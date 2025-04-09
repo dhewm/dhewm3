@@ -233,6 +233,29 @@ This can be configured with the following CVars:
 - `r_glDebugContext` Enable OpenGL debug context and printing warnings/errors from the graphics driver.  
   Changing that CVar requires a `vid_restart` (or set it as startup argument)
 
+- `image_usePrecompressedTextures` can now also be set to `2`.
+    - `1` Use precompressed textures (.dds files), no matter which format they're in
+    - `2` Only use precompressed textures if they're in BPTC (BC7) format, which has better quality
+      than the old ones shipped with Doom3 that use S3TC/DXT. If no BPTC/BC7 (or uncompressed) .dds file
+      is found, fall back to uncompressed .tga. Especially useful when using high-res texture
+      packs that use BC7 compression.
+    - `0` Don't use precompressed (.dds) textures but the uncompressed ones (.tga)
+- `image_useCompression` can now also be set to `2`.
+    - `1` When loading an uncompressed (.tga) texture, let the GPU (driver) compress it to S3TC/DXT
+      so it uses less VRAM (Video memory on the GPU) but doesn't look as good as leaving it
+      uncompressed or using precompressed textures, if available.  
+      **Note:** IMHO this only makes sense together with `image_usePrecompressedTextures 1`,
+      so .dds textures are preferred (they should have better encoding quality than what the GPU
+      driver produces on the fly *and* load faster) and only if a texture doesn't exist as .dds,
+      the uncompressed TGA is loaded and then compressed on upload.
+    - `2` When loading an uncompressed (.tga) texture, let the GPU (driver) compress it to BPTC/BC7
+      (if the GPU supports it). Has better quality than S3TC/DXT but loading textures might take longer.  
+      *Probably only makes sense with high-res texturing packs that don't use BPTC/BC7, because
+      if your GPU supports BPTC, it most probably has enough VRAM for the uncompressed original TGA
+      textures, which look at least as good, but for high resolution textures saving VRAM by
+      compressing on load can help)*.
+    - `0` Don't compress uncompressed textures when loading them - best quality, but uses more VRAM.
+
 - `s_alReverbGain` reduce strength of OpenAL (EAX-like) EFX reverb effects, `0.0` - `1.0` (default `0.5`)
 - `s_alHRTF` Enable [HRTF](https://en.wikipedia.org/w/index.php?title=Head-related_transfer_function)
    for better surround sound with stereo **headphones**. `0`: Disable, `1`: Enable, `-1`: Let OpenAL decide (default).  
@@ -243,7 +266,8 @@ This can be configured with the following CVars:
    including the current HRTF state (if supported by your OpenAL version).
 - `s_alOutputLimiter` Configure OpenAL's output-limiter which temporarily reduces the overall volume
   when too many too loud sounds play at once, to avoid issues like clipping. `0`: Disable, `1`: Enable, `-1`: Let OpenAL decide (default)
-- `s_scaleDownAndClamp` Clamp and reduce volume of all sounds to prevent clipping or temporary downscaling by OpenAL's output limiter (default `1`)
+- `s_scaleDownAndClamp` Clamp and reduce volume of all sounds to prevent clipping or temporary
+  downscaling by OpenAL's output limiter (default `1`)
 
 - `imgui_scale` Factor to scale ImGui menus by (especially relevant for HighDPI displays).
   Should be a positive factor like `1.5` or `2`; or `-1` (the default) to let dhewm3 automatically
