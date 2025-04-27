@@ -179,6 +179,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 Then point CMake at your toolchain file:
 `cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/Toolchain.cmake -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
 
+**NOTE:** The `DHEWM3LIBS` path must be an **absolute path**, i.e. it must start with `/`!
+
 If you want to build for x86_64 aka AMD64 aka x64, replace all instances of `i686`
 in the toolchain file with `x86_64`.
 
