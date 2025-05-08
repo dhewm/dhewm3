@@ -155,6 +155,10 @@ void RB_PrepareStageTexturing( const shaderStage_t *pStage,  const drawSurf_t *s
 	}
 
 	if ( pStage->texture.texgen == TG_GLASSWARP ) {
+		// DG: this doesn't work with the scratchImage array, and the shader is missing anyway
+		//     so I commented out the code and added this warning
+		common->Warning( "RB_PrepareStageTexturing(): Someone is trying to use the glasswarp shader, but it's not implemented..." );
+#if 0
 		if ( tr.backEndRenderer == BE_ARB2 /*|| tr.backEndRenderer == BE_NV30*/ ) {
 			qglBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, FPROG_GLASSWARP );
 			qglEnable( GL_FRAGMENT_PROGRAM_ARB );
@@ -192,6 +196,7 @@ void RB_PrepareStageTexturing( const shaderStage_t *pStage,  const drawSurf_t *s
 
 			GL_SelectTexture( 0 );
 		}
+#endif // 0
 	}
 
 	if ( pStage->texture.texgen == TG_REFLECT_CUBE ) {
