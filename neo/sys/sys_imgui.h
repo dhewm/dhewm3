@@ -14,7 +14,21 @@ enum D3ImGuiWindow {
 	D3_ImGuiWin_None        = 0,
 	D3_ImGuiWin_Settings    = 1, // advanced dhewm3 settings menu
 	D3_ImGuiWin_Demo        = 2, // ImGui demo window
-	// next should be 4, then 8, etc so a bitmask can be used
+	D3_ImGuiWin_LightEditor = 4, // new ingame Light Editor
+	D3_ImGuiWin_AfEditor    = 8, // new AF Editor
+	D3_ImGuiWin_PDAEditor	= 16, // new PDA Editor
+	D3_ImGuiWin_ParticleEditor = 32, // new Particle Editor
+	D3_ImGuiWin_ScriptEditor = 64, // new Script Editor
+	D3_ImGuiWin_DeclBrowser = 128, // new Decl Browser
+	D3_ImGuiWin_MaterialEditor = 256, // next should be 512, then 1024, etc so a bitmask can be used
+
+	D3_ImGuiWin_AnyEditor = D3_ImGuiWin_LightEditor
+		| D3_ImGuiWin_AfEditor
+		| D3_ImGuiWin_PDAEditor
+		| D3_ImGuiWin_ParticleEditor
+		| D3_ImGuiWin_ScriptEditor
+		| D3_ImGuiWin_DeclBrowser
+		| D3_ImGuiWin_MaterialEditor // to decide whether to call DrawToolWindows()
 };
 
 #ifndef IMGUI_DISABLE
@@ -65,6 +79,10 @@ extern void SetScale( float scale );
 // a warning symbol (triangle with !) and the given text
 // disappears after a few seconds or when a key is pressed or the mouse is moved
 extern void ShowWarningOverlay( const char* text );
+
+// show a little overlay-window at the upper left of the screen showing the given text
+// disappears after a few seconds or when a key is pressed or the mouse is moved
+extern void ShowInfoOverlay( const char* text );
 
 enum Style {
 	Dhewm3,
