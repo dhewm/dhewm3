@@ -61,6 +61,8 @@ option(SDL3			"Use SDL3 instead of SDL2 or SDL1.2" OFF)
 option(IMGUI		"Build with Dear ImGui integration - requires SDL2/SDL3 and C++11" ON)
 option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
+option(TRACY		"Build and integrate the Tracy profiler, requires HARDLINK_GAME" OFF)
+
 option(HARDLINK_GAME "Compile gamecode into executable (no game DLLs)" OFF)
 
 if(NOT MSVC) # GCC/clang or compatible, hopefully
@@ -255,6 +257,41 @@ else()
 	set(ID_ENABLE_CURL OFF)
 	set(CURL_LIBRARY "")
 endif()
+
+if(TRACY)
+	if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION LESS 11 ))
+		message(WARNING "To build with support for Tracy, CMake 3.11 or newer is required (for the FetchContent module)!")
+		unset(TRACY)
+	else()
+		add_definitions(-DTRACY_ENABLE=1)
+		# on demand has some overhead per sample, but when it's disabled and dhewm3 is started
+		# without the viewer it'll cache all the measurement data until the viewer connects
+		# which will eat lots of RAM (growing the longer the game runs)
+		add_definitions(-DTRACY_ON_DEMAND=1)
+		option(TRACY_ENABLE "" ON)
+		include(FetchContent)
+		FetchContent_Declare(
+			tracy
+			GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+			GIT_TAG v0.12.2
+			#GIT_TAG master
+			GIT_SHALLOW TRUE
+			GIT_PROGRESS TRUE
+		)
+		FetchContent_MakeAvailable(tracy)
+
+		# make sure tracy/Tracy.hpp can be included everywhere, not just in dhewm3(ded) source
+		FetchContent_GetProperties(tracy SOURCE_DIR tracy_src)
+		include_directories("${tracy_src}/public")
+
+		# link it into the executables
+		set(sys_libs ${sys_libs} TracyClient)
+
+		# to get calltraces for every sampled "zone" (expensive!)
+		#add_definitions(-DTRACY_CALLSTACK=10)
+	endif()
+endif()
+
 
 set(D3_COMPILER_IS_CLANG FALSE)
 set(D3_COMPILER_IS_GCC_OR_CLANG FALSE)

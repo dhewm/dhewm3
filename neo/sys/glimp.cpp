@@ -1058,6 +1058,7 @@ void GLimp_SwapBuffers() {
 #else
 	SDL_GL_SwapBuffers();
 #endif
+	D3P_NAMED_FRAMEMARK("Render Frame");
 }
 
 // SDL3 doesn't support hardware gamma
