@@ -100,7 +100,9 @@ typedef enum {
 } soundDemoCommand_t;
 
 const int SOUND_MAX_CHANNELS		= 8;
-const int SOUND_DECODER_FREE_DELAY	= 1000 * MIXBUFFER_SAMPLES / USERCMD_MSEC;		// four seconds
+// DG: TODO: keep the next at the same value for ~4 seconds, no matter how many frames that is?
+//     (we don't play sound faster just because we're running at higher FPS, I hope..)
+const int SOUND_DECODER_FREE_DELAY	= 1000 * MIXBUFFER_SAMPLES / 16; //USERCMD_MSEC;		// four seconds
 
 const int PRIMARYFREQ				= 44100;			// samples per second
 const float SND_EPSILON				= 1.0f / 32768.0f;	// if volume is below this, it will always multiply to zero

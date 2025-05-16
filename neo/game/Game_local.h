@@ -272,7 +272,13 @@ public:
 	int						framenum;
 	int						previousTime;			// time in msec of last frame
 	int						time;					// in msec
-	static const int		msec = USERCMD_MSEC;	// time since last update in milliseconds
+	//static const int		msec = USERCMD_MSEC;	// time since last update in milliseconds
+
+	int						msec;					// time since last update in milliseconds - DG: just mirrors gameMsec (in d3xp it's modified for slowmo)
+	// DG: added for configurable framerate
+	int						gameMsec;				// length of one frame/tic in milliseconds - TODO: make float?
+	int						gameHz;					// current gameHz value (tic-rate, FPS)
+	float					gameTicScale;			// gameHz/60 factor to multiply delays in tics (that assume 60fps) with
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 
@@ -337,6 +343,9 @@ public:
 	virtual void			SwitchTeam( int clientNum, int team );
 
 	virtual bool			DownloadRequest( const char *IP, const char *guid, const char *paks, char urls[ MAX_STRING_CHARS ] );
+
+	// DG: Added for configurable framerate
+	virtual void			SetGameHz( float hz, float frametime, float ticScaleFactor );
 
 	// ---------------------- Public idGameLocal Interface -------------------
 

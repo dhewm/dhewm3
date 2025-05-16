@@ -92,7 +92,23 @@ idForce_Grab::Init
 */
 void idForce_Grab::Init( float damping ) {
 	if ( damping >= 0.0f && damping < 1.0f ) {
-		this->damping = damping;
+		/* DG: in Evaluate(), the linear velocity (or actually momentum) of this->physics
+		 *     is multiplied with damping (0.5 by default) each frame.
+		 *     So how quickly the velocity is reduced per second depended on the framerate,
+		 *     and at higher framerates the grabbed item is slowed down too much and
+		 *     because of that sometimes even drops on the floor (gravity stronger than
+		 *     the force dragging it towards the player, or something like that).
+		 *     To fix that, damping must be adjusted depending on the framerate.
+		 *     The fixed code below is the result of this math (figuring out fixeddamping;
+		 *     note that here a^b means pow(a, b)):
+		 *       // we want velocity multiplied with damping 60 times per second to have the
+		 *       // same value as velocity multiplied with fixeddamping gameHz times per second
+		 *       velocity * damping^60 = velocity * fixeddamping^gameHz
+		 *    <=> damping^60 = fixeddamping^gameHz                // divided by velocity
+		 *    <=> gameHz-th-root-of( damping^60 ) = fixeddamping  // took gameHz-th root
+		 *    <=> fixeddamping = damping^( 60/gameHz )            // n-th-root-of(x^m) == x^(m/n)
+		 */
+		this->damping = idMath::Pow( damping, 60.0f/gameLocal.gameHz );
 	}
 }
 

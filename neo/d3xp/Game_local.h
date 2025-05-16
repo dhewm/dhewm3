@@ -233,7 +233,7 @@ struct timeState_t {
 	void				Get( int& t, int& pt, int& ms, int& f, int& rct )	{ t = time; pt = previousTime; ms = msec; f = framenum; rct = realClientTime; };
 	void				Save( idSaveGame *savefile ) const	{ savefile->WriteInt( time ); savefile->WriteInt( previousTime ); savefile->WriteInt( msec ); savefile->WriteInt( framenum ); savefile->WriteInt( realClientTime ); }
 	void				Restore( idRestoreGame *savefile )	{ savefile->ReadInt( time ); savefile->ReadInt( previousTime ); savefile->ReadInt( msec ); savefile->ReadInt( framenum ); savefile->ReadInt( realClientTime ); }
-	void				Increment()											{ framenum++; previousTime = time; time += msec; realClientTime = time; };
+	void				Increment(int _msec)				{ framenum++; previousTime = time; msec = _msec; time += msec; realClientTime = time; };  // dezo2: update msec
 };
 
 enum slowmoState_t {
@@ -300,6 +300,11 @@ public:
 	int						time;					// in msec
 	int						msec;					// time since last update in milliseconds
 
+	// DG: added for configurable framerate
+	int						gameMsec;				// length of one frame/tic in milliseconds - TODO: make float?
+	int						gameHz;					// current gameHz value (tic-rate, FPS)
+	float					gameTicScale;			// gameHz/60 factor to multiply delays in tics (that assume 60fps) with
+
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 
 	gameType_t				gameType;
@@ -341,7 +346,7 @@ public:
 	virtual void			GetBestGameType( const char* map, const char* gametype, char buf[ MAX_STRING_CHARS ] );
 
 	void					ComputeSlowMsec();
-	void					RunTimeGroup2();
+	void					RunTimeGroup2( int msec_fast );  // dezo2: add argument for high-fps support
 
 	void					ResetSlowTimeVars();
 	void					QuickSlowmoReset();
@@ -396,6 +401,9 @@ public:
 	virtual bool			DownloadRequest( const char *IP, const char *guid, const char *paks, char urls[ MAX_STRING_CHARS ] );
 
 	virtual void				GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] );
+
+	// DG: Added for configurable framerate
+	virtual void			SetGameHz( float hz, float frametime, float ticScaleFactor );
 
 	// ---------------------- Public idGameLocal Interface -------------------
 
@@ -512,7 +520,7 @@ public:
 
 private:
 	const static int		INITIAL_SPAWN_COUNT = 1;
-	const static int		INTERNAL_SAVEGAME_VERSION = 1; // DG: added this for >= 1305 savegames
+	const static int		INTERNAL_SAVEGAME_VERSION = 2; // DG: added this for >= 1305 savegames
 
 	idStr					mapFileName;			// name of the map, empty string if no map loaded
 	idMapFile *				mapFile;				// will be NULL during the game unless in-game editing is used

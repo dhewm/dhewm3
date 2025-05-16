@@ -2152,7 +2152,7 @@ void idPlayer::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( numProjectileHits );
 
 	savefile->WriteBool( airless );
-	savefile->WriteInt( airTics );
+	savefile->WriteInt( (int)airTics );
 	savefile->WriteInt( lastAirDamage );
 
 	savefile->WriteBool( gibDeath );
@@ -2420,7 +2420,11 @@ void idPlayer::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( numProjectileHits );
 
 	savefile->ReadBool( airless );
-	savefile->ReadInt( airTics );
+	// DG: I made made airTics float for high-fps (where we have fractions of 60Hz tics),
+	//     but for saving ints should still suffice (and this preserves savegame compat)
+	int iairTics;
+	savefile->ReadInt( iairTics );
+	airTics = iairTics;
 	savefile->ReadInt( lastAirDamage );
 
 	savefile->ReadBool( gibDeath );
@@ -3238,6 +3242,9 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 			} else {
 				cursor->SetStateString( "grabbercursor", "0" );
 				cursor->SetStateString( "combatcursor", "1" );
+				cursor->SetStateBool("scaleto43", true);   // dezo2, scaled
+				cursor->StateChanged(gameLocal.realClientTime);   // dezo2, set state
+
 			}
 			// DG: update scaleto43 state if necessary
 			if ( cursor->GetStateBool( "scaleto43" ) != wantScaleTo43 ) {
@@ -3520,12 +3527,12 @@ bool idPlayer::Give( const char *statname, const char *value ) {
 		}
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		if ( airTics >= pm_airTics.GetInteger() ) {
+		if ( airTics >= pm_airTics.GetFloat() ) { // DG: airTics are floats now for high-fps support
 			return false;
 		}
-		airTics += atoi( value ) / 100.0 * pm_airTics.GetInteger();
-		if ( airTics > pm_airTics.GetInteger() ) {
-			airTics = pm_airTics.GetInteger();
+		airTics += atoi( value ) / 100.0 * pm_airTics.GetFloat();
+		if ( airTics > pm_airTics.GetFloat() ) {
+			airTics = pm_airTics.GetFloat();
 		}
 #ifdef _D3XP
 	} else if ( !idStr::Icmp( statname, "enviroTime" ) ) {
@@ -6114,7 +6121,8 @@ void idPlayer::UpdateAir( void ) {
 				hud->HandleNamedEvent( "noAir" );
 			}
 		}
-		airTics--;
+		// DG: was airTics--, but airTics assume 60Hz tics and we support other ticrates now (com_gameHz)
+		airTics -= 1.0f / gameLocal.gameTicScale;
 		if ( airTics < 0 ) {
 			airTics = 0;
 			// check for damage
@@ -6134,16 +6142,16 @@ void idPlayer::UpdateAir( void ) {
 				hud->HandleNamedEvent( "Air" );
 			}
 		}
-		airTics+=2;	// regain twice as fast as lose
-		if ( airTics > pm_airTics.GetInteger() ) {
-			airTics = pm_airTics.GetInteger();
+		airTics += 2.0f / gameLocal.gameTicScale; // regain twice as fast as lose - DG: scale for com_gameHz
+		if ( airTics > pm_airTics.GetFloat() ) {
+			airTics = pm_airTics.GetFloat();
 		}
 	}
 
 	airless = newAirless;
 
 	if ( hud ) {
-		hud->SetStateInt( "player_air", 100 * airTics / pm_airTics.GetInteger() );
+		hud->SetStateInt( "player_air", 100 * (airTics / pm_airTics.GetFloat()) );
 	}
 }
 
@@ -7116,8 +7124,12 @@ void idPlayer::Move( void ) {
 		if ( spectating ) {
 			SetEyeHeight( newEyeOffset );
 		} else {
+			// DG: make this framerate-independent, code suggested by tyuah8 on Github
+			// https://en.wikipedia.org/wiki/Exponential_smoothing#Time_constant
+			const float tau = -16.0f / idMath::Log( pm_crouchrate.GetFloat() );
+			const float a = 1.0f - idMath::Exp( -gameLocal.gameMsec / tau );
 			// smooth out duck height changes
-			SetEyeHeight( EyeHeight() * pm_crouchrate.GetFloat() + newEyeOffset * ( 1.0f - pm_crouchrate.GetFloat() ) );
+			SetEyeHeight( EyeHeight() * (1.0f - a) + newEyeOffset * a );
 		}
 	}
 
@@ -7657,7 +7669,7 @@ bool idPlayer::CanGive( const char *statname, const char *value ) {
 		return true;
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		if ( airTics >= pm_airTics.GetInteger() ) {
+		if ( airTics >= pm_airTics.GetFloat() ) {
 			return false;
 		}
 		return true;

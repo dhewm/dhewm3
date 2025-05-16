@@ -1608,6 +1608,8 @@ struct VidMode {
 static CVarOption videoOptionsImmediately[] = {
 	CVarOption( "Options that take effect immediately" ),
 
+	CVarOption( "com_gameHz", "Framerate", OT_INT, 30, 250 ),
+
 	CVarOption( "r_swapInterval", []( idCVar& cvar ) {
 		int curVsync = idMath::ClampInt( -1, 1, r_swapInterval.GetInteger() );
 		if ( curVsync == -1 ) {
@@ -1774,9 +1776,11 @@ static bool VideoHasResettableChanges()
 	return false;
 }
 
+static glimpParms_t curState;
+
 static bool VideoHasApplyableChanges()
 {
-	glimpParms_t curState = GLimp_GetCurState();
+	curState = GLimp_GetCurState();
 	int wantedWidth = 0, wantedHeight = 0;
 	R_GetModeInfo( &wantedWidth, &wantedHeight, r_mode.GetInteger() );
 	if ( wantedWidth != curState.width || wantedHeight != curState.height ) {
@@ -1958,10 +1962,10 @@ static void DrawVideoOptionsMenu()
 		float scale = float(glConfig.vidWidth)/glConfig.winWidth;
 		int pw = scale * displayRect.w;
 		int ph = scale * displayRect.h;
-		ImGui::TextDisabled( "Display Size: %d x %d (Physical: %d x %d)", displayRect.w, displayRect.h, pw, ph );
+		ImGui::TextDisabled( "Display Size: %d x %d (Physical: %d x %d) @ %d Hz", displayRect.w, displayRect.h, pw, ph, curState.displayHz );
 	} else {
 		ImGui::TextDisabled( "Current Resolution: %d x %d", glConfig.vidWidth, glConfig.vidHeight );
-		ImGui::TextDisabled( "Display Size: %d x %d", displayRect.w, displayRect.h );
+		ImGui::TextDisabled( "Display Size: %d x %d @ %d Hz", displayRect.w, displayRect.h, curState.displayHz );
 	}
 
 	// MSAA
@@ -2333,7 +2337,13 @@ static CVarOption gameOptions[] = {
 	CVarOption( "ui_autoSwitch", "Auto Weapon Switch", OT_BOOL ),
 	CVarOption( "Visual" ),
 	CVarOption( "g_showHud", "Show HUD", OT_BOOL ),
-	CVarOption( "com_showFPS", "Show Framerate (FPS)", OT_BOOL ),
+	CVarOption( "com_showFPS",  []( idCVar& cvar ) {
+		int curSel = idMath::ClampInt( 0, 2, cvar.GetInteger() );
+		if ( ImGui::Combo( "Show Framerate (FPS)", &curSel, "No\0Yes (simple)\0Yes, also frametimes\0" ) ) {
+			cvar.SetInteger( curSel );
+		}
+		AddTooltip( "com_showFPS" );
+	} ),
 	CVarOption( "ui_showGun", "Show Gun Model", OT_BOOL ),
 	CVarOption( "g_decals", "Show Decals", OT_BOOL ),
 	CVarOption( "g_bloodEffects", "Show Blood and Gibs", OT_BOOL ),
