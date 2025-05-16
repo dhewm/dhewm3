@@ -1019,6 +1019,133 @@ int Win_ChoosePixelFormat(HDC hdc)
 }
 #endif
 
+
+// ---------- Time Stuff -------------
+
+// D3_CpuPause() abstracts a CPU pause instruction, to make busy waits a bit less power-hungry
+// (code taken from Yamagi Quake II)
+#ifdef SDL_CPUPauseInstruction
+  #define D3_CpuPause() SDL_CPUPauseInstruction()
+#elif defined(__GNUC__)
+  #if (__i386 || __x86_64__)
+    #define D3_CpuPause() asm volatile("pause")
+  #elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
+    #define D3_CpuPause() asm volatile("yield")
+  #elif defined(__powerpc__) || defined(__powerpc64__)
+    #define D3_CpuPause() asm volatile("or 27,27,27")
+  #elif defined(__riscv) && __riscv_xlen == 64
+    #define D3_CpuPause() asm volatile(".insn i 0x0F, 0, x0, x0, 0x010");
+  #endif
+#elif defined(_MSC_VER)
+  #if defined(_M_IX86) || defined(_M_X64)
+    #define D3_CpuPause() _mm_pause()
+  #elif defined(_M_ARM) || defined(_M_ARM64)
+    #define D3_CpuPause() __yield()
+  #endif
+#endif
+
+#ifndef D3_CpuPause
+  #warning "No D3_CpuPause implementation for this platform/architecture! Will busy-wait sometimes!"
+  // TODO: something that prevents the loop from being optimized away?
+  //#define D3_CpuPause()
+#endif
+
+static double perfCountToMS = 0.0; // set in initTime()
+static LARGE_INTEGER firstCount = { 0 };
+
+static size_t pauseLoopsPer5usec = 100; // set in initTime()
+
+static void Win_InitTime() {
+	LARGE_INTEGER freq = { 0 };
+	QueryPerformanceFrequency(&freq); // in Hz
+	perfCountToMS = 1000.0 / (double)freq.QuadPart; // 1/freq would be factor for seconds, we want milliseconds
+	QueryPerformanceCounter(&firstCount);
+	firstCount.QuadPart -= 1.5 / perfCountToMS; // make sure Sys_MillisecondsPrecise() always returns value >= 1
+
+	double before = Sys_MillisecondsPrecise();
+	for ( int i=0; i < 1000; ++i ) {
+		// volatile so the call isn't optimized away
+		volatile double x = Sys_MillisecondsPrecise();
+		(void)x;
+	}
+	double after = Sys_MillisecondsPrecise();
+	double callDiff = after - before;
+	printf( "Win_InitTime(): 1000 calls to Sys_MillisecondsPrecise() took %g usec (%g usec per call)\n", diff*1000, diff );
+
+#ifdef D3_CpuPause
+	// figure out how long D3_CpuPause() instructions take
+	before = Sys_MillisecondsPrecise();
+	for( int i=0; i < 1000000; ++i ) {
+		// call it 4 times per loop, so the ratio between pause and loop-instructions is better
+		D3_CpuPause(); D3_CpuPause(); D3_CpuPause(); D3_CpuPause();
+	}
+	after = Sys_MillisecondsPrecise();
+	double diff = after - before;
+	double onePauseIterTime = diff / 1000000;
+	if ( onePauseIterTime > 0.00000001 ) {
+		double loopsPer10usec = 0.005 / onePauseIterTime;
+		pauseLoopsPer5usec = loopsPer10usec;
+		printf( "Win_InitTime(): A call to Sys_MillisecondsPrecise() takes about %g nsec; 1mio pause loops took %g ms => pauseLoopsPer5usec = %zd\n",
+		        callDiff*1000.0, diff, pauseLoopsPer5usec );
+		if ( pauseLoopsPer5usec == 0 )
+			pauseLoopsPer5usec = 1;
+	} else {
+		assert( 0 && "apparently 1mio pause loops are so fast we can't even measure it?!" );
+		pauseLoopsPer5usec = 1000000;
+	}
+	// Note: Due to CPU frequency scaling this is not super precise, but it should be within
+	//   an order of magnitude of the real current value, I think, which should suffice for our purposes
+#else
+	printf( "Win_InitTime(): A call to Sys_MillisecondsPrecise() takes about %g nsecs\n", callDiff*1000.0 );
+#endif
+}
+
+/*
+=======================
+Sys_MillisecondsPrecise
+=======================
+*/
+double Sys_MillisecondsPrecise() {
+	LARGE_INTEGER cur;
+	QueryPerformanceCounter(&cur);
+
+	double ret = cur.QuadPart - firstCount.QuadPart;
+	ret *= perfCountToMS;
+	return ret;
+}
+
+/*
+=====================
+Sys_SleepUntilPrecise
+=====================
+*/
+void Sys_SleepUntilPrecise( double targetTimeMS ) {
+	double msec = targetTimeMS - Sys_MillisecondsPrecise();
+	if ( msec < 0.01 ) // don't bother for less than 10usec
+		return;
+
+	if ( msec > 2.0 ) {
+		// Note: Theoretically one could use SetWaitableTimer() and WaitForSingleObject()
+		//   for higher precision, but last time I tested (on Win10),
+		//   in practice that also only had millisecond-precision
+		dword sleepMS = msec - 1.0; // wait for last MS or so in busy(-ish) loop below
+		Sleep( sleepMS );
+	}
+
+	// wait for the remaining time with a busy loop, as that has higher precision
+	do {
+#ifdef D3_CpuPause
+		for ( size_t i=0; i < pauseLoopsPer5usec; ++i ) {
+			// call it 4 times per loop, so the ratio between pause and loop-instructions is better
+			D3_CpuPause(); D3_CpuPause(); D3_CpuPause(); D3_CpuPause();
+		}
+#endif
+
+		msec = targetTimeMS - Sys_MillisecondsPrecise();
+	} while ( msec >= 0.01 );
+}
+
+
 // stdout/stderr redirection, originally from SDL_win32_main.c
 
 /* The standard output files */
@@ -1200,6 +1327,8 @@ int SDL_main(int argc, char *argv[]) {
 	}
 
 	InitializeCriticalSection( &printfCritSect );
+
+	Win_InitTime();
 
 #ifdef ID_DEDICATED
 	MSG msg;
