@@ -203,6 +203,11 @@ private:
 
   idSpring
 
+  Enhancements (like Save/Restore functions) taken from FraggingFree by IvanTheB
+
+  https://github.com/IvanTheB/fraggingfree-dhewm3-sdk
+  https://www.moddb.com/mods/fragging-free
+
 ===============================================================================
 */
 
@@ -210,20 +215,26 @@ class idSpring : public idEntity {
 public:
 	CLASS_PROTOTYPE( idSpring );
 
-	void				Spawn( void );
+							idSpring(); //ivan
+	void					Spawn( void );
 
-	virtual void		Think( void );
+	void					Save( idSaveGame *savefile ) const; //ivan
+	void					Restore( idRestoreGame *savefile ); //ivan
+
+	virtual void			Think( void );
 
 private:
-	idEntity *			ent1;
-	idEntity *			ent2;
-	int					id1;
-	int					id2;
-	idVec3				p1;
-	idVec3				p2;
-	idForce_Spring		spring;
+	idEntityPtr<idEntity>	ent1;
+	idEntityPtr<idEntity>	ent2;
+	int						id1;
+	int						id2;
+	idVec3					p1;
+	idVec3					p2;
+	idForce_Spring			spring;
+	bool					enabled; //ivan
 
-	void				Event_LinkSpring( void );
+	void					Event_LinkSpring( void );
+	void					Event_Activate( idEntity *activator );
 };
 
 
