@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#define DEBUG 1
+//#define DEBUG 1
 #include <aros/debug.h>
 
 #include <string.h>
