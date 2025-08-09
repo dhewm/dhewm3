@@ -561,7 +561,7 @@ const char *idMultiplayerGame::GameTime() {
 		s -= t * 10; // => s < 10
 		// writing <= 5 for m + 3 bytes for ":ts" + 1 byte for \0 => 16 bytes is enough
 
-		sprintf( buff, "%i:%i%i", m, t, s );
+		idStr::snPrintf( buff, sizeof( buff ), "%i:%i%i", m, t, s );
 	}
 	return &buff[0];
 }
