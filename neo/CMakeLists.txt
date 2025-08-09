@@ -1154,13 +1154,7 @@ endif()
 
 if(AROS)
 	set(DHEWM3BINARY "ADoom3")
-	set(sys_libs ${sys_libs} dll)
-
-	set(src_arosdll
-		sys/aros/dll/dllstartup.c
-		sys/aros/dll/dll.c
-		sys/aros/dll/dllimport.c
-	)
+	set(sys_libs ${sys_libs} dynmod)
 
 	set(src_sys_base
 		sys/cpu.cpp
@@ -1170,6 +1164,8 @@ if(AROS)
 		sys/aros/aros_net.cpp
 		sys/aros/aros_signal.cpp
 		sys/aros/aros_main.cpp
+		 sys/aros/aros_dynmodcommon.cpp
+		sys/aros/aros_support.cpp
 		sys/aros/aros_dos.cpp
 	)
 
@@ -1263,10 +1259,9 @@ if(SDL3)
 	target_link_libraries(idlib SDL3::Headers) # so it can use SDL_Endian.h
 endif()
 if (AROS)
-	add_library(dll STATIC ${src_arosdll})
-        if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")
+	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")
 		set(AROS_ARCH "x86")
-        else()
+	else()
 		set(AROS_ARCH ${CMAKE_SYSTEM_PROCESSOR})
 	endif()
 else()
@@ -1371,7 +1366,8 @@ endif()
 
 if(BASE AND NOT HARDLINK_GAME)
 	if (AROS)
-		add_executable(base sys/aros/dll/dllglue.c ${src_game})
+		add_executable(base ${src_game} sys/aros/aros_dynmodule.cpp sys/aros/aros_dynmodcommon.cpp)
+		target_link_libraries(base idlib dynmodglue)
 		set_target_properties(base PROPERTIES OUTPUT_NAME "base.aros-${AROS_ARCH}")
 	else()
 		add_library(base SHARED ${src_game})
@@ -1385,7 +1381,7 @@ if(BASE AND NOT HARDLINK_GAME)
 	set_target_properties(base PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(base PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	if (AROS)
-		target_link_libraries(base idlib dll)
+		target_link_libraries(base idlib dynmod)
 	else()
 		target_link_libraries(base idlib)
 	endif()
@@ -1401,7 +1397,8 @@ endif()
 
 if(D3XP AND NOT HARDLINK_GAME)
 	if (AROS)
-		add_executable(d3xp sys/aros/dll/dllglue.c ${src_d3xp})
+		add_executable(d3xp ${src_d3xp} sys/aros/aros_dynmodule.cpp sys/aros/aros_dynmodcommon.cpp)
+		target_link_libraries(d3xp dynmodglue)
 		set_target_properties(d3xp PROPERTIES OUTPUT_NAME "d3xp.aros-${AROS_ARCH}")
 	else()
 		add_library(d3xp SHARED ${src_d3xp})
@@ -1413,7 +1410,7 @@ if(D3XP AND NOT HARDLINK_GAME)
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	if (AROS)
-		target_link_libraries(d3xp idlib dll)
+		target_link_libraries(d3xp idlib dynmod)
 	else()
 		target_link_libraries(d3xp idlib)
 	endif()

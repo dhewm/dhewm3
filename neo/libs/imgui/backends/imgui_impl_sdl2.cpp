@@ -769,9 +769,11 @@ void ImGui_ImplSDL2_NewFrame()
         w = h = 0;
     if (bd->Renderer != nullptr)
         SDL_GetRendererOutputSize(bd->Renderer, &display_w, &display_h);
+#if !defined(__AROS__)
 #if SDL_HAS_VULKAN
     else if (SDL_GetWindowFlags(bd->Window) & SDL_WINDOW_VULKAN)
         SDL_Vulkan_GetDrawableSize(bd->Window, &display_w, &display_h);
+#endif
 #endif
     else
         SDL_GL_GetDrawableSize(bd->Window, &display_w, &display_h);

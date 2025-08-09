@@ -15037,6 +15037,12 @@ static bool Platform_OpenInShellFn_DefaultImpl(ImGuiContext*, const char* path)
 {
     return (INT_PTR)::ShellExecuteA(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT) > 32;
 }
+#elif defined(__AROS__)
+static bool Platform_OpenInShellFn_DefaultImpl(ImGuiContext*, const char* path)
+{
+#warning: TODO - implement
+    return false;
+}
 #else
 #include <sys/wait.h>
 #include <unistd.h>

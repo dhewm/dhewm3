@@ -1,10 +1,20 @@
-# Copyright © 2004, The AROS Development Team. All rights reserved.
-# $Id: mmakefile.src 33489 2010-06-07 23:03:12Z mazze $
+# Copyright © 2012-2025, The AROS Development Team. All rights reserved.
+# $Id$
 
-include $(TOP)/config/make.cfg
+include $(SRCDIR)/config/aros-contrib.cfg
 
 #MM- iconset-Gorilla-contrib-games-doom3game : doom3-gorillaicons-game
 
 DOOM3_EXEDIR := $(AROS_CONTRIB)/Games/Fps/ADoom3
 DOOM3_ICONS := ADoom3  ROE
+
+$(DOOM3_EXEDIR)/ROE: $(SRCDIR)/$(CURDIR)/ROE | $(DOOM3_EXEDIR)
+	$(Q)$(CP) $< $@
+
+#MM
+aros-doom3-copy-script : $(DOOM3_EXEDIR)/ROE
+	$(Q)$(NOP)
+
 %build_icons mmake=doom3-gorillaicons-game icons="$(DOOM3_ICONS)" dir=$(DOOM3_EXEDIR)
+
+#MM- aros-doom3 : aros-doom3-copy-script

@@ -1,3 +1,4 @@
+# Copyright © 2012-2017, The AROS Development Team. All rights reserved.
 # $Id$
 
 include $(TOP)/config/make.cfg
@@ -8,13 +9,13 @@ include $(TOP)/config/make.cfg
 
 aros-doom3-defconfig:  $(AROS_CONTRIB)/Games/Fps/ADoom3/base/default.cfg
 
-$(AROS_CONTRIB)/Games/ADoom3/base/default.cfg: $(SRCDIR)/$(CURDIR)/default.cfg
+$(AROS_CONTRIB)/Games/Fps/ADoom3/base/default.cfg: $(SRCDIR)/$(CURDIR)/../../../../base/default.cfg
 	@$(CP) $< $@
 
 %build_icons mmake=iconset-Gorilla-contrib-icons-extras-games-adoom3 icons=ADoom3 dir=$(AROS_CONTRIB)/Games/Fps
 
 #MM
 aros-doom3-dirs :
-	%mkdirs_q $(AROS_CONTRIB)/Fps/Games/ADoom3/base
+	%mkdirs_q $(AROS_CONTRIB)/Games/Fps/ADoom3/base
 
 %common

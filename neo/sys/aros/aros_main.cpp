@@ -27,24 +27,12 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #define DEBUG 1
-
 #include <aros/debug.h>
-#undef ASSERT
 
 #include <proto/exec.h>
 #include <proto/dos.h>
 
-// undefine - conflict with ID functions
-#undef Remove
-#undef Insert
-#undef Read
-#undef Write
-#undef Seek
-#undef Flush
-#undef Close
-#undef Allocate
-#undef Printf
-#undef VPrintf
+#include "sys/aros/aros_fixup.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,9 +45,11 @@ If you have questions concerning this license or the applicable additional terms
 #include <signal.h>
 #include <fcntl.h>
 
+#include <setjmp.h>
+
 #include <SDL_main.h>
 
-#include "dll/dll.h"
+#include <dynmod/dynmodule.h>
 
 #include "sys/platform.h"
 #include "idlib/containers/StrList.h"
@@ -70,37 +60,45 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/aros/aros_public.h"
 
-#define					COMMAND_HISTORY 64
+#define                                 COMMAND_HISTORY 64
 
-extern idStr	adoom3_basepath;
-extern idStr	adoom3_savepath;
+extern struct Library                   *SocketBase;
 
-static int				input_hide = 0;
+extern idStr                            adoom3_basepath;
+extern idStr                            adoom3_savepath;
+char                                    launch_path[1024];
 
-idEditField				input_field;
-static char				input_ret[256];
+static int                              input_hide = 0;
 
-static idStr			history[ COMMAND_HISTORY ];	// cycle buffer
-static int				history_count = 0;			// buffer fill up
-static int				history_start = 0;			// current history start
-static int				history_current = 0;			// goes back in history
-idEditField				history_backup;				// the base edit line
+idEditField                             input_field;
+static char                             input_ret[256];
+
+static idStr                            history[ COMMAND_HISTORY ]; // cycle buffer
+static int                              history_count = 0;          // buffer fill up
+static int                              history_start = 0;          // current history start
+static int                              history_current = 0;        // goes back in history
+idEditField                             history_backup;             // the base edit line
 
 // terminal support
 idCVar in_tty( "in_tty", "1", CVAR_BOOL | CVAR_INIT | CVAR_SYSTEM, "terminal tab-completion and history" );
 
-static bool				tty_enabled = false;
-static struct termios	tty_tc;
+static bool                             tty_enabled = false;
+static struct termios                   tty_tc;
 
-static FILE* consoleLog = NULL;
+static FILE                             *consoleLog = NULL;
 
 // pid - useful when you attach to gdb..
 idCVar com_pid( "com_pid", "0", CVAR_INTEGER | CVAR_INIT | CVAR_SYSTEM, "process id" );
 
 // exit - quit - error --------------------------------------------------------
 
-static int set_exit = 0;
-static char exit_spawn[ 1024 ];
+static int                              set_exit = 0;
+static char                             exit_spawn[ 1024 ];
+
+// Work around exiting from NewStackSwapped task
+int                                     nsstask_exittype = 0;
+int                                     nsstask_exitcode = 0;
+jmp_buf                                 nsstask_exitjmp;
 
 /*
 ================
@@ -108,7 +106,7 @@ AROS_Exit
 ================
 */
 void AROS_Exit(int ret) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     if ( tty_enabled ) {
         Sys_Printf( "shutdown terminal support\n" );
@@ -122,7 +120,7 @@ void AROS_Exit(int ret) {
     AROS_ClearSigs();
 
     if( consoleLog != NULL ) {
-        fclose(consoleLog);
+        fclose( consoleLog );
         consoleLog = NULL;
     }
 
@@ -133,9 +131,13 @@ void AROS_Exit(int ret) {
     // in case of signal, handler tries a common->Quit
     // we use set_exit to maintain a correct exit code
     if ( set_exit ) {
-        exit( set_exit );
+        nsstask_exittype = 1;
+        nsstask_exitcode = set_exit;
+        longjmp( nsstask_exitjmp, 1 );
     }
-    exit( ret );
+    nsstask_exittype = 1;
+    nsstask_exitcode = ret;
+    longjmp( nsstask_exitjmp, 1 );
 }
 
 /*
@@ -144,7 +146,7 @@ AROS_SetExit
 ================
 */
 void AROS_SetExit(int ret) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     set_exit = 0;
 }
@@ -156,7 +158,7 @@ set the process to be spawned when we quit
 ===============
 */
 void AROS_SetExitSpawn( const char *exeName ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     idStr::Copynz( exit_spawn, exeName, 1024 );
 }
@@ -171,7 +173,7 @@ NOTE: might even want to add a small delay?
 ==================
 */
 void idSysLocal::StartProcess( const char *exeName, bool quit ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     if ( quit ) {
         common->DPrintf( "Sys_StartProcess %s (delaying until final exit)\n", exeName );
@@ -190,7 +192,7 @@ Sys_Quit
 ================
 */
 void Sys_Quit(void) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     AROS_Exit( EXIT_SUCCESS );
 }
@@ -201,7 +203,7 @@ Sys_Init
 =================
 */
 void Sys_Init( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     AROS_InitConsoleInput();
     com_pid.SetString( (char *)FindTask(NULL) );
@@ -220,10 +222,10 @@ AROS_Shutdown
 =================
 */
 void AROS_Shutdown( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    for ( int i = 0; i < COMMAND_HISTORY; i++ ) {
-            history[ i ].Clear();
+    for( int i = 0; i < COMMAND_HISTORY; i++ ) {
+        history[ i ].Clear();
     }
 }
 
@@ -233,11 +235,11 @@ Sys_DLL_Load
 =================
 */
 uintptr_t Sys_DLL_Load( const char *path ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s('%s')\n", __func__, path ) );
 
-    void *handle = dllLoadLibrary( (char *)path, FilePart(path) );
-    if ( !handle ) {
-            Sys_Printf( "dllLoadLibrary '%s' failed\n", path );
+    void *handle = dynmoduleLoadModule( (char *)path, FilePart( path ) );
+    if( !handle ) {
+        Sys_Printf( "dynmoduleLoadModule '%s' failed\n", path );
     }
     return (uintptr_t)handle;
 }
@@ -248,12 +250,12 @@ Sys_DLL_GetProcAddress
 =================
 */
 void* Sys_DLL_GetProcAddress( uintptr_t handle, const char *sym ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     //const char *error;
-    void *ret = dllGetProcAddress( (void *)handle, (char *)sym);
-    if (ret == NULL)  {
-            Sys_Printf( "dllGetProcAddress '%s' failed\n", sym );
+    void *ret = dynmoduleGetProcAddress( (void *)handle, (char *)sym );
+    if( ret == NULL )  {
+        Sys_Printf( "dynmoduleGetProcAddress '%s' failed\n", sym );
     }
     return ret;
 }
@@ -264,9 +266,9 @@ Sys_DLL_Unload
 =================
 */
 void Sys_DLL_Unload( uintptr_t handle ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    dllFreeLibrary( (void *)handle);		
+    dynmoduleFreeModule( (void *)handle );		
 }
 
 /*
@@ -275,33 +277,33 @@ Sys_ShowConsole
 ================
 */
 void Sys_ShowConsole( int visLevel, bool quitOnClose ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 }
 
 // ---------------------------------------------------------------------------
 
 ID_TIME_T Sys_FileTimeStamp(FILE * fp) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     struct stat st;
-    fstat(fileno(fp), &st);
+    fstat( fileno( fp ), &st );
     return st.st_mtime;
 }
 
 bool Sys_FPU_StackIsEmpty( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     return true;
 }
 
 const char *Sys_FPU_GetState( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     return "";
 }
 
 void Sys_FPU_SetPrecision( int precision ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
 }
 
@@ -311,38 +313,38 @@ Sys_SetPhysicalWorkMemory
 ================
 */
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     common->DPrintf( "TODO: Sys_SetPhysicalWorkMemory\n" );
 }
 
-extern bool AROS_GetSavePath(char buf[1024]);
+extern bool AROS_GetSavePath(char *buf, const size_t max);
 
 static void initLog()
 {
-	char logPath[1024];
-	if(!AROS_GetSavePath(logPath))
-		return;
+    char logPath[1024];
+    if( !AROS_GetSavePath( logPath, sizeof( logPath ) ) )
+        return;
 
-	// TODO: create savePath directory if it doesn't exist..
+    // TODO: create savePath directory if it doesn't exist..
 
-	char logBkPath[1024];
-	strcpy(logBkPath, logPath);
-	idStr::Append(logBkPath, sizeof(logBkPath), PATHSEPERATOR_STR "dhewm3log-old.txt");
-	idStr::Append(logPath, sizeof(logPath), PATHSEPERATOR_STR "dhewm3log.txt");
+    char logBkPath[1024];
+    strcpy( logBkPath, logPath );
+    idStr::Append( logBkPath, sizeof( logBkPath ), PATHSEPERATOR_STR "dhewm3log-old.txt" );
+    idStr::Append( logPath, sizeof( logPath ), PATHSEPERATOR_STR "dhewm3log.txt" );
 
-	rename(logPath, logBkPath); // I hope AROS supports this, but it's standard C89 so it should
+    rename( logPath, logBkPath ); // I hope AROS supports this, but it's standard C89 so it should
 
-	consoleLog = fopen(logPath, "w");
-	if(consoleLog == NULL) {
-		printf("WARNING: Couldn't open/create '%s', error was: %d (%s)\n", logPath, errno, strerror(errno));
-	} else {
-		time_t tt = time(NULL);
-		const struct tm* tms = localtime(&tt);
-		char timeStr[64] = {};
-		strftime(timeStr, sizeof(timeStr), "%F %H:%M:%S", tms);
-		fprintf(consoleLog, "Opened this log at %s\n", timeStr);
-	}
+    consoleLog = fopen( logPath, "w" );
+    if( consoleLog == NULL ) {
+        printf( "WARNING: Couldn't open/create '%s', error was: %d (%s)\n", logPath, errno, strerror( errno ) );
+    } else {
+        time_t tt = time( NULL );
+        const struct tm* tms = localtime( &tt );
+        char timeStr[64] = {};
+        strftime( timeStr, sizeof( timeStr ), "%F %H:%M:%S", tms );
+        fprintf( consoleLog, "Opened this log at %s\n", timeStr );
+    }
 }
 
 /*
@@ -351,7 +353,7 @@ AROS_EarlyInit
 ===============
 */
 void AROS_EarlyInit( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     initLog();
 
@@ -360,6 +362,7 @@ void AROS_EarlyInit( void ) {
     AROS_InitSigs();
 
     // TODO: logfile
+    D( bug( "[ADoom3] %s: Init complete\n", __func__ ) );
 }
 
 /*
@@ -370,23 +373,22 @@ AROS_InitConsoleInput
 void AROS_InitConsoleInput( void ) {
     struct termios tc;
 
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-
-    if ( in_tty.GetBool() ) {
-        if ( isatty( STDIN_FILENO ) != 1 ) {
+    if( in_tty.GetBool() ) {
+        if( isatty( STDIN_FILENO ) != 1 ) {
             Sys_Printf( "terminal support disabled: stdin is not a tty\n" );
             in_tty.SetBool( false );
             return;
         }
 #if !defined(__AROS__)
-        if ( tcgetattr( 0, &tty_tc ) == -1 ) {
+        if( tcgetattr( 0, &tty_tc ) == -1 ) {
             Sys_Printf( "tcgetattr failed. disabling terminal support: %s\n", strerror( errno ) );
             in_tty.SetBool( false );
             return;
         }
         // make the input non blocking
-        if ( fcntl( STDIN_FILENO, F_SETFL, fcntl( STDIN_FILENO, F_GETFL, 0 ) | O_NONBLOCK ) == -1 ) {
+        if( fcntl( STDIN_FILENO, F_SETFL, fcntl( STDIN_FILENO, F_GETFL, 0 ) | O_NONBLOCK ) == -1 ) {
             Sys_Printf( "fcntl STDIN non blocking failed.  disabling terminal support: %s\n", strerror( errno ) );
             in_tty.SetBool( false );
             return;
@@ -411,20 +413,20 @@ void AROS_InitConsoleInput( void ) {
         tc.c_cc[VTIME] = 0;
         
 #if !defined(__AROS__)
-        if ( tcsetattr( 0, TCSADRAIN, &tc ) == -1 ) {
+        if( tcsetattr( 0, TCSADRAIN, &tc ) == -1 ) {
             Sys_Printf( "tcsetattr failed: %s\n", strerror( errno ) );
             Sys_Printf( "terminal support may not work correctly. Use +set in_tty 0 to disable it\n" );
         }
         // make the output non blocking
-        if ( fcntl( STDOUT_FILENO, F_SETFL, fcntl( STDOUT_FILENO, F_GETFL, 0 ) | O_NONBLOCK ) == -1 ) {
+        if( fcntl( STDOUT_FILENO, F_SETFL, fcntl( STDOUT_FILENO, F_GETFL, 0 ) | O_NONBLOCK ) == -1 ) {
             Sys_Printf( "fcntl STDOUT non blocking failed: %s\n", strerror( errno ) );
         }
 #endif
         tty_enabled = true;
         // check the terminal type for the supported ones
         char *term = getenv( "TERM" );
-        if ( term ) {
-            if ( strcmp( term, "linux" ) && strcmp( term, "xterm" ) && strcmp( term, "xterm-color" ) && strcmp( term, "screen" ) ) {
+        if( term ) {
+            if( strcmp( term, "linux" ) && strcmp( term, "xterm" ) && strcmp( term, "xterm-color" ) && strcmp( term, "screen" ) ) {
                 Sys_Printf( "WARNING: terminal type '%s' is unknown. terminal support may not work correctly\n", term );
             }
         }
@@ -461,21 +463,21 @@ void tty_Right() {
 void tty_Hide() {
     int len, buf_len;
 
-    if ( !tty_enabled ) {
+    if( !tty_enabled ) {
         return;
     }
-    if ( input_hide ) {
+    if( input_hide ) {
         input_hide++;
         return;
     }
     // clear after cursor
     len = strlen( input_field.GetBuffer() ) - input_field.GetCursor();
-    while ( len > 0 ) {
+    while( len > 0 ) {
         tty_Right();
         len--;
     }
     buf_len = strlen( input_field.GetBuffer() );
-    while ( buf_len > 0 ) {
+    while( buf_len > 0 ) {
         tty_Del();
         buf_len--;
     }
@@ -485,23 +487,23 @@ void tty_Hide() {
 // show the current line
 void tty_Show() {
     //	int i;
-    if ( !tty_enabled ) {
+    if( !tty_enabled ) {
         return;
     }
     assert( input_hide > 0 );
     input_hide--;
-    if ( input_hide == 0 ) {
+    if( input_hide == 0 ) {
         char *buf = input_field.GetBuffer();
         size_t len = strlen(buf);
-        if ( len < 1 )
+        if( len < 1 )
             return;
 
         len = write( STDOUT_FILENO, buf, len );
-        if ( len < 1 )
+        if( len < 1 )
             return;
 
         len -= input_field.GetCursor();
-        while ( len > 0 ) {
+        while( len > 0 ) {
             tty_Left();
             len--;
         }
@@ -510,7 +512,7 @@ void tty_Show() {
 
 void tty_FlushIn() {
   char key;
-  while ( ( key = getchar() ) != EOF ) {
+  while( ( key = getchar() ) != EOF ) {
       Sys_Printf( "'%d' ", key );
   }
   Sys_Printf( "\n" );
@@ -524,250 +526,7 @@ Return NULL if a complete line is not ready.
 ================
 */
 char *Sys_ConsoleInput( void ) {
-    /*
-	if ( tty_enabled ) {
-		char	key;
-		bool	hidden = false;
-		while ( ( key = getchar() ) != EOF ) {
-			if ( !hidden ) {
-				tty_Hide();
-				hidden = true;
-			}
-			switch ( key ) {
-			case 1:
-				input_field.SetCursor( 0 );
-				break;
-			case 5:
-				input_field.SetCursor( strlen( input_field.GetBuffer() ) );
-				break;
-			case 127:
-			case 8:
-				input_field.CharEvent( K_BACKSPACE );
-				break;
-			case '\n':
-				idStr::Copynz( input_ret, input_field.GetBuffer(), sizeof( input_ret ) );
-				assert( hidden );
-				tty_Show();
-				putchar(key);
-				input_field.Clear();
-				if ( history_count < CMD_HIST ) {
-					history[ history_count ] = input_ret;
-					history_count++;
-				} else {
-					history[ history_start ] = input_ret;
-					history_start++;
-					history_start %= CMD_HIST;
-				}
-				history_current = 0;
-				return input_ret;
-			case '\t':
-				input_field.AutoComplete();
-				break;
-			case 27: {
-				// enter escape sequence mode
-				if ( ( key = getchar() ) == EOF ) {
-					Sys_Printf( "dropping sequence: '27' " );
-					tty_FlushIn();
-					assert( hidden );
-					tty_Show();
-					return NULL;
-				}
-				switch ( key ) {
-				case 79:
-					if ( ( key = getchar() ) == EOF ) {
-						Sys_Printf( "dropping sequence: '27' '79' " );
-						tty_FlushIn();
-						assert( hidden );
-						tty_Show();
-						return NULL;
-					}
-					switch ( key ) {
-					case 72:
-						// xterm only
-						input_field.SetCursor( 0 );
-						break;
-					case 70:
-						// xterm only
-						input_field.SetCursor( strlen( input_field.GetBuffer() ) );
-						break;
-					default:
-						Sys_Printf( "dropping sequence: '27' '79' '%d' ", key );
-						tty_FlushIn();
-						assert( hidden );
-						tty_Show();
-						return NULL;
-					}
-					break;
-				case 91: {
-					if ( ( key = getchar() ) == EOF ) {
-						Sys_Printf( "dropping sequence: '27' '91' " );
-						tty_FlushIn();
-						assert( hidden );
-						tty_Show();
-						return NULL;
-					}
-					switch ( key ) {
-					case 49: {
-						if ( ( key = getchar() ) == EOF  || key != 126 ) {
-							Sys_Printf( "dropping sequence: '27' '91' '49' '%d' ", key );
-							tty_FlushIn();
-							assert( hidden );
-							tty_Show();
-							return NULL;
-						}
-						// only screen and linux terms
-						input_field.SetCursor( 0 );
-						break;
-					}
-					case 50: {
-						if ( ( key = getchar() ) == EOF || key != 126 ) {
-							Sys_Printf( "dropping sequence: '27' '91' '50' '%d' ", key );
-							tty_FlushIn();
-							assert( hidden );
-							tty_Show();
-							return NULL;
-						}
-						// all terms
-						input_field.KeyDownEvent( K_INS );
-						break;
-					}
-					case 52: {
-						if ( ( key = getchar() ) == EOF || key != 126 ) {
-							Sys_Printf( "dropping sequence: '27' '91' '52' '%d' ", key );
-							tty_FlushIn();
-							assert( hidden );
-							tty_Show();
-							return NULL;
-						}
-						// only screen and linux terms
-						input_field.SetCursor( strlen( input_field.GetBuffer() ) );
-						break;
-					}
-					case 51: {
-						if ( ( key = getchar() ) == EOF ) {
-							Sys_Printf( "dropping sequence: '27' '91' '51' " );
-							tty_FlushIn();
-							assert( hidden );
-							tty_Show();
-							return NULL;
-						}
-						if ( key == 126 ) {
-							input_field.KeyDownEvent( K_DEL );
-							break;
-						}
-						Sys_Printf( "dropping sequence: '27' '91' '51' '%d'", key );
-						tty_FlushIn();
-						assert( hidden );
-						tty_Show();
-						return NULL;
-					}
-					case 65:
-					case 66: {
-						// history
-						if ( history_current == 0 ) {
-							history_backup = input_field;
-						}
-						if ( key == 65 ) {
-							// up
-							history_current++;
-						} else {
-							// down
-							history_current--;
-						}
-						// history_current cycle:
-						// 0: current edit
-						// 1 .. Min( CMD_HIST, history_count ): back in history
-						if ( history_current < 0 ) {
-							history_current = Min( CMD_HIST, history_count );
-						} else {
-							history_current %= Min( CMD_HIST, history_count ) + 1;
-						}
-						int index = -1;
-						if ( history_current == 0 ) {
-							input_field = history_backup;
-						} else {
-							index = history_start + Min( CMD_HIST, history_count ) - history_current;
-							index %= CMD_HIST;
-							assert( index >= 0 && index < CMD_HIST );
-							input_field.SetBuffer( history[ index ] );
-						}
-						assert( hidden );
-						tty_Show();
-						return NULL;
-					}
-					case 67:
-						input_field.KeyDownEvent( K_RIGHTARROW );
-						break;
-					case 68:
-						input_field.KeyDownEvent( K_LEFTARROW );
-						break;
-					default:
-						Sys_Printf( "dropping sequence: '27' '91' '%d' ", key );
-						tty_FlushIn();
-						assert( hidden );
-						tty_Show();
-						return NULL;
-					}
-					break;
-				}
-				default:
-					Sys_Printf( "dropping sequence: '27' '%d' ", key );
-					tty_FlushIn();
-					assert( hidden );
-					tty_Show();
-					return NULL;
-				}
-				break;
-			}
-			default:
-				if ( key >= ' ' ) {
-					input_field.CharEvent( key );
-					break;
-				}
-				Sys_Printf( "dropping sequence: '%d' ", key );
-				tty_FlushIn();
-				assert( hidden );
-				tty_Show();
-				return NULL;
-			}
-		}
-		if ( hidden ) {
-			tty_Show();
-		}
-		return NULL;
-	} else {
-		// no terminal support - read only complete lines
-		int				len;
-		fd_set			fdset;
-		struct timeval	timeout;
-
-		FD_ZERO( &fdset );
-		FD_SET( STDIN_FILENO, &fdset );
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 0;
-		if ( select( 1, &fdset, NULL, NULL, &timeout ) == -1 || !FD_ISSET( 0, &fdset ) ) {
-			return NULL;
-		}
-
-		len = read( 0, input_ret, sizeof( input_ret ) );
-		if ( len == 0 ) {
-			// EOF
-			return NULL;
-		}
-
-		if ( len < 1 ) {
-			Sys_Printf( "read failed: %s\n", strerror( errno ) );	// something bad happened, cancel this line and print an error
-			return NULL;
-		}
-
-		if ( len == sizeof( input_ret ) ) {
-			Sys_Printf( "read overflow\n" );	// things are likely to break, as input will be cut into pieces
-		}
-
-		input_ret[ len-1 ] = '\0';		// rip off the \n and terminate
-		return input_ret;
-	}*/
-	return NULL;
+    return NULL;
 }
 
 /*
@@ -777,20 +536,20 @@ low level output
 */
 
 void Sys_VPrintf(const char *msg, va_list arg) {
-	// gonna use arg twice, so copy it
-	va_list arg2;
-	va_copy(arg2, arg);
+    // gonna use arg twice, so copy it
+    va_list arg2;
+    va_copy( arg2, arg );
 
-	// first print to stdout()
-	vprintf(msg, arg2);
+    // first print to stdout()
+    vprintf( msg, arg2 );
 
-	va_end(arg2); // arg2 is not needed anymore
+    va_end( arg2 ); // arg2 is not needed anymore
 
-	// then print to the log, if any
-	if(consoleLog != NULL)
-	{
-		vfprintf(consoleLog, msg, arg);
-	}
+    // then print to the log, if any
+    if( consoleLog != NULL )
+    {
+        vfprintf( consoleLog, msg, arg );
+    }
 }
 
 void Sys_DebugPrintf( const char *fmt, ... ) {
@@ -842,7 +601,7 @@ Sys_Shutdown
 ===============
 */
 void Sys_Shutdown( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     adoom3_basepath.Clear();
     adoom3_savepath.Clear();
@@ -855,7 +614,7 @@ Sys_FPU_EnableExceptions
 ===============
 */
 void Sys_FPU_EnableExceptions( int exceptions ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 }
 
 /*
@@ -864,7 +623,7 @@ Sys_FPE_handler
 ===============
 */
 void Sys_FPE_handler( int signum, siginfo_t *info, void *context ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     assert( signum == SIGFPE );
     Sys_Printf( "FPE\n" );
@@ -882,34 +641,36 @@ if the command contains spaces, system() is used. Otherwise the more straightfor
 void Sys_DoStartProcess( const char *exeName, bool dofork ) {
     bool use_system = false;
 
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    if ( strchr( exeName, ' ' ) ) {
-            use_system = true;
+    if( strchr( exeName, ' ' ) ) {
+        use_system = true;
     } else {
-            // set exec rights when it's about a single file to execute
-            struct stat buf;
-            if ( stat( exeName, &buf ) == -1 ) {
-                    printf( "stat %s failed: %s\n", exeName, strerror( errno ) );
-            } else {
-                    if ( chmod( exeName, buf.st_mode | S_IXUSR ) == -1 ) {
-                            printf( "cmod +x %s failed: %s\n", exeName, strerror( errno ) );
-                    }
+        // set exec rights when it's about a single file to execute
+        struct stat buf;
+        if( stat( exeName, &buf ) == -1 ) {
+            printf( "stat %s failed: %s\n", exeName, strerror( errno ) );
+        } else {
+            if( chmod( exeName, buf.st_mode | S_IXUSR ) == -1 ) {
+                printf( "cmod +x %s failed: %s\n", exeName, strerror( errno ) );
             }
+        }
     }
-    if ( use_system ) {
-            printf( "system %s\n", exeName );
-            if (system( exeName ) == -1)
-                    printf( "system failed: %s\n", strerror( errno ) );
-            else
-                    sleep( 1 );	// on some systems I've seen that starting the new process and exiting this one should not be too close
+    if( use_system ) {
+        printf( "system %s\n", exeName );
+        if(system( exeName ) == -1)
+            printf( "system failed: %s\n", strerror( errno ) );
+        else
+            sleep( 1 );	// on some systems I've seen that starting the new process and exiting this one should not be too close
     } else {
-            printf( "execl %s\n", exeName );
-            execl( exeName, exeName, 0 );
-            printf( "execl failed: %s\n", strerror( errno ) );
+        printf( "execl %s\n", exeName );
+        execl( exeName, exeName, 0 );
+        printf( "execl failed: %s\n", strerror( errno ) );
     }
     // terminate
-    _exit( 0 );
+    nsstask_exittype = 2;
+    nsstask_exitcode = 0;
+    longjmp( nsstask_exitjmp, 1 );
 }
 
 /*
@@ -918,12 +679,52 @@ Sys_OpenURL
 =================
 */
 void idSysLocal::OpenURL( const char *url, bool quit ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug("[ADoom3] %s()\n", __func__ ) );
 
     AROS_OpenURL( url );
 }
 
+int dhewm3game_entry(int argc, char **argv) {
 
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
+
+    AROS_EarlyInit( );
+
+    if( argc > 1 ) {
+        common->Init( argc-1, &argv[1] );
+    } else {
+        common->Init( 0, NULL );
+    }
+
+    Sys_Init( );
+
+    while(1) {
+        common->Frame();
+    }
+
+    D( bug( "[ADoom3] %s: game finished\n", __func__ ) );
+
+    return 0;
+}
+
+int dhewm3game_tramp(int argc, char **argv) {
+    int retval = 0;
+
+    if( setjmp( nsstask_exitjmp ) == 0 ) {
+        retval = dhewm3game_entry( argc, argv );
+    } else {
+        D( bug( "[ADoom3] %s: game exited (retcode %u)\n", __func__, nsstask_exitcode ) );
+        //
+    }
+
+    if (SocketBase)
+    {
+        CloseLibrary(SocketBase);
+        SocketBase = NULL;
+    }
+
+    return retval;
+}
 
 // DG: apparently AROS supports clock_gettime(), so use that for Sys_MillisecondsPrecise()
 static struct timespec first;
@@ -982,23 +783,55 @@ void Sys_SleepUntilPrecise( double targetTimeMS ) {
 main
 ===============
 */
+
+// Use 1MB stack - c++ & software rasterizer can be greedy.
+#define DOOM3STACKSIZE	(1 << 20)
+
 int main(int argc, char **argv) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    AROS_initTime();
+    struct Task *tc;
+    BOOL nostacklaunch = TRUE;
 
-    AROS_EarlyInit( );
+    tc = FindTask( NULL );
 
-    if ( argc > 1 ) {
-            common->Init( argc-1, &argv[1] );
-    } else {
-            common->Init( 0, NULL );
+    BPTR dirLock = ((struct Process *)tc)->pr_CurrentDir;
+    launch_path[0] = 0;
+    if( dirLock != 0 ) {
+        if( NameFromLock( dirLock, launch_path, sizeof( launch_path ) ) ) {
+            D( bug( "[ADoom3] %s: Launch directory: %s\n", __func__, launch_path ) );
+        }
     }
 
-    Sys_Init( );
+    if( ( (IPTR)tc->tc_SPUpper - (IPTR)tc->tc_SPLower ) < DOOM3STACKSIZE ) {
+        struct StackSwapStruct *newStack;
+        if( ( newStack = (struct StackSwapStruct *)AllocVec( sizeof( struct StackSwapStruct ), MEMF_PUBLIC ) ) != NULL ) {
+            if( ( newStack->stk_Lower = AllocVec( DOOM3STACKSIZE, MEMF_PUBLIC ) ) != NULL ) {
+                struct StackSwapArgs swapargs;
+                nostacklaunch = FALSE;
 
-    while (1) {
-            common->Frame();
+                newStack->stk_Upper = (APTR)((IPTR)newStack->stk_Lower + DOOM3STACKSIZE);
+                newStack->stk_Pointer = (APTR)newStack->stk_Upper;
+
+                swapargs.Args[0] = (IPTR)argc;
+                swapargs.Args[1] = (IPTR)argv;
+                NewStackSwap( newStack, (APTR)dhewm3game_tramp, &swapargs );
+
+                D( bug( "[ADoom3] %s: Freeing used stack\n", __func__ ) );
+                FreeVec( newStack->stk_Lower );
+            }
+            FreeVec( newStack );
+        }
+        if( nsstask_exittype > 0 ) {
+            if( nsstask_exittype == 1 )
+                exit( nsstask_exitcode );
+            else
+                _exit( nsstask_exitcode );
+        }
     }
+    if( nostacklaunch )
+        dhewm3game_entry( argc, argv );
+
+    D( bug( "[ADoom3] %s: Exiting\n", __func__ ) );
     return 0;
 }
