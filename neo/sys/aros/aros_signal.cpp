@@ -42,9 +42,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/aros/aros_public.h"
 
-extern jmp_buf	nsstask_exitjmp;
-extern int        nsstask_exittype;
-extern int        nsstask_exitcode;
+extern jmp_buf		nsstask_exitjmp;
+extern int        	nsstask_exittype;
+extern int        	nsstask_exitcode;
 
 const int siglist[] = {
 	SIGHUP,
@@ -96,7 +96,7 @@ void AROS_ClearSigs( ) {
 	struct sigaction action;
 	int i;
 
-    D(bug("[ADoom3] %s()\n", __func__));
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
 	/* Set up the structure */
 	action.sa_handler = SIG_DFL;
@@ -120,7 +120,7 @@ sig_handler
 static void sig_handler( int signum, siginfo_t *info, void *context ) {
 	static bool double_fault = false;
 
-    D(bug("[ADoom3] %s()\n", __func__));
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
 	if ( double_fault ) {
 		Sys_Printf( "double fault %s, bailing out\n", strsignal( signum ) );
@@ -154,7 +154,7 @@ void AROS_InitSigs( ) {
 	struct sigaction action;
 	int i;
 
-    D(bug("[ADoom3] %s()\n", __func__));
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
 	fatalError[0] = '\0';
 
@@ -182,7 +182,7 @@ void AROS_InitSigs( ) {
 	signal( SIGTTIN, SIG_IGN );
 	signal( SIGTTOU, SIG_IGN );
 
-    D(bug("[ADoom3] %s: Init complete\n", __func__));
+    D( bug( "[ADoom3] %s: Init complete\n", __func__ ) );
 }
 
 /*
@@ -191,6 +191,6 @@ Sys_SetFatalError
 ==================
 */
 void Sys_SetFatalError( const char *error ) {
-    D(bug("[ADoom3] %s('%s')\n", __func__, error));
+    D( bug( "[ADoom3] %s('%s')\n", __func__, error ) );
 	idStr::Copynz( fatalError, error, sizeof( fatalError ) );
 }
