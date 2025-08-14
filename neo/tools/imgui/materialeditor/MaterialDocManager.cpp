@@ -58,7 +58,7 @@ MaterialDocManager::~MaterialDocManager(void) {
 * @param view The object that would like to receive material notifications.
 */
 void MaterialDocManager::RegisterMaterialView(MaterialView* view) {
-	ASSERT(view);
+	assert(view);
 	UnRegisterMaterialView(view);
 	materialViews.Append(view);
 
@@ -71,7 +71,7 @@ void MaterialDocManager::RegisterMaterialView(MaterialView* view) {
 * @param view The view that no longer wants notifications.
 */
 void MaterialDocManager::UnRegisterMaterialView(MaterialView* view) {
-	ASSERT(view);
+	assert(view);
 	materialViews.Remove(view);
 
 	//Remove the reference to myself
