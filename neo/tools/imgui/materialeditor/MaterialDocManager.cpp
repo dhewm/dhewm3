@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "tools/edit_gui_common.h"
+#include "renderer/Material.h"
 
 
 #include "MaterialDocManager.h"

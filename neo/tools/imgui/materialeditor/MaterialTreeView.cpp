@@ -520,7 +520,7 @@ bool MaterialTreeView::FindNextMaterial(MaterialSearchData_t* searchData) {
 
 	//Make sure we are in a file
 	if(searchData->searchScope == 0) {
-		DWORD type = tree.GetItemData(selected);
+		int type = tree.GetItemData(selected);
 		if(type == TYPE_FOLDER || type == TYPE_ROOT)
 			return false;
 	}
@@ -785,7 +785,7 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 			//Generate the new name
 			idStr material;
 			TreeNode *parent = tree.GetParentItem(item);
-			DWORD parentType = tree.GetItemData(parent);
+			int parentType = tree.GetItemData(parent);
 			if(parentType == TYPE_MATERIAL_FOLDER) {
 				//Need to include the material folder
 				material = GetMediaPath(parent, TYPE_MATERIAL_FOLDER);
@@ -1413,7 +1413,7 @@ idStr MaterialTreeView::GetMediaPath(TreeNode *item, int type) {
 	while ( parent != NULL ) {
 
 		//stop the iteration once we have found a specific type
-		DWORD parentType = tree.GetItemData(parent);
+		int parentType = tree.GetItemData(parent);
 		if(parentType == stopType) {
 			break;
 		}
@@ -1441,7 +1441,7 @@ void MaterialTreeView::GetMaterialPaths(TreeNode *item, idList<MaterialTreeItem_
 		TreeNode *childItem = tree.GetChildItem(item);
 		while(childItem != NULL) {
 
-			DWORD childType = tree.GetItemData(childItem);
+			int childType = tree.GetItemData(childItem);
 			if (childType == TYPE_MATERIAL) {
 				MaterialTreeItem_t mat;
 				mat.materialName = GetMediaPath(childItem, TYPE_MATERIAL);
@@ -1815,7 +1815,7 @@ void MaterialTreeView::BuildLookupTrees(TreeNode *item) {
 	if(tree.GetChildItem(item)) {
 		TreeNode *childItem = tree.GetChildItem(item);
 		while(childItem != NULL) {
-			DWORD childType = tree.GetItemData(childItem);
+			int childType = tree.GetItemData(childItem);
 			if(childType == TYPE_MATERIAL_FOLDER) {
 				//Recursively call this method for all my child folders
 				BuildLookupTrees(childItem);

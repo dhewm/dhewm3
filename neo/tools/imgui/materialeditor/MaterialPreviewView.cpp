@@ -27,7 +27,9 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "tools/edit_gui_common.h"
+#include "framework/EventLoop.h"
+#include "framework/Session.h"
+#include "renderer/ModelManager.h"
 #include "../../renderer/tr_local.h"
 
 
