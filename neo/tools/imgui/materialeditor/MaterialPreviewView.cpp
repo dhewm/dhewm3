@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "framework/EventLoop.h"
 #include "framework/Session.h"
+#include "renderer/Image.h"
 #include "renderer/ModelManager.h"
 #include "../../renderer/tr_local.h"
 
@@ -592,6 +593,7 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 	int					i;
 	renderView_t		refdef;
 	const idMaterial	*mat = material;
+	idImage				*image;
 
 	if ( mat ) {
 		UpdateLights();
@@ -622,6 +624,11 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 		renderSystem->CropRenderSize( w, h, true );
 		renderSystem->CaptureRenderToImage( "_currentRender" );
 		renderSystem->UnCrop();
+
+		image = globalImages->GetImage( "_currentRender" );
+		if ( image ) {
+			ImGui::Image(image->texnum, ImVec2(w, h));
+		}
 	}
 }
 
