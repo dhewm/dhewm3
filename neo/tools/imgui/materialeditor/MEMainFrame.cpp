@@ -385,7 +385,7 @@ void MEMainFrame::Draw() {
 
 				// m_materialPreviewView : MaterialPreviewView at 0, 1 of m_previewSplitter
 					// Size 200, 200
-				if ( m_materialPreviewView->Draw( ImVec2( 0, previewSplitterHeight ) ) ) {
+				if ( m_materialPreviewView->Draw( ImVec2( windowSize.x - previewSplitterPos, previewSplitterHeight ) ) ) {
 
 				}
 

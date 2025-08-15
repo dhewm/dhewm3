@@ -51,21 +51,14 @@ MaterialPreviewView::MaterialPreviewView() {
 MaterialPreviewView::~MaterialPreviewView() {
 }
 
-/*
-BEGIN_MESSAGE_MAP(MaterialPreviewView, CView)
-	ON_WM_CREATE()
-	ON_WM_SIZE()
-END_MESSAGE_MAP()
-*/
-
 // MaterialPreviewView drawing
 
 bool MaterialPreviewView::Draw( const ImVec2 &size ) {
 	ImGui::BeginChild( "MaterialPreviewView", size, ImGuiChildFlags_Borders );
 	
 	ImGui::Text( "MaterialPreviewView" );
-	//ImVec2 pos = ImGui::GetCursorPos();
-	//renderedView.draw( pos.x, pos.y, size.x, size.y );
+	ImVec2 pos = ImGui::GetCursorPos();
+	renderedView.draw( pos.x, pos.y, size.x, size.y );
 
 	ImGui::EndChild();
 
@@ -115,10 +108,6 @@ void MaterialPreviewView::MV_OnMaterialSelectionChange( MaterialDoc *pMaterial )
 	if ( pMaterial && pMaterial->renderMaterial ) {
 		currentMaterial = pMaterial->renderMaterial->GetName();
 		renderedView.setMedia( currentMaterial );
-		/*
-		renderWindow.Invalidate();
-		renderWindow.RedrawWindow();
-		*/
 	}
 }
 
@@ -605,17 +594,9 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 	const idMaterial	*mat = material;
 
 	if ( mat ) {
-		qglViewport( x, y, w, h );
-		qglScissor( x, y, w, h );
-		qglMatrixMode( GL_PROJECTION );
-		qglClearColor( 0.1f, 0.1f, 0.1f, 0.0f );
-		qglClear( GL_COLOR_BUFFER_BIT );
-
 		UpdateLights();
 
 		// render it
-		renderSystem->BeginFrame( w, h );
-
 		memset( &refdef, 0, sizeof( refdef ) );
 
 		UpdateCamera( &refdef );
@@ -638,12 +619,9 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 			drawLights( &refdef );
 		}
 
-		renderSystem->EndFrame( NULL, NULL );
-
-		world->DebugClearLines( refdef.time );
-
-		qglMatrixMode( GL_MODELVIEW );
-		qglLoadIdentity();
+		renderSystem->CropRenderSize( w, h, true );
+		renderSystem->CaptureRenderToImage( "_currentRender" );
+		renderSystem->UnCrop();
 	}
 }
 
