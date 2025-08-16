@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 //#include "../radiant/QE3.H"
 #include "MaterialDoc.h"
 #include "MaterialView.h"
+#include "renderer/RenderSystem.h"
+#include "tools/imgui/materialeditor/MaterialDef.h"
 #include "MaterialPreviewView.h"
 
 namespace ImGuiTools {
@@ -621,13 +623,13 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 			drawLights( &refdef );
 		}
 
-		renderSystem->CropRenderSize( w, h, true );
+		renderSystem->CropRenderSize( SCREEN_WIDTH, SCREEN_HEIGHT, true );
 		renderSystem->CaptureRenderToImage( "_currentRender" );
 		renderSystem->UnCrop();
 
 		image = globalImages->GetImage( "_currentRender" );
 		if ( image ) {
-			ImGui::Image(image->texnum, ImVec2(w, h));
+			ImGui::Image( image->texnum, ImVec2( w, h ), ImVec2( 0.0f, 1.0f ), ImVec2( 1.0f, 0.0f ) );
 		}
 	}
 }

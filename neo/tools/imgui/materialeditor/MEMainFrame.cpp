@@ -199,7 +199,8 @@ void MEMainFrame::OnCreateClient() {
 	editSplitterHeight = 200;
 	previewSplitterPos = 300;
 	previewSplitterPos = 500;
-	previewSplitterHeight = 200;
+	previewSplitterWidth = 500;
+	previewSplitterHeight = 500;
 
 	int val = options.GetMaterialEditHeight();
 	if(val <= 0)
