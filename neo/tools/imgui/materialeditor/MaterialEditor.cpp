@@ -27,17 +27,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../util/ImGui_IdWidgets.h"
 #include "sys/sys_imgui.h"
 
-#include "MaterialEditor.h"
 #include "MEMainFrame.h"
 
 namespace ImGuiTools {
 
 MEMainFrame* meMainFrame = NULL;
-
-//CFont* materialEditorFont = NULL;
 
 /**
 * Initializes the material editor tool.
@@ -100,7 +96,7 @@ void MaterialEditorShutdown( void ) {
 * Allows the doom engine to reflect console output to the material editors console.
 */
 void MaterialEditorPrintConsole( const char *msg ) {
-	// meMainFrame can be null when starting immedeatly from commandline.
+	// meMainFrame can be null when starting immediately from commandline.
 	if(meMainFrame && com_editors & EDITOR_MATERIAL)
 		meMainFrame->PrintConsoleMessage(msg);
 }

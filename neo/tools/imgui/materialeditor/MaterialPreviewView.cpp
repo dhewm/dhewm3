@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "framework/EventLoop.h"
 #include "framework/Session.h"
+#include "imgui.h"
+#include "imgui_internal.h"
 #include "renderer/Image.h"
 #include "renderer/ModelManager.h"
 #include "../../renderer/tr_local.h"
@@ -36,15 +38,12 @@ If you have questions concerning this license or the applicable additional terms
 
 //#include "../radiant/QE3.H"
 #include "MaterialDoc.h"
-#include "MaterialView.h"
 #include "renderer/RenderSystem.h"
-#include "tools/imgui/materialeditor/MaterialDef.h"
 #include "MaterialPreviewView.h"
 
 namespace ImGuiTools {
 
 // MaterialPreviewView
-//IMPLEMENT_DYNCREATE(MaterialPreviewView, CView)
 
 MaterialPreviewView::MaterialPreviewView() {
 	// Initialize the rendered material
@@ -60,7 +59,41 @@ bool MaterialPreviewView::Draw( const ImVec2 &size ) {
 	ImGui::BeginChild( "MaterialPreviewView", size, ImGuiChildFlags_Borders );
 	
 	ImGui::Text( "MaterialPreviewView" );
+	ImGui::SetNextItemAllowOverlap();
+	ImGui::InvisibleButton("###MaterialPreviewRenderedView", size, ImGuiButtonFlags_AllowOverlap | ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonMiddle | ImGuiButtonFlags_MouseButtonRight );
 	ImVec2 pos = ImGui::GetCursorPos();
+	if ( ImGui::IsItemActive() )
+	{
+		//ImVec2 delta = ImGui::GetIO().MouseDelta;
+		//float dt = ImGui::GetIO().DeltaTime;
+
+		//delta.x *= dt;
+		//delta.y *= dt;
+		//renderedView.mouseMove( delta.x, delta.y );
+		renderedView.input();
+	}
+	/*const ImVec2 p0 = ImGui::GetItemRectMin();
+	ImVec2 mpos = ImGui::GetIO().MousePos;
+	mpos.x += p0.x;
+	mpos.y += p0.y;
+	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Left ) ) {
+		renderedView.buttonDown( ImGuiMouseButton_Left, mpos.x, mpos.y );
+	}
+	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Middle ) ) {
+		renderedView.buttonDown( ImGuiMouseButton_Middle, mpos.x, mpos.y );
+	}
+	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Right ) ) {
+		renderedView.buttonDown( ImGuiMouseButton_Right, mpos.x, mpos.y );
+	}
+	if ( ImGui::IsMouseReleased( ImGuiMouseButton_Left ) ) {
+		renderedView.buttonUp( ImGuiMouseButton_Left, mpos.x, mpos.y );
+	}
+	if ( ImGui::IsMouseReleased( ImGuiMouseButton_Middle ) ) {
+		renderedView.buttonUp( ImGuiMouseButton_Middle, mpos.x, mpos.y );
+	}
+	if ( ImGui::IsMouseReleased( ImGuiMouseButton_Right ) ) {
+		renderedView.buttonUp( ImGuiMouseButton_Right, mpos.x, mpos.y );
+	}*/
 	renderedView.draw( pos.x, pos.y, size.x, size.y );
 
 	ImGui::EndChild();
@@ -69,42 +102,6 @@ bool MaterialPreviewView::Draw( const ImVec2 &size ) {
 }
 
 // MaterialPreviewView message handlers
-
-/*
-int MaterialPreviewView::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (CView::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	DWORD dwStyle;
-	CRect rc;
-
-	dwStyle = WS_CHILD|WS_VISIBLE;
-
-	// Init the control's size to cover the entire client area
-	GetClientRect(rc);
-
-	// Initialize the rendered window and material
-	renderWindow.Create( NULL, "renderWindow", dwStyle, rc, this, 1010 );
-
-	renderWindow.setDrawable( &renderedView );
-	renderWindow.SetWindowPos(NULL, 0, 0, rc.Width(), rc.Height(), SWP_SHOWWINDOW);
-
-	return 0;
-}
-
-void MaterialPreviewView::OnSize(UINT nType, int cx, int cy)
-{
-	CRect rc;
-
-	CView::OnSize( nType, cx, cy );
-
-	GetClientRect( rc );
-
-	renderWindow.SetWindowPos(NULL, 0, 0, rc.Width(), rc.Height(), SWP_SHOWWINDOW);
-	renderWindow.Invalidate();
-	renderWindow.RedrawWindow();
-}*/
 
 void MaterialPreviewView::MV_OnMaterialSelectionChange( MaterialDoc *pMaterial )
 {
@@ -179,77 +176,7 @@ idGLDrawable::idGLDrawable() {
 	scale = 1.0;
 	xOffset = 0.0;
 	yOffset = 0.0;
-	handleMove = false;
 	realTime = 0;
-}
-
-void idGLDrawable::buttonDown( int _button, float x, float y ) {
-	pressX = x;
-	pressY = y;
-	button = _button;
-	if ( button == ImGuiMouseButton_Right ) {
-		handleMove = true;
-	}
-}
-
-void idGLDrawable::buttonUp( int button, float x, float y ) {
-	handleMove = false;
-}
-
-static float fDiff( float f1, float f2 ) {
-	if ( f1 > f2 ) {
-		return f1 - f2;
-	} else {
-		return f2 - f1;
-	}
-}
-
-void idGLDrawable::mouseMove( float x, float y ) {
-	if ( handleMove ) {
-		Update();
-		if ( ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt ) ) {
-			// scale
-			float* px = &x;
-			float* px2 = &pressX;
-
-			if ( fDiff( y, pressY ) > fDiff( x, pressX ) ) {
-				px = &y;
-				px2 = &pressY;
-			}
-
-			if ( *px > *px2 ) {
-				// zoom in
-				scale += 0.1f;
-				if ( scale > 10.0f ) {
-					scale = 10.0f;
-				}
-			} else if (*px < *px2) {
-				// zoom out
-				scale -= 0.1f;
-				if ( scale <= 0.001f ) {
-					scale = 0.001f;
-				}
-			}
-
-			*px2 = *px;
-			//::SetCursorPos(pressX, pressY);
-		}
-		else if ( ImGui::IsKeyDown( ImGuiKey_LeftShift ) || ImGui::IsKeyDown( ImGuiKey_RightShift ) ) {
-			// rotate
-		}
-		else {
-			// origin
-			if ( x != pressX ) {
-				xOffset += ( x - pressX );
-				pressX = x;
-			}
-			if ( y != pressY ) {
-				yOffset -= ( y - pressY );
-				pressY = y;
-			}
-			//::SetCursorPos(pressX, pressY);
-		}
-	}
 }
 
 void idGLDrawable::draw(int x, int y, int w, int h) {
@@ -345,109 +272,6 @@ void idGLDrawableView::InitWorld() {
 	worldModel->InitEmpty( "GLWorldModel" );
 
 	viewLights.Clear();
-}
-
-void idGLDrawableView::buttonDown(int _button, float x, float y) {
-	pressX = x;
-	pressY = y;
-	button = _button;
-	if ( button == ImGuiMouseButton_Left || button == ImGuiMouseButton_Right || button == ImGuiMouseButton_Middle ) {
-		handleMove = true;
-	}
-}
-
-void idGLDrawableView::mouseMove( float x, float y ) {
-	bool doZoom;
-	float sensitivity = 0.5f;
-
-	if ( handleMove ) {
-
-		// Left mouse button rotates and zooms the view
-		if ( button == ImGuiMouseButton_Left ) {
-			doZoom = ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt );
-			if ( doZoom ) {
-				if ( y != pressY ) {
-					viewDistance -= ( y - pressY );
-					pressY = y;
-				}
-			} else {
-				float xo = 0.f;
-				float yo = 0.f;
-
-				if ( x != pressX ) {
-					xo = ( x - pressX );
-					pressX = x;
-				}
-				if ( y != pressY ) {
-					yo = ( y - pressY );
-					pressY = y;
-				}
-
-				viewRotation.yaw += -( xo * sensitivity );
-				viewRotation.pitch += ( yo * sensitivity );
-
-				viewRotation.pitch = idMath::ClampFloat( -89.9f, 89.9f, viewRotation.pitch );
-			}
-
-		// Right mouse button moves lights in the view plane
-		} else if ( button == ImGuiMouseButton_Right ) {
-			int		i;
-			float	lightMovement = 0;
-			idVec3	lightForward, lightRight, lightUp;
-			idVec3	lightMove;
-
-			lightMove.Zero();
-			viewRotation.ToVectors( &lightForward, &lightRight, &lightUp );
-
-			doZoom = ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt );
-			if ( doZoom ) {
-				if ( y != pressY ) {
-					lightMovement = -( y - pressY ) * sensitivity;
-					pressY = y;
-
-					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
-					lightMove = lightForward * lightMovement;
-				}
-			} else {
-				if ( x != pressX ) {
-					lightMovement = (x - pressX) * sensitivity;
-					pressX = x;
-
-					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
-					lightMove = lightRight * lightMovement;
-				}
-				if ( y != pressY ) {
-					lightMovement = -(y - pressY) * sensitivity;
-					pressY = y;
-
-					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
-					lightMove += lightUp * lightMovement;
-				}
-			}
-
-			// Go through the lights and move the ones that are set to allow movement
-			for ( i = 0; i < viewLights.Num(); i++ ) {
-				lightInfo_t	*vLight = &viewLights[i];
-
-				if ( vLight->allowMove ) {
-					vLight->origin += lightMove;
-				}
-			}
-
-		// Middle mouse button moves object up and down
-		} else if ( button == ImGuiMouseButton_Middle ) {
-			float yo = 0.f;
-
-			if (y != pressY) {
-				yo = (y - pressY);
-				pressY = y;
-			}
-
-			viewOrigin.z -= yo;
-
-			UpdateModel();
-		}
-	}
 }
 
 void idGLDrawableView::addLight( void ) {
@@ -590,12 +414,81 @@ void idGLDrawableView::drawLights( renderView_t *refdef ) {
 	}
 }
 
+void idGLDrawableView::input() {
+	// mouse move
+	bool doZoom;
+	float sensitivity = 0.5f;
+
+	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Left ) || ImGui::IsMouseDragging( ImGuiMouseButton_Middle ) || ImGui::IsMouseDragging( ImGuiMouseButton_Right ) ) {
+		ImVec2 delta = ImGui::GetIO().MouseDelta;
+
+		// Left mouse button rotates and zooms the view
+		if ( ImGui::IsMouseDragging( ImGuiMouseButton_Left ) ) {
+			doZoom = ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt );
+			if (doZoom) {
+				viewDistance -= delta.y;
+			} else {
+				viewRotation.yaw += -(delta.x * sensitivity);
+				viewRotation.pitch += (delta.y * sensitivity);
+
+				viewRotation.pitch = idMath::ClampFloat( -89.9f, 89.9f, viewRotation.pitch );
+			}
+
+		// Right mouse button moves lights in the view plane
+		} else if ( ImGui::IsMouseDragging( ImGuiMouseButton_Right ) ) {
+			int		i;
+			float	lightMovement = 0;
+			idVec3	lightForward, lightRight, lightUp;
+			idVec3	lightMove;
+
+			lightMove.Zero();
+			viewRotation.ToVectors( &lightForward, &lightRight, &lightUp );
+
+			doZoom = ImGui::IsKeyDown( ImGuiKey_LeftAlt ) || ImGui::IsKeyDown( ImGuiKey_RightAlt );
+			if (doZoom) {
+				if ( delta.y != 0 ) {
+					lightMovement = -delta.y * sensitivity;
+
+					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
+					lightMove = lightForward * lightMovement;
+				}
+			} else {
+				if (delta.x != 0) {
+					lightMovement = delta.x * sensitivity;
+
+					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
+					lightMove = lightRight * lightMovement;
+				}
+				if (delta.y != 0) {
+					lightMovement = -delta.y * sensitivity;
+
+					lightMovement = idMath::ClampFloat( -32.f, 32.f, lightMovement );
+					lightMove += lightUp * lightMovement;
+				}
+			}
+
+			// Go through the lights and move the ones that are set to allow movement
+			for ( i = 0; i < viewLights.Num(); i++ ) {
+				lightInfo_t	*vLight = &viewLights[i];
+
+				if ( vLight->allowMove ) {
+					vLight->origin += lightMove;
+				}
+			}
+
+		// Middle mouse button moves object up and down
+		} else if ( ImGui::IsMouseDragging( ImGuiMouseButton_Middle ) ) {
+			viewOrigin.z -= delta.y;
+
+			UpdateModel();
+		}
+	}
+}
 
 void idGLDrawableView::draw( int x, int y, int w, int h ) {
 	int					i;
 	renderView_t		refdef;
 	const idMaterial	*mat = material;
-	idImage				*image;
 
 	if ( mat ) {
 		UpdateLights();
@@ -617,20 +510,25 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 
 		refdef.time = eventLoop->Milliseconds();
 
+		renderSystem->SetColor( idVec4( 0.1f, 0.1f, 0.1f, 1.0f ) );
+		renderSystem->DrawStretchPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0, white );
+
 		world->RenderScene( &refdef );
 
 		if ( showLights ) {
 			drawLights( &refdef );
 		}
 
-		renderSystem->CropRenderSize( SCREEN_WIDTH, SCREEN_HEIGHT, true );
+		renderSystem->CropRenderSize( SCREEN_WIDTH, SCREEN_HEIGHT, false );
 		renderSystem->CaptureRenderToImage( "_currentRender" );
 		renderSystem->UnCrop();
 
-		image = globalImages->GetImage( "_currentRender" );
-		if ( image ) {
-			ImGui::Image( image->texnum, ImVec2( w, h ), ImVec2( 0.0f, 1.0f ), ImVec2( 1.0f, 0.0f ) );
-		}
+		const ImVec2 p0 = ImGui::GetItemRectMin();
+		const ImVec2 p1 = ImGui::GetItemRectMax();
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImGui::PushClipRect(p0, p1, true);
+		draw_list->AddImage(currentRender->texnum, p0, p1, ImVec2( 0.0f, 1.0f ), ImVec2( 1.0f, 0.0f ));
+		ImGui::PopClipRect();
 	}
 }
 
@@ -640,6 +538,9 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 
 void idGLDrawableView::setMedia( const char *name ) {
 	float	ratio = 1;
+
+	currentRender = globalImages->GetImage( "_currentRender" );
+	white = declManager->FindMaterial( "guis/assets/white.tga" );
 
 	if ( name && *name ) {
 		material = declManager->FindMaterial( name );

@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-//#include "tools/edit_gui_common.h"
-
 
 #include "MaterialEditView.h"
 
@@ -34,15 +32,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define EDIT_TAB_CONTROL	0x2006
 #define NAME_CONTROL		0x2007
-
-/*
-BEGIN_MESSAGE_MAP(MaterialEditView, CFormView)
-	ON_WM_SIZE()
-	ON_WM_CREATE()
-	ON_NOTIFY(TCN_SELCHANGE, EDIT_TAB_CONTROL, OnTcnSelChange)
-	ON_NOTIFY(EN_CHANGE, IDC_MATERIALEDITOR_EDIT_TEXT, OnEnChangeEdit)
-END_MESSAGE_MAP()
-*/
 
 namespace ImGuiTools {
 
@@ -162,40 +151,13 @@ void MaterialEditView::OnCreate()
 	m_textView.SetText("");
 	m_textView.SetReadOnly( true );
 
-	/*
-	if (CFormView::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	m_nameEdit.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_READONLY, CRect(0,0,0,0), this, NAME_CONTROL);
-
-	m_editSplitter.CreateStatic(this, 1, 2);
-
-	if(!m_editSplitter.CreateView(0, 0, RUNTIME_CLASS(StageView), CSize(200, 200), NULL)) {
-		TRACE0("Failed to create stage property pane\n");
-		return -1;
-	}
-
-	if(!m_editSplitter.CreateView(0, 1, RUNTIME_CLASS(MaterialPropTreeView), CSize(500, 200), NULL)) {
-		TRACE0("Failed to create property pane\n");
-		return -1;
-	}
-
-	m_nameEdit.SetFont(materialEditorFont);
-	*/
 	m_editSplitterPos = 200;
 	m_editSplitterWidth = 700;
 	m_editSplitterHeight = 200;
 
-	m_stageView = new StageView(); //(StageView*)m_editSplitter.GetPane(0, 0);
+	m_stageView = new StageView();
 	m_stageView->OnCreate();
-	m_materialPropertyView = new MaterialPropTreeView(); // (MaterialPropTreeView*)m_editSplitter.GetPane(0, 1);
-	/*
-	m_tabs.Create(TCS_BOTTOM | TCS_FLATBUTTONS | WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, EDIT_TAB_CONTROL);
-	m_tabs.InsertItem(0, "Properties");
-	m_tabs.InsertItem(1, "Text");
-
-	m_tabs.SetFont(materialEditorFont);
-	*/
+	m_materialPropertyView = new MaterialPropTreeView();
 }
 
 bool MaterialEditView::Draw( const ImVec2 &size ) {

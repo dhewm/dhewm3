@@ -28,7 +28,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../libs/ImGuiColorTextEdit/TextEditor.h"
 
 #include "../util/ImGui_IdWidgets.h"
-#include "sys/sys_imgui.h"
 
 #include "ConsoleView.h"
 

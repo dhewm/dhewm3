@@ -42,11 +42,6 @@ typedef struct {
 	int			searchScope;
 } MaterialSearchData_t;
 
-
-//extern CFont* materialEditorFont;
-
-//extern HWND GetMaterialEditorWindow();
-
 }
 
 #endif /* !MATERIALEDITOR_H_ */

@@ -62,8 +62,6 @@ public:
 	//Message Handlers
 	int							OnCreate();
 	void						OnDestroy();
-	void						OnSize();
-	void						OnTcnSelChange(/*NMHDR* pNMHDR, LRESULT* pResult*/);
 
 	void						Draw();
 
@@ -72,7 +70,7 @@ public:
 	void						OnFileSaveMaterial();
 	void						OnFileSaveFile();
 	void						OnFileSaveAll();
-	void						OnFileSaveMaterialUpdate();
+	bool						IsFileSaveMaterialEnabled();
 	void						OnFileSaveFileUpdate();
 	void						OnFileSaveAllUpdate();
 

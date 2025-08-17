@@ -124,13 +124,6 @@ void MEMainFrame::PrintConsoleMessage(const char *msg) {
 * Sets a few window styles for the main window during the creation process.
 */
 bool MEMainFrame::PreCreateWindow() {
-	//if( !CFrameWnd::PreCreateWindow(cs) )
-	//	return FALSE;
-
-	//cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-	//cs.lpszClass = AfxRegisterWndClass(0);
-
-	//return TRUE;
 	return true;
 }
 
@@ -266,31 +259,6 @@ void MEMainFrame::OnCreateClient() {
 * /todo Bmatt Nerve: Need to get the toolbars to work correctly.
 */
 int MEMainFrame::OnCreate() {
-	//if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
-//		return -1;
-
-	/*
-	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP	| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-		!m_wndToolBar.LoadToolBar(IDR_ME_MAINFRAME))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
-
-
-
-	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  sizeof(indicators)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
-	}
-
-	//Load the window placement from the options
-	options.GetWindowPlacement ( "mainframe", m_hWnd );
-	*/
-
 	m_stageView = new StageView();
 
 	return 0;
@@ -329,11 +297,40 @@ void MEMainFrame::OnDestroy() {
 	m_materialPropertyView->SaveSettings();
 
 	MaterialDefManager::DestroyMaterialDefLists();
-
-	//AfxGetApp()->ExitInstance();
 }
 
 void MEMainFrame::Draw() {
+	bool clickedNew = false, clickedSelect = false;
+
+	if( ImGui::BeginMenuBar() )
+	{
+		if( ImGui::BeginMenu( "File" ) )
+		{
+			if( ImGui::MenuItem( "New", "Ctrl+N" ) )
+			{
+				clickedNew = true;
+			}
+
+			if( ImGui::MenuItem( "Open..", "Ctrl+O" ) )
+			{
+				clickedSelect = true;
+			}
+
+			if( ImGui::MenuItem( "Save", "Ctrl+S" ) )
+			{
+				OnFileSaveMaterial();
+			}
+
+			if( ImGui::MenuItem( "Close", "Ctrl+W" ) )
+			{
+				//showTool = false;
+			}
+
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+
 	if ( ImGui::BeginTabBar( "MainTabBar" ) ) {
 
 		if (ImGui::BeginTabItem( "Editor" ) )
@@ -410,62 +407,6 @@ void MEMainFrame::Draw() {
 }
 
 /**
-* Called by the MFC framework when the window size is changed. This method adjusts the console view
-* so that it is always at the bottom of the window and resizes the splitter window to fit
-* the remaining space.
-*/
-void MEMainFrame::OnSize()
-{
-	/*
-	CFrameWnd::OnSize(nType, cx, cy);
-
-	float scaling_factor = Win_GetWindowScalingFactor(GetSafeHwnd());
-	int s5 = int(5 * scaling_factor);
-
-	CRect statusRect;
-	m_wndStatusBar.GetWindowRect(statusRect);
-
-	CRect toolbarRect;
-	m_wndToolBar.GetWindowRect(toolbarRect);
-
-	CRect tabRect;
-	m_tabs.GetItemRect(0, tabRect);
-
-	int tabHeight = tabRect.Height()+ s5;
-
-	m_splitterWnd.MoveWindow(0, toolbarRect.Height(), cx, cy-statusRect.Height()-toolbarRect.Height()-tabHeight);
-
-	m_tabs.MoveWindow(0, cy-statusRect.Height()-tabHeight, cx, tabHeight);
-
-	m_consoleView->MoveWindow(0, toolbarRect.Height(), cx, cy-statusRect.Height()-toolbarRect.Height()-tabHeight);*/
-}
-
-/**
-* Called when the user changes the editor/console tab selection. This methods shows and hides
-* the appropriate windows.
-*/
-void MEMainFrame::OnTcnSelChange() {
-	/*
-	int sel = m_tabs.GetCurSel();
-
-	switch(sel) {
-		case 0:
-			m_splitterWnd.ShowWindow(SW_SHOW);
-			m_consoleView->ShowWindow(SW_HIDE);
-
-			break;
-		case 1:
-			m_splitterWnd.ShowWindow(SW_HIDE);
-			m_consoleView->ShowWindow(SW_SHOW);
-
-			CRect rect;
-			GetWindowRect(rect);
-			MoveWindow(rect);
-			break;
-	}*/
-}
-
-/**
 * Shuts down the material editor.
 * /todo BMatt Nerve: Need to warn the user if a file is modified.
 */
@@ -487,11 +428,10 @@ void MEMainFrame::OnFileSaveMaterial() {
 * Saves the selected file.
 */
 void MEMainFrame::OnFileSaveFile() {
-	/*
 	idStr filename = m_materialTreeView->GetSaveFilename();
 	if(filename.Length() > 0) {
 		materialDocManager.SaveFile(filename);
-	}*/
+	}
 }
 
 /**
@@ -504,21 +444,16 @@ void MEMainFrame::OnFileSaveAll() {
 /**
 * Enables the save material menu item if a material is selected and has been modified.
 */
-void MEMainFrame::OnFileSaveMaterialUpdate() {
-/*
+bool MEMainFrame::IsFileSaveMaterialEnabled() {
 	MaterialDoc* pDoc = materialDocManager.GetCurrentMaterialDoc();
 
+	/*
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
 		return;
-	}
-
-	if(pDoc && pDoc->modified) {
-		pCmdUI->Enable(TRUE);
-
-	} else {
-		pCmdUI->Enable(FALSE);
 	}*/
+
+	return pDoc && pDoc->modified;
 }
 
 /**
@@ -569,11 +504,10 @@ void MEMainFrame::OnApplyMaterial() {
 * Applies all modified materials in the selected file.
 */
 void MEMainFrame::OnApplyFile() {
-	/*
 	idStr filename = m_materialTreeView->GetSaveFilename();
 	if(filename.Length() > 0) {
 		materialDocManager.ApplyFile(filename);
-	}*/
+	}
 }
 
 /**

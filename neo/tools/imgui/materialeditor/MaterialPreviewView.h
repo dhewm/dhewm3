@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #define MATERIALPREVIEWVIEW_H_
 
 #include "../util/ImGui_IdWidgets.h"
+#include "renderer/Material.h"
 #include "sys/sys_imgui.h"
 
 #include "MaterialDoc.h"
@@ -41,11 +42,9 @@ class idGLDrawable {
 public:
 	idGLDrawable();
 	~idGLDrawable() {};
+	virtual void input() {}
 	virtual void draw(int x, int y, int w, int h);
 	virtual void setMedia(const char* name) {}
-	virtual void buttonDown(int button, float x, float y);
-	virtual void buttonUp(int button, float x, float y);
-	virtual void mouseMove(float x, float y);
 	virtual int getRealTime() { return realTime; };
 	virtual bool ScreenCoords() {
 		return true;
@@ -65,10 +64,6 @@ protected:
 	float xOffset;
 	float yOffset;
 	float zOffset;
-	float pressX;
-	float pressY;
-	bool  handleMove;
-	int button;
 	int realTime;
 };
 
@@ -79,10 +74,8 @@ public:
 	~idGLDrawableView();
 
 	virtual void setMedia(const char *name);
+	virtual void input();
 	virtual void draw(int x, int y, int w, int h);
-	virtual void buttonUp(int button){}
-	virtual void buttonDown(int _button, float x, float y);
-	virtual void mouseMove(float x, float y);
 	virtual void Update() {};
 
 	void UpdateCamera( renderView_t *refdef );
@@ -109,6 +102,8 @@ public:
 protected:
 	idRenderWorld		*world;
 	idRenderModel		*worldModel;
+	const idImage		*currentRender;
+	const idMaterial	*white;
 	const idMaterial	*material;
 
 	bool				showLights;
