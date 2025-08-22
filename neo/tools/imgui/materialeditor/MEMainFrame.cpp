@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "imgui.h"
-#include "imgui_internal.h"
 #include "sys/sys_imgui.h"
 
 #include "MaterialEditor.h"
@@ -863,11 +861,10 @@ void MEMainFrame::OnEditFindNext() {
 */
 void MEMainFrame::OnEditUndo() {
 	//Check for undo operation on special windows
-	// /Material Editor\/editorSplitters_D5DAAA9C\/###MaterialTreeView_6E8A8DE1/(void*)0x0x14b06e448/(void*)0x0x14b92aad8/(void*)0x0x14b92a938/(void*)0x0x14b929bd0/(void*)0x0x14b929688
-	if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+	/*if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
 		m_materialEditView->m_textView.Undo();
 		return;
-	}
+	}*/
 
 	materialDocManager.Undo();
 }
@@ -877,10 +874,10 @@ void MEMainFrame::OnEditUndo() {
 */
 void MEMainFrame::OnEditRedo() {
 	//Check for redo operation on special windows
-	if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+	/*if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
 		m_materialEditView->m_textView.Redo();
 		return;
-	}
+	}*/
 	materialDocManager.Redo();
 }
 
@@ -888,11 +885,11 @@ void MEMainFrame::OnEditRedo() {
 * Enables the undo menu item if an undo is available.
 */
 bool MEMainFrame::IsEditUndoEnabled() {
-	ImGuiID active = ImGui::GetFocusID();
+	/*ImGuiID active = ImGui::GetFocusID();
 	ImGuiID textId = ImGui::GetID( "Text" );
 	if ( textId == active ) {
 		return m_materialEditView->m_textView.CanUndo();
-	}
+	}*/
 
 	return materialDocManager.IsUndoAvailable();
 }
@@ -901,9 +898,9 @@ bool MEMainFrame::IsEditUndoEnabled() {
 * Enables the redo menu item if a redo is available.
 */
 bool MEMainFrame::IsEditRedoEnabled() {
-	if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+	/*if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
 		return m_materialEditView->m_textView.CanRedo();
-	}
+	}*/
 
 	return materialDocManager.IsRedoAvailable();
 }

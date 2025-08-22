@@ -26,8 +26,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 #include "../util/ImGui_IdWidgets.h"
-#include "imgui.h"
-#include <cstddef>
 
 #include "MaterialTreeView.h"
 
@@ -890,7 +888,7 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 				internalChange = false;
 
 				renamedFolder = item;
-				//PostMessage(MSG_RENAME_MATERIAL_COMPLETE);
+				OnRenameMaterialComplete();
 
 				result = true;
 			}
