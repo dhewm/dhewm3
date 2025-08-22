@@ -577,7 +577,7 @@ void SyntaxRichEditCtrl::Undo() {
 }
 
 bool SyntaxRichEditCtrl::CanRedo() {
-	scriptEdit->CanRedo();
+	return scriptEdit->CanRedo();
 }
 
 void SyntaxRichEditCtrl::Redo() {
