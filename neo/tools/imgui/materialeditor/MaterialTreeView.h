@@ -107,14 +107,13 @@ private:
 public:
 	void			OnTvnSelchanged( bool doubleClicked );
 	bool			OnNMRclick( TreeNode *item );
+	void			OnTvnBegindrag( TreeNode *item );
+	void			OnTvnEndDrag( TreeNode *source, TreeNode *destination );
 private:
 	bool			OnTvnBeginlabeledit( TreeNode *item );
 	bool			OnTvnEndlabeledit( TreeNode *item, idStr &text );
 	void			OnContextMenu( TreeNode *item );
 	bool			OnChar(int nChar);
-	void			OnTvnBegindrag( TreeNode *item );
-	void			OnMouseMove();
-	void			OnLButtonUp();
 
 	//Menu Commands
 	void			OnApplyMaterial();

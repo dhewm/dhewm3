@@ -112,6 +112,8 @@ typedef bool (*treeItemCompare_t)( void *data, TreeNode *item, const char *name 
 typedef bool (*treeItemTooltip_t)( void *data, TreeNode *item, idStr &tooltipText );
 typedef void (*treeItemSelected_t)( void *data, bool doubleClick );
 typedef void (*treeItemContextMenu_t)( void *data, TreeNode *item );
+typedef void (*treeItemBeginDrag_t)( void *data, TreeNode *source );
+typedef void (*treeItemEndDrag_t)( void *data, TreeNode *source, TreeNode *destination );
 
 class TreeCtrl {
 public:
@@ -145,10 +147,10 @@ public:
 	void							SortChildren( TreeNode *item );
 	void							EditLabel( TreeNode *item );
 
-	void							Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data );
+	void							Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, void *data );
 
 private:
-	void							DrawNode( TreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data );
+	void							DrawNode( TreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, void *data );
 	void							DeleteAllItemsOfNode( TreeNode *item );
 
 	idBlockAlloc<TreeNode,256>		nodeAllocator;

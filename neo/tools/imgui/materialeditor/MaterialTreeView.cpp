@@ -55,6 +55,12 @@ void MaterialTreeViewOnTreeSelChanged(void* data, bool doubleClicked) {
 void MaterialTreeViewOnContextMenu( void *data, TreeNode *item ) {
 	reinterpret_cast<MaterialTreeView*>(data)->OnNMRclick( item );
 }
+void MaterialTreeViewOnBeginDrag( void *data, TreeNode *item ) {
+	reinterpret_cast<MaterialTreeView*>(data)->OnTvnBegindrag( item );
+}
+void MaterialTreeViewOnEndDrag( void *data, TreeNode *source, TreeNode *destination ) {
+	reinterpret_cast<MaterialTreeView*>(data)->OnTvnEndDrag( source, destination );
+}
 
 
 //IMPLEMENT_DYNCREATE(MaterialTreeView, CTreeView)
@@ -242,7 +248,7 @@ bool MaterialTreeView::Draw( const ImVec2 &size ) {
 
 	if ( ImGui::BeginChild( "###MaterialTreeView", size, ImGuiChildFlags_Borders ) ) {
 
-		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, MaterialTreeViewOnContextMenu, this );
+		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, MaterialTreeViewOnContextMenu, MaterialTreeViewOnBeginDrag, MaterialTreeViewOnEndDrag, this );
 	}
 	ImGui::EndChild();
 
@@ -982,75 +988,31 @@ void MaterialTreeView::OnTvnBegindrag(TreeNode *item)
 }
 
 /**
-* Handles mouse movement as an item is being dragged.
-*/
-void MaterialTreeView::OnMouseMove() {
-	if( bDragging ) {
-		//dropPoint = ImGui::GetMousePos();
-
-		//Move the drag image
-		/*
-		dragImage->DragMove(dropPoint);
-		dragImage->DragShowNolock(FALSE);
-
-		dragImage->DragShowNolock(TRUE);
-		*/
-	}
-	/*
-	if(bDragging) {
-		//Test the hover item
-
-		ImVec2 point = ImGui::GetMousePos();
-		
-		int flags;
-		TreeNode *item = tree.HitTest(point, &flags);
-		if(item && (TVHT_ONITEM & flags)) {
-			if(item != hoverItem) {
-				hoverItem = item;
-				hoverStartTime = Sys_Milliseconds();
-			} else {
-				unsigned int currentTime = Sys_Milliseconds();
-				if(currentTime - hoverStartTime > HOVER_EXPAND_DELAY) {
-
-					int state = tree.GetItemState(hoverItem, TVIS_EXPANDED);
-					if(state != TVIS_EXPANDED && tree.GetChildItem(hoverItem)) {
-						tree.Expand(hoverItem, TVE_EXPAND);
-					}
-				}
-			}
-		}
-	}*/
-}
-
-/**
 * Handles the end of a drag copy/move when the user releases the left mouse button.
 */
-void MaterialTreeView::OnLButtonUp() {
-	/*if (bDragging) {
+void MaterialTreeView::OnTvnEndDrag( TreeNode *source, TreeNode *item ) {
+	if (bDragging) {
 		//Release mouse capture
-		ReleaseCapture();
+		//ReleaseCapture();
 
 		//Delete the drag image
-		dragImage->DragLeave(GetDesktopWindow());
-		dragImage->EndDrag();
+		//dragImage->DragLeave(GetDesktopWindow());
+		//dragImage->EndDrag();
 
 		bDragging = false;
 
-		delete dragImage;
+		//delete dragImage;
 
-		UINT flags;
-		HTREEITEM item = tree.HitTest(point, &flags);
-		if(item && (TVHT_ONITEM & flags)) {
+		if(item) {
 
-			DWORD itemType = tree.GetItemData(item);
+			int itemType = tree.GetItemData(item);
 
 			if(itemType == TYPE_MATERIAL) //Backup one if a file is selected
 				item = tree.GetParentItem(item);
 
 			//Make sure we aren't dragging to the same place
-			HTREEITEM dragItemParent = tree.GetParentItem(dragItem);
+			TreeNode *dragItemParent = tree.GetParentItem(dragItem);
 			if(dragItemParent != item) {
-
 
 				idStr dragFile;
 				GetFileName(dragItem, dragFile);
@@ -1081,7 +1043,7 @@ void MaterialTreeView::OnLButtonUp() {
 				materialDocManager->PasteMaterial(materialName, filename);
 			}
 		}
-	}*/
+	}
 }
 
 /**

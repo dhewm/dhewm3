@@ -152,16 +152,16 @@ int TreeCtrl::GetItemData( TreeNode *item ) const {
 	return item->GetItem();
 }
 
-void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data ) {
+void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, void *data ) {
 	TreeNode *parentNode = GetRootItem();
 	TreeNode *node;
 
 	for ( node = GetChildItem( parentNode ) ; node ; node = GetNextSiblingItem( node ) ) {
-		DrawNode( node, tooltip, selected, contextMenu, data );
+		DrawNode( node, tooltip, selected, contextMenu, beginDrag, endDrag, data );
 	}
 }
 
-void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data ) {
+void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, void *data ) {
 	TreeNode *			item;
 	ImGuiTreeNodeFlags	flags = 0;
 	idStr				tooltipText;
@@ -193,9 +193,30 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
                 ImGui::EndTooltip();
 			}
 		}
+
+		if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) )
+		{
+			ImGui::SetDragDropPayload( "TreeCtrl", node, sizeof( TreeNode * ) );
+
+			// Display preview
+			ImGui::Text( "%s", node->GetLabel().c_str() );
+			ImGui::EndDragDropSource();
+			beginDrag( data, node );
+		}
+		if ( ImGui::BeginDragDropTarget() )
+		{
+			if ( const ImGuiPayload* payload = ImGui::AcceptDragDropPayload( "TreeCtrl" ) )
+			{
+				IM_ASSERT( payload->DataSize == sizeof( TreeNode * ) );
+				TreeNode *dropSource = ( TreeNode * )payload->Data;
+				endDrag( data, dropSource, node );
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		
 		for ( item = GetChildItem( node ); item; item = GetNextSiblingItem( item ) ) {
-			DrawNode( item, tooltip, selected, contextMenu, data );
+			DrawNode( item, tooltip, selected, contextMenu, beginDrag, endDrag, data );
 		}
 
 		if ( GetChildItem( node ) ) {
