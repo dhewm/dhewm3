@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "imgui.h"
 #include "sys/sys_imgui.h"
 
 #include "MEMainFrame.h"
@@ -64,7 +65,7 @@ void MaterialEditorDraw( void ) {
 
 	showTool = meMainFrame != NULL;
 
-	if ( ImGui::Begin( "Material Editor", &showTool, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+	if ( ImGui::Begin( "Material Editor", &showTool, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar ) ) {
 		impl::SetReleaseToolMouse( true );
 
 		meMainFrame->Draw();

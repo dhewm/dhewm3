@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../util/ImGui_IdWidgets.h"
 
+#include "idlib/Str.h"
 #include "idlib/containers/HashTable.h"
 #include "../util/TreeCtrl.h"
 #include "MaterialEditor.h"
@@ -105,11 +106,11 @@ private:
 	//Window Messages
 public:
 	void			OnTvnSelchanged( bool doubleClicked );
+	bool			OnNMRclick( TreeNode *item );
 private:
 	bool			OnTvnBeginlabeledit( TreeNode *item );
 	bool			OnTvnEndlabeledit( TreeNode *item, idStr &text );
-	void			OnContextMenu();
-	bool			OnNMRclick( TreeNode *item );
+	void			OnContextMenu( TreeNode *item );
 	bool			OnChar(int nChar);
 	void			OnTvnBegindrag( TreeNode *item );
 	void			OnMouseMove();
@@ -126,7 +127,9 @@ private:
 	void			OnAddMaterial();
 	void			OnAddFolder();
 	void			OnDeleteMaterial();
+	void			OnDeleteMaterialAccepted();
 	void			OnReloadFile();
+	void			OnReloadFileAccepted();
 	void			OnCut();
 	void			OnCopy();
 	void			OnPaste();
@@ -144,6 +147,7 @@ private:
 	void			PopupMenu(TreeNode *item);
 	void			SetItemImage(TreeNode *item, bool mod, bool apply, bool children);
 
+	void			OpenMessageBox(int message);
 
 	//Methods for working with the quicktree
 	void			CleanLookupTrees(TreeNode *item);
@@ -177,6 +181,15 @@ private:
 	int						hoverStartTime;
 
 	bool					internalChange;
+
+	enum {
+		MSG_BOX_CLOSED						= 0,
+		MSG_BOX_UNABLE_TO_RENAME_MATERIAL,
+		MSG_BOX_DELETE_FOLDER,
+		MSG_BOX_DELETE_MATERIAL,
+		MSG_BOX_RELOAD_MODIFIED_FILE,
+	};
+	int						messageBox;
 };
 
 }

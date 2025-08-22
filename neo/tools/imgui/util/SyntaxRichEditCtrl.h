@@ -111,6 +111,11 @@ public:
 	void					SetReadOnly( bool readOnly );
 	bool					GetReadOnly();
 
+	bool					CanUndo();
+	void					Undo();
+	bool					CanRedo();
+	void					Redo();
+
 	bool					IsEdited() const;
 
 	void					SetFocus();

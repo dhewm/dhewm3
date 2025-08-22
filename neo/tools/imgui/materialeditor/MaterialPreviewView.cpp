@@ -58,42 +58,13 @@ MaterialPreviewView::~MaterialPreviewView() {
 bool MaterialPreviewView::Draw( const ImVec2 &size ) {
 	ImGui::BeginChild( "MaterialPreviewView", size, ImGuiChildFlags_Borders );
 	
-	ImGui::Text( "MaterialPreviewView" );
 	ImGui::SetNextItemAllowOverlap();
 	ImGui::InvisibleButton("###MaterialPreviewRenderedView", size, ImGuiButtonFlags_AllowOverlap | ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonMiddle | ImGuiButtonFlags_MouseButtonRight );
 	ImVec2 pos = ImGui::GetCursorPos();
 	if ( ImGui::IsItemActive() )
 	{
-		//ImVec2 delta = ImGui::GetIO().MouseDelta;
-		//float dt = ImGui::GetIO().DeltaTime;
-
-		//delta.x *= dt;
-		//delta.y *= dt;
-		//renderedView.mouseMove( delta.x, delta.y );
 		renderedView.input();
 	}
-	/*const ImVec2 p0 = ImGui::GetItemRectMin();
-	ImVec2 mpos = ImGui::GetIO().MousePos;
-	mpos.x += p0.x;
-	mpos.y += p0.y;
-	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Left ) ) {
-		renderedView.buttonDown( ImGuiMouseButton_Left, mpos.x, mpos.y );
-	}
-	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Middle ) ) {
-		renderedView.buttonDown( ImGuiMouseButton_Middle, mpos.x, mpos.y );
-	}
-	if ( ImGui::IsMouseDragging( ImGuiMouseButton_Right ) ) {
-		renderedView.buttonDown( ImGuiMouseButton_Right, mpos.x, mpos.y );
-	}
-	if ( ImGui::IsMouseReleased( ImGuiMouseButton_Left ) ) {
-		renderedView.buttonUp( ImGuiMouseButton_Left, mpos.x, mpos.y );
-	}
-	if ( ImGui::IsMouseReleased( ImGuiMouseButton_Middle ) ) {
-		renderedView.buttonUp( ImGuiMouseButton_Middle, mpos.x, mpos.y );
-	}
-	if ( ImGui::IsMouseReleased( ImGuiMouseButton_Right ) ) {
-		renderedView.buttonUp( ImGuiMouseButton_Right, mpos.x, mpos.y );
-	}*/
 	renderedView.draw( pos.x, pos.y, size.x, size.y );
 
 	ImGui::EndChild();
@@ -519,7 +490,7 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 			drawLights( &refdef );
 		}
 
-		renderSystem->CropRenderSize( SCREEN_WIDTH, SCREEN_HEIGHT, false );
+		renderSystem->CropRenderSize( SCREEN_WIDTH, SCREEN_HEIGHT, true );
 		renderSystem->CaptureRenderToImage( "_currentRender" );
 		renderSystem->UnCrop();
 
@@ -527,7 +498,7 @@ void idGLDrawableView::draw( int x, int y, int w, int h ) {
 		const ImVec2 p1 = ImGui::GetItemRectMax();
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		ImGui::PushClipRect(p0, p1, true);
-		draw_list->AddImage(currentRender->texnum, p0, p1, ImVec2( 0.0f, 1.0f ), ImVec2( 1.0f, 0.0f ));
+		draw_list->AddImage(currentRender->texnum, p0, p1, ImVec2( 0.0f, 1.0f ), ImVec2( 1.0f, 0.0f ) );
 		ImGui::PopClipRect();
 	}
 }

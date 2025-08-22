@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "ImGui_IdWidgets.h"
+#include "imgui.h"
 
 #include "TreeCtrl.h"
 
@@ -73,7 +74,8 @@ TreeNode *TreeCtrl::GetChildItem( TreeNode *item ) const {
 
 TreeNode *TreeCtrl::GetParentItem( TreeNode *item ) const {
 	if ( item ) {
-		return item->GetNode().GetParent();
+		TreeNode *parent = item->GetNode().GetParent();
+		return ( parent != root ) ? parent : NULL;
 	}
 	return NULL;
 }
@@ -150,16 +152,16 @@ int TreeCtrl::GetItemData( TreeNode *item ) const {
 	return item->GetItem();
 }
 
-void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data ) {
+void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data ) {
 	TreeNode *parentNode = GetRootItem();
 	TreeNode *node;
 
 	for ( node = GetChildItem( parentNode ) ; node ; node = GetNextSiblingItem( node ) ) {
-		DrawNode( node, tooltip, selected, data );
+		DrawNode( node, tooltip, selected, contextMenu, data );
 	}
 }
 
-void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data ) {
+void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data ) {
 	TreeNode *			item;
 	ImGuiTreeNodeFlags	flags = 0;
 	idStr				tooltipText;
@@ -172,12 +174,14 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
 		flags |= ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	}
 
-	if ( ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() ) ) {
-		if ( ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() ) {
+	bool opened = ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() );
+	contextMenu( data, node );
+	if ( opened ) {
+		if ( ImGui::IsItemClicked( ImGuiMouseButton_Left ) && !ImGui::IsItemToggledOpen() ) {
 			SelectItem( node );
 			selected( data, false );
 		}
-		if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) ) {
+		if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) ) {
 			SelectItem( node );
 			selected( data, true );
 		}
@@ -191,7 +195,7 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
 		}
 		
 		for ( item = GetChildItem( node ); item; item = GetNextSiblingItem( item ) ) {
-			DrawNode( item, tooltip, selected, data );
+			DrawNode( item, tooltip, selected, contextMenu, data );
 		}
 
 		if ( GetChildItem( node ) ) {
@@ -205,13 +209,14 @@ void TreeCtrl::DeleteAllItemsOfNode( TreeNode *node ) {
 		return;
 	}
 
-	TreeNode *child = node->GetNode().GetChild();
+	TreeNode *child = GetChildItem( node );
 	while ( child ) {
-		TreeNode *next = child->GetNode().GetSibling();
 		DeleteAllItemsOfNode( child );
-		child->Shutdown();
-		nodeAllocator.Free( child );
-		child = next;
+		child = GetChildItem( node );
+	}
+	if ( node != root ) {
+		node->Shutdown();
+		nodeAllocator.Free( node );
 	}
 }
 

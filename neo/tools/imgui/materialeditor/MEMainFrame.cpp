@@ -25,6 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#include "imgui.h"
+#include "imgui_internal.h"
 #include "sys/sys_imgui.h"
 
 #include "MaterialEditor.h"
@@ -132,6 +134,8 @@ bool MEMainFrame::PreCreateWindow() {
 * creates all of the spliter windows and registers all of the views with the document manager.
 */
 void MEMainFrame::OnCreateClient() {
+	includeFileInMaterialList = true;
+
 	/*
 	CCreateContext consoleContext;
 	consoleContext.m_pNewViewClass = RUNTIME_CLASS(ConsoleView);
@@ -248,7 +252,7 @@ void MEMainFrame::OnCreateClient() {
 	//m_previewPropertyView->GetPropertyTreeCtrl().SetColumn(val);
 
 	// Build the material list
-	m_materialTreeView->InitializeMaterialList( true );
+	m_materialTreeView->InitializeMaterialList( includeFileInMaterialList );
 	
 	//SetActiveView(m_materialTreeView);
 }
@@ -300,30 +304,121 @@ void MEMainFrame::OnDestroy() {
 }
 
 void MEMainFrame::Draw() {
-	bool clickedNew = false, clickedSelect = false;
-
 	if( ImGui::BeginMenuBar() )
 	{
 		if( ImGui::BeginMenu( "File" ) )
 		{
-			if( ImGui::MenuItem( "New", "Ctrl+N" ) )
-			{
-				clickedNew = true;
-			}
-
-			if( ImGui::MenuItem( "Open..", "Ctrl+O" ) )
-			{
-				clickedSelect = true;
-			}
-
-			if( ImGui::MenuItem( "Save", "Ctrl+S" ) )
-			{
+			ImGui::BeginDisabled( !IsFileSaveMaterialEnabled() );
+			if( ImGui::MenuItem( "Save Material" ) ) {
 				OnFileSaveMaterial();
 			}
+			ImGui::EndDisabled();
 
-			if( ImGui::MenuItem( "Close", "Ctrl+W" ) )
+			ImGui::BeginDisabled( !IsFileSaveEnabled() );
+			if ( ImGui::MenuItem( "Save File", "Ctrl+S" ) ) {
+				OnFileSaveFile();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled( !IsFileSaveAllEnabled() );
+			if ( ImGui::MenuItem( "Save All" ) ) {
+				OnFileSaveAll();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::Separator();
+
+			if( ImGui::MenuItem( "Exit", "Ctrl+W" ) )
 			{
-				//showTool = false;
+				OnFileExit();
+			}
+
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "Edit" ) ) {
+			ImGui::BeginDisabled( !IsEditUndoEnabled() );
+			if ( ImGui::MenuItem( "Undo", "Ctrl+Z" ) ) {
+				OnEditUndo();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled( !IsEditRedoEnabled() );
+			if ( ImGui::MenuItem( "Redo", "Ctrl-Y" ) ) {
+				OnEditRedo();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::Separator();
+
+			ImGui::BeginDisabled( !IsEditCutEnabled() );
+			if ( ImGui::MenuItem( "Cut", "Ctrl+X" ) ) {
+				OnEditCut();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled( !IsEditCopyEnabled() );
+			if ( ImGui::MenuItem( "Copy", "Ctrl+C" ) ) {
+				OnEditCopy();
+			}
+			ImGui::EndDisabled();
+			ImGui::BeginDisabled( !IsEditPasteEnabled() );
+			if ( ImGui::MenuItem( "Paste", "Ctrl+V" ) ) {
+				OnEditPaste();
+			}
+			ImGui::EndDisabled();
+			ImGui::BeginDisabled( !IsEditDeleteEnabled() );
+			if ( ImGui::MenuItem( "Delete", "Del" ) ) {
+				OnEditDelete();
+			}
+			ImGui::EndDisabled();
+			ImGui::BeginDisabled( !IsEditRenameEnabled() );
+			if ( ImGui::MenuItem( "Rename", "F2" ) ) {
+				OnEditRename();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::Separator();
+		
+			if ( ImGui::MenuItem( "Find", "Ctrl+F" ) ) {
+				OnEditFind();
+			}
+
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "Material View" ) ) {
+			if ( ImGui::Checkbox( "Include Filename",  &includeFileInMaterialList ) ) {
+				OnViewIncludeFile();
+			}
+
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "Preview" ) ) {
+			ImGui::BeginDisabled( !IsApplyAllEnabled() );
+			if ( ImGui::MenuItem( "Apply Material", "Ctrl+A" ) ) {
+				OnApplyMaterial();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled( !IsApplyFileEnabled() );
+			if ( ImGui::MenuItem( "Apply File" ) ) {
+				OnApplyFile();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled( !IsApplyAllEnabled() );
+			if ( ImGui::MenuItem( "Apply All" ) ) {
+				OnApplyAll();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::Separator();
+
+			if ( ImGui::MenuItem( "Reload ARB Programs", "Ctrl+R" ) ) {
+				OnReloadArbPrograms();
+			}
+
+			if ( ImGui::MenuItem( "Reload Images", "Ctrl+I" ) ) {
+				OnReloadImages();
 			}
 
 			ImGui::EndMenu();
@@ -447,47 +542,21 @@ void MEMainFrame::OnFileSaveAll() {
 bool MEMainFrame::IsFileSaveMaterialEnabled() {
 	MaterialDoc* pDoc = materialDocManager.GetCurrentMaterialDoc();
 
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}*/
-
 	return pDoc && pDoc->modified;
 }
 
 /**
 * Enables the Save File menu item if the current file contains a modified material.
 */
-void MEMainFrame::OnFileSaveFileUpdate() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	if(m_materialTreeView->CanSaveFile()) {
-		pCmdUI->Enable(TRUE);
-	} else {
-		pCmdUI->Enable(FALSE);
-	}*/
+bool MEMainFrame::IsFileSaveEnabled() {
+	return (m_materialTreeView->CanSaveFile());
 }
 
 /**
 * Enables the Save All menu item if there are any materials that have been modified.
 */
-void MEMainFrame::OnFileSaveAllUpdate() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	if(materialDocManager.IsAnyModified()) {
-		pCmdUI->Enable(TRUE);
-	} else {
-		pCmdUI->Enable(FALSE);
-	}*/
+bool MEMainFrame::IsFileSaveAllEnabled() {
+	return (materialDocManager.IsAnyModified());
 }
 
 /**
@@ -520,57 +589,28 @@ void MEMainFrame::OnApplyAll() {
 /**
 * Enables the Apply Material menu item if the current material has an apply waiting.
 */
-void MEMainFrame::OnApplyMaterialUpdate() {
+bool MEMainFrame::IsApplyMaterialEnabled() {
 	MaterialDoc* pDoc = materialDocManager.GetCurrentMaterialDoc();
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
 
-	if(pDoc && pDoc->applyWaiting) {
-		pCmdUI->Enable(TRUE);
-	} else {
-		pCmdUI->Enable(FALSE);
-	}*/
+	return (pDoc && pDoc->applyWaiting);
 }
 
 /**
 * Enables the apply file menu item if the current file contains any materials
 * that need to be applied.
 */
-void MEMainFrame::OnApplyFileUpdate() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
+bool MEMainFrame::IsApplyFileEnabled() {
 	MaterialDoc* pDoc = materialDocManager.GetCurrentMaterialDoc();
 
-	if(pDoc && materialDocManager.DoesFileNeedApply(pDoc->renderMaterial->GetFileName())) {
-		pCmdUI->Enable(TRUE);
-	} else {
-		pCmdUI->Enable(FALSE);
-	}*/
+	return (pDoc && materialDocManager.DoesFileNeedApply(pDoc->renderMaterial->GetFileName()));
 }
 
 /**
 * Enables the apply all menu item if there are any materials that need
 * to be applied.
 */
-void MEMainFrame::OnApplyAllUpdate() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	if(materialDocManager.DoesAnyNeedApply()) {
-		pCmdUI->Enable(TRUE);
-	} else {
-		pCmdUI->Enable(FALSE);
-	}*/
+bool MEMainFrame::IsApplyAllEnabled() {
+	return (materialDocManager.DoesAnyNeedApply());
 }
 
 /**
@@ -646,7 +686,7 @@ void MEMainFrame::OnEditRename() {
 /**
 * Enable the cut menu item if a material is selected.
 */
-void MEMainFrame::OnEditCutUpdate() {
+bool MEMainFrame::IsEditCutEnabled() {
 	/*
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
@@ -671,12 +711,13 @@ void MEMainFrame::OnEditCutUpdate() {
 	}
 
 	pCmdUI->Enable(enable);*/
+	return false;
 }
 
 /**
 * Enables the copy menu item if a material or stage is selected.
 */
-void MEMainFrame::OnEditCopyUpdate() {
+bool MEMainFrame::IsEditCopyEnabled() {
 	/*
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
@@ -701,12 +742,13 @@ void MEMainFrame::OnEditCopyUpdate() {
 	}
 
 	pCmdUI->Enable(enable);*/
+	return false;
 }
 
 /**
 * Enables a paste operation when a material or stage has been copied.
 */
-void MEMainFrame::OnEditPasteUpdate() {
+bool MEMainFrame::IsEditPasteEnabled() {
 	/*
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
@@ -731,12 +773,13 @@ void MEMainFrame::OnEditPasteUpdate() {
 	}
 
 	pCmdUI->Enable(enable);*/
+	return false;
 }
 
 /**
 * Enables a delete operation when a material or stage is selected.
 */
-void MEMainFrame::OnEditDeleteUpdate() {
+bool MEMainFrame::IsEditDeleteEnabled() {
 	/*
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
@@ -762,12 +805,13 @@ void MEMainFrame::OnEditDeleteUpdate() {
 	}
 
 	pCmdUI->Enable(enable);*/
+	return false;
 }
 
 /**
 * Enables a rename operation when a material, folder or stage is selected.
 */
-void MEMainFrame::OnEditRenameUpdate() {
+bool MEMainFrame::IsEditRenameEnabled() {
 	/*
 	if(pCmdUI->m_pMenu == NULL) {
 		pCmdUI->Enable(TRUE);
@@ -789,6 +833,7 @@ void MEMainFrame::OnEditRenameUpdate() {
 		}
 	}
 	pCmdUI->Enable(enable);*/
+	return false;
 }
 
 /**
@@ -817,95 +862,57 @@ void MEMainFrame::OnEditFindNext() {
 * Performs an undo operation.
 */
 void MEMainFrame::OnEditUndo() {
-	/*
 	//Check for undo operation on special windows
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			m_materialEditView->m_textView.Undo();
-			return;
-		}
+	// /Material Editor\/editorSplitters_D5DAAA9C\/###MaterialTreeView_6E8A8DE1/(void*)0x0x14b06e448/(void*)0x0x14b92aad8/(void*)0x0x14b92a938/(void*)0x0x14b929bd0/(void*)0x0x14b929688
+	if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+		m_materialEditView->m_textView.Undo();
+		return;
 	}
 
-	materialDocManager.Undo();*/
+	materialDocManager.Undo();
 }
 
 /**
 * Performs a redo operation.
 */
 void MEMainFrame::OnEditRedo() {
-	/*
 	//Check for redo operation on special windows
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			m_materialEditView->m_textView.Redo();
-			return;
-		}
+	if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+		m_materialEditView->m_textView.Redo();
+		return;
 	}
-
-	materialDocManager.Redo();*/
+	materialDocManager.Redo();
 }
 
 /**
 * Enables the undo menu item if an undo is available.
 */
-void MEMainFrame::OnEditUndoUpdate() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
+bool MEMainFrame::IsEditUndoEnabled() {
+	ImGuiID active = ImGui::GetFocusID();
+	ImGuiID textId = ImGui::GetID( "Text" );
+	if ( textId == active ) {
+		return m_materialEditView->m_textView.CanUndo();
 	}
 
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			pCmdUI->Enable(m_materialEditView->m_textView.CanUndo());
-			return;
-		}
-	}
-
-	pCmdUI->Enable(materialDocManager.IsUndoAvailable());*/
+	return materialDocManager.IsUndoAvailable();
 }
 
 /**
 * Enables the redo menu item if a redo is available.
 */
-void MEMainFrame::OnEditRedoUpdate() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
+bool MEMainFrame::IsEditRedoEnabled() {
+	if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+		return m_materialEditView->m_textView.CanRedo();
 	}
 
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			pCmdUI->Enable(m_materialEditView->m_textView.CanRedo());
-			return;
-		}
-	}
-
-	pCmdUI->Enable(materialDocManager.IsRedoAvailable());*/
+	return materialDocManager.IsRedoAvailable();
 }
 
 /**
 * Toggles between including the file into the material list and not.
 */
 void MEMainFrame::OnViewIncludeFile() {
-	/*
-	CMenu* mmenu = GetMenu();
-
-	UINT state = mmenu->GetMenuState(ID_VIEW_INCLUDEFILENAME, MF_BYCOMMAND);
-	ASSERT(state != 0xFFFFFFFF);
-
-	if (state & MF_CHECKED) {
-		mmenu->CheckMenuItem(ID_VIEW_INCLUDEFILENAME, MF_UNCHECKED | MF_BYCOMMAND);
-		m_materialTreeView->InitializeMaterialList(false);
-	} else {
-		mmenu->CheckMenuItem(ID_VIEW_INCLUDEFILENAME, MF_CHECKED | MF_BYCOMMAND);
-		m_materialTreeView->InitializeMaterialList(true);
-	}*/
+	m_materialTreeView->InitializeMaterialList( includeFileInMaterialList );
 }
 
 /**

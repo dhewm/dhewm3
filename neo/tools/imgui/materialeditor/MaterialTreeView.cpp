@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 #include "../util/ImGui_IdWidgets.h"
+#include "imgui.h"
+#include <cstddef>
 
 #include "MaterialTreeView.h"
 
@@ -49,6 +51,9 @@ bool MaterialTreeViewOnToolTipNotify(void* data, TreeNode* item, idStr& tooltipT
 }
 void MaterialTreeViewOnTreeSelChanged(void* data, bool doubleClicked) {
 	reinterpret_cast<MaterialTreeView*>(data)->OnTvnSelchanged(doubleClicked);
+}
+void MaterialTreeViewOnContextMenu( void *data, TreeNode *item ) {
+	reinterpret_cast<MaterialTreeView*>(data)->OnNMRclick( item );
 }
 
 
@@ -95,6 +100,7 @@ MaterialTreeView::MaterialTreeView() {
 	bDragging = false;
 	hoverItem = NULL;
 	internalChange = false;
+	messageBox = MSG_BOX_CLOSED;
 }
 
 /**
@@ -161,9 +167,82 @@ void MaterialTreeView::BuildMaterialList(bool includeFile, const char* filename)
 
 bool MaterialTreeView::Draw( const ImVec2 &size ) {
 
+	const char *messageBoxTitle = NULL;
+	const char *messageBoxText = NULL;
+	bool messageBoxYesNo = true;
+	switch ( messageBox ) {
+		case MSG_BOX_UNABLE_TO_RENAME_MATERIAL:
+			messageBoxTitle = "Error";
+			messageBoxText = "Unable to rename material because it conflicts with another material";
+			messageBoxYesNo = false;
+			break;
+		case MSG_BOX_DELETE_MATERIAL:
+			messageBoxTitle = "Are you sure?";
+			messageBoxText = "Are you sure you want to delete this material?";
+			break;
+		case MSG_BOX_DELETE_FOLDER:
+			messageBoxTitle = "Are you sure?";
+			messageBoxText = "Are you sure you want to delete this folder?";
+			break;
+		case MSG_BOX_RELOAD_MODIFIED_FILE:
+			messageBoxTitle = "Are you sure?";
+			messageBoxText = "The file has been modified. Are you sure you want to reload this file?";
+			break;
+		default:
+		case MSG_BOX_CLOSED:
+			break;
+	}
+
+	if ( messageBox != MSG_BOX_CLOSED ) {
+		ImGui::OpenPopup( "###MaterialTreeViewPopup" );
+	}
+
+	if ( ImGui::BeginPopupModal( "###MaterialTreeViewPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+		bool accepted = false;
+
+		ImGui::Text( "%s", messageBoxTitle );
+		ImGui::Text( "%s", messageBoxText );
+
+		if ( messageBoxYesNo ) {
+
+			if ( ImGui::Button( "Yes" ) ) {
+				ImGui::CloseCurrentPopup();
+				accepted = true;
+			}
+			if ( ImGui::Button( "No" ) ) {
+				ImGui::CloseCurrentPopup();
+				messageBox = MSG_BOX_CLOSED;
+			}
+		} else {
+			if ( ImGui::Button( "OK" ) ) {
+				ImGui::CloseCurrentPopup();
+				messageBox = MSG_BOX_CLOSED;
+			}
+		}
+
+		if ( accepted ) {
+			switch ( messageBox ) {
+				case MSG_BOX_DELETE_MATERIAL:
+				case MSG_BOX_DELETE_FOLDER:
+					OnDeleteMaterialAccepted();
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				case MSG_BOX_RELOAD_MODIFIED_FILE:
+					OnReloadFileAccepted();
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				default:
+				case MSG_BOX_CLOSED:
+					break;
+			}
+		}
+
+		ImGui::EndPopup();
+	}
+
 	if ( ImGui::BeginChild( "###MaterialTreeView", size, ImGuiChildFlags_Borders ) ) {
 
-		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, this );
+		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, MaterialTreeViewOnContextMenu, this );
 	}
 	ImGui::EndChild();
 
@@ -294,8 +373,7 @@ void MaterialTreeView::MV_OnMaterialAdd(MaterialDoc* pMaterial) {
 	}
 	if(item) {
 		TreeNode *parent = tree.GetParentItem(item);
-		// TODO: implement
-		//tree.SortChildren(parent);
+		tree.SortChildren(parent);
 	}
 
 	MV_OnMaterialChange(pMaterial);
@@ -694,8 +772,7 @@ void MaterialTreeView::RenameFolder(TreeNode *item, const char* name) {
 
 	tree.SetItemText(item, name);
 
-	// TODO: what's this for?
-	//PostMessage(MSG_RENAME_FOLDER_COMPLETE);
+	OnRenameFolderComplete();
 }
 
 /**
@@ -796,8 +873,7 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 
 			if(declManager->FindMaterial(material, false)) {
 				//Can't rename because it conflicts with an existing file
-				// TODO: fix this
-				//MessageBox("Unable to rename material because it conflicts with another material", "Error");
+				OpenMessageBox( MSG_BOX_UNABLE_TO_RENAME_MATERIAL );
 			} else {
 				//Add it to our quick lookup
 				materialToTree.Set(material, item);
@@ -824,8 +900,7 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 			affectedMaterials.Clear();
 			GetMaterialPaths(renamedFolder, &affectedMaterials);
 
-			// TODO: fix this
-			//PostMessage(MSG_RENAME_FOLDER_COMPLETE);
+			OnRenameFolderComplete();
 
 			RenameMaterialFolderModifier* mod = new RenameMaterialFolderModifier(materialDocManager, text, this, item, tree.GetItemText(item));
 			materialDocManager->AddMaterialUndoModifier(mod);
@@ -840,11 +915,9 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 /**
 * Displays the popup menu.
 */
-void MaterialTreeView::OnContextMenu()
+void MaterialTreeView::OnContextMenu(TreeNode *item)
 {
-	// TODO: what should this do?
-	/*ScreenToClient(&point);
-	PopupMenu (&point);*/
+	PopupMenu(item);
 }
 
 /**
@@ -853,8 +926,7 @@ void MaterialTreeView::OnContextMenu()
 bool MaterialTreeView::OnNMRclick(TreeNode *item)
 {
 	// Select the item
-	tree.SelectItem(item);
-	OnContextMenu();
+	OnContextMenu(item);
 	return true;
 }
 
@@ -1183,17 +1255,20 @@ void MaterialTreeView::OnDeleteMaterial() {
 	int itemType = tree.GetItemData(item);
 
 	if(itemType == TYPE_MATERIAL_FOLDER) {
-		// TODO: fix
-		int result = 0; // MessageBox("Are you sure you want to delete this folder?", "Delete?", MB_ICONQUESTION | MB_YESNO);
-		if(result) {
-			DeleteFolder(item);
-		}
+		OpenMessageBox( MSG_BOX_DELETE_FOLDER );
 	} else if (itemType == TYPE_MATERIAL) {
-		// TODO: fix
-		int result = 0; // MessageBox("Are you sure you want to delete this material?", "Delete?", MB_ICONQUESTION | MB_YESNO);
-		if(result) {
-			materialDocManager->DeleteMaterial(materialDocManager->GetCurrentMaterialDoc());
-		}
+		OpenMessageBox( MSG_BOX_DELETE_MATERIAL );
+	}
+}
+
+void MaterialTreeView::OnDeleteMaterialAccepted() {
+	TreeNode *item = tree.GetSelectedItem();
+	int itemType = tree.GetItemData(item);
+
+	if(itemType == TYPE_MATERIAL_FOLDER) {
+		DeleteFolder(item);
+	} else if (itemType == TYPE_MATERIAL) {
+		materialDocManager->DeleteMaterial(materialDocManager->GetCurrentMaterialDoc());
 	}
 }
 
@@ -1210,12 +1285,21 @@ void MaterialTreeView::OnReloadFile() {
 		GetFileName(item, filename);
 
 		if(materialDocManager->IsFileModified(filename)) {
-			// TODO: implement
-			int result = 0;// MessageBox("This file has been modified. Are you sure you want to reload this file?", "Reload?", MB_ICONQUESTION | MB_YESNO);
-			if(!result) {
-				return;
-			}
+			OpenMessageBox( MSG_BOX_RELOAD_MODIFIED_FILE );
+		} else {
+			materialDocManager->ReloadFile(filename);
 		}
+	}
+}
+
+void MaterialTreeView::OnReloadFileAccepted() {
+	TreeNode *item = tree.GetSelectedItem();
+	int itemType = tree.GetItemData(item);
+
+	if(itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) {
+		idStr filename;
+		GetFileName(item, filename);
+
 		materialDocManager->ReloadFile(filename);
 	}
 }
@@ -1627,105 +1711,128 @@ void MaterialTreeView::AddStrList(const char *root, idStrList *list, bool includ
 void MaterialTreeView::PopupMenu(TreeNode *item) {
 
 	//Determine the type of object clicked on
-	/*
-	CMenu FloatingMenu;
-	VERIFY(FloatingMenu.LoadMenu(IDR_ME_MATERIALTREE_POPUP));
-	CMenu* pPopupMenu = FloatingMenu.GetSubMenu (0);
-	*/
 	int itemType = tree.GetItemData(item);
 
 	//Enable/Disable based on the state
 	MaterialDoc* pDoc = materialDocManager->GetCurrentMaterialDoc();
 
+	if (ImGui::BeginPopupContextItem( NULL ) ) {
+		tree.SelectItem( item );
 
-	//Apply Changes
-	if(pDoc && pDoc->applyWaiting) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
-
-	//Apply File
-	idStr filename;
-	if(GetFileName(item, filename)) {
-		if(materialDocManager->DoesFileNeedApply(filename.c_str())) {
-			//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_ENABLED);
-		} else {
-			//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//Apply Changes
+		ImGui::BeginDisabled( !(pDoc && pDoc->applyWaiting) );
+		if ( ImGui::Button( "Apply Material" ) ) {
+			OnApplyMaterial();
 		}
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		ImGui::EndDisabled();
 
-	//Apply All
-	if(materialDocManager->DoesAnyNeedApply()) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYALL, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_APPLYALL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
-
-	//Save Material
-	if(pDoc && pDoc->modified) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
-
-	//Save File
-	if(GetFileName(item, filename)) {
-		if(materialDocManager->IsFileModified(filename.c_str())) {
-			//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_ENABLED);
-		} else {
-			//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		//Apply File
+		idStr filename;
+		bool applyFileEnabled = false;
+		if(GetFileName(item, filename)) {
+			applyFileEnabled = materialDocManager->DoesFileNeedApply(filename.c_str());
 		}
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		ImGui::BeginDisabled( !applyFileEnabled );
+		if ( ImGui::Button( "Apply File" ) ) {
+			OnApplyFile();
+		}
+		ImGui::EndDisabled();
 
-	//Save All
-	if(materialDocManager->IsAnyModified()) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEALL, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_SAVEALL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		//Apply All
+		ImGui::BeginDisabled( !materialDocManager->DoesAnyNeedApply() );
+		if ( ImGui::Button( "Apply All" ) ) {
+			OnApplyAll();
+		}
+		ImGui::EndDisabled();
 
-	if(itemType == TYPE_MATERIAL || itemType == TYPE_MATERIAL_FOLDER) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_RENAMEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-		//pPopupMenu->EnableMenuItem(ID_POPUP_DELETEMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_RENAMEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		//pPopupMenu->EnableMenuItem(ID_POPUP_DELETEMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		ImGui::Separator();
 
-	if(itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER || itemType == TYPE_MATERIAL) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDMATERIAL, MF_BYCOMMAND | MF_ENABLED);
-		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDFOLDER, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDMATERIAL, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		//pPopupMenu->EnableMenuItem(ID_POPUP_ADDFOLDER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		//Save Material
+		ImGui::BeginDisabled( !(pDoc && pDoc->modified) );
+		if ( ImGui::Button( "Save Material" ) ) {
+			OnSaveMaterial();
+		}
+		ImGui::EndDisabled();
 
-	if(itemType == TYPE_MATERIAL) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_CUT, MF_BYCOMMAND | MF_ENABLED);
-		//pPopupMenu->EnableMenuItem(ID_POPUP_COPY, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_CUT, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		//pPopupMenu->EnableMenuItem(ID_POPUP_COPY, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		//Save File
+		bool saveFileEnabled = false;
+		if(GetFileName(item, filename)) {
+			saveFileEnabled = (materialDocManager->IsFileModified(filename.c_str()));
+		}
+		ImGui::BeginDisabled( !saveFileEnabled );
+		if ( ImGui::Button( "Save File" ) ) {
+			OnSaveFile();
+		}
+		ImGui::EndDisabled();
 
-	if((itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) && materialDocManager->IsCopyMaterial()) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_PASTE, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_PASTE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		//Save All
+		ImGui::BeginDisabled( !materialDocManager->IsAnyModified() );
+		if ( ImGui::Button( "Save All" ) ) {
+			OnSaveMaterial();
+		}
+		ImGui::EndDisabled();
 
-	if(itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_POPUP_RELOADFILE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		ImGui::Separator();
 
-	//pPopupMenu->TrackPopupMenu (TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt->x, pt->y, &GetTreeCtrl());
+		bool cutEnabled = (itemType == TYPE_MATERIAL);
+		ImGui::BeginDisabled( !cutEnabled );
+		if ( ImGui::Button( "Cut" ) ) {
+			OnCut();
+		}
+		ImGui::EndDisabled();
+		bool copyEnabled = (itemType == TYPE_MATERIAL);
+		ImGui::BeginDisabled( !copyEnabled );
+		if ( ImGui::Button( "Copy" ) ) {
+			OnCopy();
+		}
+		ImGui::EndDisabled();
+		bool pasteEnabled = ((itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) && materialDocManager->IsCopyMaterial());
+		ImGui::BeginDisabled( !pasteEnabled );
+		if ( ImGui::Button( "Paste" ) ) {
+			OnPaste();
+		}
+		ImGui::EndDisabled();
+		bool deleteMaterialEnabled = (itemType == TYPE_MATERIAL || itemType == TYPE_MATERIAL_FOLDER);
+		ImGui::BeginDisabled( !deleteMaterialEnabled );
+		if ( ImGui::Button( "Delete" ) ) {
+			OnDeleteMaterial();
+		}
+		ImGui::EndDisabled();
+
+		ImGui::Separator();
+
+		bool addMaterialEnabled = (itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER || itemType == TYPE_MATERIAL);
+		ImGui::BeginDisabled( !addMaterialEnabled );
+		if ( ImGui::Button( "Add Material" ) ) {
+			OnAddMaterial();
+		}
+		ImGui::EndDisabled();
+		bool addFolderEnabled = (itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER || itemType == TYPE_MATERIAL);
+		ImGui::BeginDisabled( !addFolderEnabled );
+		if ( ImGui::Button( "Add Folder" ) ) {
+			OnAddFolder();
+		}
+		ImGui::EndDisabled();
+		bool renameMaterialEnabled = (itemType == TYPE_MATERIAL || itemType == TYPE_MATERIAL_FOLDER);
+		ImGui::BeginDisabled( !renameMaterialEnabled );
+		if ( ImGui::Button( "Rename" ) ) {
+			OnRenameMaterial();
+		}
+		ImGui::EndDisabled();
+
+		ImGui::Separator();
+
+		bool reloadFileEnabled = (itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER);
+		ImGui::BeginDisabled( !reloadFileEnabled );
+		if ( ImGui::Button( "Reload" ) ) {
+			OnReloadFile();
+		}
+		ImGui::EndDisabled(); 
+
+		ImGui::Separator();
+
+		ImGui::EndPopup();		
+	}
 }
 
 /**
@@ -1837,6 +1944,10 @@ idStr MaterialTreeView::GetQuicktreePath(TreeNode *item) {
 		pathItem = tree.GetParentItem(pathItem);
 	}
 	return qt;
+}
+
+void MaterialTreeView::OpenMessageBox( int message ) {
+	messageBox = message;
 }
 
 }

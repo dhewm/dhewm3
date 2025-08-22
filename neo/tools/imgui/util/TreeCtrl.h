@@ -69,7 +69,7 @@ public:
 
 	virtual void Shutdown()
 	{
-		node.RemoveFromHierarchy();
+		node.RemoveFromParent();
 		label.Clear();
 		id = 0;
 		imageId = -1;
@@ -111,6 +111,7 @@ private:
 typedef bool (*treeItemCompare_t)( void *data, TreeNode *item, const char *name );
 typedef bool (*treeItemTooltip_t)( void *data, TreeNode *item, idStr &tooltipText );
 typedef void (*treeItemSelected_t)( void *data, bool doubleClick );
+typedef void (*treeItemContextMenu_t)( void *data, TreeNode *item );
 
 class TreeCtrl {
 public:
@@ -144,10 +145,10 @@ public:
 	void							SortChildren( TreeNode *item );
 	void							EditLabel( TreeNode *item );
 
-	void							Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data );
+	void							Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data );
 
 private:
-	void							DrawNode( TreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, void *data );
+	void							DrawNode( TreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, void *data );
 	void							DeleteAllItemsOfNode( TreeNode *item );
 
 	idBlockAlloc<TreeNode,256>		nodeAllocator;

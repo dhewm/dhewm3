@@ -568,6 +568,23 @@ bool SyntaxRichEditCtrl::IsEdited() const {
 	return scriptEdit->CanUndo();
 }
 
+bool SyntaxRichEditCtrl::CanUndo() {
+	return scriptEdit->CanUndo();
+}
+
+void SyntaxRichEditCtrl::Undo() {
+	scriptEdit->Undo();
+}
+
+bool SyntaxRichEditCtrl::CanRedo() {
+	scriptEdit->CanRedo();
+}
+
+void SyntaxRichEditCtrl::Redo() {
+	scriptEdit->Redo();
+}
+
+
 /*
 ================
 SyntaxRichEditCtrl::SetFocus

@@ -53,6 +53,9 @@ bool DeclBrowserOnToolTipNotify( void *data, TreeNode *item, idStr &tooltipText 
 void DeclBrowserOnTreeSelChanged( void *data, bool doubleClicked ) {
 	reinterpret_cast<DeclBrowser *>(data)->OnTreeSelChanged( doubleClicked );
 }
+void DeclBrowserOnTreeContextMenu( void *data, TreeNode *item ) {
+	// nop
+}
 
 /*
 ================
@@ -101,7 +104,7 @@ void DeclBrowser::Draw() {
 
 		if ( ImGui::BeginChild( "Decl Tree", ImVec2( 300, 400 ) ) ) {
 			ImGui::SetItemTooltip( "decl browser" );
-			declTree.Draw( DeclBrowserOnToolTipNotify, DeclBrowserOnTreeSelChanged, this );
+			declTree.Draw( DeclBrowserOnToolTipNotify, DeclBrowserOnTreeSelChanged, DeclBrowserOnTreeContextMenu, this );
 			ImGui::EndChild();
 		}
 

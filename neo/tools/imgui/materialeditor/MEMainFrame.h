@@ -71,34 +71,34 @@ public:
 	void						OnFileSaveFile();
 	void						OnFileSaveAll();
 	bool						IsFileSaveMaterialEnabled();
-	void						OnFileSaveFileUpdate();
-	void						OnFileSaveAllUpdate();
+	bool						IsFileSaveEnabled();
+	bool						IsFileSaveAllEnabled();
 
 	void						OnApplyMaterial();
 	void						OnApplyFile();
 	void						OnApplyAll();
-	void						OnApplyMaterialUpdate();
-	void						OnApplyFileUpdate();
-	void						OnApplyAllUpdate();
+	bool						IsApplyMaterialEnabled();
+	bool						IsApplyFileEnabled();
+	bool						IsApplyAllEnabled();
 
 	void						OnEditCut();
 	void						OnEditCopy();
 	void						OnEditPaste();
 	void						OnEditDelete();
 	void						OnEditRename();
-	void						OnEditCutUpdate();
-	void						OnEditCopyUpdate();
-	void						OnEditPasteUpdate();
-	void						OnEditDeleteUpdate();
-	void						OnEditRenameUpdate();
+	bool						IsEditCutEnabled();
+	bool						IsEditCopyEnabled();
+	bool						IsEditPasteEnabled();
+	bool						IsEditDeleteEnabled();
+	bool						IsEditRenameEnabled();
 
 	void				OnEditFind();
 	void				OnEditFindNext();
 
 	void				OnEditUndo();
 	void				OnEditRedo();
-	void				OnEditUndoUpdate();
-	void				OnEditRedoUpdate();
+	bool				IsEditUndoEnabled();
+	bool				IsEditRedoEnabled();
 
 	void				OnViewIncludeFile();
 	void				OnReloadArbPrograms();
@@ -153,6 +153,8 @@ private:
 
 	//Options
 	MEOptions					options;
+
+	bool						includeFileInMaterialList;
 
 };
 

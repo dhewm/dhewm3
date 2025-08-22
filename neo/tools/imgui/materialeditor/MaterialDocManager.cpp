@@ -26,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include "imgui.h"
 #include "renderer/Material.h"
 
 
