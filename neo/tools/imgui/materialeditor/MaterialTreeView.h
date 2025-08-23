@@ -109,11 +109,11 @@ public:
 	bool			OnNMRclick( TreeNode *item );
 	void			OnTvnBegindrag( TreeNode *item );
 	void			OnTvnEndDrag( TreeNode *source, TreeNode *destination );
+	void			OnInput( bool prepare, TreeNode *item );
 private:
 	bool			OnTvnBeginlabeledit( TreeNode *item );
 	bool			OnTvnEndlabeledit( TreeNode *item, idStr &text );
 	void			OnContextMenu( TreeNode *item );
-	bool			OnChar(int nChar);
 
 	//Menu Commands
 	void			OnApplyMaterial();
@@ -169,6 +169,7 @@ private:
 	//Member variables for renaming folders
 	TreeNode*				renamedFolder;
 	idList<MaterialTreeItem_t> affectedMaterials;
+	idStr					newName;
 
 	int						dragImage;
 	bool					bDragging;
@@ -187,6 +188,7 @@ private:
 		MSG_BOX_DELETE_FOLDER,
 		MSG_BOX_DELETE_MATERIAL,
 		MSG_BOX_RELOAD_MODIFIED_FILE,
+		MSG_BOX_RENAME_MATERIAL,
 	};
 	int						messageBox;
 };

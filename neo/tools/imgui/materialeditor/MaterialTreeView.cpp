@@ -59,6 +59,9 @@ void MaterialTreeViewOnBeginDrag( void *data, TreeNode *item ) {
 void MaterialTreeViewOnEndDrag( void *data, TreeNode *source, TreeNode *destination ) {
 	reinterpret_cast<MaterialTreeView*>(data)->OnTvnEndDrag( source, destination );
 }
+void MaterialTreeViewOnInput( void *data, bool prepare, TreeNode *item ) {
+	reinterpret_cast<MaterialTreeView*>(data)->OnInput( prepare, item );
+}
 
 
 //IMPLEMENT_DYNCREATE(MaterialTreeView, CTreeView)
@@ -105,12 +108,14 @@ MaterialTreeView::MaterialTreeView() {
 	hoverItem = NULL;
 	internalChange = false;
 	messageBox = MSG_BOX_CLOSED;
+	newName.Clear();
 }
 
 /**
 * Destructor for MaterialTreeView
 */
 MaterialTreeView::~MaterialTreeView() {
+	newName.FreeData();
 }
 
 /**
@@ -180,6 +185,10 @@ bool MaterialTreeView::Draw( const ImVec2 &size ) {
 			messageBoxText = "Unable to rename material because it conflicts with another material";
 			messageBoxYesNo = false;
 			break;
+		case MSG_BOX_RENAME_MATERIAL:
+			messageBoxTitle = "Please provide a new name";
+			messageBoxText = "Name";
+			break;
 		case MSG_BOX_DELETE_MATERIAL:
 			messageBoxTitle = "Are you sure?";
 			messageBoxText = "Are you sure you want to delete this material?";
@@ -205,7 +214,12 @@ bool MaterialTreeView::Draw( const ImVec2 &size ) {
 		bool accepted = false;
 
 		ImGui::Text( "%s", messageBoxTitle );
-		ImGui::Text( "%s", messageBoxText );
+		if ( messageBox == MSG_BOX_RENAME_MATERIAL ) {
+			if ( ImGui::InputTextStr( messageBoxText, &newName ) ) {
+			}
+		} else {
+			ImGui::Text( "%s", messageBoxText );
+		}
 
 		if ( messageBoxYesNo ) {
 
@@ -228,12 +242,16 @@ bool MaterialTreeView::Draw( const ImVec2 &size ) {
 			switch ( messageBox ) {
 				case MSG_BOX_DELETE_MATERIAL:
 				case MSG_BOX_DELETE_FOLDER:
-					OnDeleteMaterialAccepted();
 					messageBox = MSG_BOX_CLOSED;
+					OnDeleteMaterialAccepted();
 					break;
 				case MSG_BOX_RELOAD_MODIFIED_FILE:
-					OnReloadFileAccepted();
 					messageBox = MSG_BOX_CLOSED;
+					OnReloadFileAccepted();
+					break;
+				case MSG_BOX_RENAME_MATERIAL:
+					messageBox = MSG_BOX_CLOSED;
+					OnTvnEndlabeledit( tree.GetSelectedItem(), newName );
 					break;
 				default:
 				case MSG_BOX_CLOSED:
@@ -246,7 +264,7 @@ bool MaterialTreeView::Draw( const ImVec2 &size ) {
 
 	if ( ImGui::BeginChild( "###MaterialTreeView", size, ImGuiChildFlags_Borders ) ) {
 
-		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, MaterialTreeViewOnContextMenu, MaterialTreeViewOnBeginDrag, MaterialTreeViewOnEndDrag, this );
+		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, MaterialTreeViewOnContextMenu, MaterialTreeViewOnBeginDrag, MaterialTreeViewOnEndDrag, MaterialTreeViewOnInput, this );
 	}
 	ImGui::EndChild();
 
@@ -882,6 +900,9 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 				//Add it to our quick lookup
 				materialToTree.Set(material, item);
 
+				// change the tree node label
+				item->SetLabel( newLabel.c_str() );
+
 				//Finally make the change
 				internalChange = true;
 				pMaterial->SetMaterialName(material);
@@ -900,6 +921,9 @@ bool MaterialTreeView::OnTvnEndlabeledit(TreeNode *item, idStr &text) {
 
 			//Store some data so the we can make the appropriate changes after the commit
 			renamedFolder = item;
+
+			// change the tree node label
+			item->SetLabel( newLabel.c_str() );
 
 			affectedMaterials.Clear();
 			GetMaterialPaths(renamedFolder, &affectedMaterials);
@@ -937,24 +961,42 @@ bool MaterialTreeView::OnNMRclick(TreeNode *item)
 /**
 * Handles keyboard shortcut for cut, copy and paste
 */
-bool MaterialTreeView::OnChar(int nChar)
+void MaterialTreeView::OnInput(bool prepare, TreeNode *item)
 {
+	if ( prepare ) {
+		ImGui::SetItemKeyOwner( ImGuiKey_F2 );
+		ImGui::SetItemKeyOwner( ImGuiKey_LeftCtrl );
+		ImGui::SetItemKeyOwner( ImGuiKey_RightCtrl );
+		ImGui::SetItemKeyOwner( ImGuiKey_C );
+		ImGui::SetItemKeyOwner( ImGuiKey_X );
+		ImGui::SetItemKeyOwner( ImGuiKey_V );
+		ImGui::SetItemKeyOwner( ImGuiKey_Delete );
+		return;
+	}
+
 	if( ImGui::IsKeyChordPressed( ImGuiMod_Ctrl | ImGuiKey_C ) ) {
-		OnCopy();
-		return false;
+		if (CanCopy()) {
+			OnCopy();
+		}
 	}
 
 	if( ImGui::IsKeyChordPressed( ImGuiMod_Ctrl | ImGuiKey_V ) ) {
-		OnPaste();
-		return false;
+		if (CanPaste()) {
+			OnPaste();
+		}
 	}
 
 	if( ImGui::IsKeyChordPressed( ImGuiMod_Ctrl | ImGuiKey_X ) ) {
-		OnCut();
-		return false;
+		if (CanCut()) {
+			OnCut();
+		}
 	}
 
-	return true;
+	if ( ImGui::IsKeyPressed( ImGuiKey_F2 ) ) {
+		if (CanRename()) {
+			OnRenameMaterial();
+		}
+	}
 }
 
 /**
@@ -1099,8 +1141,11 @@ void MaterialTreeView::OnSaveAll() {
 */
 void MaterialTreeView::OnRenameMaterial() {
 
-	TreeNode *item = tree.GetSelectedItem();
-	tree.EditLabel(item);
+	TreeNode *node = tree.GetSelectedItem();
+	if ( node && OnTvnBeginlabeledit( node ) ) {
+		newName = node->GetLabel();
+		OpenMessageBox( MSG_BOX_RENAME_MATERIAL );
+	}
 }
 
 /**
@@ -1736,24 +1781,28 @@ void MaterialTreeView::PopupMenu(TreeNode *item) {
 
 		bool cutEnabled = (itemType == TYPE_MATERIAL);
 		ImGui::BeginDisabled( !cutEnabled );
+		ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_X );
 		if ( ImGui::Button( "Cut" ) ) {
 			OnCut();
 		}
 		ImGui::EndDisabled();
 		bool copyEnabled = (itemType == TYPE_MATERIAL);
 		ImGui::BeginDisabled( !copyEnabled );
+		ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_C );
 		if ( ImGui::Button( "Copy" ) ) {
 			OnCopy();
 		}
 		ImGui::EndDisabled();
 		bool pasteEnabled = ((itemType == TYPE_MATERIAL || itemType == TYPE_FILE || itemType == TYPE_MATERIAL_FOLDER) && materialDocManager->IsCopyMaterial());
 		ImGui::BeginDisabled( !pasteEnabled );
+		ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_V );
 		if ( ImGui::Button( "Paste" ) ) {
 			OnPaste();
 		}
 		ImGui::EndDisabled();
 		bool deleteMaterialEnabled = (itemType == TYPE_MATERIAL || itemType == TYPE_MATERIAL_FOLDER);
 		ImGui::BeginDisabled( !deleteMaterialEnabled );
+		ImGui::SetNextItemShortcut( ImGuiKey_Delete );
 		if ( ImGui::Button( "Delete" ) ) {
 			OnDeleteMaterial();
 		}

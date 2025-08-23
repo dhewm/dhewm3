@@ -62,6 +62,9 @@ void DeclBrowserOnTreeBeginDrag( void *data, TreeNode *item ) {
 void DeclBrowserOnTreeEndDrag( void *data, TreeNode *source, TreeNode *destination ) {
 	// nop
 }
+void DeclBrowserOnTreeInput( void *data, bool prepare, TreeNode *item ) {
+	// nop
+}
 
 /*
 ================
@@ -110,7 +113,7 @@ void DeclBrowser::Draw() {
 
 		if ( ImGui::BeginChild( "Decl Tree", ImVec2( 300, 400 ) ) ) {
 			ImGui::SetItemTooltip( "decl browser" );
-			declTree.Draw( DeclBrowserOnToolTipNotify, DeclBrowserOnTreeSelChanged, DeclBrowserOnTreeContextMenu, DeclBrowserOnTreeBeginDrag, DeclBrowserOnTreeEndDrag, this );
+			declTree.Draw( DeclBrowserOnToolTipNotify, DeclBrowserOnTreeSelChanged, DeclBrowserOnTreeContextMenu, DeclBrowserOnTreeBeginDrag, DeclBrowserOnTreeEndDrag, DeclBrowserOnTreeInput, this );
 			ImGui::EndChild();
 		}
 

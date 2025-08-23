@@ -152,16 +152,16 @@ int TreeCtrl::GetItemData( TreeNode *item ) const {
 	return item->GetItem();
 }
 
-void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, void *data ) {
+void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, treeItemInput_t input, void *data ) {
 	TreeNode *parentNode = GetRootItem();
 	TreeNode *node;
 
 	for ( node = GetChildItem( parentNode ) ; node ; node = GetNextSiblingItem( node ) ) {
-		DrawNode( node, tooltip, selected, contextMenu, beginDrag, endDrag, data );
+		DrawNode( node, tooltip, selected, contextMenu, beginDrag, endDrag, input, data );
 	}
 }
 
-void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, void *data ) {
+void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, treeItemInput_t input, void *data ) {
 	TreeNode *			item;
 	ImGuiTreeNodeFlags	flags = 0;
 	idStr				tooltipText;
@@ -173,6 +173,8 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
 		flags |= ImGuiTreeNodeFlags_Leaf;
 		flags |= ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	}
+
+	input( data, true, node );
 
 	bool opened = ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() );
 	contextMenu( data, node );
@@ -193,7 +195,9 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
                 ImGui::EndTooltip();
 			}
 		}
-
+		if ( ImGui::IsItemFocused() ) {
+			input( data, false, node );
+		}
 		if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) )
 		{
 			ImGui::SetDragDropPayload( "TreeCtrl", node, sizeof( TreeNode * ) );
@@ -216,7 +220,7 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
 
 		
 		for ( item = GetChildItem( node ); item; item = GetNextSiblingItem( item ) ) {
-			DrawNode( item, tooltip, selected, contextMenu, beginDrag, endDrag, data );
+			DrawNode( item, tooltip, selected, contextMenu, beginDrag, endDrag, input, data );
 		}
 
 		if ( GetChildItem( node ) ) {
