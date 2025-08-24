@@ -335,13 +335,17 @@ void MEMainFrame::Draw() {
 		}
 		if ( ImGui::BeginMenu( "Edit" ) ) {
 			ImGui::BeginDisabled( !IsEditUndoEnabled() );
-			if ( ImGui::MenuItem( "Undo", "Ctrl+Z" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_Z );
+			ImGui::MenuItem( "Undo", "Ctrl+Z" );
+			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_Z ) ) { 
 				OnEditUndo();
 			}
 			ImGui::EndDisabled();
 
 			ImGui::BeginDisabled( !IsEditRedoEnabled() );
-			if ( ImGui::MenuItem( "Redo", "Ctrl-Y" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_Y );
+			ImGui::MenuItem( "Redo", "Ctrl-Y" );
+			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_Y ) || ImGui::Shortcut( ImGuiMod_Shift | ImGuiMod_Ctrl | ImGuiKey_Z ) ) {
 				OnEditRedo();
 			}
 			ImGui::EndDisabled();
@@ -349,34 +353,45 @@ void MEMainFrame::Draw() {
 			ImGui::Separator();
 
 			ImGui::BeginDisabled( !IsEditCutEnabled() );
-			if ( ImGui::MenuItem( "Cut", "Ctrl+X" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_X );
+			ImGui::MenuItem( "Cut", "Ctrl+X" );
+			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_X ) ) {
 				OnEditCut();
 			}
 			ImGui::EndDisabled();
 
 			ImGui::BeginDisabled( !IsEditCopyEnabled() );
-			if ( ImGui::MenuItem( "Copy", "Ctrl+C" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_C );
+			ImGui::MenuItem( "Copy", "Ctrl+C" );
+			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_C ) ) {
 				OnEditCopy();
 			}
 			ImGui::EndDisabled();
 			ImGui::BeginDisabled( !IsEditPasteEnabled() );
-			if ( ImGui::MenuItem( "Paste", "Ctrl+V" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_V );
+			ImGui::MenuItem( "Paste", "Ctrl+V" );
+			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_V ) ) {
 				OnEditPaste();
 			}
 			ImGui::EndDisabled();
 			ImGui::BeginDisabled( !IsEditDeleteEnabled() );
-			if ( ImGui::MenuItem( "Delete", "Del" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiKey_Delete );
+			ImGui::MenuItem( "Delete", "Del" );
+			if ( ImGui::Shortcut( ImGuiKey_Delete ) ) {
 				OnEditDelete();
 			}
 			ImGui::EndDisabled();
 			ImGui::BeginDisabled( !IsEditRenameEnabled() );
-			if ( ImGui::MenuItem( "Rename", "F2" ) ) {
+			ImGui::SetNextItemShortcut( ImGuiKey_F2 );
+			ImGui::MenuItem( "Rename", "F2" );
+			if ( ImGui::Shortcut( ImGuiKey_F2 ) ) {
 				OnEditRename();
 			}
 			ImGui::EndDisabled();
 
 			ImGui::Separator();
-		
+
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_F );
 			if ( ImGui::MenuItem( "Find", "Ctrl+F" ) ) {
 				OnEditFind();
 			}
@@ -392,6 +407,7 @@ void MEMainFrame::Draw() {
 		}
 		if ( ImGui::BeginMenu( "Preview" ) ) {
 			ImGui::BeginDisabled( !IsApplyAllEnabled() );
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_A );
 			if ( ImGui::MenuItem( "Apply Material", "Ctrl+A" ) ) {
 				OnApplyMaterial();
 			}
@@ -411,10 +427,12 @@ void MEMainFrame::Draw() {
 
 			ImGui::Separator();
 
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_R );
 			if ( ImGui::MenuItem( "Reload ARB Programs", "Ctrl+R" ) ) {
 				OnReloadArbPrograms();
 			}
 
+			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_I );
 			if ( ImGui::MenuItem( "Reload Images", "Ctrl+I" ) ) {
 				OnReloadImages();
 			}
@@ -685,153 +703,35 @@ void MEMainFrame::OnEditRename() {
 * Enable the cut menu item if a material is selected.
 */
 bool MEMainFrame::IsEditCutEnabled() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	BOOL enable = FALSE;
-
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			if(m_stageView->CanCut()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			if(m_materialTreeView->CanCut()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			enable = TRUE;
-		}
-	}
-
-	pCmdUI->Enable(enable);*/
-	return false;
+	return m_stageView->CanCut() || m_materialTreeView->CanCut() || m_materialEditView->CanCut();
 }
 
 /**
 * Enables the copy menu item if a material or stage is selected.
 */
 bool MEMainFrame::IsEditCopyEnabled() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	BOOL enable = FALSE;
-
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			if(m_stageView->CanCopy()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			if(m_materialTreeView->CanCopy()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			enable = TRUE;
-		}
-	}
-
-	pCmdUI->Enable(enable);*/
-	return false;
+	return m_stageView->CanCopy() || m_materialTreeView->CanCopy() || m_materialEditView->CanCopy();
 }
 
 /**
 * Enables a paste operation when a material or stage has been copied.
 */
 bool MEMainFrame::IsEditPasteEnabled() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	BOOL enable = FALSE;
-
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			if(m_stageView->CanPaste()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			if(m_materialTreeView->CanPaste()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			enable = TRUE;
-		}
-	}
-
-	pCmdUI->Enable(enable);*/
-	return false;
+	return m_stageView->CanPaste() || m_materialTreeView->CanPaste() || m_materialEditView->CanPaste();
 }
 
 /**
 * Enables a delete operation when a material or stage is selected.
 */
 bool MEMainFrame::IsEditDeleteEnabled() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	BOOL enable = FALSE;
-
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			if(m_stageView->CanDelete()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			if(m_materialTreeView->CanDelete()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(CRichEditCtrl))) {
-			enable = TRUE;
-		}
-
-	}
-
-	pCmdUI->Enable(enable);*/
-	return false;
+	return m_stageView->CanDelete() || m_materialTreeView->CanDelete() || m_materialEditView->CanDelete();
 }
 
 /**
 * Enables a rename operation when a material, folder or stage is selected.
 */
 bool MEMainFrame::IsEditRenameEnabled() {
-	/*
-	if(pCmdUI->m_pMenu == NULL) {
-		pCmdUI->Enable(TRUE);
-		return;
-	}
-
-	BOOL enable = FALSE;
-
-	CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			if(m_stageView->CanRename()) {
-				enable = TRUE;
-			}
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			if(m_materialTreeView->CanRename()) {
-				enable = TRUE;
-			}
-		}
-	}
-	pCmdUI->Enable(enable);*/
-	return false;
+	return m_stageView->CanRename() || m_materialTreeView->CanRename();
 }
 
 /**
@@ -878,31 +778,21 @@ void MEMainFrame::OnEditRedo() {
 		m_materialEditView->m_textView.Redo();
 		return;
 	}*/
-	materialDocManager.Redo();
+	//materialDocManager.Redo();
 }
 
 /**
 * Enables the undo menu item if an undo is available.
 */
 bool MEMainFrame::IsEditUndoEnabled() {
-	/*ImGuiID active = ImGui::GetFocusID();
-	ImGuiID textId = ImGui::GetID( "Text" );
-	if ( textId == active ) {
-		return m_materialEditView->m_textView.CanUndo();
-	}*/
-
-	return materialDocManager.IsUndoAvailable();
+	return m_materialEditView->m_textView.CanUndo() || materialDocManager.IsUndoAvailable();
 }
 
 /**
 * Enables the redo menu item if a redo is available.
 */
 bool MEMainFrame::IsEditRedoEnabled() {
-	/*if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
-		return m_materialEditView->m_textView.CanRedo();
-	}*/
-
-	return materialDocManager.IsRedoAvailable();
+	return m_materialEditView->m_textView.CanRedo() || materialDocManager.IsRedoAvailable();
 }
 
 /**

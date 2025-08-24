@@ -738,8 +738,8 @@ void TextEditor::HandleKeyboardInputs()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	auto shift = io.KeyShift;
-	auto ctrl = io.ConfigMacOSXBehaviors ? io.KeySuper : io.KeyCtrl;
-	auto alt = io.ConfigMacOSXBehaviors ? io.KeyCtrl : io.KeyAlt;
+	auto ctrl = io.KeyCtrl;
+	auto alt = io.KeyAlt;
 
 	if (ImGui::IsWindowFocused())
 	{
@@ -758,7 +758,8 @@ void TextEditor::HandleKeyboardInputs()
 			Undo();
 		else if (!IsReadOnly() && !ctrl && !shift && alt && ImGui::IsKeyPressed(ImGuiKey_Backspace))
 			Undo();
-		else if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Y))
+		else if (!IsReadOnly() && (io.ConfigMacOSXBehaviors ? (ctrl && shift && ImGui::IsKeyPressed( ImGuiKey_Z ))
+					: (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Y))))
 			Redo();
 		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_UpArrow))
 			MoveUp(1, shift);

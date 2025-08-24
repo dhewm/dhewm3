@@ -509,6 +509,9 @@ void MaterialTreeView::MV_OnFileReload(const char* filename) {
 bool MaterialTreeView::CanCopy() {
 
 	TreeNode *item = tree.GetSelectedItem();
+	if (!item) {
+		return false;
+	}
 	int itemType = tree.GetItemData(item);
 
 	if(item && itemType == TYPE_MATERIAL) {
@@ -531,6 +534,9 @@ bool MaterialTreeView::CanPaste() {
 bool MaterialTreeView::CanCut() {
 
 	TreeNode *item = tree.GetSelectedItem();
+	if (!item) {
+		return false;
+	}
 	int itemType = tree.GetItemData(item);
 
 	if(item && itemType == TYPE_MATERIAL) {
@@ -546,6 +552,9 @@ bool MaterialTreeView::CanCut() {
 bool MaterialTreeView::CanDelete() {
 
 	TreeNode *item = tree.GetSelectedItem();
+	if (!item) {
+		return false;
+	}
 	int itemType = tree.GetItemData(item);
 
 	if(itemType == TYPE_MATERIAL_FOLDER || itemType == TYPE_MATERIAL) {
@@ -561,6 +570,9 @@ bool MaterialTreeView::CanDelete() {
 bool MaterialTreeView::CanRename() {
 
 	TreeNode *item = tree.GetSelectedItem();
+	if (!item) {
+		return false;
+	}
 	int itemType = tree.GetItemData(item);
 
 	if(itemType == TYPE_MATERIAL_FOLDER || itemType == TYPE_MATERIAL) {
@@ -575,6 +587,9 @@ bool MaterialTreeView::CanRename() {
 bool MaterialTreeView::CanSaveFile() {
 
 	TreeNode *item = tree.GetSelectedItem();
+	if (!item) {
+		return false;
+	}
 
 	idStr filename;
 	if(item && GetFileName(item, filename)) {
@@ -798,19 +813,6 @@ void MaterialTreeView::RenameFolder(TreeNode *item, const char* name) {
 }
 
 /**
-* Handles the keyboard shortcut for delete.
-*/
-bool MaterialTreeView::PreTranslateMessage() {
-
-	if ( ImGui::IsKeyPressed( ImGuiKey_Delete ) ) {
-
-		OnDeleteMaterial();
-		return true;
-	}
-	return false;
-}
-
-/**
 * Called by the MFC framework as the view is being created.
 */
 int MaterialTreeView::OnCreate() {
@@ -967,6 +969,9 @@ void MaterialTreeView::OnInput(bool prepare, TreeNode *item)
 		ImGui::SetItemKeyOwner( ImGuiKey_F2 );
 		ImGui::SetItemKeyOwner( ImGuiKey_LeftCtrl );
 		ImGui::SetItemKeyOwner( ImGuiKey_RightCtrl );
+		ImGui::SetItemKeyOwner( ImGuiKey_LeftShift );
+		ImGui::SetItemKeyOwner( ImGuiKey_RightShift );
+		ImGui::SetItemKeyOwner( ImGuiKey_Z );
 		ImGui::SetItemKeyOwner( ImGuiKey_C );
 		ImGui::SetItemKeyOwner( ImGuiKey_X );
 		ImGui::SetItemKeyOwner( ImGuiKey_V );
@@ -996,6 +1001,10 @@ void MaterialTreeView::OnInput(bool prepare, TreeNode *item)
 		if (CanRename()) {
 			OnRenameMaterial();
 		}
+	}
+
+	if ( ImGui::IsKeyPressed( ImGuiKey_Delete ) ) {
+		OnDeleteMaterial();
 	}
 }
 
@@ -1840,7 +1849,7 @@ void MaterialTreeView::PopupMenu(TreeNode *item) {
 
 		ImGui::Separator();
 
-		ImGui::EndPopup();		
+		ImGui::EndPopup();
 	}
 }
 

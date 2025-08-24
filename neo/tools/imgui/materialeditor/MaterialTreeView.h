@@ -101,8 +101,6 @@ private:
 		TYPE_MATERIAL
 	};
 
-	bool			PreTranslateMessage();
-
 	//Window Messages
 public:
 	void			OnTvnSelchanged( bool doubleClicked );

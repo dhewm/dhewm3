@@ -97,6 +97,23 @@ idStr MaterialEditView::GetSourceText() {
 	return text;
 }
 
+bool MaterialEditView::CanCopy() {
+	return m_textView.CanCopy();
+}
+
+bool MaterialEditView::CanCut() {
+	return m_textView.CanCut();
+}
+
+bool MaterialEditView::CanPaste() {
+	return m_textView.CanCopy();
+}
+
+bool MaterialEditView::CanDelete() {
+	return !m_textView.GetReadOnly();
+}
+
+
 /**
 * Gets the source of the current document and populates the
 * source edit control.

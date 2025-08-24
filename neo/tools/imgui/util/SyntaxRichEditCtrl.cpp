@@ -568,6 +568,29 @@ bool SyntaxRichEditCtrl::IsEdited() const {
 	return scriptEdit->CanUndo();
 }
 
+bool SyntaxRichEditCtrl::CanCopy() {
+	return scriptEdit->HasSelection();
+}
+
+void SyntaxRichEditCtrl::Copy() {
+	scriptEdit->Copy();
+}
+
+bool SyntaxRichEditCtrl::CanCut() {
+	return !scriptEdit->IsReadOnly() && scriptEdit->HasSelection();
+}
+
+void SyntaxRichEditCtrl::Cut() {
+	scriptEdit->Cut();
+}
+
+bool SyntaxRichEditCtrl::CanPaste() {
+	const char *clipboardText = ImGui::GetClipboardText();
+
+	return !scriptEdit->IsReadOnly() && clipboardText && *clipboardText;
+}
+
+
 bool SyntaxRichEditCtrl::CanUndo() {
 	return scriptEdit->CanUndo();
 }

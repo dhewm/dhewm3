@@ -111,6 +111,12 @@ public:
 	void					SetReadOnly( bool readOnly );
 	bool					GetReadOnly();
 
+	bool					CanCopy();
+	void					Copy();
+	bool					CanCut();
+	void					Cut();
+	bool					CanPaste();
+	void					Paste();
 	bool					CanUndo();
 	void					Undo();
 	bool					CanRedo();

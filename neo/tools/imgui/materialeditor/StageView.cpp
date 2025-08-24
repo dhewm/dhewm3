@@ -68,8 +68,10 @@ END_MESSAGE_MAP()
 StageView::StageView()
 	: m_propView(NULL)
 	, currentMaterial(NULL)
+	, messageBox(MSG_BOX_CLOSED)
 	, labelEdit()
 	, labelIndex(-1)
+	, replaceStageName()
 	, items()
 	, itemCurSel(-1)
 	, lastKeyDownTime(0)
@@ -291,6 +293,68 @@ int StageView::OnCreate() {
 bool StageView::Draw( const ImVec2 &size ) {
 	if ( ImGui::BeginChild( "###StageView", size, ImGuiChildFlags_Borders ) ) {
 
+		if ( messageBox != MSG_BOX_CLOSED ) {
+			ImGui::OpenPopup( "###StageViewPopup" );
+		}
+
+		if ( ImGui::BeginPopupModal( "###StageViewPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+			bool accepted = false;
+
+			switch ( messageBox ) {
+			case MSG_BOX_RENAME_STAGE:
+				ImGui::Text( "%s", "Please enter the new name of the stage" );
+				if ( ImGui::InputTextStr( "Edit Label", &labelEdit ) ) {
+				}
+				break;
+			case MSG_BOX_DELETE_STAGE:
+				ImGui::Text( "%s", "Are you sure you want to delete this stage?" );
+				break;
+			case MSG_BOX_DELETE_ALL_STAGES:
+				ImGui::Text( "%s", "Are you sure you want to delete all stages?" );
+				break;
+			case MSG_BOX_REPLACE_STAGE:
+				ImGui::Text( "Do you want to replace '%s' stage?", replaceStageName.c_str() );
+				break;
+			}
+
+			if ( ImGui::Button( "Yes" ) ) {
+				ImGui::CloseCurrentPopup();
+				accepted = true;
+			}
+			if ( ImGui::Button( "No" ) ) {
+				ImGui::CloseCurrentPopup();
+				messageBox = MSG_BOX_CLOSED;
+			}
+		
+
+			if ( accepted ) {
+				switch ( messageBox ) {
+				case MSG_BOX_RENAME_STAGE:
+					OnLvnEndlabeledit( labelIndex, labelEdit.c_str() );
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				case MSG_BOX_DELETE_STAGE:
+					OnDeleteStageAccepted();
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				case MSG_BOX_DELETE_ALL_STAGES:
+					OnDeleteAllStagesAccepted();
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				case MSG_BOX_REPLACE_STAGE:
+					OnPasteAccepted();
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				default:
+					messageBox = MSG_BOX_CLOSED;
+					break;
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+
+
 		if ( ImGui::BeginListBox( "##StageViewItems", size ) ) {
 			int num = items.Num();
 			for ( int i = 0; i < num; i++ ) {
@@ -306,27 +370,19 @@ bool StageView::Draw( const ImVec2 &size ) {
 				}
 
 				ImGui::SetNextItemAllowOverlap();
-				if ( ImGui::Selectable( items[i].GetLabel().c_str(), selected ) ) {
-					SetItemState( i );
-					/*
-					* TODO: make this work
-					if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) ) {
-						if ( OnLvnBeginlabeledit( i ) ) {
-							labelEdit = items[i].GetLabel();
-							labelIndex = i;
-							ImGui::OpenPopup( "Edit Label" );
-						}
-					}
-					*/
-				}
-				ImGui::SetItemKeyOwner( ImGuiKey_C );
-				ImGui::SetItemKeyOwner( ImGuiKey_V );
-				//ImGui::SetItemKeyOwner( ImGuiKey_F2 );
-				ImGui::SetItemKeyOwner( ImGuiKey_Delete );
-				OnChar( i );
+
+				OnChar( true, i );
+
 				if ( selected ) {
 					ImGui::SetItemDefaultFocus();
 				}
+
+				bool interacted = ImGui::Selectable( items[i].GetLabel().c_str(), selected );
+				if ( interacted ) {
+					SetItemState( i );
+				}
+				OnChar( false, i );
+				PopupMenu();
 				if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) )
 				{
 					ImGui::SetDragDropPayload( "StageViewItemsCell", &i, sizeof( int ) );
@@ -357,13 +413,6 @@ bool StageView::Draw( const ImVec2 &size ) {
 			}
 			ImGui::EndListBox();
 		}
-
-		/*
-		// TODO: make this work
-		if ( ImGui::InputDialogName( "Please enter the new name of the stage", "Edit Label", &labelEdit ) ) {
-			OnLvnEndlabeledit( labelIndex, labelEdit.c_str() );
-		}
-		*/
 	}
 	ImGui::EndChild();
 
@@ -578,7 +627,8 @@ void StageView::OnRenameStage() {
 	if ( nItem ) {
 		if ( OnLvnBeginlabeledit( nItem ) ) {
 			labelEdit = items[nItem].GetLabel();
-			ImGui::OpenPopup( "Edit Label" );
+			labelIndex = nItem;
+			messageBox = MSG_BOX_RENAME_STAGE;
 		}
 	}
 }
@@ -590,13 +640,16 @@ void StageView::OnDeleteStage() {
 
 	int nItem = GetSelectedItemIndex();
 	if(nItem > 0) {
-		// TODO: fix this
-		int result = 0; // MessageBox("Are you sure you want to delete this stage?", "Delete?", MB_ICONQUESTION | MB_YESNO);
-		if(result == 1) {
+		messageBox = MSG_BOX_DELETE_STAGE;
+	}
+}
 
-			MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
-			material->RemoveStage(nItem-1);
-		}
+void StageView::OnDeleteStageAccepted() {
+	int nItem = GetSelectedItemIndex();
+	if(nItem > 0) {
+		MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
+		material->RemoveStage(nItem-1);
+		itemCurSel = 0;
 	}
 }
 
@@ -604,12 +657,13 @@ void StageView::OnDeleteStage() {
 * Conforms the user wants to delete all stages and then performs the operation.
 */
 void StageView::OnDeleteAllStages() {
-	// TODO: fix this
-	int result = 0; // MessageBox("Are you sure you want to delete all stages?", "Delete?", MB_ICONQUESTION | MB_YESNO);
-	if(result == 1) {
-		MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
-		material->ClearStages();
-	}
+	messageBox = MSG_BOX_DELETE_ALL_STAGES;
+}
+
+void StageView::OnDeleteAllStagesAccepted() {
+	MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
+	material->ClearStages();
+	itemCurSel = -1;
 }
 
 /**
@@ -678,12 +732,29 @@ void StageView::OnPaste() {
 		if ( type != MaterialDoc::STAGE_TYPE_SPECIALMAP || existingIndex == -1 ) {
 			materialDocManager->PasteStage( material );
 		} else {
-			// TODO: fix this
-			int result = 0; //MessageBox(va("Do you want to replace '%s' stage?", name.c_str()), "Replace?", MB_ICONQUESTION | MB_YESNO);
-			if(result == 1) {
-				material->RemoveStage( existingIndex );
-				materialDocManager->PasteStage( material );
-			}
+			replaceStageName = name;
+			messageBox = MSG_BOX_REPLACE_STAGE;
+		}
+	}
+}
+
+void StageView::OnPasteAccepted() {
+	if ( materialDocManager->IsCopyStage() ) {
+
+		MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
+
+		int type;
+		idStr name;
+
+		materialDocManager->GetCopyStageInfo(type, name);
+
+		int existingIndex = material->FindStage(type, name);
+
+		if ( type != MaterialDoc::STAGE_TYPE_SPECIALMAP || existingIndex == -1 ) {
+			
+		} else {
+			material->RemoveStage( existingIndex );
+			materialDocManager->PasteStage( material );
 		}
 	}
 }
@@ -718,7 +789,14 @@ void StageView::OnLvnEndlabeledit( int index, const char *newLabel ) {
 /**
 * Handles keyboard shortcuts for copy and paste operations.
 */
-void StageView::OnChar( int index ) {
+void StageView::OnChar( bool prepare, int index ) {
+	if ( prepare ) {
+		ImGui::SetItemKeyOwner( ImGuiKey_C );
+		ImGui::SetItemKeyOwner( ImGuiKey_V );
+		ImGui::SetItemKeyOwner( ImGuiKey_F2 );
+		ImGui::SetItemKeyOwner( ImGuiKey_Delete );
+	}
+	
 	int timeEnd = Sys_Milliseconds();
 	int elapsed = timeEnd - lastKeyDownTime;
 	int keydownTime = 200;
@@ -735,12 +813,17 @@ void StageView::OnChar( int index ) {
 			lastKeyDownTime = timeEnd;
 		}
 	}
+	if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) ) {
+		if ( OnLvnBeginlabeledit( index ) ) {
+			labelEdit = items[index].GetLabel();
+			labelIndex = index;
+		}
+	}
 	if ( ImGui::IsKeyPressed( ImGuiKey_F2 ) ) {
 		if ( elapsed > keydownTime ) {
 			if ( OnLvnBeginlabeledit( itemCurSel ) ) {
 				labelEdit = items[itemCurSel].GetLabel();
 				labelIndex = itemCurSel;
-				ImGui::OpenPopup( "Edit Label", ImGuiPopupFlags_AnyPopupId );
 			}
 			lastKeyDownTime = timeEnd;
 		}
@@ -750,6 +833,10 @@ void StageView::OnChar( int index ) {
 			OnDeleteStage();
 			lastKeyDownTime = timeEnd;
 		}
+	}
+
+	if ( ImGui::IsMouseClicked( ImGuiMouseButton_Right ) ) {
+		OnNMRclick();
 	}
 }
 
@@ -768,54 +855,66 @@ void StageView::OnStateChanged(int index, int toggleState) {
 }
 
 /**
-* Dispalys the popup menu with the appropriate menu items enabled.
+* Displays the popup menu with the appropriate menu items enabled.
 */
 void StageView::PopupMenu() {
 
 	//Determine the type of object clicked on
-	/*
-	CListCtrl& list = GetListCtrl();
-
-	ClientToScreen (pt);
-
-	CMenu FloatingMenu;
-	VERIFY(FloatingMenu.LoadMenu(IDR_ME_STAGELIST_POPUP));
-	CMenu* pPopupMenu = FloatingMenu.GetSubMenu (0);
-	ASSERT(pPopupMenu != NULL);
-	*/
 	int nItem = GetSelectedItemIndex();
 
-	if(nItem <= 0) {
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_RENAMESTAGE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_DELETESTAGE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+	if (ImGui::BeginPopupContextItem( NULL ) ) {
 
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_CUT, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_COPY, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	} else {
 		MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
-		if(material->GetAttributeInt(nItem-1, "stagetype") != MaterialDoc::STAGE_TYPE_NORMAL) {
-			//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_RENAMESTAGE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		int stageType = nItem > 0 ? material->GetAttributeInt(nItem-1, "stagetype") : -1;
+
+		ImGui::BeginDisabled( nItem <= 0 || (nItem > 0 && stageType != MaterialDoc::STAGE_TYPE_NORMAL) );
+		if ( ImGui::Button( "Rename" ) ) {
+			OnRenameStage();
 		}
-	}
+		ImGui::EndDisabled();
 
-	MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
-	if(material->FindStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "bumpmap") >= 0) {
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_ADDBUMPMAP, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
-	if(material->FindStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "diffusemap") >= 0) {
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_ADDDIFFUSEMAP, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
-	if(material->FindStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "specularmap") >= 0) {
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_ADDSPECULAR, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		if ( ImGui::Button( "Add" ) ) {
+			OnAddStage();
+		}
+		ImGui::BeginDisabled( material->FindStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "bumpmap") >= 0 );
+		if ( ImGui::Button( "Add Bumpmap Stage" ) ) {
+			OnAddBumpmapStage();
+		}
+		ImGui::EndDisabled();
+		ImGui::BeginDisabled( material->FindStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "diffusemap") >= 0 );
+		if ( ImGui::Button( "Add Diffuse Stage" ) ) {
+			OnAddDiffuseStage();
+		}
+		ImGui::EndDisabled();
+		ImGui::BeginDisabled( material->FindStage(MaterialDoc::STAGE_TYPE_SPECIALMAP, "specularmap") >= 0 );
+		if ( ImGui::Button( "Add Specular Stage" ) ) {
+			OnAddSpecualarStage();
+		}
+		ImGui::EndDisabled();
 
-	if(materialDocManager->IsCopyStage()) {
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_PASTE, MF_BYCOMMAND | MF_ENABLED);
-	} else {
-		//pPopupMenu->EnableMenuItem(ID_STAGEPOPUP_PASTE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	}
+		ImGui::Separator();
 
-	//pPopupMenu->TrackPopupMenu (TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt->x, pt->y, &list);
+		ImGui::BeginDisabled( nItem <= 0 );
+		if ( ImGui::Button( "Copy" ) ) {
+			OnCopy();
+		}
+		ImGui::EndDisabled();
+		ImGui::BeginDisabled( !materialDocManager->IsCopyStage() );
+		if ( ImGui::Button( "Paste" ) ) {
+			OnPaste();
+		}
+		ImGui::EndDisabled();
+		ImGui::BeginDisabled( nItem <= 0 );
+		if ( ImGui::Button( "Delete" ) ) {
+			OnDeleteStage();
+		}
+		ImGui::EndDisabled();
+		if ( ImGui::Button( "Delete All Stages" ) ) {
+			OnDeleteAllStages();
+		}
+
+		ImGui::EndPopup();
+	}
 }
 
 /**

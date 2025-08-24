@@ -69,6 +69,11 @@ public:
 	//SourceModifyOwner Interface
 	virtual idStr GetSourceText();
 
+	bool			CanCopy();
+	bool			CanCut();
+	bool			CanPaste();
+	bool			CanDelete();
+
 protected:
 	void			GetMaterialSource();
 	void			ApplyMaterialSource();

@@ -142,8 +142,11 @@ protected:
 	void					OnNMClick( int index );
 
 	void					OnRenameStage();
+	void					OnRenameStageAccepted();
 	void					OnDeleteStage();
+	void					OnDeleteStageAccepted();
 	void					OnDeleteAllStages();
+	void					OnDeleteAllStagesAccepted();
 	void					OnAddStage();
 	void					OnAddBumpmapStage();
 	void					OnAddDiffuseStage();
@@ -151,11 +154,12 @@ protected:
 
 	void					OnCopy();
 	void					OnPaste();
+	void					OnPasteAccepted();
 	
 	bool					OnLvnBeginlabeledit( int index );
 	void					OnLvnEndlabeledit( int index, const char *newLabel );
 	
-	void					OnChar( int index );
+	void					OnChar( bool prepare, int index );
 
 	//Toggle List View Interface
 	void					OnStateChanged(int index, int toggleState);
@@ -169,8 +173,18 @@ protected:
 	MaterialPropTreeView*	m_propView;
 	MaterialDoc*			currentMaterial;
 
+	enum {
+		MSG_BOX_CLOSED						= 0,
+		MSG_BOX_RENAME_STAGE,
+		MSG_BOX_DELETE_STAGE,
+		MSG_BOX_DELETE_ALL_STAGES,
+		MSG_BOX_REPLACE_STAGE,
+	};
+	int						messageBox;
+
 	idStr					labelEdit;
 	int						labelIndex;
+	idStr					replaceStageName;
 
 	idList<StageViewItem>	items;
 	int						itemCurSel;
