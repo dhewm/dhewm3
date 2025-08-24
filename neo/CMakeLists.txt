@@ -901,6 +901,8 @@ set(src_imgui ${src_imgui}
 	tools/imgui/materialeditor/MEOptions.cpp
 	tools/imgui/materialeditor/MEMainFrame.h
 	tools/imgui/materialeditor/MEMainFrame.cpp
+	tools/imgui/materialeditor/FindDialog.h
+	tools/imgui/materialeditor/FindDialog.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)

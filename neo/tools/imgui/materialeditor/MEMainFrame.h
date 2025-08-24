@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "MaterialPreviewPropView.h"
 #include "MEOptions.h"
 #include "ConsoleView.h"
-//#include "FindDialog.h"
+#include "FindDialog.h"
 //#include "../common/PropTree/PropTreeView.h"
 #include "MaterialDocManager.h"
 #include "MaterialEditView.h"
@@ -106,7 +106,7 @@ public:
 
 private:
 	//Methods for Find interactions
-	//friend						FindDialog;
+	friend						FindDialog;
 	void						CloseFind();
 	void						FindNext(MaterialSearchData_t* search);
 
@@ -144,7 +144,7 @@ private:
 	MaterialEditView*			m_materialEditView;
 
 	//Find Data
-	//FindDialog*					m_find;
+	FindDialog*		 			m_find;
 	MaterialSearchData_t		searchData;
 
 	//Document Management

@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/Str.h"
 #include "idlib/Heap.h"
 #include "idlib/containers/Hierarchy.h"
+#include "idlib/containers/List.h"
 
 namespace ImGuiTools {
 
@@ -122,6 +123,7 @@ public:
 		: nodeAllocator()
 		, root()
 		, selectedItem(NULL)
+		, pathToSelectedItem()
 		, numNodes(0)
 	{
 		root = nodeAllocator.Alloc();
@@ -130,6 +132,7 @@ public:
 	}
 	virtual ~TreeCtrl() {
 		DeleteAllItems();
+		pathToSelectedItem.Clear();
 	}
 
 	void							DeleteAllItems();
@@ -152,11 +155,13 @@ public:
 
 private:
 	void							DrawNode( TreeNode *item,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, treeItemInput_t input, void *data );
+	void							UpdatePathToSelectedItem();
 	void							DeleteAllItemsOfNode( TreeNode *item );
 
 	idBlockAlloc<TreeNode,256>		nodeAllocator;
 	TreeNode *						root;
 	TreeNode *						selectedItem;
+	idList<int>						pathToSelectedItem;
 	int								numNodes;
 };
 

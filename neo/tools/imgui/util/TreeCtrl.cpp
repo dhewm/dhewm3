@@ -48,7 +48,7 @@ void TreeCtrl::DeleteItem( TreeNode* item ) {
 	}
 
 	DeleteAllItemsOfNode( item );
-	selectedItem = NULL; // TODO: figure out what to do with it?
+	SelectItem( NULL ); // TODO: figure out what to do with it?
 }
 
 TreeNode *TreeCtrl::GetRootItem() const {
@@ -93,6 +93,7 @@ TreeNode *TreeCtrl::GetSelectedItem() const {
 
 void TreeCtrl::SelectItem( TreeNode *item ) {
 	selectedItem = item;
+	UpdatePathToSelectedItem();
 }
 
 int SortTreeNodeByLabel( TreeNode * const *a, TreeNode * const *b ) {
@@ -161,22 +162,54 @@ void TreeCtrl::Draw( treeItemTooltip_t tooltip, treeItemSelected_t selected, tre
 	}
 }
 
+void TreeCtrl::UpdatePathToSelectedItem() {
+	pathToSelectedItem.Clear();
+	if ( !selectedItem ) {
+		return;
+	}
+
+	TreeNode *node = selectedItem;
+	while ( node ) {
+		pathToSelectedItem.Insert( node->GetID() );
+		node = GetParentItem( node );
+	}
+}
+
 void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSelected_t selected, treeItemContextMenu_t contextMenu, treeItemBeginDrag_t beginDrag, treeItemEndDrag_t endDrag, treeItemInput_t input, void *data ) {
 	TreeNode *			item;
+	TreeNode *			childItem;
 	ImGuiTreeNodeFlags	flags = 0;
 	idStr				tooltipText;
+	bool				scrollToNode = false;
+	bool				openNode = false;
+
+	childItem = GetChildItem( node );
 
 	if ( node == selectedItem ) {
 		flags |= ImGuiTreeNodeFlags_Selected;
+		scrollToNode = true;
 	}
-	if ( !GetChildItem( node ) ) {
+	if ( !childItem ) {
 		flags |= ImGuiTreeNodeFlags_Leaf;
 		flags |= ImGuiTreeNodeFlags_NoTreePushOnOpen;
+	} else {
+		if ( pathToSelectedItem.Num() && pathToSelectedItem[0] == node->GetID() ) {
+			openNode = true;
+			flags |= ImGuiTreeNodeFlags_DefaultOpen;
+			pathToSelectedItem.RemoveIndex( 0 );
+		}
 	}
 
 	input( data, true, node );
 
+	if ( openNode ) {
+		ImGui::SetNextItemOpen( openNode );
+	}
+
 	bool opened = ImGui::TreeNodeEx( static_cast<const void *>(node), flags, "%s", node->GetLabel().c_str() );
+	if ( scrollToNode ) {
+		ImGui::SetScrollHereY();
+	}
 	contextMenu( data, node );
 	if ( opened ) {
 		if ( ImGui::IsItemClicked( ImGuiMouseButton_Left ) && !ImGui::IsItemToggledOpen() ) {
@@ -217,13 +250,12 @@ void TreeCtrl::DrawNode( TreeNode *node,  treeItemTooltip_t tooltip, treeItemSel
 			}
 			ImGui::EndDragDropTarget();
 		}
-
 		
-		for ( item = GetChildItem( node ); item; item = GetNextSiblingItem( item ) ) {
+		for ( item = childItem; item; item = GetNextSiblingItem( item ) ) {
 			DrawNode( item, tooltip, selected, contextMenu, beginDrag, endDrag, input, data );
 		}
 
-		if ( GetChildItem( node ) ) {
+		if ( childItem ) {
 			ImGui::TreePop();
 		}
 	}

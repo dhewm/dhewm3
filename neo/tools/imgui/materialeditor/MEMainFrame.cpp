@@ -99,7 +99,7 @@ namespace ImGuiTools {
 MEMainFrame::MEMainFrame() {
 
 	currentDoc = NULL;
-	//m_find = NULL;
+	m_find = NULL;
 
 	searchData.searched = false;
 
@@ -473,6 +473,10 @@ void MEMainFrame::Draw() {
 			
 				}
 
+				if ( m_find ) {
+					m_find->Draw( ImVec2( previewSplitterPos, 0 ), ImVec2( editSplitterWidth, editSplitterHeight ) );
+				}
+
 				ImGui::InvisibleButton("editRowHSplitter", ImVec2(-1, splitterButtonWidthOrHeight));
 				if ( ImGui::IsItemActive() ) {
 					editSplitterHeight += ImGui::GetIO().MouseDelta.y;
@@ -738,15 +742,13 @@ bool MEMainFrame::IsEditRenameEnabled() {
 * Opens the find dialog.
 */
 void MEMainFrame::OnEditFind() {
-	/*
+
 	if (m_find== NULL)
 	{
-		m_find = new FindDialog(this);
-		m_find->Create();
-		m_find->ShowWindow(SW_SHOW);
+		m_find = new FindDialog( this );
 	}
-	else
-		m_find->SetActiveWindow();*/
+
+	m_find->Start();
 }
 
 /**
@@ -829,7 +831,7 @@ void MEMainFrame::CloseFind() {
 * parameters.
 */
 void MEMainFrame::FindNext(MaterialSearchData_t* search) {
-	/*
+
 	if(search) {
 		searchData = *search;
 	} else {
@@ -840,9 +842,9 @@ void MEMainFrame::FindNext(MaterialSearchData_t* search) {
 
 	//The material tree controls the searching
 	if(!m_materialTreeView->FindNextMaterial(&searchData)) {
-		MessageBox(va("Unable to find '%s'.", searchData.searchText.c_str()), "Find");
+		m_find->UnableToFind();
 	}
-	searchData.searched = true;*/
+	searchData.searched = true;
 }
 
 /**
