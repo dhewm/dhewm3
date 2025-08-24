@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef REGISTRYOPTIONS_H_
 #define REGISTRYOPTIONS_H_
 
+#include "idlib/Dict.h"
+#include "idlib/math/Vector.h"
+
 namespace ImGuiTools {
 
 class rvRegistryOptions

@@ -271,30 +271,30 @@ int MEMainFrame::OnCreate() {
 * saves the splitter and window positions.
 */
 void MEMainFrame::OnDestroy() {
-	/*int cur;
+	int cur;
 	int min;
 
-	m_splitterWnd.GetRowInfo(0, cur, min);
+	cur = editSplitterHeight;
 	options.SetMaterialEditHeight(cur);
 
-	m_editSplitter.GetColumnInfo(0, cur, min);
+	cur = editSplitterPos;
 	options.SetMaterialTreeWidth(cur);
 
-	m_materialEditSplitter->GetColumnInfo(0, cur, min);
+	cur = m_materialEditView->m_editSplitterPos;
 	options.SetStageWidth(cur);
 
-	m_previewSplitter.GetColumnInfo(0, cur, min);
+	cur = previewSplitterPos;
 	options.SetPreviewPropertiesWidth(cur);
 
 
-	cur = m_materialPropertyView->GetPropertyTreeCtrl().GetColumn();
-	options.SetMaterialPropHeadingWidth(cur);
+	//cur = m_materialPropertyView->GetPropertyTreeCtrl().GetColumn();
+	//options.SetMaterialPropHeadingWidth(cur);
 
-	cur = m_previewPropertyView->GetPropertyTreeCtrl().GetColumn();
-	options.SetPreviewPropHeadingWidth(cur);
+	//cur = m_previewPropertyView->GetPropertyTreeCtrl().GetColumn();
+	//options.SetPreviewPropHeadingWidth(cur);
 
-	options.SetWindowPlacement ( "mainframe", m_hWnd );
-	options.Save();*/
+	//options.SetWindowPlacement ( "mainframe", m_hWnd );
+	options.Save();
 
 	m_materialPropertyView->SaveSettings();
 
@@ -526,7 +526,8 @@ void MEMainFrame::Draw() {
 * /todo BMatt Nerve: Need to warn the user if a file is modified.
 */
 void MEMainFrame::OnFileExit() {
-	//PostMessage(WM_DESTROY, 0, 0);
+	OnDestroy();
+	cmdSystem->BufferCommandText( CMD_EXEC_NOW, "quit\n" );
 }
 
 /**
@@ -823,7 +824,7 @@ void MEMainFrame::OnReloadImages() {
 * Called by the find dialog when it is closing.
 */
 void MEMainFrame::CloseFind() {
-	//m_find = NULL;
+
 }
 
 /**

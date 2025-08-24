@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_imgui.h"
 #include "MaterialEditor.h"
-//#include "../common/registryoptions.h"
+#include "../util/RegistryOptions.h"
 
 namespace ImGuiTools {
 
@@ -67,10 +67,11 @@ protected:
 
 protected:
     bool                    visible;
+	bool					focus;
     int                     message;
 	MEMainFrame*			parent;
 	MaterialSearchData_t	searchData;
-	//rvRegistryOptions		registry;
+	rvRegistryOptions		registry;
 };
 
 }

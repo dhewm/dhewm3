@@ -25,10 +25,9 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "../../edit_public.h"
-
 #include "sys/sys_imgui.h"
 
+#include "../util/RegistryOptions.h"
 #include "MEOptions.h"
 
 namespace ImGuiTools {
@@ -38,7 +37,7 @@ namespace ImGuiTools {
 */
 MEOptions::MEOptions ( ) {
 
-	//registry.Init("Software\\id Software\\DOOM3\\Tools\\MaterialEditor");
+	registry.Init("MaterialEditor");
 
 	materialTreeWidth = 0;
 	stageWidth = 0;
@@ -59,7 +58,7 @@ MEOptions::~MEOptions() {
 * Saves the material editor options to the registry.
 */
 bool MEOptions::Save (void) {
-	/*
+	
 	registry.SetFloat("materialTreeWidth", materialTreeWidth);
 	registry.SetFloat("stageWidth", stageWidth);
 	registry.SetFloat("previewPropertiesWidth", previewPropertiesWidth);
@@ -67,15 +66,14 @@ bool MEOptions::Save (void) {
 	registry.SetFloat("materialPropHeadingWidth", materialPropHeadingWidth);
 	registry.SetFloat("previewPropHeadingWidth", previewPropHeadingWidth);
 
-	return registry.Save();*/
-	return false;
+	return registry.Save();
 }
 
 /**
 * Loads the material editor options from the registry.
 */
 bool MEOptions::Load (void) {
-	/*
+	
 	if(!registry.Load()) {
 		return false;
 	}
@@ -87,8 +85,7 @@ bool MEOptions::Load (void) {
 	materialPropHeadingWidth = (int)registry.GetFloat("materialPropHeadingWidth");
 	previewPropHeadingWidth = (int)registry.GetFloat("previewPropHeadingWidth");
 
-	return true;*/
-	return false;
+	return true;
 
 }
 

@@ -34,20 +34,15 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace ImGuiTools {
 
-//IMPLEMENT_DYNAMIC(FindDialog, CDialog)
-
-/*BEGIN_MESSAGE_MAP(FindDialog, CDialog)
-	ON_BN_CLICKED(ID_FIND_NEXT, OnBnClickedFindNext)
-END_MESSAGE_MAP()*/
-
 /**
 * Constructor for FindDialog.
 */
 FindDialog::FindDialog(MEMainFrame *pParent)
     : visible(false)
+    , focus(false)
     , message(0)
 {
-    //registry.Init("Software\\id Software\\DOOM3\\Tools\\MaterialEditor\\Find");
+    registry.Init("MaterialEditor_Find");
 	parent = pParent;
 }
 
@@ -62,7 +57,9 @@ FindDialog::~FindDialog() {
 */
 void FindDialog::Start() {
     visible = true;
+    focus = true;
     message = 0;
+    LoadFindSettings();
 }
 
 bool FindDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
@@ -78,11 +75,15 @@ bool FindDialog::Draw( const ImVec2 &pos, const ImVec2 &size ) {
     // FIXME: find a better color
     ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(50, 50, 50, 255));
     bool ret = ImGui::BeginChild( "Find", size, ImGuiChildFlags_Borders | ImGuiChildFlags_FrameStyle );
-    if ( ret) {
+    if ( ret ) {
 
         if ( ImGui::InputTextStr( "Find What", &searchData.searchText ) ) {
             message = 0;
         }
+		if ( focus ) {
+			ImGui::SetKeyboardFocusHere( -1 );
+			focus = false;
+		}
 
         bool nameOnly = searchData.nameOnly;
         if ( ImGui::Checkbox( "Name Only", &nameOnly ) ) {
@@ -131,39 +132,10 @@ void FindDialog::UnableToFind() {
 }
 
 /**
-* Transfers data to and from the controls in the find dialog.
-*//*
-void FindDialog::DoDataExchange(CDataExchange* pDX) {
-	CDialog::DoDataExchange(pDX);
-
-	CString temp = searchData.searchText;
-	DDX_Text(pDX, IDC_EDIT_FINDTEXT, temp);
-	DDX_Check(pDX, IDC_CHECK_NAME_ONLY, searchData.nameOnly);
-	DDX_Radio(pDX, IDC_RADIO_SEARCHFILE, searchData.searchScope);
-
-	searchData.searchText = temp;
-}*/
-
-/**
-* Called while the dialog is being initialized to load the find parameters
-* from the registry and set the focus to the correct control.
-*//*
-bool FindDialog::OnInitDialog() {
-	CDialog::OnInitDialog();
-
-	LoadFindSettings();
-
-	GetDlgItem(IDC_EDIT_FINDTEXT)->SetFocus();
-
-	return FALSE;
-}*/
-
-/**
 * Triggers a search based on the parameters in the dialog.
 */
 void FindDialog::OnBnClickedFindNext() {
 
-	//UpdateData();
 	searchData.searched = false;
 	parent->FindNext(&searchData);
 }
@@ -176,7 +148,6 @@ void FindDialog::OnCancel()
 	SaveFindSettings();
 
 	parent->CloseFind();
-	//DestroyWindow();
 }
 
 /**
@@ -184,15 +155,13 @@ void FindDialog::OnCancel()
 * initialized.
 */
 void FindDialog::LoadFindSettings() {
-	//registry.Load();
+	registry.Load();
 
-	/*searchData.searchText = registry.GetString("searchText");
+	searchData.searchText = registry.GetString("searchText");
 	searchData.nameOnly = (int)registry.GetFloat("nameOnly");
 	searchData.searchScope = (int)registry.GetFloat("searchScope");
 
-	registry.GetWindowPlacement("findDialog", GetSafeHwnd());
-
-	UpdateData(FALSE);*/
+	//registry.GetWindowPlacement("findDialog", GetSafeHwnd());
 }
 
 /**
@@ -200,16 +169,13 @@ void FindDialog::LoadFindSettings() {
 */
 void FindDialog::SaveFindSettings() {
 
-	//UpdateData();
-/*
-    // TODO: implement
 	registry.SetString("searchText", searchData.searchText);
 	registry.SetFloat("nameOnly", searchData.nameOnly);
 	registry.SetFloat("searchScope", searchData.searchScope);
 
-	registry.SetWindowPlacement("findDialog", GetSafeHwnd());
+	//registry.SetWindowPlacement("findDialog", GetSafeHwnd());
 
-	registry.Save();*/
+	registry.Save();
 }
 
 } // namespace ImGuiTools

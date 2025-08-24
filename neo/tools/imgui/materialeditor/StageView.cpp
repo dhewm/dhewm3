@@ -28,39 +28,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_imgui.h"
 #include "../util/ImGui_IdWidgets.h"
+#include "../util/RegistryOptions.h"
 
 #include "StageView.h"
 
 namespace ImGuiTools {
-
-/*
-IMPLEMENT_DYNCREATE(StageView, ToggleListView)
-
-BEGIN_MESSAGE_MAP(StageView, ToggleListView)
-	ON_WM_CREATE()
-	ON_NOTIFY_REFLECT(LVN_ITEMCHANGED, OnLvnItemchanged)
-	ON_NOTIFY_REFLECT(LVN_DELETEALLITEMS, OnLvnDeleteallitems)
-	ON_NOTIFY_REFLECT(LVN_BEGINDRAG, OnLvnBegindrag)
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_NOTIFY_REFLECT(NM_RCLICK, OnNMRclick)
-
-	ON_COMMAND(ID_STAGEPOPUP_RENAMESTAGE, OnRenameStage)
-	ON_COMMAND(ID_STAGEPOPUP_DELETESTAGE, OnDeleteStage)
-	ON_COMMAND(ID_STAGEPOPUP_DELETEALLSTAGES, OnDeleteAllStages)
-	ON_COMMAND(ID_STAGEPOPUP_ADDSTAGE, OnAddStage)
-	ON_COMMAND(ID_STAGEPOPUP_ADDBUMPMAP, OnAddBumpmapStage)
-	ON_COMMAND(ID_STAGEPOPUP_ADDDIFFUSEMAP, OnAddDiffuseStage)
-	ON_COMMAND(ID_STAGEPOPUP_ADDSPECULAR, OnAddSpecualarStage)
-
-	ON_COMMAND(ID_STAGEPOPUP_COPY, OnCopy)
-	ON_COMMAND(ID_STAGEPOPUP_PASTE, OnPaste)
-
-	ON_NOTIFY_REFLECT(LVN_BEGINLABELEDIT, OnLvnBeginlabeledit)
-	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnLvnEndlabeledit)
-	ON_WM_CHAR()
-END_MESSAGE_MAP()
-*/
 
 /**
 * Constructor for StageView.

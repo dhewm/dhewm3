@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "../util/ImGui_IdWidgets.h"
+#include "../util/RegistryOptions.h"
 
 #include "MaterialPropTreeView.h"
 
@@ -43,7 +44,7 @@ MaterialPropTreeView::MaterialPropTreeView()
 	, currentStage(-1)
 	, currentPropDefs(NULL)
 {
-	//registry.Init("Software\\id Software\\DOOM3\\Tools\\MaterialEditor\\PropertySettings");
+	registry.Init("MaterialEditor_PropertySettings");
 	internalChange = false;
 }
 
@@ -67,16 +68,12 @@ bool MaterialPropTreeView::Draw( const ImVec2 &size ) {
 				switch ( (*currentPropDefs)[i]->type ) {
 				case MaterialDef::MATERIAL_DEF_TYPE_GROUP:
 					{
-						//if(!registry.GetBool(va("Expand%d%s", currentListType, (*propList)[i]->displayName.c_str())))
-						//	pCurrentGroup->Expand();
+						ImGui::SetNextItemOpen( registry.GetBool(va("Expand%d%s", currentListType, propItem->displayName.c_str())) );
 
 						if ( ImGui::TreeNodeEx( static_cast<const void*>(propItem), flags, "%s", propItem->displayName.c_str() ) ) {
-							if ( ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() ) {
-								/*
-								//The item isn't toggled till after this returns so use the opposite of the current state.
-								registry.SetBool(va("Expand%d%s", currentListType, item->GetLabelText()), item->IsExpanded() ? true : false);
+							if ( ImGui::IsItemClicked() ) {
+								registry.SetBool(va("Expand%d%s", currentListType, propItem->displayName.c_str()), ImGui::IsItemToggledOpen());
 								registry.Save();
-								*/
 							}
 
 							j = DrawGroup( i + 1 );
@@ -199,14 +196,14 @@ void MaterialPropTreeView::SetPropertyListType(int listType, int stageNum) {
 * Loads the property view settings from the registry.
 */
 void MaterialPropTreeView::LoadSettings() {
-	//registry.Load();
+	registry.Load();
 }
 
 /**
 * Saves the property view settings to the registry.
 */
 void MaterialPropTreeView::SaveSettings() {
-	//registry.Save();
+	registry.Save();
 }
 
 /**

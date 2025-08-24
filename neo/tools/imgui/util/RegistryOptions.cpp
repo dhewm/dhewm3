@@ -28,6 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_imgui.h"
 #include "framework/FileSystem.h"
+#include "idlib/Token.h"
 
 #include "RegistryOptions.h"
 
@@ -52,6 +53,25 @@ void rvRegistryOptions::Init( const char *key ) {
 	mBaseKey = key;
 }
 
+void OutputString( idFile *file, const char *string ) {
+	char *out;
+	int i, c;
+
+	while ( 1 ) {
+		c = *string++;
+		switch( c ) {
+			case '\0': return;
+			case '\\': file->Printf( "\\\\" ); break;
+			case '\n': file->Printf( "\\n" ); break;
+			case '\r': file->Printf( "\\r" ); break;
+			case '\t': file->Printf( "\\t" ); break;
+			case '\v': file->Printf( "\\v" ); break;
+			case '"': file->Printf( "\\\"" ); break;
+			default: file->Printf( "%c", c ); break;
+		}
+	}
+}
+
 /*
 ================
 rvRegistryOptions::Save
@@ -61,7 +81,6 @@ Write the options to the registry
 */
 bool rvRegistryOptions::Save ( void )
 {
-	/*HKEY	hKey;
 	int		i;
 
 	idFile	*file = fileSystem->OpenFileWrite( mBaseKey );
@@ -69,7 +88,7 @@ bool rvRegistryOptions::Save ( void )
 		return false;
 	}
 	
-	file->WriteString( "{\n" );
+	file->Printf( "{\n" );
 
 	// Write out the values
 	for ( i = 0; i < mValues.GetNumKeyVals(); i ++ )
@@ -77,25 +96,28 @@ bool rvRegistryOptions::Save ( void )
 		const idKeyValue* key = mValues.GetKeyVal ( i );
 		assert ( key );
 		
-		file->WriteString( va( "\"%s\" ", key->GetKey().c_str() ) );
-		file->WriteString( va( "\"%s\"", key->GetValue().c_str() ) );
-		file->WriteString( "\n" );
+		file->Printf( "%s ", key->GetKey().c_str() );
+		file->Printf( "\"" );
+		OutputString( file, key->GetValue().c_str() );
+		file->Printf( "\"\n" );
 	}
 
-	file->WriteString( "}\n" );
+	file->Printf( "}\n" );
 
 	// Write Recent Files
-	file->WriteString( "{\n" );
+	file->Printf( "{\n" );
 	for ( i = 0; i < mRecentFiles.Num(); i ++ )
 	{
-		file->WriteString( va( "\"mru%d\" ", i ) );
-		file->WriteString( va( "\"%s\"", mRecentFiles[i].c_str() ) );
-		file->WriteString( "\n" );
+		file->Printf( "mru%d ", i );
+		file->Printf( "\"%s\"", mRecentFiles[i].c_str() );
+		file->Printf( "\n" );
 	}
-	file->WriteString( "}\n" );
+	file->Printf( "}\n" );
 
-	return true;*/
-	return false;
+	file->Flush();
+	fileSystem->CloseFile( file );
+
+	return true;
 }
 
 /*
@@ -107,59 +129,56 @@ Read the options from the registry
 */
 bool rvRegistryOptions::Load ( void )
 {
-	/*HKEY	hKey;
-	char	temp[MAX_PATH];
-	TCHAR	keyname[MAX_PATH];
-	DWORD	dwType;
-	DWORD	dwSize;
-	int		i;
+	const char *buffer = NULL;
 
 	mValues.Clear ( );
 	mRecentFiles.Clear ( );
 
-	if ( ERROR_SUCCESS != RegOpenKeyEx ( HKEY_LOCAL_MACHINE, mBaseKey, 0, KEY_READ, &hKey ) )
-	{
+	idLexer src( LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_ALLOWMULTICHARLITERALS | LEXFL_ALLOWBACKSLASHSTRINGCONCAT );
+
+	int len = fileSystem->ReadFile( mBaseKey.c_str(), (void**)&buffer );
+	if ( len <= 0 ) {
+		return false;
+	}
+	src.LoadMemory( buffer, strlen( buffer ), mBaseKey.c_str() );
+	if ( !src.IsLoaded() ) {
 		return false;
 	}
 
-	// Read in the values and recent files
-	keyname[0] = 0;
-	dwSize = MAX_PATH;
-	for ( i = 0; RegEnumValue ( hKey, i, keyname, &dwSize, NULL, NULL, NULL, NULL ) == ERROR_SUCCESS; i ++ )
-	{
-		temp[0] = '\0';
-		dwSize = MAX_PATH;
-
-		if ( ERROR_SUCCESS != RegQueryValueEx ( hKey, keyname, NULL, &dwType, (LPBYTE)temp, &dwSize ) )
-		{
-			continue;
+	idToken tok, tok2;
+	src.ExpectTokenString( "{" );
+	while ( src.ReadToken( &tok ) ) {
+		if ( tok == "}" ) {
+			break;
 		}
-
-		dwSize = MAX_PATH;
-
-		// Skip the mru values
-		if( !idStr(keyname).IcmpPrefix ( "mru" ) )
-		{
-			continue;
+		if ( src.ReadToken( &tok2 ) ) {
+			if ( tok2 == "}" ) {
+				break;
+			}
+			mValues.Set( tok.c_str(), tok2.c_str() );
 		}
-
-		mValues.Set ( keyname, temp );
 	}
 
-	// Read Recent Files
-	for ( i = 0; i < MAX_MRU_SIZE; i ++ )
-	{
-		dwSize = MAX_PATH;
-		if ( ERROR_SUCCESS != RegQueryValueEx ( hKey, va("mru%d", i ), NULL, &dwType, (LPBYTE)temp, &dwSize ) )
-		{
-			continue;
-		}
-
-		AddRecentFile ( temp );
+	if ( tok != "}" ) {
+		idLib::fileSystem->FreeFile( (void*)buffer );
+		return false;
 	}
 
-	return true;*/
-	return false;
+	while ( src.ReadToken( &tok ) ) {
+		if ( tok == "}" ) {
+			break;
+		}
+		if ( src.ReadToken( &tok2 ) ) {
+			if ( tok2 == "}" ) {
+				break;
+			}
+			AddRecentFile( tok2.c_str() );
+		}
+	}
+
+	idLib::fileSystem->FreeFile( (void*)buffer );
+
+	return true;
 }
 
 /*
@@ -321,14 +340,14 @@ Set binary data for the given key
 ================
 */
 void rvRegistryOptions::SetBinary ( const char* name, const unsigned char* data, int size )
-{/*
+{
 	idStr binary;
 	for ( size --; size >= 0; size --, data++ )
 	{
 		binary += va("%02x", *data );
 	}
 
-	mValues.Set ( name, binary );*/
+	mValues.Set ( name, binary );
 }
 
 /*
@@ -339,7 +358,7 @@ Get the binary data for a given key
 ================
 */
 void rvRegistryOptions::GetBinary ( const char* name, unsigned char* data, int size )
-{/*
+{
 	const char* parse;
 	parse = mValues.GetString ( name );
 	for ( size --; size >= 0 && *parse && *(parse+1); size --, parse += 2, data ++  )
@@ -347,7 +366,7 @@ void rvRegistryOptions::GetBinary ( const char* name, unsigned char* data, int s
 		int value;
 		sscanf ( parse, "%02x", &value );
 		*data = (unsigned char)value;
-	}*/
+	}
 }
 
 }
