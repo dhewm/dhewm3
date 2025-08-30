@@ -70,9 +70,13 @@ public:
 	virtual idStr GetSourceText();
 
 	bool			CanCopy();
+	void			OnCopy();
 	bool			CanCut();
+	void			OnCut();
 	bool			CanPaste();
+	void			OnPaste();
 	bool			CanDelete();
+	void			OnDelete();
 
 protected:
 	void			GetMaterialSource();

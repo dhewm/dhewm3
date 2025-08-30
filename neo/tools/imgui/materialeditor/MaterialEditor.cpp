@@ -52,6 +52,14 @@ void MaterialEditorInit( void ) {
 	D3::ImGuiHooks::OpenWindow(D3::ImGuiHooks::D3_ImGuiWin_MaterialEditor);
 }
 
+void MaterialEditorSetActiveWindow( MaterialEditorWindow_t window ) {
+	if ( !meMainFrame ) {
+		return;
+	}
+
+	meMainFrame->SetActiveWindow( window );
+}
+
 /**
 * Called every frame by the doom engine to allow the material editor to process messages.
 */

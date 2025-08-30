@@ -42,6 +42,19 @@ typedef struct {
 	int			searchScope;
 } MaterialSearchData_t;
 
+typedef enum {
+	ME_WINDOW_NONE = 0,
+	ME_WINDOW_TREE,
+	ME_WINDOW_TEXT_EDIT,
+	ME_WINDOW_PROP,
+	ME_WINDOW_PREVIEW,
+	ME_WINDOW_PREVIEW_PROP,
+	ME_WINDOW_STAGE,
+	ME_WINDOW_CONSOLE,
+} MaterialEditorWindow_t;
+
+void MaterialEditorSetActiveWindow( MaterialEditorWindow_t window );
+
 }
 
 #endif /* !MATERIALEDITOR_H_ */

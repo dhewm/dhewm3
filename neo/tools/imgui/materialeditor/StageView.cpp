@@ -352,6 +352,7 @@ bool StageView::Draw( const ImVec2 &size ) {
 				bool interacted = ImGui::Selectable( items[i].GetLabel().c_str(), selected );
 				if ( interacted ) {
 					SetItemState( i );
+					MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 				}
 				OnChar( false, i );
 				PopupMenu();
@@ -363,6 +364,7 @@ bool StageView::Draw( const ImVec2 &size ) {
 					ImGui::Text( "%s", items[i].GetLabel().c_str() );
 					ImGui::EndDragDropSource();
 					OnLvnBegindrag( i );
+					MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 				}
 				if ( ImGui::BeginDragDropTarget() )
 				{
@@ -371,6 +373,7 @@ bool StageView::Draw( const ImVec2 &size ) {
 						IM_ASSERT( payload->DataSize == sizeof( int ) );
 						int dropSource = *( const int * )payload->Data;
 						OnLvnEnddrag( i );
+						MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 					}
 					ImGui::EndDragDropTarget();
 				}
@@ -378,6 +381,7 @@ bool StageView::Draw( const ImVec2 &size ) {
 				ImGui::BeginDisabled( disabled );
 				if ( ImGui::Checkbox("###cb", &enabled ) ) {
 					OnNMClick( i );
+					MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 				}
 				ImGui::EndDisabled();
 
@@ -542,6 +546,8 @@ void StageView::OnLvnDeleteallitems() {
 * Starts the stage drag operation.
 */
 void StageView::OnLvnBegindrag( int index ) {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
+
 	//Start a drag if the item isn't the material
 	if(index > 0) {
 
@@ -558,6 +564,7 @@ void StageView::OnLvnBegindrag( int index ) {
 */
 void StageView::OnLvnEnddrag( int index ) {
 	if( bDragging ) {
+		MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 		DropItemOnList( index );
 
 		bDragging = false;
@@ -578,6 +585,7 @@ void StageView::OnNMRclick() {
 */
 void StageView::OnNMClick( int index ) {
 	if ( index != -1 ) {
+		MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 		int toggleState = GetToggleState( index );
 		if ( toggleState != TOGGLE_STATE_DISABLED ) {
 
@@ -594,6 +602,7 @@ void StageView::OnNMClick( int index ) {
 * Begins a label edit when the user selects the rename menu option.
 */
 void StageView::OnRenameStage() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 
 	int nItem = GetSelectedItemIndex();
 	if ( nItem ) {
@@ -609,6 +618,7 @@ void StageView::OnRenameStage() {
 * Deletes the selected stage when the user selects the delete menu option.
 */
 void StageView::OnDeleteStage() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 
 	int nItem = GetSelectedItemIndex();
 	if(nItem > 0) {
@@ -629,6 +639,7 @@ void StageView::OnDeleteStageAccepted() {
 * Conforms the user wants to delete all stages and then performs the operation.
 */
 void StageView::OnDeleteAllStages() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 	messageBox = MSG_BOX_DELETE_ALL_STAGES;
 }
 
@@ -642,6 +653,8 @@ void StageView::OnDeleteAllStagesAccepted() {
 * Adds a new stage when the user selects the menu option.
 */
 void StageView::OnAddStage() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
+
 	MaterialDoc *material = materialDocManager->GetCurrentMaterialDoc();
 
 	idStr name = va( "Stage %d", material->GetStageCount() + 1 );
@@ -660,6 +673,7 @@ void StageView::OnAddBumpmapStage() {
 * Adds a new diffusemap stage when the user selects the menu option.
 */
 void StageView::OnAddDiffuseStage() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 	MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
 	material->AddStage( MaterialDoc::STAGE_TYPE_SPECIALMAP, "diffusemap" );
 }
@@ -668,6 +682,7 @@ void StageView::OnAddDiffuseStage() {
 * Adds a new specularmap stage when the user selects the menu option.
 */
 void StageView::OnAddSpecualarStage() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 	MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
 	material->AddStage( MaterialDoc::STAGE_TYPE_SPECIALMAP, "specularmap" );
 }
@@ -677,6 +692,7 @@ void StageView::OnAddSpecualarStage() {
 */
 void StageView::OnCopy() {
 
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 	MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();
 
 	int nItem = GetSelectedItemIndex();
@@ -690,6 +706,7 @@ void StageView::OnCopy() {
 * Performs a paste operation when the user selects the menu option.
 */
 void StageView::OnPaste() {
+	MaterialEditorSetActiveWindow( ME_WINDOW_STAGE );
 	if ( materialDocManager->IsCopyStage() ) {
 
 		MaterialDoc* material = materialDocManager->GetCurrentMaterialDoc();

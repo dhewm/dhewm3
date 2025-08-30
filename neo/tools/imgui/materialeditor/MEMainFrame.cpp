@@ -103,6 +103,8 @@ MEMainFrame::MEMainFrame() {
 
 	searchData.searched = false;
 
+	activeWindow = ME_WINDOW_NONE;
+
 	options.Load();
 }
 
@@ -326,8 +328,7 @@ void MEMainFrame::Draw() {
 
 			ImGui::Separator();
 
-			if( ImGui::MenuItem( "Exit", "Ctrl+W" ) )
-			{
+			if( ImGui::MenuItem( "Exit", "Ctrl+W" ) || ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_W ) ) {
 				OnFileExit();
 			}
 
@@ -336,8 +337,7 @@ void MEMainFrame::Draw() {
 		if ( ImGui::BeginMenu( "Edit" ) ) {
 			ImGui::BeginDisabled( !IsEditUndoEnabled() );
 			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_Z );
-			ImGui::MenuItem( "Undo", "Ctrl+Z" );
-			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_Z ) ) { 
+			if ( ImGui::MenuItem( "Undo", "Ctrl+Z" ) || ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_Z ) ) {
 				OnEditUndo();
 			}
 			ImGui::EndDisabled();
@@ -354,37 +354,32 @@ void MEMainFrame::Draw() {
 
 			ImGui::BeginDisabled( !IsEditCutEnabled() );
 			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_X );
-			ImGui::MenuItem( "Cut", "Ctrl+X" );
-			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_X ) ) {
+			if ( ImGui::MenuItem( "Cut", "Ctrl+X" ) || ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_X ) ) {
 				OnEditCut();
 			}
 			ImGui::EndDisabled();
 
 			ImGui::BeginDisabled( !IsEditCopyEnabled() );
 			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_C );
-			ImGui::MenuItem( "Copy", "Ctrl+C" );
-			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_C ) ) {
+			if ( ImGui::MenuItem( "Copy", "Ctrl+C" ) || ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_C ) ) {
 				OnEditCopy();
 			}
 			ImGui::EndDisabled();
 			ImGui::BeginDisabled( !IsEditPasteEnabled() );
 			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_V );
-			ImGui::MenuItem( "Paste", "Ctrl+V" );
-			if ( ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_V ) ) {
+			if ( ImGui::MenuItem( "Paste", "Ctrl+V" ) || ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_V ) ) {
 				OnEditPaste();
 			}
 			ImGui::EndDisabled();
 			ImGui::BeginDisabled( !IsEditDeleteEnabled() );
 			ImGui::SetNextItemShortcut( ImGuiKey_Delete );
-			ImGui::MenuItem( "Delete", "Del" );
-			if ( ImGui::Shortcut( ImGuiKey_Delete ) ) {
+			if ( ImGui::MenuItem( "Delete", "Del" ) || ImGui::Shortcut( ImGuiKey_Delete ) ) {
 				OnEditDelete();
 			}
 			ImGui::EndDisabled();
 			ImGui::BeginDisabled( !IsEditRenameEnabled() );
 			ImGui::SetNextItemShortcut( ImGuiKey_F2 );
-			ImGui::MenuItem( "Rename", "F2" );
-			if ( ImGui::Shortcut( ImGuiKey_F2 ) ) {
+			if ( ImGui::MenuItem( "Rename", "F2" ) || ImGui::Shortcut( ImGuiKey_F2 ) ) {
 				OnEditRename();
 			}
 			ImGui::EndDisabled();
@@ -392,7 +387,7 @@ void MEMainFrame::Draw() {
 			ImGui::Separator();
 
 			ImGui::SetNextItemShortcut( ImGuiMod_Ctrl | ImGuiKey_F );
-			if ( ImGui::MenuItem( "Find", "Ctrl+F" ) ) {
+			if ( ImGui::MenuItem( "Find", "Ctrl+F" ) || ImGui::Shortcut( ImGuiMod_Ctrl | ImGuiKey_F ) ) {
 				OnEditFind();
 			}
 
@@ -442,10 +437,20 @@ void MEMainFrame::Draw() {
 		ImGui::EndMenuBar();
 	}
 
+	// debug
+	/*ImGui::Text( "Focus: %s",
+		activeWindow == ME_WINDOW_NONE ? "None"
+		: activeWindow == ME_WINDOW_TREE ? "Tree"
+		: activeWindow == ME_WINDOW_TEXT_EDIT ? "Text Edit"
+		: activeWindow == ME_WINDOW_PROP ? "Prop"
+		: activeWindow == ME_WINDOW_PREVIEW ? "Preview"
+		: activeWindow == ME_WINDOW_PREVIEW_PROP ? "Preview Prop"
+		: activeWindow == ME_WINDOW_STAGE ? "Stage"
+		: "Console" );*/
+
 	if ( ImGui::BeginTabBar( "MainTabBar" ) ) {
 
-		if (ImGui::BeginTabItem( "Editor" ) )
-        {
+		if ( ImGui::BeginTabItem( "Editor" ) ) {
 			float splitterButtonWidthOrHeight = 8.0f;
 			ImVec2 windowSize = ImVec2( Max( editSplitterWidth, previewSplitterWidth ) + splitterButtonWidthOrHeight, editSplitterHeight + previewSplitterHeight + splitterButtonWidthOrHeight * 2.0f );
 
@@ -477,7 +482,7 @@ void MEMainFrame::Draw() {
 					m_find->Draw( ImVec2( previewSplitterPos, 0 ), ImVec2( editSplitterWidth, editSplitterHeight ) );
 				}
 
-				ImGui::InvisibleButton("editRowHSplitter", ImVec2(-1, splitterButtonWidthOrHeight));
+				ImGui::InvisibleButton( "editRowHSplitter", ImVec2( -1, splitterButtonWidthOrHeight ) );
 				if ( ImGui::IsItemActive() ) {
 					editSplitterHeight += ImGui::GetIO().MouseDelta.y;
 				}
@@ -519,6 +524,10 @@ void MEMainFrame::Draw() {
 		}
 		ImGui::EndTabBar();
 	}
+}
+
+void MEMainFrame::SetActiveWindow( MaterialEditorWindow_t window ) {
+	activeWindow = window;
 }
 
 /**
@@ -638,69 +647,89 @@ bool MEMainFrame::IsApplyAllEnabled() {
 * Performs a cut operation on the selected material.
 */
 void MEMainFrame::OnEditCut() {
-	/*CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			m_materialTreeView->OnCut();
-		}
-	}*/
+	switch ( activeWindow ) {
+	case ME_WINDOW_TREE:
+		m_materialTreeView->OnCut();
+		break;
+	case ME_WINDOW_TEXT_EDIT:
+		m_materialEditView->OnCut();
+		break;
+	default:
+		break;
+	}
 }
 
 /**
 * Performs a copy operation on the selected material or stage.
 */
 void MEMainFrame::OnEditCopy() {
-	/*CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			m_stageView->OnCopy();
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			m_materialTreeView->OnCopy();
-		}
-	}*/
+	switch ( activeWindow ) {
+	case ME_WINDOW_STAGE:
+		m_stageView->OnCopy();
+		break;
+	case ME_WINDOW_TREE:
+		m_materialTreeView->OnCopy();
+		break;
+	case ME_WINDOW_TEXT_EDIT:
+		m_materialEditView->OnCopy();
+		break;
+	default:
+		break;
+	}
 }
 
 /**
 * Performs a paste operation on the selected material or stage.
 */
 void MEMainFrame::OnEditPaste() {
-	/*CWnd* focus = GetFocus();
-
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			m_stageView->OnPaste();
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			m_materialTreeView->OnPaste();
-		}
-	}*/
+	switch ( activeWindow ) {
+	case ME_WINDOW_STAGE:
+		m_stageView->OnPaste();
+		break;
+	case ME_WINDOW_TREE:
+		m_materialTreeView->OnPaste();
+		break;
+	case ME_WINDOW_TEXT_EDIT:
+		m_materialEditView->OnPaste();
+		break;
+	default:
+		break;
+	}
 }
 
 /**
 * Performs a delete operation on the selected material or stage.
 */
 void MEMainFrame::OnEditDelete() {
-	/*CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			m_stageView->OnDeleteStage();
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			m_materialTreeView->OnDeleteMaterial();
-		}
-	}*/
+	switch ( activeWindow ) {
+	case ME_WINDOW_STAGE:
+		m_stageView->OnDeleteStage();
+		return;
+	case ME_WINDOW_TREE:
+		m_materialTreeView->OnDeleteMaterial();
+		break;
+	case ME_WINDOW_TEXT_EDIT:
+		m_materialEditView->OnDelete();
+		break;
+	default:
+		break;
+	}
 }
 
 /**
 * Performs a rename operation on the selected material or stage.
 */
 void MEMainFrame::OnEditRename() {
-	/*CWnd* focus = GetFocus();
-	if(focus) {
-		if (focus->IsKindOf(RUNTIME_CLASS(StageView))) {
-			m_stageView->OnRenameStage();
-		} else if (focus->IsKindOf(RUNTIME_CLASS(MaterialTreeView))) {
-			m_materialTreeView->OnRenameMaterial();
-		}
-	}*/
+	switch ( activeWindow ) {
+	case ME_WINDOW_STAGE:
+		m_stageView->OnRenameStage();
+		break;
+	case ME_WINDOW_TREE:
+		m_materialTreeView->OnRenameMaterial();
+		break;
+	default:
+		break;
+	}
 }
 
 
@@ -764,12 +793,21 @@ void MEMainFrame::OnEditFindNext() {
 */
 void MEMainFrame::OnEditUndo() {
 	//Check for undo operation on special windows
-	/*if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+	switch ( activeWindow ) {
+	case ME_WINDOW_TEXT_EDIT:
 		m_materialEditView->m_textView.Undo();
-		return;
-	}*/
-
-	materialDocManager.Undo();
+		break;
+	case ME_WINDOW_TREE:
+	case ME_WINDOW_PROP:
+	case ME_WINDOW_PREVIEW:
+	case ME_WINDOW_PREVIEW_PROP:
+	case ME_WINDOW_STAGE:
+	case ME_WINDOW_CONSOLE:
+		materialDocManager.Undo();
+		break;
+	default:
+		break;
+	}
 }
 
 /**
@@ -777,11 +815,21 @@ void MEMainFrame::OnEditUndo() {
 */
 void MEMainFrame::OnEditRedo() {
 	//Check for redo operation on special windows
-	/*if ( ImGui::GetID( "Text" ) == ImGui::GetActiveID() ) {
+	switch ( activeWindow ) {
+	case ME_WINDOW_TEXT_EDIT:
 		m_materialEditView->m_textView.Redo();
-		return;
-	}*/
-	//materialDocManager.Redo();
+		break;
+	case ME_WINDOW_TREE:
+	case ME_WINDOW_PROP:
+	case ME_WINDOW_PREVIEW:
+	case ME_WINDOW_PREVIEW_PROP:
+	case ME_WINDOW_STAGE:
+	case ME_WINDOW_CONSOLE:
+		materialDocManager.Redo();
+		break;
+	default:
+		break;
+	}
 }
 
 /**

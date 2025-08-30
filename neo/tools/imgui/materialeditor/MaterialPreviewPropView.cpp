@@ -248,6 +248,10 @@ bool MaterialPreviewPropView::Draw( const ImVec2 &size ) {
 		}
 
 		ImGui::TreePop();
+
+		if ( ImGui::IsWindowFocused() ) {
+			MaterialEditorSetActiveWindow( ME_WINDOW_PREVIEW_PROP );
+		}
 	}
 
 	ImGui::EndChild();

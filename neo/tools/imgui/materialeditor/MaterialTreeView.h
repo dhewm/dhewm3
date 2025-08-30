@@ -70,10 +70,15 @@ public:
 	virtual void	MV_OnFileReload(const char* filename);
 
 	bool			CanCopy();
+	void			OnCopy();
 	bool			CanPaste();
+	void			OnPaste();
 	bool			CanCut();
+	void			OnCut();
 	bool			CanDelete();
+	void			OnDeleteMaterial();
 	bool			CanRename();
+	void			OnRenameMaterial();
 	bool			CanSaveFile();
 	idStr			GetSaveFilename();
 
@@ -120,16 +125,11 @@ private:
 	void			OnSaveMaterial();
 	void			OnSaveFile();
 	void			OnSaveAll();
-	void			OnRenameMaterial();
 	void			OnAddMaterial();
 	void			OnAddFolder();
-	void			OnDeleteMaterial();
 	void			OnDeleteMaterialAccepted();
 	void			OnReloadFile();
 	void			OnReloadFileAccepted();
-	void			OnCut();
-	void			OnCopy();
-	void			OnPaste();
 
 	//Internal Messages
 	void OnRenameFolderComplete();

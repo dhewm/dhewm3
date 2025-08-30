@@ -229,7 +229,12 @@ bool MaterialTreeView::Draw( const ImVec2 &size ) {
 	if ( ImGui::BeginChild( "###MaterialTreeView", size, ImGuiChildFlags_Borders ) ) {
 
 		tree.Draw( MaterialTreeViewOnToolTipNotify, MaterialTreeViewOnTreeSelChanged, MaterialTreeViewOnContextMenu, MaterialTreeViewOnBeginDrag, MaterialTreeViewOnEndDrag, MaterialTreeViewOnInput, this );
+
+		if ( ImGui::IsWindowFocused() ) {
+			MaterialEditorSetActiveWindow( ME_WINDOW_TREE );
+		}
 	}
+
 	ImGui::EndChild();
 
 	return false;

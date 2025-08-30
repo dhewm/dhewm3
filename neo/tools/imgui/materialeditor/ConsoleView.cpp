@@ -176,6 +176,9 @@ void ConsoleView::Draw( const ImVec2 &pos, const ImVec2 &size ) {
 	if ( selectEditInput ) {
 		selectEditInput = false;
 	}
+	if ( ImGui::IsWindowFocused() ) {
+		MaterialEditorSetActiveWindow( ME_WINDOW_CONSOLE );
+	}
 }
 
 /**

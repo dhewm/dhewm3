@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "MaterialEditView.h"
+#include "tools/imgui/materialeditor/MaterialEditor.h"
 
 #define EDIT_HEIGHT 25
 
@@ -101,16 +102,32 @@ bool MaterialEditView::CanCopy() {
 	return m_textView.CanCopy();
 }
 
+void MaterialEditView::OnCopy() {
+	m_textView.Copy();
+}
+
 bool MaterialEditView::CanCut() {
 	return m_textView.CanCut();
+}
+
+void MaterialEditView::OnCut() {
+	m_textView.Cut();
 }
 
 bool MaterialEditView::CanPaste() {
 	return m_textView.CanCopy();
 }
 
+void MaterialEditView::OnPaste() {
+	m_textView.Paste();
+}
+
 bool MaterialEditView::CanDelete() {
 	return !m_textView.GetReadOnly();
+}
+
+void MaterialEditView::OnDelete() {
+	m_textView.Delete();
 }
 
 
@@ -178,51 +195,55 @@ void MaterialEditView::OnCreate()
 }
 
 bool MaterialEditView::Draw( const ImVec2 &size ) {
-	ImGui::BeginChild( "MaterialEditView", size, ImGuiChildFlags_Borders );
+	if ( ImGui::BeginChild( "MaterialEditView", size, ImGuiChildFlags_Borders ) ) {
 
-	// two rows
+		// two rows
 
-	if ( ImGui::BeginTabBar( "MaterialEditViewTabBar" ) ) {
+		if ( ImGui::BeginTabBar( "MaterialEditViewTabBar" ) ) {
 
-		if ( ImGui::BeginTabItem( "Properties" ) ) {
-			OnTcnSelChange( 0 );
+			if ( ImGui::BeginTabItem( "Properties" ) ) {
+				OnTcnSelChange( 0 );
 
-			if ( ImGui::BeginChild( "materialEditSplitter", size ) ) {
-				float splitterButtonWidthOrHeight = 8.0f;
+				if ( ImGui::BeginChild( "materialEditSplitter", size ) ) {
+					float splitterButtonWidthOrHeight = 8.0f;
 
-				m_editSplitterHeight = size.y;
+					m_editSplitterHeight = size.y;
 
-				ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0, 0 ) );
+					ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0, 0 ) );
 
-				if ( m_stageView->Draw( ImVec2( m_editSplitterPos, m_editSplitterHeight ) ) ) {
+					if ( m_stageView->Draw( ImVec2( m_editSplitterPos, m_editSplitterHeight ) ) ) {
 
+					}
+
+					ImGui::SameLine();
+					ImGui::InvisibleButton( "editSplitter", ImVec2( splitterButtonWidthOrHeight, m_editSplitterHeight) );
+					if ( ImGui::IsItemActive() ) {
+						m_editSplitterPos += ImGui::GetIO().MouseDelta.x;
+					}
+					ImGui::SameLine();
+
+					if ( m_materialPropertyView->Draw( ImVec2( 0, m_editSplitterHeight) ) ) {
+				
+					}
+
+					ImGui::PopStyleVar();
 				}
+				ImGui::EndChild();
 
-				ImGui::SameLine();
-				ImGui::InvisibleButton( "editSplitter", ImVec2( splitterButtonWidthOrHeight, m_editSplitterHeight) );
-				if ( ImGui::IsItemActive() ) {
-					m_editSplitterPos += ImGui::GetIO().MouseDelta.x;
-				}
-				ImGui::SameLine();
-
-				if ( m_materialPropertyView->Draw( ImVec2( 0, m_editSplitterHeight) ) ) {
-			
-				}
-
-				ImGui::PopStyleVar();
+				ImGui::EndTabItem();
 			}
-			ImGui::EndChild();
+			if ( ImGui::BeginTabItem( "Text" ) ) {
+				OnTcnSelChange( 1 );
 
-			ImGui::EndTabItem();
+				m_textView.Draw();
+				if ( ImGui::IsWindowFocused() ) {
+					MaterialEditorSetActiveWindow( ME_WINDOW_TEXT_EDIT );
+				}
+				OnEnChangeEdit();
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
 		}
-		if ( ImGui::BeginTabItem( "Text" ) ) {
-			OnTcnSelChange( 1 );
-
-			m_textView.Draw();
-			OnEnChangeEdit();
-			ImGui::EndTabItem();
-		}
-		ImGui::EndTabBar();
 	}
 
 	ImGui::EndChild();

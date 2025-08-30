@@ -28,6 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../util/ImGui_IdWidgets.h"
 #include "../util/RegistryOptions.h"
+#include "tools/imgui/materialeditor/MaterialEditor.h"
 
 #include "MaterialPropTreeView.h"
 
@@ -56,6 +57,7 @@ MaterialPropTreeView::~MaterialPropTreeView() {
 
 bool MaterialPropTreeView::Draw( const ImVec2 &size ) {
 	if ( ImGui::BeginChild( "###MaterialPropTreeView", size, ImGuiChildFlags_Borders ) ) {
+
 		MaterialDoc *materialDoc = materialDocManager->GetCurrentMaterialDoc();
 
 		if ( currentPropDefs )
@@ -102,7 +104,12 @@ bool MaterialPropTreeView::Draw( const ImVec2 &size ) {
 				i = j;
 			}
 		}
+		
+		if ( ImGui::IsWindowFocused() ) {
+			MaterialEditorSetActiveWindow( ME_WINDOW_PROP );
+		}
 	}
+
 	ImGui::EndChild();
 
 	return false;

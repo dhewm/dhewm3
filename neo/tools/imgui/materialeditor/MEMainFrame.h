@@ -63,6 +63,8 @@ public:
 	int							OnCreate();
 	void						OnDestroy();
 
+	void						SetActiveWindow(MaterialEditorWindow_t window);
+
 	void						Draw();
 
 	//Menu Message Handlers
@@ -156,6 +158,7 @@ private:
 
 	bool						includeFileInMaterialList;
 
+	MaterialEditorWindow_t		activeWindow;
 };
 
 }

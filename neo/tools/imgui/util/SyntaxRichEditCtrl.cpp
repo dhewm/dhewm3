@@ -590,6 +590,9 @@ bool SyntaxRichEditCtrl::CanPaste() {
 	return !scriptEdit->IsReadOnly() && clipboardText && *clipboardText;
 }
 
+void SyntaxRichEditCtrl::Paste() {
+	scriptEdit->Paste();
+}
 
 bool SyntaxRichEditCtrl::CanUndo() {
 	return scriptEdit->CanUndo();
@@ -606,6 +609,15 @@ bool SyntaxRichEditCtrl::CanRedo() {
 void SyntaxRichEditCtrl::Redo() {
 	scriptEdit->Redo();
 }
+
+bool SyntaxRichEditCtrl::CanDelete() {
+	return !scriptEdit->IsReadOnly();
+}
+
+void SyntaxRichEditCtrl::Delete() {
+	scriptEdit->Delete();
+}
+
 
 
 /*

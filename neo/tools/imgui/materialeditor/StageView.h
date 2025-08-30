@@ -104,10 +104,14 @@ public:
 
 	//Edit Operation Tests
 	bool					CanCopy();
+	void					OnCopy();
 	bool					CanPaste();
+	void					OnPaste();
 	bool					CanCut();
 	bool					CanDelete();
+	void					OnDeleteStage();
 	bool					CanRename();
+	void					OnRenameStage();
 
 	//Refresh the stage list
 	void					RefreshStageList();
@@ -141,9 +145,7 @@ protected:
 	void					OnNMRclick();
 	void					OnNMClick( int index );
 
-	void					OnRenameStage();
 	void					OnRenameStageAccepted();
-	void					OnDeleteStage();
 	void					OnDeleteStageAccepted();
 	void					OnDeleteAllStages();
 	void					OnDeleteAllStagesAccepted();
@@ -152,8 +154,6 @@ protected:
 	void					OnAddDiffuseStage();
 	void					OnAddSpecualarStage();
 
-	void					OnCopy();
-	void					OnPaste();
 	void					OnPasteAccepted();
 	
 	bool					OnLvnBeginlabeledit( int index );

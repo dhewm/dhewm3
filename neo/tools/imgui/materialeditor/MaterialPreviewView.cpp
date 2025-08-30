@@ -56,17 +56,20 @@ MaterialPreviewView::~MaterialPreviewView() {
 // MaterialPreviewView drawing
 
 bool MaterialPreviewView::Draw( const ImVec2 &size ) {
-	ImGui::BeginChild( "MaterialPreviewView", size, ImGuiChildFlags_Borders );
-	
-	ImGui::SetNextItemAllowOverlap();
-	ImGui::InvisibleButton("###MaterialPreviewRenderedView", size, ImGuiButtonFlags_AllowOverlap | ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonMiddle | ImGuiButtonFlags_MouseButtonRight );
-	ImVec2 pos = ImGui::GetCursorPos();
-	if ( ImGui::IsItemActive() )
-	{
-		renderedView.input();
-	}
-	renderedView.draw( pos.x, pos.y, size.x, size.y );
+	if ( ImGui::BeginChild( "MaterialPreviewView", size, ImGuiChildFlags_Borders ) ) {
+		ImGui::SetNextItemAllowOverlap();
+		ImGui::InvisibleButton("###MaterialPreviewRenderedView", size, ImGuiButtonFlags_AllowOverlap | ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonMiddle | ImGuiButtonFlags_MouseButtonRight );
+		ImVec2 pos = ImGui::GetCursorPos();
+		if ( ImGui::IsItemActive() )
+		{
+			renderedView.input();
+		}
+		renderedView.draw( pos.x, pos.y, size.x, size.y );
 
+		if ( ImGui::IsWindowFocused() ) {
+			MaterialEditorSetActiveWindow( ME_WINDOW_PREVIEW );
+		}
+	}
 	ImGui::EndChild();
 
 	return false;

@@ -121,6 +121,8 @@ public:
 	void					Undo();
 	bool					CanRedo();
 	void					Redo();
+	bool					CanDelete();
+	void					Delete();
 
 	bool					IsEdited() const;
 
