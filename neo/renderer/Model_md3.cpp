@@ -59,7 +59,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	md3St_t				*st;
 	md3XyzNormal_t		*xyz;
 	md3Tag_t			*tag;
-	void				*buffer;
+	void				*buffer = NULL;
 	int					version;
 	int					size;
 
@@ -67,7 +67,13 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	name = fileName;
 
 	size = fileSystem->ReadFile( fileName, &buffer, NULL );
-	if ( size <= sizeof(md3Header_t) ) {
+	// DG: without the int cast, an unsigned comparison is made which fails for size = -1
+	if ( size <= (int)sizeof(md3Header_t) ) {
+		if (buffer != NULL) {
+			fileSystem->FreeFile( buffer );
+		}
+		// DG: must make it a default model so failure can be detected elsewhere
+		MakeDefaultModel();
 		return;
 	}
 
@@ -78,6 +84,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 		fileSystem->FreeFile( buffer );
 		common->Warning( "InitFromFile: %s has wrong version (%i should be %i)",
 				 fileName, version, MD3_VERSION);
+		MakeDefaultModel();
 		return;
 	}
 
@@ -100,6 +107,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	if ( md3->numFrames < 1 ) {
 		common->Warning( "InitFromFile: %s has no frames", fileName );
 		fileSystem->FreeFile( buffer );
+		MakeDefaultModel();
 		return;
 	}
 
