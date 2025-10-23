@@ -264,9 +264,19 @@ Special transform to make the mesh seem fat or skinny.  May be used for zombie d
 ====================
 */
 void idMD5Mesh::TransformScaledVerts( idDrawVert *verts, const idJointMat *entJoints, float scale ) {
-	idVec4 *scaledWeights = (idVec4 *) _alloca16( numWeights * sizeof( scaledWeights[0] ) );
-	SIMDProcessor->Mul( scaledWeights[0].ToFloatPtr(), scale, scaledWeights[0].ToFloatPtr(), numWeights * 4 );
-	SIMDProcessor->TransformVerts( verts, texCoords.Num(), entJoints, scaledWeights, weightIndex, numWeights );
+	idVec4 *tmpScaledWeights = (idVec4 *) _alloca16( numWeights * sizeof( scaledWeights[0] ) );
+	//SIMDProcessor->Mul( tmpScaledWeights[0].ToFloatPtr(), scale, this->scaledWeights[0].ToFloatPtr(), numWeights * 4 );
+	// DG: for this effect to work, we must scale x, y, z but not w (when also scaling w it just shrinks)
+	//     (still doesn't look right with all monsters, e.g. the fat zombies face looks real weird,
+	//      but I don't think that can be fixed here)
+	for( int i=0, n=numWeights; i < n; ++i ) {
+		const idVec4& sw = this->scaledWeights[i];
+		tmpScaledWeights[i].x = sw.x * scale;
+		tmpScaledWeights[i].y = sw.y * scale;
+		tmpScaledWeights[i].z = sw.z * scale;
+		tmpScaledWeights[i].w = sw.w;
+	}
+	SIMDProcessor->TransformVerts( verts, texCoords.Num(), entJoints, tmpScaledWeights, weightIndex, numWeights );
 }
 
 /*
