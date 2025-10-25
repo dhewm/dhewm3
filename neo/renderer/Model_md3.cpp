@@ -39,7 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 ***********************************************************************/
 
 // DG: added constructor to make sure all members are initialized
-idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0)
+idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0),
+	lastFrame(-1), lastOldFrame(0), lastBackLerp(0.0f)
 {}
 
 // DG: added destructor to clean up the newly added silInfos (and md3 which used to leak)
@@ -320,21 +321,32 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEnt
 	int				frame, oldframe;
 	idRenderModelStatic	*staticModel;
 
+	// TODO: these need set by an entity
+	frame = ent->shaderParms[SHADERPARM_MD3_FRAME];			// probably want to keep frames < 1000 or so
+	oldframe = ent->shaderParms[SHADERPARM_MD3_LASTFRAME];
+	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
+
 	if ( cachedModel ) {
-		delete cachedModel;
-		cachedModel = NULL;
+		if ( !r_useCachedDynamicModels.GetBool() || frame != lastFrame
+		     || oldframe != lastOldFrame || backlerp != lastBackLerp ) {
+			delete cachedModel;
+			cachedModel = NULL;
+		} else {
+			// if we're still in the same animation frame etc, just use the existing model
+			return cachedModel;
+		}
 	}
+
+	// DG: remember (old)frame and backlerp for the check above if the cached model can be reused
+	lastFrame = frame;
+	lastOldFrame = oldframe;
+	lastBackLerp = backlerp;
 
 	staticModel = new idRenderModelStatic;
 	staticModel->InitEmpty("_MD3_Snapshot_");
 	staticModel->bounds.Clear();
 
 	surface = (md3Surface_t *) ((byte *)md3 + md3->ofsSurfaces);
-
-	// TODO: these need set by an entity
-	frame = ent->shaderParms[SHADERPARM_MD3_FRAME];			// probably want to keep frames < 1000 or so
-	oldframe = ent->shaderParms[SHADERPARM_MD3_LASTFRAME];
-	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
 
 	for( i = 0; i < md3->numSurfaces; i++ ) {
 
