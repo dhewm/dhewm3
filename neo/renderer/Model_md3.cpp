@@ -321,9 +321,11 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEnt
 	int				frame, oldframe;
 	idRenderModelStatic	*staticModel;
 
+	int numFrames = md3->numFrames;
+
 	// TODO: these need set by an entity
-	frame = ent->shaderParms[SHADERPARM_MD3_FRAME];			// probably want to keep frames < 1000 or so
-	oldframe = ent->shaderParms[SHADERPARM_MD3_LASTFRAME];
+	frame = idMath::ClampInt(0, numFrames-1, ent->shaderParms[SHADERPARM_MD3_FRAME]);	// probably want to keep frames < 1000 or so
+	oldframe = idMath::ClampInt(0, numFrames-1,ent->shaderParms[SHADERPARM_MD3_LASTFRAME]);
 	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
 
 	if ( cachedModel ) {
