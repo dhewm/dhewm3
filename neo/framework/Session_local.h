@@ -60,6 +60,10 @@ else
 
 */
 
+// DG: functions used for improved frame timing - I put them here so they don't end up in the SDK
+extern void Com_UpdateFrameTime();
+
+
 typedef struct {
 	usercmd_t	cmd;
 	int			consistencyHash;

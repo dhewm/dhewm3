@@ -533,6 +533,7 @@ void idSessionLocal::CompleteWipe() {
 	}
 }
 
+
 /*
 ================
 idSessionLocal::ShowLoadingGui
@@ -550,7 +551,7 @@ void idSessionLocal::ShowLoadingGui() {
 	int stop = Sys_Milliseconds() + 1000;
 	int force = 10;
 	while ( Sys_Milliseconds() < stop || force-- > 0 ) {
-		com_frameTime = com_ticNumber * USERCMD_MSEC;
+		Com_UpdateFrameTime(); // DG: put updating com_frameTime into a function
 		session->Frame();
 		session->UpdateScreen( false );
 	}
