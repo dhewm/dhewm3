@@ -1130,10 +1130,12 @@ const int GRAB_ENABLETEXTINPUT = (1 << 3); // only used with SDL3, where textinp
 void GLimp_GrabInput(int flags);
 
 bool GLimp_SetSwapInterval( int swapInterval );
+int GLimp_GetSwapInterval();
 bool GLimp_SetWindowResizable( bool enableResizable );
 void GLimp_UpdateWindowSize();
 
 glimpParms_t GLimp_GetCurState();
+float GLimp_GetDisplayRefresh();
 
 /*
 ====================================================================
