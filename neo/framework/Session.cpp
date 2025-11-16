@@ -2765,10 +2765,8 @@ void idSessionLocal::Frame() {
 	//------------ single player game tics --------------
 
 	if ( !mapSpawned || guiActive ) {
-		if ( !com_asyncInput.GetBool() ) {
-			// early exit, won't do RunGameTic .. but still need to update mouse position for GUIs
-			usercmdGen->GetDirectUsercmd();
-		}
+		// early exit, won't do RunGameTic .. but still need to update mouse position for GUIs
+		usercmdGen->GetDirectUsercmd();
 	}
 
 	if ( !mapSpawned ) {
@@ -2888,11 +2886,7 @@ void idSessionLocal::RunGameTic() {
 	// if we didn't get one from the file, get it locally
 	if ( !cmdDemoFile ) {
 		// get a locally created command
-		if ( com_asyncInput.GetBool() ) {
-			cmd = usercmdGen->TicCmd( lastGameTic );
-		} else {
-			cmd = usercmdGen->GetDirectUsercmd();
-		}
+		cmd = usercmdGen->GetDirectUsercmd();
 		lastGameTic++;
 	}
 
