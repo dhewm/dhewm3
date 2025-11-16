@@ -275,8 +275,10 @@ public:
 	const idMaterial *	whiteMaterial;
 
 	const idMaterial *	wipeMaterial;
-	int					wipeStartTic;
-	int					wipeStopTic;
+	// DG: make wiping use Sys_Milliseconds() instead of tics
+	//     so we can get rid of the AsyncThread
+	unsigned			wipeStartTime;
+	unsigned			wipeStopTime;
 	bool				wipeHold;
 
 #if ID_CONSOLE_LOCK

@@ -508,8 +508,8 @@ void idSessionLocal::StartWipe( const char *_wipeMaterial, bool hold ) {
 
 	wipeMaterial = declManager->FindMaterial( _wipeMaterial, false );
 
-	wipeStartTic = com_ticNumber;
-	wipeStopTic = wipeStartTic + 1000.0f / USERCMD_MSEC * com_wipeSeconds.GetFloat();
+	wipeStartTime = Sys_Milliseconds();
+	wipeStopTime = wipeStartTime + com_wipeSeconds.GetFloat() * 1000.0f;
 	wipeHold = hold;
 }
 
@@ -520,12 +520,12 @@ idSessionLocal::CompleteWipe
 */
 void idSessionLocal::CompleteWipe() {
 	if ( com_ticNumber == 0 ) {
-		// if the async thread hasn't started, we would hang here
-		wipeStopTic = 0;
+		// if the tic counting hasn't started, we would hang here
+		wipeStopTime = 0;
 		UpdateScreen( true );
 		return;
 	}
-	while ( com_ticNumber < wipeStopTic ) {
+	while ( Sys_Milliseconds() < wipeStopTime ) {
 #if ID_CONSOLE_LOCK
 		emptyDrawCount = 0;
 #endif
@@ -574,8 +574,8 @@ idSessionLocal::ClearWipe
 */
 void idSessionLocal::ClearWipe( void ) {
 	wipeHold = false;
-	wipeStopTic = 0;
-	wipeStartTic = wipeStopTic + 1;
+	wipeStopTime = 0;
+	wipeStartTime = 16;
 }
 
 /*
@@ -2346,17 +2346,17 @@ Draw the fade material over everything that has been drawn
 ===============
 */
 void	idSessionLocal::DrawWipeModel() {
-	int		latchedTic = com_ticNumber;
+	unsigned now = Sys_Milliseconds();
 
-	if (  wipeStartTic >= wipeStopTic ) {
+	if (  wipeStartTime >= wipeStopTime ) {
 		return;
 	}
 
-	if ( !wipeHold && latchedTic >= wipeStopTic ) {
+	if ( !wipeHold && now > wipeStopTime ) {
 		return;
 	}
 
-	float fade = ( float )( latchedTic - wipeStartTic ) / ( wipeStopTic - wipeStartTic );
+	float fade = ( float )( now - wipeStartTime ) / ( wipeStopTime - wipeStartTime );
 	renderSystem->SetColor4( 1, 1, 1, fade );
 	renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, wipeMaterial );
 }
