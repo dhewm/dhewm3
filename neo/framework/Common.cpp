@@ -265,6 +265,7 @@ static double nextTicTime = 0.0;
 
 // DG: updates the tic number based on the (real) time expired since it has last been updated
 void Com_UpdateTicNumber() {
+	D3P_CPUSampleFn();
 	double now = Sys_MillisecondsPrecise();
 	double timeDiff = now - nextTicTime + 0.1; // 0.1 ms tolerance in case we're just a little early
 	if ( timeDiff >= 0.0) {
@@ -303,6 +304,7 @@ void Com_UpdateFrameTime() {
 
 // DG: waits until com_ticNumber should be increased and then calls Com_UpdateFrameTime() to make that happen
 void Com_WaitForNextTicStart() {
+	D3P_CPUSampleFn();
 	if ( nextTicTime != 0.0 ) {
 		Sys_SleepUntilPrecise( nextTicTime );
 	}
@@ -1129,6 +1131,7 @@ Writes key bindings and archived cvars to config file if modified
 ===============
 */
 void idCommonLocal::WriteConfiguration( void ) {
+	D3P_ScopedCPUSample(WriteConfiguration);
 	// if we are quiting without fully initializing, make sure
 	// we don't write out anything
 	if ( !com_fullyInitialized ) {
@@ -2481,6 +2484,7 @@ idCommonLocal::Frame
 =================
 */
 void idCommonLocal::Frame( void ) {
+	D3P_ScopedCPUSample(Common_Frame);
 	try {
 		// DG: update tic number here for ticNumAtStart (used below to decide whether to sleep before next frame)
 		Com_UpdateTicNumber();
@@ -2828,6 +2832,7 @@ int idCommonLocal::AsyncThread(void* arg)
 	double nextTicTargetMsec = Sys_MillisecondsPrecise();
 
 	while ( self->runAsyncThread ) {
+		D3P_ScopedCPUSample(Async_Frame);
 		self->Async();
 
 		// TODO: Should this be synchronized with the main thread somehow?

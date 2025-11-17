@@ -885,7 +885,7 @@ instead of once every ~100ms.
 ===================
 */
 int idSoundSystemLocal::AsyncUpdateWrite( int inTime ) {
-
+	D3P_CPUSampleFn();
 	if ( !isInitialized || shutdown ) {
 		return 0;
 	}

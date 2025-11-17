@@ -308,6 +308,7 @@ void Shutdown()
 // => ProcessEvent() has already been called (probably multiple times)
 void NewFrame()
 {
+	D3P_ScopedCPUSample(Imgui_NewFrame);
 	// it can happen that NewFrame() is called without EndFrame() having been called
 	// after the last NewFrame() call, for example when D3Radiant is active and in
 	// idSessionLocal::UpdateScreen() Sys_IsWindowVisible() returns false.

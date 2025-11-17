@@ -1114,11 +1114,14 @@ GLimp_SwapBuffers
 ===================
 */
 void GLimp_SwapBuffers() {
+	D3P_BeginCPUSample(SDL_GL_SwapWindow);
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_GL_SwapWindow(window);
 #else
 	SDL_GL_SwapBuffers();
 #endif
+	D3P_EndCPUSample(SDL_GL_SwapWindow);
+
 	D3P_NAMED_FRAMEMARK("Render Frame");
 }
 
