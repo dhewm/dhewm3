@@ -2727,7 +2727,7 @@ void idSessionLocal::Frame() {
 		if ( latchedTicNumber >= minTic ) {
 			break;
 		}
-		Sys_WaitForEvent( TRIGGER_EVENT_ONE );
+		Com_WaitForNextTicStart();
 	}
 
 	if ( authEmitTimeout ) {

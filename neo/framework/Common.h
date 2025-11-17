@@ -142,8 +142,8 @@ public:
 								// Called repeatedly by blocking function calls with GUI interactivity.
 	virtual void				GUIFrame( bool execCmd, bool network ) = 0;
 
-								// Called 60 times a second from a background thread for sound mixing,
-								// and input generation. Not called until idCommon::Init() has completed.
+								// Called 60 times a second from a background thread for sound mixing.
+								// Not called until idCommon::Init() has completed.
 	virtual void				Async( void ) = 0;
 
 								// Checks for and removes command line "+set var arg" constructs.
