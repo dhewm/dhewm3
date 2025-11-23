@@ -39,8 +39,35 @@ If you have questions concerning this license or the applicable additional terms
 ***********************************************************************/
 
 // DG: added constructor to make sure all members are initialized
-idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0)
+idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0),
+	lastFrame(-1), lastOldFrame(0), lastBackLerp(0.0f)
 {}
+
+// DG: added destructor to clean up the newly added silInfos (and md3 which used to leak)
+idRenderModelMD3::~idRenderModelMD3() {
+	srfTriangles_t tri;
+	memset( &tri, 0, sizeof( tri ) );
+
+	for ( int i=0, n=silInfos.Num() ; i < n ; ++i ) {
+		silInfo_t& silInfo = silInfos[i];
+		// Note: Because tri.sil* was allocated by specialized allocators only available
+		//       in tr.trisurf.cpp, they need to be free'd with them as well.
+		//       The easiest way to do this is by putting them into a srfTriangles_t first
+		tri.silIndexes = silInfo.silIndexes;
+		tri.silEdges = silInfo.silEdges;
+
+		R_FreeStaticTriSurfSilIndexes( &tri );
+		R_FreeStaticTriSurfSilEdges( &tri );
+
+		if ( sizeof(md3Triangle_t::indexes[0]) != sizeof(silInfo.indexes[0]) ) {
+			tri.indexes = silInfo.indexes;
+			R_FreeStaticTriSurfIndexes( &tri );
+		} // else silInfos[i].indexes points directly into the corresponding data in this->md3
+	}
+	silInfos.Clear();
+
+	Mem_Free(md3);
+}
 
 #define	LL(x) x=LittleInt(x)
 
@@ -59,7 +86,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	md3St_t				*st;
 	md3XyzNormal_t		*xyz;
 	md3Tag_t			*tag;
-	void				*buffer;
+	void				*buffer = NULL;
 	int					version;
 	int					size;
 
@@ -67,7 +94,13 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	name = fileName;
 
 	size = fileSystem->ReadFile( fileName, &buffer, NULL );
-	if ( size <= sizeof(md3Header_t) ) {
+	// DG: without the int cast, an unsigned comparison is made which fails for size = -1
+	if ( size <= (int)sizeof(md3Header_t) ) {
+		if (buffer != NULL) {
+			fileSystem->FreeFile( buffer );
+		}
+		// DG: must make it a default model so failure can be detected elsewhere
+		MakeDefaultModel();
 		return;
 	}
 
@@ -78,6 +111,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 		fileSystem->FreeFile( buffer );
 		common->Warning( "InitFromFile: %s has wrong version (%i should be %i)",
 				 fileName, version, MD3_VERSION);
+		MakeDefaultModel();
 		return;
 	}
 
@@ -100,6 +134,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	if ( md3->numFrames < 1 ) {
 		common->Warning( "InitFromFile: %s has no frames", fileName );
 		fileSystem->FreeFile( buffer );
+		MakeDefaultModel();
 		return;
 	}
 
@@ -170,7 +205,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 		shader = (md3Shader_t *) ( (byte *)surf + surf->ofsShaders );
 		for ( j = 0 ; j < surf->numShaders ; j++, shader++ ) {
 			const idMaterial *sh = declManager->FindMaterial( shader->name );
-			// DG: md3Shadder_t must use an index to the material instead of a pointer,
+			// DG: md3Shader_t must use an index to the material instead of a pointer,
 			//     otherwise the sizes are wrong on 64bit and we get data corruption
 			shader->shaderIndex = (sh != NULL) ? shaders.AddUnique( sh ) : -1;
 		}
@@ -201,6 +236,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 			xyz->normal = LittleShort( xyz->normal );
 		}
 
+		silInfos.Append( BuildSilInfo( surf ) );
 
 		// find the next surface
 		surf = (md3Surface_t *)( (byte *)surf + surf->ofsEnd );
@@ -279,34 +315,60 @@ idRenderModelMD3::InstantiateDynamicModel
 idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel ) {
 	int				i, j;
 	float			backlerp;
-	int *			triangles;
 	float *			texCoords;
-	int				indexes;
 	int				numVerts;
 	md3Surface_t *	surface;
 	int				frame, oldframe;
 	idRenderModelStatic	*staticModel;
 
+	int numFrames = md3->numFrames;
+
+	// TODO: these need set by an entity
+	frame = idMath::ClampInt(0, numFrames-1, ent->shaderParms[SHADERPARM_MD3_FRAME]);	// probably want to keep frames < 1000 or so
+	oldframe = idMath::ClampInt(0, numFrames-1,ent->shaderParms[SHADERPARM_MD3_LASTFRAME]);
+	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
+
 	if ( cachedModel ) {
-		delete cachedModel;
-		cachedModel = NULL;
+		if ( !r_useCachedDynamicModels.GetBool() || frame != lastFrame
+		     || oldframe != lastOldFrame || backlerp != lastBackLerp ) {
+			delete cachedModel;
+			cachedModel = NULL;
+		} else {
+			// if we're still in the same animation frame etc, just use the existing model
+			return cachedModel;
+		}
 	}
 
+	// DG: remember (old)frame and backlerp for the check above if the cached model can be reused
+	lastFrame = frame;
+	lastOldFrame = oldframe;
+	lastBackLerp = backlerp;
+
 	staticModel = new idRenderModelStatic;
+	staticModel->InitEmpty("_MD3_Snapshot_");
 	staticModel->bounds.Clear();
 
 	surface = (md3Surface_t *) ((byte *)md3 + md3->ofsSurfaces);
-
-	// TODO: these need set by an entity
-	frame = ent->shaderParms[SHADERPARM_MD3_FRAME];			// probably want to keep frames < 1000 or so
-	oldframe = ent->shaderParms[SHADERPARM_MD3_LASTFRAME];
-	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
 
 	for( i = 0; i < md3->numSurfaces; i++ ) {
 
 		srfTriangles_t *tri = R_AllocStaticTriSurf();
 		R_AllocStaticTriSurfVerts( tri, surface->numVerts );
-		R_AllocStaticTriSurfIndexes( tri, surface->numTriangles * 3 );
+
+		// DG: set sil edges for shadows
+		silInfo_t& silInfo = silInfos[i];
+		tri->numSilEdges = silInfo.numSilEdges;
+		tri->silEdges = silInfo.silEdges;
+		tri->silIndexes = silInfo.silIndexes;
+
+		tri->indexes = silInfo.indexes;
+		tri->numIndexes = silInfo.numIndexes;
+		assert(surface->numTriangles * 3 == silInfo.numIndexes);
+
+		// deformedSurface prevents silEdges, silIndexes, indexes (and more not used here)
+		// from being freed (they belong to silInfo which is freed in ~idRenderModelMD3())
+		tri->deformedSurface = true;
+
 		tri->bounds.Clear();
 
 		modelSurface_t	surf;
@@ -320,13 +382,6 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEnt
 		surf.shader = (shaderIdx >= 0) ? this->shaders[shaderIdx] : NULL;
 
 		LerpMeshVertexes( tri, surface, backlerp, frame, oldframe );
-
-		triangles = (int *) ((byte *)surface + surface->ofsTriangles);
-		indexes = surface->numTriangles * 3;
-		for (j = 0 ; j < indexes ; j++) {
-			tri->indexes[j] = triangles[j];
-		}
-		tri->numIndexes += indexes;
 
 		texCoords = (float *) ((byte *)surface + surface->ofsSt);
 
@@ -370,10 +425,78 @@ idBounds idRenderModelMD3::Bounds(const struct renderEntity_s *ent) const {
 	}
 
 	md3Frame_t	*frame = (md3Frame_t *)( (byte *)md3 + md3->ofsFrames );
-	frame += (int)ent->shaderParms[SHADERPARM_MD3_FRAME]; // DG: use bounds of current frame
+	int frameNum = Max(0, Min(md3->numFrames-1, (int)ent->shaderParms[SHADERPARM_MD3_FRAME]));
+	frame += frameNum; // DG: use bounds of current frame
 
 	ret.AddPoint( frame->bounds[0] );
 	ret.AddPoint( frame->bounds[1] );
+
+	return ret;
+}
+
+/*
+=====================
+idRenderModelMD3::BuildSilInfo
+=====================
+*/
+
+silInfo_t idRenderModelMD3::BuildSilInfo( md3Surface_t *surf ) {
+	//
+	// build the information that will be common to all animations of this surface:
+	// silhouette edge connectivity and normal / tangent generation information
+	//
+	int numVerts = surf->numVerts;
+	silInfo_t ret = {0};
+
+	md3XyzNormal_t *xyzs = (md3XyzNormal_t *) ( (byte *)surf + surf->ofsXyzNormals );
+
+	bool onStack;
+	idDrawVert *verts = (idDrawVert*)Mem_MallocA( numVerts*sizeof(idDrawVert), onStack );
+
+	for ( int i=0; i < numVerts; ++i ) {
+		idDrawVert& v = verts[i];
+		v.Clear();
+		// Note: MD3 defines these for all frames - using frame 0 here
+		short* xyz = xyzs[i].xyz;
+		v.xyz.x = xyz[0] * float(MD3_XYZ_SCALE);
+		v.xyz.y = xyz[1] * float(MD3_XYZ_SCALE);
+		v.xyz.z = xyz[2] * float(MD3_XYZ_SCALE);
+		// Note: idDrawVert has more fields, but R_CreateSilIndexes() and R_IdentifySilEdges()
+		//       only use .xyz
+	}
+
+	int numIndexes = surf->numTriangles * 3;
+	md3Triangle_t *md3TriIdx = (md3Triangle_t *) ( (byte *)surf + surf->ofsTriangles );
+	int *triIndexes = (int*)md3TriIdx->indexes;
+
+	srfTriangles_t tri;
+	memset( &tri, 0, sizeof( tri ) );
+
+	tri.verts = verts;
+	tri.numVerts = numVerts;
+	tri.numIndexes = numIndexes;
+	if ( sizeof(triIndexes[0]) == sizeof(tri.indexes[0]) ) {
+		tri.indexes = triIndexes;
+	} else {
+		R_AllocStaticTriSurfIndexes( &tri, numIndexes );
+		// don't memcpy, so we can change the index type from int to short without changing the interface
+		for ( int i = 0 ; i < numIndexes ; i++ ) {
+			tri.indexes[i] = triIndexes[i];
+		}
+	}
+	R_CreateSilIndexes(&tri); // allocates and sets tri.silIndexes with triSilIndexAllocator
+	// if there's only one frame (no animation), the omitCoplanarEdges optimization can be used
+	// (otherwise it can't because edges that are coplanar in frame 0 may not be in another frame)
+	bool omitCoplanarEdges = (surf->numFrames == 1);
+	R_IdentifySilEdges(&tri, omitCoplanarEdges); // allocates and sets tri.silEdges with triSilEdgeAllocator
+
+	ret.numIndexes = tri.numIndexes;
+	ret.numSilEdges = tri.numSilEdges;
+	ret.indexes = tri.indexes;
+	ret.silIndexes = tri.silIndexes;
+	ret.silEdges = tri.silEdges;
+
+	Mem_FreeA( verts, onStack );
 
 	return ret;
 }

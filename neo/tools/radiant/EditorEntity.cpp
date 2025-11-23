@@ -662,9 +662,10 @@ entity_t *Entity_PostParse(entity_t *ent, brush_t *pList) {
 			// model entity
 			idRenderModel *modelHandle = renderModelManager->FindModel( pModel );
 
-			if ( dynamic_cast<idRenderModelPrt*>( modelHandle ) || dynamic_cast<idRenderModelLiquid*>( modelHandle ) ) {
+			if ( modelHandle == NULL || dynamic_cast<idRenderModelPrt*>( modelHandle ) || dynamic_cast<idRenderModelLiquid*>( modelHandle ) ) {
 				bo.Zero();
 				bo.ExpandSelf( 12.0f );
+				common->Printf( "Missing model '%s'!\n", pModel );
 			} else {
 				bo = modelHandle->Bounds( NULL );
 			}
