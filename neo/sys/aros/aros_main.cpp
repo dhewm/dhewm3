@@ -320,7 +320,7 @@ void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
 
 extern bool AROS_GetSavePath(char *buf, const size_t max);
 
-static void initLog()
+static void AROS_InitLog()
 {
     char logPath[1024];
     if( !AROS_GetSavePath( logPath, sizeof( logPath ) ) )
@@ -347,6 +347,27 @@ static void initLog()
     }
 }
 
+// DG: apparently AROS supports clock_gettime(), so use that for Sys_MillisecondsPrecise()
+static struct timespec first;
+static void AROS_InitTime() {
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+
+	long nsec = now.tv_nsec;
+	long long sec = now.tv_sec;
+	// set back first by 1.5ms so neither Sys_MillisecondsPrecise() nor Sys_Milliseconds()
+	// (which calls Sys_MillisecondsPrecise()) will ever return 0 or even a negative value
+	nsec -= 1500000;
+	if(nsec < 0)
+	{
+		nsec += 1000000000ll; // 1s in ns => definitely positive now
+		--sec;
+	}
+
+	first.tv_sec = sec;
+	first.tv_nsec = nsec;
+}
+
 /*
 ===============
 AROS_EarlyInit
@@ -355,10 +376,11 @@ AROS_EarlyInit
 void AROS_EarlyInit( void ) {
     D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    initLog();
+    AROS_InitLog();
 
     exit_spawn[0] = '\0';
     AROS_InitLibs();
+    AROS_InitTime( );
     AROS_InitSigs();
 
     // TODO: logfile
@@ -724,27 +746,6 @@ int dhewm3game_tramp(int argc, char **argv) {
     }
 
     return retval;
-}
-
-// DG: apparently AROS supports clock_gettime(), so use that for Sys_MillisecondsPrecise()
-static struct timespec first;
-static void AROS_initTime() {
-	struct timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
-
-	long nsec = now.tv_nsec;
-	long long sec = now.tv_sec;
-	// set back first by 1.5ms so neither Sys_MillisecondsPrecise() nor Sys_Milliseconds()
-	// (which calls Sys_MillisecondsPrecise()) will ever return 0 or even a negative value
-	nsec -= 1500000;
-	if(nsec < 0)
-	{
-		nsec += 1000000000ll; // 1s in ns => definitely positive now
-		--sec;
-	}
-
-	first.tv_sec = sec;
-	first.tv_nsec = nsec;
 }
 
 /*
