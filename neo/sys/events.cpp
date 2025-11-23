@@ -1802,6 +1802,7 @@ Sys_GenerateEvents
 ================
 */
 void Sys_GenerateEvents() {
+	D3P_ScopedCPUSample(Sys_GenerateEvents);
 
 	handleMouseGrab();
 

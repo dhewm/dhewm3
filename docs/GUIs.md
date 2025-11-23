@@ -182,7 +182,7 @@ Luckily, dhewm3 has some improvements :)
 
 dhewm3 has several features to better support non-4:3 resolutions.
 
-### Scaling of mMenus to 4:3 with Letter-Boxing
+### Scaling of Menus to 4:3 with Letter-Boxing
 
 *dhewm3* scales fullscreen menus like the main menu and the PDA to 4:3 regardless of the resolution,
 leaving **black bars on the left and the right**, or if you happen to use a portrait resolution like
@@ -347,7 +347,7 @@ If the screen has 4:3 aspect ratio, anchoring to top-left looks like this:
 ![](img/d3gui-cst-tl-43.png)
 
 Note how:
-* In non 4:3 modes he `Desktop` is stretched (=> its grid isn't square).
+* In non 4:3 modes the `Desktop` is stretched (=> its grid isn't square).
 * The `AnchorArea` retains its 4:3 aspect ratio and fills as much of the screen (or dhewm3 window)
   as possible without stretching, staying at the *top* or *left* border of the screen, like the name 
   `CST_ANCHOR_TOP_LEFT` suggests.

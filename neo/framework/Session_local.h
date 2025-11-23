@@ -60,6 +60,11 @@ else
 
 */
 
+// DG: functions used for improved frame timing - I put them here so they don't end up in the SDK
+extern void Com_UpdateFrameTime();
+extern void Com_WaitForNextTicStart();
+
+
 typedef struct {
 	usercmd_t	cmd;
 	int			consistencyHash;
@@ -271,8 +276,10 @@ public:
 	const idMaterial *	whiteMaterial;
 
 	const idMaterial *	wipeMaterial;
-	int					wipeStartTic;
-	int					wipeStopTic;
+	// DG: make wiping use Sys_Milliseconds() instead of tics
+	//     so we can get rid of the AsyncThread
+	unsigned			wipeStartTime;
+	unsigned			wipeStopTime;
 	bool				wipeHold;
 
 #if ID_CONSOLE_LOCK

@@ -952,6 +952,63 @@ bool GLimp_SetScreenParms(glimpParms_t parms) {
 #endif
 }
 
+float GLimp_GetDisplayRefresh()
+{
+	if ( window == NULL ) {
+		return -1.0f; // TODO: or 0? this is special though and ideally shouldn't happen
+	}
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	My_SDL_WindowFlags winFlags = SDL_GetWindowFlags( window );
+	bool isFullscreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
+	if ( isFullscreen ) {
+		const SDL_DisplayMode* fullscreenMode = SDL_GetWindowFullscreenMode( window );
+		if (fullscreenMode != NULL) {
+			return fullscreenMode->refresh_rate;
+		}
+	}
+	// if we get here, it's windowed mode or fullscreen desktop
+	int curdisplay = SDL_GetDisplayForWindow( window );
+	if ( curdisplay == 0 ) {
+		common->Warning( "GLimp_GetDisplayRefresh(): Can't get display for window, falling back to primary display: %s\n", SDL_GetError() );
+		/* There are some obscure setups were SDL is
+		   unable to get the current display,one X11
+		   server with several screen is one of these,
+		   so add a fallback to the first display. */
+		curdisplay = SDL_GetPrimaryDisplay();
+	}
+	const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode( curdisplay );
+	if ( mode == NULL ) {
+		common->Warning( "GLimp_GetDisplayRefresh(): Can't get display mode for window: %s\n", SDL_GetError() );
+		return 0.0f;
+	}
+	return mode->refresh_rate;
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
+	My_SDL_WindowFlags winFlags = SDL_GetWindowFlags( window );
+	bool isFullScreen = (winFlags & SDL_WINDOW_FULLSCREEN) != 0;
+	bool isFullScreenDesktop = (winFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
+	if ( isFullScreen && !isFullScreenDesktop ) { // I think SDL_GetWindowDisplayMode() is only for "real" fullscreen?
+		SDL_DisplayMode real_mode = {};
+		if ( SDL_GetWindowDisplayMode( window, &real_mode ) == 0 ) {
+			return real_mode.refresh_rate;
+		} else {
+			common->Warning( "GLimp_GetDisplayRefresh(): Can't get display mode: %s\n", SDL_GetError() );
+		}
+	}
+	// if we get here, it's windowed mode or fullscreen desktop
+	SDL_DisplayMode real_mode = {};
+	int displayIndex = SDL_GetWindowDisplayIndex( window );
+	if ( displayIndex < 0 ) {
+		common->Warning( "GLimp_GetDisplayRefresh(): Can't get display index for window, falling back to first one: %s\n", SDL_GetError() );
+		displayIndex = 0;
+	}
+	if ( SDL_GetDesktopDisplayMode(displayIndex, &real_mode) == 0 ) {
+		return real_mode.refresh_rate;
+	}
+#endif
+	// NOTE: SDL1.2 doesn't support querying (nor setting) this, as far as I can tell
+	return 0.0f;
+}
+
 // sets a glimpParms_t based on the current true state (according to SDL)
 // Note: here, ret.fullScreenDesktop is only true if currently in fullscreen desktop mode
 //       (and ret.fullScreen is true as well)
@@ -978,7 +1035,7 @@ glimpParms_t GLimp_GetCurState()
 		if (fullscreenMode != NULL) {
 			ret.width = fullscreenMode->w;
 			ret.height = fullscreenMode->h;
-			ret.displayHz = fullscreenMode->refresh_rate;
+			ret.displayHz = roundf(fullscreenMode->refresh_rate);
 		} else {
 			// SDL_WINDOW_FULLSCREEN is set, but SDL_GetWindowFullscreenMode() returns NULL
 			// => fullscreen desktop mode
@@ -1011,6 +1068,10 @@ glimpParms_t GLimp_GetCurState()
 
 	if ( ret.width == 0 && ret.height == 0 ) { // windowed mode, fullscreen-desktop mode or SDL_GetWindowDisplayMode() failed
 		SDL_GetWindowSize( window, &ret.width, &ret.height );
+	}
+
+	if ( ret.displayHz == 0 ) {
+		ret.displayHz = roundf(GLimp_GetDisplayRefresh());
 	}
 
 	assert( ret.width == glConfig.winWidth && ret.height == glConfig.winHeight );
@@ -1053,11 +1114,15 @@ GLimp_SwapBuffers
 ===================
 */
 void GLimp_SwapBuffers() {
+	D3P_BeginCPUSample(SDL_GL_SwapWindow);
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_GL_SwapWindow(window);
 #else
 	SDL_GL_SwapBuffers();
 #endif
+	D3P_EndCPUSample(SDL_GL_SwapWindow);
+
+	D3P_NAMED_FRAMEMARK("Render Frame");
 }
 
 // SDL3 doesn't support hardware gamma
@@ -1204,6 +1269,7 @@ void GLimp_GrabInput(int flags) {
 #endif
 }
 
+static int cur_swapInterval = 0;
 bool GLimp_SetSwapInterval( int swapInterval )
 {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -1213,13 +1279,21 @@ bool GLimp_SetSwapInterval( int swapInterval )
 	if ( SDL_GL_SetSwapInterval( swapInterval ) < 0 ) {
   #endif
 		common->Warning( "SDL_GL_SetSwapInterval( %d ) not supported", swapInterval );
+		cur_swapInterval = 0;
 		return false;
 	}
+	cur_swapInterval = swapInterval;
 	return true;
 #else
 	common->Warning( "SDL1.2 does not support changing the swapinterval (vsync) on-the-fly!" );
+	cur_swapInterval = 0;
 	return false;
 #endif
+}
+
+int GLimp_GetSwapInterval()
+{
+	return cur_swapInterval;
 }
 
 bool GLimp_SetWindowResizable( bool enableResizable )
