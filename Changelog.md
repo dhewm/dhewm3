@@ -9,6 +9,9 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 
 * Enable/disable Soft Particles when **loading** a graphics quality preset (only enabled in Ultra preset,
   though you can still configure it independently like before; #604)
+* Greatly improve precision of internal timing, which should eliminate micro stutters
+  (that were esp. noticeable when using VSync with 60Hz displays).  
+  Related: `com_showFPS` is now more precise and `com_showFPS 2` shows additional information
 * Support BC7-compressed (BPTC) .dds textures. They offer better quality than the older S3TC/DXT/BC1-3
   texture compression standard that Doom3 always supported. Mostly relevant for high-res retexturing
   packs, because they offer similar quality as uncompressed TGAs while being smaller, using only
@@ -26,6 +29,10 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   id confusingly called that "RXGB", and AFAIK no other tool supports that for BC7.)*  
   Just like the old DXT .dds files, they must be in the `dds/` subdirectory of a mod (either directly
   in the filesystem or in a .pk4).
+* Allow creating aspect-ratio-independent GUIs (HUD and menus), based on code from
+  [CstDoom3](https://www.moddb.com/mods/cstdoom3), but greatly extended (#324).  
+  Note that this won't work out of the box with the original Doom3 game data, but requires updated GUIs.
+  See [docs/GUIs.md](docs/GUIs.md) for how to use these features when creating GUIs.
 * Support SDL3 (SDL2 and, to some degree, SDL1.2 are also still supported)
 * Fix bugs on 64bit Big Endian platforms (#472, #625)
 * Fixes for high-poly models (use heap allocation instead of `alloca()` for big buffers; #528)
@@ -49,6 +56,11 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Windows: Show error MessageBox if dhewm3log.txt can't be created on startup (#544)
 * Running a timedemo with sound disabled (`s_noSound 1`) doesn't crash anymore (#163)
 * Show some OpenGL/GPU information in the *Video Options* tab of the *dhewm3 Settings Menu*
+* Fix saving/loading of `idSpring` (`func_spring`) entity (#31)
+* Fix several issues (incl. crashes and missing shadows) with MD3 models (#698)
+* Fix the "shrivel" effect of MD5 models (`SHADERPARM_MD5_SKINSCALE`)
+* Optionally integrate the [Tracy](https://github.com/wolfpld/tracy) profiler.
+  Disabled unless you enable it in CMake.
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------
