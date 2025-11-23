@@ -26,8 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#define DEBUG 1
-
+//#define DEBUG 1
 #include <aros/debug.h>
 #undef ASSERT
 
@@ -46,35 +45,26 @@ If you have questions concerning this license or the applicable additional terms
 #include <intuition/intuition.h>
 #include <workbench/startup.h>
 
-// undefine - conflict with ID functions
-#undef Remove
-#undef Insert
-#undef Read
-#undef Write
-#undef Seek
-#undef Flush
-#undef Close
-#undef Allocate
-#undef Printf
-#undef VPrintf
+#include "sys/aros/aros_fixup.h"
 
 #include "sys/platform.h"
 #include "idlib/containers/StrList.h"
 #include "framework/Licensee.h"
 #include "sys/sys_local.h"
 
-#define ID_FTXT	MAKE_ID('F','T','X','T')
-#define ID_CHRS	MAKE_ID('C','H','R','S')
+#define ID_FTXT MAKE_ID('F','T','X','T')
+#define ID_CHRS MAKE_ID('C','H','R','S')
 
-extern idCVar com_pid;
+extern idCVar   com_pid;
 
-struct Library *MiamiBase;
-struct Library *OpenURLBase;
+struct Library  *MiamiBase;
+struct Library  *OpenURLBase;
 
-char chunk_buffer[1024];
+char            chunk_buffer[1024];
+extern char     launch_path[1024];
 
-idStr	adoom3_basepath;
-idStr	adoom3_savepath;
+idStr           adoom3_basepath;
+idStr           adoom3_savepath;
 
 /*
 ================
@@ -83,9 +73,9 @@ returns in megabytes rounded to the nearest 16Mb
 ================
 */
 int Sys_GetSystemRam( void ) {
-    int		mb;
+    int mb;
 
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
     mb = ( ( AvailMem( MEMF_ANY ) / ( 1024 * 1024 ) ) + 8 ) & ~15;
 
@@ -98,7 +88,7 @@ Sys_LockMemory
 ================
 */
 bool Sys_LockMemory( void *ptr, int bytes ) {
-    D(bug("[ADoom3] Sys_LockMemory( 0x%p, %u )\n", ptr, bytes));
+    D( bug( "[ADoom3] %s( 0x%p, %u )\n", __func__, ptr, bytes ) );
     return true;
 }
 
@@ -108,7 +98,7 @@ Sys_UnlockMemory
 ================
 */
 bool Sys_UnlockMemory( void *ptr, int bytes ) {
-    D(bug("[ADoom3] Sys_UnlockMemory( 0x%p, %u )\n", ptr, bytes));
+    D( bug( "[ADoom3] %s( 0x%p, %u )\n", __func__, ptr, bytes ) );
     return true;
 }
 
@@ -124,56 +114,53 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 
     bool dironly = false;
 
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug("[ADoom3] %s()\n", __func__ ) );
 
     list.Clear();
 
-    if (!extension)
-            extension = "";
+    if ( !extension )
+        extension = "";
 
     // passing a slash as extension will find directories
-    if (extension[0] == '/' && extension[1] == 0) {
-            extension = "";
-            dironly = true;
+    if( extension[0] == '/' && extension[1] == 0 ) {
+        extension = "";
+        dironly = true;
     }
 
     // search
     // NOTE: case sensitivity of directory path can screw us up here
-    if ((dirlock = Lock(directory, SHARED_LOCK)) == BNULL) {
-            D(bug("[ADoom3] Sys_ListFiles: opendir '%s' failed\n", directory));
-            return -1;
+    if( ( dirlock = Lock( directory, SHARED_LOCK ) ) == BNULL ) {
+        D( bug( "[ADoom3] %s: opendir '%s' failed\n", __func__, directory ) );
+        return -1;
     }
 
-    if ((fib = (struct FileInfoBlock *)AllocDosObject(DOS_FIB, NULL)) != (struct FileInfoBlock *)NULL)
-    {
-        if (Examine(dirlock, fib))
-        {
-            while(ExNext(dirlock, fib))
-            {
-                idStr filename((const char *)fib->fib_FileName);
+    if( ( fib = (struct FileInfoBlock *)AllocDosObject( DOS_FIB, NULL ) ) != (struct FileInfoBlock *)NULL ) {
+        if( Examine( dirlock, fib ) ) {
+            while( ExNext( dirlock, fib ) ) {
+                idStr filename( (const char *)fib->fib_FileName );
 
-                idStr::snPrintf(search, sizeof(search), "%s/%s", directory, fib->fib_FileName);
-                if (!dironly) {
-                    idStr look(search);
+                idStr::snPrintf( search, sizeof( search ), "%s/%s", directory, fib->fib_FileName );
+                if( !dironly ) {
+                    idStr look( search );
                     idStr ext;
-                    look.ExtractFileExtension(ext);
-                    if (extension[0] != '\0' && ext.Icmp(&extension[1]) != 0) {
+                    look.ExtractFileExtension( ext );
+                    if( extension[0] != '\0' && ext.Icmp( &extension[1] ) != 0 ) {
                             continue;
                     }
                 }
-                if ((dironly && (fib->fib_DirEntryType != ST_USERDIR)) ||
-                        (!dironly && (fib->fib_DirEntryType == ST_USERDIR)))
+                if( ( dironly && ( fib->fib_DirEntryType != ST_USERDIR ) ) ||
+                        ( !dironly && ( fib->fib_DirEntryType == ST_USERDIR ) ) )
                         continue;
-                D(bug("[ADoom3] Sys_ListFiles:\tadding %s to list\n", filename.c_str()));
-                list.Append(filename);
+                D( bug( "[ADoom3] %s:\tadding %s to list\n", __func__, filename.c_str() ) );
+                list.Append( filename );
             }
         }
-        FreeDosObject(DOS_FIB, fib);
+        FreeDosObject( DOS_FIB, fib );
     }
 
-    UnLock(dirlock);
+    UnLock( dirlock );
 
-    D(bug( "[ADoom3] Sys_ListFiles: %d entries in %s\n", list.Num(), directory ));
+    D( bug( "[ADoom3] %s: %d entries in %s\n", __func__, list.Num(), directory ) );
 
     return list.Num();
 }
@@ -186,12 +173,11 @@ Sys_Mkdir
 void Sys_Mkdir( const char *path ) {
     BPTR dirlock;
 
-    D(bug("[ADoom3] Sys_Mkdir('%s')\n", path));
+    D( bug( "[ADoom3] %s('%s')\n", __func__, path ) );
 
-    if ((dirlock = CreateDir(path)) != BNULL)
-    {
-        D(bug("[ADoom3] Sys_Mkdir: created\n"));
-        UnLock(dirlock);
+    if( ( dirlock = CreateDir( path ) ) != BNULL ) {
+        D( bug( "[ADoom3] %s: created\n", __func__ ) );
+        UnLock( dirlock );
     }
 }
 
@@ -200,38 +186,28 @@ char *Sys_GetClipboardData(void) {
     struct ContextNode  *cn;
     ULONG error, read = 0;
 
-    D(bug("[ADoom3] Sys_GetClipboardData()\n"));
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    if ((IFFHandle = AllocIFF()))
-    {
-        if ((IFFHandle->iff_Stream = (IPTR)OpenClipboard(0)))
-        {
+    if( ( IFFHandle = AllocIFF() ) ) {
+        if( ( IFFHandle->iff_Stream = (IPTR)OpenClipboard( 0 ) ) ) {
             InitIFFasClip(IFFHandle);
-
-            if (!OpenIFF(IFFHandle, IFFF_READ))
-            {
-                if (!StopChunk(IFFHandle, ID_FTXT, ID_CHRS))
-                {
-                    if (!(error = ParseIFF(IFFHandle, IFFPARSE_SCAN)))
-                    {
+            if( !OpenIFF( IFFHandle, IFFF_READ ) ) {
+                if( !StopChunk( IFFHandle, ID_FTXT, ID_CHRS ) ) {
+                    if( !( error = ParseIFF( IFFHandle, IFFPARSE_SCAN ) ) ) {
                         cn = CurrentChunk(IFFHandle);
-
-                        if (cn && (cn->cn_Type == ID_FTXT) && (cn->cn_ID == ID_CHRS))
-                        {
-                            read = ReadChunkBytes(IFFHandle, chunk_buffer, 1024);
+                        if( cn && ( cn->cn_Type == ID_FTXT ) && ( cn->cn_ID == ID_CHRS ) ) {
+                            read = ReadChunkBytes( IFFHandle, chunk_buffer, 1024 );
                         }
                     }
                 }
-                CloseIFF(IFFHandle);
+                CloseIFF( IFFHandle );
             }
-            CloseClipboard((struct ClipboardHandle *)IFFHandle->iff_Stream);
+            CloseClipboard( (struct ClipboardHandle *)IFFHandle->iff_Stream );
         }
-        FreeIFF(IFFHandle);
+        FreeIFF( IFFHandle );
     }
-
     
-    if (read > 0)
-    {   
+    if( read > 0 ) {   
         return chunk_buffer;
     }
 
@@ -239,43 +215,35 @@ char *Sys_GetClipboardData(void) {
 }
 
 void Sys_FreeClipboardData( char* data ) {
-	// as Sys_GetClipboardData() returns a static buffer, there's nothing to free
+    // as Sys_GetClipboardData() returns a static buffer, there's nothing to free
 }
 
 void Sys_SetClipboardData( const char *string ) {
     struct	IFFHandle	*IFFHandle;
     BOOL	written = FALSE;
 
-    D(bug("[ADoom3] Sys_SetClipboardData('%s')\n", string));
+    D( bug( "[ADoom3] %s('%s')\n", __func__, string ) );
 
-    if ((string) && (strlen(string) > 0))
-    {
-        if((IFFHandle = AllocIFF()))
-        {
-            if((IFFHandle->iff_Stream = (IPTR)OpenClipboard(0)))
-            {
-                InitIFFasClip(IFFHandle);
-
-                if(!OpenIFF(IFFHandle, IFFF_WRITE))
-                {
-                    if(!PushChunk(IFFHandle, ID_FTXT, ID_FORM, IFFSIZE_UNKNOWN))
-                    {
-                        if(!PushChunk(IFFHandle, 0, ID_CHRS, IFFSIZE_UNKNOWN))
-                        {
-                            if(WriteChunkBytes(IFFHandle, (char *)string, strlen(string)) == strlen(string))
-                            {
-                                if(!PopChunk(IFFHandle))
+    if( ( string ) && ( strlen( string ) > 0 ) ) {
+        if( ( IFFHandle = AllocIFF() ) ) {
+            if( ( IFFHandle->iff_Stream = (IPTR)OpenClipboard( 0 ) ) ) {
+                InitIFFasClip( IFFHandle );
+                if( !OpenIFF( IFFHandle, IFFF_WRITE ) ) {
+                    if( !PushChunk( IFFHandle, ID_FTXT, ID_FORM, IFFSIZE_UNKNOWN ) ) {
+                        if( !PushChunk( IFFHandle, 0, ID_CHRS, IFFSIZE_UNKNOWN ) ) {
+                            if( WriteChunkBytes( IFFHandle, (char *)string, strlen( string ) ) == strlen( string ) ) {
+                                if( !PopChunk( IFFHandle ) )
                                     written = TRUE;
                             }
                         }
-                        if(written)
-                            PopChunk(IFFHandle);
+                        if( written )
+                            PopChunk( IFFHandle );
                     }
-                    CloseIFF(IFFHandle);
+                    CloseIFF( IFFHandle );
                 }
-                CloseClipboard((struct ClipboardHandle *)IFFHandle->iff_Stream);
+                CloseClipboard( (struct ClipboardHandle *)IFFHandle->iff_Stream );
             }
-            FreeIFF(IFFHandle);
+            FreeIFF( IFFHandle );
         }
     }
 }
@@ -287,9 +255,9 @@ return in MegaBytes
 ===========
 */
 int Sys_GetDriveFreeSpace( const char *path ) {
-    D(bug("[ADoom3] Sys_GetDriveFreeSpace('%s')\n", path));
+    D( bug( "[ADoom3] %s('%s')\n", __func__, path ) );
 
-    D(bug("[ADoom3] ** TODO: Sys_GetDriveFreeSpace\n"));
+    D( bug( "[ADoom3] ** TODO: Sys_GetDriveFreeSpace\n" ) );
 
     return 1000 * 1024;
 }
@@ -300,165 +268,16 @@ AROS_InitLibs
 ===============
 */
 void AROS_InitLibs( void ) {
-    bug("[ADoom3] %s()\n", __PRETTY_FUNCTION__);
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
 
-    MiamiBase = OpenLibrary("miami.library", 0);
-    OpenURLBase = OpenLibrary("openurl.library", 0);
+    MiamiBase = OpenLibrary( "miami.library", 0 );
+    OpenURLBase = OpenLibrary( "openurl.library", 0 );
+
+    D(
+        bug( "[ADoom3] %s: MiamiBase @ 0x%p\n", __func__, MiamiBase );
+        bug( "[ADoom3] %s: OpenURLBase @ 0x%p\n", __func__, OpenURLBase );
+    )
 }
-
-#if (0)
-/*
-==============
-Sys_EXEPath
-==============
-*/
-const char *Sys_EXEPath( void ) {
-    static char	buf[ 1024 ];
-    BPTR                  pathlock;
-
-    D(bug("[ADoom3] Sys_EXEPath()\n"));
-
-    if ((pathlock = Lock("PROGDIR:", SHARED_LOCK)) != BNULL)
-    {
-        if ( NameFromLock( pathlock, buf, sizeof( buf ) ) )
-        {
-            UnLock(pathlock);
-            struct Node *thisTask = (struct Node *)FindTask(NULL);
-
-            AddPart(buf, thisTask->ln_Name, 1024);
-
-            D(bug("[ADoom3] Sys_EXEPath: using '%s'\n", buf));
-            return buf;
-        }
-        UnLock(pathlock);
-    }
-    D(bug("[ADoom3] Sys_EXEPath: faling back to PROGDIR\n"));
-
-    return "PROGDIR:ADoom3";
-}
-
-
-/*
-================
-AROS_Cwd
-================
-*/
-const char *AROS_Cwd( void ) {
-    static char	buf[ 1024 ];
-    struct Process *thisTask = (struct Process *)FindTask(NULL);
-    D(bug("[ADoom3] AROS_Cwd()\n"));
-
-    if (thisTask->pr_CurrentDir != BNULL)
-    {
-        if ( NameFromLock( thisTask->pr_CurrentDir, buf, sizeof( buf ) ) )
-        {
-            D(bug("[ADoom3] AROS_Cwd: '%s'\n", buf));
-            return buf;
-        }
-    }
-    return "PROGDIR:";
-}
-
-/*
-================
-Sys_DefaultBasePath
-
-Get the default base path
-- binary image path
-- current directory
-- hardcoded
-Try to be intelligent: if there is no BASE_GAMEDIR, try the next path
-================
-*/
-const char *Sys_DefaultBasePath(void) {
-    struct FileInfoBlock *fib;
-    BPTR pathLock = BNULL;
-    idStr testbase;
-
-    D(bug("[ADoom3] Sys_DefaultBasePath()\n"));
-
-    adoom3_basepath = Sys_EXEPath();
-    if ( adoom3_basepath.Length() ) {
-            adoom3_basepath.StripFilename();
-            testbase = adoom3_basepath; testbase += "/"; testbase += BASE_GAMEDIR;
-            if ((fib = (struct FileInfoBlock *)AllocDosObject(DOS_FIB, NULL)) != (struct FileInfoBlock *)NULL)
-            {
-                if ((pathLock = Lock(testbase.c_str(), SHARED_LOCK)) != BNULL)
-                {
-                    if (Examine(pathLock, fib))
-                    {
-                        if (fib->fib_DirEntryType == ST_USERDIR)
-                        {
-                            UnLock(pathLock);
-                            FreeDosObject(DOS_FIB, fib);
-                            return adoom3_basepath.c_str();
-                        }
-                    }
-                    UnLock(pathLock);
-                }
-                FreeDosObject(DOS_FIB, fib);
-            }
-            D(bug( "[ADoom3] Sys_DefaultBasePath: no '%s' directory in exe path %s, skipping\n", BASE_GAMEDIR, adoom3_basepath.c_str() ));
-    }
-    if ( adoom3_basepath != AROS_Cwd() ) {
-            adoom3_basepath = AROS_Cwd();
-            testbase = adoom3_basepath; testbase += "/"; testbase += BASE_GAMEDIR;
-            if ((fib = (struct FileInfoBlock *)AllocDosObject(DOS_FIB, NULL)) != (struct FileInfoBlock *)NULL)
-            {
-                if ((pathLock = Lock(testbase.c_str(), SHARED_LOCK)) != BNULL)
-                {
-                    if (Examine(pathLock, fib))
-                    {
-                        if (fib->fib_DirEntryType == ST_USERDIR)
-                        {
-                            UnLock(pathLock);
-                            FreeDosObject(DOS_FIB, fib);
-                            return adoom3_basepath.c_str();
-                        }
-                    }
-                    UnLock(pathLock);
-                }
-                FreeDosObject(DOS_FIB, fib);
-            }
-            D(bug( "[ADoom3] Sys_DefaultBasePath: no '%s' directory in cwd path %s, skipping\n", BASE_GAMEDIR, adoom3_basepath.c_str()));
-    }
-    return "PROGDIR:";
-}
-
-/*
- ==============
- Sys_DefaultSavePath
- ==============
- */
-const char *Sys_DefaultSavePath(void) {
-    static char	buf[ 1024 ];
-    BPTR                  pathlock;
-
-    D(bug("[ADoom3] Sys_DefaultSavePath()\n"));
-
-    if ((pathlock = Lock("ENVARC:", SHARED_LOCK)) != BNULL)
-    {
-        if ( NameFromLock( pathlock, buf, sizeof( buf ) ) )
-        {
-            UnLock(pathlock);
-
-#if defined( ID_DEMO_BUILD )
-            AddPart(buf, ".doom3-demo", sizeof( buf ));
-#else
-            AddPart(buf, ".doom3", sizeof( buf ));
-#endif
-            D(bug("[ADoom3] Sys_DefaultSavePath: using '%s'\n", buf));
-            return buf;
-        }
-        UnLock(pathlock);
-    }
-
-    D(bug("[ADoom3] Sys_DefaultSavePath: faling back to DefaultBasePath\n"));
-
-    sprintf(buf, "%s/.doom3", Sys_DefaultBasePath());
-    return buf;
-}
-#endif
 
 /*
 =================
@@ -466,30 +285,49 @@ Sys_OpenURL
 =================
 */
 void AROS_OpenURL( const char *url ) {
-    struct TagItem tags[2];
+    D( bug( "[ADoom3] %s( '%s' )\n", __func__, url ) );
 
-    tags[0].ti_Tag = TAG_DONE; tags[0].ti_Data = 0;
+    if( OpenURLBase ) {
+        struct TagItem tags[2];
 
-    D(bug("[ADoom3] OpenURL( '%s' )\n", url));
+        tags[0].ti_Tag = TAG_DONE;
+        tags[0].ti_Data = 0;
 
-    URL_OpenA( (char *)url, tags );
+        URL_OpenA( (char *)url, tags );
+    }
 }
 
-bool AROS_GetSavePath(char buf[1024])
+bool AROS_GetSavePath(char *buf, const size_t max)
 {
-	static const size_t bufSize = 1024; // NOTE: keep in sync with caller/function sig!
-	BPTR pathlock;
-	bool ret = false;
-	if ((pathlock = Lock("PROGDIR:", SHARED_LOCK)) != BNULL)
-	{
-		if ( NameFromLock( pathlock, buf, bufSize ) )
-		{
-			D(bug("[ADoom3] Sys_GetPath: using '%s'\n", buf));
-			ret = true;
-		}
-		UnLock(pathlock);
-	}
-	return ret;
+    BPTR pathlock;
+    bool ret = false;
+    if( ( pathlock = Lock( "PROGDIR:", SHARED_LOCK ) ) != BNULL )
+    {
+        struct FileInfoBlock *fib;
+        bool readonly = false;
+        if( ( fib = (struct FileInfoBlock *)AllocDosObject( DOS_FIB, NULL ) ) ) {
+            if( Examine( pathlock, fib ) )
+                if( fib->fib_Protection & FIBF_WRITE )
+                    readonly = TRUE;
+
+            FreeDosObject( DOS_FIB, fib );
+        }
+        if( readonly ) {
+            UnLock( pathlock );
+            pathlock = Lock( "T:ADoom3", SHARED_LOCK );
+            if( pathlock == BNULL ) {
+                pathlock = CreateDir( "T:ADoom3" );
+            }
+        }
+        if( pathlock ) {
+            if( NameFromLock( pathlock, buf, max ) ) {
+                D( bug( "[ADoom3] %s: using '%s'\n", __func__, buf ) );
+                ret = true;
+            }
+            UnLock( pathlock );
+        }
+    }
+    return ret;
 }
 
 bool Sys_GetPath(sysPath_t type, idStr &path) {
@@ -497,37 +335,51 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
     BPTR pathlock;
     bool ret = false;
 
-    D(bug("[ADoom3] Sys_GetPath(%d)\n", type));
+    D( bug( "[ADoom3] %s(%d)\n", __func__, type ) );
 
     path.Clear();
 
-    switch(type) {
-    case PATH_BASE:
+    switch( type ) {
     case PATH_CONFIG:
+        if( launch_path[0] != 0 ) {
+            path = launch_path;
+            ret = true;
+            break;
+        }
+    case PATH_BASE:
     case PATH_SAVE:
-            if(AROS_GetSavePath(buf)) {
+        if( AROS_GetSavePath( buf, sizeof( buf ) ) ) {
+            path = buf;
+            ret = true;
+        }
+        break;
+
+    case PATH_LAUNCH:
+        if( launch_path[0] != 0 ) {
+            path = launch_path;
+            ret = true;
+            break;
+        }
+    case PATH_EXE:
+        if( ( pathlock = Lock( "PROGDIR:", SHARED_LOCK ) ) != BNULL ) {
+            if( NameFromLock( pathlock, buf, sizeof( buf ) ) ) {
+                struct Node *thisTask = (struct Node *)FindTask( NULL );
+
+                if( thisTask->ln_Name )
+                    AddPart( buf, FilePart( thisTask->ln_Name ), sizeof( buf ) );
+
                 path = buf;
                 ret = true;
             }
-            break;
-
-    case PATH_EXE:
-            if ((pathlock = Lock("PROGDIR:", SHARED_LOCK)) != BNULL)
-            {
-                if ( NameFromLock( pathlock, buf, sizeof( buf ) ) )
-                {
-                    struct Node *thisTask = (struct Node *)FindTask(NULL);
-
-                    AddPart(buf, thisTask->ln_Name, 1024);
-
-                    D(bug("[ADoom3] Sys_GetPath: using '%s'\n", buf));
-                    path = buf;
-                    ret = true;
-                }
-                UnLock(pathlock);
-            }
-            break;
+            UnLock( pathlock );
+        }
+        break;
     }
-
+    D(
+        if( path )
+            bug( "[ADoom3] %s: using '%s'\n", __func__, path.c_str() );
+        else
+            bug( "[ADoom3] %s: returning 0\n", __func__);
+    )
     return ret;
 }

@@ -2626,7 +2626,16 @@ Helper for LoadGameDLL() to make it less painful to try different dll names.
 */
 void idCommonLocal::LoadGameDLLbyName( const char *dll, idStr& s ) {
 	s.CapLength(0);
-	// try next to the binary first (build tree)
+	#if defined(__AROS__)
+	// check in the launch (mod) directory first on AROS
+	if (Sys_GetPath(PATH_LAUNCH, s)) {
+		s.AppendPath(dll);
+		gameDLL = sys->DLL_Load(s);
+		if (gameDLL)
+			return;
+	}
+	#endif
+	// try next to the binary
 	if (Sys_GetPath(PATH_EXE, s)) {
 		// "s = " seems superfluous, but works around g++ 4.7 bug else StripFilename()
 		// (and possibly even CapLength()) seems to be "optimized" away and the string contains garbage
@@ -2657,7 +2666,7 @@ void idCommonLocal::LoadGameDLLbyName( const char *dll, idStr& s ) {
 			s.AppendPath(dll);
 			gameDLL = sys->DLL_Load(s);
 		}
-	#else
+	#elif !defined(__AROS__)
 		// then the install folder on *nix
 		if (!gameDLL) {
 			s = BUILD_LIBDIR;

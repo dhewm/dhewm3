@@ -26,14 +26,25 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+//#define DEBUG 1
+#include <aros/debug.h>
+
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include <setjmp.h>
+
+#include "sys/aros/aros_fixup.h"
 
 #include "sys/platform.h"
 #include "framework/Common.h"
 
 #include "sys/aros/aros_public.h"
+
+extern jmp_buf		nsstask_exitjmp;
+extern int        	nsstask_exittype;
+extern int        	nsstask_exitcode;
 
 const int siglist[] = {
 	SIGHUP,
@@ -85,6 +96,8 @@ void AROS_ClearSigs( ) {
 	struct sigaction action;
 	int i;
 
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
+
 	/* Set up the structure */
 	action.sa_handler = SIG_DFL;
 	sigemptyset( &action.sa_mask );
@@ -107,9 +120,13 @@ sig_handler
 static void sig_handler( int signum, siginfo_t *info, void *context ) {
 	static bool double_fault = false;
 
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
+
 	if ( double_fault ) {
 		Sys_Printf( "double fault %s, bailing out\n", strsignal( signum ) );
-		_exit( signum );
+		nsstask_exittype = 2;
+		nsstask_exitcode = signum;
+		longjmp( nsstask_exitjmp, 1 );
 	}
 
 	double_fault = true;
@@ -137,6 +154,8 @@ void AROS_InitSigs( ) {
 	struct sigaction action;
 	int i;
 
+    D( bug( "[ADoom3] %s()\n", __func__ ) );
+
 	fatalError[0] = '\0';
 
 	/* Set up the structure */
@@ -162,6 +181,8 @@ void AROS_InitSigs( ) {
 	// then SIGTTIN or SIGTOU could be emitted, if not caught, turns into a SIGSTP
 	signal( SIGTTIN, SIG_IGN );
 	signal( SIGTTOU, SIG_IGN );
+
+    D( bug( "[ADoom3] %s: Init complete\n", __func__ ) );
 }
 
 /*
@@ -170,5 +191,6 @@ Sys_SetFatalError
 ==================
 */
 void Sys_SetFatalError( const char *error ) {
+    D( bug( "[ADoom3] %s('%s')\n", __func__, error ) );
 	idStr::Copynz( fatalError, error, sizeof( fatalError ) );
 }

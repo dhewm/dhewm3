@@ -1,0 +1,4 @@
+ADoom3 +set fs_game d3xp
+If NOT ERROR
+    EndCLI
+EndIf

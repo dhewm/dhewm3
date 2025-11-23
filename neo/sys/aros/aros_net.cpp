@@ -26,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#define __BSDSOCKET_NOLIBBASE__
 
 #include <proto/socket.h>
 #include <proto/miami.h>
@@ -56,6 +57,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_public.h"
 
 #include "sys/aros/aros_public.h"
+
+struct Library *SocketBase = NULL;
 
 idPort clientPort, serverPort;
 
@@ -278,10 +281,16 @@ bool Sys_CompareNetAdrBase( const netadr_t a, const netadr_t b ) {
 NET_InitNetworking
 ====================
 */
+extern struct Library *Sys_AROS_InitNetworking(void);
 void Sys_InitNetworking(void)
 {
 	// haven't been able to clearly pinpoint which standards or RFCs define SIOCGIFCONF, SIOCGIFADDR, SIOCGIFNETMASK ioctls
 	// it seems fairly widespread, in Linux kernel ioctl, and in BSD .. so let's assume it's always available on our targets
+
+	if ((SocketBase = Sys_AROS_InitNetworking()) == NULL) {
+		common->FatalError( "InitNetworking: unable to open bsdsocket.libary\n");
+		return;
+	}
 
 	int		s;
 	char	buf[ MAX_INTERFACES*sizeof( ifreq ) ];
