@@ -415,6 +415,8 @@ private:
 	static idCVar			fs_game_base;
 	static idCVar			fs_caseSensitiveOS;
 	static idCVar			fs_searchAddons;
+	// DG: additional directory to search for game DLLs
+	static idCVar			fs_gameDllPath;
 
 	backgroundDownload_t *	backgroundDownloads;
 	backgroundDownload_t	defaultBackgroundDownload;
@@ -482,6 +484,8 @@ idCVar	idFileSystemLocal::fs_caseSensitiveOS( "fs_caseSensitiveOS", "0", CVAR_SY
 idCVar	idFileSystemLocal::fs_caseSensitiveOS( "fs_caseSensitiveOS", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
 #endif
 idCVar	idFileSystemLocal::fs_searchAddons( "fs_searchAddons", "0", CVAR_SYSTEM | CVAR_BOOL, "search all addon pk4s ( disables addon functionality )" );
+
+idCVar idFileSystemLocal::fs_gameDllPath( "fs_gameDllPath", "", CVAR_SYSTEM | CVAR_INIT, "additional directory to search the game .dll (.so/.dylib/...) in; searched before all other places (if set)" );
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem *		fileSystem = &fileSystemLocal;
