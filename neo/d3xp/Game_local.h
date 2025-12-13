@@ -233,7 +233,13 @@ struct timeState_t {
 	void				Get( int& t, int& pt, int& ms, int& f, int& rct )	{ t = time; pt = previousTime; ms = msec; f = framenum; rct = realClientTime; };
 	void				Save( idSaveGame *savefile ) const	{ savefile->WriteInt( time ); savefile->WriteInt( previousTime ); savefile->WriteInt( msec ); savefile->WriteInt( framenum ); savefile->WriteInt( realClientTime ); }
 	void				Restore( idRestoreGame *savefile )	{ savefile->ReadInt( time ); savefile->ReadInt( previousTime ); savefile->ReadInt( msec ); savefile->ReadInt( framenum ); savefile->ReadInt( realClientTime ); }
-	void				Increment()											{ framenum++; previousTime = time; time += msec; realClientTime = time; };
+	void				Increment(int _msec) { // dezo2/DG: update msec (sometimes it's 16, sometimes 17)
+		framenum++;
+		previousTime = time;
+		msec = _msec;
+		time += msec;
+		realClientTime = time;
+	}
 };
 
 enum slowmoState_t {
@@ -341,7 +347,7 @@ public:
 	virtual void			GetBestGameType( const char* map, const char* gametype, char buf[ MAX_STRING_CHARS ] );
 
 	void					ComputeSlowMsec();
-	void					RunTimeGroup2();
+	void					RunTimeGroup2( int msec_fast ); // dezo2/DG: added argument for 16 vs 17ms
 
 	void					ResetSlowTimeVars();
 	void					QuickSlowmoReset();

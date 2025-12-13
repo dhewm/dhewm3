@@ -2428,11 +2428,11 @@ void idGameLocal::SortActiveEntityList( void ) {
 idGameLocal::RunTimeGroup2
 ================
 */
-void idGameLocal::RunTimeGroup2() {
+void idGameLocal::RunTimeGroup2( int msec_fast ) { // dezo2/DG: added argument for 16 vs 17ms
 	idEntity *ent;
 	int num = 0;
 
-	fast.Increment();
+	fast.Increment( msec_fast );
 	fast.Get( time, previousTime, msec, framenum, realClientTime );
 
 	for( ent = activeEntities.Next(); ent != NULL; ent = ent->activeNode.Next() ) {
@@ -2447,6 +2447,16 @@ void idGameLocal::RunTimeGroup2() {
 	slow.Get( time, previousTime, msec, framenum, realClientTime );
 }
 #endif
+
+// dezo2/DG: returns number of milliseconds for this frame, either 1000/gameHz or 1000/gameHz + 1,
+//   (16 or 17) so the frametimes of gameHz frames add up to 1000ms.
+//   This prevents animations or videos from running slightly to slow or running out of sync
+//   with audio in cutscenes (those only worked right at 62.5fps with exactly 16ms frames,
+//   but now even without vsync we're enforcing 16.666ms frames for proper 60fps)
+static int CalcMSec( long long framenum ) {
+	long long divisor = 100LL * USERCMD_HZ;
+	return int( (framenum * 100000LL) / divisor - ((framenum-1) * 100000LL) / divisor );
+}
 
 /*
 ================
@@ -2491,6 +2501,12 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
 		// update the game time
 		framenum++;
 		previousTime = time;
+
+		// dezo2/DG: recalculate each frame, see comment at CalcMSec()
+		int msec_fast = CalcMSec( framenum );
+		if ( slowmoState == SLOWMO_STATE_OFF )
+			msec = msec_fast;
+
 		time += msec;
 		realClientTime = time;
 
@@ -2588,7 +2604,7 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
 		}
 
 #ifdef _D3XP
-		RunTimeGroup2();
+		RunTimeGroup2( msec_fast );
 #endif
 
 		// remove any entities that have stopped thinking
