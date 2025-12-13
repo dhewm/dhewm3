@@ -272,7 +272,11 @@ public:
 	int						framenum;
 	int						previousTime;			// time in msec of last frame
 	int						time;					// in msec
-	static const int		msec = USERCMD_MSEC;	// time since last update in milliseconds
+
+	// DG: msec used to be static const, making it mutable
+	//     so it can be set to 16 or 17 in different frames
+	//     so 60 frames add up to 1000ms
+	int						msec;					// time since last update in milliseconds
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 

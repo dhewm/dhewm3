@@ -217,6 +217,7 @@ void idGameLocal::Clear( void ) {
 	framenum = 0;
 	previousTime = 0;
 	time = 0;
+	msec = USERCMD_MSEC;
 	vacuumAreaNum = 0;
 	mapFileName.Clear();
 	mapFile = NULL;
@@ -2227,6 +2228,16 @@ void idGameLocal::SortActiveEntityList( void ) {
 	sortPushers = false;
 }
 
+// dezo2/DG: returns number of milliseconds for this frame, either 1000/gameHz or 1000/gameHz + 1,
+//   (16 or 17) so the frametimes of gameHz frames add up to 1000ms.
+//   This prevents animations or videos from running slightly to slow or running out of sync
+//   with audio in cutscenes (those only worked right at 62.5fps with exactly 16ms frames,
+//   but now even without vsync we're enforcing 16.666ms frames for proper 60fps)
+static int CalcMSec( long long framenum ) {
+	long long divisor = 100LL * USERCMD_HZ;
+	return int( (framenum * 100000LL) / divisor - ((framenum-1) * 100000LL) / divisor );
+}
+
 /*
 ================
 idGameLocal::RunFrame
@@ -2263,6 +2274,7 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		// update the game time
 		framenum++;
 		previousTime = time;
+		msec = CalcMSec( framenum ); // dezo2/DG: recalculate each frame, see comment at CalcMSec()
 		time += msec;
 		realClientTime = time;
 
