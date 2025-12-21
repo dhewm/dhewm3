@@ -250,6 +250,11 @@ else()
 	add_definitions(-DIMGUI_DISABLE)
 endif()
 
+if (MINGW)
+	message(STATUS "MINGW detected! using alternate curl path")
+	set(CURL_NO_CURL_CMAKE ON)
+endif()
+
 find_package(CURL QUIET)
 if(CURL_FOUND)
 	set(ID_ENABLE_CURL ON)
