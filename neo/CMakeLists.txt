@@ -250,8 +250,8 @@ else()
 	add_definitions(-DIMGUI_DISABLE)
 endif()
 
-if (MINGW)
-	message(STATUS "MINGW detected! using alternate curl path")
+if(DEFINED ENV{MSYSTEM})
+	message(STATUS "Detected MSYS or similar environment. Using alternate curl path")
 	set(CURL_NO_CURL_CMAKE ON)
 endif()
 
