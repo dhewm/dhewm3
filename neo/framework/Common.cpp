@@ -114,11 +114,14 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
-// in the high-fps branch, the next three values will be set based on com_gameHz
-// here (in the old 60fps-only code) they're const and just to reduce difference to the other branch
-//const int    com_gameHzVal = 60;
-//const int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz
-const double  com_preciseFrameLengthMS = 1000.0 / 60.0;
+// DG: the next block is for configurable framerate
+idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, "Frames per second the game runs at", 10, 480 ); // TODO: make it float? make it default to 62.5?
+// the next values will be set based on com_gameHz
+int    com_gameHzVal = 60;
+int    com_gameFrameTime = 16; // length of one frame in msec, 1000 / com_gameHz
+float  com_gameTicScale = 1.0f; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
+
+double  com_preciseFrameLengthMS = 1000.0 / 60.0;
 
 double com_preciseFrameTimeMS = 0; // like com_frameTime but as double: time (since start) for the current frame in milliseconds
 
@@ -231,6 +234,8 @@ private:
 	void						PrintLoadingMessage( const char *msg );
 	void						FilterLangList( idStrList* list, idStr lang );
 
+	void						UpdateGameHz(); // DG: for configurable framerate
+
 	bool						com_fullyInitialized;
 	bool						com_refreshOnPrint;		// update the screen every print for dmap
 	int							com_errorEntered;		// 0, ERP_DROP, etc
@@ -276,9 +281,9 @@ void Com_UpdateTicNumber() {
 			// usually numTics should be 1, except if timeDiff > 16.6667 (skipped a frame?)
 			// should be `1 + timediff / com_preciseFrameLengthMS`
 			// <=> 1 + timediff / (1000.0 / USERCMD_HZ) // 1000ms in one second
-			// <=> 1 + timediff * (USERCMD_HZ / 1000.0) // USERCMD_HZ = 60;
-			// <=> 1 + timediff * 0.06;
-			int numTics = 1 + timeDiff * 0.06;
+			// <=> 1 + timediff * (USERCMD_HZ / 1000.0) // USERCMD_HZ = com_gameHzVal;
+			// <=> 1 + timediff * com_gameHzVal * 0.001
+			int numTics = 1 + timeDiff * double(com_gameHzVal) * 0.001;
 			com_ticNumber += numTics;
 
 			nextTicTime += numTics * com_preciseFrameLengthMS;
@@ -289,6 +294,11 @@ void Com_UpdateTicNumber() {
 // DG: updates com_frameTime based on the current tic number (which is also updated if necessary)
 //     and com_preciseFrameLengthMS
 void Com_UpdateFrameTime() {
+	// It used to be just com_frameTime = com_ticNumber * USERCMD_MSEC;
+	// But now that USERCMD_MSEC isn't fixed to 16 for fixed 60fps anymore (thanks to com_gameHz),
+	// that doesn't work anymore (com_frameTime would decrease when setting com_gameHz to a lower value!)
+	// So I moved updating it into a function (it's done in 3 places) that has just slightly more logic
+	// to ensure com_frameTime never decreases (well, until it overflows :-p)
 	static int lastTicNum = 0;
 
 	Com_UpdateTicNumber();
@@ -2509,6 +2519,11 @@ void idCommonLocal::Frame( void ) {
 			}
 		}
 
+		// DG: for configurable framerate
+		if ( com_gameHz.IsModified() ) {
+			UpdateGameHz();
+		}
+
 		eventLoop->RunEventLoop();
 
 		// DG: prepare new ImGui frame - I guess this is a good place, as all new events should be available?
@@ -2777,6 +2792,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// initialize the game object
 	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale ); // DG: make sure it knows the ticrate
 		game->Init();
 	}
 }
@@ -3276,6 +3292,8 @@ void idCommonLocal::InitGame( void ) {
 	// if any archived cvars are modified after this, we will trigger a writing of the config file
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 
+	UpdateGameHz(); // DG: for configurable framerate
+
 	// init the user command input code
 	usercmdGen->Init();
 
@@ -3387,6 +3405,25 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 
 	// shut down the file system
 	fileSystem->Shutdown( reloading );
+}
+
+// DG: for configurable framerate
+void idCommonLocal::UpdateGameHz()
+{
+	com_gameHz.ClearModified();
+	com_gameHzVal = com_gameHz.GetInteger();
+	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
+	// but for 60Hz (16.6667ms) it remains 16ms, like before
+	com_gameFrameTime = ( 1000.0f / com_gameHzVal ) + 0.1f; // TODO: idMath::Rint ?
+	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5 ?
+
+	com_preciseFrameLengthMS = 1000.0 / double(com_gameHzVal);
+
+	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameTime );
+
+	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale );
+	}
 }
 
 // DG: below here are hacks to allow adding callbacks and exporting additional functions to the

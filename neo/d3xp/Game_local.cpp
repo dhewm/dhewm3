@@ -203,6 +203,10 @@ idGameLocal::idGameLocal
 */
 idGameLocal::idGameLocal() {
 	Clear();
+	// DG: some sane default values until the proper values are set by SetGameHz()
+	msec = gameMsec = 16;
+	gameHz = 60;
+	gameTicScale = 1.0f;
 }
 
 /*
@@ -5062,3 +5066,13 @@ idGameLocal::GetMapLoadingGUI
 ===============
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
+
+// DG: Added for configurable framerate
+void idGameLocal::SetGameHz( float hz, float frametime, float ticScaleFactor )
+{
+	gameHz = hz;
+	gameMsec = frametime;
+	msec = frametime; // TODO: maybe msec must be scaled
+	// TODO: adjust this->fast and this->slow
+	gameTicScale = ticScaleFactor;
+}
