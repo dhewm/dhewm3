@@ -118,10 +118,9 @@ idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SY
 idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, "Frames per second the game runs at", 10, 480 ); // TODO: make it float? make it default to 62.5?
 // the next values will be set based on com_gameHz
 int    com_gameHzVal = 60;
-int    com_gameFrameTime = 16; // length of one frame in msec, 1000 / com_gameHz
+int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz
+double  com_preciseFrameLengthMS = 1000.0 / 60.0; // 1000 / com_gameHzVal
 float  com_gameTicScale = 1.0f; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
-
-double  com_preciseFrameLengthMS = 1000.0 / 60.0;
 
 double com_preciseFrameTimeMS = 0; // like com_frameTime but as double: time (since start) for the current frame in milliseconds
 
@@ -2561,8 +2560,8 @@ void idCommonLocal::Frame( void ) {
 		// set idLib frame number for frame based memory dumps
 		idLib::frameNumber = com_frameNumber;
 
-		if ( GLimp_GetSwapInterval() != 0 && fabsf(60.0f - GLimp_GetDisplayRefresh()) < 1.0f ) {
-			// if we're using vsync and the display is running at about 60Hz, start next tic
+		if ( GLimp_GetSwapInterval() != 0 && fabsf(com_gameHzVal - GLimp_GetDisplayRefresh()) < 1.0f ) {
+			// if we're using vsync and the display is running at about the target framerate, start next tic
 			// immediately so our internal tic time and vsync don't drift apart
 			double now = Sys_MillisecondsPrecise();
 			if(nextTicTime > now) {
@@ -2792,7 +2791,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// initialize the game object
 	if ( game != NULL ) {
-		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale ); // DG: make sure it knows the ticrate
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale ); // DG: make sure it knows the ticrate
 		game->Init();
 	}
 }
@@ -3412,17 +3411,17 @@ void idCommonLocal::UpdateGameHz()
 {
 	com_gameHz.ClearModified();
 	com_gameHzVal = com_gameHz.GetInteger();
+	com_preciseFrameLengthMS = 1000.0 / double(com_gameHzVal);
 	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
 	// but for 60Hz (16.6667ms) it remains 16ms, like before
-	com_gameFrameTime = ( 1000.0f / com_gameHzVal ) + 0.1f; // TODO: idMath::Rint ?
+	com_gameFrameLengthMS = com_preciseFrameLengthMS + 0.1f; // TODO: idMath::Rint ?
+
 	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5 ?
 
-	com_preciseFrameLengthMS = 1000.0 / double(com_gameHzVal);
-
-	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameTime );
+	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameLengthMS );
 
 	if ( game != NULL ) {
-		game->SetGameHz( com_gameHzVal, com_gameFrameTime, com_gameTicScale );
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale );
 	}
 }
 
