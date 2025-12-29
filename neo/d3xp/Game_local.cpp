@@ -2465,12 +2465,12 @@ void idGameLocal::RunTimeGroup2( int msec_fast ) { // dezo2/DG: added argument f
 #endif
 
 // dezo2/DG: returns number of milliseconds for this frame, either 1000/gameHz or 1000/gameHz + 1,
-//   (16 or 17) so the frametimes of gameHz frames add up to 1000ms.
+//   (e.g. 16 or 17 for 60Hz) so the frametimes of gameHz frames add up to 1000ms.
 //   This prevents animations or videos from running slightly to slow or running out of sync
 //   with audio in cutscenes (those only worked right at 62.5fps with exactly 16ms frames,
 //   but now even without vsync we're enforcing 16.666ms frames for proper 60fps)
 static int CalcMSec( long long framenum ) {
-	long long divisor = 100LL * USERCMD_HZ;
+	long long divisor = 100LL * gameLocal.gameHz;
 	return int( (framenum * 100000LL) / divisor - ((framenum-1) * 100000LL) / divisor );
 }
 
