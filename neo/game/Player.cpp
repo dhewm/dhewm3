@@ -1747,7 +1747,7 @@ void idPlayer::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( numProjectileHits );
 
 	savefile->WriteBool( airless );
-	savefile->WriteInt( airTics );
+	savefile->WriteInt( (int)airTics );
 	savefile->WriteInt( lastAirDamage );
 
 	savefile->WriteBool( gibDeath );
@@ -1979,7 +1979,11 @@ void idPlayer::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( numProjectileHits );
 
 	savefile->ReadBool( airless );
-	savefile->ReadInt( airTics );
+	// DG: I made made airTics float for high-fps (where we have fractions of 60Hz tics),
+	//     but for saving ints should still suffice (and this preserves savegame compat)
+	int iairTics;
+	savefile->ReadInt( iairTics );
+	airTics = iairTics;
 	savefile->ReadInt( lastAirDamage );
 
 	savefile->ReadBool( gibDeath );
@@ -2903,12 +2907,12 @@ bool idPlayer::Give( const char *statname, const char *value ) {
 		}
 
 	} else if ( !idStr::Icmp( statname, "air" ) ) {
-		if ( airTics >= pm_airTics.GetInteger() ) {
+		if ( airTics >= pm_airTics.GetFloat() ) { // DG: airTics are floats now for high-fps support
 			return false;
 		}
-		airTics += atoi( value ) / 100.0 * pm_airTics.GetInteger();
-		if ( airTics > pm_airTics.GetInteger() ) {
-			airTics = pm_airTics.GetInteger();
+		airTics += atoi( value ) / 100.0 * pm_airTics.GetFloat();
+		if ( airTics > pm_airTics.GetFloat() ) {
+			airTics = pm_airTics.GetFloat();
 		}
 	} else {
 		return inventory.Give( this, spawnArgs, statname, value, &idealWeapon, true );
@@ -5095,7 +5099,8 @@ void idPlayer::UpdateAir( void ) {
 				hud->HandleNamedEvent( "noAir" );
 			}
 		}
-		airTics--;
+		// DG: was airTics--, but airTics assume 60Hz tics and we support other ticrates now (com_gameHz)
+		airTics -= 1.0f / gameLocal.gameTicScale;
 		if ( airTics < 0 ) {
 			airTics = 0;
 			// check for damage
@@ -5115,16 +5120,16 @@ void idPlayer::UpdateAir( void ) {
 				hud->HandleNamedEvent( "Air" );
 			}
 		}
-		airTics+=2;	// regain twice as fast as lose
-		if ( airTics > pm_airTics.GetInteger() ) {
-			airTics = pm_airTics.GetInteger();
+		airTics += 2.0f / gameLocal.gameTicScale; // regain twice as fast as lose - DG: scale for com_gameHz
+		if ( airTics > pm_airTics.GetFloat() ) {
+			airTics = pm_airTics.GetFloat();
 		}
 	}
 
 	airless = newAirless;
 
 	if ( hud ) {
-		hud->SetStateInt( "player_air", 100 * airTics / pm_airTics.GetInteger() );
+		hud->SetStateInt( "player_air", 100 * (airTics / pm_airTics.GetFloat()) );
 	}
 }
 
