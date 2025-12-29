@@ -59,7 +59,7 @@ public:
 ===============================================================================
 */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN64)
 #define VPCALL __fastcall
 #else
 #define VPCALL
