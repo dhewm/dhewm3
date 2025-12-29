@@ -115,7 +115,9 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
 // DG: the next block is for configurable framerate
-idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, "Frames per second the game runs at", 10, 480 ); // TODO: make it float? make it default to 62.5?
+#define COM_GAMEHZ_DESCR "Frames per second the game should run at - keep in mind that Vertical Sync (or a too slow computer) may slow it down, and that running below this configured framerate can cause problems!"
+idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, COM_GAMEHZ_DESCR, 10, 480 ); // TODO: make it float?
+
 // the next values will be set based on com_gameHz
 int    com_gameHzVal = 60;
 int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz

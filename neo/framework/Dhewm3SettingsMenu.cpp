@@ -2332,6 +2332,7 @@ static CVarOption gameOptions[] = {
 	CVarOption( "ui_autoReload", "Auto Weapon Reload", OT_BOOL ),
 	CVarOption( "ui_autoSwitch", "Auto Weapon Switch", OT_BOOL ),
 	CVarOption( "Visual" ),
+	CVarOption( "com_gameHz", "Framerate", OT_INT, 10, 500 ),
 	CVarOption( "g_showHud", "Show HUD", OT_BOOL ),
 	CVarOption( "com_showFPS", "Show Framerate (FPS)", OT_BOOL ),
 	CVarOption( "ui_showGun", "Show Gun Model", OT_BOOL ),
