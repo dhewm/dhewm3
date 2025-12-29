@@ -383,7 +383,11 @@ typedef int (*xthread_t)( void * );
 typedef struct {
 	const char		*name;
 	SDL_Thread		*threadHandle;
+#ifdef D3_SDL3
+	uint64_t		threadId;
+#else
 	unsigned long	threadId;
+#endif
 } xthreadInfo;
 
 void				Sys_CreateThread( xthread_t function, void *parms, xthreadInfo &info, const char *name );
