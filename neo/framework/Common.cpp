@@ -115,7 +115,7 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
 // DG: the next block is for configurable framerate
-#define COM_GAMEHZ_DESCR "Frames per second the game should run at - keep in mind that Vertical Sync (or a too slow computer) may slow it down, and that running below this configured framerate can cause problems!"
+#define COM_GAMEHZ_DESCR "Frames per second the game should run at. You really shouldn't set a higher value than 250! Also keep in mind that Vertical Sync (or a too slow computer) may slow it down, and that running below this configured framerate can cause problems!"
 idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, COM_GAMEHZ_DESCR, 10, 480 ); // TODO: make it float?
 
 // the next values will be set based on com_gameHz
@@ -3413,9 +3413,16 @@ void idCommonLocal::UpdateGameHz()
 {
 	com_gameHz.ClearModified();
 	com_gameHzVal = com_gameHz.GetInteger();
+
+	if ( com_gameHzVal > 250 ) {
+		Warning( "Setting com_gameHz to values above 250 is known to cause bugs! You generally shouldn't do this, it's only for testing/debugging purposes!" );
+	}
+
 	com_preciseFrameLengthMS = 1000.0 / double(com_gameHzVal);
 	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
 	// but for 60Hz (16.6667ms) it remains 16ms, like before
+	// FIXME: still do this, now that the game code increases the frametime by 1ms for some frames
+	//        so com_gameHz frames add up to 1000ms?
 	com_gameFrameLengthMS = com_preciseFrameLengthMS + 0.1f; // TODO: idMath::Rint ?
 
 	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5 ?
