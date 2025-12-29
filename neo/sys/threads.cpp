@@ -55,6 +55,13 @@ If you have questions concerning this license or the applicable additional terms
   #define SDL_CondSignal SDL_SignalCondition
 #endif
 
+#if SDL_MAJOR_VERSION < 3
+  // in SDL3 SDL_ThreadID is the type (that's called SDL_threadID with lowercase-t in SDL2),
+  // in SDL1.2 and SDL2 SDL_ThreadID() is a function that returns the current thread's ID...
+  // So use SDL_GetCurrentThreadID() in all cases to avoid this clash
+  #define SDL_GetCurrentThreadID SDL_ThreadID
+#endif
+
 #if __cplusplus >= 201103
   // xthreadinfo::threadId doesn't use SDL_threadID directly so we don't drag SDL headers into sys_public.h
   // but we should still make sure that the type fits (in SDL1.2 it's Uint32, in SDL2 it's unsigned long)
@@ -87,7 +94,7 @@ Sys_InitThreads
 ==================
 */
 void Sys_InitThreads() {
-	mainThreadID = SDL_ThreadID();
+	mainThreadID = SDL_GetCurrentThreadID();
 	mainThreadIDset = true;
 
 	// critical sections
@@ -330,7 +337,7 @@ const char *Sys_GetThreadName(int *index) {
 
 	Sys_EnterCriticalSection();
 
-	SDL_threadID id = SDL_ThreadID();
+	SDL_threadID id = SDL_GetCurrentThreadID();
 
 	for (int i = 0; i < thread_count; i++) {
 		if (id == thread[i]->threadId) {
@@ -362,7 +369,7 @@ returns true if the current thread is the main thread
 */
 bool Sys_IsMainThread() {
 	if ( mainThreadIDset )
-		return SDL_ThreadID() == mainThreadID;
+		return SDL_GetCurrentThreadID() == mainThreadID;
 	// if this is called before mainThreadID is set, we haven't created
 	// any threads yet so it should be the main thread
 	return true;
