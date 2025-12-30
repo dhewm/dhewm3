@@ -405,7 +405,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 		set(sys_libs ${sys_libs} -fsanitize=undefined)
 	endif()
 
-	if(NOT AROS)
+	if(NOT AROS AND NOT WIN32)
 		CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
 		if(NOT cxx_has_fvisibility)
 			message(FATAL_ERROR "Compiler does not support -fvisibility")
