@@ -1969,6 +1969,12 @@ char * D3_ISO8859_1toUTF8( const char* isoStr, char *utf8buf, int utf8bufLen )
 			++str;
 		}
 	}
+	if(i > n) {
+		// last written codepoint used two chars
+		// => would be out of bounds with terminating \0
+		// => utf8buf was too short, return NULL
+		return NULL;
+	}
 	buffer[i] = '\0';
 	return utf8buf;
 }
