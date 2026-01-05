@@ -1,7 +1,7 @@
 [Desktop Entry]
 Comment=dhewm 3 is a Doom 3 GPL source port
 Categories=Game;Shooter;
-Exec=dhewm3 "\\$@"
+Exec=dhewm3
 Icon=org.dhewm3.Dhewm3
 Name=Dhewm3
 StartupNotify=true
