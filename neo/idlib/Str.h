@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __STR_H__
 #define __STR_H__
 
+#include "sys/platform.h" // ID_INLINE
 #include "idlib/CmdArgs.h"
 
 /*

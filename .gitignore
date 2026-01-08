@@ -5,6 +5,8 @@
 .cproject
 .project
 .settings/
+.cache/
+.DS_Store
 
 /dhewm*
 /*-releases/
