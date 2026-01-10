@@ -272,7 +272,7 @@ public:
 		// it returns true if we're currently running the doom3 demo
 		// not relevant for mods, only for game/ aka base.dll/base.so/...
 		FT_IsDemo = 1,
-		// the function's signature is bool fn(idInterpreter,idProgram,int) with arguments:
+		// the function's signature is bool fn(idInterpreter*, idProgram*, int) with arguments:
 		// idInterpreter *interpreter, idProgram *program, int instructionPointer
 		// it returns true if the game debugger is active.
 		// relevant for mods.

@@ -2633,14 +2633,16 @@ void idCommonLocal::LoadGameDLLbyName( const char *dll, idStr& s ) {
 		gameDLL = sys->DLL_Load(s);
 	}
 
-	s.CapLength(0);
 	#if defined(__AROS__)
-	// check in the launch (mod) directory first on AROS
-	if (Sys_GetPath(PATH_LAUNCH, s)) {
-		s.AppendPath(dll);
-		gameDLL = sys->DLL_Load(s);
-		if (gameDLL)
-			return;
+	if (!gameDLL) {
+		s.CapLength(0);
+		// check in the launch (mod) directory first on AROS
+		if (Sys_GetPath(PATH_LAUNCH, s)) {
+			s.AppendPath(dll);
+			gameDLL = sys->DLL_Load(s);
+			if (gameDLL)
+				return;
+		}
 	}
 	#endif
 
