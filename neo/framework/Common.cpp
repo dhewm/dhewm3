@@ -114,11 +114,15 @@ idCVar com_dbgServerAdr( "com_dbgServerAdr", "localhost", CVAR_SYSTEM | CVAR_ARC
 
 idCVar com_product_lang_ext( "com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files." );
 
-// in the high-fps branch, the next three values will be set based on com_gameHz
-// here (in the old 60fps-only code) they're const and just to reduce difference to the other branch
-//const int    com_gameHzVal = 60;
-//const int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz
-const double  com_preciseFrameLengthMS = 1000.0 / 60.0;
+// DG: the next block is for configurable framerate
+#define COM_GAMEHZ_DESCR "Frames per second the game should run at. You really shouldn't set a higher value than 250! Also keep in mind that Vertical Sync (or a too slow computer) may slow it down, and that running below this configured framerate can cause problems!"
+idCVar com_gameHz( "com_gameHz", "60", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_SYSTEM, COM_GAMEHZ_DESCR, 10, 480 ); // TODO: make it float?
+
+// the next values will be set based on com_gameHz
+int    com_gameHzVal = 60;
+int    com_gameFrameLengthMS = 16; // length of one frame in msec, 1000 / com_gameHz
+double  com_preciseFrameLengthMS = 1000.0 / 60.0; // 1000 / com_gameHzVal
+float  com_gameTicScale = 1.0f; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
 
 double com_preciseFrameTimeMS = 0; // like com_frameTime but as double: time (since start) for the current frame in milliseconds
 
@@ -231,6 +235,8 @@ private:
 	void						PrintLoadingMessage( const char *msg );
 	void						FilterLangList( idStrList* list, idStr lang );
 
+	void						UpdateGameHz(); // DG: for configurable framerate
+
 	bool						com_fullyInitialized;
 	bool						com_refreshOnPrint;		// update the screen every print for dmap
 	int							com_errorEntered;		// 0, ERP_DROP, etc
@@ -276,9 +282,9 @@ void Com_UpdateTicNumber() {
 			// usually numTics should be 1, except if timeDiff > 16.6667 (skipped a frame?)
 			// should be `1 + timediff / com_preciseFrameLengthMS`
 			// <=> 1 + timediff / (1000.0 / USERCMD_HZ) // 1000ms in one second
-			// <=> 1 + timediff * (USERCMD_HZ / 1000.0) // USERCMD_HZ = 60;
-			// <=> 1 + timediff * 0.06;
-			int numTics = 1 + timeDiff * 0.06;
+			// <=> 1 + timediff * (USERCMD_HZ / 1000.0) // USERCMD_HZ = com_gameHzVal;
+			// <=> 1 + timediff * com_gameHzVal * 0.001
+			int numTics = 1 + timeDiff * double(com_gameHzVal) * 0.001;
 			com_ticNumber += numTics;
 
 			nextTicTime += numTics * com_preciseFrameLengthMS;
@@ -289,6 +295,11 @@ void Com_UpdateTicNumber() {
 // DG: updates com_frameTime based on the current tic number (which is also updated if necessary)
 //     and com_preciseFrameLengthMS
 void Com_UpdateFrameTime() {
+	// It used to be just com_frameTime = com_ticNumber * USERCMD_MSEC;
+	// But now that USERCMD_MSEC isn't fixed to 16 for fixed 60fps anymore (thanks to com_gameHz),
+	// that doesn't work anymore (com_frameTime would decrease when setting com_gameHz to a lower value!)
+	// So I moved updating it into a function (it's done in 3 places) that has just slightly more logic
+	// to ensure com_frameTime never decreases (well, until it overflows :-p)
 	static int lastTicNum = 0;
 
 	Com_UpdateTicNumber();
@@ -2509,6 +2520,11 @@ void idCommonLocal::Frame( void ) {
 			}
 		}
 
+		// DG: for configurable framerate
+		if ( com_gameHz.IsModified() ) {
+			UpdateGameHz();
+		}
+
 		eventLoop->RunEventLoop();
 
 		// DG: prepare new ImGui frame - I guess this is a good place, as all new events should be available?
@@ -2546,8 +2562,8 @@ void idCommonLocal::Frame( void ) {
 		// set idLib frame number for frame based memory dumps
 		idLib::frameNumber = com_frameNumber;
 
-		if ( GLimp_GetSwapInterval() != 0 && fabsf(60.0f - GLimp_GetDisplayRefresh()) < 1.0f ) {
-			// if we're using vsync and the display is running at about 60Hz, start next tic
+		if ( GLimp_GetSwapInterval() != 0 && fabsf(com_gameHzVal - GLimp_GetDisplayRefresh()) < 1.0f ) {
+			// if we're using vsync and the display is running at about the target framerate, start next tic
 			// immediately so our internal tic time and vsync don't drift apart
 			double now = Sys_MillisecondsPrecise();
 			if(nextTicTime > now) {
@@ -2779,6 +2795,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
 	// initialize the game object
 	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale ); // DG: make sure it knows the ticrate
 		game->Init();
 	}
 }
@@ -3278,6 +3295,8 @@ void idCommonLocal::InitGame( void ) {
 	// if any archived cvars are modified after this, we will trigger a writing of the config file
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 
+	UpdateGameHz(); // DG: for configurable framerate
+
 	// init the user command input code
 	usercmdGen->Init();
 
@@ -3389,6 +3408,32 @@ void idCommonLocal::ShutdownGame( bool reloading ) {
 
 	// shut down the file system
 	fileSystem->Shutdown( reloading );
+}
+
+// DG: for configurable framerate
+void idCommonLocal::UpdateGameHz()
+{
+	com_gameHz.ClearModified();
+	com_gameHzVal = com_gameHz.GetInteger();
+
+	if ( com_gameHzVal > 250 ) {
+		Warning( "Setting com_gameHz to values above 250 is known to cause bugs! You generally shouldn't do this, it's only for testing/debugging purposes!" );
+	}
+
+	com_preciseFrameLengthMS = 1000.0 / double(com_gameHzVal);
+	// only rounding up the frame time a little bit, so for 144hz (6.94ms) it becomes 7ms,
+	// but for 60Hz (16.6667ms) it remains 16ms, like before
+	// FIXME: still do this, now that the game code increases the frametime by 1ms for some frames
+	//        so com_gameHz frames add up to 1000ms?
+	com_gameFrameLengthMS = com_preciseFrameLengthMS + 0.1f; // TODO: idMath::Rint ?
+
+	com_gameTicScale = com_gameHzVal / 60.0f; // TODO: or / 62.5 ?
+
+	Printf( "Running the game at com_gameHz = %dHz, frametime %dms\n", com_gameHzVal, com_gameFrameLengthMS );
+
+	if ( game != NULL ) {
+		game->SetGameHz( com_gameHzVal, com_gameFrameLengthMS, com_gameTicScale );
+	}
 }
 
 // DG: below here are hacks to allow adding callbacks and exporting additional functions to the

@@ -203,6 +203,10 @@ idGameLocal::idGameLocal
 */
 idGameLocal::idGameLocal() {
 	Clear();
+	// DG: some sane default values until the proper values are set by SetGameHz()
+	msec = gameMsec = 16;
+	gameHz = 60;
+	gameTicScale = 1.0f;
 }
 
 /*
@@ -629,6 +633,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteInt( time );
 
 #ifdef _D3XP
+	savegame.WriteInt( gameMsec ); // DG: added with INTERNAL_SAVEGAME_VERSION 2
 	savegame.WriteInt( msec );
 #endif
 
@@ -1538,7 +1543,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadInt( time );
 
 #ifdef _D3XP
+	int savedGameMsec = 16;
+	if( savegame.GetInternalSavegameVersion() > 1 ) {
+		savegame.ReadInt( savedGameMsec );
+	}
+	float gameMsecScale = float(gameMsec) / float(savedGameMsec);
+
 	savegame.ReadInt( msec );
+	// DG: the saved msec must be scaled, in case com_gameHz has a different value now
+	msec *= gameMsecScale;
 #endif
 
 	savegame.ReadInt( vacuumAreaNum );
@@ -1561,12 +1574,15 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	fast.Restore( &savegame );
 	slow.Restore( &savegame );
+	fast.msec *= gameMsecScale; // DG: the saved value must be scaled, in case com_gameHz has a different value now
+	slow.msec *= gameMsecScale; //     same here
 
 	int blah;
 	savegame.ReadInt( blah );
 	slowmoState = (slowmoState_t)blah;
 
 	savegame.ReadFloat( slowmoMsec );
+	slowmoMsec *= gameMsecScale; // DG: the saved value must be scaled, in case com_gameHz has a different value now
 	savegame.ReadBool( quickSlowmoReset );
 
 	if ( slowmoState == SLOWMO_STATE_OFF ) {
@@ -2449,12 +2465,12 @@ void idGameLocal::RunTimeGroup2( int msec_fast ) { // dezo2/DG: added argument f
 #endif
 
 // dezo2/DG: returns number of milliseconds for this frame, either 1000/gameHz or 1000/gameHz + 1,
-//   (16 or 17) so the frametimes of gameHz frames add up to 1000ms.
+//   (e.g. 16 or 17 for 60Hz) so the frametimes of gameHz frames add up to 1000ms.
 //   This prevents animations or videos from running slightly to slow or running out of sync
 //   with audio in cutscenes (those only worked right at 62.5fps with exactly 16ms frames,
 //   but now even without vsync we're enforcing 16.666ms frames for proper 60fps)
 static int CalcMSec( long long framenum ) {
-	long long divisor = 100LL * USERCMD_HZ;
+	long long divisor = 100LL * gameLocal.gameHz;
 	return int( (framenum * 100000LL) / divisor - ((framenum-1) * 100000LL) / divisor );
 }
 
@@ -4932,10 +4948,10 @@ void idGameLocal::ComputeSlowMsec() {
 
 	// do any necessary ramping
 	if ( slowmoState == SLOWMO_STATE_RAMPUP ) {
-		delta = 4 - slowmoMsec;
+		delta = gameMsec * 0.25f - slowmoMsec; // DG: adjust to support com_gameHz
 
 		if ( fabs( delta ) < g_slowmoStepRate.GetFloat() ) {
-			slowmoMsec = 4;
+			slowmoMsec = gameMsec * 0.25f; // DG: adjust to support com_gameHz (was 4 = 16/4)
 			slowmoState = SLOWMO_STATE_ON;
 		}
 		else {
@@ -4947,10 +4963,10 @@ void idGameLocal::ComputeSlowMsec() {
 		}
 	}
 	else if ( slowmoState == SLOWMO_STATE_RAMPDOWN ) {
-		delta = 16 - slowmoMsec;
+		delta = gameMsec - slowmoMsec; // DG: adjust to support com_gameHz
 
 		if ( fabs( delta ) < g_slowmoStepRate.GetFloat() ) {
-			slowmoMsec = 16;
+			slowmoMsec = gameMsec; // DG: adjust to support com_gameHz
 			slowmoState = SLOWMO_STATE_OFF;
 			if ( gameSoundWorld ) {
 				gameSoundWorld->SetSlowmo( false );
@@ -5062,3 +5078,24 @@ idGameLocal::GetMapLoadingGUI
 ===============
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
+
+// DG: Added for configurable framerate
+void idGameLocal::SetGameHz( float hz, float frametime, float ticScaleFactor )
+{
+	gameHz = hz;
+	int oldGameMsec = gameMsec;
+	gameMsec = frametime;
+	gameTicScale = ticScaleFactor;
+
+	if ( slowmoState == SLOWMO_STATE_OFF ) {
+		// if slowmo is off, msec, slowmoMsec and slow/fast.msec should all be set to gameMsec
+		msec = slowmoMsec = slow.msec = fast.msec = gameMsec;
+	} else {
+		// otherwise the msec values must be scaled accordingly
+		float gameMsecScale = frametime / float(oldGameMsec);
+		msec *= gameMsecScale;
+		slowmoMsec *= gameMsecScale;
+		fast.msec *= gameMsecScale;
+		slow.msec *= gameMsecScale;
+	}
+}

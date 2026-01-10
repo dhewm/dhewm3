@@ -1088,8 +1088,9 @@ bool		GLimp_Init( glimpParms_t parms );
 // The renderer will then reset the glimpParms to "safe mode" of 640x480
 // fullscreen and try again.  If that also fails, the error will be fatal.
 
-bool		GLimp_SetScreenParms( glimpParms_t parms );
-// will set up gl up with the new parms
+bool		GLimp_SetScreenParms( glimpParms_t parms, bool fromInit = false );
+// will set up gl up with the new parms (set multisamples to -1 if you don't care about them)
+// fromInit should only be set when called from GLimp_Init()
 
 void		GLimp_Shutdown( void );
 // Destroys the rendering context, closes the window, resets the resolution,
@@ -1134,7 +1135,7 @@ int GLimp_GetSwapInterval();
 bool GLimp_SetWindowResizable( bool enableResizable );
 void GLimp_UpdateWindowSize();
 
-glimpParms_t GLimp_GetCurState();
+glimpParms_t GLimp_GetCurState( bool checkConsistency = true );
 float GLimp_GetDisplayRefresh();
 
 /*

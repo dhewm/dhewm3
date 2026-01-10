@@ -1083,6 +1083,19 @@ int idParser::Directive_undef( void ) {
 	return true;
 }
 
+
+// DG: helperfunction for my hack in Directive_define()
+static idToken* createToken(const char* str, int type, int subtype, int line) {
+	idToken* ret = new idToken();
+	*ret = str;
+	ret->type = type;
+	ret->subtype = subtype;
+	ret->line = line;
+	ret->flags = 0;
+	ret->ClearTokenWhiteSpace();
+	return ret;
+}
+
 /*
 ================
 idParser::Directive_define
@@ -1126,6 +1139,89 @@ int idParser::Directive_define( void ) {
 	if ( !idParser::ReadLine( &token ) ) {
 		return true;
 	}
+
+	// Stradex/DG: Hack to support com_gameHZ (configurable framerate instead of fixed 60fps):
+	//    we replace GAME_FPS, GAME_FRAMETIME and CHAINGUN_FIRE_SKIPFRAMES #defines with script code
+	// NOTE: it's theoretically possible to just replace them with the current value instead
+	//   of function calls ("#define GAME_FPS 144"), but that changes the script's checksum
+	//   which makes loading savegames fail after changing com_gameHz
+	const char* defName = define->name;
+	int numHackTokens = 0;
+	idToken* hackTokens[12] = {};
+	if ( idStr::Icmp(defName, "GAME_FPS") == 0 || idStr::Icmp(defName, "GAME_FRAMETIME") == 0 ) {
+		const char* funName = (idStr::Icmp(defName, "GAME_FPS") == 0) ? "getTicsPerSecond" : "getRawFrameTime";
+		int line = token.line;
+
+		// change "#define GAME_FPS 60" to "#define GAME_FPS sys.getTicsPerSecond()"
+		// (or equivalent for GAME_FRAMETIME and sys.getRawFrameTime())
+		hackTokens[0] = createToken( "sys", TT_NAME, 3, line );
+		hackTokens[1] = createToken( ".", TT_PUNCTUATION, P_REF, line );
+		hackTokens[2] = createToken( funName, TT_NAME, strlen(funName), line ); // getTicsPerSecond or getFrameTime
+		hackTokens[3] = createToken( "(", TT_PUNCTUATION, P_PARENTHESESOPEN, line );
+		hackTokens[4] = createToken( ")", TT_PUNCTUATION, P_PARENTHESESCLOSE, line );
+		numHackTokens = 5;
+	}
+	else if ( idStr::Icmp(defName, "CHAINGUN_FIRE_SKIPFRAMES" ) == 0) {
+		int line = token.line;
+
+		// change "#define CHAINGUN_FIRE_SKIPFRAMES 7" (or similar) to
+		// "#define CHAINGUN_FIRE_SKIPFRAMES int( ( 0.118644 * sys.getTicsPerSecond() ) )
+		//   where 0.118644 is the value of "factor" below (sth like 7/59)
+		// Note: Yes, it looks like there's a superfluous set of parenthesis, but without them
+		//       it doesn't work. I guess that's a bug in the script compiler, but I have no
+		//       motivation to debug that further..
+
+		float origVal = ( token.type == TT_NUMBER ) ? token.GetFloatValue() : 7.0f;
+		// should divide by 60, but with 59 it rounds up a bit, esp. for 144 fps the resulting
+		// value is better (in the script we clamp to int and don't round): 7/60 * 144 = 16.8
+		// => converted to int that's 16, while 7/59 * 144 = 17.084 => 17 => closer to 16.8
+		// (and for other common values like 60 or 120 or 200 or 240 it doesn't make a difference)
+		// Note that clamping to int is important, so the following script code works as before:
+		//   "for( skip = 0; skip < CHAINGUN_FIRE_SKIPFRAMES; skip++ )"
+		// (if CHAINGUN_FIRE_SKIPFRAMES isn't 7 but 7.01, this runs 8 times instead of 7)
+		float factor = origVal / 59.0f;
+		char facStr[10];
+		idStr::snPrintf( facStr, sizeof(facStr), "%f", factor );
+
+		// int( ( 0.118644 * sys.getTicsPerSecond() ) )
+		hackTokens[0]  = createToken( "int", TT_NAME, 3, line );
+		hackTokens[1]  = createToken( "(", TT_PUNCTUATION, P_PARENTHESESOPEN, line );
+
+		hackTokens[2]  = createToken( "(", TT_PUNCTUATION, P_PARENTHESESOPEN, line );
+
+		hackTokens[3]  = createToken( facStr, TT_NUMBER, TT_DECIMAL | TT_FLOAT | TT_DOUBLE_PRECISION, line );
+		hackTokens[4]  = createToken( "*", TT_PUNCTUATION, P_MUL, line );
+		hackTokens[5]  = createToken( "sys", TT_NAME, 3, line );
+		hackTokens[6]  = createToken( ".", TT_PUNCTUATION, P_REF, line );
+		hackTokens[7]  = createToken( "getTicsPerSecond", TT_NAME, strlen("getTicsPerSecond"), line );
+		hackTokens[8]  = createToken( "(", TT_PUNCTUATION, P_PARENTHESESOPEN, line );
+		hackTokens[9]  = createToken( ")", TT_PUNCTUATION, P_PARENTHESESCLOSE, line );
+
+		hackTokens[10] = createToken( ")", TT_PUNCTUATION, P_PARENTHESESCLOSE, line );
+
+		hackTokens[11] = createToken( ")", TT_PUNCTUATION, P_PARENTHESESCLOSE, line );
+		numHackTokens = 12;
+	}
+
+	if ( numHackTokens != 0 ) {
+		// skip rest of the line, inject our hackTokens instead and return
+		while ( idParser::ReadLine( &token ) )
+		{}
+
+		define->tokens = hackTokens[0];
+		last = hackTokens[0];
+
+		for( int i=1; i < numHackTokens; ++i ) {
+			t = hackTokens[i];
+			last->next = t;
+			last = t;
+		}
+		last->next = NULL;
+
+		return true;
+	}
+	// DG: END of Hack.
+
 	// if it is a define with parameters
 	if ( token.WhiteSpaceBeforeToken() == 0 && token == "(" ) {
 		// read the define parameters

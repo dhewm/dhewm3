@@ -76,6 +76,14 @@ extern idCVar		com_enableDebuggerServer;
 extern idCVar		com_dbgClientAdr;
 extern idCVar		com_dbgServerAdr;
 
+// DG: the next block is for configurable framerate
+extern idCVar		com_gameHz;
+extern int			com_gameHzVal;
+extern int			com_gameFrameLengthMS; // round(1000.0f / gameHzVal), I guess
+extern double		com_preciseFrameLengthMS; // 1000.0 / gameHzVal
+extern float		com_gameTicScale; // com_gameHzVal/60.0f, multiply stuff assuming one tic is 16ms with this
+extern double		com_preciseFrameTimeMS;   // like com_frameTime but as double: time (since start) for the current frame in milliseconds
+
 extern int			time_gameFrame;			// game logic time
 extern int			time_gameDraw;			// game present time
 extern int			time_frontend;			// renderer frontend time

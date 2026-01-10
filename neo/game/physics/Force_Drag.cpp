@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "physics/Force_Drag.h"
 
+#include "Game_local.h"
+
 CLASS_DECLARATION( idForce, idForce_Drag )
 END_CLASS
 

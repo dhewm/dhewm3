@@ -1082,8 +1082,8 @@ static void Win_InitTime() {
 	double diff = after - before;
 	double onePauseIterTime = diff / 1000000;
 	if ( onePauseIterTime > 0.00000001 ) {
-		double loopsPer10usec = 0.005 / onePauseIterTime;
-		pauseLoopsPer5usec = loopsPer10usec;
+		double loopsPer5usec = 0.005 / onePauseIterTime;
+		pauseLoopsPer5usec = loopsPer5usec;
 		printf( "Win_InitTime(): A call to Sys_MillisecondsPrecise() takes about %g nsec; 1mio pause loops took %g ms => pauseLoopsPer5usec = %zd\n",
 		        callDiff*1000.0, diff, pauseLoopsPer5usec );
 		if ( pauseLoopsPer5usec == 0 )
