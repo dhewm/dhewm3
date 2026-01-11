@@ -561,6 +561,7 @@ static void loadMod ( const idStr& modName ) {
 	static const char* d3xpMods[] = {
 		// TODO: if there are more mods that need d3xp as base
 		// (and that are supported by dhewm3), add them here
+		"bloodmod_roe",
 		"d3le", // The Lost Mission
 		"librecoopd3xp",
 		"perfected_roe",
