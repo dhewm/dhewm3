@@ -44,7 +44,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Fix a crash (assertion) on start with ImGui if `SDL_GetWindowDisplayIndex()`
   or `SDL_GetDisplayDPI()` failed and the `imgui_scale` CVar was set to the default value of `-1`
   (setting it to `1` worked around the bug; #632)
-* Updated Dear ImGui to 1.91.4
+* Updated Dear ImGui to 1.91.7
 * Fix scaling of Grabber cursor in Resurrection of Evil in non-4:3 resolutions (#637)
 * Add `com_disableAutoSaves` CVar: If set to `1`, Autosaves (when starting a level) are disabled (#620)
 * Add support for "nospecular" parm of lights, enabled by setting `"allow_nospecular" "1"` in a maps
@@ -61,6 +61,13 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Fix the "shrivel" effect of MD5 models (`SHADERPARM_MD5_SKINSCALE`)
 * Optionally integrate the [Tracy](https://github.com/wolfpld/tracy) profiler.
   Disabled unless you enable it in CMake.
+* Fixed a crash in AI pathfinding code that could happen in the lotsaimps testmap (#721)
+* Disabled assertion in `TestHugeTranslation()` that led to "crashes" in several user-maps (#720)
+* Fixed concatenation of timed GUI commands that sometimes lead to glitches in UIs
+* Added `fs_gameDllPath` CVar: If set, game DLLs will be searched in that directory before the other
+  standard places (like next to the executable). Especially useful for developing/debugging mod DLLs
+  (you can just set `fs_gameDllPath` to the build dir, no need to copy the DLL/.so/.dylib)
+* Several smaller fixes for all kinds of things incl. build issues
 
 1.5.4 (2024-08-03)
 ------------------------------------------------------------------------

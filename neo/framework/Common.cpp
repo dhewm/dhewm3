@@ -2918,6 +2918,10 @@ static bool checkForHelp(int argc, char **argv)
 				WriteString("+set fs_game_base <base-modname>\n");
 				WriteString("  some mods are based on other mods, usually d3xp.\n");
 				WriteString("  This specifies the base mod e.g. +set fs_game d3le +set fs_game_base d3xp\n");
+				WriteString("+set fs_gameDllPath <additional game lib path>");
+				WriteString("  sets a path to look for game/mod libs (.dll/.so/.dylib) in.");
+				WriteString("  It's searched before all the other default paths (like next to the executable");
+				WriteString("  Especially useful when developing/testing/debugging a mod DLL");
 #ifndef ID_DEDICATED
 				WriteString("+set r_fullscreen <0 or 1>\n");
 				WriteString("  start game in windowed (0) or fullscreen (1) mode\n");

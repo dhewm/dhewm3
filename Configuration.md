@@ -256,6 +256,10 @@ This can be configured with the following CVars:
       compressing on load can help)*.
     - `0` Don't compress uncompressed textures when loading them - best quality, but uses more VRAM.
 
+- `fs_gameDllPath` If set, game DLLs will be searched in that directory before the other
+   standard places (like next to the executable). Especially useful for developing/debugging mod DLLs
+   (you can just set `fs_gameDllPath` to the build dir, no need to copy the DLL/.so/.dylib)
+
 - `s_alReverbGain` reduce strength of OpenAL (EAX-like) EFX reverb effects, `0.0` - `1.0` (default `0.5`)
 - `s_alHRTF` Enable [HRTF](https://en.wikipedia.org/w/index.php?title=Head-related_transfer_function)
    for better surround sound with stereo **headphones**. `0`: Disable, `1`: Enable, `-1`: Let OpenAL decide (default).  
