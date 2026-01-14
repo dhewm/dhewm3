@@ -1007,6 +1007,9 @@ bool R_LoadCubeImages( const char *imgName, cubeFiles_t extensions, byte *pics[6
 		if ( pics ) {
 			for ( j = 0 ; j < i ; j++ ) {
 				R_StaticFree( pics[j] );
+				// DG: this lets ActuallyLoadImage() print a warning and load
+				//     a default texture instead of crash later
+				pics[j] = NULL;
 			}
 		}
 
