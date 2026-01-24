@@ -231,10 +231,6 @@ private:
 	int							dataSize;		// just for listing purposes
 	struct md3Header_s *		md3;			// only if type == MOD_MESH
 	int							numLods;
-
-	int							lastFrame;
-	int							lastOldFrame;
-	float						lastBackLerp;
 	idList<const idMaterial*>	shaders;		// DG: md3Shader_t::shaderIndex indexes into this array
 
 	// DG: added the following so we can generate/store sil edges for shadows

@@ -39,8 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 ***********************************************************************/
 
 // DG: added constructor to make sure all members are initialized
-idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0),
-	lastFrame(-1), lastOldFrame(0), lastBackLerp(0.0f)
+idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0)
 {}
 
 // DG: added destructor to clean up the newly added silInfos (and md3 which used to leak)
@@ -329,20 +328,9 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEnt
 	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
 
 	if ( cachedModel ) {
-		if ( !r_useCachedDynamicModels.GetBool() || frame != lastFrame
-		     || oldframe != lastOldFrame || backlerp != lastBackLerp ) {
-			delete cachedModel;
-			cachedModel = NULL;
-		} else {
-			// if we're still in the same animation frame etc, just use the existing model
-			return cachedModel;
-		}
+		delete cachedModel;
+		cachedModel = NULL;
 	}
-
-	// DG: remember (old)frame and backlerp for the check above if the cached model can be reused
-	lastFrame = frame;
-	lastOldFrame = oldframe;
-	lastBackLerp = backlerp;
 
 	staticModel = new idRenderModelStatic;
 	staticModel->InitEmpty("_MD3_Snapshot_");
