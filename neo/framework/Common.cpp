@@ -281,7 +281,13 @@ void Com_UpdateTicNumber() {
 			int numTics = 1 + timeDiff * 0.06;
 			com_ticNumber += numTics;
 
-			nextTicTime += numTics * com_preciseFrameLengthMS;
+			// the number of msec per tic can be varied with the timescale cvar
+			float timescale = com_timescale.GetFloat();
+			if ( timescale == 1.0f ) {
+				nextTicTime += numTics * com_preciseFrameLengthMS;
+			} else {
+				nextTicTime += numTics * com_preciseFrameLengthMS / timescale;
+			}
 		}
 	}
 }
@@ -2546,7 +2552,8 @@ void idCommonLocal::Frame( void ) {
 		// set idLib frame number for frame based memory dumps
 		idLib::frameNumber = com_frameNumber;
 
-		if ( GLimp_GetSwapInterval() != 0 && fabsf(60.0f - GLimp_GetDisplayRefresh()) < 1.0f ) {
+		if ( com_timescale.GetFloat() == 1.0f && GLimp_GetSwapInterval() != 0
+		     && fabsf(60.0f - GLimp_GetDisplayRefresh()) < 1.0f ) {
 			// if we're using vsync and the display is running at about 60Hz, start next tic
 			// immediately so our internal tic time and vsync don't drift apart
 			double now = Sys_MillisecondsPrecise();
