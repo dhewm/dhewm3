@@ -5770,7 +5770,7 @@ void idPlayer::BobCycle( const idVec3 &pushVelocity ) {
 
 		// check for footstep / splash sounds
 		old = bobCycle;
-		bobCycle = (int)( old + bobmove * gameLocal.msec ) & 255;
+		bobCycle = (int)( old + bobmove * gameLocal.msecPrecise ) & 255;
 		bobFoot = ( bobCycle & 128 ) >> 7;
 		bobfracsin = idMath::Fabs( sin( ( bobCycle & 127 ) / 127.0 * idMath::PI ) );
 	}

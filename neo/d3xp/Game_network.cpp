@@ -1543,8 +1543,8 @@ gameReturn_t idGameLocal::ClientPrediction( int clientNum, const usercmd_t *clie
 	}
 
 #ifdef _D3XP
-	slow.Set( time, previousTime, msec, framenum, realClientTime );
-	fast.Set( time, previousTime, msec, framenum, realClientTime );
+	slow.Set( time, previousTime, msec, framenum, realClientTime, msecPrecise );
+	fast.Set( time, previousTime, msec, framenum, realClientTime, msecPrecise );
 #endif
 
 	// set the user commands for this frame

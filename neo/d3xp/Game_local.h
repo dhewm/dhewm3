@@ -89,6 +89,9 @@ extern idRenderWorld *				gameRenderWorld;
 extern idSoundWorld *				gameSoundWorld;
 
 extern const int NUM_RENDER_PORTAL_BITS;
+
+// DG: USERCMD_MSEC is 16, USERCMD_MSEC_PRECISE is a float and 16.6666..
+extern const float USERCMD_MSEC_PRECISE;
 /*
 ===============================================================================
 
@@ -226,13 +229,25 @@ struct timeState_t {
 	int					time;
 	int					previousTime;
 	int					msec;
+	float				msecPrecise; // DG: added for smoother timing
 	int					framenum;
 	int					realClientTime;
 
-	void				Set( int t, int pt, int ms, int f, int rct )		{ time = t; previousTime = pt; msec = ms; framenum = f; realClientTime = rct; };
-	void				Get( int& t, int& pt, int& ms, int& f, int& rct )	{ t = time; pt = previousTime; ms = msec; f = framenum; rct = realClientTime; };
+	void				Set( int t, int pt, int ms, int f, int rct, float msp )		{ time = t; previousTime = pt; msec = ms; framenum = f; realClientTime = rct; msecPrecise = msp; };
+	void				Get( int& t, int& pt, int& ms, int& f, int& rct, float& msp )	{ t = time; pt = previousTime; ms = msec; f = framenum; rct = realClientTime; msp = msecPrecise; };
 	void				Save( idSaveGame *savefile ) const	{ savefile->WriteInt( time ); savefile->WriteInt( previousTime ); savefile->WriteInt( msec ); savefile->WriteInt( framenum ); savefile->WriteInt( realClientTime ); }
-	void				Restore( idRestoreGame *savefile )	{ savefile->ReadInt( time ); savefile->ReadInt( previousTime ); savefile->ReadInt( msec ); savefile->ReadInt( framenum ); savefile->ReadInt( realClientTime ); }
+	void				Restore( idRestoreGame *savefile )	{ // DG: only functional change to Restore(): setting msecPrecise
+		savefile->ReadInt( time ); savefile->ReadInt( previousTime );
+		savefile->ReadInt( msec ); savefile->ReadInt( framenum );
+		savefile->ReadInt( realClientTime );
+		if ( msec == 16 || msec == 17 ) {
+			msecPrecise = USERCMD_MSEC_PRECISE;
+		} else {
+			// if we're in some slowmo state, the approximate msec has to suffice,
+			// it'll be set to the proper value again soon anyway.
+			msecPrecise = msec;
+		}
+	}
 	void				Increment(int _msec) { // dezo2/DG: update msec (sometimes it's 16, sometimes 17)
 		framenum++;
 		previousTime = time;
@@ -305,6 +320,12 @@ public:
 	int						previousTime;			// time in msec of last frame
 	int						time;					// in msec
 	int						msec;					// time since last update in milliseconds
+
+	// DG: unlike msec (which is varies by +/-1 each frame, see CalcMSec()),
+	//     msecPrecise remains constant (unless scaled for slowmo) and is not rounded down to an integer,
+	//     so it can be used when the correct time for multiple frames must be calculated,
+	//     or when setting an int-timer for next frame (where it rounds down which is safe for that case)
+	float					msecPrecise;
 
 	int						vacuumAreaNum;			// -1 if level doesn't have any outside areas
 
