@@ -883,10 +883,83 @@ set(src_imgui ${src_imgui}
 	libs/imgui/imgui_widgets.cpp
 	
 	libs/imgui/imgui_demo.cpp
-	
+
+	libs/ImGuiColorTextEdit/TextEditor.h
+	libs/ImGuiColorTextEdit/TextEditor.cpp
+
 	sys/sys_imgui.h
 	sys/sys_imgui.cpp
 	sys/imgui_savestyle.cpp
+	
+	tools/imgui/ImGuiTools.cpp
+	tools/imgui/util/ImGui_IdWidgets.h
+	tools/imgui/util/ImGui_IdWidgets.cpp
+	tools/imgui/util/SyntaxRichEditCtrl.h
+	tools/imgui/util/SyntaxRichEditCtrl.cpp
+	tools/imgui/util/TreeCtrl.h
+	tools/imgui/util/TreeCtrl.cpp
+	tools/imgui/util/RegistryOptions.h
+	tools/imgui/util/RegistryOptions.cpp
+
+	tools/imgui/afeditor/AfEditor.h
+	tools/imgui/afeditor/AfEditor.cpp
+	tools/imgui/afeditor/AfBodyEditor.h
+	tools/imgui/afeditor/AfBodyEditor.cpp
+	tools/imgui/afeditor/AfConstraintEditor.h
+	tools/imgui/afeditor/AfConstraintEditor.cpp
+	tools/imgui/afeditor/AfPropertyEditor.h
+	tools/imgui/afeditor/AfPropertyEditor.cpp
+
+	tools/imgui/lighteditor/LightEditor.h
+	tools/imgui/lighteditor/LightEditor.cpp
+	tools/imgui/pdaeditor/PDAEditor.h
+	tools/imgui/pdaeditor/PDAEditor.cpp
+	tools/imgui/particleeditor/ParticleEditor.h
+	tools/imgui/particleeditor/ParticleEditor.cpp
+	tools/imgui/scripteditor/ScriptEditor.h
+	tools/imgui/scripteditor/ScriptEditor.cpp
+
+	tools/imgui/decleditor/PathTreeCtrl.h
+	tools/imgui/decleditor/PathTreeCtrl.cpp
+	tools/imgui/decleditor/DeclBrowser.h
+	tools/imgui/decleditor/DeclBrowser.cpp
+	tools/imgui/decleditor/DeclEditor.h
+	tools/imgui/decleditor/DeclEditor.cpp
+	tools/imgui/decleditor/DeclNew.h
+	tools/imgui/decleditor/DeclNew.cpp
+
+	tools/imgui/materialeditor/MaterialEditor.h
+	tools/imgui/materialeditor/MaterialEditor.cpp
+	tools/imgui/materialeditor/MaterialDef.h
+	tools/imgui/materialeditor/MaterialDef.cpp
+	tools/imgui/materialeditor/ConsoleView.h
+	tools/imgui/materialeditor/ConsoleView.cpp
+	tools/imgui/materialeditor/MaterialModifier.h
+	tools/imgui/materialeditor/MaterialModifier.cpp
+	tools/imgui/materialeditor/MaterialDoc.h
+	tools/imgui/materialeditor/MaterialDoc.cpp
+	tools/imgui/materialeditor/MaterialDocManager.h
+	tools/imgui/materialeditor/MaterialDocManager.cpp
+	tools/imgui/materialeditor/MaterialView.h
+	tools/imgui/materialeditor/MaterialView.cpp
+	tools/imgui/materialeditor/MaterialEditView.h
+	tools/imgui/materialeditor/MaterialEditView.cpp
+	tools/imgui/materialeditor/MaterialTreeView.h
+	tools/imgui/materialeditor/MaterialTreeView.cpp
+	tools/imgui/materialeditor/MaterialPropTreeView.h
+	tools/imgui/materialeditor/MaterialPropTreeView.cpp
+	tools/imgui/materialeditor/MaterialPreviewPropView.h
+	tools/imgui/materialeditor/MaterialPreviewPropView.cpp
+	tools/imgui/materialeditor/MaterialPreviewView.h
+	tools/imgui/materialeditor/MaterialPreviewView.cpp
+	tools/imgui/materialeditor/StageView.h
+	tools/imgui/materialeditor/StageView.cpp
+	tools/imgui/materialeditor/MEOptions.h
+	tools/imgui/materialeditor/MEOptions.cpp
+	tools/imgui/materialeditor/MEMainFrame.h
+	tools/imgui/materialeditor/MEMainFrame.cpp
+	tools/imgui/materialeditor/FindDialog.h
+	tools/imgui/materialeditor/FindDialog.cpp
 )
 else()
 set(src_imgui sys/sys_imgui.h)

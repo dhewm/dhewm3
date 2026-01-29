@@ -1050,6 +1050,24 @@ idCommonLocal::InitTool
 =================
 */
 void idCommonLocal::InitTool( const toolFlag_t tool, const idDict *dict ) {
+#ifndef IMGUI_DISABLE
+	if ( tool & EDITOR_SOUND ) {
+		//SoundEditorInit( dict );
+	} else if ( tool & EDITOR_LIGHT ) {
+		ImGuiTools::LightEditorInit( dict );
+	} else if ( tool & EDITOR_PARTICLE ) {
+		ImGuiTools::ParticleEditorInit( dict );
+	} else if ( tool & EDITOR_AF ) {
+		ImGuiTools::AfEditorInit(); // TODO: dict ?
+	} else if ( tool & EDITOR_PDA ) {
+		ImGuiTools::PDAEditorInit( dict );
+	} else if ( tool & EDITOR_SCRIPT ) {
+		ImGuiTools::ScriptEditorInit( dict );
+	} else if ( tool & EDITOR_DECL ) {
+		ImGuiTools::DeclBrowserInit( dict );
+	}
+#endif
+
 #ifdef ID_ALLOW_TOOLS
 	if ( tool & EDITOR_SOUND ) {
 		SoundEditorInit( dict );
@@ -1241,17 +1259,6 @@ Com_EditGUIs_f
 static void Com_EditGUIs_f( const idCmdArgs &args ) {
 	GUIEditorInit();
 }
-
-/*
-=============
-Com_MaterialEditor_f
-=============
-*/
-static void Com_MaterialEditor_f( const idCmdArgs &args ) {
-	// Turn off sounds
-	soundSystem->SetMute( true );
-	MaterialEditorInit();
-}
 #endif // ID_ALLOW_TOOLS
 
 /*
@@ -1295,17 +1302,119 @@ static void PrintMemInfo_f( const idCmdArgs &args ) {
 	fileSystem->CloseFile( f );
 }
 
-#ifdef ID_ALLOW_TOOLS
+
 /*
 ==================
 Com_EditLights_f
 ==================
 */
 static void Com_EditLights_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	D3::ImGuiHooks::ShowInfoOverlay( "Shoot a light to open it in the Light Editor" );
+	cvarSystem->SetCVarInteger( "g_editEntityMode", 1 );
+#elif defined(ID_ALLOW_TOOLS)
 	LightEditorInit( NULL );
 	cvarSystem->SetCVarInteger( "g_editEntityMode", 1 );
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
 }
 
+/*
+==================
+Com_EditPDAs_f
+==================
+*/
+static void Com_EditPDAs_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::PDAEditorInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
+	PDAEditorInit( NULL );
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
+}
+
+/*
+==================
+Com_EditAFs_f
+==================
+*/
+static void Com_EditAFs_f( const idCmdArgs &args ) {
+	// TODO: cvarSystem->SetCVarInteger( "g_editEntityMode", 3 ); ?
+#ifndef IMGUI_DISABLE
+	ImGuiTools::AfEditorInit();
+#elif defined(ID_ALLOW_TOOLS)
+	AFEditorInit( NULL );
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
+}
+
+/*
+==================
+Com_EditParticles_f
+==================
+*/
+static void Com_EditParticles_f(const idCmdArgs& args) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::ParticleEditorInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
+	ParticleEditorInit(NULL);
+#else
+	common->Warning( "Editors not available because dhewm3 was built without ImGui or MFC Tools" );
+#endif
+}
+
+/*
+==================
+Com_EditDecls_f
+==================
+*/
+static void Com_EditDecls_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::DeclBrowserInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
+	DeclBrowserInit( NULL );
+#else
+	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
+#endif
+}
+
+/*
+==================
+Com_EditScripts_f
+==================
+*/
+static void Com_EditScripts_f( const idCmdArgs &args ) {
+#ifndef IMGUI_DISABLE
+	ImGuiTools::ScriptEditorInit( NULL );
+#elif defined(ID_ALLOW_TOOLS)
+	ScriptEditorInit( NULL );
+#else
+	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
+#endif
+}
+
+/*
+=============
+Com_MaterialEditor_f
+=============
+*/
+static void Com_MaterialEditor_f( const idCmdArgs &args ) {
+	// Turn off sounds
+	soundSystem->SetMute( true );
+#ifndef IMGUI_DISABLE
+	ImGuiTools::MaterialEditorInit();
+#elif defined(ID_ALLOW_TOOLS)
+	MaterialEditorInit();
+#else
+	common->Warning("Editors not available because dhewm3 was built without ImGui or MFC Tools");
+#endif
+}
+
+
+#ifdef ID_ALLOW_TOOLS
 /*
 ==================
 Com_EditSounds_f
@@ -1316,50 +1425,6 @@ static void Com_EditSounds_f( const idCmdArgs &args ) {
 	cvarSystem->SetCVarInteger( "g_editEntityMode", 2 );
 }
 
-/*
-==================
-Com_EditDecls_f
-==================
-*/
-static void Com_EditDecls_f( const idCmdArgs &args ) {
-	DeclBrowserInit( NULL );
-}
-
-/*
-==================
-Com_EditAFs_f
-==================
-*/
-static void Com_EditAFs_f( const idCmdArgs &args ) {
-	AFEditorInit( NULL );
-}
-
-/*
-==================
-Com_EditParticles_f
-==================
-*/
-static void Com_EditParticles_f( const idCmdArgs &args ) {
-	ParticleEditorInit( NULL );
-}
-
-/*
-==================
-Com_EditScripts_f
-==================
-*/
-static void Com_EditScripts_f( const idCmdArgs &args ) {
-	ScriptEditorInit( NULL );
-}
-
-/*
-==================
-Com_EditPDAs_f
-==================
-*/
-static void Com_EditPDAs_f( const idCmdArgs &args ) {
-	PDAEditorInit( NULL );
-}
 #endif // ID_ALLOW_TOOLS
 
 /*
@@ -2398,21 +2463,20 @@ void idCommonLocal::InitCommands( void ) {
 	cmdSystem->AddCommand( "roq", RoQFileEncode_f, CMD_FL_TOOL, "encodes a roq file" );
 #endif
 
-#ifdef ID_ALLOW_TOOLS
 	// editors
-	cmdSystem->AddCommand( "editor", Com_Editor_f, CMD_FL_TOOL, "launches the level editor Radiant" );
 	cmdSystem->AddCommand( "editLights", Com_EditLights_f, CMD_FL_TOOL, "launches the in-game Light Editor" );
-	cmdSystem->AddCommand( "editSounds", Com_EditSounds_f, CMD_FL_TOOL, "launches the in-game Sound Editor" );
-	cmdSystem->AddCommand( "editDecls", Com_EditDecls_f, CMD_FL_TOOL, "launches the in-game Declaration Editor" );
+	cmdSystem->AddCommand( "editPDAs", Com_EditPDAs_f, CMD_FL_TOOL, "launches the in-game PDA Editor" );
 	cmdSystem->AddCommand( "editAFs", Com_EditAFs_f, CMD_FL_TOOL, "launches the in-game Articulated Figure Editor" );
+	cmdSystem->AddCommand( "editDecls", Com_EditDecls_f, CMD_FL_TOOL, "launches the in-game Declaration Editor" );
 	cmdSystem->AddCommand( "editParticles", Com_EditParticles_f, CMD_FL_TOOL, "launches the in-game Particle Editor" );
 	cmdSystem->AddCommand( "editScripts", Com_EditScripts_f, CMD_FL_TOOL, "launches the in-game Script Editor" );
-	cmdSystem->AddCommand( "editGUIs", Com_EditGUIs_f, CMD_FL_TOOL, "launches the GUI Editor" );
-	cmdSystem->AddCommand( "editPDAs", Com_EditPDAs_f, CMD_FL_TOOL, "launches the in-game PDA Editor" );
-	cmdSystem->AddCommand( "debugger", Com_ScriptDebugger_f, CMD_FL_TOOL, "launches the Script Debugger" );
-
 	//BSM Nerve: Add support for the material editor
 	cmdSystem->AddCommand( "materialEditor", Com_MaterialEditor_f, CMD_FL_TOOL, "launches the Material Editor" );
+#ifdef ID_ALLOW_TOOLS
+	cmdSystem->AddCommand( "editor", Com_Editor_f, CMD_FL_TOOL, "launches the level editor Radiant" );
+	cmdSystem->AddCommand( "editSounds", Com_EditSounds_f, CMD_FL_TOOL, "launches the in-game Sound Editor" );
+	cmdSystem->AddCommand( "editGUIs", Com_EditGUIs_f, CMD_FL_TOOL, "launches the GUI Editor" );
+	cmdSystem->AddCommand( "debugger", Com_ScriptDebugger_f, CMD_FL_TOOL, "launches the Script Debugger" );
 #endif
 
 	cmdSystem->AddCommand( "printMemInfo", PrintMemInfo_f, CMD_FL_SYSTEM, "prints memory debugging data" );
