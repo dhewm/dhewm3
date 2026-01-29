@@ -69,6 +69,7 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   (you can just set `fs_gameDllPath` to the build dir, no need to copy the DLL/.so/.dylib)
 * Fixed a crash when using an incomplete cubemap texture (missing one side).  
   Will now print a warning about the missing side.
+* Fix wrong (flipped) labels of Prev./Next Weapon in dhewm3 settings menu (#731)
 * Several smaller fixes for all kinds of things incl. build issues
 
 

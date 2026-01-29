@@ -1098,8 +1098,8 @@ static void InitBindingEntries()
 
 		{ "_attack",        "Attack"     , "#str_02112" },
 		{ "_impulse13",     "Reload"     , "#str_02115" },
-		{ "_impulse14",     "Prev. Weapon" , "#str_02113" },
-		{ "_impulse15",     "Next Weapon"  , "#str_02114" },
+		{ "_impulse15",     "Prev. Weapon" , "#str_02113" },
+		{ "_impulse14",     "Next Weapon"  , "#str_02114" },
 		{ "_zoom",          "Zoom View"    , "#str_02120" },
 		{ "clientDropWeapon", "Drop Weapon", "#str_04071" },
 
