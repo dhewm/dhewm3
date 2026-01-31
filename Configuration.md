@@ -93,6 +93,8 @@ Some notes:
     - `joy_pitchSpeed` How fast you look up/down (when the stick is at a maximum position)
     - `joy_yawSpeed` Same for turning left/right
     - `joy_invertLook` Inverts the controls for looking up/down (like in a flight simulator)
+        - Though the better way to invert any axis is to just bind the actions accordingly,
+          e.g. bind "stick up" to "look down" and "stick down" to "look up"
     - `joy_gammaLook` If set to `1`, use a log curve instead of a power curve for looking around,
        affects how fast you turn (or look up/down) when the stick is between center and maximum.
     - `joy_powerScale` If `joy_gammaLook` is `0`, this is the exponent used for the power curve.
