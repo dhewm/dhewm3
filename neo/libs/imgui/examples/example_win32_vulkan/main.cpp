@@ -50,7 +50,7 @@ static bool                     g_SwapChainRebuild = false;
 
 static void check_vk_result(VkResult err)
 {
-    if (err == 0)
+    if (err == VK_SUCCESS)
         return;
     fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
     if (err < 0)
@@ -252,17 +252,15 @@ static void CleanupVulkanWindow()
 
 static void FrameRender(ImGui_ImplVulkanH_Window* wd, ImDrawData* draw_data)
 {
-    VkResult err;
-
     VkSemaphore image_acquired_semaphore  = wd->FrameSemaphores[wd->SemaphoreIndex].ImageAcquiredSemaphore;
     VkSemaphore render_complete_semaphore = wd->FrameSemaphores[wd->SemaphoreIndex].RenderCompleteSemaphore;
-    err = vkAcquireNextImageKHR(g_Device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &wd->FrameIndex);
+    VkResult err = vkAcquireNextImageKHR(g_Device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &wd->FrameIndex);
     if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
-    {
         g_SwapChainRebuild = true;
+    if (err == VK_ERROR_OUT_OF_DATE_KHR)
         return;
-    }
-    check_vk_result(err);
+    if (err != VK_SUBOPTIMAL_KHR)
+        check_vk_result(err);
 
     ImGui_ImplVulkanH_Frame* fd = &wd->Frames[wd->FrameIndex];
     {
@@ -331,15 +329,25 @@ static void FramePresent(ImGui_ImplVulkanH_Window* wd)
     info.pImageIndices = &wd->FrameIndex;
     VkResult err = vkQueuePresentKHR(g_Queue, &info);
     if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
-    {
         g_SwapChainRebuild = true;
+    if (err == VK_ERROR_OUT_OF_DATE_KHR)
         return;
-    }
-    check_vk_result(err);
+    if (err != VK_SUBOPTIMAL_KHR)
+        check_vk_result(err);
     wd->SemaphoreIndex = (wd->SemaphoreIndex + 1) % wd->SemaphoreCount; // Now we can use the next set of semaphores
 }
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// FIXME: This code would ideally be inside imgui_impl_win32.cpp, it would create a dependency on Vulkan headers in imgui_impl_win32.cpp
+static int ImGui_ImplWin32_CreateVkSurface(ImGuiViewport* viewport, ImU64 vk_instance, const void* vk_allocator, ImU64* out_vk_surface)
+{
+    VkWin32SurfaceCreateInfoKHR createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    createInfo.hwnd = (HWND)viewport->PlatformHandleRaw;
+    createInfo.hinstance = ::GetModuleHandle(nullptr);
+    return (int)vkCreateWin32SurfaceKHR((VkInstance)vk_instance, &createInfo, (VkAllocationCallbacks*)vk_allocator, (VkSurfaceKHR*)out_vk_surface);
+}
 
 // Main code
 int main(int, char**)
@@ -381,13 +389,27 @@ int main(int, char**)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
+    ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
+
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = g_Instance;
     init_info.PhysicalDevice = g_PhysicalDevice;
@@ -487,17 +509,25 @@ int main(int, char**)
 
         // Rendering
         ImGui::Render();
-        ImDrawData* draw_data = ImGui::GetDrawData();
-        const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
-        if (!is_minimized)
+        ImDrawData* main_draw_data = ImGui::GetDrawData();
+        const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+        wd->ClearValue.color.float32[0] = clear_color.x * clear_color.w;
+        wd->ClearValue.color.float32[1] = clear_color.y * clear_color.w;
+        wd->ClearValue.color.float32[2] = clear_color.z * clear_color.w;
+        wd->ClearValue.color.float32[3] = clear_color.w;
+        if (!main_is_minimized)
+            FrameRender(wd, main_draw_data);
+
+        // Update and Render additional Platform Windows
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
-            wd->ClearValue.color.float32[0] = clear_color.x * clear_color.w;
-            wd->ClearValue.color.float32[1] = clear_color.y * clear_color.w;
-            wd->ClearValue.color.float32[2] = clear_color.z * clear_color.w;
-            wd->ClearValue.color.float32[3] = clear_color.w;
-            FrameRender(wd, draw_data);
-            FramePresent(wd);
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
         }
+
+        // Present Main Platform Window
+        if (!main_is_minimized)
+            FramePresent(wd);
     }
 
     // Cleanup
