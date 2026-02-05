@@ -181,15 +181,17 @@ static float GetDefaultScale()
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 	float ret = SDL_GetWindowDisplayScale( sdlWindow );
 #else
-	float dpi = 0.0f;
-	int winIdx = SDL_GetWindowDisplayIndex( sdlWindow );
-	SDL_GetDisplayDPI((winIdx >= 0) ? winIdx : 0, NULL, &dpi, NULL);
-	// TODO: different reference DPI on mac? also, doesn't work that well on my laptop..
-	float ret = dpi / 96.0f;
+	float ret = ImGui_ImplSDL2_GetContentScaleForWindow( sdlWindow );
 #endif
-	if ( ret <= 0.0f ) {
+
+	// Validate that the reported scale is a reasonable size
+	// For example: if xrandr fails to read the EDID of the display,
+	// a default value 1mm x 1mm will be reported, resulting in an
+	// absurdly high DPI
+	if ( ret <= 0.0f || ret > 10.0f ) {
 		return 1.0f;
 	}
+
 	ret = round(ret*2.0)*0.5; // round to .0 or .5
 	return ret;
 }
@@ -233,6 +235,7 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 	iniPath += "/imgui.ini";
 	io.IniFilename = iniPath.c_str();
 
+  // Setup styles
 	SetImGuiStyle( Style::Dhewm3 );
 	userStyle = ImGui::GetStyle(); // set dhewm3 style as default, in case the user style is missing values
 	if ( DG::ReadImGuiStyle( userStyle, GetUserStyleFilename() ) && imgui_style.GetInteger() == 2 ) {
@@ -242,8 +245,14 @@ bool Init(void* _sdlWindow, void* sdlGlContext)
 		ImGui::StyleColorsDark();
 	}
 
+	imgui_scale.SetModified();
 
-	imgui_scale.SetModified(); // so NewFrame() will load the scaled font
+	// Setup fonts, size will come from style.FontSizeBase
+#ifdef _MSC_VER
+	io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size);
+#else
+	io.Fonts->AddFontFromMemoryCompressedBase85TTF(ProggyVector_compressed_data_base85);
+#endif
 
 	// Setup Platform/Renderer backends
 	if ( ! ImGui_ImplSDLx_InitForOpenGL( sdlWindow, sdlGlContext ) ) {
@@ -330,23 +339,15 @@ void NewFrame()
 		framesAfterAllWindowsClosed = 0;
 	}
 
-	if( imgui_scale.IsModified() ) {
+	if ( imgui_scale.IsModified() ) {
 		imgui_scale.ClearModified();
-		ImGuiIO& io = ImGui::GetIO();
-		io.Fonts->Clear();
-		ImGui_ImplOpenGL2_DestroyFontsTexture();
-		ImFontConfig fontCfg;
-		strcpy( fontCfg.Name, "ProggyVector" );
-		float fontSize = 18.0f * GetScale();
-		float fontSizeInt = roundf( fontSize ); // font sizes are supposed to be rounded to integers
-#ifdef _MSC_VER
-		// because Visual C++ (at least up to 2019) doesn't support the long string literal
-		// of the base85-encoded font, use the alternative compression instead
-		// (this is incompatible with Big Endian, so keep on using Base85 for other platforms)
-		io.Fonts->AddFontFromMemoryCompressedTTF(ProggyVector_compressed_data, ProggyVector_compressed_size, fontSizeInt, nullptr);
-#else // better compilers
-		io.Fonts->AddFontFromMemoryCompressedBase85TTF(ProggyVector_compressed_data_base85, fontSizeInt, &fontCfg);
-#endif
+		float scale = imgui_scale.GetFloat();
+		if (scale < 0.0f) {
+			scale = GetDefaultScale();
+		}
+
+  	ImGuiStyle& style = ImGui::GetStyle();
+		style.FontScaleDpi = scale;
 	}
 
 	// Start the Dear ImGui frame

@@ -91,54 +91,69 @@ namespace DG {
 // this table contains all members of struct ImGuiStyle that come before the Colors array
 // when updating Dear ImGui, this might have to be adjusted for members that have been added/removed/renamed
 #define D3_IMSTYLE_ATTRS \
-	D3_IMATTR_FLOAT( Alpha                       ) \
-	D3_IMATTR_FLOAT( DisabledAlpha               ) \
-	D3_IMATTR_VEC2(  WindowPadding               ) \
-	D3_IMATTR_FLOAT( WindowRounding              ) \
-	D3_IMATTR_FLOAT( WindowBorderSize            ) \
-	D3_IMATTR_VEC2(  WindowMinSize               ) \
-	D3_IMATTR_VEC2(  WindowTitleAlign            ) \
-	D3_IMATTR_DIR(   WindowMenuButtonPosition    ) \
-	D3_IMATTR_FLOAT( ChildRounding               ) \
-	D3_IMATTR_FLOAT( ChildBorderSize             ) \
-	D3_IMATTR_FLOAT( PopupRounding               ) \
-	D3_IMATTR_FLOAT( PopupBorderSize             ) \
-	D3_IMATTR_VEC2(  FramePadding                ) \
-	D3_IMATTR_FLOAT( FrameRounding               ) \
-	D3_IMATTR_FLOAT( FrameBorderSize             ) \
-	D3_IMATTR_VEC2(  ItemSpacing                 ) \
-	D3_IMATTR_VEC2(  ItemInnerSpacing            ) \
-	D3_IMATTR_VEC2(  CellPadding                 ) \
-	D3_IMATTR_VEC2(  TouchExtraPadding           ) \
-	D3_IMATTR_FLOAT( IndentSpacing               ) \
-	D3_IMATTR_FLOAT( ColumnsMinSpacing           ) \
-	D3_IMATTR_FLOAT( ScrollbarSize               ) \
-	D3_IMATTR_FLOAT( ScrollbarRounding           ) \
-	D3_IMATTR_FLOAT( GrabMinSize                 ) \
-	D3_IMATTR_FLOAT( GrabRounding                ) \
-	D3_IMATTR_FLOAT( LogSliderDeadzone           ) \
-	D3_IMATTR_FLOAT( TabRounding                 ) \
-	D3_IMATTR_FLOAT( TabBorderSize               ) \
-	D3_IMATTR_FLOAT( TabMinWidthForCloseButton   ) \
-	D3_IMATTR_FLOAT( TabBarBorderSize            ) \
-	D3_IMATTR_FLOAT( TabBarOverlineSize          ) \
-	D3_IMATTR_FLOAT( TableAngledHeadersAngle     ) \
-	D3_IMATTR_VEC2(  TableAngledHeadersTextAlign ) \
-	D3_IMATTR_DIR(   ColorButtonPosition         ) \
-	D3_IMATTR_VEC2(  ButtonTextAlign             ) \
-	D3_IMATTR_VEC2(  SelectableTextAlign         ) \
-	D3_IMATTR_FLOAT( SeparatorTextBorderSize     ) \
-	D3_IMATTR_VEC2(  SeparatorTextAlign          ) \
-	D3_IMATTR_VEC2(  SeparatorTextPadding        ) \
-	D3_IMATTR_VEC2(  DisplayWindowPadding        ) \
-	D3_IMATTR_VEC2(  DisplaySafeAreaPadding      ) \
-	DGIMST_ENABLE_IF_DOCKING( D3_IMATTR_FLOAT( DockingSeparatorSize ) ) \
-	D3_IMATTR_FLOAT( MouseCursorScale            ) \
-	D3_IMATTR_BOOL(  AntiAliasedLines            ) \
-	D3_IMATTR_BOOL(  AntiAliasedLinesUseTex      ) \
-	D3_IMATTR_BOOL(  AntiAliasedFill             ) \
-	D3_IMATTR_FLOAT( CurveTessellationTol        ) \
-	D3_IMATTR_FLOAT( CircleTessellationMaxError  )
+    D3_IMATTR_FLOAT( FontSizeBase                     ) \
+    D3_IMATTR_FLOAT( FontScaleMain                    ) \
+    D3_IMATTR_FLOAT( FontScaleDpi                     ) \
+    D3_IMATTR_FLOAT( Alpha                            ) \
+    D3_IMATTR_FLOAT( DisabledAlpha                    ) \
+    D3_IMATTR_VEC2(  WindowPadding                    ) \
+    D3_IMATTR_FLOAT( WindowRounding                   ) \
+    D3_IMATTR_FLOAT( WindowBorderSize                 ) \
+    D3_IMATTR_FLOAT( WindowBorderHoverPadding         ) \
+    D3_IMATTR_VEC2(  WindowMinSize                    ) \
+    D3_IMATTR_VEC2(  WindowTitleAlign                 ) \
+    D3_IMATTR_DIR(   WindowMenuButtonPosition         ) \
+    D3_IMATTR_FLOAT( ChildRounding                    ) \
+    D3_IMATTR_FLOAT( ChildBorderSize                  ) \
+    D3_IMATTR_FLOAT( PopupRounding                    ) \
+    D3_IMATTR_FLOAT( PopupBorderSize                  ) \
+    D3_IMATTR_VEC2(  FramePadding                     ) \
+    D3_IMATTR_FLOAT( FrameRounding                    ) \
+    D3_IMATTR_FLOAT( FrameBorderSize                  ) \
+    D3_IMATTR_VEC2(  ItemSpacing                      ) \
+    D3_IMATTR_VEC2(  ItemInnerSpacing                 ) \
+    D3_IMATTR_VEC2(  CellPadding                      ) \
+    D3_IMATTR_VEC2(  TouchExtraPadding                ) \
+    D3_IMATTR_FLOAT( IndentSpacing                    ) \
+    D3_IMATTR_FLOAT( ColumnsMinSpacing                ) \
+    D3_IMATTR_FLOAT( ScrollbarSize                    ) \
+    D3_IMATTR_FLOAT( ScrollbarRounding                ) \
+    D3_IMATTR_FLOAT( ScrollbarPadding                 ) \
+    D3_IMATTR_FLOAT( GrabMinSize                      ) \
+    D3_IMATTR_FLOAT( GrabRounding                     ) \
+    D3_IMATTR_FLOAT( LogSliderDeadzone                ) \
+    D3_IMATTR_FLOAT( ImageBorderSize                  ) \
+    D3_IMATTR_FLOAT( TabRounding                      ) \
+    D3_IMATTR_FLOAT( TabBorderSize                    ) \
+    D3_IMATTR_FLOAT( TabMinWidthBase                  ) \
+    D3_IMATTR_FLOAT( TabMinWidthShrink                ) \
+    D3_IMATTR_FLOAT( TabCloseButtonMinWidthSelected   ) \
+    D3_IMATTR_FLOAT( TabCloseButtonMinWidthUnselected ) \
+    D3_IMATTR_FLOAT( TabBarBorderSize                 ) \
+    D3_IMATTR_FLOAT( TabBarOverlineSize               ) \
+    D3_IMATTR_FLOAT( TableAngledHeadersAngle          ) \
+    D3_IMATTR_VEC2(  TableAngledHeadersTextAlign      ) \
+    D3_IMATTR_INT(   TreeLinesFlags                   ) \
+    D3_IMATTR_FLOAT( TreeLinesSize                    ) \
+    D3_IMATTR_FLOAT( TreeLinesRounding                ) \
+    D3_IMATTR_FLOAT( DragDropTargetRounding           ) \
+    D3_IMATTR_FLOAT( DragDropTargetBorderSize         ) \
+    D3_IMATTR_FLOAT( DragDropTargetPadding            ) \
+    D3_IMATTR_DIR(   ColorButtonPosition              ) \
+    D3_IMATTR_VEC2(  ButtonTextAlign                  ) \
+    D3_IMATTR_VEC2(  SelectableTextAlign              ) \
+    D3_IMATTR_FLOAT( SeparatorTextBorderSize          ) \
+    D3_IMATTR_VEC2(  SeparatorTextAlign               ) \
+    D3_IMATTR_VEC2(  SeparatorTextPadding             ) \
+    D3_IMATTR_VEC2(  DisplayWindowPadding             ) \
+    D3_IMATTR_VEC2(  DisplaySafeAreaPadding           ) \
+    D3_IMATTR_FLOAT( MouseCursorScale                 ) \
+    D3_IMATTR_BOOL(  AntiAliasedLines                 ) \
+    D3_IMATTR_BOOL(  AntiAliasedLinesUseTex           ) \
+    D3_IMATTR_BOOL(  AntiAliasedFill                  ) \
+    D3_IMATTR_FLOAT( CurveTessellationTol             ) \
+    D3_IMATTR_FLOAT( CircleTessellationMaxError       ) \
+    DGIMST_ENABLE_IF_DOCKING( D3_IMATTR_FLOAT( DockingSeparatorSize ) )
 
 // this table contains the members of struct ImGuiStyle that come after the Colors array
 // when updating Dear ImGui, this might have to be adjusted for members that have been added/removed/renamed
@@ -147,71 +162,77 @@ namespace DG {
 	D3_IMATTR_FLOAT( HoverDelayShort             ) \
 	D3_IMATTR_FLOAT( HoverDelayNormal            ) \
 	D3_IMATTR_INT(   HoverFlagsForTooltipMouse   ) \
-	D3_IMATTR_INT(   HoverFlagsForTooltipNav     )
+	D3_IMATTR_INT(   HoverFlagsForTooltipNav     ) \
+	D3_IMATTR_FLOAT( _MainScale                  ) \
+	D3_IMATTR_FLOAT( _NextFrameFontSizeBase      )
 
 // this table contains one entry for every value of enum ImGuiCol_ (except for ImGuiCol_COUNT)
 // as you can see, the "ImGuiCol_" prefix is left out in this table,
 // it's added programatically when needed
 // when updating Dear ImGui, this might have to be adjusted for enum members that have been added/removed/renamed
 #define D3_IMSTYLE_COLORS \
-	D3_IMSTYLE_COLOR( Text                  ) \
-	D3_IMSTYLE_COLOR( TextDisabled          ) \
-	D3_IMSTYLE_COLOR( WindowBg              ) \
-	D3_IMSTYLE_COLOR( ChildBg               ) \
-	D3_IMSTYLE_COLOR( PopupBg               ) \
-	D3_IMSTYLE_COLOR( Border                ) \
-	D3_IMSTYLE_COLOR( BorderShadow          ) \
-	D3_IMSTYLE_COLOR( FrameBg               ) \
-	D3_IMSTYLE_COLOR( FrameBgHovered        ) \
-	D3_IMSTYLE_COLOR( FrameBgActive         ) \
-	D3_IMSTYLE_COLOR( TitleBg               ) \
-	D3_IMSTYLE_COLOR( TitleBgActive         ) \
-	D3_IMSTYLE_COLOR( TitleBgCollapsed      ) \
-	D3_IMSTYLE_COLOR( MenuBarBg             ) \
-	D3_IMSTYLE_COLOR( ScrollbarBg           ) \
-	D3_IMSTYLE_COLOR( ScrollbarGrab         ) \
-	D3_IMSTYLE_COLOR( ScrollbarGrabHovered  ) \
-	D3_IMSTYLE_COLOR( ScrollbarGrabActive   ) \
-	D3_IMSTYLE_COLOR( CheckMark             ) \
-	D3_IMSTYLE_COLOR( SliderGrab            ) \
-	D3_IMSTYLE_COLOR( SliderGrabActive      ) \
-	D3_IMSTYLE_COLOR( Button                ) \
-	D3_IMSTYLE_COLOR( ButtonHovered         ) \
-	D3_IMSTYLE_COLOR( ButtonActive          ) \
-	D3_IMSTYLE_COLOR( Header                ) \
-	D3_IMSTYLE_COLOR( HeaderHovered         ) \
-	D3_IMSTYLE_COLOR( HeaderActive          ) \
-	D3_IMSTYLE_COLOR( Separator             ) \
-	D3_IMSTYLE_COLOR( SeparatorHovered      ) \
-	D3_IMSTYLE_COLOR( SeparatorActive       ) \
-	D3_IMSTYLE_COLOR( ResizeGrip            ) \
-	D3_IMSTYLE_COLOR( ResizeGripHovered     ) \
-	D3_IMSTYLE_COLOR( ResizeGripActive      ) \
-	D3_IMSTYLE_COLOR( TabHovered            ) \
-	D3_IMSTYLE_COLOR( Tab                   ) \
-	D3_IMSTYLE_COLOR( TabSelected           ) \
-	D3_IMSTYLE_COLOR( TabSelectedOverline   ) \
-	D3_IMSTYLE_COLOR( TabDimmed             ) \
-	D3_IMSTYLE_COLOR( TabDimmedSelected     ) \
+	D3_IMSTYLE_COLOR( Text                      ) \
+	D3_IMSTYLE_COLOR( TextDisabled              ) \
+	D3_IMSTYLE_COLOR( WindowBg                  ) \
+	D3_IMSTYLE_COLOR( ChildBg                   ) \
+	D3_IMSTYLE_COLOR( PopupBg                   ) \
+	D3_IMSTYLE_COLOR( Border                    ) \
+	D3_IMSTYLE_COLOR( BorderShadow              ) \
+	D3_IMSTYLE_COLOR( FrameBg                   ) \
+	D3_IMSTYLE_COLOR( FrameBgHovered            ) \
+	D3_IMSTYLE_COLOR( FrameBgActive             ) \
+	D3_IMSTYLE_COLOR( TitleBg                   ) \
+	D3_IMSTYLE_COLOR( TitleBgActive             ) \
+	D3_IMSTYLE_COLOR( TitleBgCollapsed          ) \
+	D3_IMSTYLE_COLOR( MenuBarBg                 ) \
+	D3_IMSTYLE_COLOR( ScrollbarBg               ) \
+	D3_IMSTYLE_COLOR( ScrollbarGrab             ) \
+	D3_IMSTYLE_COLOR( ScrollbarGrabHovered      ) \
+	D3_IMSTYLE_COLOR( ScrollbarGrabActive       ) \
+	D3_IMSTYLE_COLOR( CheckMark                 ) \
+	D3_IMSTYLE_COLOR( SliderGrab                ) \
+	D3_IMSTYLE_COLOR( SliderGrabActive          ) \
+	D3_IMSTYLE_COLOR( Button                    ) \
+	D3_IMSTYLE_COLOR( ButtonHovered             ) \
+	D3_IMSTYLE_COLOR( ButtonActive              ) \
+	D3_IMSTYLE_COLOR( Header                    ) \
+	D3_IMSTYLE_COLOR( HeaderHovered             ) \
+	D3_IMSTYLE_COLOR( HeaderActive              ) \
+	D3_IMSTYLE_COLOR( Separator                 ) \
+	D3_IMSTYLE_COLOR( SeparatorHovered          ) \
+	D3_IMSTYLE_COLOR( SeparatorActive           ) \
+	D3_IMSTYLE_COLOR( ResizeGrip                ) \
+	D3_IMSTYLE_COLOR( ResizeGripHovered         ) \
+	D3_IMSTYLE_COLOR( ResizeGripActive          ) \
+	D3_IMSTYLE_COLOR( InputTextCursor           ) \
+	D3_IMSTYLE_COLOR( TabHovered                ) \
+	D3_IMSTYLE_COLOR( Tab                       ) \
+	D3_IMSTYLE_COLOR( TabSelected               ) \
+	D3_IMSTYLE_COLOR( TabSelectedOverline       ) \
+	D3_IMSTYLE_COLOR( TabDimmed                 ) \
+	D3_IMSTYLE_COLOR( TabDimmedSelected         ) \
 	D3_IMSTYLE_COLOR( TabDimmedSelectedOverline ) \
+	D3_IMSTYLE_COLOR( PlotLines                 ) \
+	D3_IMSTYLE_COLOR( PlotLinesHovered          ) \
+	D3_IMSTYLE_COLOR( PlotHistogram             ) \
+	D3_IMSTYLE_COLOR( PlotHistogramHovered      ) \
+	D3_IMSTYLE_COLOR( TableHeaderBg             ) \
+	D3_IMSTYLE_COLOR( TableBorderStrong         ) \
+	D3_IMSTYLE_COLOR( TableBorderLight          ) \
+	D3_IMSTYLE_COLOR( TableRowBg                ) \
+	D3_IMSTYLE_COLOR( TableRowBgAlt             ) \
+	D3_IMSTYLE_COLOR( TextLink                  ) \
+	D3_IMSTYLE_COLOR( TextSelectedBg            ) \
+	D3_IMSTYLE_COLOR( TreeLines                 ) \
+	D3_IMSTYLE_COLOR( DragDropTarget            ) \
+	D3_IMSTYLE_COLOR( DragDropTargetBg          ) \
+	D3_IMSTYLE_COLOR( UnsavedMarker             ) \
+	D3_IMSTYLE_COLOR( NavCursor                 ) \
+	D3_IMSTYLE_COLOR( NavWindowingHighlight     ) \
+	D3_IMSTYLE_COLOR( NavWindowingDimBg         ) \
+	D3_IMSTYLE_COLOR( ModalWindowDimBg          ) \
 	DGIMST_ENABLE_IF_DOCKING( D3_IMSTYLE_COLOR( DockingPreview ) ) \
-	DGIMST_ENABLE_IF_DOCKING( D3_IMSTYLE_COLOR( DockingEmptyBg ) ) \
-	D3_IMSTYLE_COLOR( PlotLines             ) \
-	D3_IMSTYLE_COLOR( PlotLinesHovered      ) \
-	D3_IMSTYLE_COLOR( PlotHistogram         ) \
-	D3_IMSTYLE_COLOR( PlotHistogramHovered  ) \
-	D3_IMSTYLE_COLOR( TableHeaderBg         ) \
-	D3_IMSTYLE_COLOR( TableBorderStrong     ) \
-	D3_IMSTYLE_COLOR( TableBorderLight      ) \
-	D3_IMSTYLE_COLOR( TableRowBg            ) \
-	D3_IMSTYLE_COLOR( TableRowBgAlt         ) \
-	D3_IMSTYLE_COLOR( TextLink              ) \
-	D3_IMSTYLE_COLOR( TextSelectedBg        ) \
-	D3_IMSTYLE_COLOR( DragDropTarget        ) \
-	D3_IMSTYLE_COLOR( NavCursor             ) \
-	D3_IMSTYLE_COLOR( NavWindowingHighlight ) \
-	D3_IMSTYLE_COLOR( NavWindowingDimBg     ) \
-	D3_IMSTYLE_COLOR( ModalWindowDimBg      )
+	DGIMST_ENABLE_IF_DOCKING( D3_IMSTYLE_COLOR( DockingEmptyBg ) )
 
 static inline char* skipWhitespace( const char* s ) {
 	while( *s == ' ' || *s == '\t' )
