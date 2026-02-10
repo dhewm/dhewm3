@@ -670,8 +670,8 @@ void idEditEntities::DisplayEntities( void ) {
 ===============================================================================
 */
 
-idGameEditExt		gameEditLocal;
-idGameEdit *		gameEdit = &gameEditLocal;
+idGameEditExt			gameEditLocal;
+idGameEditBase *		gameEdit = &gameEditLocal;
 
 
 /*
