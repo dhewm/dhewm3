@@ -3050,6 +3050,15 @@ void idCommonLocal::Init( int argc, char **argv ) {
 	 *  * https://github.com/libsdl-org/SDL/issues/4039
 	 *  * https://github.com/libsdl-org/SDL/issues/3656 */
 	SDL_SetHint( SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1" );
+  #ifdef SDL_HINT_ENABLE_SCREEN_KEYBOARD
+	SDL_SetHint( SDL_HINT_ENABLE_SCREEN_KEYBOARD, "0" );
+  #else
+	// fallback for older SDL2 versions, maybe at least the runtime version is new enough
+	// for this hint if the compile time SDL2 version wasn't (and if not this won't hurt)
+	if (SDL_getenv("SDL_ENABLE_SCREEN_KEYBOARD") == NULL) {
+		SDL_setenv("SDL_ENABLE_SCREEN_KEYBOARD", "0", 0);
+	}
+  #endif
 #endif
 
 	try {
