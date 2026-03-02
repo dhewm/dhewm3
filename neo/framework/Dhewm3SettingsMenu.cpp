@@ -2333,7 +2333,15 @@ static CVarOption gameOptions[] = {
 	CVarOption( "ui_autoSwitch", "Auto Weapon Switch", OT_BOOL ),
 	CVarOption( "Visual" ),
 	CVarOption( "g_showHud", "Show HUD", OT_BOOL ),
-	CVarOption( "com_showFPS", "Show Framerate (FPS)", OT_BOOL ),
+	CVarOption( "com_showFPS", []( idCVar& cvar ) {
+		int curFormat = idMath::ClampInt( 0, 2, cvar.GetInteger() );
+		const char* choices = "Don't show framerate\0Show only framerate\0Show framerate and frame times (avg/min/max)\0";
+		if ( ImGui::Combo( "Show Framerate (FPS)", &curFormat, choices ) ) {
+			cvar.SetInteger( curFormat );
+		}
+		AddTooltip( "com_showFPS" );
+		AddDescrTooltip( cvar.GetDescription() );
+	} ),
 	CVarOption( "ui_showGun", "Show Gun Model", OT_BOOL ),
 	CVarOption( "g_decals", "Show Decals", OT_BOOL ),
 	CVarOption( "g_bloodEffects", "Show Blood and Gibs", OT_BOOL ),
