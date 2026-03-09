@@ -2281,9 +2281,9 @@ ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec, int& hash
 	return (x + y * VERTEX_HASH_BOXSIZE + z) & (VERTEX_HASH_SIZE-1);
 #else // DG: adjusted code for potentially multiple hashes
 	idVec3 offs(vec.x - cm_modelBounds[0].x, vec.y - cm_modelBounds[0].y, vec.z - cm_modelBounds[0].z);
-	// in the original calculation, 0.5 is added before casting to int etc
-	// do two checks here: 0.5 +/- 0.1 (VERTEX_EPSILON)
-	const idVec3 checkOffs[2] = { idVec3(0.4f, 0.4f, 0.4f), idVec3(0.6f, 0.6f, 0.6f) };
+	// in the original calculation for the "real" hash, 0.38 is added before casting to int etc
+	// do two checks here: 0.38 +/- 0.1 (VERTEX_EPSILON)
+	const idVec3 checkOffs[2] = { idVec3(0.28f, 0.28f, 0.28f), idVec3(0.48f, 0.48f, 0.48f) };
 	int xs[2], ys[2], zs[2], hashes[2];
 	for ( int i=0; i<2; ++i ) {
 		idVec3 hc = offs + checkOffs[i];
@@ -2301,7 +2301,20 @@ ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec, int& hash
 		numDiff += xs[0] != xs[1];
 		numDiff += ys[0] != ys[1];
 		numDiff += zs[0] != zs[1];
-		idVec3 hc = offs + idVec3(0.5f, 0.5f, 0.5f);
+		// originally 0.5 was added instead of 0.38, but I guess that values
+		// around .5 are relatively common, and then adding 0.5 will result
+		// in a different hash (for values < .5 vs >= .5)
+		// so use 0.38 instead - still rounds up most values closer to X+1,
+		// but not the ones around .5 - and in the checks above +0.28 and +0.48
+		// will be used, and even +0.48 will not move most values around .5
+		// to the next integer.
+		// When compiling game/caverns2, using 0.5 +/- 0.1 results in 2158 vertex
+		// lookups in GetVertex() needing two hashes and 134 that iterate all vertices,
+		// while with 0.38 +/- 0.1 only 1568 verts lookups need two hashes
+		// and 76 iterated all hashes (of 146'498 calls to GetVertex() in total)
+		// => both unusual cases (where looking up with just hash isn't enough)
+		//    significantly reduced
+		idVec3 hc = offs + idVec3(0.38f, 0.38f, 0.38f);
 		int x = (int(hc.x) + 2) >> 2;
 		int y = (int(hc.y) + 2) >> 2;
 		int z = (int(hc.z) + 2) >> 2;
