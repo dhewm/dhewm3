@@ -2249,9 +2249,19 @@ void idCollisionModelManagerLocal::ClearHash( idBounds &bounds ) {
 /*
 ================
 idCollisionModelManagerLocal::HashVec
+
+ DG: added "hash" and "althash" arguments - the function used to return "hash",
+     now it returns the number of potential hashes for vertices close to "vec":
+If 1 is returned, "hash" is the proper hash for "vec" (and vectors close to it, with coordinates +/- 0.1).
+If 2 is returned, "hash" and "althash" are both proper hashes for vectors close to "vec",
+                  "hash" will hold the hash for exactly "vec", "althash" the hash of points close to it
+If 3 is returned, there would be *at least* 4 different potential hashes for vectors close to it.
+                  in that case, "hash" contains the hash for "vec" (exactly vec), but you
+                  can't rely on the hashmap (if you get a match there that's great, if not
+                   you still need to check *all* vertices of the current model)
 ================
 */
-ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec) {
+ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec, int& hash, int& althash) {
 	/*
 	int x, y;
 
@@ -2262,13 +2272,63 @@ ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec) {
 
 	return y * VERTEX_HASH_BOXSIZE + x;
 	*/
-	int x, y, z;
 
+#if 0 // original code
+	int x, y, z;
 	x = (((int) (vec[0] - cm_modelBounds[0].x + 0.5)) + 2) >> 2;
 	y = (((int) (vec[1] - cm_modelBounds[0].y + 0.5)) + 2) >> 2;
 	z = (((int) (vec[2] - cm_modelBounds[0].z + 0.5)) + 2) >> 2;
 	return (x + y * VERTEX_HASH_BOXSIZE + z) & (VERTEX_HASH_SIZE-1);
+#else // DG: adjusted code for potentially multiple hashes
+	idVec3 offs(vec.x - cm_modelBounds[0].x, vec.y - cm_modelBounds[0].y, vec.z - cm_modelBounds[0].z);
+	// in the original calculation, 0.5 is added before casting to int etc
+	// do two checks here: 0.5 +/- 0.1 (VERTEX_EPSILON)
+	const idVec3 checkOffs[2] = { idVec3(0.4f, 0.4f, 0.4f), idVec3(0.6f, 0.6f, 0.6f) };
+	int xs[2], ys[2], zs[2], hashes[2];
+	for ( int i=0; i<2; ++i ) {
+		idVec3 hc = offs + checkOffs[i];
+		xs[i] = (int(hc.x) + 2) >> 2;
+		ys[i] = (int(hc.y) + 2) >> 2;
+		zs[i] = (int(hc.z) + 2) >> 2;
+		hashes[i] = (xs[i] + ys[i] * VERTEX_HASH_BOXSIZE + zs[i]) & (VERTEX_HASH_SIZE-1);
+	}
+	if ( hashes[0] == hashes[1] ) {
+		hash = hashes[0];
+		return 1;
+	} else {
+		// this should be rare
+		int numDiff = 0;
+		numDiff += xs[0] != xs[1];
+		numDiff += ys[0] != ys[1];
+		numDiff += zs[0] != zs[1];
+		idVec3 hc = offs + idVec3(0.5f, 0.5f, 0.5f);
+		int x = (int(hc.x) + 2) >> 2;
+		int y = (int(hc.y) + 2) >> 2;
+		int z = (int(hc.z) + 2) >> 2;
+		int realHash = (x + y * VERTEX_HASH_BOXSIZE + z) & (VERTEX_HASH_SIZE-1);
+		if ( numDiff == 1 ) {
+			assert(realHash == hashes[0] || realHash == hashes[1]);
+			hash = realHash;
+			althash = (realHash == hashes[0]) ? hashes[1] : hashes[0];
+			return 2;
+		}
+		// if the hash-part is different for more than one coordinate
+		// (this should be even rarer), return 3 so all model vertices are checked,
+		// but still set hash because if vec isn't found at all the hash will be
+		// used to add it to the hashmap.
+		// Note that this would require more than 3 hashes, e.g. with x and y different,
+		// you'd need 4 hashes: (x[0], y[0], z[0]), (x[1], y[0], z[0]),
+		// (x[0], y[1], z[0]), (x[1], y[1], z[0])
+		// if all three hash parts are different you'd need even more...
+		// I think at that point hashing doesn't give much of a speedup anymore
+		// (and the code would get even more complicated)
+		hash = realHash;
+		return 3;
+	}
+
+#endif
 }
+
 
 /*
 ================
@@ -2276,7 +2336,7 @@ idCollisionModelManagerLocal::GetVertex
 ================
 */
 int idCollisionModelManagerLocal::GetVertex( cm_model_t *model, const idVec3 &v, int *vertexNum ) {
-	int i, hashKey, vn;
+	int i, hashKey, altHashKey, vn;
 	idVec3 vert, *p;
 
 	for (i = 0; i < 3; i++) {
@@ -2286,8 +2346,7 @@ int idCollisionModelManagerLocal::GetVertex( cm_model_t *model, const idVec3 &v,
 			vert[i] = v[i];
 	}
 
-	hashKey = HashVec( vert );
-
+	int numHashCandidates = HashVec( vert, hashKey, altHashKey );
 	for (vn = cm_vertexHash->First( hashKey ); vn >= 0; vn = cm_vertexHash->Next( vn ) ) {
 		p = &model->vertices[vn].p;
 		// first compare z-axis because hash is based on x-y plane
@@ -2297,6 +2356,33 @@ int idCollisionModelManagerLocal::GetVertex( cm_model_t *model, const idVec3 &v,
 		{
 			*vertexNum = vn;
 			return true;
+		}
+	}
+	// DG: points that are really close to each other can still have different hashes
+	if ( numHashCandidates == 2 ) {
+		for (vn = cm_vertexHash->First( altHashKey ); vn >= 0; vn = cm_vertexHash->Next( vn ) ) {
+			p = &model->vertices[vn].p;
+			// first compare z-axis because hash is based on x-y plane
+			if (idMath::Fabs(vert[2] - (*p)[2]) < VERTEX_EPSILON &&
+				idMath::Fabs(vert[0] - (*p)[0]) < VERTEX_EPSILON &&
+				idMath::Fabs(vert[1] - (*p)[1]) < VERTEX_EPSILON )
+			{
+				*vertexNum = vn;
+				return true;
+			}
+		}
+	} else if( numHashCandidates > 2 ) {
+		// more than two potential hashes for vert? just check all of model's vertices
+		for (i = 0; i < model->numVertices; ++i ) {
+			p = &model->vertices[i].p;
+			// first compare z-axis because hash is based on x-y plane
+			if (idMath::Fabs(vert[2] - (*p)[2]) < VERTEX_EPSILON &&
+				idMath::Fabs(vert[0] - (*p)[0]) < VERTEX_EPSILON &&
+				idMath::Fabs(vert[1] - (*p)[1]) < VERTEX_EPSILON )
+			{
+				*vertexNum = i;
+				return true;
+			}
 		}
 	}
 
