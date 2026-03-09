@@ -768,11 +768,13 @@ void idWinding::RemoveColinearPoints( const idVec3 &normal, const float epsilon 
 	idVec3 edgeNormal;
 	float dist;
 
-	if ( numPoints <= 3 ) {
-		return;
-	}
-
 	for ( i = 0; i < numPoints; i++ ) {
+
+		// from TDM: angua: don't remove any points when there are only 3 or less left to avoid
+		// degenerating the winding, otherwise this may result in windings with numPoints = 0
+		if ( numPoints <= 3 ) {
+			return;
+		}
 
 		// create plane through edge orthogonal to winding plane
 		edgeNormal = (p[i].ToVec3() - p[(i+numPoints-1)%numPoints].ToVec3()).Cross( normal );
