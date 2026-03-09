@@ -2253,12 +2253,17 @@ idCollisionModelManagerLocal::HashVec
  DG: added "hash" and "althash" arguments - the function used to return "hash",
      now it returns the number of potential hashes for vertices close to "vec":
 If 1 is returned, "hash" is the proper hash for "vec" (and vectors close to it, with coordinates +/- 0.1).
+    - in my tests with compiling game/cavern2.map, this was the case for about 95% of all calls to HashVec()
 If 2 is returned, "hash" and "althash" are both proper hashes for vectors close to "vec",
                   "hash" will hold the hash for exactly "vec", "althash" the hash of points close to it
+    - with cavern2.map, this was the case in about 4.8% of the calls to HashVec(), though in
+      most cases the first hashmap lookup (with "hash") was already successful.
 If 3 is returned, there would be *at least* 4 different potential hashes for vectors close to it.
                   in that case, "hash" contains the hash for "vec" (exactly vec), but you
                   can't rely on the hashmap (if you get a match there that's great, if not
                    you still need to check *all* vertices of the current model)
+    - with cavern2.map, this was the case in about 0.2% of the calls, but for most of them
+      using "hash" with the hashmap still found a vertex, so iterating all vertices was avoided
 ================
 */
 ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec, int& hash, int& althash) {
@@ -2326,9 +2331,11 @@ ID_INLINE int idCollisionModelManagerLocal::HashVec(const idVec3 &vec, int& hash
 			return 2;
 		}
 		// if the hash-part is different for more than one coordinate
-		// (this should be even rarer), return 3 so all model vertices are checked,
-		// but still set hash because if vec isn't found at all the hash will be
-		// used to add it to the hashmap.
+		// (this should be even rarer), return 3 so if needed all model vertices are checked,
+		// but still set "hash" because:
+		// 1. it still makes sense to try the hashmap with that hash (success in >77% of the
+		//    cases with potentially many hashes with game/cavern2.map)
+		// 2. if vec isn't found at all, the hash will be  used to add it to the hashmap
 		// Note that this would require more than 3 hashes, e.g. with x and y different,
 		// you'd need 4 hashes: (x[0], y[0], z[0]), (x[1], y[0], z[0]),
 		// (x[0], y[1], z[0]), (x[1], y[1], z[0])
