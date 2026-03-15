@@ -46,7 +46,7 @@ namespace DG {
 
 	// reads the the given filename (opened with fopen())
 	// and sets the given ImGuiStyle accordingly.
-	// if any attributes/colors/behaviors are missing the the file,
+	// if any attributes/colors/behaviors are missing in the file,
 	// they are not modified in style, so it probably makes sense to initialize
 	// style to a sane default before calling this function.
 	// returns true on success, false if opening the file failed
@@ -416,6 +416,8 @@ bool ReadImGuiStyle( ImGuiStyle& s, const char* filename )
 			warnPrintf( "Invalid line in ImGui before start of any section: '%s'\n", line );
 		}
 	}
+
+	fclose(f);
 
 	return true;
 }
