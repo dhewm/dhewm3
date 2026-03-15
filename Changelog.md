@@ -44,7 +44,6 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Fix a crash (assertion) on start with ImGui if `SDL_GetWindowDisplayIndex()`
   or `SDL_GetDisplayDPI()` failed and the `imgui_scale` CVar was set to the default value of `-1`
   (setting it to `1` worked around the bug; #632)
-* Updated Dear ImGui to 1.91.7
 * Fix scaling of Grabber cursor in Resurrection of Evil in non-4:3 resolutions (#637)
 * Add `com_disableAutoSaves` CVar: If set to `1`, Autosaves (when starting a level) are disabled (#620)
 * Add support for "nospecular" parm of lights, enabled by setting `"allow_nospecular" "1"` in a maps
@@ -69,8 +68,11 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
   (you can just set `fs_gameDllPath` to the build dir, no need to copy the DLL/.so/.dylib)
 * Fixed a crash when using an incomplete cubemap texture (missing one side).  
   Will now print a warning about the missing side.
+* Fix bug in map compiling (`dmap`) that could lead to errors when loading the map,
+  due to "dangling edges" in collision models (#742)
 * Fix wrong (flipped) labels of Prev./Next Weapon in dhewm3 settings menu (#731)
 * Gamepad trigger axes can now also be used for ducking and jumping (#733)
+* Updated Dear ImGui to v1.92.5 (thanks *Klaus Silveira*!)
 * Several smaller fixes for all kinds of things incl. build issues
 
 

@@ -451,7 +451,7 @@ private:			// CollisionMap_load.cpp
 	void			SetupHash(void);
 	void			ShutdownHash(void);
 	void			ClearHash( idBounds &bounds );
-	int				HashVec(const idVec3 &vec);
+	int				HashVec(const idVec3 &vec, int& hash, int& althash);
 	int				GetVertex( cm_model_t *model, const idVec3 &v, int *vertexNum );
 	int				GetEdge( cm_model_t *model, const idVec3 &v1, const idVec3 &v2, int *edgeNum, int v1num );
 	void			CreatePolygon( cm_model_t *model, idFixedWinding *w, const idPlane &plane, const idMaterial *material, int primitiveNum );
