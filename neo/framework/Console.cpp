@@ -250,10 +250,10 @@ float SCR_DrawMemoryUsage( float y ) {
 	memoryStats_t allocs, frees;
 
 	Mem_GetStats( allocs );
-	SCR_DrawTextRightAlign( y, "total allocated memory: %4d, %4dkB", allocs.num, allocs.totalSize>>10 );
+	SCR_DrawTextRightAlign( y, "total allocated memory: %4d, %4lldkB", allocs.num, allocs.totalSize>>10 );
 
 	Mem_GetFrameStats( allocs, frees );
-	SCR_DrawTextRightAlign( y, "frame alloc: %4d, %4dkB  frame free: %4d, %4dkB", allocs.num, allocs.totalSize>>10, frees.num, frees.totalSize>>10 );
+	SCR_DrawTextRightAlign( y, "frame alloc: %4d, %4lldkB  frame free: %4d, %4lldkB", allocs.num, allocs.totalSize>>10, frees.num, frees.totalSize>>10 );
 
 	Mem_ClearFrameStats();
 
