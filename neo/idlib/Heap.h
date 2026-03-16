@@ -49,7 +49,7 @@ typedef struct {
 	int		num;
 	int		minSize;
 	int		maxSize;
-	int		totalSize;
+	long long totalSize; // DG: prevent overflows by using a 64bit int for totalSize
 } memoryStats_t;
 
 
