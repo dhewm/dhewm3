@@ -70,7 +70,9 @@ ID_INLINE int idRandom::GetSeed( void ) const {
 }
 
 ID_INLINE int idRandom::RandomInt( void ) {
-	seed = 69069 * seed + 1;
+	// DG: prevent signed int overflow by letting an unsigned int overflow instead
+	unsigned s = 69069u * (unsigned)seed + 1u;
+	seed = s;
 	return ( seed & idRandom::MAX_RAND );
 }
 
