@@ -101,39 +101,20 @@ Newer versions of Homebrew install openal-soft to another directory, so use this
 
 `cmake -DOPENAL_LIBRARY="/opt/homebrew/opt/openal-soft/lib/libopenal.dylib" -DOPENAL_INCLUDE_DIR="/opt/homebrew/opt/openal-soft/include" /path/to/repo/neo`
 
-### Compiling example using Ubuntu
+### Compiling using Linux
 
-Should be the same for Debian and other Debian-derivatives, but apart from the first step (installing
-build dependecies) it should be the same on other Linux distros and even other UNIX-likes in general.
+Inside your dhewm3 clone
 
 Open a terminal and follow these steps:
 
-* Install build dependencies:  
-  `sudo apt install git cmake build-essential libsdl2-dev libopenal-dev libcurl4-openssl-dev`  
-    - The build-essential package on Debian/Ubuntu/... installs some basics for compiling code
-      like GCC (incl. g++), GNU Make and the glibc development package
-    - Instead of libcurl4-openssl-dev, other libcurl*-dev packages should also work - or none at all, curl is optional.
-    - Not strictly necessary, but I recommend making libbacktrace available. On distributions not
-      based on Debian, you may have to manually install some kind of libbacktrace development package.
-* Use git to get the code from Github (alternatively you can also download the code as an archive and extract that):  
-  `git clone https://github.com/dhewm/dhewm3.git`
-* Change into the dhewm3 directory, create a directory to build in and change into the build directory:  
-  `cd dhewm3` then `mkdir build` then `cd build`
-* Create a Makefile with CMake: `cmake ../neo/`
-    - You can set different options for CMake with arguments like `-DDEDICATED=ON` (to enable the dedicated server).
-      You can show a list of supported options by running `cmake -LH ../neo/`. You can run CMake again
-      with another `-DFOO=BAR` option to change that option (previously set options are remembered,
-      unless you remove all contents of the build/ dir).
-    - You could also install the **cmake-qt-gui** package and run `cmake-gui ../neo/`, which will let
-      you configure the build in a GUI instead of using `-D` commandline-arguments.
-* Compile dhewm3: `make -j8`
-    - `-j8` specifies the number of compiler processes to run in parallel (8 in this example),
-      it makes sense to use the number of CPU threads (or cores) in your system.
+* Run `chmod +x build.sh && chmod +x run.sh` this allows you to run the build.sh and run.sh files.
 
-When all steps are done and no errors occurred, you should be able to run dhewm3 right there, like:  
-`./dhewm3 +set fs_basepath /path/to/your/doom3/`  
-*Replace `/path/to/your/doom3/` with the path to your Doom3 installation (that contains `base/` with
-`pak000.pk4` to `pak008.pk4`)*
+* Run `./build.sh` This file installs all dependencies, builds dhewm3 and moves all necessary files to the main folder.
+
+* Put all .pk4 files from the original Doom 3 NOT THE BFG edition in the base/ folder.
+
+* Run `./run.sh` This file checks if you have all .pk4 files in the base/ folder and runs dhewm3.
+
 
 ### Using the provided Windows binaries
 
