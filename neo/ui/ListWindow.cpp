@@ -126,8 +126,17 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 		}
 
 		if ( key == K_MOUSE1) {
-			if (Contains(gui->CursorX(), gui->CursorY())) {
-				int cur = ( int )( ( gui->CursorY() - actualY - pixelOffset ) / vert ) + top;
+			float cursorY = gui->CursorY();
+			if (Contains(gui->CursorX(), cursorY)) {
+
+				// DG: adjust cursorY for cst anchors
+				idVec2 scale, offset;
+				if ( idDeviceContext::CstGetParams( cstAnchor, cstAnchorTo, cstAnchorFactor, scale, offset ) ) {
+					cursorY -= offset.y;
+					cursorY /= scale.y;
+				}
+
+				int cur = ( int )( ( cursorY - actualY - pixelOffset ) / vert ) + top;
 				if ( cur >= 0 && cur < listItems.Num() ) {
 					if ( multipleSel && idKeyInput::IsDown( K_CTRL ) ) {
 						if ( IsSelected( cur ) ) {

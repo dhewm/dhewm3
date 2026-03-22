@@ -293,6 +293,16 @@ const char *idSliderWindow::RouteMouseCoords(float xd, float yd) {
 	r.y = actualY;
 	r.x += thumbWidth / 2.0;
 	r.w -= thumbWidth;
+
+	// DG: adjust r for anchors, like in idWindow::Contains()
+	idVec2 scale, offset;
+	if ( idDeviceContext::CstGetParams( cstAnchor, cstAnchorTo, cstAnchorFactor, scale, offset ) ) {
+		r.x = r.x * scale.x + offset.x;
+		r.y = r.y * scale.y + offset.y;
+		r.w *= scale.x;
+		r.h *= scale.y;
+	}
+
 	if (vertical) {
 		r.y += thumbHeight / 2;
 		r.h -= thumbHeight;
