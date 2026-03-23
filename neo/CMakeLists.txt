@@ -1340,6 +1340,14 @@ endif()
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
+		install(FILES "../dist/linux/share/icons/hicolor/128x128/apps/org.dhewm3.Dhewm3.png"
+				DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps")
+		install(FILES "../dist/linux/share/icons/hicolor/256x256/apps/org.dhewm3.Dhewm3.png"
+				DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps")
+		install(FILES "../dist/linux/share/icons/hicolor/scalable/apps/org.dhewm3.Dhewm3.svg"
+				DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps")
+		install(FILES "../dist/linux/share/metainfo/org.dhewm3.Dhewm3.metainfo.xml"
+				DESTINATION "${CMAKE_INSTALL_DATADIR}/metainfo")
 	endif()
 endif()
 
@@ -1405,6 +1413,8 @@ if(BASE AND NOT HARDLINK_GAME)
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
+		install(FILES "../dist/linux/share/applications/org.dhewm3.Dhewm3.desktop"
+				DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
 	endif()
 endif()
 
@@ -1434,5 +1444,7 @@ if(D3XP AND NOT HARDLINK_GAME)
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 		)
+		install(FILES "../dist/linux/share/applications/org.dhewm3.Dhewm3.d3xp.desktop"
+				DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
 	endif()
 endif()
