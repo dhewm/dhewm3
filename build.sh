@@ -36,12 +36,12 @@ mkdir -p build
 cd build
 
 echo -e "\n>>> Step 4: Configuring CMake..."
-cmake ../neo/
+cmake ../neo/ -DCMAKE_BUILD_TYPE=Release
 
 echo -e "\n>>> Step 5: Compiling dhewm3..."
 CORES=$(nproc 2>/dev/null || echo 4)
 echo "Using $CORES CPU threads for compilation..."
-#make -j"$CORES"
+make -j"$CORES"
 
 
 echo -e "\n========================================"
