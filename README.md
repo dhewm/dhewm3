@@ -111,7 +111,7 @@ Open a terminal and follow these steps:
 
 * Run `./build.sh` This file installs all dependencies, builds dhewm3 and moves all necessary files to the main folder.
 
-* Put all .pk4 files from the original Doom 3 NOT THE BFG edition in the base/ folder.
+* Put all .pk4 files from the original Doom 3 NOT THE BFG edition in your dhewm3 clone at the base/ folder.
 
 * Run `./run.sh` in your dhewm3 clone. This file checks if you have all .pk4 files in the base/ folder and runs dhewm3.
 
