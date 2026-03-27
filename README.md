@@ -101,6 +101,20 @@ Newer versions of Homebrew install openal-soft to another directory, so use this
 
 `cmake -DOPENAL_LIBRARY="/opt/homebrew/opt/openal-soft/lib/libopenal.dylib" -DOPENAL_INCLUDE_DIR="/opt/homebrew/opt/openal-soft/include" /path/to/repo/neo`
 
+### Compiling using Linux (easy way)
+
+Inside your dhewm3 clone
+
+Open a terminal and follow these steps:
+
+* Run `chmod +x build.sh && chmod +x run.sh` this allows you to run the build.sh and run.sh files.
+
+* Run `./build.sh` This file installs all dependencies, builds dhewm3 and moves all necessary files to the main folder.
+
+* Put all .pk4 files from the original Doom 3 NOT THE BFG edition in your dhewm3 clone at the base/ folder.
+
+* Run `./run.sh` in your dhewm3 clone. This file checks if you have all .pk4 files in the base/ folder and runs dhewm3.
+
 ### Compiling example using Ubuntu
 
 Should be the same for Debian and other Debian-derivatives, but apart from the first step (installing
@@ -134,6 +148,27 @@ When all steps are done and no errors occurred, you should be able to run dhewm3
 `./dhewm3 +set fs_basepath /path/to/your/doom3/`  
 *Replace `/path/to/your/doom3/` with the path to your Doom3 installation (that contains `base/` with
 `pak000.pk4` to `pak008.pk4`)*
+
+### Using the provided Windows binaries
+
+Get a clone of the latest binaries here: https://github.com/dhewm/dhewm3-libs
+
+There are two subfolders:
+
+- 32-bit binaries are located in `i686-w64-mingw32`
+- 64-bit binaries are located in `x86_64-w64-mingw32`
+
+Issue the appropriate command from the build folder, for example (for VS2019 and 32bit):
+
+`cmake -G "Visual Studio 16 2019" -A Win32 -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+
+For 64bit dhewm3 binaries, use `-A x64` and `/path/to/dhewm3-libs/x86_64-w64-mingw32` instead (note that the official dhewm3 binaries for Windows are 32bit).  
+For Visual Studio 2022 it's `"Visual Studio 17 2022"`.
+
+For 32bit MinGW use:
+`cmake -G "MinGW Makefiles" -DDHEWM3LIBS=/path/to/dhewm3-libs/i686-w64-mingw32 /path/to/repository/neo`
+
+The binaries are compatible with MinGW-w64 and all MSVC versions.
 
 ### Using the provided Windows binaries
 
