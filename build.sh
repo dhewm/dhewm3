@@ -11,7 +11,7 @@ echo "========================================"
 echo "    dhewm3 Auto-Compiler Script         "
 echo "========================================"
 
-echo ">>> Step 1: Installing build dependencies..."
+echo "1. Installing build dependencies..."
 if command -v apt >/dev/null 2>&1; then
     echo "Detected Debian/Ubuntu-based system (apt)."
     sudo apt update
@@ -35,10 +35,10 @@ fi
 mkdir -p build
 cd build
 
-echo -e "\n>>> Step 4: Configuring CMake..."
+echo -e "\n 2. Configuring CMake..."
 cmake ../neo/ -DCMAKE_BUILD_TYPE=Release
 
-echo -e "\n>>> Step 5: Compiling dhewm3..."
+echo -e "\n 3. Compiling dhewm3..."
 CORES=$(nproc 2>/dev/null || echo 4)
 echo "Using $CORES CPU threads for compilation..."
 make -j"$CORES"
