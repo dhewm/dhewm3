@@ -199,6 +199,22 @@ Then point CMake at your toolchain file:
 If you want to build for x86_64 aka AMD64 aka x64, replace all instances of `i686`
 in the toolchain file with `x86_64`.
 
+## Contributing
+
+Contributions in the form of Pull Requests or by creating (meaningful) bugreports are welcome!
+
+But please note that **only human-written code** is accepted for dhewm3.
+
+#### Do not submit code developed with the assistance of generative "AI"!
+
+... like Microsoft Copilot, Anthropic Claude, ChatGPT, etc.
+
+Don't generate bugreports/issues or comments with "AI" either.
+
+Doing it anyway may get you banned from this project.
+
+This is not open for discussion.
+
 ## Back End Rendering of Stencil Shadows
 
 The Doom 3 GPL source code release **did** not include functionality enabling rendering
