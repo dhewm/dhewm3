@@ -27,6 +27,7 @@ if [ "$ALL_PRESENT" = true ]; then
     echo -e "${GREEN}Success! All required .pk4 files are present.${NONE}"
     echo "Running game ..."
     echo "Happy Gaming"
+    ./dhewm3
     exit 0
 else
     echo -e "${RED}Error: You are missing some .pk4 files. Please add all pk4 to the base/ folder.${NONE}"
