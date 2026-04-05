@@ -422,7 +422,7 @@ try_again:
 		SDL_DestroyProperties(props);
 		if (window == NULL) {
 			common->Warning("Couldn't set GL mode %d/%d/%d with %dx MSAA: %s",
-							channelcolorbits, tdepthbits, tstencilbits, parms.multiSamples, SDL_GetError());
+							channelcolorbits, tdepthbits, tstencilbits, multisamples, SDL_GetError());
 
 			// before trying to reduce color channel size or whatever, first try reducing MSAA, if possible
 			if (multisamples > 1) {
@@ -485,7 +485,7 @@ try_again:
 
 		if (!window) {
 			common->Warning("Couldn't set GL mode %d/%d/%d with %dx MSAA: %s",
-							channelcolorbits, tdepthbits, tstencilbits, parms.multiSamples, SDL_GetError());
+							channelcolorbits, tdepthbits, tstencilbits, multisamples, SDL_GetError());
 
 			// before trying to reduce color channel size or whatever, first try reducing MSAA, if possible
 			if(multisamples > 1) {
@@ -732,24 +732,41 @@ try_again:
 		}		
 #endif // defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 
-		common->Printf("Requested %d color bits per chan, %d alpha %d depth, %d stencil\n",
-						channelcolorbits, talphabits, tdepthbits, tstencilbits);
+		idStr msaaStr;
+		if (parms.multiSamples > 0)
+			msaaStr = idStr::Format("%dx MSAA", parms.multiSamples);
+		else
+			msaaStr = "no MSAA";
+
+
+		common->Printf("Requested %d color bits per chan, %d alpha %d depth, %d stencil and %s\n",
+						channelcolorbits, talphabits, tdepthbits, tstencilbits, msaaStr.c_str());
 
 		{
-			int r, g, b, a, d, s;
+			int r, g, b, a, d, s, msaa;
 			SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &r);
 			SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &g);
 			SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &b);
 			SDL_GL_GetAttribute(SDL_GL_ALPHA_SIZE, &a);
 			SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &d);
 			SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &s);
+			SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &msaa);
+			if (msaa) {
+				SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &msaa);
+			}
 
-			common->Printf("Got %d stencil bits, %d depth bits, color bits: r%d g%d b%d a%d\n", s, d, r, g, b, a);
+			if (msaa > 0)
+				msaaStr = idStr::Format("%dx MSAA", msaa);
+			else
+				msaaStr = "no MSAA";
+
+			common->Printf("Got %d stencil bits, %d depth bits, color bits: r%d g%d b%d a%d and %s\n", s, d, r, g, b, a, msaaStr.c_str());
 
 			glConfig.colorBits = r+g+b; // a bit imprecise, but seems to be used only in GfxInfo_f()
 			glConfig.alphabits = a;
 			glConfig.depthBits = d;
 			glConfig.stencilBits = s;
+			r_multiSamples.SetInteger(msaa);
 		}
 
 		glConfig.displayFrequency = 0;
