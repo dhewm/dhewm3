@@ -101,6 +101,20 @@ Newer versions of Homebrew install openal-soft to another directory, so use this
 
 `cmake -DOPENAL_LIBRARY="/opt/homebrew/opt/openal-soft/lib/libopenal.dylib" -DOPENAL_INCLUDE_DIR="/opt/homebrew/opt/openal-soft/include" /path/to/repo/neo`
 
+### Compiling using Linux (easy way)
+
+Inside your dhewm3 clone
+
+Open a terminal and follow these steps:
+
+* Run `chmod +x build.sh && chmod +x run.sh` this allows you to run the build.sh and run.sh files.
+
+* Run `./build.sh` This file installs all dependencies, builds dhewm3 and moves all necessary files to the main folder.
+
+* Put all .pk4 files from the original Doom 3 NOT THE BFG edition in your dhewm3 clone at the base/ folder.
+
+* Run `./run.sh` in your dhewm3 clone. This file checks if you have all .pk4 files in the base/ folder and runs dhewm3.
+
 ### Compiling example using Ubuntu
 
 Should be the same for Debian and other Debian-derivatives, but apart from the first step (installing
