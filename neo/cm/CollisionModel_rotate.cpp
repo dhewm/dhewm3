@@ -1587,10 +1587,11 @@ void idCollisionModelManagerLocal::Rotation180( trace_t *results, const idVec3 &
 	if ( tw.maxTan == initialTan ) {
 		results->fraction = 1.0f;
 	} else {
-		double angleRad = atan((double)tw.maxTan);
-		double conversionFactor = 360.0 / idMath::PI; // replaced 180 * 2 for 360 because it will never change
-		results->fraction = (float)(idMath::Fabs(angleRad * conversionFactor) / (double)tw.angle);
+		double maxTan = tan( ((double)idMath::PI / 360.0) * (double)tw.angle );
+		double angleRad = atan((double)maxTan);
+		results->fraction = idMath::Fabs(angleRad);
 	}
+
 	assert( results->fraction <= 1.0f );
 	endRotation.Set( rorg, axis, startAngle + (endAngle-startAngle) * results->fraction );
 	endRotation.RotatePoint( results->endpos );
