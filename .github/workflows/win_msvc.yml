@@ -33,7 +33,7 @@ jobs:
         # https://github.com/dhewm/dhewm3-libs/archive/refs/heads/master.zip
         # for some reason the following downloads an empty file, so use the other URL I got from
         # "Copy Download Link" in Firefox (after downloading the file there) instead
-        #curl -o dhewm3libs.zip https://github.com/dhewm/dhewm3-libs/archive/refs/heads/master.zip
+        #curl -o dhewm3libs.zip https://github.com/dhewm/dhewm3-libs/archive/refs/heads/master.zip 
         curl -o dhewm3libs.zip https://codeload.github.com/dhewm/dhewm3-libs/zip/refs/heads/master
         # only unpack the stuff needed (no x86_64 stuff, no docs from share/)
         unzip dhewm3libs.zip "dhewm3-libs-master/i686-w64-mingw32/**" -x "dhewm3-libs-master/i686-w64-mingw32/share/**"
