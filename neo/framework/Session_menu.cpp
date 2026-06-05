@@ -482,8 +482,12 @@ void idSessionLocal::HandleRestartMenuCommands( const char *menuCommand ) {
 		}
 
 		if ( !idStr::Icmp( cmd, "restart" ) ) {
+			// DG: I adjusted the autosave (file) name when writing it in MoveToNewMap()
+			//     so here it must be created in the same way
+			idStr saveName = "Autosave_";
+			saveName += mapSpawnData.serverInfo.GetString("si_map");
 			if ( com_disableAutoSaves.GetBool() // DG: support com_disableAutoSaves
-				|| !LoadGame( GetAutoSaveName( mapSpawnData.serverInfo.GetString("si_map") ) ) ) {
+				|| !LoadGame( saveName ) ) {
 				// If we can't load the autosave (or they're disabled) then just restart the map
 				MoveToNewMap( mapSpawnData.serverInfo.GetString("si_map") );
 			}

@@ -384,21 +384,33 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0")
 	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
 	set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELEASE "${OPT_LEVEL} -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb ${OPT_LEVEL} -fno-math-errno -fno-trapping-math  -ffinite-math-only -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELEASE "${OPT_LEVEL} -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb ${OPT_LEVEL} -fno-omit-frame-pointer")
+	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fomit-frame-pointer")
 
 	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
 
+	# these options (together with -ffinite-math-only) should make compilers use direct
+	# CPU instructions (if available) instead of libm calls for many math operations
+	add_compile_options(-fno-math-errno -fno-trapping-math)
+	if( (NOT cpu STREQUAL "arm64") OR APPLE OR WIN32 )
+		# RPi5 on Linux has a weird bug with -ffinite-math-only (#749)
+		# so only enable it for other CPU architectures or Apple or Windows ARM64 devices,
+		# that most probably use different CPUs that hopefully don't have this bug
+		add_compile_options(-ffinite-math-only)
+	endif()
+
+	# Doom3 code wouldn't work with strict aliasing optimizations
 	add_compile_options(-fno-strict-aliasing)
+
 	# dear idiot compilers, don't fuck up math code with useless FMA "optimizations"
 	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 	CHECK_CXX_COMPILER_FLAG("-ffp-contract=off" cxx_has_fp-contract)
 	if(cxx_has_fp-contract)
 		add_compile_options(-ffp-contract=off)
 	endif()
-	
+
 	if(ASAN)
 		# if this doesn't work, ASan might not be available on your platform, don't set ASAN then..
 		add_compile_options(-fsanitize=address)
@@ -439,7 +451,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	endif()
 
 	# ignore warnings about variables named "requires" for now (in C++20 it's a keyword,
-	#  but currently we don't even use C++11 features)
+	#  but currently we barely use C++11 features)
 	CHECK_CXX_COMPILER_FLAG("-Wno-c++20-compat" cxx_has_Wno-cpp20-compat)
 	if(cxx_has_Wno-cpp20-compat)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++20-compat")

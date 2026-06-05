@@ -33,7 +33,7 @@ jobs:
         sudo apt update
         sudo apt install -y libgl1-mesa-dev libsdl2-dev libopenal-dev libcurl4-openssl-dev cmake ninja-build
     - name: Check out repository code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Build
       run: |
         mkdir build
@@ -66,7 +66,7 @@ jobs:
         cp Changelog.md publish/$PKGDIR/Changelog.txt
         cp Configuration.md publish/$PKGDIR/Configuration.txt
     - name: Upload testbuild package
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ env.pkgname }}
         path: publish/

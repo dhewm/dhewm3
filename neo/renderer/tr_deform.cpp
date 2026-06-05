@@ -813,7 +813,7 @@ AddTriangleToIsland_r
 
 =====================
 */
-#define	MAX_EYEBALL_TRIS	10
+#define	MAX_EYEBALL_TRIS	20
 #define	MAX_EYEBALL_ISLANDS	6
 
 typedef struct {
