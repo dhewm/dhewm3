@@ -4,7 +4,7 @@ dhewm3 Changelog
 Note: Numbers starting with a "#" like #330 refer to the bugreport with that number
       at https://github.com/dhewm/dhewm3/issues/
 
-1.5.5 (WIP)
+1.5.5 (2026-06-08)
 ------------------------------------------------------------------------
 
 * Enable/disable Soft Particles when **loading** a graphics quality preset (only enabled in Ultra preset,
@@ -73,6 +73,12 @@ Note: Numbers starting with a "#" like #330 refer to the bugreport with that num
 * Fix wrong (flipped) labels of Prev./Next Weapon in dhewm3 settings menu (#731)
 * Gamepad trigger axes can now also be used for ducking and jumping (#733)
 * Updated Dear ImGui to v1.92.5 (thanks *Klaus Silveira*!)
+* Fix that after dying the wrong autosave might be loaded (#762)
+* Increase `MAX_EYEBALL_TRIS` to 20, so mods can have eyeballs with more triangles in their models (#758)
+* Work around a problem with compiler math optimizations leading to assertion errors on Raspberry Pi 5 (#749)
+* Default to building as C++98 if ImGui is disabled - with ImGui it still defaults to C++11.
+  The dhewm3-sdk does the same to avoid issues with compilers defaulting to C++20 that are unhappy
+  about variables named "requires" (which is a keyword in C++20).
 * Several smaller fixes for all kinds of things incl. build issues
 
 

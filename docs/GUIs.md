@@ -219,18 +219,17 @@ must also be applied after loading a savegame.
 See [commit 5070b8c7](https://github.com/dhewm/dhewm3-sdk/commit/5070b8c7ec6f3a8ba1cb4123de37732f9cd9437f)
 for a full example.
 
-Since dhewm3 1.5.5 *(or, if it hasn't been released yet, the current code in Git)* this also works
-the other way around: You can set `scaleto43 0` in a GUI's `windowDef Desktop` (or do it via code
-as shown above) to explicitly *disable* this scaling and letter-boxing for a menu, even if that
-feature is generally enabled (`r_scaleMenusTo43 1`), so that particlar menu *is* stretched over the
-whole screen.
+Since dhewm3 1.5.5 this also works the other way around: You can set `scaleto43 0` in a GUI's
+`windowDef Desktop` (or do it via code as shown above) to explicitly *disable* this scaling and 
+letter-boxing for a menu, even if that feature is generally enabled (`r_scaleMenusTo43 1`), so
+that particlar menu *is* stretched over the whole screen.
 
 ### Aspect-Ratio-Independent GUIs Covering the whole Screen, with CstDoom3's Anchors
 
-Also since dhewm3 1.5.5 *(or, if it hasn't been released yet, the current code in Git)*, the
-"HUD Aspect Correction" code from [CstDoom3 2.0](https://www.moddb.com/mods/cstdoom3) has been
-merged and more features were added to that like supporting menus (in CstDoom3 you couldn't properly
-click buttons in such a GUI, so it was only used for non-interactive fullscreen GUIs like the HUD).
+Also since dhewm3 1.5.5, the "HUD Aspect Correction" code from [CstDoom3 2.0](https://www.moddb.com/mods/cstdoom3)
+has been merged and more features were added to that like supporting menus (in CstDoom3 you
+couldn't properly click buttons in such a GUI, so it was only used for non-interactive fullscreen
+GUIs like the HUD).
 
 CstDoom3 introduced some new "Window Register" variables to windowDefs.  
 The most important one is **cstAnchor**. It allows "anchoring" windowDefs to specific points of the
@@ -254,7 +253,7 @@ The full list from `_cst_anchor.pd`, note that when it says "scale to 4:3" it me
 
 ```c
 // don't anchor to anything, stretch over whole screen
-// (the default, you'll probably don't set this explicitly)
+// (the default, you probably won't set this explicitly)
 #define CST_ANCHOR_NONE				-1
 
 // anchor to top left corner, scale to 4:3
@@ -761,7 +760,7 @@ and a 320x160 windowDef, it will be repeated 5 times in each direction.
 If you resize the windowDef to 384x160, it will repeat the texture 6 times horizontally
 (and still 5 times vertically).
 
-In dhewm3 1.5.5 *(or current git..)*, `matscalex`/`matscaley` allow scaling that texture.  
+In dhewm3 1.5.5, `matscalex`/`matscaley` allow scaling that texture.  
 If both values are set to 2, (and `naturalmatscale` to `1`) the 64x32 texture in a 384x160 windowDef
 will be repeated 12 times horizontally and 10 times vertically, at half the size per direction.  
 *Without* `naturalmatscale` it would be repeated 2 times in each direction, no matter how big

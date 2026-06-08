@@ -250,6 +250,12 @@ else()
 	add_definitions(-DIMGUI_DISABLE)
 endif()
 
+if(NOT IMGUI)
+	# without ImGui C++98 should suffices, preserves compatibility
+	# with vintage system like PPC Macs
+	set (CMAKE_CXX_STANDARD 98)
+endif()
+
 if(DEFINED ENV{MSYSTEM})
 	message(STATUS "Detected MSYS or similar environment. Using alternate curl path")
 	set(CURL_NO_CURL_CMAKE ON)
