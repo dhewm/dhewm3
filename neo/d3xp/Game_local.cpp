@@ -277,6 +277,9 @@ void idGameLocal::Clear( void ) {
 	realClientTime = 0;
 	isNewFrame = true;
 	clientSmoothing = 0.1f;
+	renderInterpolate = 1.0f;
+	renderInterpPass = 0;
+	renderViewAngleDelta.Zero();
 	entityDefBits = 0;
 
 	nextGibTime = 0;
@@ -2799,8 +2802,12 @@ idGameLocal::Draw
 makes rendering and sound system calls
 ================
 */
-bool idGameLocal::Draw( int clientNum ) {
+bool idGameLocal::Draw( int clientNum, float interpolate, const idAngles &viewAngleDelta ) {
+	renderInterpolate = interpolate;
+	renderViewAngleDelta = viewAngleDelta;
+
 	if ( isMultiplayer ) {
+		InterpolateRenderEntities( interpolate );
 		return mpGame.Draw( clientNum );
 	}
 
@@ -2810,10 +2817,28 @@ bool idGameLocal::Draw( int clientNum ) {
 		return false;
 	}
 
+	InterpolateRenderEntities( interpolate );
+
 	// render the scene
 	player->playerView.RenderPlayerView( player->hud );
 
 	return true;
+}
+
+void idGameLocal::InterpolateRenderEntities( float frac ) {
+	if ( frac == 1.0f ) {
+		return;
+	}
+
+	renderInterpPass++;
+	for ( idEntity *ent = activeEntities.Next(); ent != NULL; ent = ent->activeNode.Next() ) {
+		ent->InterpolateRender( frac );
+
+		// Since this might not be inside activeEntities
+		for ( idEntity *team = ent->GetNextTeamEntity(); team != NULL; team = team->GetNextTeamEntity() ) {
+			team->InterpolateRender( frac );
+		}
+	}
 }
 
 /*

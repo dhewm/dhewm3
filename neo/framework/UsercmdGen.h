@@ -163,6 +163,8 @@ public:
 
 	// Directly sample a usercmd.
 	virtual usercmd_t	GetDirectUsercmd( void ) = 0;
+
+	virtual void		GetPendingViewAngleDelta( float &yaw, float &pitch ) = 0;
 };
 
 extern idUsercmdGen	*usercmdGen;

@@ -2371,13 +2371,16 @@ void idAsyncServer::RunFrame( void ) {
 
 	gameTimeResidual += msec;
 
+	bool interpolate = cvarSystem->GetCVarBool( "com_interpolate" ) && idAsyncNetwork::serverDedicated.GetInteger() == 0;
+
 	// spin in place processing incoming packets until enough time lapsed to run a new game frame
 	do {
 
 		do {
 
 			// blocking read with game time residual timeout
-			newPacket = serverPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), USERCMD_MSEC - gameTimeResidual - 1 );
+			int blockTime = interpolate ? 0 : ( USERCMD_MSEC - gameTimeResidual - 1 );
+			newPacket = serverPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), blockTime );
 			if ( newPacket ) {
 				msg.Init( msgBuf, sizeof( msgBuf ) );
 				msg.SetSize( size );
@@ -2392,7 +2395,7 @@ void idAsyncServer::RunFrame( void ) {
 
 		} while( newPacket );
 
-	} while( gameTimeResidual < USERCMD_MSEC );
+	} while( !interpolate && gameTimeResidual < USERCMD_MSEC );
 
 	// send heart beat to master servers
 	MasterHeartbeat();

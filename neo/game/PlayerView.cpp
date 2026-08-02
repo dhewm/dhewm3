@@ -703,6 +703,8 @@ idPlayerView::RenderPlayerView
 ===================
 */
 void idPlayerView::RenderPlayerView( idUserInterface *hud ) {
+	player->ApplyViewInterpolation( gameLocal.renderInterpolate );
+
 	const renderView_t *view = player->GetRenderView();
 
 	if ( g_skipViewEffects.GetBool() ) {

@@ -325,6 +325,16 @@ public:
 	idVec3					firstPersonViewOrigin;
 	idMat3					firstPersonViewAxis;
 
+	idVec3					viewInterpOriginPrev;
+	idMat3					viewInterpAxisPrev;
+	idVec3					viewInterpOriginCur;
+	idMat3					viewInterpAxisCur;
+	int						viewInterpTic;
+	int						viewInterpSnapFrame;
+
+	idVec3					predictionError;
+	int						predictionErrorTime;
+
 	idDragEntity			dragEntity;
 
 public:
@@ -393,6 +403,8 @@ public:
 	renderView_t *			GetRenderView( void );
 	void					CalculateRenderView( void );	// called every tic by player code
 	void					CalculateFirstPersonView( void );
+	void					ApplyViewInterpolation( float frac );
+	idVec3					GetPredictionErrorOffset( void ) const;
 
 	void					DrawHUD( idUserInterface *hud );
 
