@@ -689,6 +689,8 @@ idPlayerView::RenderPlayerView
 ===================
 */
 void idPlayerView::RenderPlayerView( idUserInterface *hud ) {
+	player->ApplyViewInterpolation( gameLocal.renderInterpolate );
+
 	const renderView_t *view = player->GetRenderView();
 
 	SingleView( hud, view );
@@ -1508,6 +1510,7 @@ void FullscreenFX_Bloom::Initialize() {
 
 	currentIntensity	= 0;
 	targetIntensity		= 0;
+	lastIntensityTime	= 0;
 }
 
 /*
@@ -1550,15 +1553,19 @@ void FullscreenFX_Bloom::HighQuality() {
 		targetIntensity = player->bloomIntensity;
 	}
 
-	delta = targetIntensity - currentIntensity;
-	float step = 0.001f;
+	if ( gameLocal.time != lastIntensityTime ) {
+		lastIntensityTime = gameLocal.time;
 
-	if ( step < fabs( delta ) ) {
-		if ( delta < 0 ) {
-			step = -step;
+		delta = targetIntensity - currentIntensity;
+		float step = 0.001f;
+
+		if ( step < fabs( delta ) ) {
+			if ( delta < 0 ) {
+				step = -step;
+			}
+
+			currentIntensity += step;
 		}
-
-		currentIntensity += step;
 	}
 
 	// draw the blends

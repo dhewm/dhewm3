@@ -209,6 +209,7 @@ public:
 	void					UpdateVisuals( void );
 	void					UpdateModel( void );
 	void					UpdateModelTransform( void );
+	void					InterpolateRender( float frac );
 	virtual void			ProjectOverlay( const idVec3 &origin, const idVec3 &dir, float size, const char *material );
 	int						GetNumPVSAreas( void );
 	const int *				GetPVSAreas( void );
@@ -365,6 +366,15 @@ protected:
 	renderEntity_t			renderEntity;						// used to present a model to the renderer
 	int						modelDefHandle;						// handle to static renderer model
 	refSound_t				refSound;							// used to present sound to the audio engine
+
+	idVec3					renderOriginPrev;
+	idMat3					renderAxisPrev;
+	idVec3					renderOriginPrev2;
+	idMat3					renderAxisPrev2;
+	int						renderInterpTic;
+	int						renderInterpPass;
+	int						renderHistCount;
+	bool					renderNoInterp;
 
 private:
 	idPhysics_Static		defaultPhysicsObj;					// default physics object

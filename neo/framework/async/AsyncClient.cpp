@@ -1770,13 +1770,16 @@ void idAsyncClient::RunFrame( void ) {
 
 	gameTimeResidual += msec;
 
+	bool interpolate = cvarSystem->GetCVarBool( "com_interpolate" );
+
 	// spin in place processing incoming packets until enough time lapsed to run a new game frame
 	do {
 
 		do {
 
 			// blocking read with game time residual timeout
-			newPacket = clientPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), USERCMD_MSEC - ( gameTimeResidual + clientPredictTime ) - 1 );
+			int blockTime = interpolate ? 0 : ( USERCMD_MSEC - ( gameTimeResidual + clientPredictTime ) - 1 );
+			newPacket = clientPort.GetPacketBlocking( from, msgBuf, size, sizeof( msgBuf ), blockTime );
 			if ( newPacket ) {
 				msg.Init( msgBuf, sizeof( msgBuf ) );
 				msg.SetSize( size );
@@ -1789,7 +1792,7 @@ void idAsyncClient::RunFrame( void ) {
 
 		} while( newPacket );
 
-	} while( gameTimeResidual + clientPredictTime < USERCMD_MSEC );
+	} while( !interpolate && gameTimeResidual + clientPredictTime < USERCMD_MSEC );
 
 	// update server list
 	serverList.RunFrame();

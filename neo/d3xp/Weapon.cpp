@@ -2151,6 +2151,13 @@ void idWeapon::AlertMonsters( void ) {
 	}
 }
 
+void idWeapon::InterpolateRenderModels( float frac ) {
+	InterpolateRender( frac );
+	if ( worldModel.GetEntity() ) {
+		worldModel.GetEntity()->InterpolateRender( frac );
+	}
+}
+
 /*
 ================
 idWeapon::PresentWeapon
