@@ -2276,7 +2276,8 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		// update the game time
 		framenum++;
 		previousTime = time;
-		msec = CalcMSec( framenum ); // dezo2/DG: recalculate each frame, see comment at CalcMSec()
+		// dezo2/DG: recalculate each frame in single-player, see comment at CalcMSec()
+		msec = isMultiplayer ? USERCMD_MSEC : CalcMSec( framenum );
 		time += msec;
 		realClientTime = time;
 

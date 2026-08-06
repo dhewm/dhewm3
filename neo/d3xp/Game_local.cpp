@@ -2511,13 +2511,12 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t* clientCmds) {
 		framenum++;
 		previousTime = time;
 
-		// dezo2/DG: recalculate each frame, see comment at CalcMSec()
-		int msec_fast = CalcMSec( framenum );
+		// dezo2/DG: recalculate each frame in single-player, see comment at CalcMSec()
+		int msec_fast = isMultiplayer ? USERCMD_MSEC : CalcMSec( framenum );
 		if ( slowmoState == SLOWMO_STATE_OFF ) {
 			msec = msec_fast;
 			msecPrecise = USERCMD_MSEC_PRECISE;
 		}
-
 		time += msec;
 		realClientTime = time;
 
