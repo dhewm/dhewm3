@@ -59,6 +59,7 @@ const char *r_rendererArgs[] = { "best", "arb2", NULL };
 idCVar r_inhibitFragmentProgram( "r_inhibitFragmentProgram", "0", CVAR_RENDERER | CVAR_BOOL, "ignore the fragment program extension" );
 idCVar r_useLightPortalFlow( "r_useLightPortalFlow", "1", CVAR_RENDERER | CVAR_BOOL, "use a more precise area reference determination" );
 idCVar r_multiSamples( "r_multiSamples", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "number of antialiasing samples" );
+idCVar r_sampleShadingLevel( "r_sampleShadingLevel", "1", CVAR_RENDERER | CVAR_FLOAT, "the level of sample shading while antialiasing is enabled", 0, 1.0f );
 idCVar r_mode( "r_mode", "5", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "video mode number" );
 idCVar r_displayRefresh( "r_displayRefresh", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_NOCHEAT, "optional display refresh rate option for vid mode", 0.0f, 200.0f );
 idCVar r_fullscreen( "r_fullscreen", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0 = windowed, 1 = full screen" );
@@ -262,6 +263,7 @@ void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t 
 void ( APIENTRY * qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
+void ( APIENTRY * qglMinSampleShadingARB )( GLfloat value );
 
 void (APIENTRY *qglTexImage3D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *);
 
@@ -392,6 +394,17 @@ R_CheckPortableExtensions
 static void R_CheckPortableExtensions( void ) {
 	glConfig.glVersion = atof( glConfig.version_string );
 
+	glConfig.glSampleShadingAvailable = R_CheckExtension( "GL_ARB_sample_shading" );
+	if ( glConfig.glSampleShadingAvailable ) {
+		qglMinSampleShadingARB = (void ( APIENTRYP )( GLfloat ))GLimp_ExtensionPointer( "glMinSampleShadingARB" );
+		if ( !qglMinSampleShadingARB ) {
+			glConfig.glSampleShadingAvailable = false;
+			common->Warning(
+				"GL_ARB_sample_shading is advertised, "
+				"but glMinSampleShadingARB could not be loaded\n"
+			);
+		}
+	}
 	// GL_ARB_multitexture
 	glConfig.multitextureAvailable = R_CheckExtension( "GL_ARB_multitexture" );
 	if ( glConfig.multitextureAvailable ) {
