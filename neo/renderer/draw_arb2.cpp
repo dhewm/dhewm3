@@ -137,8 +137,23 @@ void	RB_ARB2_DrawInteraction( const drawInteraction_t *din ) {
 	GL_SelectTextureNoClient( 5 );
 	din->specularImage->Bind();
 
-	// draw it
-	RB_DrawElementsWithCounters( din->surf->geo );
+	const bool sampleShading = r_multiSamples.GetInteger()
+		&& glConfig.glSampleShadingAvailable
+		&& !r_skipDiffuse.GetBool()
+		&& r_sampleShadingLevel.GetFloat() > 0
+		&& din->specularImage != globalImages->blackImage;
+
+	if ( sampleShading ) {
+		qglEnable( GL_SAMPLE_SHADING_ARB );
+		qglMinSampleShadingARB( r_sampleShadingLevel.GetFloat() );
+	}
+
+ 	// draw it
+ 	RB_DrawElementsWithCounters( din->surf->geo );
+
+	if ( sampleShading ) {
+		qglDisable( GL_SAMPLE_SHADING_ARB );
+	}
 }
 
 

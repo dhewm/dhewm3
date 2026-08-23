@@ -62,6 +62,7 @@ typedef struct glconfig_s {
 	int					colorBits, alphabits, depthBits, stencilBits;
 
 	bool				multitextureAvailable;
+	bool				glSampleShadingAvailable;
 	bool				textureCompressionAvailable;
 	bool				bptcTextureCompressionAvailable; // DG: for GL_ARB_texture_compression_bptc (BC7)
 	bool				anisotropicAvailable;
