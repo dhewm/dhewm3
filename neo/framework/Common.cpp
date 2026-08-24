@@ -63,6 +63,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "GameCallbacks_local.h"
 #include "Session_local.h" // DG: For FT_IsDemo/isDemo() hack
 
+#include "framework/compat/Compat_131.h"
+
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
 
@@ -2765,29 +2767,62 @@ void idCommonLocal::LoadGameDLL( void ) {
 		return;
 	}
 
-	gameImport.version					= GAME_API_VERSION;
-	gameImport.sys						= ::sys;
-	gameImport.common					= ::common;
-	gameImport.cmdSystem				= ::cmdSystem;
-	gameImport.cvarSystem				= ::cvarSystem;
-	gameImport.fileSystem				= ::fileSystem;
-	gameImport.networkSystem			= ::networkSystem;
-	gameImport.renderSystem				= ::renderSystem;
-	gameImport.soundSystem				= ::soundSystem;
-	gameImport.renderModelManager		= ::renderModelManager;
-	gameImport.uiManager				= ::uiManager;
-	gameImport.declManager				= ::declManager;
-	gameImport.AASFileManager			= ::AASFileManager;
-	gameImport.collisionModelManager	= ::collisionModelManager;
+	gameImport.version					        = GAME_API_VERSION;
+	gameImport.sys						        = ::sys;
+	gameImport.common					        = ::common;
+	gameImport.cmdSystem				        = ::cmdSystem;
+	gameImport.cvarSystem				        = ::cvarSystem;
+	gameImport.fileSystem				        = ::fileSystem;
+	gameImport.networkSystem			        = ::networkSystem;
+	gameImport.renderSystem				        = ::renderSystem;
+	gameImport.soundSystem				        = ::soundSystem;
+	gameImport.renderModelManager		        = ::renderModelManager;
+	gameImport.uiManager				        = ::uiManager;
+	gameImport.declManager				        = ::declManager;
+	gameImport.AASFileManager			        = ::AASFileManager;
+	gameImport.collisionModelManager	        = ::collisionModelManager;
+                                                
+	gameExport							        = *GetGameAPI( &gameImport );
 
-	gameExport							= *GetGameAPI( &gameImport);
+    switch ( gameExport.version )
+    {
+        case Shim131::SDK_131_API_VERSION: {
+            // retry with 1.3.1 compatibility shim
+            Shim131::sys131->Shim(::sys);
+            Shim131::fileSystem131->Shim(::fileSystem);
+            Shim131::collisionModelManager131->Shim(::collisionModelManager);
+            Shim131::renderSystem131->Shim(::renderSystem);
+            Shim131::soundSystem131->Shim(::soundSystem);
 
-	if ( gameExport.version != GAME_API_VERSION ) {
-		Sys_DLL_Unload( gameDLL );
-		gameDLL = 0;
-		common->FatalError( "wrong game DLL API version" );
-		return;
-	}
+            gameImport.version	                = Shim131::SDK_131_API_VERSION;
+            gameImport.sys						= (::idSys *)Shim131::sys131;
+            gameImport.common					= ::common;
+            gameImport.cmdSystem				= ::cmdSystem;
+            gameImport.cvarSystem				= ::cvarSystem;
+            gameImport.fileSystem				= (::idFileSystem *)Shim131::fileSystem131;
+            gameImport.networkSystem			= ::networkSystem;
+            gameImport.renderSystem				= (::idRenderSystem *)Shim131::renderSystem131;
+            gameImport.soundSystem				= (::idSoundSystem *)Shim131::soundSystem131;
+            gameImport.renderModelManager		= ::renderModelManager;
+            gameImport.uiManager				= ::uiManager;
+            gameImport.declManager				= ::declManager;
+            gameImport.AASFileManager			= ::AASFileManager;
+            gameImport.collisionModelManager	= (::idCollisionModelManager *)Shim131::collisionModelManager131;
+
+            gameExport = *GetGameAPI( &gameImport);
+            break;
+        }
+        case GAME_API_VERSION: {
+            // game api supported, we're done
+            break;
+        }
+        default: {
+            Sys_DLL_Unload( gameDLL );
+            gameDLL = 0;
+            common->FatalError( "wrong game DLL API version" );
+            return;
+        }
+    }
 
 	game								= gameExport.game;
 	gameEdit							= gameExport.gameEdit;
