@@ -606,7 +606,7 @@ namespace Shim131 {
     class idSoundSystemShim131 : public idSoundSystem {
     public:
         idSoundSystemShim131() : soundSystem( NULL ) {}
-        void Shim(::idSoundSystem* soundSystem) { this->soundSystem = soundSystem; }
+        void Shim(::idSoundSystem *soundSystem) { this->soundSystem = soundSystem; }
 
         // all non-hardware initialization
         virtual void			Init( void );

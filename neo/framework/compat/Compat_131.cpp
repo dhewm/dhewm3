@@ -55,11 +55,11 @@ namespace Shim131 {
         return (cpuid_t)sys->GetProcessorId();
     }
 
-    const char* idSysShim131::GetProcessorString( void ) {
+    const char *idSysShim131::GetProcessorString( void ) {
         return "unavailable";
     }
 
-    const char* idSysShim131::FPU_GetState( void ) {
+    const char *idSysShim131::FPU_GetState( void ) {
         return "unavailable";
     }
 
@@ -75,9 +75,7 @@ namespace Shim131 {
         Sys_FPU_SetDAZ( enable );
     }
 
-    void idSysShim131::FPU_EnableExceptions( int exceptions ) {
-        return;
-    }
+    void idSysShim131::FPU_EnableExceptions( int exceptions ) {}
 
     bool idSysShim131::LockMemory( void *ptr, int bytes ) {
         return sys->LockMemory( ptr, bytes );
@@ -90,9 +88,8 @@ namespace Shim131 {
     void idSysShim131::GetCallStack( address_t *callStack, const int callStackSize ) {
         int i;
 
-        for (i = 0; i < callStackSize; i++)
-        {
-            callStack[i] = 0;
+        for ( i = 0; i < callStackSize; i++ ) {
+            callStack[ i ] = 0;
         }
     }
 
@@ -122,10 +119,10 @@ namespace Shim131 {
         sys->DLL_GetFileName( baseName, dllName, maxLength );
     }
 
-    sysEvent_t ToSysEvent131(::sysEvent_t evt) {
+    sysEvent_t ToSysEvent131( ::sysEvent_t evt ) {
         sysEvent_t res;
 
-        switch (evt.evType) {
+        switch ( evt.evType ) {
             case ::sysEventType_t::SE_NONE:
                 res.evType = sysEventType_t::SE_NONE;
                 break;
@@ -493,21 +490,21 @@ namespace Shim131 {
 
     ***********************************************************************/
 
-    void idSoundSystemShim131::Init() {
+    void idSoundSystemShim131::Init( void ) {
         soundSystem->Init();
     }
 
-    void idSoundSystemShim131::Shutdown() {
+    void idSoundSystemShim131::Shutdown( void ) {
         soundSystem->Shutdown();
     }
 
-    void idSoundSystemShim131::ClearBuffer() {}
+    void idSoundSystemShim131::ClearBuffer( void ) {}
 
-    bool idSoundSystemShim131::InitHW() {
+    bool idSoundSystemShim131::InitHW( void ) {
         return soundSystem->InitHW();
     }
 
-    bool idSoundSystemShim131::ShutdownHW() {
+    bool idSoundSystemShim131::ShutdownHW( void ) {
         return soundSystem->ShutdownHW();
     }
 
@@ -520,7 +517,7 @@ namespace Shim131 {
     }
 
     void idSoundSystemShim131::SetMute( bool mute ) {
-        return soundSystem->SetMute( mute );
+        soundSystem->SetMute( mute );
     }
 
     cinData_t idSoundSystemShim131::ImageForTime( const int milliseconds, const bool waveform ) {
@@ -539,11 +536,11 @@ namespace Shim131 {
         soundSystem->SetPlayingSoundWorld( (::idSoundWorld *)soundWorld );
     }
 
-    idSoundWorld *idSoundSystemShim131::GetPlayingSoundWorld() {
+    idSoundWorld *idSoundSystemShim131::GetPlayingSoundWorld( void ) {
         return (idSoundWorld *)soundSystem->GetPlayingSoundWorld();
     }
 
-    void idSoundSystemShim131::BeginLevelLoad() {
+    void idSoundSystemShim131::BeginLevelLoad( void ) {
         soundSystem->BeginLevelLoad();
     }
 
@@ -569,39 +566,39 @@ namespace Shim131 {
 
     ***********************************************************************/
 
-    void idRenderSystemShim131::Init() {
+    void idRenderSystemShim131::Init( void ) {
         renderSystem->Init();
     }
 
-    void idRenderSystemShim131::Shutdown() {
+    void idRenderSystemShim131::Shutdown( void ) {
         renderSystem->Shutdown();
     }
 
-    void idRenderSystemShim131::InitOpenGL() {
+    void idRenderSystemShim131::InitOpenGL( void ) {
         renderSystem->InitOpenGL();
     }
 
-    void idRenderSystemShim131::ShutdownOpenGL() {
+    void idRenderSystemShim131::ShutdownOpenGL( void ) {
         renderSystem->ShutdownOpenGL();
     }
 
-    bool idRenderSystemShim131::IsOpenGLRunning() const {
+    bool idRenderSystemShim131::IsOpenGLRunning( void ) const {
         return renderSystem->IsOpenGLRunning();
     }
 
-    bool idRenderSystemShim131::IsFullScreen() const {
+    bool idRenderSystemShim131::IsFullScreen( void ) const {
         return renderSystem->IsFullScreen();
     }
 
-    int idRenderSystemShim131::GetScreenWidth() const {
+    int idRenderSystemShim131::GetScreenWidth( void ) const {
         return renderSystem->GetScreenWidth();
     }
 
-    int idRenderSystemShim131::GetScreenHeight() const {
+    int idRenderSystemShim131::GetScreenHeight( void ) const {
         return renderSystem->GetScreenHeight();
     }
 
-    idRenderWorld *idRenderSystemShim131::AllocRenderWorld() {
+    idRenderWorld *idRenderSystemShim131::AllocRenderWorld( void ) {
         return (idRenderWorld *)renderSystem->AllocRenderWorld();
     }
 
@@ -609,11 +606,11 @@ namespace Shim131 {
         renderSystem->FreeRenderWorld( (::idRenderWorld *)rw );
     }
 
-    void idRenderSystemShim131::BeginLevelLoad() {
+    void idRenderSystemShim131::BeginLevelLoad( void ) {
         renderSystem->BeginLevelLoad();
     }
 
-    void idRenderSystemShim131::EndLevelLoad() {
+    void idRenderSystemShim131::EndLevelLoad( void ) {
         renderSystem->EndLevelLoad();
     }
 
