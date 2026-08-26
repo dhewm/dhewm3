@@ -254,11 +254,17 @@ namespace Shim131 {
     }
 
     fsPureReply_t idFileSystemShim131::SetPureServerChecksums( const int pureChecksums[], int gamePakChecksum, int missingChecksums[], int *missingGamePakChecksum ) {
-        missingGamePakChecksum = 0;
+        assert( missingGamePakChecksum );
+        *missingGamePakChecksum = 0;
+
         return fileSystem->SetPureServerChecksums( pureChecksums, missingChecksums );
     }
 
     void idFileSystemShim131::GetPureServerChecksums( int checksums[], int OS, int *gamePakChecksum ) {
+        if ( gamePakChecksum ) {
+            *gamePakChecksum = 0;
+        }
+
         fileSystem->GetPureServerChecksums( checksums );
     }
 
