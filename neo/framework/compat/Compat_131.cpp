@@ -1,4 +1,7 @@
 #include "framework/compat/Compat_131.h"
+
+#if D3_SDK_131_COMPAT
+
 #include "framework/FileSystem.h"
 #include "cm/CollisionModel.h"
 #include "idlib/MapFile.h"
@@ -712,3 +715,5 @@ namespace Shim131 {
     }
 
 } // namespace Shim131
+
+#endif /* !D3_SDK_131_COMPAT */

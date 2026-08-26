@@ -1,6 +1,14 @@
 #ifndef __COMPAT_131_H__
 #define __COMPAT_131_H__
 
+#if defined(_WIN32) && !defined(_WIN64)
+#define D3_SDK_131_COMPAT 1
+#else
+#define D3_SDK_131_COMPAT 0
+#endif
+
+#if D3_SDK_131_COMPAT
+
 #include "sys/platform.h"
 #include "sys/sys_public.h"
 #include "framework/Common.h"
@@ -869,5 +877,7 @@ namespace Shim131 {
     };
 
 } /* namespace Shim131 */
+
+#endif /* !D3_SDK_131_COMPAT */
 
 #endif /* !__COMPAT_131_H__ */

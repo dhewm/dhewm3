@@ -2786,6 +2786,7 @@ void idCommonLocal::LoadGameDLL( void ) {
 
     switch ( gameExport.version )
     {
+#if D3_SDK_131_COMPAT
         case Shim131::SDK_131_API_VERSION: {
             // retry with 1.3.1 compatibility shim
             Shim131::sys131->Shim(::sys);
@@ -2812,6 +2813,7 @@ void idCommonLocal::LoadGameDLL( void ) {
             gameExport = *GetGameAPI( &gameImport);
             break;
         }
+#endif
         case GAME_API_VERSION: {
             // game api supported, we're done
             break;
