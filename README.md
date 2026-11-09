@@ -1,3 +1,27 @@
+#  !!! ATTENTION: DO NOT PLAY DOOM3 ONLINE !!!
+
+It turned out that the **multiplayer** code in Doom3 and all sourceports (incl. dhewm3) is **fundamentally insecure**.
+
+As in: remote code execution seems feasible, malicious servers you connect to or clients
+connecting to your server may infect your system.
+
+**Do not play** vanilla Doom3 or dhewm3 or any other Doom3 source port **on public servers**.
+
+**Do not host public servers** either, at least not without *sandboxing them thoroughly*.
+
+*Singleplayer* is fine (as long as you're not using non-trustworthy mods),
+multiplayer in LAN (or VPN) with only trusted participants should also be fine.
+
+I'm not sure about *Doom3 BFG*, its netcode is quite different and I had no time to check.
+
+Also no idea about *Quake 4 or other idtech4 games*, hard to tell with them being closed source,
+*you should probably assume that they're not safe either*.
+
+For dhewm3 I will try to fix those issues in the next update, if that's even possible, but for now it's not safe.
+
+As far as I know the the vulnerabilities are currently not publicly known or actively exploited.
+I wouldn't bet on that though...
+
 # ABOUT
 
 _dhewm 3_ is a _Doom 3_ GPL source port, known to work on at least Windows, Linux, macOS and FreeBSD.
