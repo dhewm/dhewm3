@@ -2570,7 +2570,13 @@ void idCommonLocal::Frame( void ) {
 				} // else a new tic is started anyway (which often means that this frame was too long)
 			}
 			else if ( com_ticNumber == ticNumAtStart ) {
-				Com_WaitForNextTicStart();
+				// Server: skip the full-frame sleep (it only adds latency).
+				// Clients keep the wait for proper pacing.
+				if ( idAsyncNetwork::server.IsActive() ) {
+					Com_UpdateFrameTime();
+				} else {
+					Com_WaitForNextTicStart();
+				}
 			}
 			// else the com_ticNumber has already been updated and it's past time to start the next frame
 		}
