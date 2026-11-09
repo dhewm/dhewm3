@@ -131,7 +131,7 @@ public:
 	virtual gameReturn_t		RunFrame( const usercmd_t *clientCmds ) = 0;
 
 	// Makes rendering and sound system calls to display for a given clientNum.
-	virtual bool				Draw( int clientNum ) = 0;
+	virtual bool				Draw( int clientNum, float interpolate, const idAngles &viewAngleDelta ) = 0;
 
 	// Let the game do it's own UI when ESCAPE is used
 	virtual escReply_t			HandleESC( idUserInterface **gui ) = 0;

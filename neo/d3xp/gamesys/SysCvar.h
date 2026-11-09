@@ -298,6 +298,7 @@ extern idCVar g_CTFArrows;
 #endif
 
 extern idCVar	net_clientSelfSmoothing;
+extern idCVar	net_clientSmoothViewTime;
 extern idCVar	net_clientLagOMeter;
 
 extern const char *si_gameTypeArgs[];

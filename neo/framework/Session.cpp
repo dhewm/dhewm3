@@ -2009,7 +2009,7 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, const char* 
 	// Write screenshot
 	if ( !autosave ) {
 		renderSystem->CropRenderSize( 320, 240, false );
-		game->Draw( 0 );
+		game->Draw( 0, 1.0f, ang_zero );
 		renderSystem->CaptureRenderToFile( previewFile, true );
 		renderSystem->UnCrop();
 	}
@@ -2523,7 +2523,7 @@ void idSessionLocal::Draw() {
 
 		// draw the menus full screen
 		if ( guiActive == guiTakeNotes && !com_skipGameDraw.GetBool() ) {
-			game->Draw( GetLocalClientNum() );
+			game->Draw( GetLocalClientNum(), com_interpFraction, ang_zero );
 		}
 
 		guiActive->Redraw( com_frameTime );
@@ -2536,7 +2536,11 @@ void idSessionLocal::Draw() {
 		if ( !com_skipGameDraw.GetBool() && GetLocalClientNum() >= 0 ) {
 			// draw the game view
 			int	start = Sys_Milliseconds();
-			gameDraw = game->Draw( GetLocalClientNum() );
+			idAngles viewAngleDelta = ang_zero;
+			if ( cvarSystem->GetCVarBool( "com_interpolate" ) ) {
+				usercmdGen->GetPendingViewAngleDelta( viewAngleDelta.yaw, viewAngleDelta.pitch );
+			}
+			gameDraw = game->Draw( GetLocalClientNum(), com_interpFraction, viewAngleDelta );
 			int end = Sys_Milliseconds();
 			time_gameDraw += ( end - start );	// note time used for com_speeds
 		}
@@ -2725,6 +2729,10 @@ void idSessionLocal::Frame() {
 
 	// fixedTic lets us run a forced number of usercmd each frame without timing
 	if ( com_fixedTic.GetInteger() ) {
+		minTic = latchedTicNumber;
+	}
+
+	if ( cvarSystem->GetCVarBool( "com_interpolate" ) && !readDemo && !writeDemo && !aviCaptureMode ) {
 		minTic = latchedTicNumber;
 	}
 

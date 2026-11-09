@@ -340,7 +340,7 @@ bool idSmokeParticles::UpdateRenderEntity( renderEntity_s *renderEntity, const r
 		for ( last = NULL, smoke = active->smokes; smoke; smoke = next ) {
 			next = smoke->next;
 
-			g.frac = (float)( gameLocal.time - smoke->privateStartTime ) / ( stage->particleLife * 1000 );
+			g.frac = (float)( renderView->time - smoke->privateStartTime ) / ( stage->particleLife * 1000 );
 			if ( g.frac >= 1.0f ) {
 				// remove the particle from the stage list
 				if ( last != NULL ) {
@@ -352,6 +352,11 @@ bool idSmokeParticles::UpdateRenderEntity( renderEntity_s *renderEntity, const r
 				smoke->next = freeSmokes;
 				freeSmokes = smoke;
 				numActiveSmokes--;
+				continue;
+			}
+
+			if ( g.frac < 0.0f ) {
+				last = smoke;
 				continue;
 			}
 

@@ -295,6 +295,7 @@ class FullscreenFX_Bloom : public FullscreenFX {
 
 	float					currentIntensity;
 	float					targetIntensity;
+	int						lastIntensityTime;
 
 public:
 	virtual void			Initialize();

@@ -363,7 +363,7 @@ bool idSmokeParticles::UpdateRenderEntity( renderEntity_s *renderEntity, const r
 				g.frac = (float)( gameLocal.fast.time - smoke->privateStartTime ) / (stage->particleLife * 1000);
 			}
 			else {
-				g.frac = (float)( gameLocal.time - smoke->privateStartTime ) / (stage->particleLife * 1000);
+				g.frac = (float)( renderView->time - smoke->privateStartTime ) / (stage->particleLife * 1000);
 			}
 #else
 			g.frac = (float)( gameLocal.time - smoke->privateStartTime ) / (stage->particleLife * 1000);
@@ -379,6 +379,11 @@ bool idSmokeParticles::UpdateRenderEntity( renderEntity_s *renderEntity, const r
 				smoke->next = freeSmokes;
 				freeSmokes = smoke;
 				numActiveSmokes--;
+				continue;
+			}
+
+			if ( g.frac < 0.0f ) {
+				last = smoke;
 				continue;
 			}
 

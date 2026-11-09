@@ -343,6 +343,8 @@ public:
 
 	usercmd_t		GetDirectUsercmd( void );
 
+	void			GetPendingViewAngleDelta( float &yaw, float &pitch );
+
 private:
 	void			MakeCurrent( void );
 	void			InitCurrent( void );
@@ -1410,4 +1412,38 @@ usercmd_t idUsercmdGenLocal::GetDirectUsercmd( void ) {
 	lastPollTime = pollTime;
 
 	return cmd;
+}
+
+void idUsercmdGenLocal::GetPendingViewAngleDelta( float &yaw, float &pitch ) {
+	yaw = 0.0f;
+	pitch = 0.0f;
+
+	if ( Inhibited() || ButtonState( UB_STRAFE ) ) {
+		return;
+	}
+
+	int numEvents = Sys_PollMouseInputEvents();
+	int dx = 0;
+	int dy = 0;
+	for ( int i = 0; i < numEvents; i++ ) {
+		int action, value;
+		if ( Sys_ReturnMouseInputEvent( i, action, value ) ) {
+			if ( action == M_DELTAX ) {
+				dx += value;
+			} else if ( action == M_DELTAY ) {
+				dy += value;
+			}
+		}
+	}
+
+	float mx = (float)dx * sensitivity.GetFloat();
+	float my = (float)dy * sensitivity.GetFloat();
+
+	float invYaw = ( m_invertLook.GetInteger() & 2 ) ? -1.0f : 1.0f;
+	yaw = - m_yaw.GetFloat() * mx * invYaw;
+
+	if ( in_freeLook.GetBool() ) {
+		float invPitch = ( m_invertLook.GetInteger() & 1 ) ? -1.0f : 1.0f;
+		pitch = m_pitch.GetFloat() * my * invPitch;
+	}
 }

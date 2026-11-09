@@ -162,6 +162,7 @@ public:
 
 	// Visual presentation
 	void					PresentWeapon( bool showViewModel );
+	void					InterpolateRenderModels( float frac );
 	int						GetZoomFov( void );
 	void					GetWeaponAngleOffsets( int *average, float *scale, float *max );
 	void					GetWeaponTimeOffsets( float *time, float *scale );

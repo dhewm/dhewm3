@@ -450,6 +450,15 @@ idEntity::idEntity() {
 	modelDefHandle	= -1;
 	memset( &refSound, 0, sizeof( refSound ) );
 
+	renderOriginPrev.Zero();
+	renderAxisPrev.Identity();
+	renderOriginPrev2.Zero();
+	renderAxisPrev2.Identity();
+	renderInterpTic = -1;
+	renderInterpPass = -1;
+	renderHistCount = 0;
+	renderNoInterp = true;
+
 	mpGUIState = -1;
 
 #ifdef _D3XP
@@ -1266,6 +1275,17 @@ void idEntity::UpdateModelTransform( void ) {
 	idVec3 origin;
 	idMat3 axis;
 
+	if ( gameLocal.isNewFrame && renderInterpTic != gameLocal.framenum ) {
+		renderOriginPrev2 = renderOriginPrev;
+		renderAxisPrev2 = renderAxisPrev;
+		renderOriginPrev = renderEntity.origin;
+		renderAxisPrev = renderEntity.axis;
+		renderInterpTic = gameLocal.framenum;
+		if ( renderHistCount < 2 ) {
+			renderHistCount++;
+		}
+	}
+
 	if ( GetPhysicsToVisualTransform( origin, axis ) ) {
 		renderEntity.axis = axis * GetPhysics()->GetAxis();
 		renderEntity.origin = GetPhysics()->GetOrigin() + origin * renderEntity.axis;
@@ -1273,6 +1293,59 @@ void idEntity::UpdateModelTransform( void ) {
 		renderEntity.axis = GetPhysics()->GetAxis();
 		renderEntity.origin = GetPhysics()->GetOrigin();
 	}
+}
+
+void idEntity::InterpolateRender( float frac ) {
+	static const float snapDistSqr = 128.0f * 128.0f;
+
+	if ( modelDefHandle == -1 ) {
+		return;
+	}
+
+	if ( renderInterpPass == gameLocal.renderInterpPass ) {
+		return;
+	}
+
+	renderInterpPass = gameLocal.renderInterpPass;
+	idVec3 curOrigin = renderEntity.origin;
+	idMat3 curAxis = renderEntity.axis;
+
+	if ( renderNoInterp || renderInterpTic != gameLocal.framenum || ( curOrigin - renderOriginPrev ).LengthSqr() > snapDistSqr ) {
+		renderOriginPrev = curOrigin;
+		renderAxisPrev = curAxis;
+		renderOriginPrev2 = curOrigin;
+		renderAxisPrev2 = curAxis;
+		renderHistCount = 1;
+		renderNoInterp = false;
+
+		return;
+	}
+
+	idVec3 origin;
+
+	if ( frac > 1.0f ) {
+		origin = curOrigin + ( curOrigin - renderOriginPrev ) * ( frac - 1.0f );
+	} else if ( renderHistCount >= 2 ) {
+		idVec3 m0 = ( curOrigin - renderOriginPrev2 ) * 0.5f;
+		idVec3 m1 = curOrigin - renderOriginPrev;
+		float t2 = frac * frac;
+		float t3 = t2 * frac;
+		origin = renderOriginPrev * ( 2.0f * t3 - 3.0f * t2 + 1.0f )
+			+ m0 * ( t3 - 2.0f * t2 + frac )
+			+ curOrigin * ( -2.0f * t3 + 3.0f * t2 )
+			+ m1 * ( t3 - t2 );
+	} else {
+		origin.Lerp( renderOriginPrev, curOrigin, frac );
+	}
+
+	idQuat q;
+	q.Slerp( renderAxisPrev.ToQuat(), curAxis.ToQuat(), idMath::ClampFloat( 0.0f, 1.0f, frac ) );
+
+	renderEntity.origin = origin;
+	renderEntity.axis = q.ToMat3();
+	gameRenderWorld->UpdateEntityDef( modelDefHandle, &renderEntity );
+	renderEntity.origin = curOrigin;
+	renderEntity.axis = curAxis;
 }
 
 /*
@@ -1546,7 +1619,12 @@ bool idEntity::UpdateRenderEntity( renderEntity_s *renderEntity, const renderVie
 		SetTimeState ts( timeGroup );
 #endif
 
-		return animator->CreateFrame( gameLocal.time, false );
+		int animTime = gameLocal.time;
+		int ticLen = gameLocal.time - gameLocal.previousTime;
+		if ( gameLocal.renderInterpolate < 1.0f && ticLen > 0 && ticLen <= 100 ) {
+			animTime -= idMath::Ftoi( ( 1.0f - gameLocal.renderInterpolate ) * (float)ticLen );
+		}
+		return animator->CreateFrame( animTime, false );
 	}
 
 	return false;
@@ -3695,6 +3773,8 @@ idEntity::Teleport
 void idEntity::Teleport( const idVec3 &origin, const idAngles &angles, idEntity *destination ) {
 	GetPhysics()->SetOrigin( origin );
 	GetPhysics()->SetAxis( angles.ToMat3() );
+
+	renderNoInterp = true;
 
 	UpdateVisuals();
 }

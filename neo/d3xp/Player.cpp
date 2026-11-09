@@ -1277,6 +1277,16 @@ idPlayer::idPlayer() {
 	firstPersonViewOrigin	= vec3_zero;
 	firstPersonViewAxis		= mat3_identity;
 
+	viewInterpOriginPrev	= vec3_zero;
+	viewInterpAxisPrev		= mat3_identity;
+	viewInterpOriginCur		= vec3_zero;
+	viewInterpAxisCur		= mat3_identity;
+	viewInterpTic			= -1;
+	viewInterpSnapFrame		= -1;
+
+	predictionError			= vec3_zero;
+	predictionErrorTime		= 0;
+
 	hipJoint				= INVALID_JOINT;
 	chestJoint				= INVALID_JOINT;
 	headJoint				= INVALID_JOINT;
@@ -2727,6 +2737,11 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 		spec_origin[ 2 ] += SPECTATE_RAISE;
 		SetOrigin( spec_origin );
 	}
+
+	viewInterpSnapFrame = gameLocal.framenum;
+	renderNoInterp = true;
+	predictionError.Zero();
+	predictionErrorTime = 0;
 
 	// if this is the first spawn of the map, we don't have a usercmd yet,
 	// so the delta angles won't be correct.  This will be fixed on the first think.
@@ -8286,6 +8301,11 @@ void idPlayer::Teleport( const idVec3 &origin, const idAngles &angles, idEntity 
 		playerView.Flash( colorWhite, 140 );
 	}
 
+	viewInterpSnapFrame = gameLocal.framenum;
+	renderNoInterp = true;
+	predictionError.Zero();
+	predictionErrorTime = 0;
+
 	UpdateVisuals();
 
 	teleportEntity = destination;
@@ -8681,6 +8701,24 @@ void idPlayer::CalculateFirstPersonView( void ) {
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
+
+	firstPersonViewOrigin += GetPredictionErrorOffset();
+}
+
+idVec3 idPlayer::GetPredictionErrorOffset( void ) const {
+	int smoothTime = net_clientSmoothViewTime.GetInteger();
+
+	if ( smoothTime <= 0 ) {
+		return vec3_origin;
+	}
+
+	int elapsed = gameLocal.time - predictionErrorTime;
+
+	if ( elapsed < 0 || elapsed >= smoothTime ) {
+		return vec3_origin;
+	}
+
+	return predictionError * ( 1.0f - (float)elapsed / (float)smoothTime );
 }
 
 /*
@@ -8769,6 +8807,65 @@ void idPlayer::CalculateRenderView( void ) {
 
 	if ( g_showviewpos.GetBool() ) {
 		gameLocal.Printf( "%s : %s\n", renderView->vieworg.ToString(), renderView->viewaxis.ToAngles().ToString() );
+	}
+
+	if ( gameLocal.isNewFrame ) {
+		if ( viewInterpTic != gameLocal.framenum ) {
+			viewInterpOriginPrev = viewInterpOriginCur;
+			viewInterpAxisPrev = viewInterpAxisCur;
+			viewInterpTic = gameLocal.framenum;
+		}
+		viewInterpOriginCur = renderView->vieworg;
+		viewInterpAxisCur = renderView->viewaxis;
+	}
+}
+
+void idPlayer::ApplyViewInterpolation( float frac ) {
+	static const float snapDistSqr = 128.0f * 128.0f;
+	static const float snapDot = 0.3f;
+
+	if ( !renderView ) {
+		return;
+	}
+
+	if ( frac < 1.0f ) {
+		int ticLen = gameLocal.slow.time - gameLocal.slow.previousTime;
+		if ( ticLen > 0 && ticLen <= 100 ) {
+			renderView->time = gameLocal.slow.previousTime + idMath::Ftoi( frac * (float)ticLen );
+		}
+	}
+
+	if ( weapon.GetEntity() ) {
+		weapon.GetEntity()->InterpolateRenderModels( frac );
+	}
+
+	bool snap = ( viewInterpSnapFrame == gameLocal.framenum )
+		|| ( viewInterpOriginCur - viewInterpOriginPrev ).LengthSqr() > snapDistSqr
+		|| ( viewInterpAxisCur[0] * viewInterpAxisPrev[0] ) < snapDot;
+
+	if ( snap ) {
+		renderView->vieworg = viewInterpOriginCur;
+	} else if ( frac > 1.0f ) {
+		renderView->vieworg = viewInterpOriginCur + ( viewInterpOriginCur - viewInterpOriginPrev ) * ( frac - 1.0f );
+	} else {
+		renderView->vieworg.Lerp( viewInterpOriginPrev, viewInterpOriginCur, frac );
+	}
+
+	bool cameraView = !noclip && ( gameLocal.GetCamera() || privateCameraView );
+	bool predictAim = frac != 1.0f && health > 0 && !spectating
+		&& !pm_thirdPerson.GetBool() && !gameLocal.inCinematic && !cameraView;
+
+	if ( predictAim ) {
+		idAngles a = viewInterpAxisCur.ToAngles();
+		a.pitch = idMath::ClampFloat( pm_minviewpitch.GetFloat(), pm_maxviewpitch.GetFloat(), a.pitch + gameLocal.renderViewAngleDelta.pitch );
+		a.yaw += gameLocal.renderViewAngleDelta.yaw;
+		renderView->viewaxis = a.ToMat3();
+	} else if ( snap ) {
+		renderView->viewaxis = viewInterpAxisCur;
+	} else {
+		idQuat q;
+		q.Slerp( viewInterpAxisPrev.ToQuat(), viewInterpAxisCur.ToQuat(), idMath::ClampFloat( 0.0f, 1.0f, frac ) );
+		renderView->viewaxis = q.ToMat3();
 	}
 }
 
@@ -9602,7 +9699,19 @@ void idPlayer::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 
 	oldHealth = health;
 
+	idVec3 predictedOrigin = physicsObj.GetOrigin();
+
 	physicsObj.ReadFromSnapshot( msg );
+
+	if ( entityNumber == gameLocal.localClientNum ) {
+		idVec3 err = predictedOrigin - physicsObj.GetOrigin();
+		float lenSqr = err.LengthSqr();
+		if ( lenSqr > Square( 0.125f ) && lenSqr < Square( 100.0f ) ) {
+			predictionError = GetPredictionErrorOffset() + err;
+			predictionErrorTime = gameLocal.time;
+		}
+	}
+
 	ReadBindFromSnapshot( msg );
 	deltaViewAngles[0] = msg.ReadDeltaFloat( 0.0f );
 	deltaViewAngles[1] = msg.ReadDeltaFloat( 0.0f );

@@ -340,6 +340,9 @@ public:
 	int						realClientTime;			// real client time
 	bool					isNewFrame;				// true if this is a new game frame, not a rerun due to prediction
 	float					clientSmoothing;		// smoothing of other clients in the view
+	float					renderInterpolate;
+	int						renderInterpPass;
+	idAngles				renderViewAngleDelta;
 	int						entityDefBits;			// bits required to store an entity def number
 
 	static const char *		sufaceTypeNames[ MAX_SURFACE_TYPES ];	// text names for surface types
@@ -399,7 +402,7 @@ public:
 	virtual void			CacheDictionaryMedia( const idDict *dict );
 	virtual void			SpawnPlayer( int clientNum );
 	virtual gameReturn_t	RunFrame(const usercmd_t* clientCmds );
-	virtual bool			Draw( int clientNum );
+	virtual bool			Draw( int clientNum, float interpolate, const idAngles &viewAngleDelta );
 	virtual escReply_t		HandleESC( idUserInterface **gui );
 	virtual idUserInterface	*StartMenu( void );
 	virtual const char *	HandleGuiCommands( const char *menuCommand );
@@ -610,6 +613,7 @@ private:
 	void					FreePlayerPVS( void );
 	void					UpdateGravity( void );
 	void					SortActiveEntityList( void );
+	void					InterpolateRenderEntities( float frac );
 	void					ShowTargets( void );
 	void					RunDebugInfo( void );
 

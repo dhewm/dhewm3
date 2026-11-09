@@ -105,6 +105,9 @@ idCVar com_showAsyncStats( "com_showAsyncStats", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR
 idCVar com_showSoundDecoders( "com_showSoundDecoders", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "show sound decoders" );
 idCVar com_timestampPrints( "com_timestampPrints", "0", CVAR_SYSTEM, "print time with each console print, 1 = msec, 2 = sec", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
 idCVar com_timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "scales the time", 0.1f, 10.0f );
+idCVar com_interpolate( "com_interpolate", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_ARCHIVE, "decouple rendering from the game tic and interpolate between frames" );
+idCVar com_maxFps( "com_maxFps", "0", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "when com_interpolate is set, cap the render framerate to this value (0 = uncapped, rely on vsync)", 0, 1000 );
+idCVar com_extrapolateMax( "com_extrapolateMax", "33", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "maximum extra milliseconds of render extrapolation past a late game tic (0 disables)", 0, 250 );
 idCVar com_makingBuild( "com_makingBuild", "0", CVAR_BOOL | CVAR_SYSTEM, "1 when making a build" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
 
@@ -129,6 +132,7 @@ int				time_frontend;			// renderSystem frontend time
 int				time_backend;			// renderSystem backend time
 
 int				com_frameTime;			// time (since start) for the current frame in milliseconds
+float			com_interpFraction = 1.0f;
 int				com_frameNumber;		// variable frame number
 volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
@@ -262,6 +266,7 @@ idCommonLocal	commonLocal;
 idCommon *		common = &commonLocal;
 
 static double nextTicTime = 0.0;
+static double nextRenderTime = 0.0;
 
 // DG: updates the tic number based on the (real) time expired since it has last been updated
 void Com_UpdateTicNumber() {
@@ -315,6 +320,17 @@ void Com_WaitForNextTicStart() {
 		Sys_SleepUntilPrecise( nextTicTime );
 	}
 	Com_UpdateFrameTime();
+}
+
+static void Com_UpdateInterpolationFraction() {
+	if ( com_interpolate.GetBool() ) {
+		double now = Sys_MillisecondsPrecise();
+		double ticStart = nextTicTime - com_preciseFrameLengthMS;
+		float maxFrac = 1.0f + (float)( (double)com_extrapolateMax.GetInteger() / com_preciseFrameLengthMS );
+		com_interpFraction = idMath::ClampFloat( 0.0f, maxFrac, (float)( ( now - ticStart ) / com_preciseFrameLengthMS ) );
+	} else {
+		com_interpFraction = 1.0f;
+	}
 }
 
 /*
@@ -2527,10 +2543,13 @@ void idCommonLocal::Frame( void ) {
 		if ( idAsyncNetwork::IsActive() ) {
 			if ( idAsyncNetwork::serverDedicated.GetInteger() != 1 ) {
 				session->GuiFrameEvents();
+				Com_UpdateInterpolationFraction();
 				session->UpdateScreen( false );
 			}
 		} else {
 			session->Frame();
+
+			Com_UpdateInterpolationFraction();
 
 			// normal, in-sequence screen update
 			session->UpdateScreen( false );
@@ -2560,7 +2579,20 @@ void idCommonLocal::Frame( void ) {
 		if ( com_editors == 0 )
 #endif
 		{
-			if ( com_timescale.GetFloat() == 1.0f && GLimp_GetSwapInterval() != 0
+			if ( com_interpolate.GetBool() ) {
+				int maxFps = com_maxFps.GetInteger();
+				if ( maxFps > 0 && com_timescale.GetFloat() == 1.0f ) {
+					double now = Sys_MillisecondsPrecise();
+					double frameLen = 1000.0 / maxFps;
+					if ( nextRenderTime < now ) {
+						nextRenderTime = now + frameLen;
+					} else {
+						nextRenderTime += frameLen;
+					}
+					Sys_SleepUntilPrecise( nextRenderTime );
+				}
+			}
+			else if ( com_timescale.GetFloat() == 1.0f && GLimp_GetSwapInterval() != 0
 				&& fabsf(60.0f - GLimp_GetDisplayRefresh()) < 1.0f ) {
 				// if we're using vsync and the display is running at about 60Hz, start next tic
 				// immediately so our internal tic time and vsync don't drift apart
