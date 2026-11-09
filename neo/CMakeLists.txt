@@ -716,6 +716,7 @@ set(src_framework
 	framework/miniz/miniz.c
 	framework/minizip/ioapi.c
 	framework/minizip/unzip.cpp
+    framework/compat/Compat_131.cpp
 )
 
 always_optimize_sourcefile(framework/miniz/miniz.c)
