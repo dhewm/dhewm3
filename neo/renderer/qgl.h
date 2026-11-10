@@ -76,6 +76,7 @@ extern	void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLf
 extern	void ( APIENTRY * qglMultiTexCoord2fvARB )( GLenum texture, GLfloat *st );
 extern	void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 extern	void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
+extern  void ( APIENTRY * qglMinSampleShadingARB )( GLfloat value );
 
 // ARB_vertex_buffer_object
 extern PFNGLBINDBUFFERARBPROC qglBindBufferARB;
