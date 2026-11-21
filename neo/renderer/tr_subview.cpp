@@ -35,6 +35,8 @@ typedef struct {
 	idMat3		axis;
 } orientation_t;
 
+static idCVar r_maxMirrorRecursion( "r_maxMirrorRecursion", "2", CVAR_RENDERER | /*CVAR_ARCHIVE |*/ CVAR_INTEGER,
+		"how deep subviews with mirrors can watch each other", 0, MAX_RENDER_CROPS-3 );
 
 /*
 =================
@@ -330,7 +332,7 @@ static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
 	// copy this rendering to the image
 	stage->dynamicFrameCount = tr.frameCount;
 	if (!stage->image) {
-		stage->image = globalImages->scratchImage;
+		stage->image = globalImages->GetNextScratchImage();
 	}
 
 	tr.CaptureRenderToImage( stage->image->imgName );
@@ -381,7 +383,7 @@ void R_MirrorRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect sciss
 
 	// copy this rendering to the image
 	stage->dynamicFrameCount = tr.frameCount;
-	stage->image = globalImages->scratchImage;
+	stage->image = globalImages->GetNextScratchImage();
 
 	tr.CaptureRenderToImage( stage->image->imgName );
 	tr.UnCrop();
@@ -431,7 +433,7 @@ void R_XrayRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect scissor
 
 	// copy this rendering to the image
 	stage->dynamicFrameCount = tr.frameCount;
-	stage->image = globalImages->scratchImage2;
+	stage->image = globalImages->GetNextScratchImage();
 
 	tr.CaptureRenderToImage( stage->image->imgName );
 	tr.UnCrop();
@@ -531,9 +533,18 @@ bool	R_GenerateSurfaceSubview( drawSurf_t *drawSurf ) {
 			case DI_REMOTE_RENDER:
 				R_RemoteRender( drawSurf, const_cast<textureStage_t *>(&stage->texture) );
 				break;
-			case DI_MIRROR_RENDER:
+			case DI_MIRROR_RENDER: {
+				// DG: prevent mirrors from mirroring each other to infinity
+				// and also prevent tr.renderCrops from overflowing (with some extra wiggle
+				// room in case other cropping things are involved)
+				int maxDepth = Min(r_maxMirrorRecursion.GetInteger(), MAX_RENDER_CROPS-3);
+				if ( tr.currentRenderCrop >= maxDepth ) {
+					const_cast<textureStage_t &>(stage->texture).image = NULL;
+					return false;
+				}
 				R_MirrorRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), scissor );
 				break;
+			}
 			case DI_XRAY_RENDER:
 				R_XrayRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), scissor );
 				break;
