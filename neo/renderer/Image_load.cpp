@@ -31,6 +31,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 
 #include "renderer/Image.h"
+#include "idlib/math/Simd_AVX2.h"
+
+#if D3_HAVE_AVX2_SIMD
+#include <immintrin.h>
+#endif
 
 /*
 PROBLEM: compressed textures may break the zero clamp rule!
@@ -51,6 +56,88 @@ int MakePowerOfTwo( int num ) {
 	}
 	return pot;
 }
+
+#if D3_HAVE_AVX2_SIMD
+/*
+==================
+ScanImageFormatAVX2
+
+Accumulate the channel properties used by SelectInternalFormat. This does
+not compress the image: it accelerates the CPU-side scan that decides which
+OpenGL format (including BC7/BPTC) should receive it.
+==================
+*/
+static D3_AVX2_TARGET void ScanImageFormatAVX2( const byte *scan, int count,
+        int &rgbDiffer, int &rgbaDiffer, int &rgbOr, int &rgbAnd, int &aOr, int &aAnd ) {
+    const __m256i shuffleR = _mm256_setr_epi8(
+        0,0,0,0, 4,4,4,4, 8,8,8,8, 12,12,12,12,
+        0,0,0,0, 4,4,4,4, 8,8,8,8, 12,12,12,12 );
+    const __m256i shuffleG = _mm256_setr_epi8(
+        1,1,1,1, 5,5,5,5, 9,9,9,9, 13,13,13,13,
+        1,1,1,1, 5,5,5,5, 9,9,9,9, 13,13,13,13 );
+    const __m256i shuffleB = _mm256_setr_epi8(
+        2,2,2,2, 6,6,6,6, 10,10,10,10, 14,14,14,14,
+        2,2,2,2, 6,6,6,6, 10,10,10,10, 14,14,14,14 );
+    const __m256i shuffleA = _mm256_setr_epi8(
+        3,3,3,3, 7,7,7,7, 11,11,11,11, 15,15,15,15,
+        3,3,3,3, 7,7,7,7, 11,11,11,11, 15,15,15,15 );
+
+    __m256i vRgbDiffer = _mm256_set1_epi8( static_cast<char>( rgbDiffer ) );
+    __m256i vRgbaDiffer = _mm256_set1_epi8( static_cast<char>( rgbaDiffer ) );
+    __m256i vRgbOr = _mm256_set1_epi8( static_cast<char>( rgbOr ) );
+    __m256i vRgbAnd = _mm256_set1_epi8( static_cast<char>( rgbAnd ) );
+    __m256i vAOr = _mm256_set1_epi8( static_cast<char>( aOr ) );
+    __m256i vAAnd = _mm256_set1_epi8( static_cast<char>( aAnd ) );
+
+    int i = 0;
+    for ( ; i + 8 <= count; i += 8 ) {
+        const __m256i pixels = _mm256_loadu_si256( reinterpret_cast<const __m256i *>( scan + i * 4 ) );
+        const __m256i r = _mm256_shuffle_epi8( pixels, shuffleR );
+        const __m256i g = _mm256_shuffle_epi8( pixels, shuffleG );
+        const __m256i b = _mm256_shuffle_epi8( pixels, shuffleB );
+        const __m256i a = _mm256_shuffle_epi8( pixels, shuffleA );
+        const __m256i rgbAny = _mm256_or_si256( _mm256_or_si256( r, g ), b );
+        const __m256i rgbAll = _mm256_and_si256( _mm256_and_si256( r, g ), b );
+        const __m256i rgbaAny = _mm256_or_si256( rgbAny, a );
+        const __m256i rgbaAll = _mm256_and_si256( rgbAll, a );
+
+        vRgbDiffer = _mm256_or_si256( vRgbDiffer, _mm256_xor_si256( rgbAny, rgbAll ) );
+        vRgbaDiffer = _mm256_or_si256( vRgbaDiffer, _mm256_xor_si256( rgbaAny, rgbaAll ) );
+        vRgbOr = _mm256_or_si256( vRgbOr, rgbAny );
+        vRgbAnd = _mm256_and_si256( vRgbAnd, rgbAll );
+        vAOr = _mm256_or_si256( vAOr, a );
+        vAAnd = _mm256_and_si256( vAAnd, a );
+    }
+
+    alignas(32) byte lanes[32];
+    _mm256_store_si256( reinterpret_cast<__m256i *>( lanes ), vRgbDiffer );
+    for ( int k = 0; k < 32; ++k ) rgbDiffer |= lanes[k];
+    _mm256_store_si256( reinterpret_cast<__m256i *>( lanes ), vRgbaDiffer );
+    for ( int k = 0; k < 32; ++k ) rgbaDiffer |= lanes[k];
+    _mm256_store_si256( reinterpret_cast<__m256i *>( lanes ), vRgbOr );
+    for ( int k = 0; k < 32; ++k ) rgbOr |= lanes[k];
+    _mm256_store_si256( reinterpret_cast<__m256i *>( lanes ), vRgbAnd );
+    for ( int k = 0; k < 32; ++k ) rgbAnd &= lanes[k];
+    _mm256_store_si256( reinterpret_cast<__m256i *>( lanes ), vAOr );
+    for ( int k = 0; k < 32; ++k ) aOr |= lanes[k];
+    _mm256_store_si256( reinterpret_cast<__m256i *>( lanes ), vAAnd );
+    for ( int k = 0; k < 32; ++k ) aAnd &= lanes[k];
+
+    // Keep the original scalar rules for fewer than eight remaining pixels.
+    scan += i * 4;
+    for ( ; i < count; ++i, scan += 4 ) {
+        const int cor = scan[0] | scan[1] | scan[2];
+        const int cand = scan[0] & scan[1] & scan[2];
+        aOr |= scan[3];
+        aAnd &= scan[3];
+        rgbDiffer |= ( cor ^ cand );
+        rgbOr |= cor;
+        rgbAnd &= cand;
+        rgbaDiffer |= ( ( cor | scan[3] ) ^ ( cand & scan[3] ) );
+    }
+    _mm256_zeroupper();
+}
+#endif
 
 /*
 ================
@@ -232,6 +319,12 @@ GLenum idImage::SelectInternalFormat( const byte **dataPtrs, int numDataPtrs, in
 
 	for ( int side = 0 ; side < numDataPtrs ; side++ ) {
 		scan = dataPtrs[side];
+#if D3_HAVE_AVX2_SIMD
+		if ( SIMDProcessor && ( SIMDProcessor->cpuid & CPUID_AVX2 ) && ( SIMDProcessor->cpuid & CPUID_FMA3 ) ) {
+			ScanImageFormatAVX2( scan, c, rgbDiffer, rgbaDiffer, rgbOr, rgbAnd, aOr, aAnd );
+			continue;
+		}
+#endif
 		for ( i = 0; i < c; i++, scan += 4 ) {
 			int		cor, cand;
 

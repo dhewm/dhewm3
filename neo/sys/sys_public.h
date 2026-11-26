@@ -41,6 +41,9 @@ typedef enum {
 	CPUID_SSE2							= 0x00080,	// Streaming SIMD Extensions 2
 	CPUID_SSE3							= 0x00100,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
 	CPUID_ALTIVEC						= 0x00200,	// AltiVec
+	CPUID_AVX							= 0x00400,	// Advanced Vector Extensions (OS state enabled)
+	CPUID_AVX2						= 0x00800,	// AVX2 integer/vector extensions
+	CPUID_FMA3						= 0x01000	// Fused multiply-add, 3-operand form
 } cpuidSimd_t;
 
 typedef enum {

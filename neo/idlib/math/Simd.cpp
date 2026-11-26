@@ -43,6 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "idlib/math/Simd_SSE.h"
 #include "idlib/math/Simd_SSE2.h"
 #include "idlib/math/Simd_SSE3.h"
+#include "idlib/math/Simd_AVX2.h"
 #include "idlib/math/Simd_AltiVec.h"
 #include "idlib/math/Plane.h"
 #include "idlib/bv/Bounds.h"
@@ -86,6 +87,11 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 	} else {
 
 		if ( !processor ) {
+#if D3_HAVE_AVX2_SIMD
+			if ( ( cpuid & CPUID_AVX2 ) && ( cpuid & CPUID_FMA3 ) ) {
+				processor = new idSIMD_AVX2;
+			} else
+#endif
 			if ( ( cpuid & CPUID_ALTIVEC ) ) {
 				processor = new idSIMD_AltiVec;
 			} else if ( ( cpuid & CPUID_MMX ) && ( cpuid & CPUID_SSE ) && ( cpuid & CPUID_SSE2 ) && ( cpuid & CPUID_SSE3 ) ) {
@@ -4038,6 +4044,14 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 				return;
 			}
 			p_simd = new idSIMD_SSE3();
+#if D3_HAVE_AVX2_SIMD
+		} else if ( idStr::Icmp( argString, "AVX2" ) == 0 ) {
+			if ( !( cpuid & CPUID_AVX2 ) || !( cpuid & CPUID_FMA3 ) ) {
+				common->Printf( "CPU does not support AVX2, FMA3, or OS AVX state\n" );
+				return;
+			}
+			p_simd = new idSIMD_AVX2();
+#endif
 		} else if ( idStr::Icmp( argString, "AltiVec" ) == 0 ) {
 			if ( !( cpuid & CPUID_ALTIVEC ) ) {
 				common->Printf( "CPU does not support AltiVec\n" );
@@ -4045,7 +4059,11 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 			}
 			p_simd = new idSIMD_AltiVec();
 		} else {
+#if D3_HAVE_AVX2_SIMD
+			common->Printf( "invalid argument, use: MMX, 3DNow, SSE, SSE2, SSE3, AVX2, AltiVec\n" );
+#else
 			common->Printf( "invalid argument, use: MMX, 3DNow, SSE, SSE2, SSE3, AltiVec\n" );
+#endif
 			return;
 		}
 	}

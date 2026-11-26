@@ -30,6 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 
 #include "renderer/Image.h"
+#include "idlib/math/Simd_AVX2.h"
+
+#if D3_HAVE_AVX2_SIMD
+#include <immintrin.h>
+#endif
 
 /*
 ================
@@ -44,7 +49,72 @@ If a larger shrinking is needed, use the mipmap function
 after resampling to the next lower power of two.
 ================
 */
-#define	MAX_DIMENSION	4096
+#if D3_HAVE_AVX2_SIMD
+/*
+================
+R_ResampleTextureAVX2
+
+Resample eight RGBA pixels per iteration. Each source pixel is gathered as
+one 32-bit word; channel sums are widened to 32-bit lanes before averaging,
+so the scalar routine's integer rounding is preserved exactly.
+================
+*/
+static D3_AVX2_TARGET void R_ResampleRowAVX2( byte *dst, const byte *row0, const byte *row1,
+        const unsigned int *p1, const unsigned int *p2, int outwidth ) {
+    const __m256i mask = _mm256_set1_epi32( 255 );
+    int x = 0;
+    for ( ; x + 8 <= outwidth; x += 8 ) {
+        ALIGN16( int index1[8] );
+        ALIGN16( int index2[8] );
+        for ( int lane = 0; lane < 8; ++lane ) {
+            index1[lane] = (int)( p1[x + lane] >> 2 );
+            index2[lane] = (int)( p2[x + lane] >> 2 );
+        }
+        const __m256i i1 = _mm256_loadu_si256( (const __m256i *)index1 );
+        const __m256i i2 = _mm256_loadu_si256( (const __m256i *)index2 );
+        const __m256i a = _mm256_i32gather_epi32( (const int *)row0, i1, 4 );
+        const __m256i b = _mm256_i32gather_epi32( (const int *)row0, i2, 4 );
+        const __m256i c = _mm256_i32gather_epi32( (const int *)row1, i1, 4 );
+        const __m256i d = _mm256_i32gather_epi32( (const int *)row1, i2, 4 );
+
+        __m256i r = _mm256_add_epi32( _mm256_and_si256( a, mask ), _mm256_and_si256( b, mask ) );
+        r = _mm256_add_epi32( r, _mm256_and_si256( c, mask ) );
+        r = _mm256_add_epi32( r, _mm256_and_si256( d, mask ) );
+        r = _mm256_srli_epi32( r, 2 );
+
+        __m256i g = _mm256_add_epi32( _mm256_and_si256( _mm256_srli_epi32( a, 8 ), mask ), _mm256_and_si256( _mm256_srli_epi32( b, 8 ), mask ) );
+        g = _mm256_add_epi32( g, _mm256_and_si256( _mm256_srli_epi32( c, 8 ), mask ) );
+        g = _mm256_add_epi32( g, _mm256_and_si256( _mm256_srli_epi32( d, 8 ), mask ) );
+        g = _mm256_slli_epi32( _mm256_srli_epi32( g, 2 ), 8 );
+
+        __m256i bl = _mm256_add_epi32( _mm256_and_si256( _mm256_srli_epi32( a, 16 ), mask ), _mm256_and_si256( _mm256_srli_epi32( b, 16 ), mask ) );
+        bl = _mm256_add_epi32( bl, _mm256_and_si256( _mm256_srli_epi32( c, 16 ), mask ) );
+        bl = _mm256_add_epi32( bl, _mm256_and_si256( _mm256_srli_epi32( d, 16 ), mask ) );
+        bl = _mm256_slli_epi32( _mm256_srli_epi32( bl, 2 ), 16 );
+
+        __m256i al = _mm256_add_epi32( _mm256_srli_epi32( a, 24 ), _mm256_srli_epi32( b, 24 ) );
+        al = _mm256_add_epi32( al, _mm256_srli_epi32( c, 24 ) );
+        al = _mm256_add_epi32( al, _mm256_srli_epi32( d, 24 ) );
+        al = _mm256_slli_epi32( _mm256_srli_epi32( al, 2 ), 24 );
+
+        const __m256i pixels = _mm256_or_si256( _mm256_or_si256( r, g ), _mm256_or_si256( bl, al ) );
+        _mm256_storeu_si256( (__m256i *)( dst + x * 4 ), pixels );
+    }
+    for ( ; x < outwidth; ++x ) {
+        const byte *a = row0 + p1[x];
+        const byte *b = row0 + p2[x];
+        const byte *c = row1 + p1[x];
+        const byte *d = row1 + p2[x];
+        dst[x*4+0] = ( a[0] + b[0] + c[0] + d[0] ) >> 2;
+        dst[x*4+1] = ( a[1] + b[1] + c[1] + d[1] ) >> 2;
+        dst[x*4+2] = ( a[2] + b[2] + c[2] + d[2] ) >> 2;
+        dst[x*4+3] = ( a[3] + b[3] + c[3] + d[3] ) >> 2;
+    }
+    _mm256_zeroupper();
+}
+#endif
+
+#define MAX_DIMENSION 4096
 byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,
 							int& _outwidth, int& _outheight ) {
 	int		i, j;
@@ -83,6 +153,13 @@ byte *R_ResampleTexture( const byte *in, int inwidth, int inheight,
 		inrow = in + 4 * inwidth * (int)( ( i + 0.25f ) * inheight / outheight );
 		inrow2 = in + 4 * inwidth * (int)( ( i + 0.75f ) * inheight / outheight );
 		frac = fracstep >> 1;
+#if D3_HAVE_AVX2_SIMD
+		if ( outwidth >= 8 && SIMDProcessor &&
+			(SIMDProcessor->cpuid & CPUID_AVX2) && (SIMDProcessor->cpuid & CPUID_FMA3) ) {
+			R_ResampleRowAVX2( out_p, inrow, inrow2, p1, p2, outwidth );
+			continue;
+		}
+#endif
 		for (j=0 ; j<outwidth ; j++) {
 			pix1 = inrow + p1[j];
 			pix2 = inrow + p2[j];
@@ -393,6 +470,67 @@ will result in a slight shrinking of the texture as it mips, but better than
 smeared clamps...
 ================
 */
+#if D3_HAVE_AVX2_SIMD
+/*
+================
+R_MipMapAVX2
+
+Downsample RGBA8 pixels using four source texels per destination texel.
+Four destination pixels are processed per iteration. Integer sums and the
+final shift exactly match the scalar (sum >> 2) implementation.
+================
+*/
+static D3_AVX2_TARGET void R_MipMapAVX2( byte *out, const byte *in, int width, int height ) {
+    const int newWidth = width >> 1;
+    const int newHeight = height >> 1;
+    // Reorder each pair of RGBA pixels so maddubs can sum matching channels.
+    // The same mask is applied independently to both 128-bit AVX2 lanes.
+    const __m256i shuffle = _mm256_setr_epi8(
+        0, 4, 1, 5, 2, 6, 3, 7, 8, 12, 9, 13, 10, 14, 11, 15,
+        0, 4, 1, 5, 2, 6, 3, 7, 8, 12, 9, 13, 10, 14, 11, 15 );
+    const __m256i ones = _mm256_set1_epi16( 0x0101 );
+
+    for ( int y = 0; y < newHeight; ++y ) {
+        const byte *top = in + ( y * 2 * width ) * 4;
+        const byte *bottom = top + width * 4;
+        byte *dst = out + y * newWidth * 4;
+        int x = 0;
+
+        // Four output pixels are generated from eight contiguous source
+        // pixels. maddubs forms exact 16-bit channel sums for each horizontal
+        // pair; adding the second row and shifting by two reproduces the
+        // original integer box filter without rounding changes.
+        for ( ; x + 4 <= newWidth; x += 4 ) {
+            __m256i topPixels = _mm256_loadu_si256( reinterpret_cast<const __m256i *>( top + x * 8 ) );
+            __m256i bottomPixels = _mm256_loadu_si256( reinterpret_cast<const __m256i *>( bottom + x * 8 ) );
+            topPixels = _mm256_shuffle_epi8( topPixels, shuffle );
+            bottomPixels = _mm256_shuffle_epi8( bottomPixels, shuffle );
+
+            __m256i sums = _mm256_add_epi16(
+                _mm256_maddubs_epi16( topPixels, ones ),
+                _mm256_maddubs_epi16( bottomPixels, ones ) );
+            sums = _mm256_srli_epi16( sums, 2 );
+
+            // Duplicate each lane's two pixels, then reorder 64-bit chunks;
+            // the low 128 bits contain four consecutive RGBA output pixels.
+            __m256i packed = _mm256_packus_epi16( sums, sums );
+            packed = _mm256_permute4x64_epi64( packed, _MM_SHUFFLE( 3, 1, 2, 0 ) );
+            _mm_storeu_si128( reinterpret_cast<__m128i *>( dst + x * 4 ), _mm256_castsi256_si128( packed ) );
+        }
+
+        // Preserve the scalar implementation for the short row tail.
+        for ( ; x < newWidth; ++x ) {
+            const byte *src = top + x * 8;
+            const byte *srcBottom = bottom + x * 8;
+            for ( int c = 0; c < 4; ++c ) {
+                dst[x * 4 + c] = ( src[c] + src[4 + c] + srcBottom[c] + srcBottom[4 + c] ) >> 2;
+            }
+        }
+    }
+    _mm256_zeroupper();
+}
+#endif
+
 byte *R_MipMap( const byte *in, int width, int height, bool preserveBorder ) {
 	int		i, j;
 	const byte	*in_p;
@@ -422,6 +560,19 @@ byte *R_MipMap( const byte *in, int width, int height, bool preserveBorder ) {
 	}
 	out = (byte *)R_StaticAlloc( newWidth * newHeight * 4 );
 	out_p = out;
+
+#if D3_HAVE_AVX2_SIMD
+	// The vector path handles ordinary 2D textures; keep the original path
+	// for narrow/degenerate images and processors without AVX2 + FMA3.
+	if ( width >= 8 && height >= 2 && SIMDProcessor &&
+		( SIMDProcessor->cpuid & CPUID_AVX2 ) && ( SIMDProcessor->cpuid & CPUID_FMA3 ) ) {
+		R_MipMapAVX2( out, in, width, height );
+		if ( preserveBorder ) {
+			R_SetBorderTexels( out, newWidth, newHeight, border );
+		}
+		return out;
+	}
+#endif
 
 	in_p = in;
 

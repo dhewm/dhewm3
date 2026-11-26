@@ -81,9 +81,19 @@ static inline void CPUid(int index, int *a, int *b, int *c, int *d) {
 	(	"mov %%" REG_b ", %%" REG_S "\n\t"
 		"cpuid\n\t"
 		"xchg %%" REG_b ", %%" REG_S
-		:	"=a" (*a), "=S" (*b),
+		: 	"=a" (*a), "=S" (*b),
 			"=c" (*c), "=d" (*d)
 		: "0" (index));
+}
+static inline void CPUidEx(int index, int subleaf, int *a, int *b, int *c, int *d) {
+	int eax = index, ecx = subleaf;
+	__asm__ volatile
+	(	"mov %%" REG_b ", %%" REG_S "\n\t"
+		"cpuid\n\t"
+		"xchg %%" REG_b ", %%" REG_S
+		: "+a" (eax), "=S" (*b), "+c" (ecx), "=d" (*d));
+	*a = eax;
+	*c = ecx;
 }
 #elif defined(_MSC_VER)
 #include <intrin.h>
@@ -98,11 +108,23 @@ static inline void CPUid(int index, int *a, int *b, int *c, int *d) {
 	*c = info[2];
 	*d = info[3];
 }
+static inline void CPUidEx(int index, int subleaf, int *a, int *b, int *c, int *d) {
+	int info[4] = { };
+	__cpuidex(info, index, subleaf);
+	*a = info[0];
+	*b = info[1];
+	*c = info[2];
+	*d = info[3];
+}
 #else
 #error unsupported compiler
 #endif
 
 #define c_SSE3		(1 << 0)
+#define c_FMA3		(1 << 12)
+#define c_OSXSAVE	(1 << 27)
+#define c_AVX		(1 << 28)
+#define d_AVX2		(1 << 5)
 #define d_SSE2		(1 << 26)
 #define d_FXSAVE	(1 << 24)
 
@@ -129,6 +151,35 @@ static inline bool HasSSE3() {
 
 	return (c & c_SSE3) == c_SSE3;
 }
+
+#if defined(__GNUC__) && ( defined(__i386__) || defined(__x86_64__) )
+// AVX instructions are usable only when the OS saves/restores XMM and YMM
+// state. CPUID's AVX bit alone is not sufficient: check OSXSAVE and XCR0.
+static inline unsigned long long CPU_GetXCR0() {
+	unsigned int eax, edx;
+	unsigned int ecx = 0;
+	__asm__ volatile ("xgetbv" : "=a" (eax), "=d" (edx) : "c" (ecx));
+	return ( (unsigned long long)edx << 32 ) | eax;
+}
+
+static inline int GetAVXFeatures() {
+	int a, b, c, d;
+	int flags = 0;
+	CPUid(0, &a, &b, &c, &d);
+	if ( a < 1 ) return 0;
+	CPUid(1, &a, &b, &c, &d);
+	if ( (c & (c_OSXSAVE | c_AVX)) != (c_OSXSAVE | c_AVX) ) return 0;
+	if ( (CPU_GetXCR0() & 0x6) != 0x6 ) return 0;
+	flags |= CPUID_AVX;
+	if ( c & c_FMA3 ) flags |= CPUID_FMA3;
+	CPUid(0, &a, &b, &c, &d);
+	if ( a >= 7 ) {
+		CPUidEx(7, 0, &a, &b, &c, &d);
+		if ( b & d_AVX2 ) flags |= CPUID_AVX2;
+	}
+	return flags;
+}
+#endif
 
 #define MXCSR_DAZ	(1 << 6)
 #define MXCSR_FTZ	(1 << 15)
@@ -222,6 +273,9 @@ int Sys_GetProcessorId( void ) {
 	// there is no SDL_HasSSE3() in SDL 1.2
 	if (HasSSE3())
 		flags |= CPUID_SSE3;
+#if defined(__GNUC__) && ( defined(__i386__) || defined(__x86_64__) )
+	flags |= GetAVXFeatures();
+#endif
 #endif
 
 	if (SDL_HasAltiVec())

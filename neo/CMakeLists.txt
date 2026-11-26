@@ -864,6 +864,7 @@ set(src_idlib
 	idlib/math/Simd_SSE.cpp
 	idlib/math/Simd_SSE2.cpp
 	idlib/math/Simd_SSE3.cpp
+	idlib/math/Simd_AVX2.cpp
 	idlib/math/Vector.cpp
 	idlib/BitMsg.cpp
 	idlib/LangDict.cpp
